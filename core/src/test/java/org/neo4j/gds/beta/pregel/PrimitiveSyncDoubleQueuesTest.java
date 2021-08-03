@@ -21,8 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.beta.pregel.PrimitiveSyncDoubleQueues;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;

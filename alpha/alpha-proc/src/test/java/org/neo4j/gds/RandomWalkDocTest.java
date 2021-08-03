@@ -24,7 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.walking.RandomWalkProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 

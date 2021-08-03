@@ -30,10 +30,10 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.core.loading.CatalogRequest;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;

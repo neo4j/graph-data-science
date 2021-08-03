@@ -28,10 +28,10 @@ import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.function.Consumer;

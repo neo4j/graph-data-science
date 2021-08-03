@@ -28,8 +28,8 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.operations.DoubleMatrixOperations;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.Map;

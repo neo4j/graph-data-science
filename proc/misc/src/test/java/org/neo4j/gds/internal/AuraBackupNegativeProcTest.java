@@ -22,7 +22,7 @@ package org.neo4j.gds.internal;
 import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.utils.CheckedSupplier;
+import org.neo4j.gds.utils.CheckedSupplier;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;

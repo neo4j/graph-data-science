@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file.csv;
 
-import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Collection;
 import java.util.List;

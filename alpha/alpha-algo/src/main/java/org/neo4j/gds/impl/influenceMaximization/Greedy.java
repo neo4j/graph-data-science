@@ -22,10 +22,10 @@ package org.neo4j.gds.impl.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;

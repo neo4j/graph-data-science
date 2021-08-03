@@ -28,10 +28,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.CatalogRequest;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 

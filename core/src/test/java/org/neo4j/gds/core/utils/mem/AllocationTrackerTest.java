@@ -27,9 +27,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.InMemoryAllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.KernelAllocationTracker;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -39,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 class AllocationTrackerTest {
 

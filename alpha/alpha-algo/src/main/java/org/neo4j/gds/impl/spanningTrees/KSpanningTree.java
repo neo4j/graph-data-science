@@ -21,9 +21,9 @@ package org.neo4j.gds.impl.spanningTrees;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipProperties;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.RelationshipProperties;
 
 import java.util.function.DoubleUnaryOperator;
 

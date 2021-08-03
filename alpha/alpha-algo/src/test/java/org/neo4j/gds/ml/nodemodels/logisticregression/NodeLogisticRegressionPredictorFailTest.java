@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.List;
 

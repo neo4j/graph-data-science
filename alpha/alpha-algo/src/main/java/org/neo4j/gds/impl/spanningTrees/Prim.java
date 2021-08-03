@@ -25,8 +25,8 @@ import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;

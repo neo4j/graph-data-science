@@ -24,8 +24,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteRelationshipConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
 
 import java.util.Optional;
 

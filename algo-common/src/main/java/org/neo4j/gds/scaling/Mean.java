@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;

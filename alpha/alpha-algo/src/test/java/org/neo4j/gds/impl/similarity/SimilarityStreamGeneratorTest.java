@@ -22,7 +22,7 @@ package org.neo4j.gds.impl.similarity;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 import java.util.function.Supplier;

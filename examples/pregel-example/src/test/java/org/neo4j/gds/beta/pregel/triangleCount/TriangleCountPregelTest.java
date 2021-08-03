@@ -23,18 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class TriangleCountPregelTest {

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
+import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.utils.CheckedRunnable;
 
 public final class GdsEditionUtils {
 

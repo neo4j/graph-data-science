@@ -21,7 +21,7 @@ package org.neo4j.gds.results;
 
 import org.neo4j.gds.result.CentralityResult;
 import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 
 public class NormalizedCentralityResult extends CentralityResult {
     private final ScalarScaler scaler;

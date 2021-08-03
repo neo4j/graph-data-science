@@ -22,10 +22,10 @@ package org.neo4j.gds.gdl;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.Aggregation;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")

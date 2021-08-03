@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
 import java.util.Random;

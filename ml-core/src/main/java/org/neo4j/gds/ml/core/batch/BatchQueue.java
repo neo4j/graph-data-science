@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.List;
 import java.util.Optional;

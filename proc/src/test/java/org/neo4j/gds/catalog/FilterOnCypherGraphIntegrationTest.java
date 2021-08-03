@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
 

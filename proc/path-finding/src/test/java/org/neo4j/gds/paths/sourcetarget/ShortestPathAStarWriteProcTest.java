@@ -44,7 +44,7 @@ import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 
 class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestPathAStarWriteConfig> {
 

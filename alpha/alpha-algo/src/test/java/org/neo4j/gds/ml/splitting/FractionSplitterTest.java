@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.splitting;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 

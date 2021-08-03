@@ -23,9 +23,9 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;

@@ -20,13 +20,13 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
+import static org.neo4j.gds.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
 
 public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>>,
     TRAIN_RESULT,

@@ -21,8 +21,6 @@ package org.neo4j.gds.core.utils;
 
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.CollectionUtil;
-import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
 import java.util.List;

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
+import org.neo4j.gds.config.FeaturePropertiesConfig;
 
 import java.util.Collection;
 import java.util.Collections;

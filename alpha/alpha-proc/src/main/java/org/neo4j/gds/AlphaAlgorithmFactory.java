@@ -20,13 +20,13 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.logging.Log;
 
 @FunctionalInterface

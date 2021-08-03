@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 

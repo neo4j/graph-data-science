@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.gds.api.Relationships;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

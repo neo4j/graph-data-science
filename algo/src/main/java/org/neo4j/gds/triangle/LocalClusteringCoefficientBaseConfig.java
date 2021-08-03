@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConfigurableSeedConfig;
 
 @ValueClass
 @Configuration

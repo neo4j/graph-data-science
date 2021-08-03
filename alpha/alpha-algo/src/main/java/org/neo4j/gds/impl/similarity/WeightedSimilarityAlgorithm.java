@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 

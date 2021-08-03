@@ -21,11 +21,11 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends AbstractAlgorithmFactory<ScaleProperties, CONFIG> {
 

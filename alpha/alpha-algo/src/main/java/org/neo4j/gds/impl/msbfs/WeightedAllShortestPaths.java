@@ -20,8 +20,8 @@
 package org.neo4j.gds.impl.msbfs;
 
 import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipIterator;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
 public enum AsUndirected implements GraphCreateConfig.Rewriter {

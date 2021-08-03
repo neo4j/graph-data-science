@@ -20,19 +20,18 @@
 package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.gds.core.utils.BitUtil;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.PageUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_MASK;
-import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_MASK;
+import static org.neo4j.gds.core.loading.BumpAllocator.PAGE_SHIFT;
 
 class TransientUncompressedListTest {
 

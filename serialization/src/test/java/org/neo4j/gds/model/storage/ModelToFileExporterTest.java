@@ -28,8 +28,8 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.FileInputStream;

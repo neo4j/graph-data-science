@@ -21,13 +21,13 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {

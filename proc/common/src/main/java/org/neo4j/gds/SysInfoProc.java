@@ -22,10 +22,10 @@ package org.neo4j.gds;
 import org.apache.commons.text.WordUtils;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.utils.mem.GcListenerExtension;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.graphdb.config.Setting;
@@ -45,7 +45,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.SysInfoProc.DebugValue.value;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
 
 // don't extend BaseProc and only inject GraphDatabaseService so that
 // we can run this procedure even if unrestricted=gds.* had not been configured

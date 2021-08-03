@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.utils.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeArrays;
+import org.neo4j.gds.core.utils.paged.HugeCursor;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
 /**
  * A PriorityQueue specialized for ints that maintains a partial ordering of

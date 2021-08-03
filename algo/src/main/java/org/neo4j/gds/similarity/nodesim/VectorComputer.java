@@ -22,9 +22,9 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

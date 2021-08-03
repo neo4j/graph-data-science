@@ -21,9 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.List;
 

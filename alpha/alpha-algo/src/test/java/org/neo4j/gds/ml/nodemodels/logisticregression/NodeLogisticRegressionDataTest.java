@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

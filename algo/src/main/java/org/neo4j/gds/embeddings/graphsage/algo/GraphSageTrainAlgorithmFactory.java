@@ -23,24 +23,24 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 import java.util.List;
 
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
 

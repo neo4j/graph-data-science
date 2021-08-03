@@ -29,11 +29,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.graphalgo.beta.generator.PropertyProducer;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -54,15 +51,15 @@ import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.core.CypherMapWrapper.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphGenerateProcTest extends BaseProcTest {
 

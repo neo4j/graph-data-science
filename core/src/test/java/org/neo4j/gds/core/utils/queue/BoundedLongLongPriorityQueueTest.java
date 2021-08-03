@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.queue;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
 
 import java.util.ArrayList;
 import java.util.List;

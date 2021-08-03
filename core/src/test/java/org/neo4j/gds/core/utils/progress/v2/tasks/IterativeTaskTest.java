@@ -20,9 +20,6 @@
 package org.neo4j.gds.core.utils.progress.v2.tasks;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Status;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 import java.util.List;
 import java.util.function.Supplier;

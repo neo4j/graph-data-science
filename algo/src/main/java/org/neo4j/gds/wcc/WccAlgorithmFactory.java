@@ -21,15 +21,15 @@ package org.neo4j.gds.wcc;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AbstractAlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends AbstractAlgorithmFactory<Wcc, CONFIG> {
 

@@ -22,8 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.core.utils.io.file.JacksonConverters;
+import org.neo4j.gds.api.DefaultValue;
 
 import java.util.stream.Stream;
 

@@ -21,9 +21,9 @@ package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

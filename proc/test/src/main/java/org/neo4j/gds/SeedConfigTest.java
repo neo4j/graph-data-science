@@ -22,13 +22,11 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Collections;
 import java.util.List;

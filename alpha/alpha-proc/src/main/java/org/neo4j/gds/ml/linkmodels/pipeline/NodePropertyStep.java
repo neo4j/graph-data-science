@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.BaseProc;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.ElementIdentifier;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 
 import java.util.Collection;
 import java.util.HashMap;

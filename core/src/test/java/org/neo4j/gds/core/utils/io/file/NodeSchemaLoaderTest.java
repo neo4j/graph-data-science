@@ -22,12 +22,11 @@ package org.neo4j.gds.core.utils.io.file;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
-import org.neo4j.graphalgo.core.utils.io.file.NodeSchemaLoader;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,7 +36,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 
 class NodeSchemaLoaderTest {
 

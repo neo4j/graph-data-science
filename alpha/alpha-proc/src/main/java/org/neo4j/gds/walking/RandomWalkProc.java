@@ -28,9 +28,9 @@ import org.neo4j.gds.impl.walking.RandomWalkConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +45,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkConfig> {

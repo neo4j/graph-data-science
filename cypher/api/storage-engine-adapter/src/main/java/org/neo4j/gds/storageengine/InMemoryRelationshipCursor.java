@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.storageengine.api.RelationshipVisitor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;

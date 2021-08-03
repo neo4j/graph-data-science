@@ -26,17 +26,17 @@ import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
 class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
 

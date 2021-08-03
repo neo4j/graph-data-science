@@ -34,13 +34,13 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogi
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;

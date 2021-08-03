@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.CsvTestSupport;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.gds.CsvTestSupport;
+import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.nio.file.Path;
 import java.util.Collection;

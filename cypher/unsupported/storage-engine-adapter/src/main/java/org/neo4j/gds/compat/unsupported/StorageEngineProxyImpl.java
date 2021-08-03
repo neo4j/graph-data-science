@@ -27,7 +27,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;

@@ -23,7 +23,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.gds.core.Settings;
 
 import java.nio.file.Path;
 import java.util.List;

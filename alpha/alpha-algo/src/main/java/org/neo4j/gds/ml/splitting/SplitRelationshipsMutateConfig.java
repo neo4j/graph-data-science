@@ -20,13 +20,13 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
-import org.neo4j.graphalgo.config.RandomSeedConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;

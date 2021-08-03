@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 class LinkPredictionTrainProcTest extends BaseProcTest {
 

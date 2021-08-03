@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 
 import java.util.function.LongToDoubleFunction;
 

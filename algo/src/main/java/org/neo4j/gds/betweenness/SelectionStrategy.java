@@ -21,10 +21,10 @@ package org.neo4j.gds.betweenness;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Optional;

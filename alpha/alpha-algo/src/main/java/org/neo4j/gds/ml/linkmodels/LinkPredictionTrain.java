@@ -35,13 +35,13 @@ import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrain
     extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {

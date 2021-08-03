@@ -26,13 +26,10 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractMap;
@@ -47,7 +44,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 class GdsCypherTest {
 

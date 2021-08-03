@@ -22,9 +22,9 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.statistics.CentralityStatistics;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.statistics.CentralityStatistics;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;

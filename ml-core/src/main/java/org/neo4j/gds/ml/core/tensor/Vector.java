@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.neo4j.gds.ml.core.Dimensions;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.gds.core.utils.ArrayUtil;
 
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

@@ -21,11 +21,11 @@ package org.neo4j.gds.core.utils.io.file;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.LABEL_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.LABEL_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 
 public final class NodeSchemaConstants {
 

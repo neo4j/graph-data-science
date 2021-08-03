@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
 
 import java.util.StringJoiner;
 

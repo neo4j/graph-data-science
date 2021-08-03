@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
+import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Random;
 import java.util.function.LongPredicate;

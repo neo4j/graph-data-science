@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.graphalgo.core.loading.NoopDoubleCodec;
-
 final class NoopDoubleCodecTest extends DoubleCodecTestBase {
     NoopDoubleCodecTest() {
         super(NoopDoubleCodec.instance());

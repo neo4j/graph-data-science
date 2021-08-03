@@ -23,13 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
-import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.Set;
 import java.util.stream.Stream;

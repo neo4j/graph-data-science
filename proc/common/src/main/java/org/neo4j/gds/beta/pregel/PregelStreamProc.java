@@ -21,11 +21,8 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.graphalgo.beta.pregel.Element;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 
 import java.util.Map;
 import java.util.stream.Collectors;

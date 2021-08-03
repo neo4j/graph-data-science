@@ -22,8 +22,8 @@ package org.neo4j.gds.impl.similarity;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.RandomSeedConfig;
+import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 
 import java.util.Collections;
 import java.util.List;

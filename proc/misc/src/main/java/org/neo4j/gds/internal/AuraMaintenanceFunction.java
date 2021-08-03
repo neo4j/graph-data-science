@@ -20,9 +20,9 @@
 package org.neo4j.gds.internal;
 
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;

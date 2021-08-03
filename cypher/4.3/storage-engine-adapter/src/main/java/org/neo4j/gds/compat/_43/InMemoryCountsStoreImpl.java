@@ -20,7 +20,7 @@
 package org.neo4j.gds.compat._43;
 
 import org.neo4j.gds.compat.AbstractInMemoryCountStore;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.token.TokenHolders;

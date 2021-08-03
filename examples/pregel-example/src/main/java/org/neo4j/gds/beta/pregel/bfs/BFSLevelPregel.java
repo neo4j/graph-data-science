@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.beta.pregel.bfs;
 
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Messages;
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
-import org.neo4j.graphalgo.beta.pregel.Reducer;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.beta.pregel.Reducer;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
 
 import java.util.Optional;
 

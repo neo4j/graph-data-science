@@ -21,11 +21,11 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
-import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.huge.CompositeAdjacencyCursor;
+import org.neo4j.gds.core.huge.CompositeAdjacencyList;
+import org.neo4j.gds.core.huge.UnionGraph;
 
 import java.util.function.LongToIntFunction;
 

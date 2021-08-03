@@ -20,20 +20,15 @@
 package org.neo4j.gds.api.schema;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
-import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
-import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
-import static org.neo4j.graphalgo.api.nodeproperties.ValueType.valueOf;
+import static org.neo4j.gds.api.nodeproperties.ValueType.valueOf;
 
 public final class SchemaDeserializer {
     private SchemaDeserializer() {}

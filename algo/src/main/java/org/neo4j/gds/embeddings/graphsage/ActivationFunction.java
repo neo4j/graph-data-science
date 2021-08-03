@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.Relu;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
 import java.util.List;

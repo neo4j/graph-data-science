@@ -20,7 +20,7 @@
 package org.neo4j.gds.nodeproperties;
 
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 
 public final class LongTestProperties implements LongNodeProperties {
     private final LongToLongFunction transformer;

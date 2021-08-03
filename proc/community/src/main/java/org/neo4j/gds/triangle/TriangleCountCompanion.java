@@ -21,9 +21,9 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 
 import java.util.Optional;
 

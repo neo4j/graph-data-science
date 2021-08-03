@@ -21,9 +21,6 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.Arrays;
 import java.util.List;

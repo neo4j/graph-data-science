@@ -27,8 +27,8 @@ import org.neo4j.gds.config.NodeClassificationTrainConfigSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

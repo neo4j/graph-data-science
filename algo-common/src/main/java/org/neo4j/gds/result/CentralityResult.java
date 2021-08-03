@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.result;
 
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 
 public class CentralityResult {
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.function.Function;

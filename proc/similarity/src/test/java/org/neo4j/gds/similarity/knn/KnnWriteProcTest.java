@@ -25,10 +25,10 @@ import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Map;
 import java.util.Optional;

@@ -23,21 +23,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.AbstractProjections;
+import org.neo4j.gds.AbstractProjections;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.fromProcedureConfig;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.fromProcedureConfig;
 
 class GraphCreateConfigFromCypherTest {
 

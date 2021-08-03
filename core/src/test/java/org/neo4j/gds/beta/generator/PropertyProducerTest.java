@@ -20,8 +20,7 @@
 package org.neo4j.gds.beta.generator;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.generator.PropertyProducer;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.Random;
 

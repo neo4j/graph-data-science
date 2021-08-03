@@ -27,7 +27,7 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Collection;
 import java.util.List;

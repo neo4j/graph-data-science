@@ -21,13 +21,13 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
 

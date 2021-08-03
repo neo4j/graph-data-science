@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.graphalgo.core.utils.DoubleUtil;
+import org.neo4j.gds.core.utils.DoubleUtil;
 
 
 /*

@@ -24,10 +24,10 @@ import org.neo4j.gds.ml.core.functions.LabelwiseFeatureProjection;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Map;
 

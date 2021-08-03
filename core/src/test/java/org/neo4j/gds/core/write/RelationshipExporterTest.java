@@ -28,18 +28,17 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.RelationshipExporter;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.values.storable.Values;
@@ -53,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
+import static org.neo4j.gds.core.utils.TerminationFlag.RUNNING_TRUE;
 
 class RelationshipExporterTest extends BaseTest {
 

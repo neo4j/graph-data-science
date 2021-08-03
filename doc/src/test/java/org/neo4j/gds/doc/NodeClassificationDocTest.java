@@ -25,8 +25,8 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 

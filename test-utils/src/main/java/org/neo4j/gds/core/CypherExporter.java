@@ -21,7 +21,7 @@ package org.neo4j.gds.core;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;

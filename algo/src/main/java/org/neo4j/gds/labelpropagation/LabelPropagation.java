@@ -20,18 +20,18 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
-import org.neo4j.graphalgo.core.loading.NullPropertyMap.LongNullPropertyMap;
-import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
+import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
+import org.neo4j.gds.core.utils.LazyBatchCollection;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;

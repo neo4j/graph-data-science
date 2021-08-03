@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.graphalgo.core.TransactionContext;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.utils.StatementApi;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Values;
 
@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
 
 public class SimilarityExporter extends StatementApi {
 

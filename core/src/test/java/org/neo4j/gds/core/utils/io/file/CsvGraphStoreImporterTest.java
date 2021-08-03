@@ -23,9 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter;
-import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporterConfig;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

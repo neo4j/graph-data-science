@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;

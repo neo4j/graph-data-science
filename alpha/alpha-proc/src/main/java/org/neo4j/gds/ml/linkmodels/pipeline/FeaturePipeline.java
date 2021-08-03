@@ -23,11 +23,11 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.ArrayList;

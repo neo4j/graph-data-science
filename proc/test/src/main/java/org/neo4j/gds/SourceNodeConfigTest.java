@@ -20,8 +20,8 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.SourceNodeConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
 
 public interface SourceNodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends SourceNodeConfig & AlgoBaseConfig, RESULT> extends NodeConfigTest<ALGORITHM, CONFIG, RESULT> {
 

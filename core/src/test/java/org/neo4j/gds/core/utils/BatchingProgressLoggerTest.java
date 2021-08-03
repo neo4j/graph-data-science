@@ -27,11 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.TestProgressLogger;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.RenamesCurrentThread;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

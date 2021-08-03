@@ -26,19 +26,19 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.utils.StringFormatting;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter;
-import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.io.file.CsvGraphStoreImporter;
+import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
-import org.neo4j.graphalgo.utils.CheckedSupplier;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.utils.CheckedRunnable;
+import org.neo4j.gds.utils.CheckedSupplier;
+import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -63,9 +63,9 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
-import static org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter.DIRECTORY_IS_READABLE;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.function;
+import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
+import static org.neo4j.gds.core.utils.io.file.CsvGraphStoreImporter.DIRECTORY_IS_READABLE;
+import static org.neo4j.gds.utils.ExceptionUtil.function;
 
 public final class BackupAndRestore {
 

@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;

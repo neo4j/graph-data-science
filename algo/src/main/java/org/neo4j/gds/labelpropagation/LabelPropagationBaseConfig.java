@@ -21,12 +21,12 @@ package org.neo4j.gds.labelpropagation;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.config.NodeWeightConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SeedConfig;
 
 public interface LabelPropagationBaseConfig extends
     AlgoBaseConfig,

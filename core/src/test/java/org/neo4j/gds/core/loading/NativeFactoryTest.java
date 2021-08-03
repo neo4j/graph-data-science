@@ -23,18 +23,16 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.utils.CheckedRunnable;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.AtomicReference;
 

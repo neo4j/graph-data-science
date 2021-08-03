@@ -22,7 +22,6 @@ package gds.example;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.*;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;

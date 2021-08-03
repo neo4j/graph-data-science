@@ -34,17 +34,17 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -60,9 +60,9 @@ import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 
 class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
 

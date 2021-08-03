@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils;
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.Intersections;
 
 import java.util.Arrays;
 

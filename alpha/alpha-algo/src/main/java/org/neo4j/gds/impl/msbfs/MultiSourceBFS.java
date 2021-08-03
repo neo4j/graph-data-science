@@ -20,13 +20,13 @@
 package org.neo4j.gds.impl.msbfs;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.utils.CloseableThreadLocal;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;

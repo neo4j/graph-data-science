@@ -22,9 +22,9 @@ package org.neo4j.gds.triangle.intersect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 

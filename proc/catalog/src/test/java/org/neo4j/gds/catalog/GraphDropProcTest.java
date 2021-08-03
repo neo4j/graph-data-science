@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.QueryRunner;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 

@@ -24,7 +24,7 @@ import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.wcc.WccStatsProc;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.gds.wcc.WccWriteProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
 import java.util.List;

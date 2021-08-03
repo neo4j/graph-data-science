@@ -21,9 +21,9 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Optional;
 

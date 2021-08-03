@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.config.DeleteRelationshipsConfig;
-import org.neo4j.graphalgo.core.loading.DeletionResult;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.config.DeleteRelationshipsConfig;
+import org.neo4j.gds.core.loading.DeletionResult;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

@@ -28,7 +28,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

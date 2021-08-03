@@ -21,9 +21,9 @@ package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.core.model.Model;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

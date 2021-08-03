@@ -25,10 +25,10 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 import java.util.Map;

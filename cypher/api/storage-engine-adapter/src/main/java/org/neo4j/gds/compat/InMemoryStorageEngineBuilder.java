@@ -21,7 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.counts.CountsStore;
 import org.neo4j.function.TriFunction;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;

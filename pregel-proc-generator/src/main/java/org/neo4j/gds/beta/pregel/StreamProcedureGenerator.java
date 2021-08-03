@@ -20,14 +20,14 @@
 package org.neo4j.gds.beta.pregel;
 
 import com.squareup.javapoet.MethodSpec;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 
-import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;
+import static org.neo4j.gds.beta.pregel.annotation.GDSMode.STREAM;
 
 class StreamProcedureGenerator extends ProcedureGenerator {
 

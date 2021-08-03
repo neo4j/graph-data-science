@@ -22,9 +22,9 @@ package org.neo4j.gds.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.graphbuilder.GridBuilder;
 

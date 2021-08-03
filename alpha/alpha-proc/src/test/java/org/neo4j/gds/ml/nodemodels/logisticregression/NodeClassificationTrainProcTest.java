@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.assertj.ConditionFactory;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.graphdb.Result;
 
 import java.util.List;

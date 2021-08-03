@@ -23,9 +23,9 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;

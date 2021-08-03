@@ -21,11 +21,11 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipIntersect;
+import org.neo4j.gds.core.huge.HugeGraph;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 

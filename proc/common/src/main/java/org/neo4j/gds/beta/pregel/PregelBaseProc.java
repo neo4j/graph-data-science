@@ -21,15 +21,12 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.List;
 import java.util.stream.Collectors;

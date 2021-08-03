@@ -20,10 +20,9 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.BytePageCreator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
 
 class BytePageCreatorTest {
 

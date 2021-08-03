@@ -21,12 +21,8 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.List;
 

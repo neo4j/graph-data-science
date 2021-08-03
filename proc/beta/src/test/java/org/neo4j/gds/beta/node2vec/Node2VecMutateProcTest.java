@@ -29,11 +29,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;

@@ -20,8 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.CompressedLongArray;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
 class CompressedLongArrayTest {
 

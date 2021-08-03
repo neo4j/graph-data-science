@@ -22,9 +22,9 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

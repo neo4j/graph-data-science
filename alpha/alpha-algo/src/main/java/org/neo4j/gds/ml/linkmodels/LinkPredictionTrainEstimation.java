@@ -27,11 +27,11 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrain.estimateModelSelectResult;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrainEstimation {
 

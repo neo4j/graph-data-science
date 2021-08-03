@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.SourceNodeConfig;
-import org.neo4j.graphalgo.config.SourceNodesConfig;
-import org.neo4j.graphalgo.config.TargetNodeConfig;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConfigurableSeedConfig;
+import org.neo4j.gds.config.FeaturePropertiesConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.NodeWeightConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.SourceNodesConfig;
+import org.neo4j.gds.config.TargetNodeConfig;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.ArrayList;
 import java.util.Collection;

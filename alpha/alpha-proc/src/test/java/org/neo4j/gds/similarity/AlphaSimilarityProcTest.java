@@ -31,10 +31,10 @@ import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.nil.NullGraph;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Procedure;
 
@@ -55,13 +55,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public abstract class AlphaSimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,

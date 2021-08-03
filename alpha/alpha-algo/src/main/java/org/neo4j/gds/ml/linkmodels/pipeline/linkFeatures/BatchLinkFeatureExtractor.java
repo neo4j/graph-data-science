@@ -20,9 +20,9 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
 
 class BatchLinkFeatureExtractor implements Runnable {
     final LinkFeatureExtractor extractor;

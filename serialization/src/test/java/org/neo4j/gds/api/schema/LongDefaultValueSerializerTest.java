@@ -20,8 +20,8 @@
 package org.neo4j.gds.api.schema;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
 import static org.assertj.core.api.Assertions.assertThat;

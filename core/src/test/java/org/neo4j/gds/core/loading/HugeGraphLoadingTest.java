@@ -21,16 +21,16 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 

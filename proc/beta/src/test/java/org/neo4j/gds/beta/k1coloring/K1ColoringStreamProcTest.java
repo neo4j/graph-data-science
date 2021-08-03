@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.HashMap;
 import java.util.Map;

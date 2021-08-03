@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import java.util.List;

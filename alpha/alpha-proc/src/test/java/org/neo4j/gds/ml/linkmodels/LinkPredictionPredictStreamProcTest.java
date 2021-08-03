@@ -28,19 +28,19 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 

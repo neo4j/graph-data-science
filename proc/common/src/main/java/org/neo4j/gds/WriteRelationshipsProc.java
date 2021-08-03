@@ -20,17 +20,17 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.TransactionContext;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
-import org.neo4j.graphalgo.core.write.RelationshipStreaming;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.core.write.RelationshipStreaming;
 
 import java.util.List;
 import java.util.stream.Stream;

@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.gds.core.GdsEdition;
 
 import java.util.function.Supplier;
 

@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.gds.config.BaseConfig;
 
 import java.util.AbstractMap;
 import java.util.Map;

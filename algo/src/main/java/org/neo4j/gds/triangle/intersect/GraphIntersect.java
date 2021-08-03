@@ -21,18 +21,18 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.api.IntersectionConsumer;
+import org.neo4j.gds.api.RelationshipIntersect;
 
 import java.util.function.IntPredicate;
 
-import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
+import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
- * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
+ * Instances are however safe to use concurrently with other {@link org.neo4j.gds.api.RelationshipIterator}s.
  */
 
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {

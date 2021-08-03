@@ -20,16 +20,15 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 
 class CsvNodeVisitorTest extends CsvVisitorTest {
 

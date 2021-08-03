@@ -21,26 +21,26 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactory<Knn, CONFIG> {
     @Override

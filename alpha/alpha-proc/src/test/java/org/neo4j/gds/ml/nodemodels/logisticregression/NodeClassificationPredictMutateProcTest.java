@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;

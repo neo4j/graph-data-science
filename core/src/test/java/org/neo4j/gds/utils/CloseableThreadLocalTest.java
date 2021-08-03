@@ -20,7 +20,6 @@
 package org.neo4j.gds.utils;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.neo4j.graphalgo.api.IntBinaryPredicate;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.IntBinaryPredicate;
+import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;

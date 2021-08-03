@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.functions;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.CatalogRequest;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Context;
@@ -37,8 +37,8 @@ import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringJoining.join;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.utils.StringJoining.join;
 
 public class NodePropertyFunc {
     @Context

@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.oversize;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.oversize;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
 
 final class HugeArraysTest {
 

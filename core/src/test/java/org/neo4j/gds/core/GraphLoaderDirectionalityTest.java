@@ -23,12 +23,10 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.GraphHelper.assertRelationships;

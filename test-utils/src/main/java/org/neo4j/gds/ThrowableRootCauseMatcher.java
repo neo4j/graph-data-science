@@ -23,7 +23,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.gds.utils.ExceptionUtil;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.instanceOf;

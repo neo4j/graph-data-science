@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.procedure.Description;
 
 import java.util.Queue;

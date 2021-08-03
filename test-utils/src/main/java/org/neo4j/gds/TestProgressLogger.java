@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;

@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.modularity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;

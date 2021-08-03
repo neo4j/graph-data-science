@@ -24,8 +24,8 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Map;
 import java.util.Optional;

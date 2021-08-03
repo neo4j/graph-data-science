@@ -34,7 +34,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.List;
 

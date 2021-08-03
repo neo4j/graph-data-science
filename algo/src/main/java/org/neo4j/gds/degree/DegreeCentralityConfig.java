@@ -22,9 +22,9 @@ package org.neo4j.gds.degree;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
 @ValueClass
 @Configuration

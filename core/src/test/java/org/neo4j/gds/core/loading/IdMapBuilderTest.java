@@ -20,8 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.IdMapBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

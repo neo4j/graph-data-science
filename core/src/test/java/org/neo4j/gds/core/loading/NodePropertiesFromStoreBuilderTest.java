@@ -25,11 +25,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

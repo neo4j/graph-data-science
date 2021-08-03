@@ -29,12 +29,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.NOT_FOUND;
+import static org.neo4j.gds.core.utils.paged.SparseLongArray.NOT_FOUND;
 
 class SparseLongArrayTest {
 

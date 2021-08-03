@@ -24,10 +24,10 @@ import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
-import org.neo4j.graphalgo.api.CSRGraph;
-import org.neo4j.graphalgo.api.CSRGraphAdapter;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.CSRGraphAdapter;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipIntersect;
 
 public class TestGraph extends CSRGraphAdapter {
 

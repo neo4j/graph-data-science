@@ -39,10 +39,10 @@ import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.results.ApproxSimilaritySummaryResult;
 import org.neo4j.gds.results.SimilarityExporter;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.TransactionContext;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.ApproximateNearestNeighborsConfigImpl;
 import org.neo4j.graphalgo.impl.similarity.ImmutableCosineConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutableEuclideanConfig;
@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 

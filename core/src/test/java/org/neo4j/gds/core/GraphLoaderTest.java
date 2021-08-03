@@ -26,12 +26,11 @@ import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 
@@ -39,9 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
+import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
 class GraphLoaderTest extends BaseTest {
 

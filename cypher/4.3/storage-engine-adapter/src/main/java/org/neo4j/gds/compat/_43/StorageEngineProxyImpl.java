@@ -26,7 +26,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.recordstorage.InMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader43;

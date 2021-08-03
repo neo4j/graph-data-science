@@ -26,8 +26,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.GraphStoreExportSettings;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 

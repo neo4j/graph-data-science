@@ -22,12 +22,12 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

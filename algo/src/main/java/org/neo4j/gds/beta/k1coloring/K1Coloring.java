@@ -21,20 +21,20 @@ package org.neo4j.gds.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.SetBitsIterable;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.SetBitsIterable;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
 
 /**
  * <p>

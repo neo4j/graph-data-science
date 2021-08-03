@@ -23,12 +23,11 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.BitIdMap;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import java.util.Arrays;
 import java.util.List;

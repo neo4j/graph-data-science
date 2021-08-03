@@ -23,9 +23,9 @@ import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 final class Node2VecCompanion {
 

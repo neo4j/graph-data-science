@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Comparator;
 import java.util.Objects;

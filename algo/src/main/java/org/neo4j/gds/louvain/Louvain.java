@@ -23,23 +23,23 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.beta.modularity.ModularityOptimization;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -48,7 +48,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain, Louvain> {
 

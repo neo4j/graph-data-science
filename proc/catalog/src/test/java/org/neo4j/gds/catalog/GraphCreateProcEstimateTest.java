@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

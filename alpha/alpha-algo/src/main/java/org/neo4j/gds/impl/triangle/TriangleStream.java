@@ -23,11 +23,11 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IntersectionConsumer;
+import org.neo4j.gds.api.RelationshipIntersect;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
 
 import java.util.Collection;

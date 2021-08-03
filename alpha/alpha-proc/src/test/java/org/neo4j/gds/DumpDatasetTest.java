@@ -29,10 +29,10 @@ import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.datasets.CommunityDbCreator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.ResultTransformer;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 

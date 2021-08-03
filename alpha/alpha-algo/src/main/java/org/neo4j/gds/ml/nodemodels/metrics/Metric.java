@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
 public interface Metric {

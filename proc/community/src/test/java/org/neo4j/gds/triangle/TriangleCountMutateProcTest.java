@@ -24,10 +24,10 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;

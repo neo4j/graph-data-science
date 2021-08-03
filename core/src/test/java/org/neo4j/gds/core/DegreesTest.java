@@ -21,12 +21,12 @@ package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.graphdb.Label;
 
 import java.util.Arrays;

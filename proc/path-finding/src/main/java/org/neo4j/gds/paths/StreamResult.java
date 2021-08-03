@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;

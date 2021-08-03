@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Collection;

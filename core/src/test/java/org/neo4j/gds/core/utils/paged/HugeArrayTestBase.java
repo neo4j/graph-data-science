@@ -20,9 +20,6 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.HugeArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 
 import java.util.Arrays;
 import java.util.Objects;

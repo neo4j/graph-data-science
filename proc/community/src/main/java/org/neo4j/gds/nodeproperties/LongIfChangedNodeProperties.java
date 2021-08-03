@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

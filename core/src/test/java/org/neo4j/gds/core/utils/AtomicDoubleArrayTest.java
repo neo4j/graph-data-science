@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

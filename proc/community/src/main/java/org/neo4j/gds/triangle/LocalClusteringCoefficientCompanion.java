@@ -22,19 +22,19 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 final class LocalClusteringCoefficientCompanion {
 

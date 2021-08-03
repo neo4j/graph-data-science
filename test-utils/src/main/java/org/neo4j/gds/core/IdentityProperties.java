@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 
 public class IdentityProperties implements LongNodeProperties {
     private final long expectedPropertyCount;

@@ -37,14 +37,14 @@ import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 

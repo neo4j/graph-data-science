@@ -21,13 +21,11 @@ package org.neo4j.gds.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.IntIntHashMap;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -35,7 +33,7 @@ import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct.memoryEstimation;
+import static org.neo4j.gds.core.utils.paged.dss.IncrementalDisjointSetStruct.memoryEstimation;
 
 class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 

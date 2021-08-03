@@ -21,8 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
 
 public abstract class PregelStatsProc<
     ALGO extends Algorithm<ALGO, PregelResult>,

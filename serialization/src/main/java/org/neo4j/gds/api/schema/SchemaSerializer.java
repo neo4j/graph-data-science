@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
 import java.util.HashMap;
@@ -66,7 +63,7 @@ public final class SchemaSerializer {
         return serializableSchema;
     }
 
-    private static GraphSchemaProto.PropertySchema propertySchema(org.neo4j.graphalgo.api.schema.PropertySchema propertySchema) {
+    private static GraphSchemaProto.PropertySchema propertySchema(PropertySchema propertySchema) {
 
         var propertySchemaBuilder = GraphSchemaProto.PropertySchema.newBuilder();
         var valueType = propertySchema.valueType();

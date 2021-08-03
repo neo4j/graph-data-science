@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.stream.Stream;
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.RandomLongIterator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

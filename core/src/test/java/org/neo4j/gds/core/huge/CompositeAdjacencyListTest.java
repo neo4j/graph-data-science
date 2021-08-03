@@ -23,8 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.gds.api.Graph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

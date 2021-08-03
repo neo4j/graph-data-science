@@ -22,10 +22,10 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.NodeConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.config.NodeConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

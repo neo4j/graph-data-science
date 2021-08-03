@@ -20,15 +20,15 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IntersectionConsumer;
+import org.neo4j.gds.api.RelationshipIntersect;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
- * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
+ * Instances are however safe to use concurrently with other {@link org.neo4j.gds.api.RelationshipIterator}s.
  */
 
 public final class NodeFilteredGraphIntersect implements RelationshipIntersect {

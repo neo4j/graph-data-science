@@ -20,12 +20,12 @@
 package org.neo4j.gds.test;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {

@@ -24,9 +24,9 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
-import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig> {

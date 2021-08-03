@@ -22,9 +22,8 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
-import org.neo4j.graphalgo.core.loading.AdjacencyCompression;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.LongArrayBuffer;
 
 import java.util.Arrays;
 import java.util.stream.Stream;

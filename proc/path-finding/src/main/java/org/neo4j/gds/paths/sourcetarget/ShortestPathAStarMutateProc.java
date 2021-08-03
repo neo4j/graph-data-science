@@ -26,7 +26,7 @@ import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

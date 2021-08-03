@@ -29,8 +29,8 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
 class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<ShortestPathAStarMutateConfig>
     implements MutateRelationshipWithPropertyTest<AStar, ShortestPathAStarMutateConfig, DijkstraResult> {

@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
 public class LinkPredictionTrainProc extends
     TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig> {

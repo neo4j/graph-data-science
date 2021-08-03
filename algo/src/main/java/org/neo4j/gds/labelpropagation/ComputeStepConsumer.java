@@ -21,9 +21,9 @@ package org.neo4j.gds.labelpropagation;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 final class ComputeStepConsumer implements RelationshipWithPropertyConsumer {
 

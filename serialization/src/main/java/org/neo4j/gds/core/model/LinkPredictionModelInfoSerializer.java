@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;

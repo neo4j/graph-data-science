@@ -20,13 +20,13 @@
 package org.neo4j.gds.beta.modularity;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.ToleranceConfig;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.config.ToleranceConfig;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 public interface ModularityOptimizationConfig extends
     AlgoBaseConfig,

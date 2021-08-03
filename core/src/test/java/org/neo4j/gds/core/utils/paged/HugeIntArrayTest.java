@@ -20,9 +20,8 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;
 import static org.junit.jupiter.api.Assertions.assertEquals;

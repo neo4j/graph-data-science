@@ -24,9 +24,9 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Collections;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public final class SimilarityProc {
 

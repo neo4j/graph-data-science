@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.features;
 
 import org.neo4j.gds.ml.core.EmbeddingUtils;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 public class LongArrayPropertyExtractor implements ArrayFeatureExtractor {
     private final int dimension;

@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static java.util.Collections.singletonList;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphWriteRelationshipProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_NAME = "testGraph";

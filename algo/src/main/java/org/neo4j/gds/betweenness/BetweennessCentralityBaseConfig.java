@@ -20,7 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.Locale;
 import java.util.Optional;

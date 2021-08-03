@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.beta.pregel.PrimitiveDoubleQueues;
 
 import java.util.ArrayList;
 import java.util.concurrent.Phaser;

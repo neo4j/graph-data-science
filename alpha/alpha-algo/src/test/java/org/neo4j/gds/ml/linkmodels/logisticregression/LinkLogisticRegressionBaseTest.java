@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;

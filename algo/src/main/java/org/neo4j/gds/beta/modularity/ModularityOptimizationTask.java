@@ -23,12 +23,12 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 final class ModularityOptimizationTask implements Runnable {
 

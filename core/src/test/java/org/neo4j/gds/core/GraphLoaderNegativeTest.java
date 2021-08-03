@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

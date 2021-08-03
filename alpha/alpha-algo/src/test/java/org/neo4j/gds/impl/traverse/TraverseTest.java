@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.traverse;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.impl.traverse.Traverse.ExitPredicate.Result;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;

@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.core.model.Model;
 
 public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>> {
 

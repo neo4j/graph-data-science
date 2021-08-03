@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

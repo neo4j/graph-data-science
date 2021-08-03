@@ -28,10 +28,10 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
 import java.util.HashSet;

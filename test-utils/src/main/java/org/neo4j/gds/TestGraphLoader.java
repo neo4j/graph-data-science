@@ -21,12 +21,11 @@ package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -40,11 +39,11 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.GdsEditionUtils.setToEnterpriseAndRun;
-import static org.neo4j.graphalgo.Orientation.NATURAL;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
-import static org.neo4j.graphalgo.core.Aggregation.NONE;
-import static org.neo4j.graphalgo.utils.StringJoining.join;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.core.Aggregation.DEFAULT;
+import static org.neo4j.gds.core.Aggregation.NONE;
+import static org.neo4j.gds.utils.StringJoining.join;
 
 public final class TestGraphLoader {
 

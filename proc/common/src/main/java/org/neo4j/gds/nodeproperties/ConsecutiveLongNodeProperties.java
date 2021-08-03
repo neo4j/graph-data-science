@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.core.utils.BitUtil;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 
 public class ConsecutiveLongNodeProperties implements LongNodeProperties {
 

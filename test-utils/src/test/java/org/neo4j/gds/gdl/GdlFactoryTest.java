@@ -21,16 +21,15 @@ package org.neo4j.gds.gdl;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashSet;

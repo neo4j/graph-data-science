@@ -21,24 +21,24 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.huge.UnionGraph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class K1ColoringTest {
 

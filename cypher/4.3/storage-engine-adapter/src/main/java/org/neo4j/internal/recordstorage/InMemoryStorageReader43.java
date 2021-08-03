@@ -23,7 +23,7 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.storageengine.InMemoryNodeCursor;
 import org.neo4j.gds.storageengine.InMemoryPropertyCursor;
 import org.neo4j.gds.storageengine.InMemoryRelationshipTraversalCursor;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.StorageNodeCursor;

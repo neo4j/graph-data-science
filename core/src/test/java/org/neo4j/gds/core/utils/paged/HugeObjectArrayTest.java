@@ -24,19 +24,18 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
 

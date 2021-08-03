@@ -21,16 +21,12 @@ package org.neo4j.gds;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -39,10 +35,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class GraphCreateConfigBuilders {

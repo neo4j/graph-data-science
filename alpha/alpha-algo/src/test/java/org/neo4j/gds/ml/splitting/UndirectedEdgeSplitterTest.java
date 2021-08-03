@@ -20,16 +20,16 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;

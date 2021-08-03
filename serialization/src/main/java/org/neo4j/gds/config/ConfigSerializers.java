@@ -25,13 +25,6 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
-import org.neo4j.graphalgo.config.BatchSizeConfig;
-import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;

@@ -22,8 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.core.utils.io.file.UserInfoLoader;
-import org.neo4j.graphalgo.core.utils.io.file.csv.UserInfoVisitor;
+import org.neo4j.gds.core.utils.io.file.csv.UserInfoVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

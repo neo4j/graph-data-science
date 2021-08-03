@@ -22,9 +22,9 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 
 import java.util.Optional;
 

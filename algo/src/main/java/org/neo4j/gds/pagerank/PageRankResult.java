@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
 @ValueClass
 public interface PageRankResult {

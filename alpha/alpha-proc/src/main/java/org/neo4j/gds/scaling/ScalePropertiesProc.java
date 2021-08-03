@@ -20,8 +20,8 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 
 public class ScalePropertiesProc {
 

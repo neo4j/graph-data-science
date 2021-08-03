@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.ml.LinkFeatureCombiner;
-import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.gds.core.utils.Intersections;
 
 public enum LinkFeatureCombiners implements LinkFeatureCombiner {
 

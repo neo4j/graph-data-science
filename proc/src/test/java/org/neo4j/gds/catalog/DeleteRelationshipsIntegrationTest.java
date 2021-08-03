@@ -26,9 +26,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

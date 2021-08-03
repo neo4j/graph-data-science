@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.compress.AdjacencyFactory;
 
 class TransientCompressedAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
 

@@ -21,13 +21,12 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphInfo;
-import org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 
 class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 

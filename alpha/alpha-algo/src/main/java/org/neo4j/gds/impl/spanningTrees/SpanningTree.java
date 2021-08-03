@@ -20,7 +20,7 @@
 package org.neo4j.gds.impl.spanningTrees;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipConsumer;
 
 /**
  * group of nodes that form a spanning tree

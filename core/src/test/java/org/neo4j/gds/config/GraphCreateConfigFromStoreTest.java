@@ -20,17 +20,16 @@
 package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.Collections;
 import java.util.Set;

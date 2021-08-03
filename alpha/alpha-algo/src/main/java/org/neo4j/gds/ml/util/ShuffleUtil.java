@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.util;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Optional;
 

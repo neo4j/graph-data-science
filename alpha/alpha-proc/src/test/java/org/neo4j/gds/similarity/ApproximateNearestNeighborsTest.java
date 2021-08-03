@@ -28,8 +28,8 @@ import org.neo4j.gds.impl.similarity.CategoricalInput;
 import org.neo4j.gds.impl.similarity.JaccardAlgorithm;
 import org.neo4j.gds.impl.similarity.JaccardConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.ImmutableApproximateNearestNeighborsConfig;
 import org.neo4j.graphalgo.impl.similarity.ImmutableJaccardConfig;
 import org.neo4j.graphdb.Label;
@@ -45,7 +45,7 @@ import java.util.stream.LongStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.compat.MapUtil.genericMap;
-import static org.neo4j.graphalgo.core.loading.ImportSizing.MIN_PAGE_SIZE;
+import static org.neo4j.gds.core.loading.ImportSizing.MIN_PAGE_SIZE;
 
 class ApproximateNearestNeighborsTest extends AlgoTestBase {
 

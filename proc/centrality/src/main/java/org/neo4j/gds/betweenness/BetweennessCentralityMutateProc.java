@@ -26,9 +26,9 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateOrientationCombinations;
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateOrientationCombinations;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityMutateProc extends MutatePropertyProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {

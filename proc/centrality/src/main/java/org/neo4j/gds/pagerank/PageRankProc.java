@@ -21,7 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 

@@ -20,13 +20,13 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.neo4j.gds.ml.TrainingConfig;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;

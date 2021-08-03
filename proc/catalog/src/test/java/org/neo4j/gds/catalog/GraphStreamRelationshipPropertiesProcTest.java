@@ -27,17 +27,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.values.storable.NumberType;
 
@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 

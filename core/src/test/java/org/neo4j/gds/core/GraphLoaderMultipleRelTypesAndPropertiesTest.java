@@ -27,18 +27,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,12 +60,12 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
-import static org.neo4j.graphalgo.core.Aggregation.MAX;
-import static org.neo4j.graphalgo.core.Aggregation.MIN;
-import static org.neo4j.graphalgo.core.Aggregation.NONE;
-import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
-import static org.neo4j.graphalgo.core.Aggregation.SUM;
+import static org.neo4j.gds.core.Aggregation.DEFAULT;
+import static org.neo4j.gds.core.Aggregation.MAX;
+import static org.neo4j.gds.core.Aggregation.MIN;
+import static org.neo4j.gds.core.Aggregation.NONE;
+import static org.neo4j.gds.core.Aggregation.SINGLE;
+import static org.neo4j.gds.core.Aggregation.SUM;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 

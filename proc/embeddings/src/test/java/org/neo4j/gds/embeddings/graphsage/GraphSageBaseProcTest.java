@@ -27,22 +27,22 @@ import org.neo4j.gds.model.catalog.ModelDropProc;
 import org.neo4j.gds.model.catalog.ModelExistsProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 class GraphSageBaseProcTest extends BaseProcTest {

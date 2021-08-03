@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.UnionNodeProperties;
-import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.UnionNodeProperties;
 
 import java.util.HashMap;
 import java.util.Map;

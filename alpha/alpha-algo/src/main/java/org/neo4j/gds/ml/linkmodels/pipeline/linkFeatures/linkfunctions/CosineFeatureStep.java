@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
 
 import java.util.List;
 import java.util.Map;

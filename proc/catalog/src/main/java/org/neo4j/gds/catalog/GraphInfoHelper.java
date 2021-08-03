@@ -21,11 +21,11 @@ package org.neo4j.gds.catalog;
 
 import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Map;
 

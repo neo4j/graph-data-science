@@ -30,7 +30,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

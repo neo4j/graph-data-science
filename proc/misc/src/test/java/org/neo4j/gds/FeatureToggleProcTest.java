@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
+import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
 
 class FeatureToggleProcTest extends BaseProcTest {
 

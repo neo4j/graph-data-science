@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.utils.BitUtil.align;
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.utils.BitUtil.isPowerOfTwo;
-import static org.neo4j.graphalgo.core.utils.BitUtil.nearbyPowerOfTwo;
-import static org.neo4j.graphalgo.core.utils.BitUtil.nextHighestPowerOfTwo;
-import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
+import static org.neo4j.gds.core.utils.BitUtil.align;
+import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.core.utils.BitUtil.isPowerOfTwo;
+import static org.neo4j.gds.core.utils.BitUtil.nearbyPowerOfTwo;
+import static org.neo4j.gds.core.utils.BitUtil.nextHighestPowerOfTwo;
+import static org.neo4j.gds.core.utils.BitUtil.previousPowerOfTwo;
 
 final class BitUtilTest {
 

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.io.file;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.core.utils.io.file.GraphInfoLoader;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 
 class GraphInfoLoaderTest {
 

@@ -21,9 +21,7 @@ package org.neo4j.gds.junit.annotation;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.gds.core.GdsEdition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

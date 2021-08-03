@@ -22,7 +22,7 @@ package org.neo4j.gds.core;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.model.StoredModel;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;

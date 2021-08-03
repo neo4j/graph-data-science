@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;

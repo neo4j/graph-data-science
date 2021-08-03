@@ -22,8 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AbstractRelationshipProjections;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;

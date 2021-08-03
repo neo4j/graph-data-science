@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.walking.RandomWalkProc;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -39,7 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
 class RandomWalkProcTest extends BaseProcTest {
 

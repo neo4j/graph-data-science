@@ -30,20 +30,10 @@ import org.neo4j.cypherdsl.core.SymbolicName;
 import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.AbstractNodeProjection;
-import org.neo4j.graphalgo.AbstractProjections;
-import org.neo4j.graphalgo.AbstractPropertyMappings;
-import org.neo4j.graphalgo.AbstractRelationshipProjection;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.ElementProjection;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,17 +49,17 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.Orientation.NATURAL;
-import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
-import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.gds.AbstractRelationshipProjection.AGGREGATION_KEY;
+import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.PropertyMapping.DEFAULT_VALUE_KEY;
+import static org.neo4j.gds.PropertyMapping.PROPERTY_KEY;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.core.Aggregation.DEFAULT;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
@@ -92,7 +82,7 @@ public abstract class GdsCypher {
 
         /**
          * Loads all nodes of any label and relationships of any type in the
-         * {@link org.neo4j.graphalgo.Orientation#NATURAL} projection.
+         * {@link Orientation#NATURAL} projection.
          *
          * Does <strong>not</strong> load any properties.
          *

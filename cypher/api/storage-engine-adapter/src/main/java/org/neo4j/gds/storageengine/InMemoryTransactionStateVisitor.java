@@ -21,7 +21,7 @@ package org.neo4j.gds.storageengine;
 
 import org.eclipse.collections.api.set.primitive.LongSet;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.schema.ConstraintDescriptor;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;

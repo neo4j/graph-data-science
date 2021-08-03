@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

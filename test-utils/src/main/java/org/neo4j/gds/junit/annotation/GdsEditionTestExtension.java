@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.gds.core.GdsEdition;
 
 public class GdsEditionTestExtension implements
     BeforeTestExecutionCallback,

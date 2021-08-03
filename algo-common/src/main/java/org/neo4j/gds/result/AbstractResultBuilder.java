@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.result;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 public abstract class AbstractResultBuilder<RESULT> {
 

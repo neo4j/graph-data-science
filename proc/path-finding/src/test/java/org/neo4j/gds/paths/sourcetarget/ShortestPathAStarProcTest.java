@@ -37,19 +37,19 @@ import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -58,8 +58,8 @@ import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 
 abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,

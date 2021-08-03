@@ -25,7 +25,7 @@ import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Description;

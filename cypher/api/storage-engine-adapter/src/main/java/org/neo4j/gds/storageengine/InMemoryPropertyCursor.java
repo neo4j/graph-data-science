@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;

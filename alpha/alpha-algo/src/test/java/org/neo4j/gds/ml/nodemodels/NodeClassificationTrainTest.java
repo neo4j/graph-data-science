@@ -27,9 +27,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.TestLog;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
+import static org.neo4j.gds.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationTrainTest {

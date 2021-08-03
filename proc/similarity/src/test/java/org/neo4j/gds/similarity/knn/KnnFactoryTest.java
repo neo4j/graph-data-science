@@ -21,18 +21,18 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 class KnnFactoryTest {
 

@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.AbstractPropertyMappings.fromObject;
+import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
 
 @ValueClass
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {

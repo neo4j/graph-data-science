@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.NodePropertyContainer;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.NodePropertyContainer;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.Arrays;
 import java.util.Objects;

@@ -21,15 +21,15 @@ package org.neo4j.gds.ml.splitting;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
 import java.util.List;

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphAdapter;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphAdapter;
+import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
 public class TopKGraph extends GraphAdapter {
 

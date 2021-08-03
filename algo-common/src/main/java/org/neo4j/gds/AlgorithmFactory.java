@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
@@ -40,11 +40,11 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
 
     /**
      * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
-     * compute the actual consumption depending on {@link org.neo4j.graphalgo.core.GraphDimensions} and concurrency.
+     * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
      *
      * @return memory estimation
-     * @see org.neo4j.graphalgo.core.utils.mem.MemoryEstimations
-     * @see MemoryEstimation#estimate(org.neo4j.graphalgo.core.GraphDimensions, int)
+     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
+     * @see MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
      */
     MemoryEstimation memoryEstimation(CONFIG configuration);
 

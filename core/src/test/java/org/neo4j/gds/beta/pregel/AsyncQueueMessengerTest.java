@@ -20,8 +20,7 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

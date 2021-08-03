@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.graphalgo.core.utils.io.file.csv.JacksonFileAppender;
 
 import java.io.IOException;
@@ -33,8 +33,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+import static org.neo4j.gds.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
+import static org.neo4j.gds.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 
 class JacksonFileAppenderTest {
 

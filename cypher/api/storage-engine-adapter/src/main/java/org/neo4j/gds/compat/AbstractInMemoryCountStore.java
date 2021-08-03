@@ -22,7 +22,7 @@ package org.neo4j.gds.compat;
 import org.neo4j.annotations.documented.ReporterFactory;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.counts.CountsVisitor;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.TokenNotFoundException;

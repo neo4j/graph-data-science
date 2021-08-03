@@ -34,8 +34,8 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
 
 import java.io.IOException;
 import java.util.List;

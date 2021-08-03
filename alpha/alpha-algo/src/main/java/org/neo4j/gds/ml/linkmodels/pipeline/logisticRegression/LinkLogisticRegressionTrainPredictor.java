@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 /**
  * Responsible for producing predictions on a specific graph.

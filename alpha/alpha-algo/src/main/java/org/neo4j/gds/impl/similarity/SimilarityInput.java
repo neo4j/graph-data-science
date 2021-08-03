@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
 
 public interface SimilarityInput {
     long getId();

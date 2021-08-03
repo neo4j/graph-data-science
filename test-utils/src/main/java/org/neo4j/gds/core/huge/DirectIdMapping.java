@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.gds.api.IdMapping;
 
 public final class DirectIdMapping implements IdMapping {
     private final long nodeCount;

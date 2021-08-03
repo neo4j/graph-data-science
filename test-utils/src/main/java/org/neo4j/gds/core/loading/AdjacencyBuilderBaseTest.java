@@ -21,15 +21,11 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMapping;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
-import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
-import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.graphalgo.core.loading.RelationshipImporter;
-import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +34,7 @@ import java.util.concurrent.atomic.LongAdder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
+import static org.neo4j.gds.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
 public abstract class AdjacencyBuilderBaseTest {
 

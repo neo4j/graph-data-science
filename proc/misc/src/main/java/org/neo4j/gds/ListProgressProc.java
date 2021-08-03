@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.utils.progress.LogEvent;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.LogEvent;
+import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;

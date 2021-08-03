@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.gdl;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 public final class GdlGraphs {
 

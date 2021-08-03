@@ -28,18 +28,18 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.logging.NullLog;
@@ -59,9 +59,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 

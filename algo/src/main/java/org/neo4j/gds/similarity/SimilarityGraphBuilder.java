@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;

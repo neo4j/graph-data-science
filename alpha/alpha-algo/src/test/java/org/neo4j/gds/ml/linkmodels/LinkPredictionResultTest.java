@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.junit.jupiter.api.RepeatedTest;
-import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.List;
 import java.util.stream.Collectors;

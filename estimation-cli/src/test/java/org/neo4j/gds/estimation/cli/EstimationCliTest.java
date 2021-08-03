@@ -114,9 +114,9 @@ import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.wcc.WccStatsProc;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.gds.wcc.WccWriteProc;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Procedure;
 
 import java.io.ByteArrayOutputStream;
@@ -142,9 +142,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
 
 @GdsEditionTest(value = Edition.EE)
 final class EstimationCliTest {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import java.util.List;
 import java.util.Optional;

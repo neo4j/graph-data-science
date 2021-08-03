@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

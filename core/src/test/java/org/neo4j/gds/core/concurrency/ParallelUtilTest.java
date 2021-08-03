@@ -25,13 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.api.BatchNodeIterable;
+import org.neo4j.gds.core.loading.HugeParallelGraphImporter;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -75,9 +73,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
+import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
 
 final class ParallelUtilTest {
 

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Optional;
 

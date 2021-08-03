@@ -23,11 +23,11 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> {

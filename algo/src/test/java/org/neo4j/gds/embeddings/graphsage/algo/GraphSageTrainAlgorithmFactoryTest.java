@@ -29,12 +29,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.BitUtil;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
@@ -53,13 +53,13 @@ import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 @GdsEditionTest(Edition.EE)
 class GraphSageTrainAlgorithmFactoryTest {

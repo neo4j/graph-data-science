@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 
 final class FastRPCompanion {
 

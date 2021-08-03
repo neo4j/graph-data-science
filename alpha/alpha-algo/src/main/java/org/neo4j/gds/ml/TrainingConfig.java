@@ -21,8 +21,8 @@ package org.neo4j.gds.ml;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.model.Model;
 
 public interface TrainingConfig extends ConcurrencyConfig, Model.Mappable {
 

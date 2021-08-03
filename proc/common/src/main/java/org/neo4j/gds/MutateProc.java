@@ -21,13 +21,13 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.gds.config.MutateConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
+import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
+import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,

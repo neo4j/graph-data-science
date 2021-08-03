@@ -31,16 +31,15 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +59,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
 class CypherFactoryTest extends BaseTest {
 

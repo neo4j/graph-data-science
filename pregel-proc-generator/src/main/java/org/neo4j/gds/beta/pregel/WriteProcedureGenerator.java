@@ -24,8 +24,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;

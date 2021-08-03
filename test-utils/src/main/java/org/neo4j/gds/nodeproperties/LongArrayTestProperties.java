@@ -20,7 +20,7 @@
 package org.neo4j.gds.nodeproperties;
 
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
-import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 
 public final class LongArrayTestProperties implements LongArrayNodeProperties {
     private final LongToObjectFunction<long[]> transformer;

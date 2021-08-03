@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
 
 public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,

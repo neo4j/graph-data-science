@@ -20,8 +20,6 @@
 package org.neo4j.gds.core.utils.collection.primitive;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.concurrent.atomic.AtomicLong;
 

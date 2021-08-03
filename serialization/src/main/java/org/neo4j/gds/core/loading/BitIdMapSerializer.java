@@ -25,10 +25,9 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.neo4j.gds.core.utils.paged.SparseLongArraySerializer;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.loading.BitIdMap;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.SparseLongArray;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

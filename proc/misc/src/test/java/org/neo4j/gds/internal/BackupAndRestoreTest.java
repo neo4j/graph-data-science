@@ -36,11 +36,11 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.internal.BackupAndRestore.BackupResult;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 

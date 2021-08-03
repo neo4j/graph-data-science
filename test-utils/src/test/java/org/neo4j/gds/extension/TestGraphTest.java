@@ -20,12 +20,11 @@
 package org.neo4j.gds.extension;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.CSRGraph;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;

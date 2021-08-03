@@ -26,25 +26,23 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,10 +53,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
-import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_KEY;
-import static org.neo4j.graphalgo.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
-import static org.neo4j.graphalgo.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
+import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
+import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
+import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
+import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,

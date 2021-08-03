@@ -22,9 +22,9 @@ package org.neo4j.gds.impl.harmonic;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.impl.msbfs.BfsConsumer;
 import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.concurrent.ExecutorService;
 

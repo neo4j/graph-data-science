@@ -23,13 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.logging.Log;
 
 public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {

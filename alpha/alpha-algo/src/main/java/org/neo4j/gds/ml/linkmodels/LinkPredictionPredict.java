@@ -23,12 +23,12 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 
 import java.util.HashSet;
 import java.util.function.Consumer;

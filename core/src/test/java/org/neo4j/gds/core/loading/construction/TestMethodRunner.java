@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.graphalgo.utils.CheckedRunnable;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.utils.CheckedRunnable;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.stream.Stream;
 

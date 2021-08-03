@@ -20,9 +20,9 @@
 package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

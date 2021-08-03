@@ -23,7 +23,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 public class SparseLongArraySerializer extends Serializer<SparseLongArray> {
 

@@ -27,7 +27,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.gds.core.Settings;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -35,8 +35,8 @@ import org.neo4j.test.extension.ExtensionCallback;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 public class AllocationTrackerProcTest extends BaseProcTest {
 

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

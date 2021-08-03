@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;

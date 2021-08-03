@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.function.Function;
@@ -37,9 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.api.DefaultValue.DEFAULT;
-import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+import static org.neo4j.gds.api.DefaultValue.DEFAULT;
+import static org.neo4j.gds.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+import static org.neo4j.gds.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 
 class DefaultValueTest {
 

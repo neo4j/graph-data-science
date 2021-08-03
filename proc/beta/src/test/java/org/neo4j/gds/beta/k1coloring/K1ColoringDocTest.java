@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

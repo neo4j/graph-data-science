@@ -29,8 +29,8 @@ import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
 class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPathYensMutateConfig>
     implements MutateRelationshipWithPropertyTest<Yens, ShortestPathYensMutateConfig, DijkstraResult> {

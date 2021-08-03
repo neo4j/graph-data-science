@@ -20,12 +20,10 @@
 package org.neo4j.gds.core.utils.paged.dss;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-import static org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct.memoryEstimation;
+import static org.neo4j.gds.core.utils.paged.dss.NonInrementalDisjointSetStruct.memoryEstimation;
 
 class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
 

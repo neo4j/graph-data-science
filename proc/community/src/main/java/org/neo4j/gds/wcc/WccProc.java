@@ -23,9 +23,9 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 final class WccProc {
 

@@ -21,9 +21,8 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.huge.HugeGraph;
 
 import java.util.Collections;
 import java.util.Iterator;

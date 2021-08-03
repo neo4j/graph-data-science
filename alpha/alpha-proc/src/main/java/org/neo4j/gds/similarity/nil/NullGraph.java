@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.similarity.nil;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;

@@ -24,8 +24,8 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public interface Aggregator {
 

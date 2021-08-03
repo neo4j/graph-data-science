@@ -30,7 +30,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.model.catalog.ModelListProc;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 public class SplitRelationships extends Algorithm<SplitRelationships, SplitResult> {
 

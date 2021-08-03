@@ -25,8 +25,8 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 

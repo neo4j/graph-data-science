@@ -21,13 +21,12 @@ package org.neo4j.gds.beta.pregel;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues.COMPACT_THRESHOLD;
+import static org.neo4j.gds.beta.pregel.PrimitiveAsyncDoubleQueues.COMPACT_THRESHOLD;
 
 class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 

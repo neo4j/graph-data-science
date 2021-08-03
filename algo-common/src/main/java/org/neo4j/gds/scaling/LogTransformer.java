@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.gds.api.NodeProperties;
 
 final class LogTransformer extends ScalarScaler {
 

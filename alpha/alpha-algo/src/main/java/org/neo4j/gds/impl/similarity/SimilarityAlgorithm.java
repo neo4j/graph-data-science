@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.similarity;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Comparator;

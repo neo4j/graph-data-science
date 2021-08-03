@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.List;
 

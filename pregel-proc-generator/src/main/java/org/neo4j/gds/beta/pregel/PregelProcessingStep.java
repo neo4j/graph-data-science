@@ -23,7 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.JavaFile;
-import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

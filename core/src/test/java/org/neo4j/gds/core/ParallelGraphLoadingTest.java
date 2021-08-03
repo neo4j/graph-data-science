@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.PrivateLookup;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -61,7 +61,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
+import static org.neo4j.gds.core.utils.RawValues.combineIntInt;
 
 class ParallelGraphLoadingTest extends RandomGraphTestCase {
 

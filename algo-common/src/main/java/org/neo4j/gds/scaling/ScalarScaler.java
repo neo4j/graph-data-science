@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
 import java.util.List;

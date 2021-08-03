@@ -28,7 +28,7 @@ import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;

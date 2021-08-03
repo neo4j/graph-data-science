@@ -20,10 +20,10 @@
 package org.neo4j.gds.impl.influenceMaximization;
 
 import com.carrotsearch.hppc.LongScatterSet;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayStack;
-import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Random;
 import java.util.concurrent.locks.Lock;

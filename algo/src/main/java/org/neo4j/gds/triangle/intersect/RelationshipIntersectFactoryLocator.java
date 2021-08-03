@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle.intersect;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.List;
 import java.util.Optional;

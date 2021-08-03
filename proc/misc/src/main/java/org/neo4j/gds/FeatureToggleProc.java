@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;

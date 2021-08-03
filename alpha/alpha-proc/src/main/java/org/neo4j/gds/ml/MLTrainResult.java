@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.core.model.Model;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
+import static org.neo4j.gds.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class MLTrainResult {

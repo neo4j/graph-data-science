@@ -20,7 +20,7 @@
 package org.neo4j.gds.results;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.ProgressTimer;
 
 public class DeltaSteppingProcResult {
 

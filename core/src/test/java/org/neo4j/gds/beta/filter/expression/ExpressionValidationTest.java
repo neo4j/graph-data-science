@@ -24,9 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.filter.expression.ExpressionParser;
-import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
-import org.neo4j.graphalgo.beta.filter.expression.ValidationContext;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
@@ -34,8 +31,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.NODE;
-import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
+import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
+import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 
 class ExpressionValidationTest {
 

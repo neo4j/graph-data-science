@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -35,7 +35,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
 

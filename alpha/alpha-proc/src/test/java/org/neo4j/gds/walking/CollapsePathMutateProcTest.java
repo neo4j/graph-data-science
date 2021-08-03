@@ -32,8 +32,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Relationships;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;

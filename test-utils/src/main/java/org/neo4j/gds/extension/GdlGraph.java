@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.extension;
 
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.Aggregation;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

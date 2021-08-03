@@ -22,11 +22,11 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
 import java.util.ArrayList;
 import java.util.List;

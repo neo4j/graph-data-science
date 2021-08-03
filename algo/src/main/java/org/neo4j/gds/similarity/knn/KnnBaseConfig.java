@@ -23,10 +23,10 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphalgo.config.RandomSeedConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.config.NodeWeightConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 
 @ValueClass
 @Configuration

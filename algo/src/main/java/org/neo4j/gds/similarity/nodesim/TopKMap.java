@@ -21,13 +21,13 @@ package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.graphalgo.core.utils.SetBitsIterable;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
+import org.neo4j.gds.core.utils.SetBitsIterable;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.gds.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Comparator;
 import java.util.Iterator;

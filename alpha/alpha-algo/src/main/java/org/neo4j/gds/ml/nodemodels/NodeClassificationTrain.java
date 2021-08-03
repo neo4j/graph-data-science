@@ -35,15 +35,15 @@ import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Collection;
@@ -55,9 +55,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.delegateEstimation;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig>> {
 

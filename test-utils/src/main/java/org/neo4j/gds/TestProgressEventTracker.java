@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 
 import java.util.ArrayList;
 import java.util.List;

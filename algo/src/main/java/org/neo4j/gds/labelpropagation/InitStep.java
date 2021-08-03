@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 final class InitStep implements Step {
 

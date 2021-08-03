@@ -26,8 +26,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.core.model.Model;
 
 import java.io.IOException;
 import java.nio.file.Files;

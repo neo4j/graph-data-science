@@ -23,10 +23,10 @@ import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Collection;
 import java.util.List;

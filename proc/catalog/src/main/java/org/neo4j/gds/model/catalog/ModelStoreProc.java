@@ -25,10 +25,10 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
-import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +41,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
+import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModelStoreProc extends BaseProc {

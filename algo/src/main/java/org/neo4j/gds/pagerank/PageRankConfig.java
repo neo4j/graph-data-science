@@ -23,11 +23,11 @@ import org.immutables.value.Value;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.pregel.Partitioning;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SourceNodesConfig;
-import org.neo4j.graphalgo.config.ToleranceConfig;
+import org.neo4j.gds.beta.pregel.Partitioning;
+import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.SourceNodesConfig;
+import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;

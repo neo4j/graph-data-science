@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.impl.similarity.SimilarityVectorAggregator;
-import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationFunction;

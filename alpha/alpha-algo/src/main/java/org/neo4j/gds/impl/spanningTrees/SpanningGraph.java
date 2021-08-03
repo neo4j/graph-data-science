@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.impl.spanningTrees;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphAdapter;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphAdapter;
+import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
 import java.util.Arrays;
 

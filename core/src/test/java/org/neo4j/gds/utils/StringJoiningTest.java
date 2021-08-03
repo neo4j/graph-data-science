@@ -21,7 +21,6 @@ package org.neo4j.gds.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.List;
 

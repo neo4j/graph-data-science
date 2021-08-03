@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.features;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 public class HugeObjectArrayFeatureConsumer implements FeatureConsumer {
     private final HugeObjectArray<double[]> features;

@@ -21,9 +21,8 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateConfig;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

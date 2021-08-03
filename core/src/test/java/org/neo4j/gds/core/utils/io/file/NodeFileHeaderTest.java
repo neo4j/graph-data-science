@@ -22,13 +22,12 @@ package org.neo4j.gds.core.utils.io.file;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.utils.io.file.NodeFileHeader;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 
 class NodeFileHeaderTest {
 

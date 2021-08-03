@@ -23,8 +23,8 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
-import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamConfig> {

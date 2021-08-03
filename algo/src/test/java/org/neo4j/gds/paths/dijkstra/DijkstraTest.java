@@ -35,10 +35,10 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;

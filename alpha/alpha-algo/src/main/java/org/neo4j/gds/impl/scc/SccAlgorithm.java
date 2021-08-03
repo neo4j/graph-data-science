@@ -21,10 +21,10 @@ package org.neo4j.gds.impl.scc;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.PagedLongStack;
 
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 import java.util.List;

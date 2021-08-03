@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.pregel.cc;
 
-import org.neo4j.graphalgo.beta.pregel.Messages;
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.PregelSchema;
+import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 
 @PregelProcedure(
     name = "gds.pregel.test",

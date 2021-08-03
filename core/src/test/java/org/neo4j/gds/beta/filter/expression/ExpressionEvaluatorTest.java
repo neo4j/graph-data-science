@@ -30,8 +30,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
-import org.neo4j.graphalgo.beta.filter.expression.ExpressionParser;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Collection;
@@ -41,8 +39,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.beta.filter.expression.Expression.FALSE;
-import static org.neo4j.graphalgo.beta.filter.expression.Expression.TRUE;
+import static org.neo4j.gds.beta.filter.expression.Expression.FALSE;
+import static org.neo4j.gds.beta.filter.expression.Expression.TRUE;
 
 class ExpressionEvaluatorTest {
 

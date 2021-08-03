@@ -21,11 +21,11 @@ package org.neo4j.gds.impl.similarity;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.roaringbitmap.RoaringBitmap;
 

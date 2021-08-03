@@ -23,9 +23,8 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;
@@ -38,8 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.BLOCK_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.NOT_FOUND;
+import static org.neo4j.gds.core.utils.paged.SparseLongArray.BLOCK_SIZE;
+import static org.neo4j.gds.core.utils.paged.SparseLongArray.NOT_FOUND;
 
 class SequentialSparseLongArrayTest {
 

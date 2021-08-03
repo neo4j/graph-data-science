@@ -23,8 +23,8 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Comparator;
 import java.util.SplittableRandom;

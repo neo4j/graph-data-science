@@ -23,13 +23,12 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitorTest;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.utils.io.file.RelationshipSchemaLoader;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.Aggregation;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 
 class RelationshipSchemaLoaderTest {
 

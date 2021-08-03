@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOf;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOf;
 
 public interface MetricSpecification {
     SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.gds.NodeLabel;
 
 import java.util.List;
 import java.util.Map;

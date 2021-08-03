@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
 class DoubleDefaultValueSerializer implements SchemaSerializer.DefaultValueSerializer {

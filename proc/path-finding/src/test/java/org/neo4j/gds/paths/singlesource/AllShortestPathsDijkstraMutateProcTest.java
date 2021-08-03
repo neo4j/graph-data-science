@@ -31,8 +31,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
 class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraMutateConfig>
     implements MutateRelationshipWithPropertyTest<Dijkstra, AllShortestPathsDijkstraMutateConfig, DijkstraResult> {

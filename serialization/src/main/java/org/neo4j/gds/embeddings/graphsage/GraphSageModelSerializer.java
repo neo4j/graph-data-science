@@ -26,7 +26,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 

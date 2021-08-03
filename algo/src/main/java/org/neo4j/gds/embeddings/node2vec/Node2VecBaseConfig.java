@@ -21,10 +21,10 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
-import org.neo4j.graphalgo.config.RandomSeedConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.EmbeddingDimensionConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
 public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, RandomSeedConfig {
 

@@ -21,9 +21,9 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.NodeFilteredGraph;
+import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Optional;

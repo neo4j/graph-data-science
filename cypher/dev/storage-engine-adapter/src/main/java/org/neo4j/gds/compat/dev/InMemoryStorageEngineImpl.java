@@ -24,7 +24,7 @@ import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.lock.LockTracer;

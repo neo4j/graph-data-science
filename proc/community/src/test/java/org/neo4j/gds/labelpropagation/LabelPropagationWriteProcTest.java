@@ -33,9 +33,9 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 

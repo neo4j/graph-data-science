@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.core.subgraph;
 
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.RelationshipWeights;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.api.Graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;

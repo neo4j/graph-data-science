@@ -22,23 +22,23 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.MutateConfig;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends AbstractAlgorithmFactory<GraphSage, CONFIG> {
 

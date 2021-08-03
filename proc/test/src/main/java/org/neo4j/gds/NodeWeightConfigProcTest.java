@@ -20,8 +20,8 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
 

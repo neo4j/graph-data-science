@@ -29,16 +29,15 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.IdMapImplementations;
-import org.neo4j.graphalgo.core.utils.io.file.GraphStoreToFileExporter;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.IdMapImplementations;
+import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
-import org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,12 +53,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
 @GdlExtension
 public class GraphStoreToFileExporterTest extends CsvTest {

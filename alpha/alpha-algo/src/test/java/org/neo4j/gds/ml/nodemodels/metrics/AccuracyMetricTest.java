@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;

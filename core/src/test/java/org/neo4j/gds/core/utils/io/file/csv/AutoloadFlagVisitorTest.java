@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
 
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;

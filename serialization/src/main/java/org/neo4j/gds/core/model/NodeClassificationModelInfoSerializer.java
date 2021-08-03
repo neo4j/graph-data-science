@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;

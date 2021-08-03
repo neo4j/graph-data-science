@@ -20,7 +20,7 @@
 package org.neo4j.gds.linkprediction;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.graphalgo.core.utils.Directions;
+import org.neo4j.gds.core.utils.Directions;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -31,8 +31,8 @@ import org.neo4j.procedure.UserFunction;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.DIRECTION_KEY;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
 
 public class LinkPredictionFunc extends BaseProc {
 

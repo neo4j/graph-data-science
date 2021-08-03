@@ -25,15 +25,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class IntersectingTriangleCountTest {

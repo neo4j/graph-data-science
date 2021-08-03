@@ -25,9 +25,8 @@ import org.neo4j.gds.api.schema.SchemaDeserializer;
 import org.neo4j.gds.api.schema.SchemaSerializer;
 import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;

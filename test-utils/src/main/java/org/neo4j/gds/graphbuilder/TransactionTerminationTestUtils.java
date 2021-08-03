@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.graphbuilder;
 
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.concurrent.TimeUnit;

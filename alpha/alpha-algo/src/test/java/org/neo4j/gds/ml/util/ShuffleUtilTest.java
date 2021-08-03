@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.util;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

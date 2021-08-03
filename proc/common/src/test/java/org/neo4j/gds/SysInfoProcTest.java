@@ -23,7 +23,7 @@ import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.gds.core.Settings;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;

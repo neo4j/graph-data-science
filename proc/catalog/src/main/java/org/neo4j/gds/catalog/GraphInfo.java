@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.config.GraphCreateFromGraphConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
 import java.util.Map;

@@ -28,9 +28,9 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
@@ -41,7 +41,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.gds.Orientation.REVERSE;
 
 class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 

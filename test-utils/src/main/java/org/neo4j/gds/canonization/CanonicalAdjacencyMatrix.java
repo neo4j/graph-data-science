@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.canonization;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.Graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.StringJoining.join;
+import static org.neo4j.gds.utils.StringJoining.join;
 
 public final class CanonicalAdjacencyMatrix {
 

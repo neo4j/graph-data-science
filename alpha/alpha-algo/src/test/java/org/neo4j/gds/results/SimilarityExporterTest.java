@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;

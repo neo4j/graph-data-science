@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.recordstorage.InMemoryNodeScan;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.storageengine.api.AllNodeScan;

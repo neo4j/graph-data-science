@@ -23,11 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.Aggregation;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -42,11 +39,11 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
-import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
+import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.core.Aggregation.SINGLE;
 
 class RelationshipProjectionsTest {
 

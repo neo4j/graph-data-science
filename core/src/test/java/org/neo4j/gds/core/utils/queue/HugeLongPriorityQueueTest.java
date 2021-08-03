@@ -23,7 +23,6 @@ import io.qala.datagen.RandomShortApi;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

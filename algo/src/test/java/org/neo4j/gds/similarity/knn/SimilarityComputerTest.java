@@ -31,7 +31,7 @@ import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;

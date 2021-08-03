@@ -21,9 +21,8 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.Aggregation;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;

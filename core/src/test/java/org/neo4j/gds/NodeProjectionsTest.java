@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,9 +39,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
-import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
+import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
 class NodeProjectionsTest {
 

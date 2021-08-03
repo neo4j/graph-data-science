@@ -21,10 +21,10 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.SeedConfig;
 
 import java.util.Optional;
 import java.util.Set;

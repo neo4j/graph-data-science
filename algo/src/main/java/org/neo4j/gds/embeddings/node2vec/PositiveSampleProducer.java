@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
 
 public class PositiveSampleProducer {
 

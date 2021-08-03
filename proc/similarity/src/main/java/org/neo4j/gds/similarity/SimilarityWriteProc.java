@@ -22,17 +22,17 @@ package org.neo4j.gds.similarity;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.TransactionContext;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.RelationshipExporter;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.write.RelationshipExporter;
 
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public abstract class SimilarityWriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
