@@ -23,8 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.model.catalog.ModelPublishProc;
-import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 

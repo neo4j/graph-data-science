@@ -20,12 +20,12 @@
 package org.neo4j.gds.model.catalog;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;

@@ -21,13 +21,13 @@ package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.TrainConfigSerializer;
+import org.neo4j.gds.config.GraphSageTrainConfigSerializer;
+import org.neo4j.gds.config.LinkPredictionTrainConfigSerializer;
+import org.neo4j.gds.config.NodeClassificationTrainConfigSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
-import org.neo4j.graphalgo.config.LinkPredictionTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.config.NodeClassificationTrainConfigSerializer;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;

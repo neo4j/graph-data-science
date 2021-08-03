@@ -20,12 +20,12 @@
 package org.neo4j.gds.model.storage;
 
 import org.neo4j.gds.ModelInfoSerializer;
+import org.neo4j.gds.core.model.GraphSageTrainModelInfoSerializer;
+import org.neo4j.gds.core.model.LinkPredictionModelInfoSerializer;
+import org.neo4j.gds.core.model.NodeClassificationModelInfoSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.graphalgo.core.model.GraphSageTrainModelInfoSerializer;
-import org.neo4j.graphalgo.core.model.LinkPredictionModelInfoSerializer;
-import org.neo4j.graphalgo.core.model.NodeClassificationModelInfoSerializer;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;

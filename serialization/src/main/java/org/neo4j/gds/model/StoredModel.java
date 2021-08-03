@@ -20,16 +20,16 @@
 package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.schema.SchemaDeserializer;
+import org.neo4j.gds.core.model.ModelMetaDataSerializer;
+import org.neo4j.gds.core.model.ZonedDateTimeSerializer;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.gds.model.storage.ModelFileWriter;
 import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
-import org.neo4j.graphalgo.core.model.ZonedDateTimeSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
