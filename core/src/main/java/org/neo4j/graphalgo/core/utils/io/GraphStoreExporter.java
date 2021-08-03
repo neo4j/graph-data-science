@@ -39,10 +39,6 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     private final Map<String, LongFunction<Object>> neoNodeProperties;
 
-    protected GraphStoreExporter(GraphStore graphStore, CONFIG config) {
-        this(graphStore, config, Optional.empty());
-    }
-
     protected GraphStoreExporter(
         GraphStore graphStore,
         CONFIG config,
