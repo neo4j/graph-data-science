@@ -49,7 +49,6 @@ class AppendixAProcedureListingTest extends BaseProcTest {
 
     private final Asciidoctor asciidoctor = create();
     private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.graphalgo",
         "org.neo4j.gds"
     );
 
