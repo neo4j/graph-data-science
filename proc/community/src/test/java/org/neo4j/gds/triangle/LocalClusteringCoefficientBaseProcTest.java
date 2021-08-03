@@ -34,7 +34,7 @@ import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;

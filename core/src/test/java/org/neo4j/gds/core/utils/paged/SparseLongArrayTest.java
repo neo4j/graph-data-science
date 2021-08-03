@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryRange;

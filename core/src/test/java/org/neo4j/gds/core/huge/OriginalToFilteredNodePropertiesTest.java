@@ -96,7 +96,7 @@ class OriginalToFilteredNodePropertiesTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.huge.OriginalToFilteredNodePropertiesTest#expectedFilteredValue")
+    @MethodSource("org.neo4j.gds.core.huge.OriginalToFilteredNodePropertiesTest#expectedFilteredValue")
     void testReturnTheDefaultValueForNodesOutOfRange(String label, long expectedAValue, long expectedBValue) {
         NodeFilteredGraph nodeFilteredGraph = (NodeFilteredGraph) graphStore.getGraph(
             List.of(NodeLabel.of(label)),

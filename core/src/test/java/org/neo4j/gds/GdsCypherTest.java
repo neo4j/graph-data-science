@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Direction;
 

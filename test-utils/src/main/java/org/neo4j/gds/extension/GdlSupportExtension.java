@@ -33,7 +33,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 

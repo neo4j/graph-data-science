@@ -21,12 +21,12 @@ package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
@@ -37,6 +37,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

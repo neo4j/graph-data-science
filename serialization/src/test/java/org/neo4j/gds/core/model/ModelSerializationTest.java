@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
+import org.neo4j.gds.core.model.proto.GraphSchemaProto;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;

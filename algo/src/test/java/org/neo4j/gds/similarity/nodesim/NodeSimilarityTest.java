@@ -33,7 +33,7 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;

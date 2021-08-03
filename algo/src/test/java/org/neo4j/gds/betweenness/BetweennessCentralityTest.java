@@ -134,7 +134,7 @@ class BetweennessCentralityTest {
     }
 
     @ParameterizedTest(name = "graph={1}, concurrency={0}, samplingSize={2}")
-    @MethodSource("org.neo4j.graphalgo.betweenness.BetweennessCentralityTest#testArguments")
+    @MethodSource("org.neo4j.gds.betweenness.BetweennessCentralityTest#testArguments")
     void sampling(int concurrency, TestGraph graph, int samplingSize, Map<String, Double> expectedResult) {
         HugeAtomicDoubleArray actualResult = new BetweennessCentrality(
             graph,
@@ -180,7 +180,7 @@ class BetweennessCentralityTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.betweenness.BetweennessCentralityTest#expectedMemoryEstimation")
+    @MethodSource("org.neo4j.gds.betweenness.BetweennessCentralityTest#expectedMemoryEstimation")
     void testMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
         assertMemoryEstimation(
             () -> new BetweennessCentralityFactory<>().memoryEstimation(DEFAULT_CONFIG),

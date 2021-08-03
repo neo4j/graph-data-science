@@ -22,7 +22,7 @@ package org.neo4j.gds.storageengine;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;

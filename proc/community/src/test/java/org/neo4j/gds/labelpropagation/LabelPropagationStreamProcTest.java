@@ -47,7 +47,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void testStream(
         GdsCypher.QueryBuilder queryBuilder,
         String desc

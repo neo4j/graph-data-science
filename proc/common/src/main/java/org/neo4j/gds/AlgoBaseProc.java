@@ -35,7 +35,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -258,7 +258,7 @@ public abstract class AlgoBaseProc<
      * Returns a single node property that has been produced by the procedure.
      */
     protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException("Procedure must implement org.neo4j.graphalgo.AlgoBaseProc.nodeProperty");
+        throw new UnsupportedOperationException("Procedure must implement org.neo4j.gds.AlgoBaseProc.nodeProperty");
     }
 
     protected Stream<MemoryEstimateResult> computeEstimate(

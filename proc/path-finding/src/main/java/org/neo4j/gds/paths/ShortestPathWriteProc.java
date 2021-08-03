@@ -27,7 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;

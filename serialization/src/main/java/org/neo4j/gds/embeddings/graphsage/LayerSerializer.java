@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
 
 import java.util.List;
 import java.util.stream.Collectors;

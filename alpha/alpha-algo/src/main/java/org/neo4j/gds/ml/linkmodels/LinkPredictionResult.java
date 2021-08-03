@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.graphalgo.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 import org.neo4j.values.storable.Value;

@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
@@ -65,7 +65,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
     private void testPropertyLoading(int maxArrayLengthShift) {
         System.setProperty(
-                "org.neo4j.graphalgo.core.utils.ArrayUtil.maxArrayLengthShift",
+                "org.neo4j.gds.core.utils.ArrayUtil.maxArrayLengthShift",
                 String.valueOf(maxArrayLengthShift));
         // something larger than one batch
         int nodeCount = 60_000;

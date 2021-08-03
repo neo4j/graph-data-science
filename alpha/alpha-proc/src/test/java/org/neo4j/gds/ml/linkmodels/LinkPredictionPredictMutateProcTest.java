@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;

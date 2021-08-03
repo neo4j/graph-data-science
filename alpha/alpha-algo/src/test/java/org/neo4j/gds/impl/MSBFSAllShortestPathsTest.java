@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;

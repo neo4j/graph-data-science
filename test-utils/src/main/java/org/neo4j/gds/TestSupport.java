@@ -42,7 +42,7 @@ import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -90,7 +90,7 @@ public final class TestSupport {
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allFactoryTypes")
+    @MethodSource("org.neo4j.gds.TestSupport#allFactoryTypes")
     public @interface AllGraphStoreFactoryTypesTest {}
 
     public static Stream<FactoryType> allFactoryTypes() {

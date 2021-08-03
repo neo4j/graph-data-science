@@ -232,7 +232,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
     void undirectedWithAggregation(TestMethodRunner runTest) {
         runTest.run(() -> {
             Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.SUM);
@@ -241,7 +241,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
     void undirectedWithoutAggregation(TestMethodRunner runTest) {
         runTest.run(() -> {
             Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);

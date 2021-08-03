@@ -86,7 +86,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -123,7 +123,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void respectsMaxIterations(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("labelPropagation")
@@ -163,7 +163,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void shouldRunLabelPropagationNatural(GdsCypher.QueryBuilder queryBuilder, String desc) {
 
         String query = queryBuilder

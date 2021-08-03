@@ -28,7 +28,7 @@ import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
 
 import java.util.Collection;
 import java.util.Iterator;

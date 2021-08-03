@@ -26,7 +26,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
+import org.neo4j.gds.core.model.proto.GraphSchemaProto;
 
 import static org.neo4j.gds.api.nodeproperties.ValueType.valueOf;
 

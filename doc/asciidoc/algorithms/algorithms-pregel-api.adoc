@@ -41,7 +41,7 @@ The Pregel Java API allows us to easily build our own algorithm by implementing 
 [[algorithms-pregel-api-java-computation]]
 === Computation
 
-The first step is to implement the `org.neo4j.graphalgo.beta.pregel.PregelComputation` interface.
+The first step is to implement the `org.neo4j.gds.beta.pregel.PregelComputation` interface.
 It is the main interface to express user-defined logic using the Pregel framework.
 
 .The Pregel computation
@@ -102,7 +102,7 @@ A context is stateful, and all its methods are subject to the current superstep 
 Both context objects share a set of methods, e.g., to access the config and node state.
 Additionally, each context adds context-specific methods.
 
-The `org.neo4j.graphalgo.beta.pregel.PregelContext.InitContext` is available in the `init` method of a Pregel computation.
+The `org.neo4j.gds.beta.pregel.PregelContext.InitContext` is available in the `init` method of a Pregel computation.
 It provides access to node properties stored in the in-memory graph.
 We can set the initial node state to a fixed value, e.g. the node id, or use graph properties and the user-defined configuration to initialize a context-dependent state.
 
@@ -135,7 +135,7 @@ public final class InitContext {
 }
 ----
 
-In contrast, `org.neo4j.graphalgo.beta.pregel.PregelContext.ComputeContext` can be accessed inside the `compute` method.
+In contrast, `org.neo4j.gds.beta.pregel.PregelContext.ComputeContext` can be accessed inside the `compute` method.
 The context provides methods to access the computation state, e.g. the current superstep, and to send messages to other nodes in the graph.
 
 .The ComputeContext
@@ -185,11 +185,11 @@ public final class ComputeContext {
 === Master Computation
 
 Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example, to reset or evaluate a global data structure.
-This can be achieved by overriding the `org.neo4j.graphalgo.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
+This can be achieved by overriding the `org.neo4j.gds.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
 This function will be called at the end of each superstep after all compute threads have finished.
 The master compute function will be called by a single thread.
 
-The `masterCompute` function has access to the `org.neo4j.graphalgo.beta.pregel.PregelContext.MasterComputeContext`.
+The `masterCompute` function has access to the `org.neo4j.gds.beta.pregel.PregelContext.MasterComputeContext`.
 That context is similar to the `ComputeContext` but is not tied to a specific node and does not allow sending messages.
 Furthermore, the `MasterComputeContext` allows to run a function for every node in the graph and has access to the computation state of all nodes.
 
@@ -288,7 +288,7 @@ The `isAsynchronous` flag at the config is ignored in that case.
 === Configuration
 
 To configure the execution of a custom Pregel computation, the framework requires a configuration.
-The `org.neo4j.graphalgo.beta.pregel.PregelConfig` provides the minimum set of options to execute a computation.
+The `org.neo4j.gds.beta.pregel.PregelConfig` provides the minimum set of options to execute a computation.
 The configuration options also map to the parameters that can later be set via a custom procedure.
 This is equivalent to all the other algorithms within the GDS library.
 
@@ -359,8 +359,8 @@ The Pregel framework in GDS provides an easy way to generate procedures for all 
 [[algorithms-pregel-api-procedure-generation]]
 === Procedure generation
 
-To generate procedures for a computation, it needs to be annotated with the `@org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure` annotation.
-In addition, the config parameter of the custom computation must be a subtype of `org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig`.
+To generate procedures for a computation, it needs to be annotated with the `@org.neo4j.gds.beta.pregel.annotation.PregelProcedure` annotation.
+In addition, the config parameter of the custom computation must be a subtype of `org.neo4j.gds.beta.pregel.PregelProcedureConfig`.
 
 .Using the `@PregelProcedure` annotation to configure code generation.
 [source, java]

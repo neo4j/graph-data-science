@@ -24,8 +24,8 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
-import org.neo4j.graphalgo.core.model.proto.TensorProto;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
+import org.neo4j.gds.core.model.proto.TensorProto;
 
 import java.io.IOException;
 import java.util.Map;

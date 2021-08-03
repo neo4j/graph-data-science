@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.cc;
+package org.neo4j.gds.beta.pregel.cc;
 
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.Algorithm;
@@ -29,7 +29,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-@Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 

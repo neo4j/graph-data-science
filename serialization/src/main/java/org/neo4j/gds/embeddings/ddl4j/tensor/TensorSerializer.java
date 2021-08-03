@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.utils.ProtoUtils;
-import org.neo4j.graphalgo.core.model.proto.TensorProto;
+import org.neo4j.gds.core.model.proto.TensorProto;
 
 public final class TensorSerializer {
 

@@ -29,9 +29,9 @@ import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 

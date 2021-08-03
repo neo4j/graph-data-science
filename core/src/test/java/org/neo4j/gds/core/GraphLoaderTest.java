@@ -27,8 +27,8 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 

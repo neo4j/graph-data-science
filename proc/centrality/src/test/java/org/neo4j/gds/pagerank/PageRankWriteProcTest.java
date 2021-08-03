@@ -57,7 +57,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void testPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         String writeProperty = "myFancyScore";
         String query = queryBuilder
@@ -76,7 +76,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         var writeProperty = "pagerank";
         String query = queryBuilder
@@ -97,7 +97,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void testWriteYields(ModeBuildStage queryBuilder, String testCaseName) {
         var writeProp = "writeProp";
         String query = queryBuilder

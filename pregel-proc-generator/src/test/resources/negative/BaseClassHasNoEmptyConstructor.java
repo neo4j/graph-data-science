@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.cc;
+package org.neo4j.gds.beta.pregel.cc;
 
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;

@@ -77,7 +77,7 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RE
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.SourceNodesConfigTest#sourceNodesTypes")
+    @MethodSource("org.neo4j.gds.SourceNodesConfigTest#sourceNodesTypes")
     default void acceptSourceNodes(Object sourceNodes) {
         var graphName = "loadedGraph";
         runQuery(graphDb(), "CREATE (), (), ()");

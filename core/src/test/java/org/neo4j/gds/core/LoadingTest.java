@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 

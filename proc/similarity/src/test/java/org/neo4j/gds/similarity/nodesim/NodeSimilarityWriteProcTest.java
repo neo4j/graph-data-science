@@ -58,7 +58,7 @@ public class NodeSimilarityWriteProcTest
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")

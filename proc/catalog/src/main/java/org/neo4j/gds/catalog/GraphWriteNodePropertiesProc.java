@@ -28,7 +28,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

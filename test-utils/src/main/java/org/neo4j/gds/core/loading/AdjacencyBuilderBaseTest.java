@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;

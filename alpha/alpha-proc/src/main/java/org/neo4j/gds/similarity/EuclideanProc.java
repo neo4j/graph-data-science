@@ -27,7 +27,7 @@ import org.neo4j.gds.results.SimilarityStatsResult;
 import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
+import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

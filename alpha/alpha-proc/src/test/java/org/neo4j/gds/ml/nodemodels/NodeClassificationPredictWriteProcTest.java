@@ -35,12 +35,12 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResu
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;

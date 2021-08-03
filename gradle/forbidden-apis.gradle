@@ -7,7 +7,7 @@ if (shouldForbiddenApis) {
             proj.forbiddenApis {
                 signaturesFiles = files("$publicDir/etc/forbidden-apis")
                 ignoreSignaturesOfMissingClasses = true
-                suppressAnnotations = ["org.neo4j.graphalgo.annotation.SuppressForbidden"]
+                suppressAnnotations = ["org.neo4j.gds.annotation.SuppressForbidden"]
             }
             proj.tasks.matching { it.name.startsWith('forbiddenApis') }.each {
                 tasks.check.dependsOn it

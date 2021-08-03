@@ -23,7 +23,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 

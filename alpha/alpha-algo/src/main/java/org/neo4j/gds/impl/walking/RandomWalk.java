@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.impl.walking.RandomWalk.NextNodeStrategy.NO_NEXT_NODE;
-import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 

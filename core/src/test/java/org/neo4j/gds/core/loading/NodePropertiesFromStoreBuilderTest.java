@@ -175,7 +175,7 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues")
+    @MethodSource("org.neo4j.gds.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues")
     void shouldFailOnUnSupportedTypes(Value data) {
         UnsupportedOperationException ex = assertThrows(
             UnsupportedOperationException.class,

@@ -31,7 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
+import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;

@@ -32,7 +32,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface SourceNodesConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.graphalgo.config.SourceNodesConfig#parseNodeIds")
+    @Configuration.ConvertWith("org.neo4j.gds.config.SourceNodesConfig#parseNodeIds")
     default List<Long> sourceNodes() {
         return Collections.emptyList();
     }

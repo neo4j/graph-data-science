@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 /**
  * parallel non-negative single source shortest path algorithm

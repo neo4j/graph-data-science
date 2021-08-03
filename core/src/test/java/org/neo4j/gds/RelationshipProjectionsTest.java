@@ -87,7 +87,7 @@ class RelationshipProjectionsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.RelationshipProjectionsTest#syntacticSugarsSimple")
+    @MethodSource("org.neo4j.gds.RelationshipProjectionsTest#syntacticSugarsSimple")
     void syntacticSugars(Object argument) {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 

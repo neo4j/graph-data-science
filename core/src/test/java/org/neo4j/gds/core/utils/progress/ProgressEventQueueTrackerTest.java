@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventQueueTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventQueueTracker;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.concurrent.ConcurrentLinkedQueue;

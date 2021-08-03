@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 
-@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
+@Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {
     private int onlyAsParameter;
 

@@ -30,7 +30,7 @@ import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.gds.core.model.proto.ModelProto;
 
 import java.io.IOException;
 import java.nio.file.Path;

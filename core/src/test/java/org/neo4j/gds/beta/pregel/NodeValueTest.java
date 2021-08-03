@@ -62,7 +62,7 @@ class NodeValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.beta.pregel.NodeValueTest#validPropertyTypeAndGetters")
+    @MethodSource("org.neo4j.gds.beta.pregel.NodeValueTest#validPropertyTypeAndGetters")
     void testThrowWhenAccessingUnknownProperty(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
         var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
@@ -74,7 +74,7 @@ class NodeValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.beta.pregel.NodeValueTest#invalidPropertyTypeAndGetters")
+    @MethodSource("org.neo4j.gds.beta.pregel.NodeValueTest#invalidPropertyTypeAndGetters")
     void testThrowWhenAccessingPropertyOfWrongType(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
         var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());

@@ -29,7 +29,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;

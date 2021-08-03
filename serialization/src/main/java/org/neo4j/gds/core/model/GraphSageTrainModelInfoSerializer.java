@@ -23,7 +23,7 @@ import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ImmutableGraphSageTrainMetrics;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
 
 public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer {
 

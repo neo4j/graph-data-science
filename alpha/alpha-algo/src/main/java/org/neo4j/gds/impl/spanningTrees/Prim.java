@@ -31,7 +31,7 @@ import org.neo4j.gds.api.IdMapping;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
-import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 /**
  * Sequential Single-Source minimum weight spanning tree algorithm (PRIM).

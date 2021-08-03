@@ -21,7 +21,7 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
+import org.neo4j.gds.core.model.proto.GraphSchemaProto;
 
 class LongDefaultValueSerializer implements SchemaSerializer.DefaultValueSerializer {
     @Override

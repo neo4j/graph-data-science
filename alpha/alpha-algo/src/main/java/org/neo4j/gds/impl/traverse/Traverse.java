@@ -29,7 +29,7 @@ import org.neo4j.gds.api.Graph;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
 
-import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 public final class Traverse extends Algorithm<Traverse, Traverse> {
 

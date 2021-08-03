@@ -21,7 +21,7 @@ package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.Parser;
 import org.neo4j.gds.model.ModelSupport;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.gds.core.model.proto.ModelProto;
 
 import java.io.File;
 import java.io.FileInputStream;

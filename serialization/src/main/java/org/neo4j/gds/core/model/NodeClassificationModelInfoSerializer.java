@@ -29,9 +29,11 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.graphalgo.ml.model.proto.CommonML;
+import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;
+
+import static org.neo4j.gds.config.ConfigSerializers.multiClassNLRTrainConfig;
 
 public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer {
 
@@ -42,13 +44,13 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
         var modelInfo = (NodeClassificationModelInfo) mappable;
         var builder = CommonML.NodeClassificationModelInfo.newBuilder()
             .addAllClasses(modelInfo.classes())
-            .setBestParameters(ConfigSerializers.multiClassNLRTrainConfig(modelInfo.bestParameters()));
+            .setBestParameters(multiClassNLRTrainConfig(modelInfo.bestParameters()));
 
 
         ModelInfoSerializer.serializeMetrics(
             modelInfo.metrics(),
             Metric::name,
-            (paramsBuilder, modelStats) -> paramsBuilder.setNodeClassificationParams(ConfigSerializers.multiClassNLRTrainConfig(modelStats.params())),
+            (paramsBuilder, modelStats) -> paramsBuilder.setNodeClassificationParams(multiClassNLRTrainConfig(modelStats.params())),
             builder::putMetrics
         );
 

@@ -29,7 +29,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

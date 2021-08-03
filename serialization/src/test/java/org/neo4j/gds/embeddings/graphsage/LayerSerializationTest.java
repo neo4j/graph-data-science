@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

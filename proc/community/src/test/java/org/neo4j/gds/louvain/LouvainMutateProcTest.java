@@ -27,7 +27,7 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;

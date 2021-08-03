@@ -81,7 +81,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
             if (!row.containsKey("weights") || !row.containsKey("item")) {
                 throw new IllegalArgumentException("Input data requires 'item' and 'weights' for every row.");
             }
-            List<Double> weightList = extractValues(row.get("weights"))
+            List<Double> weightList = SimilarityInput.extractValues(row.get("weights"))
                 .stream()
                 .map(NumberUtils::getDoubleValue)
                 .collect(Collectors.toList());

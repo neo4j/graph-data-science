@@ -26,8 +26,8 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
-import org.neo4j.graphalgo.core.model.proto.TensorProto;
-import org.neo4j.graphalgo.ml.model.proto.LinkPredictionProto;
+import org.neo4j.gds.core.model.proto.TensorProto;
+import org.neo4j.gds.ml.model.proto.LinkPredictionProto;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -108,7 +108,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.similarity.knn.KnnProcTest#allGraphVariations")
+    @MethodSource("org.neo4j.gds.similarity.knn.KnnProcTest#allGraphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
         String query = queryBuilder
             .algo("gds", "beta", "knn")

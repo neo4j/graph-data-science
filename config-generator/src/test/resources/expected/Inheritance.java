@@ -26,7 +26,7 @@ import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
+@Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class MyConfig implements Inheritance.MyConfig {
     private String baseValue;
 

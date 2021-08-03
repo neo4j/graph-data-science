@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryRange;

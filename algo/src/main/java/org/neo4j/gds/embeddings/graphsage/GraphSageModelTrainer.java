@@ -34,7 +34,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
+import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;

@@ -31,8 +31,8 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.graphalgo.Orientation#parse")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.Orientation#toString")
+    @Configuration.ConvertWith("org.neo4j.gds.Orientation#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.Orientation#toString")
     default Orientation orientation() {
         return Orientation.NATURAL;
     }

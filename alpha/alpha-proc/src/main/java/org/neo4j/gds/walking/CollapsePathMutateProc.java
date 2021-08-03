@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.ImmutableComputationResult;
+import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;

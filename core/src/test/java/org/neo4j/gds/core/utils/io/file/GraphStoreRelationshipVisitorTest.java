@@ -30,7 +30,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.logging.NullLog;

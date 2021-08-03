@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.StoreLoaderWithConfigBuilder;
+import org.neo4j.gds.StoreLoaderWithConfigBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;

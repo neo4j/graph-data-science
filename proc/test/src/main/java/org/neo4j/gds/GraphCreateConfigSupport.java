@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;

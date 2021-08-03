@@ -19,13 +19,13 @@
         don't match one of the naming patterns from above
     -->
     <Match>
-        <Class name="~org.neo4j.graphalgo.NodeProjections?" />
+        <Class name="~org.neo4j.gds.NodeProjections?" />
     </Match>
     <Match>
-        <Class name="~org.neo4j.graphalgo.RelationshipProjections?" />
+        <Class name="~org.neo4j.gds.RelationshipProjections?" />
     </Match>
     <Match>
-        <Class name="~org.neo4j.graphalgo.PropertyMappings" />
+        <Class name="~org.neo4j.gds.PropertyMappings" />
     </Match>
 
 

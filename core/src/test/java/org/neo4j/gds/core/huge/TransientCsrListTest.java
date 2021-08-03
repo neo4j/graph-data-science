@@ -43,12 +43,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.huge.AdjacencyDecompressingReader.CHUNK_SIZE;
+import static org.neo4j.gds.core.huge.AdjacencyDecompressingReader.CHUNK_SIZE;
 
 class TransientCsrListTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldPeekValues(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 3, 3, 7});
@@ -59,7 +59,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldSkipUntilLargerValue(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -71,7 +71,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldAdvanceUntilEqualValue(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -84,7 +84,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void advanceOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -94,7 +94,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void advanceOutOfLowerBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -104,7 +104,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void skipUntilOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -114,7 +114,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void skipUntilOutOfLowerBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -124,7 +124,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldPeekAcrossBlocks(TestMethodRunner runner) {
         runner.run(() -> {
             int targetCount = 2 * CHUNK_SIZE;
@@ -146,7 +146,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldNextAcrossBlocks(TestMethodRunner runner) {
         runner.run(() -> {
             int targetCount = 2 * CHUNK_SIZE;

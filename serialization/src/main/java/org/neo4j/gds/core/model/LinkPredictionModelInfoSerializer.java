@@ -28,21 +28,23 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.graphalgo.ml.model.proto.CommonML;
+import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;
+
+import static org.neo4j.gds.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
 public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer {
 
     public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
         LinkPredictionModelInfo linkPredictionModelInfo = (LinkPredictionModelInfo) mappable;
         var builder = CommonML.LinkPredictionModelInfo.newBuilder()
-            .setBestParameters(ConfigSerializers.linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
+            .setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
 
         ModelInfoSerializer.serializeMetrics(
             linkPredictionModelInfo.metrics(),
             Enum::name,
-            (paramsBuilder, modelStats) -> paramsBuilder.setLinkPredictionParams(ConfigSerializers.linkLogisticRegressionTrainConfig(modelStats.params())),
+            (paramsBuilder, modelStats) -> paramsBuilder.setLinkPredictionParams(linkLogisticRegressionTrainConfig(modelStats.params())),
             builder::putMetrics
         );
 

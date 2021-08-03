@@ -127,7 +127,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
         // graph must not be empty
     }
 
-    // disabling tests from org.neo4j.graphalgo.RelationshipWeightConfigTest
+    // disabling tests from org.neo4j.gds.RelationshipWeightConfigTest
 
     // The following tests are disabled since we have no means of
     // setting a valid source and/or target node id to succeed in
@@ -158,5 +158,5 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     @Override
     public void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {}
 
-    // end of disabled tests from org.neo4j.graphalgo.RelationshipWeightConfigTest
+    // end of disabled tests from org.neo4j.gds.RelationshipWeightConfigTest
 }

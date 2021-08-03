@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.graphalgo.core.utils.io.file.csv.JacksonFileAppender;
+import org.neo4j.gds.core.utils.io.file.csv.JacksonFileAppender;
 
 import java.io.IOException;
 import java.nio.file.Path;

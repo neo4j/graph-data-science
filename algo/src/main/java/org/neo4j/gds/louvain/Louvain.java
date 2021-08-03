@@ -30,7 +30,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
+import org.neo4j.gds.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;

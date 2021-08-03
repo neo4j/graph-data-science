@@ -62,12 +62,12 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
         )).collect(Collectors.toList());
     }
 
-    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
+    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType trainRelationshipType();
 
-    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
+    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType testRelationshipType();
 
     @Configuration.Ignore

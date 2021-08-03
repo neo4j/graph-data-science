@@ -68,7 +68,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -110,7 +110,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
     void testWriteIntermediateCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         String query = queryBuilder
@@ -162,7 +162,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
     void testWriteWithSeeding(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyWriteProperty";
         String query = queryBuilder

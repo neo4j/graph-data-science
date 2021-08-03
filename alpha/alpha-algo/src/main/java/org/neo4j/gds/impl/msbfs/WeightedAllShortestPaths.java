@@ -30,7 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.Converters.longToIntConsumer;
 
 /**
  * WeightedAllShortestPaths:

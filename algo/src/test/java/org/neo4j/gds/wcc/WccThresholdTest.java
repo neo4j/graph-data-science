@@ -69,7 +69,7 @@ class WccThresholdTest {
     private TestGraph graph;
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.wcc.WccThresholdTest#thresholdParams")
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
     void testThreshold(double threshold, String[][] expectedComponents) {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()

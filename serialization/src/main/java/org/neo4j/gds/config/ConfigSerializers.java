@@ -25,9 +25,9 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
-import org.neo4j.graphalgo.config.proto.CommonConfigProto;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.graphalgo.ml.model.proto.CommonML;
+import org.neo4j.gds.config.proto.CommonConfigProto;
+import org.neo4j.gds.core.model.proto.ModelProto;
+import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.Map;
 import java.util.Optional;

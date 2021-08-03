@@ -33,7 +33,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;

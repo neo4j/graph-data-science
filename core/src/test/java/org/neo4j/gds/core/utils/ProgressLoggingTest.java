@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.graphalgo.compat.WriterLogBuilder;
+import org.neo4j.gds.compat.WriterLogBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 

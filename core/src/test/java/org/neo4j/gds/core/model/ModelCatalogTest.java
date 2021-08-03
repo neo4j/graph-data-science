@@ -207,8 +207,8 @@ class ModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has a training config with different types than expected. " +
-            "Expected train config type: `org.neo4j.graphalgo.model.catalog.TestTrainConfigImpl`, " +
-            "invoked with model config type: `org.neo4j.graphalgo.core.model.ModelCatalogTest$ModelCatalogTestTrainConfig`.",
+            "Expected train config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`, " +
+            "invoked with model config type: `org.neo4j.gds.core.model.ModelCatalogTest$ModelCatalogTestTrainConfig`.",
             ex.getMessage()
         );
     }
@@ -379,7 +379,7 @@ class ModelCatalogTest {
         }
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.graphalgo.core.model.ModelCatalogTest#modelInput")
+        @MethodSource("org.neo4j.gds.core.model.ModelCatalogTest#modelInput")
         void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
             existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
 

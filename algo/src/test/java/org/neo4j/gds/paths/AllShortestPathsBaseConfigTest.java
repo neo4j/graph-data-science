@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AllShortestPathsBaseConfigTest {

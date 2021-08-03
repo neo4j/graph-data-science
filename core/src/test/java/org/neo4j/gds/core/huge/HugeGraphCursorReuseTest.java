@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.graphalgo.api.ImmutableTopology;
+import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;

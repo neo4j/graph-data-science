@@ -81,7 +81,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .statsMode()

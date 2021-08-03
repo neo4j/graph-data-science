@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.cc;
+package org.neo4j.gds.beta.pregel.cc;
 
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +45,7 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-@Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
+@Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(
             name = "gds.pregel.test.stats",

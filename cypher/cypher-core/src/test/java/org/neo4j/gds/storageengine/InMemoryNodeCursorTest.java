@@ -20,10 +20,10 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.NodeProjection;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.extension.Neo4jGraph;

@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
+import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongToDoubleFunction;

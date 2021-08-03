@@ -46,7 +46,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> impleme
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
     void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")
@@ -64,7 +64,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> impleme
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
     void testStreamCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")

@@ -31,7 +31,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
-import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
+import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.Optional;
 import java.util.Random;

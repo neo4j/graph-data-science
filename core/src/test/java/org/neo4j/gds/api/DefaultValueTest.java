@@ -60,7 +60,7 @@ class DefaultValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.api.DefaultValueTest#validLongValues")
+    @MethodSource("org.neo4j.gds.api.DefaultValueTest#validLongValues")
     void shouldReturnLongsFromNumericValues(Object input, long expected) {
         var defaultValue = DefaultValue.of(input);
 
@@ -76,7 +76,7 @@ class DefaultValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.api.DefaultValueTest#invalidNumericValues")
+    @MethodSource("org.neo4j.gds.api.DefaultValueTest#invalidNumericValues")
     void shouldThrowAnErrorIfValueCannotBeCoercedToLong(Object input) {
         var defaultValue = DefaultValue.of(input);
 
@@ -111,7 +111,7 @@ class DefaultValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.api.DefaultValueTest#validDoubleValues")
+    @MethodSource("org.neo4j.gds.api.DefaultValueTest#validDoubleValues")
     void shouldReturnDoublesFromNumericValues(Object input, Double expected) {
         var defaultValue = DefaultValue.of(input);
 
@@ -119,7 +119,7 @@ class DefaultValueTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.api.DefaultValueTest#invalidNumericValues")
+    @MethodSource("org.neo4j.gds.api.DefaultValueTest#invalidNumericValues")
     void shouldThrowAnErrorIfValueCannotBeCoercedToDouble(Object input) {
         var defaultValue = DefaultValue.of(input);
 

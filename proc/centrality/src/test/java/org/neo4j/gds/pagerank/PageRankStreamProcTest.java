@@ -50,7 +50,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsLabel3")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsLabel3")
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
@@ -67,7 +67,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
@@ -82,7 +82,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void testPageRank(ModeBuildStage queryBuilder, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
@@ -93,7 +93,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRank(ModeBuildStage queryBuilder, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
@@ -124,7 +124,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
     void streamWithSourceNodes(ModeBuildStage queryBuilder, String testCaseName) {
         var sourceNodes = allNodesWithLabel("Label1");
 

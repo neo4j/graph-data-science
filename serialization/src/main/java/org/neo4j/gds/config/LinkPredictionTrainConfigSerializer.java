@@ -22,8 +22,8 @@ package org.neo4j.gds.config;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainConfig;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.graphalgo.config.proto.CommonConfigProto;
-import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
+import org.neo4j.gds.config.proto.CommonConfigProto;
+import org.neo4j.gds.core.model.proto.TrainConfigsProto;
 
 import static org.neo4j.gds.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 import static org.neo4j.gds.config.ConfigSerializers.linkLogisticRegressionTrainConfigMap;

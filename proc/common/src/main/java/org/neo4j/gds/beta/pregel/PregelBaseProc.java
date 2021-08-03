@@ -25,7 +25,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.List;

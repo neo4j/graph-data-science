@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
+import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.Collections;

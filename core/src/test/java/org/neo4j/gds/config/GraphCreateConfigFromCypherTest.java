@@ -24,8 +24,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.AbstractProjections;
-import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.RelationshipProjections;
 
 import java.util.stream.Stream;
 

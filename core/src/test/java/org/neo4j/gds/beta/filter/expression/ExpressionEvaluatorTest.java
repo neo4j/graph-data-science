@@ -206,7 +206,7 @@ class ExpressionEvaluatorTest {
     }
 
     @ParameterizedTest()
-    @MethodSource("org.neo4j.graphalgo.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
+    @MethodSource("org.neo4j.gds.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
     void hasLabelsOrTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
         var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
         var expr = ExpressionParser.parse("n" + labelExpression);

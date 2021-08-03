@@ -22,8 +22,8 @@ package org.neo4j.gds.config;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.graphalgo.config.proto.CommonConfigProto;
-import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
+import org.neo4j.gds.config.proto.CommonConfigProto;
+import org.neo4j.gds.ml.model.proto.NodeClassificationProto;
 
 import java.util.stream.Collectors;
 

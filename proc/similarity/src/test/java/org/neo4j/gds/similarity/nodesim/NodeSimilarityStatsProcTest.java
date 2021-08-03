@@ -84,7 +84,7 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
+    @MethodSource("org.neo4j.gds.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")

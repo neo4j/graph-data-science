@@ -24,7 +24,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 

@@ -36,7 +36,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class ValueConversionTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#longConversion")
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longConversion")
     void testGettingALong(Value value, Long expected) {
         if (expected != null) {
             Assertions.assertEquals(expected, ValueConversion.getLongValue(value));
@@ -62,7 +62,7 @@ class ValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#doubleConversion")
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleConversion")
     void testGettingADouble(Value value, Double expected) {
         if (expected != null) {
             assertEquals(expected, ValueConversion.getDoubleValue(value), 0.1);
@@ -87,7 +87,7 @@ class ValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#longArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longArrayConversion")
     void testGettingALongArray(Value value, long[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, ValueConversion.getLongArray(value));
@@ -107,7 +107,7 @@ class ValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#doubleArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleArrayConversion")
     void testGettingADoubleArray(Value value, double[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, ValueConversion.getDoubleArray(value), 0.1);
@@ -127,7 +127,7 @@ class ValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#floatArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatArrayConversion")
     void testGettingAFloatArray(Value value, float[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, ValueConversion.getFloatArray(value), 0.1f);

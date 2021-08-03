@@ -25,9 +25,9 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.graphalgo.ImmutablePropertyMapping;
+import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 

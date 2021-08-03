@@ -27,7 +27,7 @@ import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.gds.core.model.proto.ModelProto;
 
 import java.io.IOException;
 

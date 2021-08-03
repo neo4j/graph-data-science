@@ -36,7 +36,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
-import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.io.File;
@@ -427,7 +427,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
     void exportBitIdMapUsage(TestMethodRunner runTest) {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
