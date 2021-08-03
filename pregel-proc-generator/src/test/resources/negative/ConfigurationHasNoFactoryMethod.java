@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.PregelSchema;

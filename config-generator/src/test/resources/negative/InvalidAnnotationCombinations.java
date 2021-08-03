@@ -21,6 +21,8 @@ package negative;
 
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.Map;
+
 @Configuration("InvalidAnnotationCombinationsConfig")
 public interface InvalidAnnotationCombinations {
 

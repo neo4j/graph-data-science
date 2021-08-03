@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.pregel.cc;
 
 import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;

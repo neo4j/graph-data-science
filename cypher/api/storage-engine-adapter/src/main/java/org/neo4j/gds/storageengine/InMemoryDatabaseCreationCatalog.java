@@ -22,7 +22,7 @@ package org.neo4j.gds.storageengine;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class InMemoryDatabaseCreationCatalog {
     private static final Map<String, String> CATALOG = new ConcurrentHashMap<>();
