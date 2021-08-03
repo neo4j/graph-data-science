@@ -288,11 +288,20 @@ class BackupAndRestoreTest {
         int additionalAllowedBackups,
         String... expectedBackups
     ) throws IOException {
+        // use the same time as base so that we don't run into issues
+        // when the system clock changes between calls to now
+        var now = LocalDateTime.now();
         int maxAllowedBackups = 3;
         for (int i = 0; i < maxAllowedBackups; i++) {
             // just create backup metadata without any actual backup files
             var backupId = 42 + i;
-            var backupTime = travelInTime.apply(LocalDateTime.now()).toInstant(ZoneOffset.UTC).toEpochMilli();
+            var backupTime = travelInTime
+                .apply(now)
+                // spread the times by _i_ seconds to make them different
+                // and put them into a defined order
+                .plus(i, ChronoUnit.SECONDS)
+                .toInstant(ZoneOffset.UTC)
+                .toEpochMilli();
 
             var backupDir = tempDir.resolve(formatWithLocale("backup-%d", backupId));
             Files.createDirectories(backupDir);
