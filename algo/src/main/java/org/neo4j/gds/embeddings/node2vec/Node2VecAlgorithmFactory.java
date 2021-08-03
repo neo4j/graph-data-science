@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.graphalgo.degree.DegreeCentralityFactory;
 import org.neo4j.logging.Log;
 
 import java.util.List;

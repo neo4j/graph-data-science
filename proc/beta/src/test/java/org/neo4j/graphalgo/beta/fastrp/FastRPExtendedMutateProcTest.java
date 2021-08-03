@@ -22,13 +22,14 @@ package org.neo4j.graphalgo.beta.fastrp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateConfig;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 

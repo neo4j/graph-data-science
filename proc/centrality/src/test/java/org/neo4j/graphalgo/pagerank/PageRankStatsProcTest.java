@@ -23,9 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.pagerank.PageRankAlgorithm;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;

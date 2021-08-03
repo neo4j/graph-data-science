@@ -28,6 +28,8 @@ import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.ToleranceConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;

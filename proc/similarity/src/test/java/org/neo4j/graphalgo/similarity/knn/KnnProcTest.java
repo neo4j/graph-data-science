@@ -31,6 +31,8 @@ import org.neo4j.gds.NodeWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
+import org.neo4j.gds.similarity.knn.Knn;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;

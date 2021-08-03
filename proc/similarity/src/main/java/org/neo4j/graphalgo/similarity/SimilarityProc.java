@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;

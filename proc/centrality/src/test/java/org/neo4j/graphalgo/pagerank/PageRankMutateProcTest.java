@@ -21,12 +21,15 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.pagerank.PageRankAlgorithm;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 

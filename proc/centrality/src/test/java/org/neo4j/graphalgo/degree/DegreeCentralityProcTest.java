@@ -20,14 +20,16 @@
 package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;

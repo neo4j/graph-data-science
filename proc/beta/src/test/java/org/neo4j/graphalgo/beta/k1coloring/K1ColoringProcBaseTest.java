@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.beta.k1coloring.K1Coloring;
+import org.neo4j.gds.beta.k1coloring.K1ColoringConfig;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;

@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.labelpropagation.LabelPropagation;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;

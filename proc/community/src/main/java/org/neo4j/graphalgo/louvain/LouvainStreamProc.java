@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainFactory;
+import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
@@ -27,7 +31,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

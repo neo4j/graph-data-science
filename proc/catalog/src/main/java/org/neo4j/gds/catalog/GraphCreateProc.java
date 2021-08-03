@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -37,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

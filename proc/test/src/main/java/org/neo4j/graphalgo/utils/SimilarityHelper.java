@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Set;
 import java.util.stream.Collectors;

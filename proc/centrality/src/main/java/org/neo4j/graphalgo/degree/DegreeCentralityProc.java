@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.degree;
 
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;

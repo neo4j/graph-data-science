@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.k1coloring;
 
+import org.neo4j.gds.beta.k1coloring.K1Coloring;
+import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
+import org.neo4j.gds.beta.k1coloring.K1ColoringStatsConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -26,7 +30,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

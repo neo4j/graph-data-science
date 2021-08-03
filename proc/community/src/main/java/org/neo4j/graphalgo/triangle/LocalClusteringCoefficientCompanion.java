@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.gds.triangle.LocalClusteringCoefficient;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.NodeProperties;

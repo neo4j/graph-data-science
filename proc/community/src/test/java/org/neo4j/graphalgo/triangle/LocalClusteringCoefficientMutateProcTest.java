@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.triangle.LocalClusteringCoefficient;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;

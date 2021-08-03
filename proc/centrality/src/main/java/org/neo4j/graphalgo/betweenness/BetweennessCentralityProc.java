@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.neo4j.gds.betweenness.BetweennessCentrality;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;

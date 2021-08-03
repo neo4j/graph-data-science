@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.beta.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.beta.fastrp.FastRPExtendedBaseConfig;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

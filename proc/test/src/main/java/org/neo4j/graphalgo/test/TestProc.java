@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.test;
 
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.Graph;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

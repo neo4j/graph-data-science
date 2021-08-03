@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;

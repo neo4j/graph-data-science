@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.degree;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -27,7 +31,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;

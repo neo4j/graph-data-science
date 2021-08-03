@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.similarity.knn;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.similarity.knn.Knn;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;

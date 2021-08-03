@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.CommunityHelper;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;

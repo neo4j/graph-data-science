@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;

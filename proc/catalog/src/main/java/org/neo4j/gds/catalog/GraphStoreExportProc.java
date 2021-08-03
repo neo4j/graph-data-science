@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -35,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.graphalgo.core.utils.io.file.csv.estimation.GraphStoreToCsvEstimationConfig;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

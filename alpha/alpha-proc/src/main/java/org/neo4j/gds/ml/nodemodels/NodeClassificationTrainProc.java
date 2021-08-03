@@ -21,14 +21,14 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.GraphStoreValidation;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

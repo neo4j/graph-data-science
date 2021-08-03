@@ -19,13 +19,16 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
+import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
+import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;

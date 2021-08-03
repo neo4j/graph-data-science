@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

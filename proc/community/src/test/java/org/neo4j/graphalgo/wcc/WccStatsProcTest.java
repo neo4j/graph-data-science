@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.MapUtil;

@@ -19,12 +19,15 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
+import org.neo4j.gds.labelpropagation.LabelPropagation;
+import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.beta.modularity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.beta.modularity.ModularityOptimization;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;

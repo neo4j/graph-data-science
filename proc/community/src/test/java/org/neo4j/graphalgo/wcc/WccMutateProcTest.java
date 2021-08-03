@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;

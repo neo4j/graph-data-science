@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.gds.pagerank.PageRankAlgorithm;
+import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
+import org.neo4j.gds.pagerank.PageRankStatsConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

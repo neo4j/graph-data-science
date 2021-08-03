@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.betweenness.BetweennessCentrality;
+import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;

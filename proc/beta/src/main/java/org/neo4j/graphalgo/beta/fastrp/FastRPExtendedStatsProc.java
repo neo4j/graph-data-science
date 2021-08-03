@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.fastrp;
 
+import org.neo4j.gds.beta.fastrp.FastRPExtendedStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

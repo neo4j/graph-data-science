@@ -23,6 +23,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
+import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;

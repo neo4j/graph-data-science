@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

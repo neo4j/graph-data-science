@@ -23,6 +23,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -42,7 +43,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
 import java.util.HashMap;

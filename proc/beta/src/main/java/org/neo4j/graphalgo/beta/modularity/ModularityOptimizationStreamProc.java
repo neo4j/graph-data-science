@@ -19,12 +19,15 @@
  */
 package org.neo4j.graphalgo.beta.modularity;
 
+import org.neo4j.gds.beta.modularity.ModularityOptimization;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

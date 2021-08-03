@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.louvain;
 
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;

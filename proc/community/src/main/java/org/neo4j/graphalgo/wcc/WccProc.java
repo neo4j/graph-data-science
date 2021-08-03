@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.CommunityProcCompanion;

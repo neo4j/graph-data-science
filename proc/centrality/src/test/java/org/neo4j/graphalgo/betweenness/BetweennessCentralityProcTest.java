@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.betweenness.BetweennessCentrality;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -27,8 +31,6 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.OrientationCombinationTest;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;

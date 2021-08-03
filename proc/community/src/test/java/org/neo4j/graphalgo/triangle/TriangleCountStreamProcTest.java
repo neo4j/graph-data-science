@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
+import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 

@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.similarity.knn.Knn;
+import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.WriteRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.api.DefaultValue;
