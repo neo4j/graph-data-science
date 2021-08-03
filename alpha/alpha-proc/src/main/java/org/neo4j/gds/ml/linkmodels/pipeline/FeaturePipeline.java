@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -30,10 +29,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,26 +39,24 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtra
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FeaturePipeline {
-    private List<NodePropertyStep> nodePropertySteps;
-    private List<LinkFeatureStep> linkFeatureSteps;
+    private final List<NodePropertyStep> nodePropertySteps;
+    private final List<LinkFeatureStep> linkFeatureSteps;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
 
-    public FeaturePipeline(BaseProc caller, NamedDatabaseId databaseId, String userName) {
+    public FeaturePipeline(
+        List<NodePropertyStep> nodePropertySteps,
+        List<LinkFeatureStep> linkFeatureSteps,
+        BaseProc caller,
+        NamedDatabaseId databaseId,
+        String userName
+    ) {
+        this.nodePropertySteps = nodePropertySteps;
+        this.linkFeatureSteps = linkFeatureSteps;
         this.caller = caller;
         this.userName = userName;
         this.databaseId = databaseId;
-        this.linkFeatureSteps = new ArrayList<>();
-        this.nodePropertySteps = new ArrayList<>();
-    }
-
-    public void addFeature(String name, Map<String, Object> config) {
-        this.linkFeatureSteps.add(LinkFeatureStepFactory.create(name, config));
-    }
-
-    public void addNodePropertyStep(String name, Map<String, Object> config) {
-        this.nodePropertySteps.add(new NodePropertyStep(name, config));
     }
 
     public HugeObjectArray<double[]> computeFeatures(

@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.AlgoBaseProc;
@@ -126,11 +126,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .build();
 
 
-            var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-            featurePipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("noise", "z", "array"))
-            );
+            var featurePipeline = new FeaturePipeline(
+                List.of(),
+                List.of(new HadamardFeatureStep(List.of("noise", "z", "array"))),
+                caller, db.databaseId(), getUsername());
 
             var linkPredictionTrain = new LinkPredictionTrain(
                 GRAPH_NAME,
@@ -178,11 +177,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .params(List.of(Map.of("penalty", 1)))
                 .build();
 
-            var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-            featurePipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("noise", "z", "array"))
-            );
+            var featurePipeline = new FeaturePipeline(
+                List.of(),
+                List.of(new HadamardFeatureStep(List.of("noise", "z", "array"))),
+                caller, db.databaseId(), getUsername());
 
             var linkPredictionTrain = new LinkPredictionTrain(
                 "g",

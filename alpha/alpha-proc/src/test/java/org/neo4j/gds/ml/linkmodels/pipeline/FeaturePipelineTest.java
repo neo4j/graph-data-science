@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -87,12 +89,7 @@ class FeaturePipelineTest extends BaseProcTest {
     @Test
     void singleLinkFeatureStep() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-
-            pipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("array"))
-            );
+            var pipeline = new FeaturePipeline(List.of(), List.of(new HadamardFeatureStep(List.of("array"))), caller, db.databaseId(), getUsername());
 
             var expected = HugeObjectArray.of(
                 new double[]{3 * 1D, 2 * 1D}, // a-b
@@ -115,14 +112,15 @@ class FeaturePipelineTest extends BaseProcTest {
     @Test
     void dependentNodePropertySteps() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-
-            pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
-            pipeline.addNodePropertyStep("scaleProperties", Map.of(
-                "mutateProperty", "nodeFeatures",
-                "nodeProperties", "degree",
-                "scaler", "MEAN"
-            ));
+            var nodePropertySteps = List.of(
+                new NodePropertyStep("degree", Map.of("mutateProperty", "degree")),
+                new NodePropertyStep("scaleProperties", Map.of(
+                    "mutateProperty", "nodeFeatures",
+                    "nodeProperties", "degree",
+                    "scaler", "MEAN"
+                ))
+            );
+            var pipeline = new FeaturePipeline(nodePropertySteps, List.of(), caller, db.databaseId(), getUsername());
 
             pipeline.executeNodePropertySteps(GRAPH_NAME, NodeLabel.listOf("N"), RelationshipType.of("REL"));
 
@@ -133,16 +131,11 @@ class FeaturePipelineTest extends BaseProcTest {
     @Test
     void multipleLinkFeatureStep() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-
-            pipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("array"))
+            var linkFeatureSteps = List.of(
+                new HadamardFeatureStep(List.of("array")),
+                new CosineFeatureStep(List.of("noise", "z"))
             );
-            pipeline.addFeature(
-                LinkFeatureStepFactory.COSINE.name(),
-                Map.of("nodeProperties", List.of("noise", "z"))
-            );
+            var pipeline = new FeaturePipeline(List.of(), linkFeatureSteps, caller, db.databaseId(), getUsername());
 
             var normA = Math.sqrt(42 * 42 + 13 * 13);
             var normB = Math.sqrt(1337 * 1337 + 0 * 0);
@@ -171,14 +164,11 @@ class FeaturePipelineTest extends BaseProcTest {
     @Test
     void testProcedureAndLinkFeatures() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-
-            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-
-            pipeline.addNodePropertyStep("pageRank", Map.of("mutateProperty", "pageRank"));
-            pipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("pageRank"))
-            );
+            var linkFeatureSteps = List.<LinkFeatureStep>of(new HadamardFeatureStep(List.of("pageRank")));
+            var pipeline = new FeaturePipeline(List.of(new NodePropertyStep(
+                "pageRank",
+                Map.of("mutateProperty", "pageRank")
+            )), linkFeatureSteps, caller, db.databaseId(), getUsername());
 
             var expectedPageRanks = List.of(
                 1.8445425214324187,
@@ -209,16 +199,12 @@ class FeaturePipelineTest extends BaseProcTest {
     @Test
     void validateLinkFeatureSteps() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
+            var linkFeatureSteps = List.<LinkFeatureStep>of(
+                new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")),
+                new HadamardFeatureStep(List.of("other-no-property"))
+            );
 
-            pipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("noise", "no-property", "no-prop-2"))
-            );
-            pipeline.addFeature(
-                LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("nodeProperties", List.of("other-no-property"))
-            );
+            var pipeline = new FeaturePipeline(List.of(), linkFeatureSteps, caller, db.databaseId(), getUsername());
 
             assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline))
                 .isInstanceOf(IllegalArgumentException.class)

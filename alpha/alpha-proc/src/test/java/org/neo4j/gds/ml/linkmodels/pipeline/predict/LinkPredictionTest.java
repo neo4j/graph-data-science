@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
@@ -44,7 +44,6 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -89,11 +88,10 @@ class LinkPredictionTest extends BaseProcTest {
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-            featurePipeline.addFeature(
-                LinkFeatureStepFactory.L2.name(),
-                Map.of("nodeProperties", List.of("a", "b", "c"))
-            );
+            var featurePipeline = new FeaturePipeline(
+                List.of(),
+                List.of(new L2FeatureStep(List.of("a", "b", "c"))),
+                caller, db.databaseId(), getUsername());
             var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
                 WEIGHTS,
                 1,
