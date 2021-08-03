@@ -43,7 +43,8 @@ public class LinkFeaturePipelineCreateProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
-    public Stream<PipelineInfo> database(@Name("pipelineName") String pipelineName) {
+    public Stream<PipelineInfo> create(@Name("pipelineName") String pipelineName) {
+        var info = PipelineInfo2.create();
         var model = Model.<Object, PipelineDummyTrainConfig>of(
             username(),
             pipelineName,
@@ -52,12 +53,12 @@ public class LinkFeaturePipelineCreateProc extends BaseProc {
             new Object(),
             PipelineDummyTrainConfig.of(username()),
             // TODO actual modelinfo
-            Model.Mappable.EMPTY
+            info
         );
 
         ModelCatalog.set(model);
 
-        return Stream.of(new PipelineInfo(pipelineName, List.of(), List.of(), Map.of(), List.of()));
+        return Stream.of(new PipelineInfo(pipelineName, info));
     }
 
     public static class PipelineInfo {
@@ -67,13 +68,13 @@ public class LinkFeaturePipelineCreateProc extends BaseProc {
         public final Map<String, Object> splitConfig;
         public final Object parameterSpace;
 
-        PipelineInfo(String pipelineName, List<Object> nodePropertySteps, List<Object> featureSteps, Map<String, Object> splitConfig, Object parameterSpace
+        PipelineInfo(String pipelineName, PipelineInfo2 info
         ) {
             this.name = pipelineName;
-            this.nodePropertySteps = nodePropertySteps;
-            this.featureSteps = featureSteps;
-            this.splitConfig = splitConfig;
-            this.parameterSpace = parameterSpace;
+            this.nodePropertySteps = info.nodePropertySteps();
+            this.featureSteps = info.featureSteps();
+            this.splitConfig = info.splitConfig();
+            this.parameterSpace = info.parameterSpace();
         }
     }
 

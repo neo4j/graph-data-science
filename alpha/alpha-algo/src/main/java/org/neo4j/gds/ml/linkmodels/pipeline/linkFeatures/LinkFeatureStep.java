@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 import org.neo4j.gds.api.Graph;
 
 import java.util.List;
+import java.util.Map;
 
 public interface LinkFeatureStep {
     String INPUT_NODE_PROPERTIES = "nodeProperties";
@@ -34,4 +35,12 @@ public interface LinkFeatureStep {
     int outputFeatureDimension(Graph graph);
 
     List<String> inputNodeProperties();
+
+    String name();
+
+    Map<String, Object> configuration();
+
+    default Map<String, Object> toMap() {
+        return Map.of("name", name(), "configuration", configuration());
+    };
 }

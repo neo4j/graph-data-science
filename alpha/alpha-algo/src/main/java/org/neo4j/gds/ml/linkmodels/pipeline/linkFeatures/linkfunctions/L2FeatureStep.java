@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 
@@ -93,5 +94,15 @@ public class L2FeatureStep implements LinkFeatureStep {
     @Override
     public List<String> inputNodeProperties() {
         return nodeProperties;
+    }
+
+    @Override
+    public Map<String, Object> configuration() {
+        return Map.of("nodeProperties", nodeProperties);
+    }
+
+    @Override
+    public String name() {
+        return LinkFeatureStepFactory.L2.name();
     }
 }

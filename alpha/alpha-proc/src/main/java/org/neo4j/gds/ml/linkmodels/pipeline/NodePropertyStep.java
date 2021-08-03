@@ -56,4 +56,8 @@ public class NodePropertyStep {
     private void execute(BaseProc caller, String graphName, Map<String, Object> config) {
         ProcedureReflection.INSTANCE.invokeProc(caller, graphName, taskName, config);
     }
+
+    public Map<String, Object> toMap() {
+        return Map.of("name", taskName, "config", config);
+    }
 }
