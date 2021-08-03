@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -33,6 +34,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -44,37 +46,34 @@ public class LinkFeaturePipelineCreateProc extends BaseProc {
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
     public Stream<PipelineInfo> create(@Name("pipelineName") String pipelineName) {
-        var info = PipelineInfo2.create();
-        var model = Model.<Object, PipelineDummyTrainConfig>of(
+        var model = Model.of(
             username(),
             pipelineName,
             PIPELINE_MODEL_TYPE,
             GraphSchema.empty(),
             new Object(),
             PipelineDummyTrainConfig.of(username()),
-            // TODO actual modelinfo
-            info
+            PipelineModelInfo.create()
         );
 
         ModelCatalog.set(model);
 
-        return Stream.of(new PipelineInfo(pipelineName, info));
+        return Stream.of(new PipelineInfo(pipelineName, (PipelineModelInfo) model.customInfo()));
     }
 
     public static class PipelineInfo {
         public final String name;
-        public final List<Object> nodePropertySteps;
-        public final List<Object> featureSteps;
+        public final List<Map<String, Object>> nodePropertySteps;
+        public final List<Map<String ,Object>> featureSteps;
         public final Map<String, Object> splitConfig;
         public final Object parameterSpace;
 
-        PipelineInfo(String pipelineName, PipelineInfo2 info
-        ) {
+        PipelineInfo(String pipelineName, PipelineModelInfo info) {
             this.name = pipelineName;
-            this.nodePropertySteps = info.nodePropertySteps();
-            this.featureSteps = info.featureSteps();
-            this.splitConfig = info.splitConfig();
-            this.parameterSpace = info.parameterSpace();
+            this.nodePropertySteps = info.nodePropertySteps().stream().map(NodePropertyStep::toMap).collect(Collectors.toList());
+            this.featureSteps = info.featureSteps().stream().map(LinkFeatureStep::toMap).collect(Collectors.toList());
+            this.splitConfig = info.splitConfig().orElse(Map.of());
+            this.parameterSpace = info.parameterSpace().orElse(List.of());
         }
     }
 

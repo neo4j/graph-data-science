@@ -49,7 +49,6 @@ public class LinkFeaturePipelineCreateProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                // TODO: actual default splitConfig
                 "splitConfig", Map.of(),
                 "parameterSpace", List.of()
             ))
