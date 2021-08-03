@@ -157,7 +157,8 @@ public class GraphStoreExportProc extends BaseProc {
         return NeoNodeProperties.of(
             graphStore,
             TransactionContext.of(api, procedureTransaction),
-            exportConfig.additionalNodeProperties()
+            exportConfig.additionalNodeProperties(),
+            log
         );
     }
 

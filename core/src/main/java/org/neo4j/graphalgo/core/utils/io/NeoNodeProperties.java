@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.TransactionContext;
+import org.neo4j.graphalgo.utils.StringFormatting;
+import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.logging.Log;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +42,8 @@ public interface NeoNodeProperties {
     static Optional<NeoNodeProperties> of(
         GraphStore graphStore,
         TransactionContext transactionContext,
-        PropertyMappings propertyMappings
+        PropertyMappings propertyMappings,
+        Log log
     ) {
         if (propertyMappings.isEmpty()) {
             return Optional.empty();
@@ -52,7 +56,8 @@ public interface NeoNodeProperties {
                     propertyMapping -> NeoProperties.of(
                         transactionContext,
                         graphStore.nodes(),
-                        propertyMapping
+                        propertyMapping,
+                        log
                     )
                 )
             );
@@ -64,33 +69,63 @@ public interface NeoNodeProperties {
 
     final class NeoProperties implements LongFunction<Object> {
 
-        final TransactionContext transactionContext;
-        final NodeMapping nodeMapping;
+        private final TransactionContext transactionContext;
+        private final NodeMapping nodeMapping;
         private final PropertyMapping propertyMapping;
+        private final Log log;
 
         static LongFunction<Object> of(
             TransactionContext transactionContext,
             NodeMapping nodeMapping,
-            PropertyMapping propertyMapping
+            PropertyMapping propertyMapping,
+            Log log
         ) {
-            return new NeoProperties(transactionContext, nodeMapping, propertyMapping);
+            return new NeoProperties(transactionContext, nodeMapping, propertyMapping, log);
         }
 
         private NeoProperties(
             TransactionContext transactionContext,
             NodeMapping nodeMapping,
-            PropertyMapping propertyMapping
+            PropertyMapping propertyMapping,
+            Log log
         ) {
             this.transactionContext = transactionContext;
             this.nodeMapping = nodeMapping;
             this.propertyMapping = propertyMapping;
+            this.log = log;
         }
 
         @Override
         public Object apply(long nodeId) {
-            return transactionContext.apply((tx, ktx) -> tx
-                .getNodeById(nodeMapping.toOriginalNodeId(nodeId))
-                .getProperty(propertyMapping.neoPropertyKey(), propertyMapping.defaultValue().getObject()));
+            return transactionContext.apply((tx, ktx) -> {
+                var neo4jNodeId = nodeMapping.toOriginalNodeId(nodeId);
+                try {
+                    var node = tx.getNodeById(neo4jNodeId);
+                    return node.getProperty(
+                        propertyMapping.neoPropertyKey(),
+                        propertyMapping.defaultValue().getObject()
+                    );
+                } catch (NotFoundException e) {
+                    var defaultValue = propertyMapping.defaultValue().getObject();
+
+                    // WARN because we have a default value and can proceed.
+                    // We don't log the exception to not flood the log with stacktraces.
+                    // The exception as it doesn't tell anything more that we already do in the log message.
+                    // It is also likely that once we run into missing nodes, we will get more than just one.
+                    // Putting a million log lines for a million missing nodes isn't great, but it's better
+                    // than putting a million stacktraces into the log.
+                    log.warn(
+                        StringFormatting.formatWithLocale(
+                            "Could not find the node with the id '%d' - using the default value for the property '%s' (%s).",
+                            neo4jNodeId,
+                            propertyMapping.neoPropertyKey(),
+                            defaultValue
+                        )
+                    );
+
+                    return defaultValue;
+                }
+            });
         }
     }
 }
