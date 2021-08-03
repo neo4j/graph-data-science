@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.test;
+package org.neo4j.gds.test;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 

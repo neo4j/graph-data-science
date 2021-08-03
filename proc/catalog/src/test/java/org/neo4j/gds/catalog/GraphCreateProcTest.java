@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.test.TestProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -49,7 +50,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 

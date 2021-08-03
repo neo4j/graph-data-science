@@ -20,15 +20,15 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.RelationshipWeightConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

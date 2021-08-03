@@ -23,10 +23,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.WriteRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.Map;

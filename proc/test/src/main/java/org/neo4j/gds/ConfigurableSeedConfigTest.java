@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;

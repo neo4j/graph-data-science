@@ -26,7 +26,9 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -34,8 +36,6 @@ import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.QueryRunner;
@@ -54,10 +54,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
-import static org.neo4j.graphalgo.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
     MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
