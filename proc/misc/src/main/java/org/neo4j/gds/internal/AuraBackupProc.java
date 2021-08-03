@@ -29,6 +29,7 @@ import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.kernel.api.ResourceTracker;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.logging.Log;
@@ -104,6 +105,15 @@ public class AuraBackupProc implements CallableProcedure {
         var neo4jConfig = InternalProceduresUtil.resolve(ctx, Config.class);
         var backupsPath = neo4jConfig.get(AuraMaintenanceSettings.backup_location_setting);
         var maxAllowedBackups = neo4jConfig.get(AuraMaintenanceSettings.max_number_of_backups);
+
+        if (backupsPath == null) {
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
+                "The configuration '%s' needs to be set in order to use '%s'.",
+                AuraMaintenanceSettings.backup_location_setting.name(),
+                PROCEDURE_NAME
+            );
+        }
 
         var config = ImmutableBackupConfig.builder()
             .backupsPath(backupsPath)

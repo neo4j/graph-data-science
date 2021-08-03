@@ -72,6 +72,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
                 registry.register(new AuraShutdownProc(restorePath), false);
+                registry.register(new AuraBackupProc(), false);
             } catch (ProcedureException e) {
                 log.warn(e.getMessage(), e);
             }
