@@ -20,11 +20,11 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientMutateProc;
-import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStatsProc;
-import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStreamProc;
-import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientWriteProc;
-import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateProc;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsProc;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamProc;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteProc;
+import org.neo4j.gds.triangle.TriangleCountMutateProc;
 
 import java.util.Arrays;
 import java.util.List;

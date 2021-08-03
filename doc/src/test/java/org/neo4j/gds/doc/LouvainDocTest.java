@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.louvain.LouvainMutateProc;
-import org.neo4j.graphalgo.louvain.LouvainStatsProc;
-import org.neo4j.graphalgo.louvain.LouvainStreamProc;
-import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.gds.louvain.LouvainMutateProc;
+import org.neo4j.gds.louvain.LouvainStatsProc;
+import org.neo4j.gds.louvain.LouvainStreamProc;
+import org.neo4j.gds.louvain.LouvainWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

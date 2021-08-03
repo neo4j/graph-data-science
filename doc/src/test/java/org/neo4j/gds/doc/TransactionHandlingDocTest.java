@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.wcc.WccStatsProc;
+import org.neo4j.gds.wcc.WccStatsProc;
 
 import java.util.Arrays;
 import java.util.List;

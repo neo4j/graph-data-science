@@ -20,11 +20,11 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.triangle.TriangleCountMutateProc;
+import org.neo4j.gds.triangle.TriangleCountStatsProc;
+import org.neo4j.gds.triangle.TriangleCountStreamProc;
+import org.neo4j.gds.triangle.TriangleCountWriteProc;
 import org.neo4j.gds.triangle.TriangleProc;
-import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
-import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
-import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
-import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.gds.labelpropagation.LabelPropagationWriteProc;
 
 import java.util.List;
 
