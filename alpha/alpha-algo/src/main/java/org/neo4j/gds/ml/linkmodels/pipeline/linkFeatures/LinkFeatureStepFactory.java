@@ -58,8 +58,8 @@ public enum LinkFeatureStepFactory {
         }
 
         throw new IllegalArgumentException(formatWithLocale(
-            "LinkFeatureStepFactory `%s` is not supported. Must be one of: %s.",
-            inputString,
+            "LinkFeatureStep `%s` is not supported. Must be one of: %s.",
+            input,
             VALUES
         ));
     }

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.graphalgo.core.model.Model.Mappable;
 
 import java.util.ArrayList;
@@ -65,16 +66,16 @@ public class PipelineModelInfo implements Mappable {
         return nodePropertySteps;
     }
 
-    void addNodePropertyStep(NodePropertyStep step) {
-        nodePropertySteps.add(step);
+    void addNodePropertyStep(String name, Map<String, Object> config) {
+        this.nodePropertySteps.add(new NodePropertyStep(name, config));
     }
 
     List<LinkFeatureStep> featureSteps() {
         return featureSteps;
     }
 
-    void addNFeatureStep(LinkFeatureStep step) {
-        featureSteps.add(step);
+    void addFeatureStep(String name, Map<String, Object> config) {
+        featureSteps.add(LinkFeatureStepFactory.create(name, config));
     }
 
     Map<String, Object> splitConfig() {

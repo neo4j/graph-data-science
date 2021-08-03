@@ -37,11 +37,32 @@ public class LinkFeaturePipelineAddStepProcs extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")
-    public Stream<PipelineInfoResult> add(
+    public Stream<PipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
+        var pipeline = getPipelineModelInfo(pipelineName);
+        pipeline.addNodePropertyStep(taskName, procedureConfig);
+
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
+    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addFeature", mode = READ)
+    @Description("Add a feature step to an existing link prediction pipeline.")
+    public Stream<PipelineInfoResult> addFeature(
+        @Name("pipelineName") String pipelineName,
+        @Name("featureName") String featureName,
+        @Name("config") Map<String, Object> config
+    ) {
+        var pipeline = getPipelineModelInfo(pipelineName);
+
+        pipeline.addFeatureStep(featureName, config);
+
+        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
+    private PipelineModelInfo getPipelineModelInfo(String pipelineName) {
         Model<?, ?> model = ModelCatalog.getUntyped(username(), pipelineName, true);
 
         assert model != null;
@@ -54,9 +75,6 @@ public class LinkFeaturePipelineAddStepProcs extends BaseProc {
             ));
         }
 
-        PipelineModelInfo pipeline = (PipelineModelInfo) model.customInfo();
-        pipeline.addNodePropertyStep(new NodePropertyStep(taskName, procedureConfig));
-
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return (PipelineModelInfo) model.customInfo();
     }
 }

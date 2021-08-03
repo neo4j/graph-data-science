@@ -63,6 +63,56 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
+    void shouldAddFeatureStep() {
+        assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})",
+            List.of(Map.of("name", "myPipeline",
+                "splitConfig", Map.of(),
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(
+                    Map.of(
+                        "name", "HADAMARD",
+                        "config", Map.of("nodeProperties", List.of("pr"))
+                    )),
+                "parameterSpace", List.of()
+            ))
+        );
+    }
+
+    @Test
+    void failsWhenAddFeatureStepIsMissingNodeProperties() {
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {mutateProperty: 'pr'})",
+            "Configuration for Hadamard link feature is missing `nodeProperties`"
+        );
+    }
+
+    @Test
+    void shouldAddNodeAndFeatureSteps() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})");
+        assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'l2', {nodeProperties: ['pr']})",
+            List.of(Map.of("name", "myPipeline",
+                "splitConfig", Map.of(),
+                "nodePropertySteps", List.of(
+                    Map.of(
+                        "name", "pageRank",
+                        "config", Map.of("mutateProperty", "pr")
+                    )),
+                "featureSteps", List.of(
+                    Map.of(
+                        "name", "HADAMARD",
+                        "config", Map.of("nodeProperties", List.of("pr"))
+                    ),
+                    Map.of(
+                        "name", "L2",
+                        "config", Map.of("nodeProperties", List.of("pr"))
+                    )
+                ),
+                "parameterSpace", List.of()
+            ))
+        );
+    }
+
+    @Test
     void shouldAddTwoNodePropertyStep() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})");
         assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr2'})",
@@ -84,16 +134,24 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowIfPipelineDoesntExist() {
+    void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('ceci nest pas une pipe', 'pageRank', {mutateProperty: 'pr'})",
             "Model with name `ceci nest pas une pipe` does not exist."
         );
     }
 
+    @Test
+    void shouldThrowIfPipelineDoesntExistForFeatureStep() {
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('ceci nest pas une pipe', 'hadamard', {nodeProperties: 'pr'})",
+            "Model with name `ceci nest pas une pipe` does not exist."
+        );
+    }
+
     @Disabled
     @Test
-    void shouldThrowInvalidStepName() {
+    void shouldThrowInvalidNodePropertyStepName() {
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'juggleSpoons', {mutateProperty: 'pr'})",
             "Invalid procedure name `juggleSpoons` for pipelining."
@@ -101,7 +159,15 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowIfAddingToANonPipeline() {
+    void shouldThrowInvalidFeatureStepName() {
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'juggleSpoons', {mutateProperty: 'pr'})",
+            "LinkFeatureStep `juggleSpoons` is not supported. Must be one of: [HADAMARD, COSINE, L2]."
+        );
+    }
+
+    @Test
+    void shouldThrowIfAddingNodePropertyToANonPipeline() {
         var model1 = Model.of(
             getUsername(),
             "testModel1",
@@ -114,6 +180,24 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
         ModelCatalog.set(model1);
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('testModel1', 'pageRank', {mutateProperty: 'pr'})",
+            "Steps can only be added to a model of type `Link prediction training pipeline`. But model `testModel1` is of type `testAlgo1`."
+        );
+    }
+
+    @Test
+    void shouldThrowIfAddingFeatureToANonPipeline() {
+        var model1 = Model.of(
+            getUsername(),
+            "testModel1",
+            "testAlgo1",
+            GraphSchema.empty(),
+            "testData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model1);
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('testModel1', 'pageRank', {mutateProperty: 'pr'})",
             "Steps can only be added to a model of type `Link prediction training pipeline`. But model `testModel1` is of type `testAlgo1`."
         );
     }
