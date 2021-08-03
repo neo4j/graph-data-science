@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.degree;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {
 

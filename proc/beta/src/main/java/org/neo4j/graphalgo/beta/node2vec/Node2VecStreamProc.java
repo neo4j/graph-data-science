@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.beta.node2vec;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;

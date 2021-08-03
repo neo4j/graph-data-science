@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.GraphStoreValidation;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TrainProc;

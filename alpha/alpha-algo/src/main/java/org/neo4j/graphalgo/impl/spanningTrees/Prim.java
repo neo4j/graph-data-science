@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;

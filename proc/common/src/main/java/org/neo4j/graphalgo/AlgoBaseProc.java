@@ -23,6 +23,8 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;

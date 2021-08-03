@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccStatsConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;

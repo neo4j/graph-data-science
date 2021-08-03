@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.k1coloring;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.k1coloring.K1Coloring;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

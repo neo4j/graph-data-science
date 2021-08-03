@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 

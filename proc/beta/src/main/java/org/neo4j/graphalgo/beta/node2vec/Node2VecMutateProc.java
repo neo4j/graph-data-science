@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.beta.node2vec;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

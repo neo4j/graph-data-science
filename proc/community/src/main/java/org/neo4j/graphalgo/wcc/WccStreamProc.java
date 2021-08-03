@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccStreamConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.AbstractAlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;

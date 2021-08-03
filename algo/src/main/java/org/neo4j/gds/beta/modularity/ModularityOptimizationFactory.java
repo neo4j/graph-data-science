@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.modularity;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.BaseConfig;

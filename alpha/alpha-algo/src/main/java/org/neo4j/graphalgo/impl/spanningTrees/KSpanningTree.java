@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;

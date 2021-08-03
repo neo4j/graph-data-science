@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;

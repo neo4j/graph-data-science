@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

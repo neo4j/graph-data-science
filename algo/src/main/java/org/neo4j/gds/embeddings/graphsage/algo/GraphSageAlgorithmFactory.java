@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;

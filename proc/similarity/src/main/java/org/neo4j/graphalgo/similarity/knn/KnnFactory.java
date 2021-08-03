@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.NeighborList;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;

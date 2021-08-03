@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainFactory;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 
 public class SplitRelationships extends Algorithm<SplitRelationships, SplitResult> {

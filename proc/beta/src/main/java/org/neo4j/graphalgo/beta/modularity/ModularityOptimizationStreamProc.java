@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.modularity;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.modularity.ModularityOptimization;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

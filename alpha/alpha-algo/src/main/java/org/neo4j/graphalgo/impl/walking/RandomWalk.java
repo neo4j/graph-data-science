@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.walking;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;

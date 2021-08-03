@@ -20,7 +20,7 @@
 package org.neo4j.gds.degree;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;

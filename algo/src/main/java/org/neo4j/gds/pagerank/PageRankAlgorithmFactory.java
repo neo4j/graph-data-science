@@ -21,9 +21,9 @@ package org.neo4j.gds.pagerank;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;

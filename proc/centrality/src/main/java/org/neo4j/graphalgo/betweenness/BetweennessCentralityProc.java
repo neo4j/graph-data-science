@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Locale;

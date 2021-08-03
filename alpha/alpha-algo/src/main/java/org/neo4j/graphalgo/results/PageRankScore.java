@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.results;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;

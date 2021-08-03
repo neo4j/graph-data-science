@@ -21,7 +21,7 @@ package org.neo4j.gds.wcc;
 
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;

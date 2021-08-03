@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.beta.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;

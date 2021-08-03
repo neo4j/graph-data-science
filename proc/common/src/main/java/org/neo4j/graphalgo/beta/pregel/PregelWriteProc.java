@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 

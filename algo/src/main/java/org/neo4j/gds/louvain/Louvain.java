@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.beta.modularity.ModularityOptimization;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;

@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.result.CentralityResult;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.result.CentralityResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

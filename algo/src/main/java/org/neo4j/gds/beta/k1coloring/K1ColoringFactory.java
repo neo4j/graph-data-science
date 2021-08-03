@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;

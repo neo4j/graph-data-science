@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.graphalgo.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.CommunitySizeConfig;
@@ -32,6 +31,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics;
+import org.neo4j.graphalgo.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.graphalgo.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 

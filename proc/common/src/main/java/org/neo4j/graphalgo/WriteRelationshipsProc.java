@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -30,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
 import org.neo4j.graphalgo.core.write.RelationshipStreaming;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;

@@ -20,9 +20,9 @@
 package org.neo4j.gds.paths.yens;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

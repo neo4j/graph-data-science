@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;

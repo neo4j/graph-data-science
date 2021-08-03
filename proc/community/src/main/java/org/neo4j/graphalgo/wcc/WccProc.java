@@ -19,16 +19,16 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 
 final class WccProc {
 

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;

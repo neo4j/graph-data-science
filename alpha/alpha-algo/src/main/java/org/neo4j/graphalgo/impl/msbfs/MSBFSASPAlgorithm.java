@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 
 import java.util.stream.Stream;
 

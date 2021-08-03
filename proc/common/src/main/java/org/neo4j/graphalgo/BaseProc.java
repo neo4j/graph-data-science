@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
@@ -46,7 +47,6 @@ import org.neo4j.graphalgo.core.utils.mem.ImmutableMemoryEstimationWithDimension
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;

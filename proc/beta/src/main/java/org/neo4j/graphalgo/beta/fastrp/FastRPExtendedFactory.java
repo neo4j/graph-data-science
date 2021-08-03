@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.fastrp;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

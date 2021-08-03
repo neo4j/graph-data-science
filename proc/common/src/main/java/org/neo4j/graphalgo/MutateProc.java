@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.Optional;
 import java.util.stream.Stream;

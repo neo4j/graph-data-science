@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.fastrp;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

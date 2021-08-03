@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.AbstractAlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

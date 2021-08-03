@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

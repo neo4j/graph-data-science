@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;

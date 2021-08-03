@@ -20,10 +20,10 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;

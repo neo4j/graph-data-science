@@ -29,6 +29,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
@@ -277,7 +278,7 @@ public final class TestSupport {
     }
 
     /**
-     * This method assumes that the given algorithm calls {@link Algorithm#assertRunning()} at least once.
+     * This method assumes that the given algorithm calls {@link org.neo4j.gds.Algorithm#assertRunning()} at least once.
      * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it checks the transaction state.
      * A second thread will terminate the transaction during the sleep interval.
      */

@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.eclipse.collections.api.tuple.Pair;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel.cc;
 
 import javax.annotation.processing.Generated;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;

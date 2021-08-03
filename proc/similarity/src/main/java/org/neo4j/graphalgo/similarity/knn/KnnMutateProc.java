@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.similarity.knn;
 
+import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Relationships;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityMutateResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;

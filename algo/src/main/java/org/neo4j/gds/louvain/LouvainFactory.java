@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;

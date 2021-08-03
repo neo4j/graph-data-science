@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;

@@ -20,9 +20,9 @@
 package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
