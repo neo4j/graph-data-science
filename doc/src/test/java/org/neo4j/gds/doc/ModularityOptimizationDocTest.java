@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.beta.modularity.ModularityOptimizationMutateProc;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamProc;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
-import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
-import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 
 import java.util.Arrays;
 import java.util.List;
