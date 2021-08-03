@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 
 public final class GraphSageCompanion {

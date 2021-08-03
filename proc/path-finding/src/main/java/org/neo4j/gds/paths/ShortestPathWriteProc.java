@@ -21,7 +21,7 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.ImmutableRelationship;
 import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
-import org.neo4j.graphalgo.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

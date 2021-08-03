@@ -21,8 +21,8 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;

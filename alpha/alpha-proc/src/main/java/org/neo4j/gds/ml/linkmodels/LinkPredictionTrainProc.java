@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.TrainProc;
+import org.neo4j.gds.TrainProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

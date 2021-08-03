@@ -20,10 +20,10 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

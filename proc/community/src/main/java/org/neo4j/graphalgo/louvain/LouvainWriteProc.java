@@ -26,7 +26,7 @@ import org.neo4j.gds.louvain.LouvainFactory;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.gds.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

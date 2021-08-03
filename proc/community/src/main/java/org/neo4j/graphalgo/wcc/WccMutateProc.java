@@ -25,7 +25,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccMutateConfig;
-import org.neo4j.graphalgo.MutatePropertyProc;
+import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

@@ -24,7 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;

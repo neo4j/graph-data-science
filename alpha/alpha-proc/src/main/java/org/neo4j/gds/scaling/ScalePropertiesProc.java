@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.GraphStore;

@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.Arrays;
 import java.util.List;

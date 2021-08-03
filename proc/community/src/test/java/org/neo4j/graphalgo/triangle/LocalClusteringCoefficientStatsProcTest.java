@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 
 import java.util.List;
 import java.util.Map;

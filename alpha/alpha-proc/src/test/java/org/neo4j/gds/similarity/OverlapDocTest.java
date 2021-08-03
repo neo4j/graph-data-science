@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

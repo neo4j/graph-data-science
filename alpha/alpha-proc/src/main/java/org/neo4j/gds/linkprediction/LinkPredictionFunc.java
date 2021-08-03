@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.linkprediction;
 
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;

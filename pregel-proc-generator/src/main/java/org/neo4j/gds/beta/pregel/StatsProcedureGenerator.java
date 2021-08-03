@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.graphalgo.beta.pregel.PregelStatsProc;
-import org.neo4j.graphalgo.beta.pregel.PregelStatsResult;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;

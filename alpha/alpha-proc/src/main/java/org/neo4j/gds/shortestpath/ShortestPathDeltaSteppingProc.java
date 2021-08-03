@@ -25,7 +25,7 @@ import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
 import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

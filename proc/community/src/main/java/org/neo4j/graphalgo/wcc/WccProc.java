@@ -24,7 +24,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

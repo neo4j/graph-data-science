@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.Collection;

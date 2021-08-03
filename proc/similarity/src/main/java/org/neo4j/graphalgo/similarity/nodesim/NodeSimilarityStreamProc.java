@@ -26,7 +26,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
-import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.gds.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

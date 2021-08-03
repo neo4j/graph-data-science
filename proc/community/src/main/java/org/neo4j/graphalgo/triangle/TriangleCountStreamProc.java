@@ -25,7 +25,7 @@ import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
-import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.gds.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

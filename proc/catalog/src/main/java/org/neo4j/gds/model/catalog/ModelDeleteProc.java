@@ -21,7 +21,7 @@ package org.neo4j.gds.model.catalog;
 
 import org.apache.commons.io.FileUtils;
 import org.neo4j.gds.model.StoredModel;
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;

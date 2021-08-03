@@ -20,16 +20,16 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.labelpropagation.LabelPropagation;
 import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.StatsProc;
+import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

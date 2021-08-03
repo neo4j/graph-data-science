@@ -21,12 +21,12 @@ package org.neo4j.gds.walking;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;

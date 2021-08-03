@@ -21,10 +21,10 @@ package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;

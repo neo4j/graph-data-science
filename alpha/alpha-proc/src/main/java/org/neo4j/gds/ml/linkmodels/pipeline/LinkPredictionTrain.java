@@ -36,7 +36,7 @@ import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.model.Model;

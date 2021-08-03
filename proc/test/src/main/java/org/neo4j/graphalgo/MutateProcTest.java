@@ -21,7 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;

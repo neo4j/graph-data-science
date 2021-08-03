@@ -30,7 +30,7 @@ import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;

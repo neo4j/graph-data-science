@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
-import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

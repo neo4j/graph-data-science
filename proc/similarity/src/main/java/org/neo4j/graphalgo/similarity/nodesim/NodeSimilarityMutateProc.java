@@ -30,7 +30,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
-import org.neo4j.graphalgo.MutatePropertyProc;
+import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;

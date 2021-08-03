@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;

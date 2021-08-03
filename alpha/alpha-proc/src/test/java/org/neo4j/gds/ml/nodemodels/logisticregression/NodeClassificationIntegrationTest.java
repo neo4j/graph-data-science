@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 import java.util.Map;

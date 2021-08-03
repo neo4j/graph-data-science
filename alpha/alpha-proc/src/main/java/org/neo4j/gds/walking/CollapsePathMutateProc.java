@@ -21,12 +21,12 @@ package org.neo4j.gds.walking;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.ImmutableComputationResult;
-import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;

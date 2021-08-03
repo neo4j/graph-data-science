@@ -26,7 +26,7 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.Arrays;

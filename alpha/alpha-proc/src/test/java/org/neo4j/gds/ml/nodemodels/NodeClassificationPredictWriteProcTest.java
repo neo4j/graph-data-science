@@ -30,7 +30,7 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;

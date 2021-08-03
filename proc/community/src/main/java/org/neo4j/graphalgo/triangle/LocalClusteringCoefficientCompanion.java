@@ -23,7 +23,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

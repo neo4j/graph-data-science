@@ -25,7 +25,7 @@ import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

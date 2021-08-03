@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.node2vec;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;

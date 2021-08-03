@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 
 import java.util.Collection;

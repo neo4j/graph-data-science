@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -26,7 +27,6 @@ import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.results.CentralityScore;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.TransactionContext;

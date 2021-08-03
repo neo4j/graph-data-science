@@ -21,8 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import com.squareup.javapoet.MethodSpec;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.beta.pregel.PregelStreamProc;
-import org.neo4j.graphalgo.beta.pregel.PregelStreamResult;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;

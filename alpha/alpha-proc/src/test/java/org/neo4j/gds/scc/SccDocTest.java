@@ -22,7 +22,7 @@ package org.neo4j.gds.scc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

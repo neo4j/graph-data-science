@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphdb.RelationshipType;
 

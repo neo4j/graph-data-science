@@ -27,7 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.List;

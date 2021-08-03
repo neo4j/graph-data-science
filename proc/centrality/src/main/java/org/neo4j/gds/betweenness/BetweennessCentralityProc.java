@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;

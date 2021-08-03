@@ -22,7 +22,7 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.impl.triangle.TriangleStream;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

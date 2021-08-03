@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;

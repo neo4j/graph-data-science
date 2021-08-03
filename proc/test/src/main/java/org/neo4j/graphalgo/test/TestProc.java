@@ -23,7 +23,7 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.StatsProc;
+import org.neo4j.gds.StatsProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

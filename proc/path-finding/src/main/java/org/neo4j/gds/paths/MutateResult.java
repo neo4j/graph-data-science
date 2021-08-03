@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.StandardMutateResult;
+import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 

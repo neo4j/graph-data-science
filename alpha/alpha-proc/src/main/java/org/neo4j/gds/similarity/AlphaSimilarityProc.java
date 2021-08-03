@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.eclipse.collections.api.tuple.Pair;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.impl.similarity.Computations;
@@ -32,7 +33,6 @@ import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.results.SimilarityStatsResult;
 import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;

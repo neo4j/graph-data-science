@@ -24,10 +24,10 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
 
 import java.util.Map;
 

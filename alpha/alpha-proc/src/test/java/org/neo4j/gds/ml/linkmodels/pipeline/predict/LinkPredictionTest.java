@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;

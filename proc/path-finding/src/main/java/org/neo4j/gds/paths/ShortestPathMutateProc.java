@@ -22,7 +22,7 @@ package org.neo4j.gds.paths;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.gds.MutateProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;

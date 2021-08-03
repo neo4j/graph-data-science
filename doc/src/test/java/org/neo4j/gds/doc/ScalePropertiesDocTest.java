@@ -22,7 +22,7 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 

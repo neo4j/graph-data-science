@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.gds.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;

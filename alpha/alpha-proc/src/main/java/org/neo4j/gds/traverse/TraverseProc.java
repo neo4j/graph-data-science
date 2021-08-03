@@ -25,7 +25,7 @@ import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
