@@ -20,8 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,8 +27,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineCreateProc.PIPELINE_MODEL_TYPE;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkFeaturePipelineAddStepProcs extends BaseProc {
@@ -42,7 +39,7 @@ public class LinkFeaturePipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = getPipelineModelInfo(pipelineName);
+        var pipeline = getPipelineModelInfo(pipelineName, username());
         pipeline.addNodePropertyStep(taskName, procedureConfig);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
@@ -55,26 +52,10 @@ public class LinkFeaturePipelineAddStepProcs extends BaseProc {
         @Name("featureName") String featureName,
         @Name("config") Map<String, Object> config
     ) {
-        var pipeline = getPipelineModelInfo(pipelineName);
+        var pipeline = getPipelineModelInfo(pipelineName, username());
 
         pipeline.addFeatureStep(featureName, config);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
-    }
-
-    private PipelineModelInfo getPipelineModelInfo(String pipelineName) {
-        Model<?, ?> model = ModelCatalog.getUntyped(username(), pipelineName, true);
-
-        assert model != null;
-        if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Steps can only be added to a model of type `%s`. But model `%s` is of type `%s`.",
-                PIPELINE_MODEL_TYPE,
-                pipelineName,
-                model.algoType()
-            ));
-        }
-
-        return (PipelineModelInfo) model.customInfo();
     }
 }
