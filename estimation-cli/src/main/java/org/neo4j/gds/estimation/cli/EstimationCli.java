@@ -26,17 +26,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
@@ -44,6 +36,13 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
@@ -68,8 +67,6 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
-import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -81,7 +78,9 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPE
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
 import static org.neo4j.gds.utils.CheckedFunction.function;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "DefaultAnnotationParam"})
 @SuppressForbidden(reason = "supposed to print")

@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.utils.mem.GcListener;
 import org.neo4j.logging.NullLog;
 
 import javax.management.Notification;

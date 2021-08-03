@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;

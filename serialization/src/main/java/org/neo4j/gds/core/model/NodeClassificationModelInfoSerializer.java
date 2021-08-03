@@ -21,7 +21,7 @@ package org.neo4j.gds.core.model;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelInfoSerializer;
-import org.neo4j.gds.config.ConfigSerializers;
+import org.neo4j.gds.ml.model.proto.CommonML;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationModelInfo;
@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;
 

@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.QueryRunner.runQuery;
-
 public class GOTQuery {
 
     public static void importGot(GraphDatabaseAPI db) {

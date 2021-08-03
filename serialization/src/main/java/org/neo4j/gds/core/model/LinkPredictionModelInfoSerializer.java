@@ -21,14 +21,13 @@ package org.neo4j.gds.core.model;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelInfoSerializer;
-import org.neo4j.gds.config.ConfigSerializers;
 import org.neo4j.gds.ml.linkmodels.ImmutableLinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.ml.model.proto.CommonML;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;
 

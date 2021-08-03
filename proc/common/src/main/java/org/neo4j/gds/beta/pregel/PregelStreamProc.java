@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.pregel;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.beta.pregel.Element;
 
 import java.util.Map;
 import java.util.stream.Collectors;

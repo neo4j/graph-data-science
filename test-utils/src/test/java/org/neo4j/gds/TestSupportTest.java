@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.gds.TestSupport;
 
 import java.util.Arrays;
 import java.util.List;
