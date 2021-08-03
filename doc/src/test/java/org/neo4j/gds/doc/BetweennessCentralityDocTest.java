@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.betweenness.BetweennessCentralityMutateProc;
+import org.neo4j.gds.betweenness.BetweennessCentralityStatsProc;
+import org.neo4j.gds.betweenness.BetweennessCentralityStreamProc;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
-import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
-import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
-import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

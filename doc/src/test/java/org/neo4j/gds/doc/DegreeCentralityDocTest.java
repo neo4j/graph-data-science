@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
-import org.neo4j.graphalgo.degree.DegreeCentralityStatsProc;
-import org.neo4j.graphalgo.degree.DegreeCentralityStreamProc;
-import org.neo4j.graphalgo.degree.DegreeCentralityWriteProc;
+import org.neo4j.gds.degree.DegreeCentralityMutateProc;
+import org.neo4j.gds.degree.DegreeCentralityStatsProc;
+import org.neo4j.gds.degree.DegreeCentralityStreamProc;
+import org.neo4j.gds.degree.DegreeCentralityWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.pagerank.ArticleRankMutateProc;
-import org.neo4j.graphalgo.pagerank.ArticleRankStatsProc;
-import org.neo4j.graphalgo.pagerank.ArticleRankStreamProc;
-import org.neo4j.graphalgo.pagerank.ArticleRankWriteProc;
+import org.neo4j.gds.pagerank.ArticleRankMutateProc;
+import org.neo4j.gds.pagerank.ArticleRankStatsProc;
+import org.neo4j.gds.pagerank.ArticleRankStreamProc;
+import org.neo4j.gds.pagerank.ArticleRankWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

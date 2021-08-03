@@ -17,33 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.common;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.gds.pagerank.PageRankStatsProc;
-import org.neo4j.gds.pagerank.PageRankStreamProc;
-import org.neo4j.gds.pagerank.PageRankWriteProc;
+@SuppressWarnings("unused")
+public final class CentralityStreamResult {
+    public final long nodeId;
+    public final double score;
 
-import java.util.Arrays;
-import java.util.List;
-
-class PageRankDocTest extends DocTestBase {
-
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            PageRankStreamProc.class,
-            PageRankWriteProc.class,
-            PageRankMutateProc.class,
-            PageRankStatsProc.class,
-            GraphCreateProc.class
-        );
+    public CentralityStreamResult(long nodeId, double score) {
+        this.nodeId = nodeId;
+        this.score = score;
     }
-
-    @Override
-    String adocFile() {
-        return "algorithms/page-rank/page-rank.adoc";
-    }
-
 }

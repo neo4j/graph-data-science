@@ -23,7 +23,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
+import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 
 import java.util.List;
 
