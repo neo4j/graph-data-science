@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
-import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -94,16 +93,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportGraph() {
         createGraph();
 
-        var exportQuery = Cypher.call("gds.graph.export")
-            .withArgs(
-                Cypher.literalOf("test-graph"),
-                Cypher.mapOf(
-                    "dbName", Cypher.literalOf("test-db")
-                )
-            )
-            .build()
-            .getCypher();
-
+        var exportQuery = "CALL gds.graph.export('test-graph', {dbName: 'test-db'})";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("test-db", row.getString("dbName"));
@@ -123,19 +113,15 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportGraphWithAdditionalNodeProperties() {
         createGraph();
 
-        var exportQuery = Cypher.call("gds.graph.export")
-            .withArgs(
-                Cypher.literalOf("test-graph"),
-                Cypher.mapOf(
-                    "dbName", Cypher.literalOf("test-db"),
-                    "additionalNodeProperties", Cypher.listOf(
-                        Cypher.mapOf("prop3", Cypher.mapOf("defaultValue", Cypher.literalOf("foo"))),
-                        Cypher.mapOf("prop4", Cypher.mapOf("defaultValue", Cypher.literalOf("bar")))
-                    )
-                )
-            )
-            .build()
-            .getCypher();
+        var exportQuery = "CALL gds.graph.export(" +
+                          "  'test-graph', {" +
+                          "    dbName: 'test-db'," +
+                          "    additionalNodeProperties: [" +
+                          "      {prop3: {defaultValue: 'foo'}}," +
+                          "      {prop4: {defaultValue: 'bar'}}" +
+                          "    ]" +
+                          "  }" +
+                          ")";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("test-db", row.getString("dbName"));
@@ -152,15 +138,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsv() {
         createGraph();
 
-        var exportQuery = Cypher.call("gds.beta.graph.export.csv")
-            .withArgs(
-                Cypher.literalOf("test-graph"),
-                Cypher.mapOf(
-                    "exportName", Cypher.literalOf("export")
-                )
-            )
-            .build()
-            .getCypher();
+        var exportQuery = "CALL gds.beta.graph.export.csv('test-graph', {exportName: 'export'})";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("export", row.getString("exportName"));
@@ -177,19 +155,15 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsvWithAdditionalNodeProperties() {
         createGraph();
 
-        var exportQuery = Cypher.call("gds.beta.graph.export.csv")
-            .withArgs(
-                Cypher.literalOf("test-graph"),
-                Cypher.mapOf(
-                    "exportName", Cypher.literalOf("export"),
-                    "additionalNodeProperties", Cypher.listOf(
-                        Cypher.mapOf("prop3", Cypher.mapOf("defaultValue", Cypher.literalOf("foo"))),
-                        Cypher.mapOf("prop4", Cypher.mapOf("defaultValue", Cypher.literalOf("bar")))
-                    )
-                )
-            )
-            .build()
-            .getCypher();
+        var exportQuery = "CALL gds.beta.graph.export.csv(" +
+                          "  'test-graph', {" +
+                          "    exportName: 'export'," +
+                          "    additionalNodeProperties: [" +
+                          "      {prop3: {defaultValue: 'foo'}}," +
+                          "      {prop4: {defaultValue: 'bar'}}" +
+                          "    ]" +
+                          "  }" +
+                          ")";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("export", row.getString("exportName"));
