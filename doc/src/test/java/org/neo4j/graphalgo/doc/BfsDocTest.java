@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.traverse.TraverseProc;
+import org.neo4j.gds.traverse.TraverseProc;
 
 import java.util.Arrays;
 import java.util.List;

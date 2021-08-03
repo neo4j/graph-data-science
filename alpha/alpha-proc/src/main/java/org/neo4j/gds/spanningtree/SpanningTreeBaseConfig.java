@@ -17,23 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.influenceΜaximization.CELFProc;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 
-import java.util.Arrays;
-import java.util.List;
-
-class CELFDocTest extends DocTestBase {
-
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(CELFProc.class, GraphCreateProc.class);
-    }
-
-    @Override
-    String adocFile() {
-        return "algorithms/alpha/influence-maximization/celf.adoc";
-    }
+public interface SpanningTreeBaseConfig extends
+    AlgoBaseConfig,
+    WritePropertyConfig,
+    RelationshipWeightConfig
+{
+    long startNodeId();
 }

@@ -17,23 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.influenceΜaximization;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.influenceΜaximization.CELFProc;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
-import java.util.Arrays;
-import java.util.List;
+@Configuration
+@ValueClass
+@SuppressWarnings("immutables:subtype")
+public interface InfluenceMaximizationConfig extends AlgoBaseConfig { //BaseConfig
+    @Configuration.IntegerRange(min = 1)
+    int seedSetSize();
 
-class CELFDocTest extends DocTestBase {
-
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(CELFProc.class, GraphCreateProc.class);
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.01, max = 1)
+    default double propagationProbability() {
+        return 0.1;
     }
 
-    @Override
-    String adocFile() {
-        return "algorithms/alpha/influence-maximization/celf.adoc";
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int monteCarloSimulations() {
+        return 1000;
     }
 }

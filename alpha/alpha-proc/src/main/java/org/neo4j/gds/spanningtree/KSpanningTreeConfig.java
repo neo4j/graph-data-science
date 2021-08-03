@@ -17,23 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.influenceΜaximization.CELFProc;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
-class CELFDocTest extends DocTestBase {
+@Configuration
+public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(CELFProc.class, GraphCreateProc.class);
-    }
+    long k();
 
     @Override
-    String adocFile() {
-        return "algorithms/alpha/influence-maximization/celf.adoc";
+    default String writeProperty() {
+        return KSpanningTreeProc.DEFAULT_CLUSTER_PROPERTY;
     }
+
+    static KSpanningTreeConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new KSpanningTreeConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+    }
+
 }
