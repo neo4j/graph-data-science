@@ -58,6 +58,7 @@ public class NodePropertyStep implements Model.Mappable {
         ProcedureReflection.INSTANCE.invokeProc(caller, graphName, taskName, config);
     }
 
+    @Override
     public Map<String, Object> toMap() {
         return Map.of("name", taskName, "config", config);
     }

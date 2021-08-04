@@ -41,7 +41,8 @@ public interface LinkFeatureStep extends Model.Mappable {
 
     Map<String, Object> configuration();
 
+    @Override
     default Map<String, Object> toMap() {
         return Map.of("name", name(), "config", configuration());
-    };
+    }
 }
