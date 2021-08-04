@@ -20,6 +20,7 @@
 package org.neo4j.gds.storageengine;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -40,11 +41,11 @@ public final class InMemoryDatabaseCreationCatalog {
         return CATALOG.get(databaseName);
     }
 
-    public static void removeDbCreationRegistration(String databaseName) {
-        CATALOG.remove(databaseName);
-    }
-
     public static void removeAllRegisteredDbCreations() {
         CATALOG.clear();
+    }
+
+    public static Set<String> databaseNamesRegisteredForCreation() {
+        return CATALOG.keySet();
     }
 }

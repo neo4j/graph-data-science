@@ -135,7 +135,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void shutdown() {
-        InMemoryDatabaseCreationCatalog.removeDbCreationRegistration(databaseLayout.getDatabaseName());
     }
 
     @Override
