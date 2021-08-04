@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineCreateProc.PIPELINE_MODEL_TYPE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineUtils {
 
