@@ -40,7 +40,7 @@ public class PipelineInfoResult {
             .map(NodePropertyStep::toMap)
             .collect(Collectors.toList());
         this.featureSteps = info.featureSteps().stream().map(LinkFeatureStep::toMap).collect(Collectors.toList());
-        this.splitConfig = info.splitConfig();
+        this.splitConfig = info.splitConfig().toMap();
         this.parameterSpace = info.parameterSpace();
     }
 }

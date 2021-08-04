@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
@@ -32,21 +33,18 @@ import java.util.Map;
 public class PipelineModelInfo implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
     private final List<LinkFeatureStep> featureSteps;
-    private Map<String, Object> splitConfig;
+    private LinkPredictionSplitConfig splitConfig;
     // Either list of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
     private List<Map<String, Object>> parameterSpace;
 
     public static PipelineModelInfo create() {
-        return new PipelineModelInfo(Map.of(), List.of());
+        return new PipelineModelInfo(List.of());
     }
 
-    private PipelineModelInfo(
-        @Nullable Map<String, Object> splitConfig,
-        @Nullable List<Map<String, Object>> parameterSpace
-    ) {
+    private PipelineModelInfo(@Nullable List<Map<String, Object>> parameterSpace) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.splitConfig = splitConfig;
+        this.splitConfig = new LinkPredictionSplitConfigImpl(CypherMapWrapper.empty());
         this.parameterSpace = parameterSpace;
     }
 
@@ -78,12 +76,12 @@ public class PipelineModelInfo implements Mappable {
         featureSteps.add(LinkFeatureStepFactory.create(name, config));
     }
 
-    Map<String, Object> splitConfig() {
+    LinkPredictionSplitConfig splitConfig() {
         return splitConfig;
     }
 
     void setSplitConfig(@NotNull Map<String, Object> splitConfig) {
-        this.splitConfig = splitConfig;
+        this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.create(splitConfig));
     }
 
     List<Map<String, Object>> parameterSpace() {

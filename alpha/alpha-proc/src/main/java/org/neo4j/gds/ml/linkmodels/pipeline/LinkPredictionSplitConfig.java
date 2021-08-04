@@ -20,30 +20,54 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 
-@ValueClass
+import java.util.Map;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @Configuration
-public interface LinkPredictionSplitConfig {
+public interface LinkPredictionSplitConfig extends Model.Mappable {
+
     @Configuration.IntegerRange(min = 2)
-    int validationFolds();
+    default int validationFolds() {
+        return 3;
+    };
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    double testFraction();
+    default double testFraction() {
+        return 0.1;
+    };
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    double trainFraction();
+    default double trainFraction() {
+        return 0.1;
+    };
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    double negativeSamplingRatio();
+    default double negativeSamplingRatio() {
+        return 1.0;
+    };
 
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {
         return new LinkPredictionSplitConfigImpl(config);
     }
 
-    static ImmutableLinkPredictionSplitConfig.Builder builder() {
-        return ImmutableLinkPredictionSplitConfig.builder();
+    @Override
+    @Configuration.ToMap
+    Map<String, Object> toMap();
+
+    @Value.Check
+    default void validFractionSum() {
+        var fractionSum = testFraction() + trainFraction();
+        if (fractionSum > 1.0) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Sum of fractions for test and train set must be not greater than 1.0. But got %s.",
+                fractionSum
+            ));
+        }
     }
 }
