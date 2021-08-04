@@ -34,6 +34,8 @@ import java.util.Map;
 
 class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
 
+    private static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1);
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(LinkFeaturePipelineAddStepProcs.class, LinkFeaturePipelineCreateProc.class);
@@ -50,7 +52,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
     void shouldAddNodePropertyStep() {
         assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
             List.of(Map.of("name", "myPipeline",
-                "splitConfig", Map.of(),
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "pageRank",
@@ -66,7 +68,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
     void shouldAddFeatureStep() {
         assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})",
             List.of(Map.of("name", "myPipeline",
-                "splitConfig", Map.of(),
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(
                     Map.of(
@@ -91,7 +93,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})");
         assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'l2', {nodeProperties: ['pr']})",
             List.of(Map.of("name", "myPipeline",
-                "splitConfig", Map.of(),
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "pageRank",
@@ -117,7 +119,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})");
         assertCypherResult("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr2'})",
             List.of(Map.of("name", "myPipeline",
-                "splitConfig", Map.of(),
+                "splitConfig",DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "pageRank",

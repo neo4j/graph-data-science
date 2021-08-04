@@ -44,7 +44,7 @@ public class PipelineModelInfo implements Mappable {
     private PipelineModelInfo(@Nullable List<Map<String, Object>> parameterSpace) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.splitConfig = new LinkPredictionSplitConfigImpl(CypherMapWrapper.empty());
+        this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.empty());
         this.parameterSpace = parameterSpace;
     }
 
@@ -80,8 +80,8 @@ public class PipelineModelInfo implements Mappable {
         return splitConfig;
     }
 
-    void setSplitConfig(@NotNull Map<String, Object> splitConfig) {
-        this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.create(splitConfig));
+    void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
+        this.splitConfig = splitConfig;
     }
 
     List<Map<String, Object>> parameterSpace() {

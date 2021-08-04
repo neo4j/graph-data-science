@@ -49,7 +49,7 @@ public class LinkFeaturePipelineCreateProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "splitConfig", Map.of(),
+                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1),
                 "parameterSpace", List.of()
             ))
         );

@@ -25,6 +25,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,12 +62,17 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     @Configuration.ToMap
     Map<String, Object> toMap();
 
+    @Configuration.CollectKeys
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    }
+
     @Value.Check
     default void validFractionSum() {
         var fractionSum = testFraction() + trainFraction();
         if (fractionSum > 1.0) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Sum of fractions for test and train set must be not greater than 1.0. But got %s.",
+                "Sum of fractions for test and train set must be smaller than or equal to 1.0. But got %s.",
                 fractionSum
             ));
         }
