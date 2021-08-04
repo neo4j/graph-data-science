@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
 import org.neo4j.memory.MemoryTracker;
@@ -40,6 +41,7 @@ import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -63,6 +65,43 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
             commandCreationContextSupplier,
             storageReaderFn
         );
+    }
+
+    @Override
+    public StoreEntityCounters storeEntityCounters() {
+        return new StoreEntityCounters() {
+            @Override
+            public long nodes() {
+                return graphStore.nodeCount();
+            }
+
+            @Override
+            public long relationships() {
+                return graphStore.relationshipCount();
+            }
+
+            @Override
+            public long properties() {
+                var properties = new HashSet<>();
+                graphStore.nodePropertyKeys().values().forEach(properties::addAll);
+                return properties.size() + graphStore.relationshipPropertyKeys().size();
+            }
+
+            @Override
+            public long relationshipTypes() {
+                return graphStore.relationshipTypes().size();
+            }
+
+            @Override
+            public long allNodesCountStore(CursorContext cursorContext) {
+                return graphStore.nodeCount();
+            }
+
+            @Override
+            public long allRelationshipsCountStore(CursorContext cursorContext) {
+                return graphStore.relationshipCount();
+            }
+        };
     }
 
     @Override

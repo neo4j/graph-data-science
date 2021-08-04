@@ -68,12 +68,12 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final DatabaseLayout databaseLayout;
     private final TokenHolders tokenHolders;
-    private final GraphStore graphStore;
     private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
     private final MetadataProvider metadataProvider;
+    protected final GraphStore graphStore;
 
     public AbstractInMemoryStorageEngine(
         DatabaseLayout databaseLayout,
