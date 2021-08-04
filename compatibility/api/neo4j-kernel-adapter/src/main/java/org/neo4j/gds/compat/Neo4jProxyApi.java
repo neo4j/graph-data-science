@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -34,6 +35,7 @@ import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -278,4 +280,8 @@ public interface Neo4jProxyApi {
         Class<T> cls,
         boolean safe
     );
+
+    long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
+
+    long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
 }

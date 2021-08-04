@@ -51,6 +51,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
@@ -119,6 +120,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -551,6 +554,20 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         GlobalProcedures registry, Class<T> cls, boolean safe
     ) {
         return registry.lookupComponentProvider(cls, safe);
+    }
+
+    @Override
+    public long getHighestPossibleNodeCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, org.neo4j.internal.id.IdType.NODE).orElseGet(read::nodesGetCount);
+    }
+
+    @Override
+    public long getHighestPossibleRelationshipCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, org.neo4j.internal.id.IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
     }
 
     private static final class InputFromCompatInput implements Input {

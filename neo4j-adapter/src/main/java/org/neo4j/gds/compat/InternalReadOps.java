@@ -23,21 +23,12 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.IdType;
-import org.neo4j.internal.kernel.api.Read;
 
 import java.util.OptionalLong;
 
 public final class InternalReadOps {
 
-    public static long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
-        return countByIdGenerator(idGeneratorFactory, IdType.NODE).orElseGet(read::nodesGetCount);
-    }
-
-    public static long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
-        return countByIdGenerator(idGeneratorFactory, IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
-    }
-
-    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
+    public static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
         if (idGeneratorFactory != null) {
             try {
                 final IdGenerator idGenerator = idGeneratorFactory.get(idType);

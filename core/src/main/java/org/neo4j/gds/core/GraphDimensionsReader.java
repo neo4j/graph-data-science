@@ -28,7 +28,7 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.compat.InternalReadOps;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.StatementFunction;
 import org.neo4j.gds.NodeProjections;
@@ -84,7 +84,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
             .sum();
-        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, idGeneratorFactory);
+        final long allNodesCount = Neo4jProxy.getHighestPossibleNodeCount(dataRead, idGeneratorFactory);
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
@@ -96,7 +96,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
             typeTokenRelTypeMappings
         );
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
-        long allRelationshipsCount = InternalReadOps.getHighestPossibleRelationshipCount(dataRead, idGeneratorFactory);
+        long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(dataRead, idGeneratorFactory);
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)
