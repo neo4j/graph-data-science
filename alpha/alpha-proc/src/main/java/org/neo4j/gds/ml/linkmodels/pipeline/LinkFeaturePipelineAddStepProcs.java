@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineCreateProc.PIPELINE_MODEL_TYPE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkFeaturePipelineAddStepProcs extends BaseProc {

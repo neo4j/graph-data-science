@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.graphalgo.core.model.Model.Mappable;
 
 import java.util.ArrayList;
 import java.util.List;
