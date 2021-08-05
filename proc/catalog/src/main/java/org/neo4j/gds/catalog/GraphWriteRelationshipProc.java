@@ -25,10 +25,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphWriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,6 +44,9 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteRelationshipProc extends CatalogProc {
+
+    @Context
+    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
@@ -82,12 +86,16 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     }
 
     private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
-        var builder = RelationshipExporter
-            .of(
-                TransactionContext.of(api, procedureTransaction),
-                graphStore.getGraph(RelationshipType.of(config.relationshipType()), config.relationshipProperty()),
-                TerminationFlag.wrap(transaction)
-            );
+        var graph = graphStore.getGraph(
+            RelationshipType.of(config.relationshipType()),
+            config.relationshipProperty()
+        );
+
+        var builder = relationshipExporterBuilder
+            .withIdMapping(graph)
+            .withGraph(graph)
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+
 
         if (config.relationshipProperty().isPresent()) {
             ValueType propertyType = graphStore.relationshipPropertyType(config.relationshipProperty().get());

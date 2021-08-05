@@ -20,14 +20,13 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteProc;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -83,11 +82,6 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     @Override
     protected NodeProperties nodeProperties(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         throw new UnsupportedOperationException("NodeSimilarity does not write node properties.");
-    }
-
-    @Override
-    protected AbstractResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
-        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override

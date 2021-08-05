@@ -20,14 +20,13 @@
 package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.WriteRelationshipsProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.RelationshipExporter;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -37,12 +36,12 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 public abstract class SimilarityWriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
+    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteRelationshipsProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
 
     public abstract String procedureName();
 
     @Override
-    protected Stream<SimilarityWriteResult> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected Stream<SimilarityWriteResult> write(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             CONFIG config = computationResult.config();
 
@@ -86,15 +85,14 @@ public abstract class SimilarityWriteProc<
                     procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            RelationshipExporter exporter = RelationshipExporter
-                                .of(
-                                    TransactionContext.of(api, procedureTransaction),
-                                    rootNodeMapping,
-                                    similarityGraph,
-                                    algorithm.getTerminationFlag()
-                                )
+
+                            var exporter = relationshipExporterBuilder
+                                .withIdMapping(rootNodeMapping)
+                                .withGraph(similarityGraph)
+                                .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withLog(log)
                                 .build();
+
                             if (SimilarityProc.shouldComputeHistogram(callContext)) {
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(

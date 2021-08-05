@@ -64,12 +64,12 @@ public abstract class RelationshipExporterBuilder<T> {
         return this;
     }
 
-    RelationshipExporterBuilder<T> withGraph(Graph graph) {
+    public RelationshipExporterBuilder<T> withGraph(Graph graph) {
         this.graph = graph;
         return this;
     }
 
-    RelationshipExporterBuilder<T> withIdMapping(IdMapping idMapping) {
+    public RelationshipExporterBuilder<T> withIdMapping(IdMapping idMapping) {
         Objects.requireNonNull(idMapping);
         this.toOriginalId = idMapping::toOriginalNodeId;
         return this;

@@ -50,12 +50,12 @@ public final class RelationshipExporter extends StatementApi {
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporterBuilder<RelationshipExporter> of(
+    public static RelationshipExporterBuilder<RelationshipExporter> builder(
         TransactionContext transactionContext,
         Graph graph,
         TerminationFlag terminationFlag
     ) {
-        return of(
+        return builder(
             transactionContext,
             graph,
             graph,
@@ -63,7 +63,7 @@ public final class RelationshipExporter extends StatementApi {
         );
     }
 
-    public static RelationshipExporterBuilder<RelationshipExporter> of(
+    public static RelationshipExporterBuilder<RelationshipExporter> builder(
         TransactionContext transactionContext,
         IdMapping idMapping,
         Graph graph,

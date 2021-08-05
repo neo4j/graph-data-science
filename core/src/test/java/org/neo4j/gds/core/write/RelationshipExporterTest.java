@@ -85,7 +85,7 @@ class RelationshipExporterTest extends BaseTest {
             .graph();
 
         var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
-        var exporter = RelationshipExporter.of(secureTransaction, graph, RUNNING_TRUE).build();
+        var exporter = RelationshipExporter.builder(secureTransaction, graph, RUNNING_TRUE).build();
 
         assertThatExceptionOfType(AuthorizationViolationException.class)
             .isThrownBy(() -> exporter.write("OUT_TYPE"));
@@ -113,7 +113,7 @@ class RelationshipExporterTest extends BaseTest {
             .graphStore();
 
         RelationshipExporter
-            .of(
+            .builder(
                 TestSupport.fullAccessTransaction(db),
                 graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
                 RUNNING_TRUE
@@ -188,7 +188,7 @@ class RelationshipExporterTest extends BaseTest {
         // with a rel exporter
         var log = new TestLog();
         var exporterBuilder = RelationshipExporter
-            .of(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withLog(log);
 
         var exporter = exporterBuilder.build();
@@ -244,7 +244,7 @@ class RelationshipExporterTest extends BaseTest {
 
         // export into new database
         return RelationshipExporter
-            .of(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
+            .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
             .build();
     }
 

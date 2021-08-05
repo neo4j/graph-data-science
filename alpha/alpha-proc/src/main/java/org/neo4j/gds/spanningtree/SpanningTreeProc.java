@@ -19,19 +19,20 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -55,6 +56,9 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.";
 
     static DoubleUnaryOperator minMax;
+
+    @Context
+    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
     @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
@@ -103,11 +107,12 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            RelationshipExporter.of(
-                TransactionContext.of(api, procedureTransaction),
-                new SpanningGraph(graph, spanningTree),
-                prim.getTerminationFlag()
-            )
+
+            var spanningGraph = new SpanningGraph(graph, spanningTree);
+            relationshipExporterBuilder
+                .withGraph(spanningGraph)
+                .withIdMapping(spanningGraph)
+                .withTerminationFlag(prim.getTerminationFlag())
                 .withLog(log)
                 .build()
                 .write(config.writeProperty(), config.weightWriteProperty());
