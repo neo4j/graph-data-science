@@ -41,11 +41,7 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
 
     @Override
     public void addNodeLabel(NodeLabel nodeLabel) {
-        if (!super.availableNodeLabels().contains(nodeLabel)) {
-            this.additionalNodeLabels.put(nodeLabel, new BitSet(nodeCount()));
-        } else {
-            throw new IllegalArgumentException(formatWithLocale("Node label %s already exists", nodeLabel));
-        }
+        this.additionalNodeLabels.put(nodeLabel, new BitSet(nodeCount()));
     }
 
     @Override
