@@ -58,7 +58,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
             configuration.concurrency(),
             eventTracker
         );
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new Knn(
             graph,
             configuration,

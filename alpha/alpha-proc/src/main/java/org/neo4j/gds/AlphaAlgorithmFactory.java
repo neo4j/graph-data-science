@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
@@ -27,6 +26,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
 @FunctionalInterface
@@ -42,7 +42,8 @@ public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
         return algo.withProgressTracker(new TaskProgressTracker(
             progressTask(graph, configuration),
-            new BatchingProgressLogger(log, 0, algo.getClass().getSimpleName(), configuration.concurrency())
+            new BatchingProgressLogger(log, 0, algo.getClass().getSimpleName(), configuration.concurrency()),
+            eventTracker
         ));
     }
 

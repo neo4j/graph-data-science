@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.progress.v2.tasks;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 
 import java.util.Optional;
 import java.util.Stack;
@@ -29,15 +31,26 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
     private final ProgressLogger progressLogger;
+    private final ProgressEventTracker eventTracker;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
 
+    @TestOnly
     public TaskProgressTracker(
         Task baseTask,
         ProgressLogger progressLogger
     ) {
+        this(baseTask, progressLogger, EmptyProgressEventTracker.INSTANCE);
+    }
+
+    public TaskProgressTracker(
+        Task baseTask,
+        ProgressLogger progressLogger,
+        ProgressEventTracker eventTracker
+    ) {
         this.baseTask = baseTask;
         this.progressLogger = progressLogger;
+        this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
     }
@@ -62,11 +75,6 @@ public class TaskProgressTracker implements ProgressTracker {
         this.currentTask = nestedTasks.isEmpty()
             ? Optional.empty()
             : Optional.of(nestedTasks.pop());
-    }
-
-    @Override
-    public void logProgress() {
-        logProgress(1);
     }
 
     @Override

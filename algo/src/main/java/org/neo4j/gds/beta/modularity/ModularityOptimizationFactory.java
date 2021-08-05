@@ -20,9 +20,9 @@
 package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -130,7 +130,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new ModularityOptimization(
             graph,

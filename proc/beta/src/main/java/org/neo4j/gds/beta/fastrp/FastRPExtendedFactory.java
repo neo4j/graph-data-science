@@ -20,8 +20,6 @@
 package org.neo4j.gds.beta.fastrp;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -30,6 +28,8 @@ import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.logging.Log;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> impl
         ProgressEventTracker eventTracker
     ) {
         var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRPE", configuration.concurrency(), eventTracker);
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
         return new FastRP(

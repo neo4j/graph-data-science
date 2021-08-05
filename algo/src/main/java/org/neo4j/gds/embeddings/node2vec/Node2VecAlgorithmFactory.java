@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -29,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.logging.Log;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> impleme
             eventTracker
         );
         validateConfig(configuration, graph);
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new Node2Vec(graph, configuration, progressTracker, tracker);
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
@@ -34,6 +33,7 @@ import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -57,7 +57,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, tracker);
     }

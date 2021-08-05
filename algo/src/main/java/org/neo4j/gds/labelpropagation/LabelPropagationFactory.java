@@ -59,7 +59,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new LabelPropagation(
             graph,

@@ -60,7 +60,8 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
         );
         var progressTracker = new TaskProgressTracker(
             progressTask(graph, configuration),
-            progressLogger
+            progressLogger,
+            eventTracker
         );
         return build(graph, configuration, tracker, progressTracker);
     }

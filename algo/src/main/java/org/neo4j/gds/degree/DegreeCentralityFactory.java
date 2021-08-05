@@ -48,7 +48,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, tracker);
     }
 
