@@ -53,8 +53,10 @@ public class NodePropertyExporter extends StatementApi {
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static Builder builder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
-        return new Builder(tx, idMapping, terminationFlag);
+    public static NodePropertyExporterBuilder<NodePropertyExporter> builder(TransactionContext transactionContext, IdMapping idMapping, TerminationFlag terminationFlag) {
+        return new Builder(transactionContext)
+            .withIdMapping(idMapping)
+            .withTerminationFlag(terminationFlag);
     }
 
     @ValueClass
@@ -71,7 +73,7 @@ public class NodePropertyExporter extends StatementApi {
             if (propertyToken == -1) {
                 throw new IllegalStateException("No write property token id is set.");
             }
-            return ResolvedNodeProperty.of((NodeProperty) this, propertyToken);
+            return ResolvedNodeProperty.of(this, propertyToken);
         }
     }
 
@@ -89,16 +91,16 @@ public class NodePropertyExporter extends StatementApi {
         }
     }
 
-    public static class Builder extends ExporterBuilder<NodePropertyExporter> {
+    public static class Builder extends NodePropertyExporterBuilder<NodePropertyExporter> {
 
-        Builder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
-            super(tx, idMapping, terminationFlag);
+        Builder(TransactionContext transactionContext) {
+            super(transactionContext);
         }
 
         @Override
         public NodePropertyExporter build() {
             return new NodePropertyExporter(
-                tx,
+                transactionContext,
                 nodeCount,
                 toOriginalId,
                 terminationFlag,
@@ -106,16 +108,6 @@ public class NodePropertyExporter extends StatementApi {
                 writeConcurrency,
                 executorService
             );
-        }
-
-        @Override
-        String taskName() {
-            return "WriteNodeProperties";
-        }
-
-        @Override
-        long taskVolume() {
-            return nodeCount;
         }
     }
 

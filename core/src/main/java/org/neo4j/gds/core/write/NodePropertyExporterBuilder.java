@@ -33,50 +33,62 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
-public abstract class ExporterBuilder<T> {
-    final TransactionContext tx;
-    final LongUnaryOperator toOriginalId;
-    final long nodeCount;
-    final TerminationFlag terminationFlag;
+public abstract class NodePropertyExporterBuilder<T> {
+    protected final TransactionContext transactionContext;
+    protected LongUnaryOperator toOriginalId;
+    protected long nodeCount;
+    protected TerminationFlag terminationFlag;
 
-    ExecutorService executorService;
-    ProgressLogger progressLogger;
-    ProgressEventTracker eventTracker;
-    int writeConcurrency;
+    protected ExecutorService executorService;
+    protected ProgressLogger progressLogger;
+    protected ProgressEventTracker eventTracker;
+    protected int writeConcurrency;
 
-    ExporterBuilder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
-        Objects.requireNonNull(idMapping);
-        this.tx = Objects.requireNonNull(tx);
-        this.nodeCount = idMapping.nodeCount();
-        this.toOriginalId = idMapping::toOriginalNodeId;
+    NodePropertyExporterBuilder(TransactionContext transactionContext) {
+        this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
-        this.terminationFlag = terminationFlag;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
         this.eventTracker = EmptyProgressEventTracker.INSTANCE;
     }
 
     public abstract T build();
 
-    abstract String taskName();
+    NodePropertyExporterBuilder<T> withIdMapping(IdMapping idMapping) {
+        Objects.requireNonNull(idMapping);
+        this.nodeCount = idMapping.nodeCount();
+        this.toOriginalId = idMapping::toOriginalNodeId;
+        return this;
+    }
 
-    abstract long taskVolume();
+    public NodePropertyExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = terminationFlag;
+        return this;
+    }
 
-    public ExporterBuilder<T> withLog(Log log) {
+    public NodePropertyExporterBuilder<T> withLog(Log log) {
         return withLog(log, eventTracker);
     }
 
-    public ExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
+    public NodePropertyExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
         return withProgressLogger(new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker));
     }
 
-    public ExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
+    public NodePropertyExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
         this.progressLogger = progressLogger;
         return this;
     }
 
-    public ExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency) {
+    public NodePropertyExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency) {
         this.executorService = es;
         this.writeConcurrency = writeConcurrency;
         return this;
+    }
+
+    protected String taskName() {
+        return "WriteNodeProperties";
+    }
+
+    protected long taskVolume() {
+        return nodeCount;
     }
 }
