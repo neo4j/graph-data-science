@@ -24,20 +24,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -110,14 +110,19 @@ class LinkPredictionTrainTest extends BaseProcTest {
     void trainsAModel() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             String modelName = "model";
+            var splitConfig = LinkPredictionSplitConfig.builder()
+                .validationFolds(2)
+                .negativeSamplingRatio(1)
+                .trainFraction(0.5)
+                .testFraction(0.5)
+                .build();
+
             LinkPredictionTrainConfig config = LinkPredictionTrainConfig
                 .builder()
                 .graphName(GRAPH_NAME)
                 .modelName(modelName)
+                .splitConfig(splitConfig)
                 .negativeClassWeight(1)
-                .holdOutFraction(0.5)
-                .negativeSamplingRatio(1)
-                .validationFolds(2)
                 .randomSeed(1337L)
                 .params(List.of(
                     Map.of("penalty", 1000000),
@@ -165,14 +170,19 @@ class LinkPredictionTrainTest extends BaseProcTest {
     @ValueSource(ints = {1, 4})
     void seededTrain(int concurrency) {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var splitConfig = LinkPredictionSplitConfig.builder()
+                .validationFolds(2)
+                .negativeSamplingRatio(1)
+                .trainFraction(0.5)
+                .testFraction(0.5)
+                .build();
+
             LinkPredictionTrainConfig config = LinkPredictionTrainConfig
                 .builder()
                 .graphName(GRAPH_NAME)
                 .modelName("model")
+                .splitConfig(splitConfig)
                 .negativeClassWeight(1)
-                .holdOutFraction(0.5)
-                .negativeSamplingRatio(1)
-                .validationFolds(2)
                 .randomSeed(1337L)
                 .params(List.of(Map.of("penalty", 1)))
                 .build();

@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 
@@ -31,6 +33,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@ValueClass
 @Configuration
 public interface LinkPredictionSplitConfig extends Model.Mappable {
     String TEST_RELATIONSHIP_TYPE = "_TEST_";
@@ -38,32 +41,28 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     String TRAIN_RELATIONSHIP_TYPE = "_TRAIN_";
     String FEATURE_INPUT_RELATIONSHIP_TYPE = "_FEATURE_INPUT_";
 
+    @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int validationFolds() {
         return 3;
     }
 
-
+    @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double testFraction() {
         return 0.1;
     }
 
-
+    @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double trainFraction() {
         return 0.1;
     }
 
-
+    @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double negativeSamplingRatio() {
         return 1.0;
-    }
-
-    
-    static LinkPredictionSplitConfig of(CypherMapWrapper config) {
-        return new LinkPredictionSplitConfigImpl(config);
     }
 
     @Override
@@ -73,6 +72,15 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     @Configuration.CollectKeys
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    }
+
+    static LinkPredictionSplitConfig of(CypherMapWrapper config) {
+        return new LinkPredictionSplitConfigImpl(config);
+    }
+
+    @TestOnly
+    static ImmutableLinkPredictionSplitConfig.Builder builder() {
+        return ImmutableLinkPredictionSplitConfig.builder();
     }
 
     @Value.Check

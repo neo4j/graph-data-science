@@ -138,7 +138,7 @@ public class LinkPredictionTrain
             TEST_RELATIONSHIP_TYPE,
             TEST_COMPLEMENT_RELATIONSHIP_TYPE,
             relationshipTypes,
-            config
+            config.splitConfig().testFraction()
         );
 
         // 2. Split test-complement into (labeled) train and feature-input.
@@ -148,7 +148,7 @@ public class LinkPredictionTrain
             TRAIN_RELATIONSHIP_TYPE,
             FEATURE_INPUT_RELATIONSHIP_TYPE,
             List.of(TEST_COMPLEMENT_RELATIONSHIP_TYPE),
-            config
+            config.splitConfig().trainFraction()
         );
 
         graphStore.deleteRelationships(RelationshipType.of(TEST_COMPLEMENT_RELATIONSHIP_TYPE));
@@ -159,16 +159,16 @@ public class LinkPredictionTrain
         String holdoutRelationshipType,
         String remainingRelationshipType,
         List<String> relationshipTypes,
-        LinkPredictionTrainConfig trainConfig
+        double holdOutFraction
     ) {
         var splittingConfig = new HashMap<String, Object>() {{
             put("holdoutRelationshipType", holdoutRelationshipType);
             put("remainingRelationshipType", remainingRelationshipType);
             put("nodeLabels", config.nodeLabels());
             put("relationshipTypes", relationshipTypes);
-            put("holdOutFraction", trainConfig.holdOutFraction());
-            put("negativeSamplingRatio", trainConfig.negativeSamplingRatio());
-            trainConfig.randomSeed().ifPresent(seed -> put("randomSeed", seed));
+            put("holdOutFraction", holdOutFraction);
+            put("negativeSamplingRatio", config.splitConfig().negativeSamplingRatio());
+            config.randomSeed().ifPresent(seed -> put("randomSeed", seed));
         }};
 
         ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splittingConfig);
@@ -222,11 +222,11 @@ public class LinkPredictionTrain
         config.paramConfigs().forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
-                config.validationFolds()
+                config.splitConfig().validationFolds()
             );
             var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,
-                config.validationFolds()
+                config.splitConfig().validationFolds()
             );
             for (NodeSplit split : validationSplits) {
                 // train each model candidate on the train sets
@@ -294,7 +294,7 @@ public class LinkPredictionTrain
         var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
         globalTargets.setAll(i -> (long) actualTargets.get(i));
         var splitter = new StratifiedKFoldSplitter(
-            config.validationFolds(),
+            config.splitConfig().validationFolds(),
             trainRelationshipIds,
             globalTargets,
             config.randomSeed()
