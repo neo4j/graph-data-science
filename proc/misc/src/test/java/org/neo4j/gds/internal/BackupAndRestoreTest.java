@@ -28,6 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -35,13 +40,8 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.internal.BackupAndRestore.BackupResult;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.internal.BackupAndRestore.BackupResult;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
@@ -73,7 +73,7 @@ class BackupAndRestoreTest {
     }
 
     @Test
-    void shouldCreateModelsFolderWhenNoModelsAreInBackup(@TempDir Path tempDir) {
+    void shouldCreateBackupWhenNoModelsExist(@TempDir Path tempDir) {
         var gdlGraph = "CREATE" +
                        "  (a:Label1 {prop1: 42})" +
                        ", (b:Label1)" +
@@ -114,9 +114,7 @@ class BackupAndRestoreTest {
                 assertThat(result.path()).isNotNull().startsWith(backupPath.toString());
             });
 
-        assertThat(backupPath)
-            .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
-            .isDirectoryRecursivelyContaining("glob:**/alice/models");
+        assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/alice/graphs");
 
         assertThat(backupPath.resolve(".backupmetadata"))
             .isNotEmptyFile()
@@ -128,7 +126,7 @@ class BackupAndRestoreTest {
     }
 
     @Test
-    void shouldCreateGraphsFolderWhenNoGraphsAreInBackup(@TempDir Path tempDir) {
+    void shouldCreateBackupWhenNoGraphsExist(@TempDir Path tempDir) {
         var model = Model.of(
             "alice",
             "firstModel",
@@ -165,9 +163,7 @@ class BackupAndRestoreTest {
                     .startsWith(backupPath.toString());
             });
 
-        assertThat(backupPath)
-            .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
-            .isDirectoryRecursivelyContaining("glob:**/alice/models");
+        assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/alice/models");
 
         assertThat(backupPath.resolve(".backupmetadata"))
             .isNotEmptyFile()

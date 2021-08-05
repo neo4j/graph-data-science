@@ -23,9 +23,6 @@ import org.apache.commons.io.file.PathUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.model.StoredModel;
-import org.neo4j.gds.model.storage.ModelToFileExporter;
-import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -36,9 +33,12 @@ import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.model.StoredModel;
+import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.utils.CheckedRunnable;
 import org.neo4j.gds.utils.CheckedSupplier;
 import org.neo4j.gds.utils.ExceptionUtil;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -56,16 +56,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.gds.core.utils.io.file.CsvGraphStoreImporter.DIRECTORY_IS_READABLE;
 import static org.neo4j.gds.utils.ExceptionUtil.function;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class BackupAndRestore {
 
@@ -217,25 +218,6 @@ public final class BackupAndRestore {
                 modelOnSuccess,
                 log
             ));
-
-            // We have the contract that both graphs and models folder exist, even if they do not contain any data
-            result.stream().flatMap(backupResult -> {
-                var userPath = backupPath.resolve(backupResult.username());
-                return Stream.of(userPath.resolve(GRAPHS_DIR), userPath.resolve(MODELS_DIR));
-            }).distinct().forEach(pathToCreate -> {
-                try {
-                    Files.createDirectories(pathToCreate);
-                } catch (IOException e) {
-                    log.error(
-                        formatWithLocale(
-                            "Failed to create %s directory '%s'",
-                            StringFormatting.toLowerCaseWithLocale(taskName),
-                            pathToCreate
-                        ),
-                        e
-                    );
-                }
-            });
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
@@ -288,11 +270,23 @@ public final class BackupAndRestore {
     private static void restoreForUser(Path userRestorePath, Log log) {
         var graphsPath = userRestorePath.resolve(GRAPHS_DIR);
         var modelsPath = userRestorePath.resolve(MODELS_DIR);
-        DIRECTORY_IS_READABLE.validate(graphsPath);
-        DIRECTORY_IS_READABLE.validate(modelsPath);
 
-        restoreGraphs(graphsPath, log);
-        restoreModels(modelsPath, log);
+        restoreUserData(graphsPath, log, BackupAndRestore::restoreGraphs);
+        restoreUserData(modelsPath, log, BackupAndRestore::restoreModels);
+    }
+
+    private static void restoreUserData(Path path, Log log, BiConsumer<Path, Log> action) {
+        try {
+            DIRECTORY_IS_READABLE.validate(path);
+        } catch (IllegalArgumentException invalid) {
+            if (Files.exists(path)) {
+                log.error(invalid.getMessage(), invalid);
+            } else {
+                // If the path does not exist, we expect to fail and only log an informational message
+                log.info(invalid.getMessage(), invalid);
+            }
+        }
+        action.accept(path, log);
     }
 
     private static void createNewBackupFromRestore(
