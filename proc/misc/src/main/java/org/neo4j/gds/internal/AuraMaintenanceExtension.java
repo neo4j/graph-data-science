@@ -78,6 +78,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             }
 
             if (restorePath != null && backupPath != null) {
+                int maxAllowedBackups = config.get(AuraMaintenanceSettings.max_number_of_backups);
                 return LifecycleAdapter.onInit(() -> {
                     var jobScheduler = dependencies.jobScheduler();
                     var jobHandle = jobScheduler.schedule(
@@ -85,7 +86,8 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                         () -> restorePersistedData(
                             dependencies.logService(),
                             restorePath,
-                            backupPath
+                            backupPath,
+                            maxAllowedBackups
                         )
                     );
                     if (blockOnRestore) {
@@ -100,11 +102,12 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
     private static void restorePersistedData(
         LogService logService,
         Path restorePath,
-        Path backupPath
+        Path backupPath,
+        int maxAllowedBackups
     ) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
         try {
-            BackupAndRestore.restore(restorePath, backupPath, -1, userLog);
+            BackupAndRestore.restore(restorePath, backupPath, maxAllowedBackups, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }
