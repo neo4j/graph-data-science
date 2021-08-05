@@ -28,6 +28,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -163,6 +164,8 @@ class LinkPredictionTrainTest extends BaseProcTest {
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
                 .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
+
+            assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL"));
         });
     }
 

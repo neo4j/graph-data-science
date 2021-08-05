@@ -36,10 +36,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 public interface LinkPredictionSplitConfig extends Model.Mappable {
-    String TEST_RELATIONSHIP_TYPE = "_TEST_";
-    String TEST_COMPLEMENT_RELATIONSHIP_TYPE = "_TEST_COMPLEMENT_";
-    String TRAIN_RELATIONSHIP_TYPE = "_TRAIN_";
-    String FEATURE_INPUT_RELATIONSHIP_TYPE = "_FEATURE_INPUT_";
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
@@ -63,6 +59,30 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double negativeSamplingRatio() {
         return 1.0;
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default String testRelationshipType() {
+        return "_TEST_";
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default String testComplementRelationshipType() {
+        return "_TEST_COMPLEMENT_";
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default String trainRelationshipType() {
+        return  "_TRAIN_";
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default String featureInputRelationshipType() {
+        return  "_FEATURE_INPUT_";
     }
 
     @Override

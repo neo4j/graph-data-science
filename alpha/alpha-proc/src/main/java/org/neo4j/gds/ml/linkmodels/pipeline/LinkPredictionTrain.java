@@ -53,10 +53,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.FEATURE_INPUT_RELATIONSHIP_TYPE;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TEST_COMPLEMENT_RELATIONSHIP_TYPE;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TEST_RELATIONSHIP_TYPE;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TRAIN_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -97,10 +93,10 @@ public class LinkPredictionTrain
         featurePipeline.executeNodePropertySteps(
             graphName,
             config.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(FEATURE_INPUT_RELATIONSHIP_TYPE)
+            RelationshipType.of(config.splitConfig().featureInputRelationshipType())
         );
 
-        var trainData = extractFeaturesAndTargets(TRAIN_RELATIONSHIP_TYPE);
+        var trainData = extractFeaturesAndTargets(config.splitConfig().trainRelationshipType());
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
 
@@ -129,29 +125,32 @@ public class LinkPredictionTrain
             .stream()
             .map(RelationshipType::name)
             .collect(Collectors.toList());
+        LinkPredictionSplitConfig splitConfig = config.splitConfig();
+
+        var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(
             graphName,
-            TEST_RELATIONSHIP_TYPE,
-            TEST_COMPLEMENT_RELATIONSHIP_TYPE,
+            splitConfig.testRelationshipType(),
+            testComplementRelationshipType,
             relationshipTypes,
-            config.splitConfig().testFraction()
+            splitConfig.testFraction()
         );
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(
             graphName,
-            TRAIN_RELATIONSHIP_TYPE,
-            FEATURE_INPUT_RELATIONSHIP_TYPE,
-            List.of(TEST_COMPLEMENT_RELATIONSHIP_TYPE),
-            config.splitConfig().trainFraction()
+            splitConfig.trainRelationshipType(),
+            splitConfig.featureInputRelationshipType(),
+            List.of(testComplementRelationshipType),
+            splitConfig.trainFraction()
         );
 
-        graphStore.deleteRelationships(RelationshipType.of(TEST_COMPLEMENT_RELATIONSHIP_TYPE));
+        graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
     }
 
     private void relationshipSplit(
@@ -260,7 +259,7 @@ public class LinkPredictionTrain
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
-        var testData = extractFeaturesAndTargets(TEST_RELATIONSHIP_TYPE);
+        var testData = extractFeaturesAndTargets(config.splitConfig().testRelationshipType());
 
         var result = computeMetric(
             testData,
@@ -436,9 +435,14 @@ public class LinkPredictionTrain
     }
 
     private void cleanUpGraphStore() {
-        graphStore.deleteRelationships(RelationshipType.of(TEST_RELATIONSHIP_TYPE));
-        graphStore.deleteRelationships(RelationshipType.of(TRAIN_RELATIONSHIP_TYPE));
-        graphStore.deleteRelationships(RelationshipType.of(FEATURE_INPUT_RELATIONSHIP_TYPE));
+        LinkPredictionSplitConfig splitConfig = config.splitConfig();
+        var trainRelTypes = List.of(
+            splitConfig.trainRelationshipType(),
+            splitConfig.testRelationshipType(),
+            splitConfig.featureInputRelationshipType()
+        );
+
+        trainRelTypes.forEach(relType -> graphStore.deleteRelationships(RelationshipType.of(relType)));
     }
 
     @Override
