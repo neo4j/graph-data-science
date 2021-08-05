@@ -28,8 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUpdater {
 
     private final Map<NodeLabel, BitSet> additionalNodeLabels;
@@ -64,11 +62,15 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
     @Override
     public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
         super.forEachNodeLabel(nodeId, consumer);
-        additionalNodeLabels.forEach((nodeLabel, bitSet) -> {
+        for (Map.Entry<NodeLabel, BitSet> entry : additionalNodeLabels.entrySet()) {
+            NodeLabel nodeLabel = entry.getKey();
+            BitSet bitSet = entry.getValue();
             if (bitSet.get(nodeId)) {
-                consumer.accept(nodeLabel);
+                if (!consumer.accept(nodeLabel)) {
+                    break;
+                }
             }
-        });
+        }
     }
 
     @Override
