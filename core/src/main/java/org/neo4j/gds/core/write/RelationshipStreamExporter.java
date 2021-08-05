@@ -20,12 +20,12 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.gds.api.IdMapping;
 import org.neo4j.values.storable.Value;
 
 import java.util.Arrays;
@@ -57,64 +57,34 @@ public final class RelationshipStreamExporter extends StatementApi {
         Value[] values();
     }
 
-    public static RelationshipStreamExporter.Builder builder(
+    public static RelationshipStreamExporterBuilder<RelationshipStreamExporter> builder(
         TransactionContext transactionContext,
         IdMapping idMapping,
         Stream<Relationship> relationships,
         TerminationFlag terminationFlag
     ) {
-        return new RelationshipStreamExporter.Builder(
-            transactionContext,
-            idMapping,
-            relationships,
-            terminationFlag
-        );
+        return new Builder(transactionContext)
+            .withRelationships(relationships)
+            .withIdMapping(idMapping)
+            .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends ExporterBuilder<RelationshipStreamExporter> {
+    public static final class Builder extends RelationshipStreamExporterBuilder<RelationshipStreamExporter> {
 
-        private final Stream<Relationship> relationships;
-        private int batchSize;
-
-        Builder(
-            TransactionContext tx,
-            IdMapping idMapping,
-            Stream<Relationship> relationships,
-            TerminationFlag terminationFlag
-        ) {
-            super(tx, idMapping, terminationFlag);
-            this.relationships = relationships;
-            this.batchSize = (int) NodePropertyExporter.MIN_BATCH_SIZE;
+        Builder(TransactionContext transactionContext) {
+            super(transactionContext);
         }
 
         @Override
         public RelationshipStreamExporter build() {
             return new RelationshipStreamExporter(
-                tx,
+                transactionContext,
                 toOriginalId,
                 relationships,
                 batchSize,
                 terminationFlag,
                 progressLogger
             );
-        }
-
-        public Builder withBatchSize(int batchSize) {
-            this.batchSize = batchSize;
-            return this;
-        }
-
-        @Override
-        String taskName() {
-            return "WriteRelationshipStream";
-        }
-
-        @Override
-        long taskVolume() {
-            // We write relationships from a finite stream.
-            // The number of relationships is therefore not
-            // known upfront.
-            return 0;
         }
     }
 
