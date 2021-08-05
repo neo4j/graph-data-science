@@ -29,12 +29,9 @@ import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration
@@ -44,20 +41,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
     @Configuration.DoubleRange(min = 0, minInclusive = false)
     double negativeClassWeight();
 
-    @Configuration.Parameter
-    LinkPredictionSplitConfig splitConfig();
-
-    @Configuration.Parameter
-    List<Map<String, Object>> parameters();
-
-    @Value.Derived
-    @Configuration.Ignore
-    default List<LinkLogisticRegressionTrainConfig> paramConfigs() {
-        return parameters().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
-            concurrency(),
-            params
-        )).collect(Collectors.toList());
-    }
+    String pipeline();
 
     @Configuration.Ignore
     @Value.Default
@@ -69,13 +53,9 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        LinkPredictionSplitConfig splitConfig,
-        List<Map<String, Object>> parameterSpace,
         CypherMapWrapper config
     ) {
         return new LinkPredictionTrainConfigImpl(
-            splitConfig,
-            parameterSpace,
             graphName,
             maybeImplicitCreate,
             username,

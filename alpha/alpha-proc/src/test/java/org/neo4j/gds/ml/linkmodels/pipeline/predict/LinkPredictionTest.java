@@ -22,15 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -39,9 +30,19 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.linkmodels.PredictedLink;
+import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.PipelineModelInfo;
+import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -87,19 +88,19 @@ class LinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
+        var pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+
+        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
+            WEIGHTS,
+            1,
+            WEIGHTS.length
+        )));
+
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var featurePipeline = new FeaturePipeline(
-                List.of(),
-                List.of(new L2FeatureStep(List.of("a", "b", "c"))),
-                caller, db.databaseId(), getUsername());
-            var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-                WEIGHTS,
-                1,
-                WEIGHTS.length
-            )));
             var linkPrediction = new LinkPrediction(
                 modelData,
-                featurePipeline,
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
                 "g",
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
@@ -112,6 +113,7 @@ class LinkPredictionTest extends BaseProcTest {
             var predictionResult = linkPrediction.compute();
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
             assertThat(predictedLinks).hasSize(Math.min(topN, 6));
+
             var expectedLinks = List.of(
                 PredictedLink.of(0, 4, 0.49750002083312506),
                 PredictedLink.of(1, 4, 0.11815697780926958),

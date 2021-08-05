@@ -21,17 +21,17 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ import java.util.stream.LongStream;
 public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
 
     private final LinkLogisticRegressionData modelData;
-    private final FeaturePipeline featurePipeline;
+    private final PipelineExecutor pipelineExecutor;
     private final String graphName;
     private final List<NodeLabel> nodeLabels;
     private final List<RelationshipType> relationshipTypes;
@@ -51,7 +51,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
 
     public LinkPrediction(
         LinkLogisticRegressionData modelData,
-        FeaturePipeline featurePipeline,
+        PipelineExecutor pipelineExecutor,
         String graphName,
         List<NodeLabel> nodeLabels,
         List<RelationshipType> relationshipTypes,
@@ -62,7 +62,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         ProgressTracker progressTracker
     ) {
         this.modelData = modelData;
-        this.featurePipeline = featurePipeline;
+        this.pipelineExecutor = pipelineExecutor;
         this.graphName = graphName;
         this.nodeLabels = nodeLabels;
         this.relationshipTypes = relationshipTypes;
@@ -80,7 +80,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     }
 
     private void computeNodeProperties() {
-        featurePipeline.executeNodePropertySteps(graphName, nodeLabels, relationshipTypes);
+        pipelineExecutor.executeNodePropertySteps(graphName, nodeLabels, relationshipTypes);
     }
 
     private LinkPredictionResult predictLinks() {
@@ -89,7 +89,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
             graph.concurrentCopy(),
-            featurePipeline.linkFeatureExtractor(graph),
+            pipelineExecutor.linkFeatureExtractor(graph),
             predictor,
             result,
             progressTracker

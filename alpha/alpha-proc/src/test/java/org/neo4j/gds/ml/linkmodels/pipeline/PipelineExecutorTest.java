@@ -22,11 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -34,9 +29,13 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
-class FeaturePipelineTest extends BaseProcTest {
+class PipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String GRAPH = "CREATE " +
@@ -88,8 +87,13 @@ class FeaturePipelineTest extends BaseProcTest {
     // add several linkFeatureSteps + assert that linkFeatures computed correct
     @Test
     void singleLinkFeatureStep() {
+        var pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
+
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var pipeline = new FeaturePipeline(List.of(), List.of(new HadamardFeatureStep(List.of("array"))), caller, db.databaseId(), getUsername());
+            var actual = computePropertiesAndLinkFeatures(
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername())
+            );
 
             var expected = HugeObjectArray.of(
                 new double[]{3 * 1D, 2 * 1D}, // a-b
@@ -99,7 +103,6 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 8, 2 * 2.3D}, // a-c
                 new double[]{3 * 0.1D, 2 * 91.0D} // a-d
             );
-            var actual = computePropertiesAndLinkFeatures(pipeline);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -111,18 +114,21 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void dependentNodePropertySteps() {
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var nodePropertySteps = List.of(
-                new NodePropertyStep("degree", Map.of("mutateProperty", "degree")),
-                new NodePropertyStep("scaleProperties", Map.of(
-                    "mutateProperty", "nodeFeatures",
-                    "nodeProperties", "degree",
-                    "scaler", "MEAN"
-                ))
-            );
-            var pipeline = new FeaturePipeline(nodePropertySteps, List.of(), caller, db.databaseId(), getUsername());
+        var pipeline = new PipelineModelInfo();
 
-            pipeline.executeNodePropertySteps(GRAPH_NAME, NodeLabel.listOf("N"), RelationshipType.of("REL"));
+        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+        pipeline.addNodePropertyStep("scaleProperties", Map.of(
+            "mutateProperty", "nodeFeatures",
+            "nodeProperties", "degree",
+            "scaler", "MEAN"
+        ));
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()).executeNodePropertySteps(
+                GRAPH_NAME,
+                NodeLabel.listOf("N"),
+                RelationshipType.of("REL")
+            );
 
             assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("degree", "nodeFeatures");
         });
@@ -130,17 +136,18 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void multipleLinkFeatureStep() {
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var linkFeatureSteps = List.of(
-                new HadamardFeatureStep(List.of("array")),
-                new CosineFeatureStep(List.of("noise", "z"))
-            );
-            var pipeline = new FeaturePipeline(List.of(), linkFeatureSteps, caller, db.databaseId(), getUsername());
+        var pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
+        pipeline.addFeatureStep(new CosineFeatureStep(List.of("noise", "z")));
 
-            var normA = Math.sqrt(42 * 42 + 13 * 13);
-            var normB = Math.sqrt(1337 * 1337 + 0 * 0);
-            var normC = Math.sqrt(42 * 42 + 2 * 2);
-            var normD = Math.sqrt(42 * 42 + 9 * 9);
+        var normA = Math.sqrt(42 * 42 + 13 * 13);
+        var normB = Math.sqrt(1337 * 1337 + 0 * 0);
+        var normC = Math.sqrt(42 * 42 + 2 * 2);
+        var normD = Math.sqrt(42 * 42 + 9 * 9);
+
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()));
 
             var expected = HugeObjectArray.of(
                 new double[]{3 * 1D, 2 * 1D, (42 * 1337 + 13 * 0D) / normA / normB}, // a-b
@@ -150,8 +157,6 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 8, 2 * 2.3D, (42 * 42 + 13 * 2) / normA / normC}, // a-c
                 new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD} // a-d
             );
-
-            var actual = computePropertiesAndLinkFeatures(pipeline);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -163,18 +168,23 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void testProcedureAndLinkFeatures() {
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var linkFeatureSteps = List.<LinkFeatureStep>of(new HadamardFeatureStep(List.of("pageRank")));
-            var pipeline = new FeaturePipeline(List.of(new NodePropertyStep(
-                "pageRank",
-                Map.of("mutateProperty", "pageRank")
-            )), linkFeatureSteps, caller, db.databaseId(), getUsername());
+        var pipeline = new PipelineModelInfo();
+        pipeline.addNodePropertyStep(new NodePropertyStep(
+            "pageRank",
+            Map.of("mutateProperty", "pageRank")
+        ));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("pageRank")));
 
-            var expectedPageRanks = List.of(
-                1.8445425214324187,
-                0.6668064514098416,
-                0.6668064514098416,
-                0.6668064514098416
+        var expectedPageRanks = List.of(
+            1.8445425214324187,
+            0.6668064514098416,
+            0.6668064514098416,
+            0.6668064514098416
+        );
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var actual = computePropertiesAndLinkFeatures(
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername())
             );
 
             var expected = HugeObjectArray.of(
@@ -186,8 +196,6 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{expectedPageRanks.get(3) * expectedPageRanks.get(0)}
             );
 
-            var actual = computePropertiesAndLinkFeatures(pipeline);
-
             assertThat(actual.size()).isEqualTo(expected.size());
 
             for (long i = 0; i < actual.size(); i++) {
@@ -198,22 +206,21 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void validateLinkFeatureSteps() {
+        var pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
+
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var linkFeatureSteps = List.<LinkFeatureStep>of(
-                new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")),
-                new HadamardFeatureStep(List.of("other-no-property"))
-            );
+            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername());
 
-            var pipeline = new FeaturePipeline(List.of(), linkFeatureSteps, caller, db.databaseId(), getUsername());
-
-            assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline))
+            assertThatThrownBy(() -> computePropertiesAndLinkFeatures(executor))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
                     "Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");
         });
     }
 
-    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline) {
+    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(PipelineExecutor pipeline) {
         pipeline.executeNodePropertySteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
         return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"), 4);
     }

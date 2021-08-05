@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model.Mappable;
@@ -31,6 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PipelineModelInfo implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
@@ -67,7 +72,11 @@ public class PipelineModelInfo implements Mappable {
     }
 
     void addNodePropertyStep(String name, Map<String, Object> config) {
-        this.nodePropertySteps.add(new NodePropertyStep(name, config));
+        this.addNodePropertyStep(new NodePropertyStep(name, config));
+    }
+
+    public void addNodePropertyStep(NodePropertyStep step) {
+        this.nodePropertySteps.add(step);
     }
 
     List<LinkFeatureStep> featureSteps() {
@@ -75,7 +84,11 @@ public class PipelineModelInfo implements Mappable {
     }
 
     void addFeatureStep(String name, Map<String, Object> config) {
-        featureSteps.add(LinkFeatureStepFactory.create(name, config));
+        this.addFeatureStep(LinkFeatureStepFactory.create(name, config));
+    }
+
+    public void addFeatureStep(LinkFeatureStep step) {
+        featureSteps.add(step);
     }
 
     LinkPredictionSplitConfig splitConfig() {
@@ -106,5 +119,26 @@ public class PipelineModelInfo implements Mappable {
 
                 return validatedConfig;
             }).collect(Collectors.toList());
+    }
+
+    List<LinkLogisticRegressionTrainConfig> parameterConfigs(int concurrency) {
+        return parameterSpace().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
+            concurrency,
+            params
+        )).collect(Collectors.toList());
+    }
+
+    public void validate(Graph graph) {
+        Set<String> graphProperties = graph.availableNodeProperties();
+
+        var invalidProperties = featureSteps()
+            .stream()
+            .flatMap(step -> step.inputNodeProperties().stream())
+            .filter(property -> !graphProperties.contains(property))
+            .collect(Collectors.toList());
+
+        if (!invalidProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
+        }
     }
 }

@@ -118,30 +118,29 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .testFraction(0.5)
                 .build();
 
-            LinkPredictionTrainConfig config = LinkPredictionTrainConfig
+            PipelineModelInfo pipeline = new PipelineModelInfo();
+            pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+            pipeline.setSplitConfig(splitConfig);
+            pipeline.setParameterSpace(List.of(
+                Map.of("penalty", 1000000),
+                Map.of("penalty", 1)
+            ));
+
+            LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfig
                 .builder()
                 .graphName(GRAPH_NAME)
                 .modelName(modelName)
-                .splitConfig(splitConfig)
+                .pipeline("DUMMY")
                 .negativeClassWeight(1)
                 .randomSeed(1337L)
-                .parameters(List.of(
-                    Map.of("penalty", 1000000),
-                    Map.of("penalty", 1)
-                ))
                 .build();
-
-
-            var featurePipeline = new FeaturePipeline(
-                List.of(),
-                List.of(new HadamardFeatureStep(List.of("noise", "z", "array"))),
-                caller, db.databaseId(), getUsername());
 
             var linkPredictionTrain = new LinkPredictionTrain(
                 GRAPH_NAME,
                 graphStore,
-                config,
-                featurePipeline,
+                trainConfig,
+                pipeline,
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
                 ProgressTracker.NULL_TRACKER,
                 caller
             );
@@ -150,7 +149,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
             assertThat(actualModel.name()).isEqualTo(modelName);
             assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
-            assertThat(actualModel.trainConfig()).isEqualTo(config);
+            assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
             // length of the linkFeatures
             assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
 
@@ -180,26 +179,26 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .testFraction(0.5)
                 .build();
 
+            var pipeline = new PipelineModelInfo();
+            pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+            pipeline.setSplitConfig(splitConfig);
+            pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));
+
             LinkPredictionTrainConfig config = LinkPredictionTrainConfig
                 .builder()
                 .graphName(GRAPH_NAME)
                 .modelName("model")
-                .splitConfig(splitConfig)
+                .pipeline("DUMMY")
                 .negativeClassWeight(1)
                 .randomSeed(1337L)
-                .parameters(List.of(Map.of("penalty", 1)))
                 .build();
-
-            var featurePipeline = new FeaturePipeline(
-                List.of(),
-                List.of(new HadamardFeatureStep(List.of("noise", "z", "array"))),
-                caller, db.databaseId(), getUsername());
 
             var linkPredictionTrain = new LinkPredictionTrain(
                 "g",
                 graphStore,
                 config,
-                featurePipeline,
+                pipeline,
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
                 ProgressTracker.NULL_TRACKER,
                 caller
             );

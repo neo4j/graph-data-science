@@ -20,40 +20,33 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FeaturePipeline {
-    private final List<NodePropertyStep> nodePropertySteps;
-    private final List<LinkFeatureStep> linkFeatureSteps;
+public class PipelineExecutor {
+    private final PipelineModelInfo pipeline;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
 
-    public FeaturePipeline(
-        List<NodePropertyStep> nodePropertySteps,
-        List<LinkFeatureStep> linkFeatureSteps,
+    public PipelineExecutor(
+        PipelineModelInfo pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
         String userName
     ) {
-        this.nodePropertySteps = nodePropertySteps;
-        this.linkFeatureSteps = linkFeatureSteps;
+        this.pipeline = pipeline;
         this.caller = caller;
         this.userName = userName;
         this.databaseId = databaseId;
@@ -68,13 +61,14 @@ public class FeaturePipeline {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
             .getGraph(nodeLabels, List.of(relationshipType), Optional.empty());
-        validate(graph);
 
-        return extractFeatures(graph, linkFeatureSteps, concurrency);
+        pipeline.validate(graph);
+
+        return extractFeatures(graph, pipeline.featureSteps(), concurrency);
     }
 
     public LinkFeatureExtractor linkFeatureExtractor(Graph graph) {
-        return LinkFeatureExtractor.of(graph, linkFeatureSteps);
+        return LinkFeatureExtractor.of(graph, pipeline.featureSteps());
     }
 
     public void executeNodePropertySteps(
@@ -90,22 +84,8 @@ public class FeaturePipeline {
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes
     ) {
-        for (NodePropertyStep step : nodePropertySteps) {
+        for (NodePropertyStep step : pipeline.nodePropertySteps()) {
             step.execute(caller, graphName, nodeLabels, relationshipTypes);
-        }
-    }
-
-    private void validate(Graph graph) {
-        Set<String> graphProperties = graph.availableNodeProperties();
-
-        var invalidProperties = linkFeatureSteps
-            .stream()
-            .flatMap(step -> step.inputNodeProperties().stream())
-            .filter(property -> !graphProperties.contains(property))
-            .collect(Collectors.toList());
-
-        if (!invalidProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
         }
     }
 }

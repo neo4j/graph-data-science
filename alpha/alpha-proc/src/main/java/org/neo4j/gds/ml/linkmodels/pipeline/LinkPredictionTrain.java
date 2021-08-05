@@ -63,23 +63,26 @@ public class LinkPredictionTrain
 
     private final String graphName;
     private final GraphStore graphStore;
-    private final LinkPredictionTrainConfig config;
-    private final FeaturePipeline featurePipeline;
+    private final LinkPredictionTrainConfig trainConfig;
+    private final PipelineExecutor pipelineExecutor;
+    private final PipelineModelInfo pipeline;
     private final AllocationTracker allocationTracker;
     private final BaseProc caller;
 
     public LinkPredictionTrain(
         String graphName,
         GraphStore graphStore,
-        LinkPredictionTrainConfig config,
-        FeaturePipeline featurePipeline,
+        LinkPredictionTrainConfig trainConfig,
+        PipelineModelInfo pipeline,
+        PipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker,
         BaseProc caller
     ) {
         this.graphName = graphName;
         this.graphStore = graphStore;
-        this.config = config;
-        this.featurePipeline = featurePipeline;
+        this.trainConfig = trainConfig;
+        this.pipelineExecutor = pipelineExecutor;
+        this.pipeline = pipeline;
         this.progressTracker = progressTracker;
         this.caller = caller;
         this.allocationTracker = AllocationTracker.empty();
@@ -90,13 +93,13 @@ public class LinkPredictionTrain
 
         splitRelationships();
 
-        featurePipeline.executeNodePropertySteps(
+        pipelineExecutor.executeNodePropertySteps(
             graphName,
-            config.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(config.splitConfig().featureInputRelationshipType())
+            trainConfig.nodeLabelIdentifiers(graphStore),
+            RelationshipType.of(pipeline.splitConfig().featureInputRelationshipType())
         );
 
-        var trainData = extractFeaturesAndTargets(config.splitConfig().trainRelationshipType());
+        var trainData = extractFeaturesAndTargets(pipeline.splitConfig().trainRelationshipType());
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
 
@@ -120,12 +123,12 @@ public class LinkPredictionTrain
     }
 
     private void splitRelationships() {
-        List<String> relationshipTypes = config
+        List<String> relationshipTypes = trainConfig
             .internalRelationshipTypes(graphStore)
             .stream()
             .map(RelationshipType::name)
             .collect(Collectors.toList());
-        LinkPredictionSplitConfig splitConfig = config.splitConfig();
+        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
 
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
@@ -163,22 +166,22 @@ public class LinkPredictionTrain
         var splittingConfig = new HashMap<String, Object>() {{
             put("holdoutRelationshipType", holdoutRelationshipType);
             put("remainingRelationshipType", remainingRelationshipType);
-            put("nodeLabels", config.nodeLabels());
+            put("nodeLabels", trainConfig.nodeLabels());
             put("relationshipTypes", relationshipTypes);
             put("holdOutFraction", holdOutFraction);
-            put("negativeSamplingRatio", config.splitConfig().negativeSamplingRatio());
-            config.randomSeed().ifPresent(seed -> put("randomSeed", seed));
+            put("negativeSamplingRatio", pipeline.splitConfig().negativeSamplingRatio());
+            trainConfig.randomSeed().ifPresent(seed -> put("randomSeed", seed));
         }};
 
         ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splittingConfig);
     }
 
     FeaturesAndTargets extractFeaturesAndTargets(String relationshipType) {
-        var features = featurePipeline.computeFeatures(
+        var features = pipelineExecutor.computeFeatures(
             graphName,
-            config.nodeLabelIdentifiers(graphStore),
+            trainConfig.nodeLabelIdentifiers(graphStore),
             RelationshipType.of(relationshipType),
-            config.concurrency()
+            trainConfig.concurrency()
         );
         var targets = extractTargets(features.size(), relationshipType);
 
@@ -218,14 +221,14 @@ public class LinkPredictionTrain
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        config.paramConfigs().forEach(modelParams -> {
+        pipeline.parameterConfigs(trainConfig.concurrency()).forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
-                config.splitConfig().validationFolds()
+                pipeline.splitConfig().validationFolds()
             );
             var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,
-                config.splitConfig().validationFolds()
+                pipeline.splitConfig().validationFolds()
             );
             for (NodeSplit split : validationSplits) {
                 // train each model candidate on the train sets
@@ -242,14 +245,14 @@ public class LinkPredictionTrain
             }
 
             // insert the candidates metrics into trainStats and validationStats
-            config.metrics().forEach(metric -> {
+            trainConfig.metrics().forEach(metric -> {
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
         });
 
         // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = config.metrics().get(0);
+        var mainMetric = trainConfig.metrics().get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
@@ -259,7 +262,7 @@ public class LinkPredictionTrain
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
-        var testData = extractFeaturesAndTargets(config.splitConfig().testRelationshipType());
+        var testData = extractFeaturesAndTargets(pipeline.splitConfig().testRelationshipType());
 
         var result = computeMetric(
             testData,
@@ -293,10 +296,10 @@ public class LinkPredictionTrain
         var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
         globalTargets.setAll(i -> (long) actualTargets.get(i));
         var splitter = new StratifiedKFoldSplitter(
-            config.splitConfig().validationFolds(),
+            pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
             globalTargets,
-            config.randomSeed()
+            trainConfig.randomSeed()
         );
         return splitter.splits();
     }
@@ -366,7 +369,7 @@ public class LinkPredictionTrain
         var targets = inputData.targets();
         var features = inputData.features();
 
-        evaluationQueue.parallelConsume(config.concurrency(), thread ->
+        evaluationQueue.parallelConsume(trainConfig.concurrency(), thread ->
             (batch) -> {
                 for (Long relationshipIdx : batch.nodeIds()) {
                     double predictedProbability = predictor.predictedProbability(features.get(relationshipIdx));
@@ -378,9 +381,9 @@ public class LinkPredictionTrain
             }
         );
 
-        return config.metrics().stream().collect(Collectors.toMap(
+        return trainConfig.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(signedProbabilities, config.negativeClassWeight())
+            metric -> metric.compute(signedProbabilities, trainConfig.negativeClassWeight())
         ));
     }
 
@@ -421,12 +424,12 @@ public class LinkPredictionTrain
         Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics
     ) {
         return Model.of(
-            config.username(),
-            config.modelName(),
+            trainConfig.username(),
+            trainConfig.modelName(),
             MODEL_TYPE,
             graphStore.schema(),
             modelData,
-            config,
+            trainConfig,
             LinkPredictionModelInfo.of(
                 modelSelectResult.bestParameters(),
                 metrics
@@ -435,7 +438,7 @@ public class LinkPredictionTrain
     }
 
     private void cleanUpGraphStore() {
-        LinkPredictionSplitConfig splitConfig = config.splitConfig();
+        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
         var trainRelTypes = List.of(
             splitConfig.trainRelationshipType(),
             splitConfig.testRelationshipType(),
