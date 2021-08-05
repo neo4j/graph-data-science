@@ -93,7 +93,7 @@ public class NodePropertyExporter extends StatementApi {
 
     public static class Builder extends NodePropertyExporterBuilder<NodePropertyExporter> {
 
-        Builder(TransactionContext transactionContext) {
+        public Builder(TransactionContext transactionContext) {
             super(transactionContext);
         }
 
