@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public class NodeMappingAdapter implements NodeMapping {
+public abstract class NodeMappingAdapter implements NodeMapping {
 
     private final NodeMapping nodeMapping;
 
