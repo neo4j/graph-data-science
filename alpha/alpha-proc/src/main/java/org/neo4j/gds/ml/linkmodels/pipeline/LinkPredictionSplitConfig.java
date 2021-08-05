@@ -33,27 +33,35 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface LinkPredictionSplitConfig extends Model.Mappable {
+    String TEST_RELATIONSHIP_TYPE = "_TEST_";
+    String TEST_COMPLEMENT_RELATIONSHIP_TYPE = "_TEST_COMPLEMENT_";
+    String TRAIN_RELATIONSHIP_TYPE = "_TRAIN_";
+    String FEATURE_INPUT_RELATIONSHIP_TYPE = "_FEATURE_INPUT_";
 
     @Configuration.IntegerRange(min = 2)
     default int validationFolds() {
         return 3;
-    };
+    }
+
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double testFraction() {
         return 0.1;
-    };
+    }
+
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double trainFraction() {
         return 0.1;
-    };
+    }
+
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double negativeSamplingRatio() {
         return 1.0;
-    };
+    }
 
+    
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {
         return new LinkPredictionSplitConfigImpl(config);
     }

@@ -21,7 +21,15 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
@@ -36,14 +44,6 @@ import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +53,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.FEATURE_INPUT_RELATIONSHIP_TYPE;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TEST_COMPLEMENT_RELATIONSHIP_TYPE;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TEST_RELATIONSHIP_TYPE;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig.TRAIN_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -60,10 +64,6 @@ public class LinkPredictionTrain
     extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
 
     public static final String MODEL_TYPE = "Link Prediction - Pipeline";
-    public static final String TEST_RELATIONSHIP_TYPE = "_TEST_";
-    public static final String TEST_COMPLEMENT_RELATIONSHIP_TYPE = "_TEST_COMPLEMENT_";
-    public static final String TRAIN_RELATIONSHIP_TYPE = "_TRAIN_";
-    public static final String FEATURE_INPUT_RELATIONSHIP_TYPE = "_FEATURE_INPUT_";
 
     private final String graphName;
     private final GraphStore graphStore;
