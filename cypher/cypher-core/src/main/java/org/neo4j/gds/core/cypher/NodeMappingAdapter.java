@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;

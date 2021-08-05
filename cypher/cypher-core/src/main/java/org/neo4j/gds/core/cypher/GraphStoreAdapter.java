@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.loading.DeletionResult;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.CompositeRelationshipIterator;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 

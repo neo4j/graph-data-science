@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeMapping;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 

@@ -20,15 +20,15 @@
 package org.neo4j.gds.core.cypher;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeMapping;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUpdater {
 
