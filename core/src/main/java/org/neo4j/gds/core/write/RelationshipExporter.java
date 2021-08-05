@@ -21,21 +21,20 @@ package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
-import org.neo4j.values.storable.Values;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
@@ -51,7 +50,7 @@ public final class RelationshipExporter extends StatementApi {
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporter.Builder of(
+    public static RelationshipExporterBuilder<RelationshipExporter> of(
         TransactionContext transactionContext,
         Graph graph,
         TerminationFlag terminationFlag
@@ -64,40 +63,28 @@ public final class RelationshipExporter extends StatementApi {
         );
     }
 
-    public static RelationshipExporter.Builder of(
+    public static RelationshipExporterBuilder<RelationshipExporter> of(
         TransactionContext transactionContext,
         IdMapping idMapping,
         Graph graph,
         TerminationFlag terminationFlag
     ) {
-        return new RelationshipExporter.Builder(
-            transactionContext,
-            idMapping,
-            graph,
-            terminationFlag
-        );
+        return new Builder(transactionContext)
+            .withGraph(graph)
+            .withIdMapping(idMapping)
+            .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends ExporterBuilder<RelationshipExporter> {
+    public static final class Builder extends RelationshipExporterBuilder<RelationshipExporter> {
 
-        private final Graph graph;
-        private RelationshipPropertyTranslator propertyTranslator;
-
-        Builder(TransactionContext tx, IdMapping idMapping, Graph graph, TerminationFlag terminationFlag) {
-            super(tx, idMapping, terminationFlag);
-            this.graph = graph;
-            this.propertyTranslator = Values::doubleValue;
-        }
-
-        public Builder withRelationPropertyTranslator(RelationshipPropertyTranslator propertyTranslator) {
-            this.propertyTranslator = propertyTranslator;
-            return this;
+        Builder(TransactionContext transactionContext) {
+            super(transactionContext);
         }
 
         @Override
         public RelationshipExporter build() {
             return new RelationshipExporter(
-                tx,
+                transactionContext,
                 graph,
                 toOriginalId,
                 propertyTranslator,
@@ -105,27 +92,17 @@ public final class RelationshipExporter extends StatementApi {
                 progressLogger
             );
         }
-
-        @Override
-        String taskName() {
-            return "WriteRelationships";
-        }
-
-        @Override
-        long taskVolume() {
-            return graph.relationshipCount();
-        }
     }
 
     private RelationshipExporter(
-        TransactionContext tx,
+        TransactionContext transactionContext,
         Graph graph,
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
-        super(tx);
+        super(transactionContext);
         this.graph = graph;
         this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;

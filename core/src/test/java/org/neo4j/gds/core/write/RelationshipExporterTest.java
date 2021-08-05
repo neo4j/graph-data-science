@@ -22,23 +22,20 @@ package org.neo4j.gds.core.write;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.values.storable.Values;
@@ -182,9 +179,8 @@ class RelationshipExporterTest extends BaseTest {
         validateWrittenGraphWithoutProperties();
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void progressLogging(boolean parallel) {
+    @Test
+    void progressLogging() {
         // given a graph of 20 rels
         // this abuses id mapping
         Graph graph = GdlFactory.of("(a)-[:T]->(b),".repeat(20)).build().graphStore().getUnion();
@@ -194,9 +190,7 @@ class RelationshipExporterTest extends BaseTest {
         var exporterBuilder = RelationshipExporter
             .of(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withLog(log);
-        if (parallel) {
-            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
-        }
+
         var exporter = exporterBuilder.build();
 
         // when writing properties

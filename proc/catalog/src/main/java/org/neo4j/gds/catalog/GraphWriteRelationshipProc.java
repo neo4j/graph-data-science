@@ -20,13 +20,12 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphWriteRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -83,7 +82,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     }
 
     private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
-        RelationshipExporter.Builder builder = RelationshipExporter
+        var builder = RelationshipExporter
             .of(
                 TransactionContext.of(api, procedureTransaction),
                 graphStore.getGraph(RelationshipType.of(config.relationshipType()), config.relationshipProperty()),
@@ -103,7 +102,6 @@ public class GraphWriteRelationshipProc extends CatalogProc {
 
         var exporter = builder
             .withLog(log)
-            .parallel(Pools.DEFAULT, config.writeConcurrency())
             .build();
 
         if (config.relationshipProperty().isPresent()) {
