@@ -35,7 +35,7 @@ import org.neo4j.gds.core.write.RelationshipStreaming;
 import java.util.List;
 import java.util.stream.Stream;
 
-public abstract class WriteRelationshipsProc<
+public abstract class WriteRelationshipStreamProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT extends RelationshipStreaming,
     PROC_RESULT,
