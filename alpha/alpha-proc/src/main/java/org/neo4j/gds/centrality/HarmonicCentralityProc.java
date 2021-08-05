@@ -19,20 +19,19 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.NodePropertiesWriter;
+import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.results.CentralityScore;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -45,7 +44,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig> {
+public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig> {
 
     private static final String DESCRIPTION =
         "Harmonic centrality is a way of detecting nodes that are " +
@@ -100,8 +99,9 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
         builder.withCentralityFunction(computationResult.result()::getCentralityScore);
 
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            NodePropertyExporter exporter = NodePropertyExporter
-                .builder(TransactionContext.of(api, procedureTransaction), graph, algorithm.getTerminationFlag())
+            NodePropertyExporter exporter =  nodePropertyExporterBuilder
+                .withIdMapping(graph)
+                .withTerminationFlag(algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();

@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.degree.DegreeCentralityMutateProc;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -36,7 +34,11 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.degree.DegreeCentralityMutateProc;
+import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -48,10 +50,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
@@ -275,6 +277,10 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
+            proc.nodePropertyExporterBuilder = new NodePropertyExporter.Builder(TransactionContext.of(
+                proc.api,
+                proc.procedureTransaction
+            ));
 
             proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
         }

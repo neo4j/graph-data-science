@@ -21,19 +21,17 @@ package org.neo4j.gds.shortestpath;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
-import org.neo4j.gds.impl.ShortestPathDeltaStepping;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.DeltaSteppingProcResult;
-import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.impl.ShortestPathDeltaStepping;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.DeltaSteppingProcResult;
+import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -58,7 +56,7 @@ import static org.neo4j.procedure.Mode.WRITE;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
+public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
 
     private static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
 
@@ -118,8 +116,9 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
                 }
             };
 
-            NodePropertyExporter
-                .builder(TransactionContext.of(api, procedureTransaction), graph, algorithm.getTerminationFlag())
+            nodePropertyExporterBuilder
+                .withIdMapping(graph)
+                .withTerminationFlag(algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()

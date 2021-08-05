@@ -19,22 +19,21 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
-import org.neo4j.gds.impl.spanningTrees.Prim;
-import org.neo4j.gds.impl.spanningTrees.SpanningTree;
-import org.neo4j.gds.utils.InputNodeValidator;
+import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
+import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.impl.spanningTrees.SpanningTree;
+import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,7 +45,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
+public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
 
     private static final String MAX_DESCRIPTION =
         "The maximum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
@@ -96,8 +95,9 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            final NodePropertyExporter exporter = NodePropertyExporter
-                .builder(TransactionContext.of(api, procedureTransaction), graph, TerminationFlag.wrap(transaction))
+            final NodePropertyExporter exporter = nodePropertyExporterBuilder
+                .withIdMapping(graph)
+                .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();

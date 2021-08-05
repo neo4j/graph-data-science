@@ -26,23 +26,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -66,15 +68,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.BaseProcTest.anonymousGraphConfig;
-import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.gds.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -85,6 +86,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KE
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Base test that should be used for every algorithm procedure.
@@ -163,6 +165,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
             proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
+
+            if (proc instanceof NodePropertiesWriter) {
+                ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NodePropertyExporter.Builder(
+                    TransactionContext.of(
+                        proc.api,
+                        proc.procedureTransaction
+                    ));
+            }
 
             func.accept(proc);
         }

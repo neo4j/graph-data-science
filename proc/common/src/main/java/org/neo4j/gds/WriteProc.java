@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -38,7 +37,7 @@ public abstract class WriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends WritePropertyConfig & AlgoBaseConfig> extends NodePropertiesWriter<ALGO, ALGO_RESULT, CONFIG> {
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
@@ -79,8 +78,9 @@ public abstract class WriteProc<
 
             Graph graph = computationResult.graph();
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
-            NodePropertyExporter exporter = NodePropertyExporter
-                .builder(TransactionContext.of(api, procedureTransaction), graph, terminationFlag)
+            var exporter = nodePropertyExporterBuilder
+                .withIdMapping(graph)
+                .withTerminationFlag(terminationFlag)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();

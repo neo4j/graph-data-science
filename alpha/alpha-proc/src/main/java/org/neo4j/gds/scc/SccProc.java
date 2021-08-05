@@ -21,23 +21,22 @@ package org.neo4j.gds.scc;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
-import org.neo4j.gds.impl.scc.SccAlgorithm;
-import org.neo4j.gds.impl.scc.SccConfig;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.impl.scc.SccAlgorithm;
+import org.neo4j.gds.impl.scc.SccConfig;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -51,7 +50,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig> {
+public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, SccConfig> {
 
     private static final String DESCRIPTION =
         "The SCC algorithm finds sets of connected nodes in an directed graph, " +
@@ -92,8 +91,9 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         log.info("Scc: overall memory usage: %s", tracker.getUsageString());
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            NodePropertyExporter exporter = NodePropertyExporter
-                .builder(TransactionContext.of(api, procedureTransaction), graph, algorithm.getTerminationFlag())
+            NodePropertyExporter exporter = nodePropertyExporterBuilder
+                .withIdMapping(graph)
+                .withTerminationFlag(algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();
