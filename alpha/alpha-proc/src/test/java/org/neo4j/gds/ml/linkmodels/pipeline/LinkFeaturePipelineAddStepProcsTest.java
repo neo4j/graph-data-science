@@ -32,9 +32,11 @@ import org.neo4j.gds.model.catalog.TestTrainConfig;
 import java.util.List;
 import java.util.Map;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+
 class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
 
-    private static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1);
+    static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1);
 
     @BeforeEach
     void setUp() throws Exception {
@@ -59,7 +61,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("mutateProperty", "pr")
                     )),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of()
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }
@@ -75,7 +77,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
                         "name", "HADAMARD",
                         "config", Map.of("nodeProperties", List.of("pr"))
                     )),
-                "parameterSpace", List.of()
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }
@@ -109,7 +111,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("nodeProperties", List.of("pr"))
                     )
                 ),
-                "parameterSpace", List.of()
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }
@@ -130,7 +132,7 @@ class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
                         "config", Map.of("mutateProperty", "pr2")
                     )),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of()
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }

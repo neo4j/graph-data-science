@@ -303,11 +303,12 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.ml.linkPrediction.predict.write.estimate`
 | `gds.alpha.ml.linkPrediction.train`
 | `gds.alpha.ml.linkPrediction.train.estimate`
-.4+<.^| <<algorithms-ml-linkprediction, Link Prediction Pipeline>>
+.5+<.^| <<algorithms-ml-linkprediction, Link Prediction Pipeline>>
 | `gds.alpha.ml.pipeline.linkPrediction.create`
 | `gds.alpha.ml.pipeline.linkPrediction.addNodeProperty`
 | `gds.alpha.ml.pipeline.linkPrediction.addFeature`
 | `gds.alpha.ml.pipeline.linkPrediction.configureSplit`
+| `gds.alpha.ml.pipeline.linkPrediction.configureParams`
 | <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
 | <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
 | <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`

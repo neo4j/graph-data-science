@@ -28,6 +28,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+
 class LinkFeaturePipelineConfigureSplitProcTest extends BaseProcTest {
 
     @BeforeEach
@@ -46,16 +48,12 @@ class LinkFeaturePipelineConfigureSplitProcTest extends BaseProcTest {
     void shouldOverrideSingleSplitField() {
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})",
-            List.of(Map.of("name",
-                "myPipeline",
-                "splitConfig",
-                Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
-                "nodePropertySteps",
-                List.of(),
-                "featureSteps",
-                List.of(),
-                "parameterSpace",
-                List.of()
+            List.of(Map.of(
+                "name", "myPipeline",
+                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(),
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }
@@ -66,16 +64,12 @@ class LinkFeaturePipelineConfigureSplitProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5})",
-            List.of(Map.of("name",
-                "myPipeline",
-                "splitConfig",
-                Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
-                "nodePropertySteps",
-                List.of(),
-                "featureSteps",
-                List.of(),
-                "parameterSpace",
-                List.of()
+            List.of(Map.of(
+                "name", "myPipeline",
+                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(),
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }

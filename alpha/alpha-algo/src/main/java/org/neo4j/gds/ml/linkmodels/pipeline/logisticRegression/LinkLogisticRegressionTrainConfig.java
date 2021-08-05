@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.TrainingConfig;
 import java.util.Collection;
 import java.util.Map;
 
+
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {

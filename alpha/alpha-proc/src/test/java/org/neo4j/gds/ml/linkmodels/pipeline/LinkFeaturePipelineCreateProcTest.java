@@ -29,6 +29,9 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+
 public class LinkFeaturePipelineCreateProcTest extends BaseProcTest {
 
     @BeforeEach
@@ -49,8 +52,8 @@ public class LinkFeaturePipelineCreateProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1),
-                "parameterSpace", List.of()
+                "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
     }

@@ -125,7 +125,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .splitConfig(splitConfig)
                 .negativeClassWeight(1)
                 .randomSeed(1337L)
-                .params(List.of(
+                .parameters(List.of(
                     Map.of("penalty", 1000000),
                     Map.of("penalty", 1)
                 ))
@@ -187,7 +187,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .splitConfig(splitConfig)
                 .negativeClassWeight(1)
                 .randomSeed(1337L)
-                .params(List.of(Map.of("penalty", 1)))
+                .parameters(List.of(Map.of("penalty", 1)))
                 .build();
 
             var featurePipeline = new FeaturePipeline(

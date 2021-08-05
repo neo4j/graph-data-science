@@ -20,11 +20,12 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +35,18 @@ public class PipelineModelInfo implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
     private final List<LinkFeatureStep> featureSteps;
     private LinkPredictionSplitConfig splitConfig;
-    // Either list of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
-    private List<Map<String, Object>> parameterSpace;
+    // List of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
+    // currently only storing the parameters as Map to avoid default concurrency issue
+    // TODO resolve default/user-defined concurrency issue and store actual config objects
+    private @NotNull List<Map<String, Object>> parameterSpace;
 
-    public static PipelineModelInfo create() {
-        return new PipelineModelInfo(List.of());
-    }
-
-    private PipelineModelInfo(@Nullable List<Map<String, Object>> parameterSpace) {
+    public PipelineModelInfo() {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
         this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.empty());
-        this.parameterSpace = parameterSpace;
+        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig
+            .of(ConcurrencyConfig.DEFAULT_CONCURRENCY, Map.of())
+            .toMap());
     }
 
     @Override
@@ -89,6 +90,7 @@ public class PipelineModelInfo implements Mappable {
     }
 
     void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
+        parameterList.forEach(trainParams -> LinkLogisticRegressionTrainConfig.of(ConcurrencyConfig.DEFAULT_CONCURRENCY, trainParams));
         this.parameterSpace = parameterList;
     }
 }

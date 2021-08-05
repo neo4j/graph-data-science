@@ -47,12 +47,13 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
     @Configuration.Parameter
     LinkPredictionSplitConfig splitConfig();
 
-    List<Map<String, Object>> params();
+    @Configuration.Parameter
+    List<Map<String, Object>> parameters();
 
     @Value.Derived
     @Configuration.Ignore
     default List<LinkLogisticRegressionTrainConfig> paramConfigs() {
-        return params().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
+        return parameters().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
             concurrency(),
             params
         )).collect(Collectors.toList());
@@ -69,10 +70,12 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         LinkPredictionSplitConfig splitConfig,
+        List<Map<String, Object>> parameterSpace,
         CypherMapWrapper config
     ) {
         return new LinkPredictionTrainConfigImpl(
             splitConfig,
+            parameterSpace,
             graphName,
             maybeImplicitCreate,
             username,

@@ -49,7 +49,7 @@ public class LinkFeaturePipelineCreateProc extends BaseProc {
             GraphSchema.empty(),
             new Object(),
             PipelineDummyTrainConfig.of(username()),
-            PipelineModelInfo.create()
+            new PipelineModelInfo()
         );
 
         ModelCatalog.set(model);
