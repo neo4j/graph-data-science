@@ -25,6 +25,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -73,7 +74,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     private final TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
     private final MetadataProvider metadataProvider;
-    protected final GraphStore graphStore;
+    protected final CypherGraphStore graphStore;
 
     public AbstractInMemoryStorageEngine(
         DatabaseLayout databaseLayout,
@@ -87,21 +88,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
         var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
-        this.graphStore = GraphStoreCatalog.getAllGraphStores()
-            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
-                .config()
-                .graphName()
-                .equals(graphName))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
-                "No graph with name %s was found in GraphStoreCatalog. Available graph names are %s",
-                databaseLayout.getDatabaseName(),
-                GraphStoreCatalog.getAllGraphStores()
-                    .map(GraphStoreCatalog.GraphStoreWithUserNameAndConfig::config)
-                    .map(GraphCreateConfig::graphName)
-                    .collect(Collectors.toList())
-            )))
-            .graphStore();
+        this.graphStore = new CypherGraphStore(getGraphStoreFromCatalog(graphName));
         this.txStateVisitorFn = txStateVisitorFn;
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
@@ -247,5 +234,23 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         CommandStream commands, LockService lockService, LockGroup lockGroup, TransactionApplicationMode mode
     ) {
 
+    }
+
+    private static GraphStore getGraphStoreFromCatalog(String graphName) {
+        return GraphStoreCatalog.getAllGraphStores()
+            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
+                .config()
+                .graphName()
+                .equals(graphName))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "No graph with name `%s` was found in GraphStoreCatalog. Available graph names are %s",
+                graphName,
+                GraphStoreCatalog.getAllGraphStores()
+                    .map(GraphStoreCatalog.GraphStoreWithUserNameAndConfig::config)
+                    .map(GraphCreateConfig::graphName)
+                    .collect(Collectors.toList())
+            )))
+            .graphStore();
     }
 }
