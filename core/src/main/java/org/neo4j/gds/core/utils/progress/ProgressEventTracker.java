@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 public interface ProgressEventTracker {
-    void addLogEvent(
+    void addTaskProgressEvent(
         String taskName,
         String message
     );

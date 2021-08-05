@@ -32,7 +32,7 @@ public final class TestProgressEventTracker implements ProgressEventTracker {
     private final List<Pair<String, String>> logEvents = new ArrayList<>();
 
     @Override
-    public void addLogEvent(String taskName, String message) {
+    public void addTaskProgressEvent(String taskName, String message) {
         logEvents.add(Tuples.pair(taskName, message));
     }
 

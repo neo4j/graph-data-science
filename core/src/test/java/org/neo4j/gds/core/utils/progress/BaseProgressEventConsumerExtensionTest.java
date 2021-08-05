@@ -71,7 +71,7 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
-            progress.addLogEvent("foo", "hello from any algo proc");
+            progress.addTaskProgressEvent("foo", "hello from any algo proc");
             return Stream.empty();
         }
     }

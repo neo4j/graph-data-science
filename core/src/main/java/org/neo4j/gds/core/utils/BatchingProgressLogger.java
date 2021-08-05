@@ -159,7 +159,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     private void logAndTrack(String task, String message) {
-        progressTracker.addLogEvent(task, message);
+        progressTracker.addTaskProgressEvent(task, message);
         log.info(message);
     }
 

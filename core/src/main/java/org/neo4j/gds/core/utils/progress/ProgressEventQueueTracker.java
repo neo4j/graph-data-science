@@ -36,7 +36,7 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
     }
 
     @Override
-    public void addLogEvent(String taskName, String message) {
+    public void addTaskProgressEvent(String taskName, String message) {
         var logEvent = ImmutableLogEvent.of(username, jobId, taskName, message, OptionalDouble.empty());
         this.queue.offer(logEvent);
     }

@@ -24,14 +24,9 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -39,6 +34,11 @@ import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -144,11 +144,11 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "message2", defaultValue = "not set") String message2,
             @Name(value = "message3", defaultValue = "not set") String message3
         ) {
-            progress.addLogEvent(taskName, message1);
+            progress.addTaskProgressEvent(taskName, message1);
             if (message2.equals("not set")) { return Stream.empty(); }
-            progress.addLogEvent(taskName, message2);
+            progress.addTaskProgressEvent(taskName, message2);
             if (message3.equals("not set")) { return Stream.empty(); }
-            progress.addLogEvent(taskName, message3);
+            progress.addTaskProgressEvent(taskName, message3);
             return Stream.empty();
         }
     }
@@ -247,8 +247,8 @@ public class ListProgressProcTest extends BaseTest {
             var tracker = this.progressTracker;
             this.progressTracker = new ProgressEventTracker() {
                 @Override
-                public void addLogEvent(String taskName, String message) {
-                    tracker.addLogEvent(taskName, message);
+                public void addTaskProgressEvent(String taskName, String message) {
+                    tracker.addTaskProgressEvent(taskName, message);
                 }
 
                 @Override

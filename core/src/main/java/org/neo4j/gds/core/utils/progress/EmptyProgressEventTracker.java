@@ -23,7 +23,7 @@ public enum EmptyProgressEventTracker implements ProgressEventTracker {
     INSTANCE;
 
     @Override
-    public void addLogEvent(String taskName, String message) {
+    public void addTaskProgressEvent(String taskName, String message) {
     }
 
     @Override

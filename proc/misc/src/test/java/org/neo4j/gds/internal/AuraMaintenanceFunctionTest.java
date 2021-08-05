@@ -26,12 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.ListProgressProc;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -39,6 +37,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
@@ -189,7 +189,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
 
         @Procedure("gds.test.addEvent")
         public void addEvent(@Name(value = "message") String message) {
-            progress.addLogEvent("gds.test", message);
+            progress.addTaskProgressEvent("gds.test", message);
             FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> progress.release(), 420, TimeUnit.MILLISECONDS);
         }
     }
