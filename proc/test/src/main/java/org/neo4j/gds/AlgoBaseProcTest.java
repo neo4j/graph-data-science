@@ -44,6 +44,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -177,6 +178,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
             if (proc instanceof WriteRelationshipsProc) {
                 ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new RelationshipExporter.Builder(
+                    TransactionContext.of(
+                        proc.api,
+                        proc.procedureTransaction
+                    ));
+            }
+
+            if (proc instanceof RelationshipStreamWriter) {
+                ((RelationshipStreamWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new RelationshipStreamExporter.Builder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction

@@ -19,18 +19,19 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreaming;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.procedure.Context;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -39,7 +40,10 @@ public abstract class WriteRelationshipStreamProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT extends RelationshipStreaming,
     PROC_RESULT,
-    CONFIG extends WriteRelationshipConfig & WritePropertyConfig & AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends WriteRelationshipConfig & WritePropertyConfig & AlgoBaseConfig> extends RelationshipStreamWriter<ALGO, ALGO_RESULT, CONFIG> {
+
+    @Context
+    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
@@ -80,13 +84,10 @@ public abstract class WriteRelationshipStreamProc<
 
             Graph graph = computationResult.graph();
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
-            RelationshipStreamExporter exporter = RelationshipStreamExporter
-                .builder(
-                    TransactionContext.of(api, procedureTransaction),
-                    graph.cloneIdMapping(),
-                    computationResult.result().relationshipStream(),
-                    terminationFlag
-                )
+            var exporter = relationshipStreamExporterBuilder
+                .withIdMapping(graph.cloneIdMapping())
+                .withRelationships(computationResult.result().relationshipStream())
+                .withTerminationFlag(terminationFlag)
                 .build();
 
             long numberOfRelationshipsWritten = exporter.write(config.writeRelationshipType(), config.writeProperty());

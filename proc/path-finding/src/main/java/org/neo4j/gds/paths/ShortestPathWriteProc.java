@@ -20,15 +20,13 @@
 package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.RelationshipStreamWriter;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableRelationship;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -40,7 +38,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
 public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
-    extends AlgoBaseProc<ALGO, DijkstraResult, CONFIG> {
+    extends RelationshipStreamWriter<ALGO, DijkstraResult, CONFIG> {
 
     protected Stream<StandardWriteRelationshipsResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Write relationships failed", () -> {
@@ -77,13 +75,10 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
             try (var statement = transaction.acquireStatement()) {
                 statement.registerCloseableResource(relationshipStream);
 
-                var exporter = RelationshipStreamExporter
-                    .builder(
-                        TransactionContext.of(api, procedureTransaction),
-                        computationResult.graph(),
-                        relationshipStream,
-                        algorithm.getTerminationFlag()
-                    )
+                var exporter = relationshipStreamExporterBuilder
+                    .withIdMapping(computationResult.graph())
+                    .withRelationships(relationshipStream)
+                    .withTerminationFlag(algorithm.getTerminationFlag())
                     .withLog(log)
                     .build();
 

@@ -51,13 +51,13 @@ public abstract class RelationshipStreamExporterBuilder<T> {
 
     public abstract T build();
 
-    RelationshipStreamExporterBuilder<T> withIdMapping(IdMapping idMapping) {
+    public RelationshipStreamExporterBuilder<T> withIdMapping(IdMapping idMapping) {
         Objects.requireNonNull(idMapping);
         this.toOriginalId = idMapping::toOriginalNodeId;
         return this;
     }
 
-    RelationshipStreamExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
+    public RelationshipStreamExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
@@ -66,7 +66,7 @@ public abstract class RelationshipStreamExporterBuilder<T> {
         return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), writeConcurrency));
     }
 
-    RelationshipStreamExporterBuilder<T> withRelationships(Stream<RelationshipStreamExporter.Relationship> relationships) {
+    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<RelationshipStreamExporter.Relationship> relationships) {
         this.relationships = relationships;
         return this;
     }
