@@ -32,6 +32,6 @@ final class ProgressEventHandlerExtensionEnabledTest extends BaseProgressEventHa
 
     @Override
     void assertResult(List<String> result) {
-        assertThat(result).containsExactly("hello from any algo proc");
+        assertThat(result).containsExactly("foo");
     }
 }
