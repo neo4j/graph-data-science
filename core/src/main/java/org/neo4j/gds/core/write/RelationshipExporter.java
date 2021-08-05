@@ -77,7 +77,7 @@ public final class RelationshipExporter extends StatementApi {
 
     public static final class Builder extends RelationshipExporterBuilder<RelationshipExporter> {
 
-        Builder(TransactionContext transactionContext) {
+        public Builder(TransactionContext transactionContext) {
             super(transactionContext);
         }
 

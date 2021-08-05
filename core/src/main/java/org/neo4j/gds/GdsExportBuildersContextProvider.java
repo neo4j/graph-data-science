@@ -22,6 +22,10 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
@@ -41,10 +45,30 @@ final class GdsExportBuildersContextProvider extends LifecycleAdapter {
             GdsExportBuildersContextProvider::nodePropertyExporterBuilder,
             true
         );
+
+        globalProcedures.registerComponent(
+            RelationshipStreamExporterBuilder.class,
+            GdsExportBuildersContextProvider::relationshipStreamExporterBuilder,
+            true
+        );
+
+        globalProcedures.registerComponent(
+            RelationshipExporterBuilder.class,
+            GdsExportBuildersContextProvider::relationshipExporterBuilder,
+            true
+        );
     }
 
     private static NodePropertyExporterBuilder<?> nodePropertyExporterBuilder(Context ctx) {
         return new NodePropertyExporter.Builder(transactionContext(ctx));
+    }
+
+    private static RelationshipStreamExporterBuilder<?> relationshipStreamExporterBuilder(Context ctx) {
+        return new RelationshipStreamExporter.Builder(transactionContext(ctx));
+    }
+
+    private static RelationshipExporterBuilder<?> relationshipExporterBuilder(Context ctx) {
+        return new RelationshipExporter.Builder(transactionContext(ctx));
     }
 
     private static TransactionContext transactionContext(Context ctx) {
