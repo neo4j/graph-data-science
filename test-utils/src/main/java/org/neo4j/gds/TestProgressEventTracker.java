@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.utils.progress.LogEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class TestProgressEventTracker implements ProgressEventTracker {
     private int releaseCalls = 0;
@@ -37,6 +39,11 @@ public final class TestProgressEventTracker implements ProgressEventTracker {
     @Override
     public void release() {
         releaseCalls++;
+    }
+
+    @Override
+    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+
     }
 
     public int releaseCalls() {

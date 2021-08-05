@@ -30,6 +30,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.LogEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -52,6 +53,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -214,6 +216,11 @@ public class ListProgressProcTest extends BaseTest {
                 @Override
                 public void release() {
                     // skip the release because we want to observe the messages after the algo is done
+                }
+
+                @Override
+                public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+
                 }
             };
             try {

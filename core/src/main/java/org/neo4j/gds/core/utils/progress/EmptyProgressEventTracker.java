@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 
+import java.util.function.Consumer;
+
 public enum EmptyProgressEventTracker implements ProgressEventTracker {
     INSTANCE;
 
@@ -30,5 +32,10 @@ public enum EmptyProgressEventTracker implements ProgressEventTracker {
 
     @Override
     public void release() {
+    }
+
+    @Override
+    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+
     }
 }

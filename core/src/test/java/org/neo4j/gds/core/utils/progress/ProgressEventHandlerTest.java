@@ -40,7 +40,9 @@ class ProgressEventHandlerTest {
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
         var queue = new ArrayBlockingQueue<LogEvent>(1);
-        var consumer = new ProgressEventHandler(runner, queue);
+        var eventHandler = new ProgressEventHandlerImpl(runner, queue);
+        var consumer = new ProgressEventStoreImpl();
+        eventHandler.registerProgressEventListener(consumer);
 
         // initial set is empty
         assertThat(consumer.query(username)).isEmpty();
@@ -51,7 +53,7 @@ class ProgressEventHandlerTest {
         // nothing polled yet
         assertThat(consumer.query(username)).isEmpty();
 
-        consumer.start();
+        eventHandler.start();
 
         // starting the component will trigger the initial polling
         assertThat(consumer.query(username)).containsExactly(event1);
@@ -67,7 +69,7 @@ class ProgressEventHandlerTest {
         fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
         assertThat(consumer.query(username)).containsExactlyInAnyOrder(event1, event2);
 
-        consumer.stop();
+        eventHandler.stop();
     }
 
     @Test
@@ -77,7 +79,9 @@ class ProgressEventHandlerTest {
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
         var queue = new ArrayBlockingQueue<LogEvent>(1);
-        var consumer = new ProgressEventHandler(runner, queue);
+        var eventHandler = new ProgressEventHandlerImpl(runner, queue);
+        var consumer = new ProgressEventStoreImpl();
+        eventHandler.registerProgressEventListener(consumer);
 
         var jobId = new JobId();
 
@@ -90,7 +94,7 @@ class ProgressEventHandlerTest {
         // nothing polled yet
         assertThat(consumer.isEmpty()).isTrue();
 
-        consumer.start();
+        eventHandler.start();
 
         // starting the component will trigger the initial polling
         assertThat(consumer.isEmpty()).isFalse();
@@ -111,12 +115,12 @@ class ProgressEventHandlerTest {
         // and the queue should now be empty again
         assertThat(consumer.isEmpty()).isTrue();
 
-        consumer.stop();
+        eventHandler.stop();
     }
 
     @Test
     void testConsumerStartStop() {
-        var consumer = new ProgressEventHandler(
+        var consumer = new ProgressEventHandlerImpl(
             // empty runner that does nothing
             (runnable, initialDelay, rate, timeUnit) -> () -> {},
             new ArrayBlockingQueue<>(1)

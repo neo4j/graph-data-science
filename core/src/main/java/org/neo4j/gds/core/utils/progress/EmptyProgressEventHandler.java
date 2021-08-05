@@ -19,23 +19,13 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-enum EmptyProgressEventStore implements ProgressEventStore {
+public enum EmptyProgressEventHandler implements ProgressEventHandler {
     INSTANCE;
 
     @Override
-    public List<LogEvent> query(String username) {
-        return List.of();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public void accept(LogEvent logEvent) {
+    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
 
     }
 }

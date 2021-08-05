@@ -20,8 +20,9 @@
 package org.neo4j.gds.core.utils.progress;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public interface ProgressEventStore {
+public interface ProgressEventStore extends Consumer<LogEvent> {
     List<LogEvent> query(String username);
 
     boolean isEmpty();

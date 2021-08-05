@@ -33,7 +33,7 @@ class ProgressEventQueueTrackerTest {
     void should() {
         var queue = new ConcurrentLinkedQueue<LogEvent>();
         var username = AuthSubject.ANONYMOUS.username();
-        var tracker = new ProgressEventQueueTracker(queue, username);
+        var tracker = new ProgressEventQueueTracker(queue, username, EmptyProgressEventHandler.INSTANCE);
         tracker.release();
         assertThat(queue.size()).isOne();
         var event = queue.remove();

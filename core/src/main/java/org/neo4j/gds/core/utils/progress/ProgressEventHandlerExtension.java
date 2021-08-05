@@ -68,7 +68,7 @@ public final class ProgressEventHandlerExtension extends ExtensionFactory<Progre
             registry.registerComponent(ProgressEventTracker.class, progressEventConsumerComponent, true);
             registry.registerComponent(
                 ProgressEventStore.class,
-                ctx -> progressEventConsumerComponent.progressEventConsumer(),
+                ctx -> progressEventConsumerComponent.progressEventStore(),
                 true
             );
             return progressEventConsumerComponent;
