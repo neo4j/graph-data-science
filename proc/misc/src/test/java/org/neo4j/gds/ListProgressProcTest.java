@@ -30,7 +30,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
+import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
@@ -69,8 +69,8 @@ public class ListProgressProcTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
-        builder.addExtension(new ProgressEventConsumerExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
+        builder.addExtension(new ProgressEventHandlerExtension(scheduler));
     }
 
     @BeforeEach

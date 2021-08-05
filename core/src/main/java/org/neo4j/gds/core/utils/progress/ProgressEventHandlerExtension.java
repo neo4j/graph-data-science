@@ -36,32 +36,32 @@ import org.neo4j.scheduler.JobScheduler;
 import java.util.Optional;
 
 @ServiceProvider
-public final class ProgressEventConsumerExtension extends ExtensionFactory<ProgressEventConsumerExtension.Dependencies> {
+public final class ProgressEventHandlerExtension extends ExtensionFactory<ProgressEventHandlerExtension.Dependencies> {
     private final @Nullable JobScheduler scheduler;
 
     @SuppressWarnings("unused - entry point for service loader")
-    public ProgressEventConsumerExtension() {
+    public ProgressEventHandlerExtension() {
         this(Optional.empty());
     }
 
     @TestOnly
-    public ProgressEventConsumerExtension(JobScheduler scheduler) {
+    public ProgressEventHandlerExtension(JobScheduler scheduler) {
         this(Optional.of(scheduler));
     }
 
-    private ProgressEventConsumerExtension(Optional<JobScheduler> maybeScheduler) {
+    private ProgressEventHandlerExtension(Optional<JobScheduler> maybeScheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
         this.scheduler = maybeScheduler.orElse(null);
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, ProgressEventConsumerExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext context, ProgressEventHandlerExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
             var scheduler = Optional.ofNullable(this.scheduler).orElseGet(dependencies::jobScheduler);
-            var progressEventConsumerComponent = new ProgressEventConsumerComponent(
-                dependencies.logService().getInternalLog(ProgressEventConsumerComponent.class),
+            var progressEventConsumerComponent = new ProgressEventHandlerComponent(
+                dependencies.logService().getInternalLog(ProgressEventHandlerComponent.class),
                 scheduler,
                 dependencies.globalMonitors()
             );

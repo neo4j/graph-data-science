@@ -34,7 +34,7 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
+import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
@@ -121,8 +121,8 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             builder.addExtension(new AuraMaintenanceExtension());
             builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
             // make sure that we 1) have our extension under test and 2) have it only once
-            builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
-            builder.addExtension(new ProgressEventConsumerExtension(scheduler));
+            builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
+            builder.addExtension(new ProgressEventHandlerExtension(scheduler));
         }
 
         @BeforeEach

@@ -31,17 +31,17 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Queue;
 
-final class ProgressEventConsumerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
+final class ProgressEventHandlerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
 
     private final Log log;
     private final JobScheduler jobScheduler;
     private final Monitors globalMonitors;
-    private final ProgressEventConsumer.Monitor monitor;
+    private final ProgressEventHandler.Monitor monitor;
     private final LoggingProgressEventMonitor loggingMonitor;
     private final Queue<LogEvent> messageQueue;
-    private volatile ProgressEventConsumer progressEventConsumer;
+    private volatile ProgressEventHandler progressEventHandler;
 
-    ProgressEventConsumerComponent(
+    ProgressEventHandlerComponent(
         Log log,
         JobScheduler jobScheduler,
         Monitors globalMonitors
@@ -49,7 +49,7 @@ final class ProgressEventConsumerComponent extends LifecycleAdapter implements T
         this.log = log;
         this.jobScheduler = jobScheduler;
         this.globalMonitors = globalMonitors;
-        this.monitor = globalMonitors.newMonitor(ProgressEventConsumer.Monitor.class);
+        this.monitor = globalMonitors.newMonitor(ProgressEventHandler.Monitor.class);
         this.loggingMonitor = new LoggingProgressEventMonitor(log);
         this.messageQueue = new MpscLinkedQueue<>();
     }
@@ -57,25 +57,25 @@ final class ProgressEventConsumerComponent extends LifecycleAdapter implements T
     @Override
     public void start() {
         globalMonitors.addMonitorListener(loggingMonitor);
-        progressEventConsumer = new ProgressEventConsumer(monitor, jobScheduler, messageQueue);
-        progressEventConsumer.start();
+        progressEventHandler = new ProgressEventHandler(monitor, jobScheduler, messageQueue);
+        progressEventHandler.start();
         this.log.info("GDS Progress event tracking is enabled");
     }
 
     @Override
     public void stop() {
-        progressEventConsumer.stop();
-        progressEventConsumer = null;
+        progressEventHandler.stop();
+        progressEventHandler = null;
         globalMonitors.removeMonitorListener(loggingMonitor);
     }
 
-    ProgressEventConsumer progressEventConsumer() {
-        return progressEventConsumer;
+    ProgressEventHandler progressEventConsumer() {
+        return progressEventHandler;
     }
 
     @Override
     public ProgressEventTracker apply(Context context) throws ProcedureException {
-        var progressEventConsumer = this.progressEventConsumer;
+        var progressEventConsumer = this.progressEventHandler;
         if (progressEventConsumer == null) {
             throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
         }

@@ -40,7 +40,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
-final class ProgressEventConsumer implements Runnable, ProgressEventStore {
+final class ProgressEventHandler implements Runnable, ProgressEventStore {
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
@@ -49,7 +49,7 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     private volatile @Nullable JobPromise job;
     private final Map<String, Map<JobId, List<LogEvent>>> events;
 
-    ProgressEventConsumer(
+    ProgressEventHandler(
         Monitor monitor,
         JobScheduler jobScheduler,
         Queue<LogEvent> queue
@@ -58,14 +58,14 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     }
 
     @TestOnly
-    ProgressEventConsumer(
+    ProgressEventHandler(
         JobRunner jobRunner,
         Queue<LogEvent> queue
     ) {
         this(Monitor.EMPTY, jobRunner, queue);
     }
 
-    private ProgressEventConsumer(
+    private ProgressEventHandler(
         Monitor monitor,
         JobRunner jobRunner,
         Queue<LogEvent> queue

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProgressEventConsumerTest {
+class ProgressEventHandlerTest {
 
     @Test
     void testConsumerLifecycle() {
@@ -40,7 +40,7 @@ class ProgressEventConsumerTest {
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
         var queue = new ArrayBlockingQueue<LogEvent>(1);
-        var consumer = new ProgressEventConsumer(runner, queue);
+        var consumer = new ProgressEventHandler(runner, queue);
 
         // initial set is empty
         assertThat(consumer.query(username)).isEmpty();
@@ -77,7 +77,7 @@ class ProgressEventConsumerTest {
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
         var queue = new ArrayBlockingQueue<LogEvent>(1);
-        var consumer = new ProgressEventConsumer(runner, queue);
+        var consumer = new ProgressEventHandler(runner, queue);
 
         var jobId = new JobId();
 
@@ -116,7 +116,7 @@ class ProgressEventConsumerTest {
 
     @Test
     void testConsumerStartStop() {
-        var consumer = new ProgressEventConsumer(
+        var consumer = new ProgressEventHandler(
             // empty runner that does nothing
             (runnable, initialDelay, rate, timeUnit) -> () -> {},
             new ArrayBlockingQueue<>(1)
