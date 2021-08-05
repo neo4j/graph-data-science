@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+
 public enum EmptyProgressEventTracker implements ProgressEventTracker {
     INSTANCE;
 
     @Override
-    public void addTaskProgressEvent(String taskName, String message) {
+    public void addTaskProgressEvent(Task task) {
     }
 
     @Override

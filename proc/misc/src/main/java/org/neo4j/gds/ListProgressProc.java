@@ -47,8 +47,8 @@ public class ListProgressProc extends BaseProc {
 
         ProgressResult(LogEvent logEvent) {
             this.id = logEvent.jobId().asString();
-            this.taskName = logEvent.taskName();
-            this.message = logEvent.message();
+            this.taskName = logEvent.task().description();
+            this.message = "";
         }
     }
 

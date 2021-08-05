@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
@@ -71,7 +73,7 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
-            progress.addTaskProgressEvent("foo", "hello from any algo proc");
+            progress.addTaskProgressEvent(Tasks.leaf("foo"));
             return Stream.empty();
         }
     }
@@ -82,7 +84,7 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.log")
         public Stream<Bar> foo() {
-            return progress.query("").stream().map(LogEvent::message).map(Bar::new);
+            return progress.query("").stream().map(LogEvent::task).map(Task::description).map(Bar::new);
         }
     }
 

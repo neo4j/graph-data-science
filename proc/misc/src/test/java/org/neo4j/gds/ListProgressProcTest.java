@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
@@ -78,7 +79,6 @@ public class ListProgressProcTest extends BaseTest {
             db,
             ListProgressProc.class,
             ProgressLoggingAlgoProc.class,
-            ProgressLoggingTestProc.class,
             GraphGenerateProc.class,
             ProgressLoggingTestFastRP.class
         );
@@ -133,26 +133,6 @@ public class ListProgressProcTest extends BaseTest {
         assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "myAlgo", "message", "bar"));
     }
 
-    public static class ProgressLoggingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
-
-        @Procedure("gds.test.pl")
-        public Stream<Bar> foo(
-            @Name(value = "taskName") String taskName,
-            @Name(value = "message1") String message1,
-            @Name(value = "message2", defaultValue = "not set") String message2,
-            @Name(value = "message3", defaultValue = "not set") String message3
-        ) {
-            progress.addTaskProgressEvent(taskName, message1);
-            if (message2.equals("not set")) { return Stream.empty(); }
-            progress.addTaskProgressEvent(taskName, message2);
-            if (message3.equals("not set")) { return Stream.empty(); }
-            progress.addTaskProgressEvent(taskName, message3);
-            return Stream.empty();
-        }
-    }
-
     @Test
     void progressLoggerShouldEmitProgressEvents() {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
@@ -191,26 +171,6 @@ public class ListProgressProcTest extends BaseTest {
         }
     }
 
-    @Test
-    public void shouldShowProgressForIndividualAlgoRuns() {
-        runQuery("CALL gds.test.pl('algo1', 'msg1')");
-        runQuery("CALL gds.test.pl('algo1', 'msg2')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-        var progressItems = runQuery(
-            "CALL gds.beta.listProgress() YIELD id, taskName, message RETURN id, taskName, message",
-            r -> r.stream().collect(Collectors.toList())
-        );
-
-        assertThat(progressItems).hasSize(2);
-        assertThat(progressItems.get(0).get("id")).isNotEqualTo(progressItems.get(1).get("id"));
-        assertThat(progressItems.get(0).get("taskName")).isEqualTo(progressItems.get(1).get("taskName"));
-        assertThat(progressItems.stream().map(fields -> fields.get("message"))).containsExactlyInAnyOrder(
-            "msg1",
-            "msg2"
-        );
-    }
-
     public static class ProgressLoggingAlgoProc extends BaseProc {
         @Context
         public ProgressEventTracker progress;
@@ -247,8 +207,8 @@ public class ListProgressProcTest extends BaseTest {
             var tracker = this.progressTracker;
             this.progressTracker = new ProgressEventTracker() {
                 @Override
-                public void addTaskProgressEvent(String taskName, String message) {
-                    tracker.addTaskProgressEvent(taskName, message);
+                public void addTaskProgressEvent(Task task) {
+                    tracker.addTaskProgressEvent(task);
                 }
 
                 @Override

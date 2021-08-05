@@ -21,22 +21,19 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 import java.util.OptionalDouble;
 
 @ValueClass
 public interface LogEvent {
 
-    String NO_TASK_NAME = "";
-    String NO_MESSAGE = "";
-
     String username();
 
     JobId jobId();
 
-    String taskName();
-
-    String message();
+    Task task();
 
     OptionalDouble progress();
 
@@ -49,8 +46,7 @@ public interface LogEvent {
     static LogEvent endOfStreamEvent(String username, JobId jobId) {
         return ImmutableLogEvent.builder()
             .username(username)
-            .taskName(NO_TASK_NAME)
-            .message(NO_MESSAGE)
+            .task(Tasks.empty())
             .jobId(jobId)
             .isEndOfStream(true)
             .build();

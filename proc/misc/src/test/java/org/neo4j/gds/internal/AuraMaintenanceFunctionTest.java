@@ -37,11 +37,11 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;
@@ -142,7 +142,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             //   - submit en event
             //   - wait 420 fake milliseconds
             //   - remove its events
-            runQuery("CALL gds.test.addEvent('foo')");
+            runQuery("CALL gds.test.addEvent()");
 
             // wait 100 milliseconds for the initial queue wait time to pick up the event
             scheduler.forward(100, TimeUnit.MILLISECONDS);
@@ -188,8 +188,8 @@ class AuraMaintenanceFunctionTest extends BaseTest {
         public ProgressEventTracker progress;
 
         @Procedure("gds.test.addEvent")
-        public void addEvent(@Name(value = "message") String message) {
-            progress.addTaskProgressEvent("gds.test", message);
+        public void addEvent() {
+            progress.addTaskProgressEvent(Tasks.leaf("gds.test"));
             FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> progress.release(), 420, TimeUnit.MILLISECONDS);
         }
     }

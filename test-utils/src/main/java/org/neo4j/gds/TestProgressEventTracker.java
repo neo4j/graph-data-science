@@ -19,21 +19,19 @@
  */
 package org.neo4j.gds;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class TestProgressEventTracker implements ProgressEventTracker {
     private int releaseCalls = 0;
-    private final List<Pair<String, String>> logEvents = new ArrayList<>();
+    private final List<Task> logEvents = new ArrayList<>();
 
     @Override
-    public void addTaskProgressEvent(String taskName, String message) {
-        logEvents.add(Tuples.pair(taskName, message));
+    public void addTaskProgressEvent(Task task) {
+        logEvents.add(task);
     }
 
     @Override
@@ -43,17 +41,5 @@ public final class TestProgressEventTracker implements ProgressEventTracker {
 
     public int releaseCalls() {
         return releaseCalls;
-    }
-
-    public List<Pair<String, String>> logEvents() {
-        return logEvents;
-    }
-
-    public List<String> taskNames() {
-        return logEvents.stream().map(Pair::getOne).collect(Collectors.toList());
-    }
-
-    public List<String> messages() {
-        return logEvents.stream().map(Pair::getTwo).collect(Collectors.toList());
     }
 }

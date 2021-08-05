@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -134,31 +132,6 @@ class BatchingProgressLoggerTest {
         var expected = IntStream.rangeClosed(1, 20).map(p -> p * 5).boxed().collect(Collectors.toList());
 
         assertEquals(expected, loggedPercentages);
-    }
-
-    @Test
-    void shouldSendMessageOnlyLogsToProgressTracker(SoftAssertions softly) {
-        try (var ignored = RenamesCurrentThread.renameThread("log-test")) {
-            var tracker = new TestProgressEventTracker();
-            var logger = new TestProgressLogger(1, "Test", 1, tracker);
-
-            logger.logMessage(() -> "supplied message");
-            logger.logMessage("direct message");
-            logger.logStart();
-            logger.logStart("start message");
-            logger.logFinish();
-            logger.logFinish("finish message");
-
-            softly.assertThat(tracker.taskNames()).hasSize(6).containsOnly("Test");
-            softly.assertThat(tracker.messages()).hasSize(6).containsExactly(
-                "[log-test] Test supplied message",
-                "[log-test] Test direct message",
-                "[log-test] Test :: Start",
-                "[log-test] Test start message :: Start",
-                "[log-test] Test :: Finished",
-                "[log-test] Test finish message :: Finished"
-            );
-        }
     }
 
     @Test

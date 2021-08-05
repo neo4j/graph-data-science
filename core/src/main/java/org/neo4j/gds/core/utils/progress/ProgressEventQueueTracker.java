@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+
 import java.util.OptionalDouble;
 import java.util.Queue;
 
@@ -36,8 +38,8 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
     }
 
     @Override
-    public void addTaskProgressEvent(String taskName, String message) {
-        var logEvent = ImmutableLogEvent.of(username, jobId, taskName, message, OptionalDouble.empty());
+    public void addTaskProgressEvent(Task task) {
+        var logEvent = ImmutableLogEvent.of(username, jobId, task, OptionalDouble.empty());
         this.queue.offer(logEvent);
     }
 
