@@ -22,7 +22,6 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.api.Graph;
@@ -31,11 +30,9 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.LogEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
@@ -55,7 +52,6 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -137,7 +133,7 @@ public class ListProgressProcTest extends BaseTest {
         assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "bar"));
     }
 
-    @Disabled("Waiting for ProgressEventTracker to be called from TaskProgressTracker")
+    @Test
     void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
             runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
@@ -170,7 +166,7 @@ public class ListProgressProcTest extends BaseTest {
 
     public static class ProgressLoggingTestFastRP extends FastRPStreamProc {
         @Context
-        public ProgressEventTracker progressTracker;
+        public ProgressEventTracker progressEventTracker;
 
         @Override
         @Procedure("gds.test.fastrp")
@@ -186,22 +182,6 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            this.progressTracker = new ProgressEventTracker() {
-                @Override
-                public void addTaskProgressEvent(Task task) {
-                    progressTracker.addTaskProgressEvent(task);
-                }
-
-                @Override
-                public void release() {
-                    // skip the release because we want to observe the messages after the algo is done
-                }
-
-                @Override
-                public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
-
-                }
-            };
             return super.stream(graphNameOrConfig, configuration);
         }
 
@@ -224,10 +204,10 @@ public class ListProgressProcTest extends BaseTest {
                         "FastRP",
                         configuration.concurrency(),
                         // use the field, not the provided one
-                        progressTracker
+                        progressEventTracker
                     );
 
-                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, progressEventTracker);
 
                     var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
                     return new FastRP(
