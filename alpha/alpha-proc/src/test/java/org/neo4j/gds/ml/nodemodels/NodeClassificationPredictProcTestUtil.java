@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,8 @@ public final class NodeClassificationPredictProcTestUtil {
                 .validationFolds(4)
                 .featureProperties(properties)
                 .addParam(Map.of("penalty", 1.0))
-                .build()
+                .build(),
+            NodeClassificationModelInfo.empty()
         );
         ModelCatalog.set(model);
     }

@@ -124,7 +124,8 @@ class LinkPredictionPredictTest {
                 .negativeClassWeight(1)
                 .trainRelationshipType(RelationshipType.of("IGNORED"))
                 .testRelationshipType(RelationshipType.of("IGNORED"))
-                .build()
+                .build(),
+            LinkPredictionModelInfo.empty()
         ));
         var config = ImmutableLinkPredictionPredictMutateConfig.builder()
             .modelName(modelName)

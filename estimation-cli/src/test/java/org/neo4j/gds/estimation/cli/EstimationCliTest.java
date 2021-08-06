@@ -699,18 +699,14 @@ final class EstimationCliTest {
         var result = Stream.of(
             runEstimation(
                 NodeClassificationPredictMutateProc.class, "estimate",
-                "modelName",
-                "model",
-                "mutateProperty",
-                "foo"
+                "modelName", "model",
+                "mutateProperty", "foo"
             ),
             runEstimation(NodeClassificationPredictStreamProc.class, "estimate", "modelName", "model"),
             runEstimation(
                 NodeClassificationPredictWriteProc.class, "estimate",
-                "modelName",
-                "model",
-                "writeProperty",
-                "foo"
+                "modelName", "model",
+                "writeProperty", "foo"
             ),
             runEstimation(
                 NodeClassificationTrainProc.class, "estimate",

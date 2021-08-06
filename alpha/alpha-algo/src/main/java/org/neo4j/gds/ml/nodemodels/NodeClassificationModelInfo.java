@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
-import org.neo4j.gds.core.model.Model;
 
 import java.util.List;
 import java.util.Map;
@@ -67,6 +67,10 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
+    }
+
+    static NodeClassificationModelInfo empty() {
+        return NodeClassificationModelInfo.of(List.of(), NodeLogisticRegressionTrainConfig.empty(), Map.of());
     }
 }
 

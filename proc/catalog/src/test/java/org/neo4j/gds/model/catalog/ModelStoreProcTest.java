@@ -22,25 +22,26 @@ package org.neo4j.gds.model.catalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.ModelStoreSettings;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.model.StoredModel;
-import org.neo4j.gds.core.GdsEdition;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -80,7 +81,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .modelName(modelName)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model1);
@@ -116,7 +117,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .modelName(modelName)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
 
         );
 
@@ -144,7 +145,8 @@ class ModelStoreProcTest extends ModelProcBaseTest {
             "unsupportedModel",
             GRAPH_SCHEMA,
             "bogusModel",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model1);
@@ -171,8 +173,8 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .username(getUsername())
                 .modelName(modelName)
                 .addFeatureProperties("a")
-                .build()
-
+                .build(),
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model1);

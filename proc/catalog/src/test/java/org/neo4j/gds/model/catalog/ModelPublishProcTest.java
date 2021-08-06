@@ -24,12 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.core.ModelStoreSettings;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -78,7 +79,8 @@ class ModelPublishProcTest extends ModelProcBaseTest {
             GraphSage.MODEL_TYPE,
             GRAPH_SCHEMA,
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model1);
@@ -92,7 +94,11 @@ class ModelPublishProcTest extends ModelProcBaseTest {
             map("modelName", modelName),
             singletonList(
                 map(
-                    "modelInfo", map("modelName", modelName + "_public", "modelType", "graphSage"),
+                    "modelInfo", map(
+                        "modelName", modelName + "_public",
+                        "modelType", "graphSage",
+                        "metrics", map("didConverge", false, "ranEpochs", 0, "epochLosses", List.of())
+                    ),
                     "trainConfig", map(
                         "dummyConfigProperty", TestTrainConfig.of().dummyConfigProperty(),
                         "modelName", TestTrainConfig.of().modelName(),
@@ -129,8 +135,13 @@ class ModelPublishProcTest extends ModelProcBaseTest {
             map("modelName", modelName),
             singletonList(
                 map(
-                    "modelInfo", map("modelName", modelName, "modelType", "graphSage"),
-                    "trainConfig", map(
+                    "modelInfo", map(
+                        "modelName", modelName,
+                        "modelType", "graphSage",
+                        "metrics", map("didConverge", false, "ranEpochs", 0, "epochLosses", List.of())
+                    ),
+                    "trainConfig",
+                    map(
                         "dummyConfigProperty", TestTrainConfig.of().dummyConfigProperty(),
                         "modelName", TestTrainConfig.of().modelName(),
                         "sudo", TestTrainConfig.of().sudo(),

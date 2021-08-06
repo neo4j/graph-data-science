@@ -335,7 +335,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
             42,
-            config
+            config,
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
         ModelCatalog.set(model);
 

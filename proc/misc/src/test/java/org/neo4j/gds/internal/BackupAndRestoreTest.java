@@ -33,7 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -135,7 +135,7 @@ class BackupAndRestoreTest {
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             GraphSageTrainConfig.builder().modelName("firstModel").addFeatureProperty("foo").build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
         ModelCatalog.set(model);
 

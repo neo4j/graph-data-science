@@ -22,6 +22,14 @@ package org.neo4j.gds.embeddings.graphsage;
 import com.carrotsearch.hppc.LongHashSet;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ImmutableRelationshipCursor;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -33,14 +41,6 @@ import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.ImmutableRelationshipCursor;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -320,6 +320,10 @@ public class GraphSageModelTrainer {
 
     @ValueClass
     public interface GraphSageTrainMetrics extends Model.Mappable {
+        static GraphSageTrainMetrics empty() {
+            return ImmutableGraphSageTrainMetrics.of(List.of(), false);
+        }
+
         List<Double> epochLosses();
         boolean didConverge();
 

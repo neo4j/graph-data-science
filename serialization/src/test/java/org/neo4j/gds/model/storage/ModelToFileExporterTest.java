@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -66,7 +65,7 @@ class ModelToFileExporterTest {
         GRAPH_SCHEMA,
         ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
         TRAIN_CONFIG,
-        EmptyGraphSageTrainMetrics.INSTANCE
+        GraphSageModelTrainer.GraphSageTrainMetrics.empty()
     );
 
     @Test

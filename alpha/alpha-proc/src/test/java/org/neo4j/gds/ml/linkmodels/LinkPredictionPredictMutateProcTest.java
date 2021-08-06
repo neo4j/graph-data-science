@@ -22,10 +22,6 @@ package org.neo4j.gds.ml.linkmodels;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -37,6 +33,10 @@ import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 
 import java.util.List;
 import java.util.Map;
@@ -164,7 +164,8 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .featureProperties(featureProperties)
                 .negativeClassWeight(1d)
-                .build()
+                .build(),
+            LinkPredictionModelInfo.empty()
         ));
     }
 }

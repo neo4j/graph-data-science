@@ -20,25 +20,25 @@
 package org.neo4j.gds.internal;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.neo4j.gds.QueryRunner;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -100,7 +100,7 @@ final class AuraTestSupport {
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             GraphSageTrainConfig.builder().modelName("firstModel").addFeatureProperty("foo").build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
         ModelCatalog.set(model1);
 
@@ -111,7 +111,7 @@ final class AuraTestSupport {
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             GraphSageTrainConfig.builder().modelName("secondModel").addFeatureProperty("foo").build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
         ModelCatalog.set(model2);
     }

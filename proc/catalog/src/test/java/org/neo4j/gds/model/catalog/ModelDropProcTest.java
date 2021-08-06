@@ -25,14 +25,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.core.ModelStoreSettings;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -71,7 +71,8 @@ class ModelDropProcTest extends ModelProcBaseTest {
                 testModelType,
                 GRAPH_SCHEMA,
                 "testData",
-                trainConfig
+                trainConfig,
+                Map::of
             )
         );
 
@@ -134,7 +135,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.INSTANCE
+                GraphSageModelTrainer.GraphSageTrainMetrics.empty()
             );
             ModelStoreProc.storeModel(db, model1);
 
@@ -163,7 +164,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.INSTANCE
+                GraphSageModelTrainer.GraphSageTrainMetrics.empty()
             );
             ModelStoreProc.storeModel(db, model1);
             ModelCatalog.getUntyped(getUsername(), modelName).unload();

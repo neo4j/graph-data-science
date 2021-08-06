@@ -27,14 +27,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.ModelStoreSettings;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -65,7 +66,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             "testAlgo1",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         var model2 = Model.of(
@@ -74,7 +76,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         var otherUserModel = Model.of(
@@ -83,7 +86,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             "testAlgo1337",
             GRAPH_SCHEMA,
             3435L,
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model1);
@@ -140,7 +144,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             "testAlgo1",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         var model2 = Model.of(
@@ -149,7 +154,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model1);
@@ -197,7 +203,7 @@ class ModelListProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.INSTANCE
+                GraphSageModelTrainer.GraphSageTrainMetrics.empty()
             );
             ModelStoreProc.storeModel(db, model1);
 
@@ -226,7 +232,7 @@ class ModelListProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.INSTANCE
+                GraphSageModelTrainer.GraphSageTrainMetrics.empty()
             );
             ModelStoreProc.storeModel(db, model1);
             ModelCatalog.getUntyped(getUsername(), modelName).unload();

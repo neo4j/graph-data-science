@@ -20,23 +20,24 @@
 package org.neo4j.gds.core.model;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.schema.SchemaDeserializer;
-import org.neo4j.gds.api.schema.SchemaSerializer;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.SchemaDeserializer;
+import org.neo4j.gds.api.schema.SchemaSerializer;
 import org.neo4j.gds.core.model.proto.GraphSchemaProto;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -79,7 +80,7 @@ class ModelSerializationTest {
                 .activationFunction(ActivationFunction.SIGMOID)
                 .featureProperties(List.of("age", "birth_year", "death_year", "embedding"))
                 .build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         var protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);
@@ -88,7 +89,7 @@ class ModelSerializationTest {
         var deserializedModel =
             ModelMetaDataSerializer.fromSerializable(protoModelMetaData)
                 .data("blah, blah")
-                .customInfo(Model.Mappable.EMPTY)
+                .customInfo(Map::of)
                 .build();
 
         assertThat(deserializedModel)
@@ -109,7 +110,8 @@ class ModelSerializationTest {
             "notSupportedAlgoType",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         assertThatThrownBy(

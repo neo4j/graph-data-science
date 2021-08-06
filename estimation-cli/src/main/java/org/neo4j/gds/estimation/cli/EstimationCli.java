@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -751,7 +752,8 @@ public class EstimationCli implements Runnable {
                 .validationFolds(4)
                 .featureProperties(properties)
                 .addParam(Map.of("penalty", 1.0))
-                .build()
+                .build(),
+            NodeClassificationModelInfo.empty()
         );
         ModelCatalog.set(model);
     }

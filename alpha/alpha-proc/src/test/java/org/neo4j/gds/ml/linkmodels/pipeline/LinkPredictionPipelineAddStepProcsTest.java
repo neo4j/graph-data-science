@@ -178,7 +178,8 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
             "testAlgo1",
             GraphSchema.empty(),
             "testData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model1);
@@ -196,7 +197,8 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
             "testAlgo1",
             GraphSchema.empty(),
             "testData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model1);

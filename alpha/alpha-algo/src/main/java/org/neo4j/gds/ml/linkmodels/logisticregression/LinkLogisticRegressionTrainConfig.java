@@ -20,9 +20,9 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
-import org.neo4j.gds.config.FeaturePropertiesConfig;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,5 +68,9 @@ public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConf
         );
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
+    }
+
+    static LinkLogisticRegressionTrainConfig empty() {
+        return new LinkLogisticRegressionTrainConfigImpl(List.of(), CypherMapWrapper.create(Map.of("penalty", 1)));
     }
 }

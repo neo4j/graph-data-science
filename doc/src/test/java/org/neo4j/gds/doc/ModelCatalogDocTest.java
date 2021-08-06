@@ -21,15 +21,15 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
@@ -45,7 +45,7 @@ abstract class ModelCatalogDocTest extends DocTestBase {
             GraphSchema.empty(),
             ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
             ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         ));
     }
 

@@ -100,7 +100,8 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             "testAlgo",
             GdlFactory.of("(:Node1)").build().graphStore().schema(),
             "modelData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         ));
 
         assertSafeToRestart(false);

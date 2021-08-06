@@ -28,13 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -43,6 +38,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.LayerConfig;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
@@ -278,7 +279,8 @@ class GraphSageAlgorithmFactoryTest {
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig
+            trainConfig,
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model);
@@ -333,7 +335,8 @@ class GraphSageAlgorithmFactoryTest {
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig
+            trainConfig,
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model);
@@ -512,7 +515,8 @@ class GraphSageAlgorithmFactoryTest {
                                             "graphSage",
                                             GraphSchema.empty(),
                                             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-                                            trainConfig
+                                            trainConfig,
+                                            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
                                         );
 
                                         ModelCatalog.set(model);
@@ -557,7 +561,8 @@ class GraphSageAlgorithmFactoryTest {
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig
+            trainConfig,
+            GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
         ModelCatalog.set(model);

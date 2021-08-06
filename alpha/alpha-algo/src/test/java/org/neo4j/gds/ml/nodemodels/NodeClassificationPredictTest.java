@@ -225,7 +225,8 @@ class NodeClassificationPredictTest {
                 .holdoutFraction(0.2)
                 .validationFolds(4)
                 .addParam(Map.of("penalty", 1.0))
-                .build()
+                .build(),
+            NodeClassificationModelInfo.empty()
         );
         ModelCatalog.set(model);
 

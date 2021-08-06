@@ -53,7 +53,8 @@ class ModelExistsProcTest extends ModelProcBaseTest {
             "testAlgo",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         ));
 
         assertCypherResult(

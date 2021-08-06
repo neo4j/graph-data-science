@@ -36,6 +36,7 @@ import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,7 +63,8 @@ class ModelCatalogTest {
         "testAlgo",
         GRAPH_SCHEMA,
         "modelData",
-        TestTrainConfig.of()
+        TestTrainConfig.of(),
+        Map::of
     );
 
     @AfterEach
@@ -83,7 +85,8 @@ class ModelCatalogTest {
                     "testAlgo",
                     GRAPH_SCHEMA,
                     1337L,
-                    TestTrainConfig.of()
+                    TestTrainConfig.of(),
+                    Map::of
                 ));
             });
         }
@@ -94,7 +97,8 @@ class ModelCatalogTest {
             "testAlgo",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         IllegalArgumentException ex = assertThrows(
@@ -113,7 +117,8 @@ class ModelCatalogTest {
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
         var model2 = Model.of(
             USERNAME,
@@ -121,7 +126,8 @@ class ModelCatalogTest {
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model);
@@ -149,7 +155,8 @@ class ModelCatalogTest {
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
         var model2 = Model.of(
             "user2",
@@ -157,7 +164,8 @@ class ModelCatalogTest {
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of()
+            TestTrainConfig.of(),
+            Map::of
         );
 
         ModelCatalog.set(model);
@@ -298,7 +306,8 @@ class ModelCatalogTest {
                 "testAlgo1",
                 GRAPH_SCHEMA,
                 "modelData1",
-                TestTrainConfig.of()
+                TestTrainConfig.of(),
+                Map::of
             );
 
             var model2 = Model.of(
@@ -307,7 +316,8 @@ class ModelCatalogTest {
                 "testAlgo2",
                 GRAPH_SCHEMA,
                 1337L,
-                TestTrainConfig.of()
+                TestTrainConfig.of(),
+                Map::of
             );
 
             var publicModel = Model.of(
@@ -316,7 +326,8 @@ class ModelCatalogTest {
                 "testAlgo2",
                 GRAPH_SCHEMA,
                 1337L,
-                TestTrainConfig.of()
+                TestTrainConfig.of(),
+                Map::of
             );
 
             ModelCatalog.set(model1);
@@ -430,7 +441,7 @@ class ModelCatalogTest {
     }
 
     private static Model<Integer, TestTrainConfig, Model.Mappable> testModel(String name) {
-        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
+        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of(), Map::of);
     }
 
     @ValueClass

@@ -20,9 +20,9 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
-import org.neo4j.gds.config.FeaturePropertiesConfig;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,6 +67,10 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
         );
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
+    }
+
+    static NodeLogisticRegressionTrainConfig empty() {
+        return new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of("penalty", 1)));
     }
 
 }

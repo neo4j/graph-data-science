@@ -87,25 +87,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .build();
     }
 
-    static <D, C extends ModelConfig & BaseConfig> Model<D, C, Model.Mappable> of(
-        String creator,
-        String name,
-        String algoType,
-        GraphSchema graphSchema,
-        D modelData,
-        C trainConfig
-    ) {
-        return Model.of(
-            creator,
-            name,
-            algoType,
-            graphSchema,
-            modelData,
-            trainConfig,
-            Mappable.EMPTY
-        );
-    }
-
     static <D, C extends ModelConfig & BaseConfig, INFO extends Mappable> Model<D, C, INFO> of(
         String creator,
         String name,
@@ -130,8 +111,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
 
     interface Mappable {
         Map<String, Object> toMap();
-
-        Mappable EMPTY = Map::of;
 
         static <T extends Model.Mappable> List<Map<String, Object>> toMap(List<T> data) {
             return data.stream().map(Model.Mappable::toMap).collect(Collectors.toList());

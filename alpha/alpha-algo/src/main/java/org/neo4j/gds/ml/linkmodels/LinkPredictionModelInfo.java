@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.MetricData;
-import org.neo4j.gds.core.model.Model;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,5 +51,9 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
         Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics
     ) {
         return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics);
+    }
+
+    static LinkPredictionModelInfo empty() {
+        return LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.empty(), Map.of());
     }
 }
