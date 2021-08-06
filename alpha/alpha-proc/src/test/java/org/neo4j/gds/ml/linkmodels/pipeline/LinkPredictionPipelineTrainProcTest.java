@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -27,6 +28,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -97,6 +99,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
+    }
+
     @Test
     void trainAModel() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
@@ -122,6 +129,21 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     "configuration", aMapWithSize(9)
                 ))
         );
+    }
+
+    @Test
+    void failsWhenMissingFeatures() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+                    "   $graphName, " +
+                    "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    ")",
+            Map.of("graphName", GRAPH_NAME),
+            "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
+
     }
 
 }

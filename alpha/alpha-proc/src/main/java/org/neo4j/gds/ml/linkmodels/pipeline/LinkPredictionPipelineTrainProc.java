@@ -61,6 +61,13 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
         return LinkPredictionTrainConfig.of(username(), graphName, maybeImplicitCreate, config);
     }
 
+    private void validatePipeline(PipelineModelInfo pipeline) {
+        if (pipeline.featureSteps().size() == 0) {
+            throw new IllegalArgumentException(
+                "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
+        }
+    }
+
     @Override
     protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
@@ -79,6 +86,8 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
                 var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), username());
+                // TODO also depend on the existing graph properties?
+                validatePipeline(pipeline);
 
                 return new LinkPredictionTrain(
                     graphName,
