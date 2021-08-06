@@ -17,17 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.procedure.Context;
+import org.neo4j.gds.api.NodeProperties;
 
-public abstract class NodePropertiesWriter<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig>
-    extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+import java.util.Collection;
 
-    @Context
-    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+public interface NodePropertyExporter {
+
+    long MIN_BATCH_SIZE = 10_000L;
+    long MAX_BATCH_SIZE = 100_000L;
+
+    void write(String property, NodeProperties properties);
+
+    void write(NodeProperty nodeProperty);
+
+    void write(Collection<NodeProperty> nodeProperties);
+
+    long propertiesWritten();
 }

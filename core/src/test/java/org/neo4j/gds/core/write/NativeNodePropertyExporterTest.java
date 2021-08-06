@@ -71,7 +71,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
+        var exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -105,7 +105,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
+        var exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -200,7 +200,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
+        var exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), new DirectIdMapping(3), terminationFlag)
             .parallel(executorService, 4)
             .build();

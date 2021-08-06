@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
-public abstract class NodePropertyExporterBuilder<T> {
+public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter> {
     protected final TransactionContext transactionContext;
     protected LongUnaryOperator toOriginalId;
     protected long nodeCount;

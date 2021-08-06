@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -50,7 +50,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteNodePropertiesProc extends CatalogProc {
 
     @Context
-    public NodePropertyExporterBuilder<? extends NativeNodePropertyExporter> nodePropertyExporterBuilder;
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE)
     @Description("Writes the given node properties to an online Neo4j database.")

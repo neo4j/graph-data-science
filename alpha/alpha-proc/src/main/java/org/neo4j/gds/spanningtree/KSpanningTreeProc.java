@@ -29,7 +29,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
@@ -95,7 +95,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            final NativeNodePropertyExporter exporter = nodePropertyExporterBuilder
+            final NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .withLog(log)

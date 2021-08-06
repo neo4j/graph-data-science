@@ -21,7 +21,7 @@ package org.neo4j.gds.result;
 
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 
 public class CentralityResult {
 
@@ -35,7 +35,7 @@ public class CentralityResult {
         return this.result;
     }
 
-    public void export(String propertyName, NativeNodePropertyExporter exporter) {
+    public void export(String propertyName, NodePropertyExporter exporter) {
         exporter.write(
             propertyName,
             asNodeProperties()

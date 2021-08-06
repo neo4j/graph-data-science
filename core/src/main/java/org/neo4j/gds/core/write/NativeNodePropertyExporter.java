@@ -20,30 +20,26 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public class NativeNodePropertyExporter extends StatementApi {
-
-    static final long MIN_BATCH_SIZE = 10_000L;
-    static final long MAX_BATCH_SIZE = 100_000L;
+public class NativeNodePropertyExporter extends StatementApi implements NodePropertyExporter {
 
     protected final TerminationFlag terminationFlag;
     protected final ExecutorService executorService;
@@ -116,16 +112,19 @@ public class NativeNodePropertyExporter extends StatementApi {
         this.propertiesWritten = new LongAdder();
     }
 
+    @Override
     public void write(String property, NodeProperties properties) {
         write(ImmutableNodeProperty.of(property, properties));
     }
 
+    @Override
     public void write(NodeProperty nodeProperty) {
         write(Collections.singletonList(nodeProperty));
     }
 
+    @Override
     public void write(Collection<NodeProperty> nodeProperties) {
-        List<ResolvedNodeProperty> resolvedNodeProperties = nodeProperties.stream()
+        var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
 
@@ -136,19 +135,20 @@ public class NativeNodePropertyExporter extends StatementApi {
         }
     }
 
+    @Override
     public long propertiesWritten() {
         return propertiesWritten.longValue();
     }
 
-    void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
+    private void writeSequential(Iterable<ResolvedNodeProperty> nodeProperties) {
         writeSequential((ops, nodeId) -> doWrite(nodeProperties, ops, nodeId));
     }
 
-    void writeParallel(List<ResolvedNodeProperty> nodeProperties) {
+    private void writeParallel(Iterable<ResolvedNodeProperty> nodeProperties) {
         writeParallel((ops, offset) -> doWrite(nodeProperties, ops, offset));
     }
 
-    void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
+    private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
             int propertyId = nodeProperty.propertyToken();
             final Value prop = nodeProperty.properties().value(nodeId);
