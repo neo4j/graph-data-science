@@ -59,24 +59,6 @@ public class NativeNodePropertyExporter extends StatementApi {
             .withTerminationFlag(terminationFlag);
     }
 
-    @ValueClass
-    public interface NodeProperty {
-        String propertyKey();
-
-        NodeProperties properties();
-
-        static NodeProperty of(String propertyKey, NodeProperties properties) {
-            return ImmutableNodeProperty.of(propertyKey, properties);
-        }
-
-        default ResolvedNodeProperty resolveWith(int propertyToken) {
-            if (propertyToken == -1) {
-                throw new IllegalStateException("No write property token id is set.");
-            }
-            return ResolvedNodeProperty.of(this, propertyToken);
-        }
-    }
-
     @SuppressWarnings("immutables:subtype")
     @ValueClass
     public interface ResolvedNodeProperty extends NodeProperty {

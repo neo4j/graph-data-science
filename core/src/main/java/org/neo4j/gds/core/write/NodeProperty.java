@@ -17,21 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.NodeProperties;
 
-import java.util.List;
+@ValueClass
+public interface NodeProperty {
+    String propertyKey();
 
-public abstract class PregelMutateProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelProcedureConfig>
-    extends MutatePropertyProc<ALGO, PregelResult, PregelMutateResult, CONFIG> {
+    NodeProperties properties();
 
-    @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
-        return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+    static NodeProperty of(String propertyKey, NodeProperties properties) {
+        return ImmutableNodeProperty.of(propertyKey, properties);
+    }
+
+    default NativeNodePropertyExporter.ResolvedNodeProperty resolveWith(int propertyToken) {
+        if (propertyToken == -1) {
+            throw new IllegalStateException("No write property token id is set.");
+        }
+        return NativeNodePropertyExporter.ResolvedNodeProperty.of(this, propertyToken);
     }
 }

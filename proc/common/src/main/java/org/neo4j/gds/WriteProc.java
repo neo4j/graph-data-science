@@ -27,7 +27,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public abstract class WriteProc<
         throw new UnsupportedOperationException("Write procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NativeNodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), nodeProperties(computationResult)));
     }
 

@@ -27,7 +27,7 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -68,13 +68,13 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected List<NativeNodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
         var config = computationResult.config();
         var writeProperty = config.writeProperty();
         var result = computationResult.result();
         var classProperties = result.predictedClasses().asNodeProperties();
-        var nodeProperties = new ArrayList<NativeNodePropertyExporter.NodeProperty>();
-        nodeProperties.add(NativeNodePropertyExporter.NodeProperty.of(writeProperty, classProperties));
+        var nodeProperties = new ArrayList<NodeProperty>();
+        nodeProperties.add(NodeProperty.of(writeProperty, classProperties));
         if (result.predictedProbabilities().isPresent()) {
             var probabilityPropertyKey = config.predictedProbabilityProperty().orElseThrow();
             var probabilityProperties = result.predictedProbabilities().get();
@@ -91,7 +91,7 @@ public class NodeClassificationPredictWriteProc
                 }
             };
 
-            nodeProperties.add(NativeNodePropertyExporter.NodeProperty.of(
+            nodeProperties.add(NodeProperty.of(
                 probabilityPropertyKey,
                 properties
             ));

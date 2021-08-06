@@ -112,7 +112,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         int[] intData = {23, 42, 84};
         double[] doubleData = {123D, 142D, 184D};
 
-        List<NativeNodePropertyExporter.NodeProperty> nodeProperties = Arrays.asList(
+        List<NodeProperty> nodeProperties = Arrays.asList(
             ImmutableNodeProperty.of("newProp1", new LongTestProperties(nodeId -> intData[(int) nodeId])),
             ImmutableNodeProperty.of("newProp2", new DoubleTestProperties(nodeId -> doubleData[(int) nodeId]))
         );

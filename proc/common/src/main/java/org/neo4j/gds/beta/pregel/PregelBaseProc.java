@@ -26,7 +26,7 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 final class PregelBaseProc {
 
     static <ALGO extends Algorithm<ALGO, PregelResult>, CONFIG extends PregelConfig>
-    List<NativeNodePropertyExporter.NodeProperty> nodeProperties(
+    List<NodeProperty> nodeProperties(
         AlgoBaseProc.ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
         String propertyPrefix
     ) {
