@@ -91,11 +91,6 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
             }
 
             @Override
-            protected long taskVolume(Graph graph, PregelProcedureConfig config) {
-                return graph.nodeCount();
-            }
-
-            @Override
             protected String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
             }

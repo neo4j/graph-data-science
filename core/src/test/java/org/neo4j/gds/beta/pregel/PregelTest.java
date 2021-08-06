@@ -213,7 +213,8 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        // TODO: reactivate when event tracking is available again for pregel
+        // assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {

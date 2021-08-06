@@ -24,12 +24,6 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressLogger;
@@ -44,6 +38,12 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,13 +149,13 @@ class LinkPredictionPredictTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "LinkPrediction compute :: Start",
+                "LinkPrediction :: Start",
                 "LinkPrediction 20%",
                 "LinkPrediction 40%",
                 "LinkPrediction 60%",
                 "LinkPrediction 80%",
                 "LinkPrediction 100%",
-                "LinkPrediction compute :: Finished"
+                "LinkPrediction :: Finished"
             );
         ModelCatalog.drop("", modelName);
     }

@@ -42,6 +42,11 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     @Override
+    protected String taskName() {
+        return "Dijkstra";
+    }
+
+    @Override
     public Task progressTask(Graph graph, T config) {
         return dijkstraProgressTask(taskName(), graph);
     }
@@ -57,12 +62,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
 
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
         return new DijkstraFactory<>() {
-
-            @Override
-            protected String taskName() {
-                return "Dijkstra#sourceTarget";
-            }
-
             @Override
             protected Dijkstra build(
                 Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
@@ -80,11 +79,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
 
     public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
         return new DijkstraFactory<>() {
-            @Override
-            protected String taskName() {
-                return "Dijkstra#singleSource";
-            }
-
             @Override
             protected Dijkstra build(
                 Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker

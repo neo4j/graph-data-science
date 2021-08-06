@@ -91,11 +91,6 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
             }
 
             @Override
-            protected long taskVolume(Graph graph, PregelProcedureConfig config) {
-                return graph.nodeCount();
-            }
-
-            @Override
             protected String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
             }

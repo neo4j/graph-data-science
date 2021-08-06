@@ -188,8 +188,8 @@ class YensTest {
         assertEquals(9, testLogger.getProgresses().size());
 
         // once
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens compute :: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens compute :: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
     }
 
     private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {

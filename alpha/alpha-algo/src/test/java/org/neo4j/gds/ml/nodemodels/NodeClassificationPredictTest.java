@@ -22,11 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
@@ -40,6 +35,11 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.logging.NullLog;
 
 import java.util.List;
@@ -251,13 +251,13 @@ class NodeClassificationPredictTest {
             .doesNotHaveDuplicates()
             .hasSize(7)
             .containsExactly(
-                "NodeLogisticRegressionPredict compute :: Start",
+                "NodeLogisticRegressionPredict :: Start",
                 "NodeLogisticRegressionPredict 20%",
                 "NodeLogisticRegressionPredict 40%",
                 "NodeLogisticRegressionPredict 60%",
                 "NodeLogisticRegressionPredict 80%",
                 "NodeLogisticRegressionPredict 100%",
-                "NodeLogisticRegressionPredict compute :: Finished"
+                "NodeLogisticRegressionPredict :: Finished"
             );
         ModelCatalog.drop("", modelName);
     }

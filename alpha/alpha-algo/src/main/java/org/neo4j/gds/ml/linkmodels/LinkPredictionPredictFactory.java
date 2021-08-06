@@ -93,6 +93,6 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf("compute", graph.nodeCount());
+        return Tasks.leaf(taskName(), graph.nodeCount());
     }
 }

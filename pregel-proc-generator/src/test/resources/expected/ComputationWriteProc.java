@@ -91,11 +91,6 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
             }
 
             @Override
-            protected long taskVolume(Graph graph, PregelProcedureConfig config) {
-                return graph.nodeCount();
-            }
-
-            @Override
             protected String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
             }
