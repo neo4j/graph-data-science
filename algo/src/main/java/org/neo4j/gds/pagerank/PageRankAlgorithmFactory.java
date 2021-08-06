@@ -22,8 +22,6 @@ package org.neo4j.gds.pagerank;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AbstractAlgorithmFactory;
-import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -36,6 +34,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -77,11 +77,6 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
 
     public PageRankAlgorithmFactory(Mode mode) {
         this.mode = mode;
-    }
-
-    @Override
-    protected long taskVolume(Graph graph, PageRankConfig configuration) {
-        return graph.nodeCount();
     }
 
     @Override

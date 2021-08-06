@@ -66,15 +66,6 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
     }
 
     /**
-     * The number of tasks the algorithm will perform. Used for progress logging.
-     *
-     * @param graph         the graph to compute over
-     * @param configuration the configuration of the algorithm
-     * @return the number of tasks to perform
-     */
-    protected abstract long taskVolume(Graph graph, CONFIG configuration);
-
-    /**
      * The name of the task. Typically the name of the algorithm, but Java type params are not good enough.
      * Used for progress logging.
      *

@@ -50,11 +50,6 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
     }
 
     @Override
-    protected long taskVolume(Graph graph, NodeClassificationTrainConfig configuration) {
-        return graph.nodeCount();
-    }
-
-    @Override
     protected String taskName() {
         return "NCTrain";
     }

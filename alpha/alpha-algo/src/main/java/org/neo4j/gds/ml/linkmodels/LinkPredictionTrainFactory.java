@@ -41,14 +41,6 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
     }
 
     @Override
-    protected long taskVolume(
-        Graph graph, LinkPredictionTrainConfig configuration
-    ) {
-        // has to be reset after model selection
-        return configuration.params().size() * configuration.validationFolds();
-    }
-
-    @Override
     protected String taskName() {
         return "LinkPredictionTrain";
     }
@@ -69,9 +61,10 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
     public Task progressTask(
         Graph graph, LinkPredictionTrainConfig config
     ) {
+        var modelSelectionTaskVolume = config.params().size() * config.validationFolds();
         return Tasks.task(
             "compute",
-            Tasks.leaf("ModelSelection", taskVolume(graph, config)),
+            Tasks.leaf("ModelSelection", modelSelectionTaskVolume),
             Tasks.leaf("Training"),
             Tasks.task(
                 "Evaluation",

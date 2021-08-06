@@ -28,18 +28,11 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends AbstractAlgorithmFactory<Wcc, CONFIG> {
 
     public WccAlgorithmFactory() {
         super();
-    }
-
-    @Override
-    protected long taskVolume(Graph graph, CONFIG configuration) {
-        return graph.relationshipCount();
     }
 
     @Override
@@ -69,11 +62,6 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return Wcc.memoryEstimation(config.isIncremental());
-    }
-
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf("compute", taskVolume(graph, config));
     }
 
     @TestOnly

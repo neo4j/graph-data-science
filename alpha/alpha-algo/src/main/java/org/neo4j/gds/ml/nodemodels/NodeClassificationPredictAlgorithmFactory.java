@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AbstractAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressLogger;
@@ -31,16 +29,13 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
 public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AbstractAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
     public NodeClassificationPredictAlgorithmFactory() {
         super();
-    }
-
-    @Override
-    protected long taskVolume(Graph graph, NodeClassificationPredictConfig configuration) {
-        return graph.nodeCount();
     }
 
     @Override
@@ -95,7 +90,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf("compute", taskVolume(graph, config));
+        return Tasks.leaf("compute", graph.nodeCount());
     }
 
     @TestOnly

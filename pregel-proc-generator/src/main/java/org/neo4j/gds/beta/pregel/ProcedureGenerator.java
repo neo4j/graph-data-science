@@ -28,15 +28,15 @@ import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -199,15 +199,6 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(ProgressTracker.class, "progressTracker")
                 .returns(algorithmClassName)
                 .addStatement("return new $T(graph, configuration, tracker, progressTracker.progressLogger())", algorithmClassName)
-                .build()
-            )
-            .addMethod(MethodSpec.methodBuilder("taskVolume")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PROTECTED)
-                .addParameter(Graph.class, "graph")
-                .addParameter(pregelSpec.configTypeName(), "config")
-                .returns(long.class)
-                .addStatement("return graph.nodeCount()")
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("taskName")

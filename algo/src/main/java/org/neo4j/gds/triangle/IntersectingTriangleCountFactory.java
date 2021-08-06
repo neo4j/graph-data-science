@@ -34,11 +34,6 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AbstractAlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     @Override
-    protected long taskVolume(Graph graph, CONFIG configuration) {
-        return graph.nodeCount();
-    }
-
-    @Override
     protected String taskName() {
         return IntersectingTriangleCount.class.getSimpleName();
     }
