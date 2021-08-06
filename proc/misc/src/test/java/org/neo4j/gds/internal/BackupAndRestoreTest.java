@@ -54,6 +54,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -239,6 +240,49 @@ class BackupAndRestoreTest {
     }
 
     @Test
+    void shouldNotDeleteExistingBackupsAfterRestore(@TempDir Path tempDir) {
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
+        assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
+
+        var backupName = "backup-1af160e1-806e-48eb-b00a-004e6aa227aa";
+        var restorePath = importPath(tempDir.resolve("shutdown"), backupName);
+        var backupsPath = tempDir.resolve("backup");
+        importPath(backupsPath.resolve(backupName), backupName);
+
+        BackupAndRestore.restore(restorePath, backupsPath, 10, new TestLog());
+
+        assertGraphsAreRestored();
+        assertModelsAreRestored();
+
+        assertThat(restorePath).exists().isEmptyDirectory();
+
+        var backupId = backupName.split("-", 2)[1];
+        var backupTime = LocalDateTime
+            .of(2021, 8, 2, 13, 37, 42, (int) TimeUnit.MILLISECONDS.toNanos(84))
+            .toInstant(ZoneOffset.UTC)
+            .toEpochMilli();
+        var expectedMetafileContent = formatWithLocale(
+            "Backup-Time: %d%nBackup-Id: %s%n",
+            backupTime,
+            backupId
+        );
+
+        for (var backupPath : List.of(backupName, backupName + "-restored")) {
+            var backupLocation = backupsPath.resolve(backupPath);
+
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/alice/graphs/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/bob/graphs/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/alice/models/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/bob/models/**");
+
+            assertThat(backupLocation.resolve(".backupmetadata"))
+                .isNotEmptyFile()
+                .usingCharset(StandardCharsets.UTF_8)
+                .hasContent(expectedMetafileContent);
+        }
+    }
+
+    @Test
     void shouldBackupIfPermitted(@TempDir Path tempDir) throws IOException {
         testBackupLimit(
             tempDir,
@@ -380,6 +424,7 @@ class BackupAndRestoreTest {
             var resourceDirectory = Arrays
                 .stream(subFolders)
                 .reduce(Paths.get(uri), Path::resolve, (p1, p2) -> p1);
+            Files.createDirectories(tempDir);
             PathUtils.copyDirectory(resourceDirectory, tempDir);
             return tempDir;
         } catch (URISyntaxException | IOException e) {

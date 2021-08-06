@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -240,11 +239,11 @@ public final class BackupAndRestore {
     }
 
     static void restore(Path restorePath, Path backupPath, int maxAllowedBackups, Log log) {
-        var successfulRestorePaths = subdirectories(restorePath, log)
+        var successfulRestorePaths = subdirectoriesOrEmpty(restorePath, log)
             .flatMap(userRestorePath -> {
                 try {
-                    restoreForUser(userRestorePath, log);
-                    return Stream.of(userRestorePath);
+                    boolean restoredData = restoreForUser(userRestorePath, log);
+                    return restoredData ? Stream.of(userRestorePath) : Stream.empty();
                 } catch (Exception e) {
                     log.error(formatWithLocale("Restore failed for user path '%s'", userRestorePath), e);
                     return Stream.empty();
@@ -267,26 +266,29 @@ public final class BackupAndRestore {
         }
     }
 
-    private static void restoreForUser(Path userRestorePath, Log log) {
+    private static boolean restoreForUser(Path userRestorePath, Log log) throws IOException {
         var graphsPath = userRestorePath.resolve(GRAPHS_DIR);
         var modelsPath = userRestorePath.resolve(MODELS_DIR);
 
-        restoreUserData(graphsPath, log, BackupAndRestore::restoreGraphs);
-        restoreUserData(modelsPath, log, BackupAndRestore::restoreModels);
+        boolean graphsRestored = restoreUserData(graphsPath, log, () -> restoreGraphs(graphsPath, log));
+        boolean modelsRestored = restoreUserData(modelsPath, log, () -> restoreModels(modelsPath, log));
+        return graphsRestored || modelsRestored;
     }
 
-    private static void restoreUserData(Path path, Log log, BiConsumer<Path, Log> action) {
+    private static <E extends IOException> boolean restoreUserData(Path path, Log log, CheckedRunnable<E> action) throws
+        E {
         try {
             DIRECTORY_IS_READABLE.validate(path);
         } catch (IllegalArgumentException invalid) {
-            if (Files.exists(path)) {
-                log.error(invalid.getMessage(), invalid);
-            } else {
+            if (!Files.exists(path)) {
                 // If the path does not exist, we expect to fail and only log an informational message
                 log.info(invalid.getMessage(), invalid);
+                return false;
             }
+            throw invalid;
         }
-        action.accept(path, log);
+        action.checkedRun();
+        return true;
     }
 
     private static void createNewBackupFromRestore(
@@ -341,7 +343,7 @@ public final class BackupAndRestore {
     private static <E extends IOException> void applyBackup(CreateBackup createBackup, CheckedRunnable<E> backupAction)
     throws IOException {
         applyBackup(createBackup, () -> {
-            backupAction.run();
+            backupAction.checkedRun();
             return null;
         }, () -> null);
     }
@@ -450,8 +452,8 @@ public final class BackupAndRestore {
         }).collect(Collectors.toList());
     }
 
-    private static void restoreGraphs(Path storePath, Log log) {
-        subdirectories(storePath, log).forEach(path -> restoreGraph(path, log));
+    private static void restoreGraphs(Path storePath, Log log) throws IOException {
+        subdirectories(storePath).forEach(path -> restoreGraph(path, log));
     }
 
     private static void restoreGraph(Path path, Log log) {
@@ -470,8 +472,8 @@ public final class BackupAndRestore {
         GraphStoreCatalog.set(createConfig, graphStore.graphStore());
     }
 
-    private static void restoreModels(Path storePath, Log log) {
-        subdirectories(storePath, log).forEach(path -> restoreModel(path, log));
+    private static void restoreModels(Path storePath, Log log) throws IOException {
+        subdirectories(storePath).forEach(path -> restoreModel(path, log));
     }
 
     private static void restoreModel(Path storedModelPath, Log log) {
@@ -497,11 +499,15 @@ public final class BackupAndRestore {
         }
     }
 
-    private static Stream<Path> subdirectories(Path path, Log log) {
+    private static Stream<Path> subdirectories(Path path) throws IOException {
+        return Files.list(path)
+            .filter(not(dir -> ExceptionUtil.supply(() -> Files.isHidden(dir))))
+            .peek(DIRECTORY_IS_READABLE::validate);
+    }
+
+    private static Stream<Path> subdirectoriesOrEmpty(Path path, Log log) {
         try {
-            return Files.list(path)
-                .filter(not(dir -> ExceptionUtil.supply(() -> Files.isHidden(dir))))
-                .peek(DIRECTORY_IS_READABLE::validate);
+            return subdirectories(path);
         } catch (IOException e) {
             log.error(
                 formatWithLocale("Could not traverse subdirectories of '%s'", path),
