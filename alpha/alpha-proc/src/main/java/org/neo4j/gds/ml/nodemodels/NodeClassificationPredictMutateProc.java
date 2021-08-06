@@ -31,7 +31,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.write.NodePropertyExporter.NodeProperty;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter.NodeProperty;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;

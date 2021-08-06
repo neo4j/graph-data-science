@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public abstract class PregelMutateProc<
     extends MutatePropertyProc<ALGO, PregelResult, PregelMutateResult, CONFIG> {
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
+    protected List<NativeNodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
     }
 }

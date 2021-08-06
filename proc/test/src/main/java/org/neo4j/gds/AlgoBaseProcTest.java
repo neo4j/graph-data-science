@@ -42,7 +42,7 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.junit.annotation.Edition;
@@ -169,7 +169,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
 
             if (proc instanceof NodePropertiesWriter) {
-                ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NodePropertyExporter.Builder(
+                ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction

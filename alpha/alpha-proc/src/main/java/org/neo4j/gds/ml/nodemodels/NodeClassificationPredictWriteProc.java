@@ -27,7 +27,7 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -64,13 +64,13 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
+    protected List<NativeNodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
         var config = computationResult.config();
         var writeProperty = config.writeProperty();
         var result = computationResult.result();
         var classProperties = result.predictedClasses().asNodeProperties();
-        var nodeProperties = new ArrayList<NodePropertyExporter.NodeProperty>();
-        nodeProperties.add(NodePropertyExporter.NodeProperty.of(writeProperty, classProperties));
+        var nodeProperties = new ArrayList<NativeNodePropertyExporter.NodeProperty>();
+        nodeProperties.add(NativeNodePropertyExporter.NodeProperty.of(writeProperty, classProperties));
         if (result.predictedProbabilities().isPresent()) {
             var probabilityPropertyKey = config.predictedProbabilityProperty().orElseThrow();
             var probabilityProperties = result.predictedProbabilities().get();
@@ -87,7 +87,7 @@ public class NodeClassificationPredictWriteProc
                 }
             };
 
-            nodeProperties.add(NodePropertyExporter.NodeProperty.of(
+            nodeProperties.add(NativeNodePropertyExporter.NodeProperty.of(
                 probabilityPropertyKey,
                 properties
             ));

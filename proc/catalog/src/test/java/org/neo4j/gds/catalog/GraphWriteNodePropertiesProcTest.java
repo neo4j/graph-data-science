@@ -36,7 +36,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -277,7 +277,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
-            proc.nodePropertyExporterBuilder = new NodePropertyExporter.Builder(TransactionContext.of(
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction
             ));

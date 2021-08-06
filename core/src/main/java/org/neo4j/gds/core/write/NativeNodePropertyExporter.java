@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public class NodePropertyExporter extends StatementApi {
+public class NativeNodePropertyExporter extends StatementApi {
 
     static final long MIN_BATCH_SIZE = 10_000L;
     static final long MAX_BATCH_SIZE = 100_000L;
@@ -53,7 +53,7 @@ public class NodePropertyExporter extends StatementApi {
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static NodePropertyExporterBuilder<NodePropertyExporter> builder(TransactionContext transactionContext, IdMapping idMapping, TerminationFlag terminationFlag) {
+    public static NodePropertyExporterBuilder<NativeNodePropertyExporter> builder(TransactionContext transactionContext, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(transactionContext)
             .withIdMapping(idMapping)
             .withTerminationFlag(terminationFlag);
@@ -91,15 +91,15 @@ public class NodePropertyExporter extends StatementApi {
         }
     }
 
-    public static class Builder extends NodePropertyExporterBuilder<NodePropertyExporter> {
+    public static class Builder extends NodePropertyExporterBuilder<NativeNodePropertyExporter> {
 
         public Builder(TransactionContext transactionContext) {
             super(transactionContext);
         }
 
         @Override
-        public NodePropertyExporter build() {
-            return new NodePropertyExporter(
+        public NativeNodePropertyExporter build() {
+            return new NativeNodePropertyExporter(
                 transactionContext,
                 nodeCount,
                 toOriginalId,
@@ -115,7 +115,7 @@ public class NodePropertyExporter extends StatementApi {
         void accept(Write ops, long value) throws Exception;
     }
 
-    protected NodePropertyExporter(
+    protected NativeNodePropertyExporter(
         TransactionContext tx,
         long nodeCount,
         LongUnaryOperator toOriginalId,

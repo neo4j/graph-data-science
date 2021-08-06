@@ -27,7 +27,7 @@ import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
@@ -78,7 +78,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
         return cc;
     }
 
-    public void export(final String propertyName, final NodePropertyExporter exporter) {
+    public void export(final String propertyName, final NativeNodePropertyExporter exporter) {
         DoubleNodeProperties properties = new DoubleNodeProperties() {
             @Override
             public double doubleValue(long nodeId) {

@@ -48,7 +48,7 @@ import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
-class NodePropertyExporterTest extends BaseTest {
+class NativeNodePropertyExporterTest extends BaseTest {
 
     @BeforeEach
     void setup() {
@@ -71,7 +71,7 @@ class NodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NodePropertyExporter exporter = NodePropertyExporter
+        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -105,14 +105,14 @@ class NodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NodePropertyExporter exporter = NodePropertyExporter
+        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .build();
 
         int[] intData = {23, 42, 84};
         double[] doubleData = {123D, 142D, 184D};
 
-        List<NodePropertyExporter.NodeProperty> nodeProperties = Arrays.asList(
+        List<NativeNodePropertyExporter.NodeProperty> nodeProperties = Arrays.asList(
             ImmutableNodeProperty.of("newProp1", new LongTestProperties(nodeId -> intData[(int) nodeId])),
             ImmutableNodeProperty.of("newProp2", new DoubleTestProperties(nodeId -> doubleData[(int) nodeId]))
         );
@@ -158,7 +158,7 @@ class NodePropertyExporterTest extends BaseTest {
 
         // with a node exporter
         var log = new TestLog();
-        var exporterBuilder = NodePropertyExporter
+        var exporterBuilder = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withLog(log);
         if (parallel) {
@@ -200,7 +200,7 @@ class NodePropertyExporterTest extends BaseTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        NodePropertyExporter exporter = NodePropertyExporter
+        NativeNodePropertyExporter exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), new DirectIdMapping(3), terminationFlag)
             .parallel(executorService, 4)
             .build();

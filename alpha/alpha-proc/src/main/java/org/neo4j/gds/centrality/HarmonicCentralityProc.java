@@ -27,7 +27,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
@@ -99,7 +99,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
         builder.withCentralityFunction(computationResult.result()::getCentralityScore);
 
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            NodePropertyExporter exporter =  nodePropertyExporterBuilder
+            NativeNodePropertyExporter exporter =  nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
                 .withLog(log)

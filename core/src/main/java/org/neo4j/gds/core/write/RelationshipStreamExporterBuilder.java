@@ -46,7 +46,7 @@ public abstract class RelationshipStreamExporterBuilder<T> {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
-        this.batchSize = (int) NodePropertyExporter.MIN_BATCH_SIZE;
+        this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
     }
 
     public abstract T build();

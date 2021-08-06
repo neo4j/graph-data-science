@@ -28,7 +28,7 @@ import org.neo4j.gds.core.huge.FilteredNodeProperties;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +46,7 @@ public abstract class MutatePropertyProc<
             "Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected List<NativeNodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return List.of(ImmutableNodeProperty.of(
             computationResult.config().mutateProperty(),
             nodeProperties(computationResult)
