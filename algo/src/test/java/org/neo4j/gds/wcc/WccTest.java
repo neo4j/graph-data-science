@@ -133,7 +133,7 @@ class WccTest {
             .extracting(removingThreadId())
             .hasSize(103)
             .containsSequence(
-                "WCC compute :: Start",
+                "WCC :: Start",
                 "WCC 0%",
                 "WCC 1%",
                 "WCC 2%"
@@ -142,7 +142,7 @@ class WccTest {
                 "WCC 98%",
                 "WCC 99%",
                 "WCC 100%",
-                "WCC compute :: Finished"
+                "WCC :: Finished"
             );
     }
 

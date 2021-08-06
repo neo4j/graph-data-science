@@ -63,7 +63,7 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
     ) {
         var modelSelectionTaskVolume = config.params().size() * config.validationFolds();
         return Tasks.task(
-            "compute",
+            taskName(),
             Tasks.leaf("ModelSelection", modelSelectionTaskVolume),
             Tasks.leaf("Training"),
             Tasks.task(

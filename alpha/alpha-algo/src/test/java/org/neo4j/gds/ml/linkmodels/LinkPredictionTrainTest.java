@@ -24,16 +24,13 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
@@ -41,6 +38,9 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 
 import java.util.List;
 import java.util.Map;
@@ -299,7 +299,7 @@ class LinkPredictionTrainTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsSequence(
-                "LinkPredictionTrain compute :: Start",
+                "LinkPredictionTrain :: Start",
                 "LinkPredictionTrain ModelSelection :: Start",
                 "LinkPredictionTrain 16%",
                 "LinkPredictionTrain 33%",
@@ -324,7 +324,7 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain 100%",
                 "LinkPredictionTrain Testing :: Finished",
                 "LinkPredictionTrain Evaluation :: Finished",
-                "LinkPredictionTrain compute :: Finished"
+                "LinkPredictionTrain :: Finished"
             );
     }
 }

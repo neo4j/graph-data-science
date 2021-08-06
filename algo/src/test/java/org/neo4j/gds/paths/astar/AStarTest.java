@@ -168,7 +168,7 @@ class AStarTest {
         assertEquals(1, progresses.size());
         assertEquals(9, progresses.get(0).get());
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar compute :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Start"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 5%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 17%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 23%"));
@@ -177,7 +177,7 @@ class AStarTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 41%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 47%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 52%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar compute :: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Finished"));
 
         // no duplicate entries in progress logger
         var logMessages = testLogger.getMessages(TestLog.INFO);

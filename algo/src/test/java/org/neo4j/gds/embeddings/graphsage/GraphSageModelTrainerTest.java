@@ -26,12 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.ml.core.AbstractVariable;
-import org.neo4j.gds.ml.core.Dimensions;
-import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
@@ -41,9 +35,15 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.AbstractVariable;
+import org.neo4j.gds.ml.core.Dimensions;
+import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
@@ -202,12 +202,12 @@ class GraphSageModelTrainerTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "GraphSageTrain train :: Start",
+                "GraphSageTrain :: Start",
                 "GraphSageTrain train epoch :: Start",
                 "GraphSageTrain batch task :: Start",
                 "GraphSageTrain batch task :: Finished",
                 "GraphSageTrain train epoch :: Finished",
-                "GraphSageTrain train :: Finished"
+                "GraphSageTrain :: Finished"
             );
     }
 

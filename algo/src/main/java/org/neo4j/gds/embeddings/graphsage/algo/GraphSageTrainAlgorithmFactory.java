@@ -85,7 +85,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
     @Override
     public Task progressTask(Graph graph, GraphSageTrainConfig config) {
         return Tasks.iterativeDynamic(
-            "train",
+            taskName(),
             () -> List.of(
                 Tasks.iterativeDynamic(
                     "train epoch",

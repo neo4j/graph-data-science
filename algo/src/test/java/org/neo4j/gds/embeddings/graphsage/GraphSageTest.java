@@ -24,12 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
@@ -48,6 +42,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -237,7 +237,7 @@ class GraphSageTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "GraphSage make embeddings :: Start",
+                "GraphSage :: Start",
                 "GraphSage 5%",
                 "GraphSage 10%",
                 "GraphSage 15%",
@@ -258,7 +258,7 @@ class GraphSageTest {
                 "GraphSage 90%",
                 "GraphSage 95%",
                 "GraphSage 100%",
-                "GraphSage make embeddings :: Finished"
+                "GraphSage :: Finished"
             );
     }
 

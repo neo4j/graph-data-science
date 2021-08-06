@@ -37,7 +37,7 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Ab
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return DijkstraFactory.dijkstraProgressTask(graph);
+        return DijkstraFactory.dijkstraProgressTask(taskName(), graph);
     }
 
     @Override

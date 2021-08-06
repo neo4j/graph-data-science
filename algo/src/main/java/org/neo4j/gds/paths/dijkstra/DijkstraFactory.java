@@ -43,12 +43,16 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
 
     @Override
     public Task progressTask(Graph graph, T config) {
-        return dijkstraProgressTask(graph);
+        return dijkstraProgressTask(taskName(), graph);
+    }
+
+    public static Task dijkstraProgressTask(Graph graph) {
+        return dijkstraProgressTask("Dijkstra", graph);
     }
 
     @NotNull
-    public static Task dijkstraProgressTask(Graph graph) {
-        return Tasks.leaf("compute", graph.relationshipCount());
+    public static Task dijkstraProgressTask(String taskName, Graph graph) {
+        return Tasks.leaf(taskName, graph.relationshipCount());
     }
 
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
