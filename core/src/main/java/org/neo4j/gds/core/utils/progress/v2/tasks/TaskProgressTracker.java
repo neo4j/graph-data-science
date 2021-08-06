@@ -99,6 +99,11 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public ProgressEventTracker progressEventTracker() {
+        return eventTracker;
+    }
+
+    @Override
     public void release() {
     }
 

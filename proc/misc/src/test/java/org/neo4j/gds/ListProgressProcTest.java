@@ -202,9 +202,7 @@ public class ListProgressProcTest extends BaseTest {
                         log,
                         graph.nodeCount(),
                         "FastRP",
-                        configuration.concurrency(),
-                        // use the field, not the provided one
-                        progressEventTracker
+                        configuration.concurrency()
                     );
 
                     var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, progressEventTracker);

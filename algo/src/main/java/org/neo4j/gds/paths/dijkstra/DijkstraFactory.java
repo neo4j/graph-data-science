@@ -61,21 +61,19 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        return new TaskProgressTracker(task, progressLogger(graph, log, eventTracker), eventTracker);
+        return new TaskProgressTracker(task, progressLogger(graph, log), eventTracker);
     }
 
     @NotNull
     private static BatchingProgressLogger progressLogger(
         Graph graph,
-        Log log,
-        ProgressEventTracker eventTracker
+        Log log
     ) {
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "Dijkstra",
-            1,
-            eventTracker
+            1
         );
     }
 

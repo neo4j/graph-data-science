@@ -24,14 +24,14 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.beta.k1coloring.K1Coloring;
-import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
-import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
+import org.neo4j.gds.beta.k1coloring.K1Coloring;
+import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
+import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -166,7 +166,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         var progressLogger = progressTracker.progressLogger();
         K1Coloring coloring = new K1ColoringFactory<>()
-            .build(graph, k1Config, tracker, progressLogger.getLog(), progressLogger.eventTracker())
+            .build(graph, k1Config, tracker, progressLogger.getLog(), progressTracker.progressEventTracker())
             .withTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();

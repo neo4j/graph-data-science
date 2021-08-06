@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -48,7 +46,6 @@ public abstract class NodePropertyExporterBuilder<T> {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
-        this.eventTracker = EmptyProgressEventTracker.INSTANCE;
     }
 
     public abstract T build();

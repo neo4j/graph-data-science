@@ -55,8 +55,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
             log,
             graph.relationshipCount(),
             "LabelPropagation",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
 
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

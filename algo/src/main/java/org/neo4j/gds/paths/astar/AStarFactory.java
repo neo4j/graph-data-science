@@ -45,19 +45,18 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
     }
 
     @NotNull
-    public static BatchingProgressLogger progressLogger(Graph graph, Log log, ProgressEventTracker eventTracker) {
+    public static BatchingProgressLogger progressLogger(Graph graph, Log log) {
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "AStar",
-            1,
-            eventTracker
+            1
         );
     }
 
     @Override
     public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
-        var progressLogger = progressLogger(graph, log, eventTracker);
+        var progressLogger = progressLogger(graph, log);
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return AStar.sourceTarget(graph, configuration, progressTracker, tracker);
     }

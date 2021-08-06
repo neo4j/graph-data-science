@@ -20,9 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.beta.modularity.ModularityOptimization;
-import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
-import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -31,6 +28,9 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.beta.modularity.ImmutableModularityOptimizationStreamConfig;
+import org.neo4j.gds.beta.modularity.ModularityOptimization;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -181,7 +181,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 seed,
                 tracker,
                 progressLogger.getLog(),
-                progressLogger.eventTracker()
+                progressTracker.progressEventTracker()
             ).withTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();

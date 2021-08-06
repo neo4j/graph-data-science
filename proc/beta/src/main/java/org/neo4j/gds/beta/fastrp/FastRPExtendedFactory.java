@@ -41,7 +41,7 @@ public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> impl
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRPE", configuration.concurrency(), eventTracker);
+        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRPE", configuration.concurrency());
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 

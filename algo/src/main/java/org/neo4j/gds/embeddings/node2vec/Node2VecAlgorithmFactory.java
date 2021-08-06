@@ -49,8 +49,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> impleme
             log,
             0, //dummy value, gets overridden
             "Node2Vec",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
         validateConfig(configuration, graph);
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

@@ -21,33 +21,32 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.core.GraphDimensionsStoreReader;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.GraphDimensionsValidation.validate;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromStoreConfig> {
 
@@ -142,9 +141,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.log(),
             dimensions.nodeCount() + relationshipCount,
             TASK_LOADING,
-            graphCreateConfig.readConcurrency(),
-            // TODO: actual tracker
-            EmptyProgressEventTracker.INSTANCE
+            graphCreateConfig.readConcurrency()
         );
     }
 

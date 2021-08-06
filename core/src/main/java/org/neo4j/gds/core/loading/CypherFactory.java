@@ -22,7 +22,11 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
@@ -30,19 +34,14 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsCypherReader;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
@@ -174,9 +173,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             loadingContext.log(),
             dimensions.nodeCount() + dimensions.maxRelCount(),
             TASK_LOADING,
-            graphCreateConfig.readConcurrency(),
-            // TODO: actual tracker
-            EmptyProgressEventTracker.INSTANCE
+            graphCreateConfig.readConcurrency()
         );
     }
 

@@ -25,19 +25,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.TestProgressEventTracker;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.test.TestPregelConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
@@ -45,6 +43,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.test.TestPregelConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
@@ -60,10 +60,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PregelProcTest extends BaseProcTest {
 
@@ -317,7 +317,6 @@ public class PregelProcTest extends BaseProcTest {
                         configuration,
                         tracker,
                         log,
-                        eventTracker,
                         configuration.throwInCompute()
                     );
                 }
@@ -375,7 +374,6 @@ public class PregelProcTest extends BaseProcTest {
                         configuration,
                         tracker,
                         log,
-                        eventTracker,
                         configuration.throwInCompute()
                     );
                 }
@@ -434,7 +432,6 @@ public class PregelProcTest extends BaseProcTest {
                         configuration,
                         tracker,
                         log,
-                        eventTracker,
                         configuration.throwInCompute()
                     );
                 }
@@ -462,10 +459,9 @@ public class PregelProcTest extends BaseProcTest {
             PregelProcedureConfig configuration,
             AllocationTracker tracker,
             Log log,
-            ProgressEventTracker eventTracker,
             boolean throwInCompute
         ) {
-            var progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
+            var progressLogger = new BatchingProgressLogger(log, 42, "test", 1);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

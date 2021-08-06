@@ -52,8 +52,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmF
             log,
             graph.nodeCount() * 2,
             "K1Coloring",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
 
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

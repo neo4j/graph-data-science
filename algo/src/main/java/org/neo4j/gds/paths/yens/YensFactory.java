@@ -57,15 +57,13 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     @NotNull
     public static BatchingProgressLogger progressLogger(
         Graph graph,
-        Log log,
-        ProgressEventTracker eventTracker
+        Log log
     ) {
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "Yens",
-            1,
-            eventTracker
+            1
         );
     }
 
@@ -77,7 +75,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = progressLogger(graph, log, eventTracker);
+        var progressLogger = progressLogger(graph, log);
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return Yens.sourceTarget(graph, configuration, progressTracker, tracker);
     }

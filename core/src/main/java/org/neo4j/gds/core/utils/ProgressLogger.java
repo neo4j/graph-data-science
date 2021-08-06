@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -96,8 +94,6 @@ public interface ProgressLogger {
 
     Log getLog();
 
-    ProgressEventTracker eventTracker();
-
     @Deprecated
     void logProgress(double percentDone, Supplier<String> msg);
 
@@ -170,21 +166,15 @@ public interface ProgressLogger {
         }
 
         @Override
-        public ProgressEventTracker eventTracker() {
-            return EmptyProgressEventTracker.INSTANCE;
-        }
-
-        @Override
         public void logProgress(double percentDone, Supplier<String> msg) {
 
         }
-
 
     }
 
     interface ProgressLoggerFactory {
         ProgressLogger newLogger(
-            Log log, long taskVolume, String task, int concurrency, ProgressEventTracker eventTracker
+            Log log, long taskVolume, String task, int concurrency
         );
     }
 }

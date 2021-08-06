@@ -53,8 +53,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
             log,
             graph.relationshipCount(),
             "NodeSimilarity",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
 
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

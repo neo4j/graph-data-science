@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 public class TestProgressLogger extends TestLog implements ProgressLogger {
 
     public static final ProgressLoggerFactory FACTORY =
-        (log, taskVolume, task, concurrency, eventTracker) -> new TestProgressLogger(taskVolume, task, concurrency, eventTracker);
+        (log, taskVolume, task, concurrency) -> new TestProgressLogger(taskVolume, task, concurrency);
 
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
@@ -44,7 +44,7 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
 
     public TestProgressLogger(long initialTaskVolume, String task, int concurrency, ProgressEventTracker eventTracker) {
         super();
-        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency, eventTracker);
+        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency);
         progresses = new ArrayList<>();
     }
 
@@ -98,11 +98,6 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     @Override
     public Log getLog() {
         return this;
-    }
-
-    @Override
-    public ProgressEventTracker eventTracker() {
-        return batchingLogger.eventTracker();
     }
 }
 

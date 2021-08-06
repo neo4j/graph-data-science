@@ -44,8 +44,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
             log,
             graph.nodeCount(),
             "DegreeCentrality",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
 
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

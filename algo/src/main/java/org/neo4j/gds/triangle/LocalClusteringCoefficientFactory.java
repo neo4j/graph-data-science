@@ -45,8 +45,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             log,
             graph.nodeCount(),
             getClass().getSimpleName(),
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
 
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);

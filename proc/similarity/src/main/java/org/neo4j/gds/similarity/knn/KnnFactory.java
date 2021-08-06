@@ -55,8 +55,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
             log,
             (long) Math.ceil(configuration.sampleRate() * configuration.topK() * graph.nodeCount()),
             "KNN-Graph",
-            configuration.concurrency(),
-            eventTracker
+            configuration.concurrency()
         );
         var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new Knn(
