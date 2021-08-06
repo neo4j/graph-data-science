@@ -24,24 +24,18 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.logging.Level;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -187,31 +181,7 @@ public class ListProgressProcTest extends BaseTest {
 
         @Override
         protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
-
-            return new FastRPFactory<>() {
-
-                @Override
-                public FastRP build(
-                    Graph graph,
-                    FastRPStreamConfig configuration,
-                    AllocationTracker tracker,
-                    Log log,
-                    ProgressEventTracker eventTracker
-                ) {
-                    var progressTask = progressTask(graph, configuration);
-                    var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
-                    var progressTracker = new TaskProgressTracker(progressTask, progressLogger, progressEventTracker);
-
-                    var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
-                    return new FastRP(
-                        graph,
-                        configuration,
-                        featureExtractors,
-                        progressTracker,
-                        tracker
-                    );
-                }
-            };
+            return new FastRPFactory<>();
         }
     }
 

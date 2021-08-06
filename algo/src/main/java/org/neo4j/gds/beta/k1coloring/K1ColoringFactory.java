@@ -19,43 +19,33 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
-public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmFactory<K1Coloring, T> {
+public class K1ColoringFactory<T extends K1ColoringConfig> extends AbstractAlgorithmFactory<K1Coloring, T> {
 
     @Override
-    public K1Coloring build(
-        Graph graph,
-        T configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
+    protected String taskName() {
+        return "k1Coloring";
+    }
 
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    @Override
+    protected K1Coloring build(
+        Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return new K1Coloring(
             graph,
             configuration.maxIterations(),

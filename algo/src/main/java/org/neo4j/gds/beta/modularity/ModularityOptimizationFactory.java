@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -35,15 +34,13 @@ import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
-public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> implements AlgorithmFactory<ModularityOptimization, T> {
+public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AbstractAlgorithmFactory<ModularityOptimization, T> {
 
     public static final MemoryEstimation MEMORY_ESTIMATION =
         MemoryEstimations.builder(ModularityOptimization.class)
@@ -77,20 +74,35 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     }
 
     @Override
+    protected String taskName() {
+        return "ModularityOptimization";
+    }
+
+    @Override
+    protected ModularityOptimization build(
+        Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
+        var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
+        return build(graph, configuration, seedProperty, tracker, progressTracker);
+    }
+
     public ModularityOptimization build(
         Graph graph,
         T configuration,
+        NodeProperties seedProperty,
         AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+        ProgressTracker progressTracker
     ) {
-        return build(
+        return new ModularityOptimization(
             graph,
-            configuration,
-            configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null,
-            tracker,
-            log,
-            eventTracker
+            configuration.maxIterations(),
+            configuration.tolerance(),
+            seedProperty,
+            configuration.concurrency(),
+            configuration.batchSize(),
+            Pools.DEFAULT,
+            progressTracker,
+            tracker
         );
     }
 
@@ -111,36 +123,6 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
                 () -> List.of(Tasks.leaf("optimizeForColor", graph.relationshipCount())),
                 config.maxIterations()
             )
-        );
-    }
-
-    public ModularityOptimization build(
-        Graph graph,
-        T configuration,
-        NodeProperties seed,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
-
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
-
-        return new ModularityOptimization(
-            graph,
-            configuration.maxIterations(),
-            configuration.tolerance(),
-            seed,
-            configuration.concurrency(),
-            configuration.batchSize(),
-            Pools.DEFAULT,
-            progressTracker,
-            tracker
         );
     }
 }

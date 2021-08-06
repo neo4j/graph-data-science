@@ -19,30 +19,27 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
-public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> implements AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
+public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AbstractAlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
     @Override
-    public LocalClusteringCoefficient build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    protected String taskName() {
+        return "LocalClusteringCoefficient";
+    }
 
+    @Override
+    protected LocalClusteringCoefficient build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return new LocalClusteringCoefficient(
             graph,
             configuration,
@@ -79,7 +76,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return config.seedProperty() == null
-            ? Tasks.task("LocalClusterCoefficient", IntersectingTriangleCountFactory.triangleCountProgressTask(graph))
-            : Tasks.leaf("LocalClusterCoefficient");
+            ? Tasks.task(taskName(), IntersectingTriangleCountFactory.triangleCountProgressTask(graph))
+            : Tasks.leaf(taskName());
     }
 }

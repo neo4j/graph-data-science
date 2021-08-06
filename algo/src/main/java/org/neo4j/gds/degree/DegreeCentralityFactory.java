@@ -20,34 +20,28 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
-public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> implements AlgorithmFactory<DegreeCentrality, CONFIG> {
+public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> extends AbstractAlgorithmFactory<DegreeCentrality, CONFIG> {
 
     @Override
-    public DegreeCentrality build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
+    protected String taskName() {
+        return "DegreeCentrality";
+    }
 
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    @Override
+    protected DegreeCentrality build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, tracker);
     }
 

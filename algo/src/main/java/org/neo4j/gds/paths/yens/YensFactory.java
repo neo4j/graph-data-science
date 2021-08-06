@@ -19,22 +19,19 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
-public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements AlgorithmFactory<Yens, CONFIG> {
+public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends AbstractAlgorithmFactory<Yens, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {
@@ -44,7 +41,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "Yens",
+            taskName(),
             DijkstraFactory.dijkstraProgressTask(graph),
             Tasks.iterativeOpen(
                 "Searching path",
@@ -54,16 +51,14 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     }
 
     @Override
-    public Yens build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+    protected String taskName() {
+        return "Yens";
+    }
+
+    @Override
+    protected Yens build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return Yens.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

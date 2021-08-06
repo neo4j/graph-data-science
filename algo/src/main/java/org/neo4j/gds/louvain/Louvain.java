@@ -172,16 +172,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .batchSize(DEFAULT_BATCH_SIZE)
             .build();
 
-        var progressLogger = progressTracker.progressLogger();
-
         ModularityOptimization modularityOptimization = new ModularityOptimizationFactory<>()
             .build(
                 louvainGraph,
                 modularityOptimizationConfig,
                 seed,
                 tracker,
-                progressLogger.getLog(),
-                progressTracker.progressEventTracker()
+                progressTracker
             ).withTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();

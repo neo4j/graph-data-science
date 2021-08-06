@@ -19,40 +19,32 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
 import static java.lang.Math.multiplyExact;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> implements AlgorithmFactory<Node2Vec, CONFIG> {
+public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends AbstractAlgorithmFactory<Node2Vec, CONFIG> {
+
     @Override
-    public Node2Vec build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+    protected String taskName() {
+        return "Node2Vec";
+    }
+
+    @Override
+    protected Node2Vec build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
         validateConfig(configuration, graph);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return new Node2Vec(graph, configuration, progressTracker, tracker);
     }
 

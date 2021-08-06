@@ -19,19 +19,16 @@
  */
 package org.neo4j.gds.paths.astar;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.logging.Log;
 
-public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
+public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends AbstractAlgorithmFactory<AStar, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
@@ -44,10 +41,14 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
     }
 
     @Override
-    public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    protected String taskName() {
+        return "AStar";
+    }
+
+    @Override
+    protected AStar build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return AStar.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

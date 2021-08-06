@@ -20,46 +20,35 @@
 package org.neo4j.gds.labelpropagation;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> implements AlgorithmFactory<LabelPropagation, CONFIG> {
+public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends AbstractAlgorithmFactory<LabelPropagation, CONFIG> {
 
     @Override
-    public LabelPropagation build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+    protected String taskName() {
+        return "LabelPropagation";
+    }
+
+    @Override
+    protected LabelPropagation build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
-
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
-
         return new LabelPropagation(
             graph,
             configuration,

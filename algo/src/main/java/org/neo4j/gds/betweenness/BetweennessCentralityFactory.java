@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -31,23 +30,22 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> implements AlgorithmFactory<BetweennessCentrality, CONFIG> {
+public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends AbstractAlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
-    public BetweennessCentrality build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+    protected String taskName() {
+        return "BetweennessCentrality";
+    }
+
+    @Override
+    protected BetweennessCentrality build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
         var samplingSize = configuration.samplingSize();
         var samplingSeed = configuration.samplingSeed();
@@ -55,15 +53,6 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
         var strategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
             : SelectionStrategy.ALL;
-
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
-
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new BetweennessCentrality(
             graph,

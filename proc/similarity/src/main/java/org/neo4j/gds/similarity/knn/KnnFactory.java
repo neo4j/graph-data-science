@@ -20,20 +20,17 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
@@ -42,19 +39,17 @@ import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactory<Knn, CONFIG> {
-    @Override
-    public Knn build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+public class KnnFactory<CONFIG extends KnnBaseConfig> extends AbstractAlgorithmFactory<Knn, CONFIG> {
 
+    @Override
+    protected String taskName() {
+        return "Knn";
+    }
+
+    @Override
+    protected Knn build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return new Knn(
             graph,
             configuration,
@@ -70,7 +65,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         return MemoryEstimations.setup(
-            "KNN",
+            taskName(),
             (dim, concurrency) -> {
                 var boundedK = configuration.boundedK(dim.nodeCount());
                 var sampledK = configuration.sampledK(dim.nodeCount());

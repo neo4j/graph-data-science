@@ -20,39 +20,33 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> implements AlgorithmFactory<NodeSimilarity, CONFIG> {
+public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AbstractAlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
-    public NodeSimilarity build(
-        Graph graph,
-        CONFIG configuration,
-        AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    protected String taskName() {
+        return "NodeSimilarity";
+    }
 
+    @Override
+    protected NodeSimilarity build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, tracker);
     }
 

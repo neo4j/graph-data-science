@@ -19,31 +19,28 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
-public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
+public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AbstractAlgorithmFactory<FastRP, CONFIG> {
 
     @Override
-    public FastRP build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressTask = progressTask(graph, configuration);
-        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+    protected String taskName() {
+        return "FastRP";
+    }
 
+    @Override
+    protected FastRP build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+    ) {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
         return new FastRP(
@@ -63,7 +60,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "FastRP",
+            taskName(),
             Tasks.leaf("Initialize Random Vectors", graph.nodeCount()),
             Tasks.iterativeFixed(
                 "Propagate embeddings",
@@ -72,5 +69,4 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
             )
         );
     }
-
 }

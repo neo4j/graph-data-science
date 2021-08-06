@@ -20,25 +20,21 @@
 package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.logging.Log;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> implements AlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends AbstractAlgorithmFactory<Dijkstra, T> {
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
@@ -55,31 +51,23 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return Tasks.leaf("compute", graph.relationshipCount());
     }
 
-    public static ProgressTracker progressTracker(
-        Task progressTask,
-        Log log,
-        ProgressEventTracker eventTracker
-    ) {
-        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
-        return new TaskProgressTracker(progressTask, progressLogger, eventTracker);
-    }
-
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
         return new DijkstraFactory<>() {
+
             @Override
-            public Dijkstra build(
-                Graph graph,
-                T configuration,
-                AllocationTracker tracker,
-                Log log,
-                ProgressEventTracker eventTracker
+            protected String taskName() {
+                return "Dijkstra#sourceTarget";
+            }
+
+            @Override
+            protected Dijkstra build(
+                Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
             ) {
-                var progressTask = progressTask(graph, configuration);
                 return Dijkstra.sourceTarget(
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressTracker(progressTask, log, eventTracker),
+                    progressTracker,
                     tracker
                 );
             }
@@ -89,19 +77,19 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
         return new DijkstraFactory<>() {
             @Override
-            public Dijkstra build(
-                Graph graph,
-                T configuration,
-                AllocationTracker tracker,
-                Log log,
-                ProgressEventTracker eventTracker
+            protected String taskName() {
+                return "Dijkstra#singleSource";
+            }
+
+            @Override
+            protected Dijkstra build(
+                Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
             ) {
-                var progressTask = progressTask(graph, configuration);
                 return Dijkstra.singleSource(
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressTracker(progressTask, log, eventTracker),
+                    progressTracker,
                     tracker
                 );
             }
