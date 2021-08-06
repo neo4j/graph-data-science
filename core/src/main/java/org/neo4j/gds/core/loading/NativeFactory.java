@@ -39,6 +39,7 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.Map;
@@ -139,8 +140,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         return new BatchingProgressLogger(
             loadingContext.log(),
-            dimensions.nodeCount() + relationshipCount,
-            TASK_LOADING,
+            Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + relationshipCount),
             graphCreateConfig.readConcurrency()
         );
     }

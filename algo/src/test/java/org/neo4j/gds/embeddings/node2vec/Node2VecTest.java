@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -39,6 +38,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -109,13 +109,12 @@ class Node2VecTest extends AlgoTestBase {
 
         int embeddingDimension = 128;
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build();
+        var progressTask = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
         var testLogger = new TestProgressLogger(
-            graph.nodeCount() * config.walksPerNode(),
-            "Node2Vec",
+            progressTask,
             4
         );
-        var task = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
-        var progressTracker = new TaskProgressTracker(task, testLogger);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
         new Node2Vec(
             graph,
             config,

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.astar;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
@@ -44,20 +43,11 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
         return DijkstraFactory.dijkstraProgressTask(graph);
     }
 
-    @NotNull
-    public static BatchingProgressLogger progressLogger(Graph graph, Log log) {
-        return new BatchingProgressLogger(
-            log,
-            graph.relationshipCount(),
-            "AStar",
-            1
-        );
-    }
-
     @Override
     public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
-        var progressLogger = progressLogger(graph, log);
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return AStar.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

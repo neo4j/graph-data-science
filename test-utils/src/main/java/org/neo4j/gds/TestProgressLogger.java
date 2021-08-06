@@ -21,8 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
@@ -33,18 +32,14 @@ import java.util.function.Supplier;
 public class TestProgressLogger extends TestLog implements ProgressLogger {
 
     public static final ProgressLoggerFactory FACTORY =
-        (log, taskVolume, task, concurrency) -> new TestProgressLogger(taskVolume, task, concurrency);
+        (log, task, concurrency) -> new TestProgressLogger(task, concurrency);
 
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
 
-    public TestProgressLogger(long initialTaskVolume, String task, int concurrency) {
-        this(initialTaskVolume, task, concurrency, EmptyProgressEventTracker.INSTANCE);
-    }
-
-    public TestProgressLogger(long initialTaskVolume, String task, int concurrency, ProgressEventTracker eventTracker) {
+    public TestProgressLogger(Task task, int concurrency) {
         super();
-        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency);
+        this.batchingLogger = new BatchingProgressLogger(this, task, concurrency);
         progresses = new ArrayList<>();
     }
 

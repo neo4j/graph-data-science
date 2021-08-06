@@ -198,14 +198,9 @@ public class ListProgressProcTest extends BaseTest {
                     Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    var progressLogger = new BatchingProgressLogger(
-                        log,
-                        graph.nodeCount(),
-                        "FastRP",
-                        configuration.concurrency()
-                    );
-
-                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, progressEventTracker);
+                    var progressTask = progressTask(graph, configuration);
+                    var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+                    var progressTracker = new TaskProgressTracker(progressTask, progressLogger, progressEventTracker);
 
                     var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
                     return new FastRP(

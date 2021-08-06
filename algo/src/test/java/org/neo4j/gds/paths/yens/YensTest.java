@@ -27,9 +27,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.paths.ImmutablePathResult;
-import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
@@ -41,6 +38,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.paths.ImmutablePathResult;
+import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Vertex;
@@ -170,7 +170,6 @@ class YensTest {
     @Test
     void shouldLogProgress() {
         int k = 3;
-        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Yens", 1);
 
         var config = defaultSourceTargetConfigBuilder()
             .sourceNode(idFunction.of("c"))
@@ -178,8 +177,9 @@ class YensTest {
             .k(k)
             .build();
 
-        var task = new YensFactory<>().progressTask(graph, config);
-        var progressTracker = new TaskProgressTracker(task, testLogger);
+        var progressTask = new YensFactory<>().progressTask(graph, config);
+        var testLogger = new TestProgressLogger(progressTask, 1);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
 
         Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()

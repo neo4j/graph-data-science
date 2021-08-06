@@ -56,25 +56,12 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     public static ProgressTracker progressTracker(
-        Task task,
-        Graph graph,
+        Task progressTask,
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        return new TaskProgressTracker(task, progressLogger(graph, log), eventTracker);
-    }
-
-    @NotNull
-    private static BatchingProgressLogger progressLogger(
-        Graph graph,
-        Log log
-    ) {
-        return new BatchingProgressLogger(
-            log,
-            graph.relationshipCount(),
-            "Dijkstra",
-            1
-        );
+        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
+        return new TaskProgressTracker(progressTask, progressLogger, eventTracker);
     }
 
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
@@ -92,7 +79,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressTracker(progressTask, graph, log, eventTracker),
+                    progressTracker(progressTask, log, eventTracker),
                     tracker
                 );
             }
@@ -114,7 +101,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressTracker(progressTask, graph, log, eventTracker),
+                    progressTracker(progressTask, log, eventTracker),
                     tracker
                 );
             }

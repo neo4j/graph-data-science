@@ -40,10 +40,12 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency());
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new FastRP(
             graph,
             configuration,

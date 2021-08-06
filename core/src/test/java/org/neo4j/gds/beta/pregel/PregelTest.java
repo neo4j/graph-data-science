@@ -32,10 +32,6 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -49,6 +45,11 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -129,9 +130,8 @@ class PregelTest {
 
         var computation = new TestPregelComputation();
 
-        var progressLogger =  new TestProgressLogger(
-            graph.nodeCount(),
-            computation.getClass().getSimpleName(),
+        var progressLogger = new TestProgressLogger(
+            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
             config.concurrency()
         );
 
@@ -194,10 +194,8 @@ class PregelTest {
         var computation = new TestPregelComputation();
 
         var progressLogger =  new TestProgressLogger(
-            graph.nodeCount(),
-            computation.getClass().getSimpleName(),
-            config.concurrency(),
-            eventTracker
+            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
+            config.concurrency()
         );
 
         // TODO: this will be handles by the ProgressTracker

@@ -51,13 +51,10 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            (long) Math.ceil(configuration.sampleRate() * configuration.topK() * graph.nodeCount()),
-            "KNN-Graph",
-            configuration.concurrency()
-        );
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+
         return new Knn(
             graph,
             configuration,

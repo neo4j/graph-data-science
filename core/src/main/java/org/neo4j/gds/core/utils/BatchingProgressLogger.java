@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -37,11 +38,15 @@ public class BatchingProgressLogger implements ProgressLogger {
     private final int concurrency;
     private long taskVolume;
     private long batchSize;
-    private String task;
+    private String taskName;
     private final LongAdder progressCounter;
     private final ThreadLocal<MutableLong> callCounter;
 
     private int globalPercentage;
+
+    private static long calculateBatchSize(Task task, int concurrency) {
+        return calculateBatchSize(Math.max(1L, task.getProgress().volume()), concurrency);
+    }
 
     private static long calculateBatchSize(long taskVolume, int concurrency) {
         // target 100 logs per full run (every 1 percent)
@@ -52,15 +57,15 @@ public class BatchingProgressLogger implements ProgressLogger {
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
-        this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency);
+    public BatchingProgressLogger(Log log, Task task, int concurrency) {
+        this(log, task, calculateBatchSize(task, concurrency), concurrency);
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
+    public BatchingProgressLogger(Log log, Task task, long batchSize, int concurrency) {
         this.log = log;
-        this.taskVolume = taskVolume;
+        this.taskVolume = task.getProgress().volume();
         this.batchSize = batchSize;
-        this.task = task;
+        this.taskName = task.description();
 
         this.progressCounter = new LongAdder();
         this.callCounter = ThreadLocal.withInitial(MutableLong::new);
@@ -70,12 +75,12 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public String getTask() {
-        return task;
+        return taskName;
     }
 
     @Override
     public void setTask(String task) {
-        this.task = task;
+        this.taskName = task;
     }
 
     @Override
@@ -122,18 +127,18 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     private void logProgress(int nextPercentage) {
-        logInfo(formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage));
+        logInfo(formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), taskName, nextPercentage));
     }
 
     private void logProgressWithMessage(int nextPercentage, String msg) {
         logInfo(
-            formatWithLocale("[%s] %s %d%% %s", Thread.currentThread().getName(), task, nextPercentage, msg)
+            formatWithLocale("[%s] %s %d%% %s", Thread.currentThread().getName(), taskName, nextPercentage, msg)
         );
     }
 
     @Override
     public void logMessage(String msg) {
-        logInfo(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), task, msg));
+        logInfo(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), taskName, msg));
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -49,9 +50,8 @@ class BatchingProgressLoggerTest {
         var batchSize = 8;
         var logger = new BatchingProgressLogger(
             log,
-            taskVolume,
+            Tasks.leaf("foo", taskVolume),
             batchSize,
-            "foo",
             /* concurrency */0
         );
 
@@ -82,9 +82,8 @@ class BatchingProgressLoggerTest {
         var batchSize = 16;
         var logger = new BatchingProgressLogger(
             log,
-            taskVolume,
+            Tasks.leaf("foo", taskVolume),
             batchSize,
-            "foo",
             /* concurrency */1
         );
 
@@ -139,7 +138,7 @@ class BatchingProgressLoggerTest {
         var concurrency = 1;
         var taskVolume = 1337;
 
-        var logger = new TestProgressLogger(taskVolume, "Test", concurrency); // batchSize is 13
+        var logger = new TestProgressLogger(Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(logger.getMessages(TestLog.INFO))
@@ -153,7 +152,7 @@ class BatchingProgressLoggerTest {
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
-        var logger = new TestProgressLogger(taskVolume, "Test", concurrency);
+        var logger = new TestProgressLogger(Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);

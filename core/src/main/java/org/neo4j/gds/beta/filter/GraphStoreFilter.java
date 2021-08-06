@@ -22,15 +22,16 @@ package org.neo4j.gds.beta.filter;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.beta.filter.expression.Expression;
-import org.neo4j.gds.config.GraphCreateFromGraphConfig;
-import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
+import org.neo4j.gds.config.GraphCreateFromGraphConfig;
+import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
@@ -50,10 +51,10 @@ public final class GraphStoreFilter {
 
         var inputNodes = graphStore.nodes();
 
+        // TODO use TaskProgressTracker here
         var progressLogger = new BatchingProgressLogger(
             log,
-            inputNodes.nodeCount(),
-            "GraphStore Filter",
+            Tasks.leaf("GraphStore Filter", inputNodes.nodeCount()),
             config.concurrency()
         );
 

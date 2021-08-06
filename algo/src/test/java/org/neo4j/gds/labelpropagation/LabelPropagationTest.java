@@ -27,10 +27,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -237,13 +237,9 @@ class LabelPropagationTest {
 
     @Test
     void shouldLogProgress() {
-        var testLogger = new TestProgressLogger(
-            graph.relationshipCount(),
-            "LabelPropagation",
-            DEFAULT_CONFIG.concurrency()
-        );
-        var task = new LabelPropagationFactory<>().progressTask(graph, DEFAULT_CONFIG);
-        var testTracker = new TaskProgressTracker(task, testLogger);
+        var progressTask = new LabelPropagationFactory<>().progressTask(graph, DEFAULT_CONFIG);
+        var testLogger = new TestProgressLogger(progressTask, DEFAULT_CONFIG.concurrency());
+        var testTracker = new TaskProgressTracker(progressTask, testLogger);
 
         var lp = new LabelPropagation(
             graph,

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
@@ -111,12 +112,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                 label.name()
             );
 
-            var progressLogger = new BatchingProgressLogger(
-                log,
-                subGraph.nodeCount(),
-                taskName,
-                config.writeConcurrency()
-            );
+            var progressLogger = new BatchingProgressLogger(log, Tasks.leaf(taskName, subGraph.nodeCount()), config.writeConcurrency());
 
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(subGraph)

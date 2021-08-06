@@ -122,14 +122,14 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
         Log log,
         ProgressEventTracker eventTracker
     ) {
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            graph.relationshipCount(),
-            "ModularityOptimization",
+            progressTask,
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new ModularityOptimization(
             graph,

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.NullLog;
 
 
@@ -31,12 +32,7 @@ public abstract class AlgoTestBase extends BaseTest {
 
     @BeforeEach
     void resetProgressLogger() {
-        this.progressLogger = new BatchingProgressLogger(
-            NullLog.getInstance(),
-            0,
-            "Test",
-            1
-        );
+        this.progressLogger = new BatchingProgressLogger(NullLog.getInstance(), Tasks.leaf("Test", 0), 1);
     }
 
     protected void runQuery(String query) {

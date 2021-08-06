@@ -430,15 +430,15 @@ class LouvainTest {
 
         var config = defaultConfigBuilder().build();
 
-        var testLogger = new TestProgressLogger(0, "Louvain", config.concurrency());
-        var task = new LouvainFactory<>().progressTask(graph, config);
-        var testTracker = new TaskProgressTracker(task, testLogger);
+        var progressTask = new LouvainFactory<>().progressTask(graph, config);
+        var testLogger = new TestProgressLogger(progressTask, config.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
 
         var louvain = new Louvain(
             graph,
             config,
             Pools.DEFAULT,
-            testTracker,
+            progressTracker,
             AllocationTracker.empty()
         );
 

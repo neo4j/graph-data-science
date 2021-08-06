@@ -43,6 +43,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.test.TestPregelConfig;
 import org.neo4j.logging.Log;
@@ -461,7 +462,7 @@ public class PregelProcTest extends BaseProcTest {
             Log log,
             boolean throwInCompute
         ) {
-            var progressLogger = new BatchingProgressLogger(log, 42, "test", 1);
+            var progressLogger = new BatchingProgressLogger(log, Tasks.leaf("test", 42), 1);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

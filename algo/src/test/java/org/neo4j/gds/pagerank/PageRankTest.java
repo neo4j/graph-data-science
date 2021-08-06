@@ -28,8 +28,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode;
-import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
@@ -43,6 +41,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode;
+import org.neo4j.gds.scaling.ScalarScaler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,9 +52,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PageRankTest {
 
@@ -170,15 +170,9 @@ class PageRankTest {
                 .maxIterations(maxIterations)
                 .build();
 
-            var testLogger = new TestProgressLogger(
-                graph.nodeCount(),
-                "PageRank",
-                config.concurrency()
-            );
-
-            var task = PageRankAlgorithmFactory.pagerankProgressTask(graph);
-
-            var progressTracker = new TaskProgressTracker(task, testLogger);
+            var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph);
+            var testLogger = new TestProgressLogger(progressTask, config.concurrency());
+            var progressTracker = new TaskProgressTracker(progressTask, testLogger);
 
             runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
 

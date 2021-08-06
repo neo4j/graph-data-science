@@ -56,14 +56,14 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
             : SelectionStrategy.ALL;
 
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            graph.nodeCount(),
-            "BetweennessCentrality",
+            progressTask,
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new BetweennessCentrality(
             graph,

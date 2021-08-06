@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -171,11 +172,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testLogging() {
-        var testLogger = new TestProgressLogger(
-            graph.relationshipCount(),
-            "ModularityOptimization",
-            3
-        );
+        var testLogger = new TestProgressLogger(Tasks.leaf("ModularityOptimization", graph.relationshipCount()), 3);
 
         compute(graph, 3, null, 3, 2, testLogger);
 

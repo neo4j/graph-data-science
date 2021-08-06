@@ -49,14 +49,9 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            graph.relationshipCount(),
-            "NodeSimilarity",
-            configuration.concurrency()
-        );
-
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, tracker);
     }

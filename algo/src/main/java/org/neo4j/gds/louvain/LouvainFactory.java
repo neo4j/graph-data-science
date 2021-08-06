@@ -57,14 +57,14 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
         final Log log,
         ProgressEventTracker eventTracker
     ) {
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            1,
-            "Louvain",
+            progressTask,
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new Louvain(
             graph,

@@ -26,9 +26,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
@@ -46,6 +45,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -62,8 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
@@ -72,6 +71,8 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
+import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 final class NodeSimilarityTest {
@@ -798,25 +799,26 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
-        var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
+        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).build();
 
+        var progressLog = new TestLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
-            configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
+            config,
             AllocationTracker.empty(),
-            progressLogger.getLog(),
+            progressLog,
             EmptyProgressEventTracker.INSTANCE
         );
 
         nodeSimilarity.compute();
 
-        assertTrue(progressLogger.hasMessages(INFO));
+        assertTrue(progressLog.hasMessages(INFO));
 
-        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity prepare :: Start"));
-        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity prepare :: Finished"));
+        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity prepare :: Start"));
+        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity prepare :: Finished"));
 
-        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity compare :: Start"));
-        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity compare :: Finished"));
+        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity compare :: Start"));
+        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity compare :: Finished"));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -824,8 +826,9 @@ final class NodeSimilarityTest {
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
-        var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
-        var progressTracker = new TaskProgressTracker(new NodeSimilarityFactory<>().progressTask(graph, config), progressLogger);
+        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
+        var progressLogger = new TestProgressLogger(progressTask, concurrency);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
 
         var nodeSimilarity = new NodeSimilarity(
             graph,

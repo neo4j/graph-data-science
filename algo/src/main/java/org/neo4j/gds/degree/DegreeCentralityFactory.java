@@ -40,14 +40,14 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
     public DegreeCentrality build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker
     ) {
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            graph.nodeCount(),
-            "DegreeCentrality",
+            progressTask,
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, tracker);
     }
 

@@ -20,9 +20,9 @@
 package org.neo4j.gds.api;
 
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.utils.ProgressLogger;
@@ -48,6 +48,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     protected final CONFIG graphCreateConfig;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
+    // TODO use progress tracker here
     protected final ProgressLogger progressLogger;
 
     public GraphStoreFactory(

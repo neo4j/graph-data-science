@@ -36,7 +36,6 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 
@@ -211,8 +210,9 @@ class K1ColoringTest {
             .maxIterations(100)
             .build();
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", concurrency, EmptyProgressEventTracker.INSTANCE);
-        var progressTracker = new TaskProgressTracker(new K1ColoringFactory<>().progressTask(graph, config), testLogger);
+        var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
+        var testLogger = new TestProgressLogger(progressTask, concurrency);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
 
         var k1Coloring = new K1Coloring(
             graph,

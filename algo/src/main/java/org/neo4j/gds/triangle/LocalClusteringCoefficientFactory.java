@@ -22,7 +22,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -40,15 +39,9 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
         ProgressEventTracker eventTracker
     ) {
-
-        ProgressLogger progressLogger = new BatchingProgressLogger(
-            log,
-            graph.nodeCount(),
-            getClass().getSimpleName(),
-            configuration.concurrency()
-        );
-
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new LocalClusteringCoefficient(
             graph,

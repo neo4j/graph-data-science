@@ -40,11 +40,10 @@ public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         ProgressEventTracker eventTracker
     ) {
         ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
-        return algo.withProgressTracker(new TaskProgressTracker(
-            progressTask(graph, configuration),
-            new BatchingProgressLogger(log, 0, algo.getClass().getSimpleName(), configuration.concurrency()),
-            eventTracker
-        ));
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, configuration.concurrency());
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
+        return algo.withProgressTracker(progressTracker);
     }
 
     ALGO buildAlphaAlgo(

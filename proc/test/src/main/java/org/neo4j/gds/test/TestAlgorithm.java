@@ -50,7 +50,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         this.throwInCompute = throwInCompute;
         this.progressTracker = new TaskProgressTracker(
             Tasks.leaf("TestAlgorithm"),
-            new BatchingProgressLogger(log, 42, "test", 1),
+            new BatchingProgressLogger(log, Tasks.leaf("test", 42), 1),
             eventTracker
         );
     }

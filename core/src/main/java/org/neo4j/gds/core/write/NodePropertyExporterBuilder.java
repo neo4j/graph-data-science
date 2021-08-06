@@ -25,6 +25,8 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -67,7 +69,7 @@ public abstract class NodePropertyExporterBuilder<T> {
     }
 
     public NodePropertyExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
-        return withProgressLogger(new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker));
+        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), taskVolume()), writeConcurrency, eventTracker));
     }
 
     public NodePropertyExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
@@ -83,9 +85,5 @@ public abstract class NodePropertyExporterBuilder<T> {
 
     protected String taskName() {
         return "WriteNodeProperties";
-    }
-
-    protected long taskVolume() {
-        return nodeCount;
     }
 }

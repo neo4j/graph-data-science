@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
@@ -54,19 +53,6 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
         );
     }
 
-    @NotNull
-    public static BatchingProgressLogger progressLogger(
-        Graph graph,
-        Log log
-    ) {
-        return new BatchingProgressLogger(
-            log,
-            graph.relationshipCount(),
-            "Yens",
-            1
-        );
-    }
-
     @Override
     public Yens build(
         Graph graph,
@@ -75,8 +61,9 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        var progressLogger = progressLogger(graph, log);
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTask = progressTask(graph, configuration);
+        var progressLogger = new BatchingProgressLogger(log, progressTask, 1);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return Yens.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

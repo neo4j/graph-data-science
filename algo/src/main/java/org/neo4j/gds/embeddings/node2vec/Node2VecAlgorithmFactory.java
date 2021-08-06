@@ -45,14 +45,14 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> impleme
         Log log,
         ProgressEventTracker eventTracker
     ) {
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            0, //dummy value, gets overridden
-            "Node2Vec",
+            progressTask,
             configuration.concurrency()
         );
         validateConfig(configuration, graph);
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
         return new Node2Vec(graph, configuration, progressTracker, tracker);
     }
 

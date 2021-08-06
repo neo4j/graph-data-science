@@ -26,13 +26,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ final class ApproxMaxKCutTest {
 
         var config = configBuilder.build();
 
-        TestProgressLogger progressLogger = new TestProgressLogger(graph.nodeCount(), "Approximate Maximum k-cut", 1);
+        TestProgressLogger progressLogger = new TestProgressLogger(Tasks.leaf("Approximate Maximum k-cut", graph.nodeCount()), 1);
         var approxMaxKCut = new ApproxMaxKCut(
             graph,
             Pools.DEFAULT,

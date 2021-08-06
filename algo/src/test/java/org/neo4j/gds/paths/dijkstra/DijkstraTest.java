@@ -28,6 +28,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -35,10 +39,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,15 +263,15 @@ final class DijkstraTest {
 
         @Test
         void shouldLogProgress() {
-            var testLogger = new TestProgressLogger(graph.relationshipCount(), "Dijkstra", 1);
 
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("a"))
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            var task = DijkstraFactory.sourceTarget().progressTask(graph, config);
-            var progressTracker = new TaskProgressTracker(task, testLogger);
+            var progressTask = DijkstraFactory.sourceTarget().progressTask(graph, config);
+            var testLogger = new TestProgressLogger(progressTask, 1);
+            var progressTracker = new TaskProgressTracker(progressTask, testLogger);
 
             Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker, AllocationTracker.empty())
                 .compute()

@@ -51,14 +51,14 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         Log log,
         ProgressEventTracker eventTracker
     ) {
+        var progressTask = progressTask(graph, configuration);
         var progressLogger = new BatchingProgressLogger(
             log,
-            graph.relationshipCount(),
-            "LabelPropagation",
+            progressTask,
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, eventTracker);
 
         return new LabelPropagation(
             graph,
