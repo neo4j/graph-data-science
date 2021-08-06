@@ -20,17 +20,17 @@
 package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.SchemaDeserializer;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.model.ZonedDateTimeSerializer;
+import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.gds.model.storage.ModelFileWriter;
 import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.ModelConfig;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.proto.ModelProto;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -40,7 +40,7 @@ import java.util.List;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class StoredModel implements Model<Object, ModelConfig> {
+public class StoredModel implements Model<Object, ModelConfig, Model.Mappable> {
 
     private final ModelProto.ModelMetaData metaData;
     private final ModelFileReader modelReader;
@@ -123,7 +123,7 @@ public class StoredModel implements Model<Object, ModelConfig> {
     }
 
     @Override
-    public Model<Object, ModelConfig> publish() {
+    public Model<Object, ModelConfig, Mappable> publish() {
         try {
             var deletedMetaData = fileLocation.resolve(META_DATA_FILE).toFile().delete();
 

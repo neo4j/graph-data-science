@@ -21,15 +21,16 @@ package org.neo4j.gds.model.storage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.FileInputStream;
@@ -58,7 +59,7 @@ class ModelToFileExporterTest {
         .projectedFeatureDimension(5)
         .build();
 
-    private static final Model<ModelData, GraphSageTrainConfig> MODEL = Model.of(
+    private static final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> MODEL = Model.of(
         "user1",
         "testModel",
         GraphSage.MODEL_TYPE,

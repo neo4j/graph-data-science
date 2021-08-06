@@ -20,10 +20,10 @@
 package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
-import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -34,14 +34,14 @@ import java.nio.file.Path;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 
-public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
+public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig, INFO extends Model.Mappable> {
 
     private final Path persistenceDir;
-    private final Model<DATA, CONFIG> model;
+    private final Model<DATA, CONFIG, INFO> model;
 
     public ModelFileWriter(
         Path persistenceDir,
-        Model<DATA, CONFIG> model
+        Model<DATA, CONFIG, INFO> model
     ) {
         this.persistenceDir = persistenceDir;
         this.model = model;

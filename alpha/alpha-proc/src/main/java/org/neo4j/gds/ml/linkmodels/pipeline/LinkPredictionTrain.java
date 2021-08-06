@@ -55,7 +55,7 @@ import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrain
-    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
+    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 
@@ -81,7 +81,7 @@ public class LinkPredictionTrain
     }
 
     @Override
-    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
+    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
         List<String> relationshipTypes = trainConfig
             .internalRelationshipTypes(graphStore)
             .stream()
@@ -359,7 +359,7 @@ public class LinkPredictionTrain
         }
     }
 
-    private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> createModel(
+    private Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         ModelSelectResult modelSelectResult,
         LinkLogisticRegressionData modelData,
         Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics

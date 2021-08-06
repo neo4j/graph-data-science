@@ -23,10 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -37,9 +33,13 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.logging.NullLog;
@@ -85,7 +85,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertNotNull(resultRow);
             assertNotNull(resultRow.get("configuration"));
             assertEquals(graphName, resultRow.get("graphName"));
-            Map<String, Object> modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
+            var modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
             assertNotNull(modelInfo);
             assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
             assertEquals(GraphSage.MODEL_TYPE, modelInfo.get(MODEL_TYPE_KEY));
@@ -96,7 +96,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             getUsername(),
             modelName,
             ModelData.class,
-            GraphSageTrainConfig.class
+            GraphSageTrainConfig.class,
+            GraphSageModelTrainer.GraphSageTrainMetrics.class
         );
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
@@ -162,7 +163,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             getUsername(),
             modelName,
             ModelData.class,
-            GraphSageTrainConfig.class
+            GraphSageTrainConfig.class,
+            GraphSageModelTrainer.GraphSageTrainMetrics.class
         );
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());

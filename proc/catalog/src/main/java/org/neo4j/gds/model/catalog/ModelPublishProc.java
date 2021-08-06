@@ -20,13 +20,11 @@
 package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -36,8 +34,8 @@ public class ModelPublishProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.model.publish", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelCatalogProc.ModelResult> publish(@Name(value = "modelName") String modelName) throws IOException {
-        Model<?, ?> publish = ModelCatalog.publish(username(), modelName);
+    public Stream<ModelCatalogProc.ModelResult> publish(@Name(value = "modelName") String modelName) {
+        var publish = ModelCatalog.publish(username(), modelName);
         return Stream.of(new ModelCatalogProc.ModelResult(publish));
     }
 }

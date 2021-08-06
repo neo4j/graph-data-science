@@ -20,18 +20,18 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -99,7 +99,8 @@ public class NodeClassificationPredictStreamProc
             config.username(),
             config.modelName(),
             NodeLogisticRegressionData.class,
-            NodeClassificationTrainConfig.class
+            NodeClassificationTrainConfig.class,
+            NodeClassificationModelInfo.class
         ).trainConfig();
         GraphStoreValidation.validate(graphStore, trainConfig);
     }

@@ -24,8 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
@@ -36,6 +34,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 
 import java.util.Arrays;
 import java.util.List;
@@ -104,7 +104,7 @@ class NodeClassificationTrainTest {
 
         var model = ncTrain.compute();
 
-        var customInfo = (NodeClassificationModelInfo) model.customInfo();
+        var customInfo = model.customInfo();
         var validationScores = customInfo.metrics().get(metric).validation();
 
         assertThat(validationScores).hasSize(2);
@@ -173,10 +173,10 @@ class NodeClassificationTrainTest {
             .withFailMessage("Should not produce the same trained `data`!")
             .isNotEqualTo(bananasModel.data());
 
-        var bananasCustomInfo = (NodeClassificationModelInfo) bananasModel.customInfo();
+        var bananasCustomInfo = bananasModel.customInfo();
         var bananasValidationScore = bananasCustomInfo.metrics().get(metric);
 
-        var arrayPropertyCustomInfo = (NodeClassificationModelInfo) arrayPropertyModel.customInfo();
+        var arrayPropertyCustomInfo = arrayPropertyModel.customInfo();
         var arrayPropertyValidationScores = arrayPropertyCustomInfo.metrics().get(metric);
 
         assertThat(arrayPropertyValidationScores)

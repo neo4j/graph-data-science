@@ -24,11 +24,11 @@ import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
-import org.neo4j.gds.core.model.ModelMetaDataSerializer;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.model.proto.GraphSageProto;
 import org.neo4j.gds.core.model.proto.ModelProto;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.io.IOException;
 
@@ -65,12 +65,12 @@ public final class GraphSageModelSerializer implements ModelSerializer {
     }
 
     @TestOnly
-    Model<ModelData, GraphSageTrainConfig> fromSerializable(
+    Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> fromSerializable(
         GeneratedMessageV3 protoModel,
         ModelProto.ModelMetaData modelMetaData
     ) throws IOException {
         return ModelMetaDataSerializer
-            .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
+            .<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>fromSerializable(modelMetaData)
             .data(deserializeModelData(protoModel))
             .build();
     }

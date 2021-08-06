@@ -22,22 +22,23 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 
 public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig, RelationshipWeightConfig {
     long serialVersionUID = 0x42L;
 
     @Value.Derived
     @Configuration.Ignore
-    default Model<ModelData, GraphSageTrainConfig> model() {
+    default Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model() {
         // Need to resolve the model at config-level to reuse the relationship-property
-        return ModelCatalog.get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class);
+        return ModelCatalog.get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class, GraphSageModelTrainer.GraphSageTrainMetrics.class);
     }
 
     @Override

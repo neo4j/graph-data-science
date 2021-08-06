@@ -41,10 +41,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
 
-public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>>,
+public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>>,
     TRAIN_RESULT,
-    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
-    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
+    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig,
+    TRAIN_INFO extends Model.Mappable>
+    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> {
 
     protected abstract String modelType();
 
@@ -52,8 +53,8 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         Object graphNameOrConfig,
         Map<String, Object> configuration,
         BiFunction<
-            Model<TRAIN_RESULT, TRAIN_CONFIG>,
-            ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG>,
+            Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>,
+            ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG>,
             T> resultConstructor
     ) {
         var result = compute(graphNameOrConfig, configuration);
@@ -78,8 +79,8 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> TrainResult(
-            Model<TRAIN_RESULT, TRAIN_CONFIG> trainedModel,
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends Model.Mappable> TrainResult(
+            Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
             long trainMillis,
             long nodeCount,
             long relationshipCount

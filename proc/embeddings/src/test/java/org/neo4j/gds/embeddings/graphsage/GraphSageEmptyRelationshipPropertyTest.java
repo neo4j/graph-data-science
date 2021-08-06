@@ -25,14 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -145,7 +145,8 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             getUsername(),
             modelName,
             ModelData.class,
-            GraphSageTrainConfig.class
+            GraphSageTrainConfig.class,
+            GraphSageModelTrainer.GraphSageTrainMetrics.class
         );
 
         var layers = model.data().layers();

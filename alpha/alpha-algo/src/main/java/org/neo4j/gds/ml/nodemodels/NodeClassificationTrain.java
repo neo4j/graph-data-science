@@ -24,6 +24,15 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
@@ -35,15 +44,6 @@ import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Collection;
@@ -53,13 +53,13 @@ import java.util.Map;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig>> {
+public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
@@ -218,7 +218,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     public void release() {}
 
     @Override
-    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
+    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         progressTracker.beginSubTask();
         progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
@@ -311,7 +311,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         return retrainedModelData;
     }
 
-    private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> createModel(
+    private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> createModel(
         NodeLogisticRegressionTrainConfig bestParameters,
         Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
         NodeLogisticRegressionData retrainedModelData

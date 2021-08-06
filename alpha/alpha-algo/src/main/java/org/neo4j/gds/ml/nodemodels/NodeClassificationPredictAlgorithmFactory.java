@@ -54,7 +54,8 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             configuration.username(),
             configuration.modelName(),
             NodeLogisticRegressionData.class,
-            NodeClassificationTrainConfig.class
+            NodeClassificationTrainConfig.class,
+            NodeClassificationModelInfo.class
         );
         var featureProperties = model.trainConfig().featureProperties();
         return new NodeClassificationPredict(
@@ -78,7 +79,8 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             .get(configuration.username(),
                 configuration.modelName(),
                 NodeLogisticRegressionData.class,
-                NodeClassificationTrainConfig.class
+                NodeClassificationTrainConfig.class,
+                NodeClassificationModelInfo.class
             )
             .data()
             .classIdMap()

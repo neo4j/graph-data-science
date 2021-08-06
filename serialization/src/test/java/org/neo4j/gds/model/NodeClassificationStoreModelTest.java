@@ -20,7 +20,9 @@
 package org.neo4j.gds.model;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -34,8 +36,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRegressionData, NodeClassificationTrainConfig> {
+class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> {
 
     @Test
     @Override
@@ -57,7 +57,7 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRe
     }
 
     @Override
-    Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> model() {
+    Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> model() {
         var featureProperties = List.of("a", "b");
         var targetProperty = "t";
         var trainConfig = NodeClassificationTrainConfig.builder()

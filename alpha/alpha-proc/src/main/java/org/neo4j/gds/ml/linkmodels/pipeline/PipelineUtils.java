@@ -31,7 +31,7 @@ public final class PipelineUtils {
     private PipelineUtils() {}
 
     static TrainingPipeline getPipelineModelInfo(String pipelineName, String username) {
-        Model<?, ?> model = ModelCatalog.getUntyped(username, pipelineName, true);
+       var model = ModelCatalog.getUntyped(username, pipelineName);
 
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
@@ -42,14 +42,15 @@ public final class PipelineUtils {
                 model.algoType()
             ));
         }
+        assert model.customInfo() instanceof TrainingPipeline;
 
         return (TrainingPipeline) model.customInfo();
     }
 
-    public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> getLinkPredictionPipeline(
+    public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getLinkPredictionPipeline(
         String pipelineName,
         String username
     ) {
-        return ModelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class);
+        return ModelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
     }
 }

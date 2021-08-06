@@ -21,6 +21,13 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
@@ -35,13 +42,6 @@ import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,12 +51,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrain
-    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
+    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
 
     public static final String MODEL_TYPE = "Link Prediction";
 
@@ -96,7 +96,7 @@ public class LinkPredictionTrain
     }
 
     @Override
-    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
+    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
 
         progressTracker.beginSubTask();
         // init and shuffle node ids

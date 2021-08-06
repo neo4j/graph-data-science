@@ -124,7 +124,7 @@ public final class BackupAndRestore {
         }
 
         @Value.Default
-        default Consumer<Model<?, ?>> modelOnSuccess() {
+        default Consumer<Model<?, ?, ?>> modelOnSuccess() {
             return ignore -> {};
         }
 
@@ -176,7 +176,7 @@ public final class BackupAndRestore {
         BackupMetadata metadata,
         Path backupPath,
         Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> graphOnSuccess,
-        Consumer<Model<?, ?>> modelOnSuccess,
+        Consumer<Model<?, ?, ?>> modelOnSuccess,
         long timeoutInSeconds,
         Log log,
         AllocationTracker allocationTracker
@@ -421,7 +421,7 @@ public final class BackupAndRestore {
     private static List<BackupResult> backupModels(
         BackupResultFactory factory,
         Path backupRoot,
-        Consumer<Model<?, ?>> onSuccess,
+        Consumer<Model<?, ?, ?>> onSuccess,
         Log log
     ) {
         return ModelCatalog.getAllModels().flatMap(model -> {

@@ -33,7 +33,7 @@ import java.util.function.BiConsumer;
 
 import static org.neo4j.gds.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
-public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer {
+public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<LinkPredictionModelInfo> {
 
     public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
         LinkPredictionModelInfo linkPredictionModelInfo = (LinkPredictionModelInfo) mappable;
@@ -50,7 +50,7 @@ public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer {
         return builder.build();
     }
 
-    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+    public LinkPredictionModelInfo fromSerializable(GeneratedMessageV3 generatedMessageV3) {
         var linkPredictionModelInfo = (CommonML.LinkPredictionModelInfo) generatedMessageV3;
         var builder = ImmutableLinkPredictionModelInfo.builder()
             .bestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.getBestParameters()));

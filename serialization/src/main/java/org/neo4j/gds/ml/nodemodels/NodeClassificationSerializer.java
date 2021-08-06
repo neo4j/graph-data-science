@@ -24,14 +24,14 @@ import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
+import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.ml.model.proto.NodeClassificationProto;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 
 public class NodeClassificationSerializer implements ModelSerializer {
 
@@ -71,7 +71,7 @@ public class NodeClassificationSerializer implements ModelSerializer {
     }
 
     @TestOnly
-    Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> fromSerializable(
+    Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> fromSerializable(
         GeneratedMessageV3 generatedMessageV3,
         ModelProto.ModelMetaData modelMetaData
     ) {
@@ -84,11 +84,12 @@ public class NodeClassificationSerializer implements ModelSerializer {
             .forEach(localIdMap::toMapped);
 
         return ModelMetaDataSerializer
-            .<NodeLogisticRegressionData, NodeClassificationTrainConfig>fromSerializable(modelMetaData)
+            .<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>fromSerializable(modelMetaData)
             .data(NodeLogisticRegressionData.builder()
                 .weights(weights)
                 .classIdMap(localIdMap)
-                .build())
+                .build()
+            )
             .build();
     }
 }

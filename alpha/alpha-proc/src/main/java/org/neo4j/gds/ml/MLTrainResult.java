@@ -36,7 +36,7 @@ public class MLTrainResult {
     public final Map<String, Object> configuration;
 
     public MLTrainResult(
-        Model<?, ?> trainedModel,
+        Model<?, ?, ?> trainedModel,
         long trainMillis
     ) {
         this.modelInfo = Stream.concat(

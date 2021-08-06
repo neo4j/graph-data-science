@@ -21,15 +21,16 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 
 import java.util.concurrent.ExecutorService;
 
@@ -42,7 +43,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     private final Graph graph;
     private final GraphSageBaseConfig config;
-    private final Model<ModelData, GraphSageTrainConfig> model;
+    private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
 

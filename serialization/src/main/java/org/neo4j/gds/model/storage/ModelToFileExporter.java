@@ -34,9 +34,9 @@ public final class ModelToFileExporter {
     private ModelToFileExporter() {}
 
     //TODO remove
-    public static <DATA, CONFIG extends BaseConfig & ModelConfig> void toFile(
+    public static <DATA, CONFIG extends BaseConfig & ModelConfig, INFO extends Model.Mappable> void toFile(
         Path exportDir,
-        Model<DATA, CONFIG> model
+        Model<DATA, CONFIG, INFO> model
     ) throws IOException {
         new ModelFileWriter<>(exportDir, model).write();
     }

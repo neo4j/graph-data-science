@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.model.storage.ModelToFileExporter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,14 +40,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 
-abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig> {
+abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig, INFO extends Model.Mappable> {
     static final String MODEL = "model";
     static final String USER = "user";
 
     @TempDir
     Path tempDir;
 
-    private Model<DATA, CONFIG> model;
+    private Model<DATA, CONFIG, INFO> model;
 
     @BeforeEach
     void storeModel() throws IOException {
@@ -58,7 +58,7 @@ abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig> {
     @Test
     abstract void testLoadingData() throws IOException;
 
-    abstract Model<DATA, CONFIG> model();
+    abstract Model<DATA, CONFIG, INFO> model();
 
     @Test
     void testLoadingMetaData() throws IOException {

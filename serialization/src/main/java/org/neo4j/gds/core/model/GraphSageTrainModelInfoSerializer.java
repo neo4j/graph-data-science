@@ -21,11 +21,11 @@ package org.neo4j.gds.core.model;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelInfoSerializer;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ImmutableGraphSageTrainMetrics;
-import org.neo4j.gds.core.model.proto.GraphSageProto;
 
-public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer {
+public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<GraphSageModelTrainer.GraphSageTrainMetrics> {
 
     public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
         var modelInfo = (GraphSageModelTrainer.GraphSageTrainMetrics) mappable;
@@ -35,7 +35,7 @@ public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer {
             .build();
     }
 
-    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+    public GraphSageModelTrainer.GraphSageTrainMetrics fromSerializable(GeneratedMessageV3 generatedMessageV3) {
         var protoModelInfo = (GraphSageProto.GraphSageMetrics) generatedMessageV3;
         return ImmutableGraphSageTrainMetrics.builder()
             .didConverge(protoModelInfo.getDidConverge())

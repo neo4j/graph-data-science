@@ -27,7 +27,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddStepProcs extends BaseProc {

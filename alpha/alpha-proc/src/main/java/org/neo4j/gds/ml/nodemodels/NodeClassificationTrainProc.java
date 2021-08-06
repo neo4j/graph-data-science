@@ -20,15 +20,15 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.MLTrainResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.MLTrainResult;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig> {
+public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")

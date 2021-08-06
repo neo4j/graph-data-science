@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.GdsEdition;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public final class ModelCatalog {
     private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
     private static final UserCatalog publicModels = new UserCatalog();
 
-    public static void set(Model<?, ?> model) {
+    public static void set(Model<?, ?, ?> model) {
         userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -52,7 +52,7 @@ public final class ModelCatalog {
         });
     }
 
-    public static void setUnsafe(Model<?, ?> model) {
+    public static void setUnsafe(Model<?, ?, ?> model) {
         userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -62,15 +62,15 @@ public final class ModelCatalog {
         });
     }
 
-    public static <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
-        String username, String modelName, Class<D> dataClass, Class<C> configClass
+    public static <D, C extends ModelConfig & BaseConfig, I extends Model.Mappable> Model<D, C, I> get(
+        String username, String modelName, Class<D> dataClass, Class<C> configClass, Class<I> infoClass
     ) {
         var userCatalog = getUserCatalog(username);
-        var userModel = userCatalog.get(modelName, dataClass, configClass);
+        var userModel = userCatalog.get(modelName, dataClass, configClass, infoClass);
         if (userModel != null) {
             return userModel;
         } else {
-            var publicModel = publicModels.get(modelName, dataClass, configClass);
+            var publicModel = publicModels.get(modelName, dataClass, configClass, infoClass);
             if (publicModel != null) {
                 return publicModel;
             }
@@ -82,11 +82,11 @@ public final class ModelCatalog {
         ));
     }
 
-    public static @Nullable Model<?, ?> getUntyped(String username, String modelName) {
+    public static @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
         return getUntyped(username, modelName, true);
     }
 
-    public static @Nullable Model<?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
+    public static @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
         var userCatalog = getUserCatalog(username);
         var model = userCatalog.getUntyped(modelName);
         if (model == null) {
@@ -104,7 +104,7 @@ public final class ModelCatalog {
         return model;
     }
 
-    public static Stream<Model<?, ?>> getAllModels() {
+    public static Stream<Model<?, ?, ?>> getAllModels() {
         return userCatalogs
             .entrySet()
             .stream()
@@ -120,13 +120,13 @@ public final class ModelCatalog {
         return getUserCatalog(username).type(modelName);
     }
 
-    public static Model<?, ?> drop(String username, String modelName) {
+    public static Model<?, ?, ?> drop(String username, String modelName) {
         return drop(username, modelName, true);
     }
 
-    public static Model<?, ?> drop(String username, String modelName, boolean failOnMissing) {
+    public static Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
         if (publicModels.exists(modelName)) {
-            Model<?, ?> model = publicModels.getUntyped(modelName);
+            var model = publicModels.getUntyped(modelName);
             if (model.creator().equals(username)) {
                 return publicModels.drop(modelName, failOnMissing);
             }
@@ -136,25 +136,25 @@ public final class ModelCatalog {
         }
     }
 
-    public static Collection<Model<?, ?>> list(String username) {
+    public static Collection<Model<?, ?, ?>> list(String username) {
         var models = new ArrayList<>(getUserCatalog(username).list());
         models.addAll(publicModels.list());
         return models;
     }
 
-    public static @Nullable Model<?, ?> list(String username, String modelName) {
+    public static @Nullable Model<?, ?, ?> list(String username, String modelName) {
         return getUntyped(username, modelName, false);
     }
 
-    public static Model<?, ?> publish(String username, String modelName) {
+    public static Model<?, ?, ?> publish(String username, String modelName) {
         if (GdsEdition.instance().isOnCommunityEdition()) {
             throw new IllegalArgumentException("Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
         }
 
-        Model<?, ?> model = getUntyped(username, modelName);
+        var model = getUntyped(username, modelName);
         // not published => publish it
         if (!model.sharedWith().contains(Model.ALL_USERS)) {
-            Model<?, ?> publicModel = model.publish();
+            var publicModel = model.publish();
             publicModels.set(publicModel);
             drop(username, modelName);
             return publicModel;
@@ -188,61 +188,73 @@ public final class ModelCatalog {
         private static final long ALLOWED_MODELS_COUNT = 3;
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
+        private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
-        public void set(Model<?, ?> model) {
+        public void set(Model<?, ?, ?> model) {
             checkStorable(model.name(), model.algoType());
             userModels.put(model.name(), model);
         }
 
-        public void setUnsafe(Model<?, ?> model) {
+        public void setUnsafe(Model<?, ?, ?> model) {
             userModels.put(model.name(), model);
         }
 
-        public <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
+        public <D, C extends ModelConfig & BaseConfig, I extends Model.Mappable> Model<D, C, I> get(
             String modelName,
             Class<D> dataClass,
-            Class<C> configClass
+            Class<C> configClass,
+            Class<I> infoClass
         ) {
             return get(
                 getUntyped(modelName),
                 dataClass,
-                configClass
+                configClass,
+                infoClass
             );
         }
 
-        private <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
-            Model<?, ?> model,
+        private <D, C extends ModelConfig & BaseConfig, I extends Model.Mappable> Model<D, C, I> get(
+            Model<?, ?, ?> model,
             Class<D> dataClass,
-            Class<C> configClass
+            Class<C> configClass,
+            Class<I> infoClass
         ) {
             if (model != null) {
-                var data = model.data();
                 var modelName = model.name();
-                if (!dataClass.isInstance(data)) {
+                if (!dataClass.isInstance(model.data())) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "The model `%s` has data with different types than expected. " +
                         "Expected data type: `%s`, invoked with model data type: `%s`.",
                         modelName,
-                        data.getClass().getName(),
+                        model.data().getClass().getName(),
                         dataClass.getName()
                     ));
                 }
-                var config = model.trainConfig();
-                if (!configClass.isInstance(config)) {
+                if (!configClass.isInstance(model.trainConfig())) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "The model `%s` has a training config with different types than expected. " +
                         "Expected train config type: `%s`, invoked with model config type: `%s`.",
                         modelName,
-                        config.getClass().getName(),
+                        model.trainConfig().getClass().getName(),
                         configClass.getName()
+                    ));
+                }
+
+
+                if (!infoClass.isInstance(model.customInfo())) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "The model `%s` has a customInfo with different types than expected. " +
+                        "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
+                        modelName,
+                        model.customInfo().getClass().getName(),
+                        infoClass.getName()
                     ));
                 }
             }
 
             // We just did the check
             // noinspection unchecked
-            return (Model<D, C>) model;
+            return (Model<D, C, I>) model;
         }
 
         public boolean exists(String modelName) {
@@ -254,8 +266,8 @@ public final class ModelCatalog {
                 .map(Model::algoType);
         }
 
-        public Model<?, ?> drop(String modelName, boolean failOnMissing) {
-            Model<?, ?> storedModel = userModels.remove(modelName);
+        public Model<?, ?, ?> drop(String modelName, boolean failOnMissing) {
+            var storedModel = userModels.remove(modelName);
 
             if (failOnMissing && storedModel == null) {
                 throw new NoSuchElementException(prettySuggestions(
@@ -268,11 +280,11 @@ public final class ModelCatalog {
             }
         }
 
-        public Collection<Model<?, ?>> list() {
+        public Collection<Model<?, ?, ?>> list() {
             return userModels.values();
         }
 
-        public Model<?, ?> list(String modelName) {
+        public Model<?, ?, ?> list(String modelName) {
             return getUntyped(modelName);
         }
 
@@ -280,7 +292,7 @@ public final class ModelCatalog {
             userModels.clear();
         }
 
-        private Stream<Model<?, ?>> streamModels() {
+        private Stream<Model<?, ?, ?>> streamModels() {
             return userModels.values().stream();
         }
 
@@ -320,7 +332,7 @@ public final class ModelCatalog {
                 .count();
         }
 
-        private Model<?, ?> getUntyped(String modelName) {
+        private Model<?, ?, ?> getUntyped(String modelName) {
             return userModels.get(modelName);
         }
     }

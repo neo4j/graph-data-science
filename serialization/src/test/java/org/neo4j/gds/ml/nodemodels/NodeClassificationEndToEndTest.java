@@ -21,17 +21,17 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.model.ModelMetaDataSerializer;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 
 import java.io.IOException;
 import java.util.List;
@@ -117,7 +117,7 @@ class NodeClassificationEndToEndTest {
             .isEqualTo(predictionsBeforeSerialization);
     }
 
-    private NodeClassificationPredict predictAlgorithm(Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> model) {
+    private NodeClassificationPredict predictAlgorithm(Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> model) {
         var featureProperties = model.trainConfig().featureProperties();
         var predictor = new NodeLogisticRegressionPredictor(model.data(), featureProperties);
         return new NodeClassificationPredict(

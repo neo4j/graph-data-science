@@ -24,13 +24,13 @@ import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
+import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.ml.model.proto.LinkPredictionProto;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -75,7 +75,7 @@ public class LinkPredictionSerializer implements ModelSerializer {
     }
 
     @TestOnly
-    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> fromSerializable(
+    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> fromSerializable(
         GeneratedMessageV3 generatedMessageV3,
         ModelProto.ModelMetaData modelMetaData
     ) {
@@ -83,7 +83,7 @@ public class LinkPredictionSerializer implements ModelSerializer {
         var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
 
         return ModelMetaDataSerializer
-            .<LinkLogisticRegressionData, LinkPredictionTrainConfig>fromSerializable(modelMetaData)
+            .<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>fromSerializable(modelMetaData)
             .data(LinkLogisticRegressionData.builder()
                 .weights(weights)
                 .linkFeatureCombiner(LinkFeatureCombiners.valueOf(serializedData.getLinkFeatureCombiner().name()))

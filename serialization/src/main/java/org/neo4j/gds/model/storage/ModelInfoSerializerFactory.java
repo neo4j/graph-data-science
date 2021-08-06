@@ -35,7 +35,7 @@ public final class ModelInfoSerializerFactory {
 
     private ModelInfoSerializerFactory() {}
 
-    public static ModelInfoSerializer modelInfoSerializer(String algoType) {
+    public static ModelInfoSerializer<?> modelInfoSerializer(String algoType) {
         switch (algoType) {
             case GraphSage.MODEL_TYPE:
                 return new GraphSageTrainModelInfoSerializer();

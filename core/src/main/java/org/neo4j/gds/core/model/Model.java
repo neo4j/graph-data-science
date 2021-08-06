@@ -21,9 +21,9 @@ package org.neo4j.gds.core.model;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.Mappable> {
 
     String ALL_USERS = "*";
     String PUBLIC_MODEL_SUFFIX = "_public";
@@ -53,7 +53,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     ZonedDateTime creationTime();
 
-    Mappable customInfo();
+    INFO customInfo();
 
     @Value.Default
     @Value.Parameter(false)
@@ -79,15 +79,15 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         throw new RuntimeException("Only stored models can be unloaded.");
     }
 
-    default Model<DATA, CONFIG> publish() {
-        return ImmutableModel.<DATA, CONFIG>builder()
+    default Model publish() {
+        return ImmutableModel.<DATA, CONFIG, INFO>builder()
             .from(this)
             .sharedWith(List.of(ALL_USERS))
             .name(name() + PUBLIC_MODEL_SUFFIX)
             .build();
     }
 
-    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
+    static <D, C extends ModelConfig & BaseConfig> Model<D, C, Model.Mappable> of(
         String creator,
         String name,
         String algoType,
@@ -106,14 +106,14 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         );
     }
 
-    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
+    static <D, C extends ModelConfig & BaseConfig, INFO extends Mappable> Model<D, C, INFO> of(
         String creator,
         String name,
         String algoType,
         GraphSchema graphSchema,
         D modelData,
         C trainConfig,
-        Mappable customInfo
+        INFO customInfo
     ) {
         return ImmutableModel.of(
             creator,

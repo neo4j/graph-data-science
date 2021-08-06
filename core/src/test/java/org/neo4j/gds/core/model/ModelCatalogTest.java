@@ -27,13 +27,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.ModelConfig;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -56,7 +56,7 @@ class ModelCatalogTest {
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
 
-    private static final Model<String, TestTrainConfig> TEST_MODEL = Model.of(
+    private static final Model<String, TestTrainConfig, Model.Mappable> TEST_MODEL = Model.of(
         USERNAME,
         "testModel",
         "testAlgo",
@@ -127,8 +127,8 @@ class ModelCatalogTest {
         ModelCatalog.set(model);
         ModelCatalog.set(model2);
 
-        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
-        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
+        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, Model.Mappable.class));
     }
 
     @Test
@@ -163,8 +163,8 @@ class ModelCatalogTest {
         ModelCatalog.set(model);
         ModelCatalog.set(model2);
 
-        assertEquals(model, ModelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class));
-        assertEquals(model2, ModelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class));
+        assertEquals(model, ModelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model2, ModelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, Model.Mappable.class));
     }
 
     @Test
@@ -173,7 +173,7 @@ class ModelCatalogTest {
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> ModelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class)
+            () -> ModelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -186,7 +186,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals(
@@ -202,7 +202,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals(
@@ -359,14 +359,15 @@ class ModelCatalogTest {
         @Test
         void shouldPublishModels() {
             ModelCatalog.set(TEST_MODEL);
-            Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");
+            var publishedModel = ModelCatalog.publish(USERNAME, "testModel");
             assertEquals(1, ModelCatalog.list(USERNAME).size());
 
-            Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
+            var publicModel = ModelCatalog.get(
                 "anotherUser",
                 publishedModel.name(),
                 String.class,
-                TestTrainConfig.class
+                TestTrainConfig.class,
+                Model.Mappable.class
             );
 
             assertThat(publicModel)
@@ -385,7 +386,7 @@ class ModelCatalogTest {
 
             // test the get code path
             assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class))
+                .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, Model.Mappable.class))
                 .withMessage(expectedMessage);
 
             // test the drop code path
@@ -428,7 +429,7 @@ class ModelCatalogTest {
         );
     }
 
-    private static Model<Integer, TestTrainConfig> testModel(String name) {
+    private static Model<Integer, TestTrainConfig, Model.Mappable> testModel(String name) {
         return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
     }
 

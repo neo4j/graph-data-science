@@ -22,12 +22,12 @@ package org.neo4j.gds;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.TrainingConfig;
+import org.neo4j.gds.ml.model.proto.CommonML;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.model.proto.CommonML;
 
 import java.util.List;
 import java.util.Map;
@@ -35,15 +35,15 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface ModelInfoSerializer {
+public interface ModelInfoSerializer<CUSTOM_INFO extends Model.Mappable> {
 
     GeneratedMessageV3 toSerializable(Model.Mappable mappable);
 
-    Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3);
+    CUSTOM_INFO fromSerializable(GeneratedMessageV3 generatedMessageV3);
 
     Class<? extends GeneratedMessageV3> serializableClass();
 
-    default Model.Mappable fromSerializable(Any protoModelInfo) {
+    default CUSTOM_INFO fromSerializable(Any protoModelInfo) {
         try {
             var unpacked = protoModelInfo.unpack(serializableClass());
             return fromSerializable(unpacked);

@@ -23,11 +23,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.neo4j.gds.api.schema.SchemaDeserializer;
 import org.neo4j.gds.api.schema.SchemaSerializer;
-import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
-import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.model.proto.ModelProto;
+import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
+import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public final class ModelMetaDataSerializer {
 
     private ModelMetaDataSerializer() {}
 
-    public static ModelProto.ModelMetaData toSerializable(Model<?, ?> model) throws IOException {
+    public static ModelProto.ModelMetaData toSerializable(Model<?, ?, ?> model) throws IOException {
         var builder = ModelProto.ModelMetaData.newBuilder();
         serializableTrainConfig(model, builder);
         serializeCustomInfo(model, builder);
@@ -49,10 +49,10 @@ public final class ModelMetaDataSerializer {
             .build();
     }
 
-    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.Mappable> ImmutableModel.Builder<DATA, CONFIG, INFO> fromSerializable(
         ModelProto.ModelMetaData protoModelMetaData
     ) {
-        return ImmutableModel.<DATA, CONFIG>builder()
+        return ImmutableModel.<DATA, CONFIG, INFO>builder()
             .creator(protoModelMetaData.getCreator())
             .sharedWith(protoModelMetaData.getSharedWithList())
             .name(protoModelMetaData.getName())
@@ -75,7 +75,7 @@ public final class ModelMetaDataSerializer {
             .build();
     }
 
-    private static void serializableTrainConfig(Model<?, ?> model, ModelProto.ModelMetaData.Builder builder) {
+    private static void serializableTrainConfig(Model<?, ?, ?> model, ModelProto.ModelMetaData.Builder builder) {
         var trainConfigSerializer =
             TrainConfigSerializerFactory.trainConfigSerializer(model.algoType());
         var serializable = trainConfigSerializer.toSerializable(model.trainConfig());
@@ -90,20 +90,19 @@ public final class ModelMetaDataSerializer {
         return (CONFIG) modelConfigSerializer.fromSerializable(protoModelMetaData.getTrainConfig());
     }
 
-    private static void serializeCustomInfo(Model<?, ?> model, ModelProto.ModelMetaData.Builder builder) {
+    private static void serializeCustomInfo(Model<?, ?, ?> model, ModelProto.ModelMetaData.Builder builder) {
         var serializable = ModelInfoSerializerFactory
             .modelInfoSerializer(model.algoType())
             .toSerializable(model.customInfo());
         builder.setCustomInfo(Any.pack(serializable));
     }
 
-    private static Model.Mappable deserializeCustomInfo(ModelProto.ModelMetaData protoModelMetaData) {
+    private static <INFO extends Model.Mappable> INFO deserializeCustomInfo(ModelProto.ModelMetaData protoModelMetaData) {
         try {
-            var serializable = ModelInfoSerializerFactory
-                .modelInfoSerializer(protoModelMetaData.getAlgoType());
-            var customInfo = protoModelMetaData.getCustomInfo();
-            var unpacked = customInfo.unpack(serializable.serializableClass());
-            return serializable.fromSerializable(unpacked);
+            var serializable = ModelInfoSerializerFactory.modelInfoSerializer(protoModelMetaData.getAlgoType());
+            // TODO why unpacked here?
+            var unpacked = protoModelMetaData.getCustomInfo().unpack(serializable.serializableClass());
+            return (INFO) serializable.fromSerializable(unpacked);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

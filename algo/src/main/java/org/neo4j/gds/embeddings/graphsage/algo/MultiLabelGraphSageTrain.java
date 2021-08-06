@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -64,7 +64,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig> compute() {
+    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
         var weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(config, multiLabelFeatureExtractors);
         var projectedFeatureDimension = config.projectedFeatureDimension().orElseThrow();

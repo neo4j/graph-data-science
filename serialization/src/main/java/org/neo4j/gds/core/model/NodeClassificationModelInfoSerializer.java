@@ -34,7 +34,7 @@ import java.util.function.BiConsumer;
 
 import static org.neo4j.gds.config.ConfigSerializers.multiClassNLRTrainConfig;
 
-public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer {
+public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer<NodeClassificationModelInfo> {
 
     public NodeClassificationModelInfoSerializer() {}
 
@@ -56,7 +56,7 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
         return builder.build();
     }
 
-    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+    public NodeClassificationModelInfo fromSerializable(GeneratedMessageV3 generatedMessageV3) {
         var protoModelInfo = (CommonML.NodeClassificationModelInfo) generatedMessageV3;
         var builder = ImmutableNodeClassificationModelInfo.builder()
             .classes(protoModelInfo.getClassesList())

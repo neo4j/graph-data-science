@@ -22,19 +22,19 @@ package org.neo4j.gds.ml.linkmodels;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.model.ModelMetaDataSerializer;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -114,7 +114,7 @@ class LinkPredictionEndToEndTest {
             .isEqualTo(predictionsBeforeSerialization);
     }
 
-    private LinkPredictionPredict predictAlgorithm(Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> model) {
+    private LinkPredictionPredict predictAlgorithm(Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model) {
         var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
 
         var predictor = new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties(), extractors);

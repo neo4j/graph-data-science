@@ -21,20 +21,20 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
+import org.neo4j.gds.core.model.proto.GraphSageProto;
+import org.neo4j.gds.core.model.proto.ModelProto;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.proto.GraphSageProto;
-import org.neo4j.gds.core.model.proto.ModelProto;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -94,7 +94,7 @@ class GraphSageMultiLabelSerializationTest {
             .isEqualTo(produceEmbeddings(deserializedModel));
     }
 
-    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig> model) {
+    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
         ModelCatalog.drop("", model.name(), false);
         ModelCatalog.set(model);
 
@@ -112,7 +112,7 @@ class GraphSageMultiLabelSerializationTest {
         ).compute();
     }
 
-    private Model<ModelData, GraphSageTrainConfig> train() {
+    private Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> train() {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)

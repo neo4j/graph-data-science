@@ -150,7 +150,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             // length of the linkFeatures
             assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
 
-            var customInfo = (LinkPredictionModelInfo) actualModel.customInfo();
+            var customInfo = actualModel.customInfo();
             assertThat(customInfo.metrics().get(LinkMetric.AUCPR).validation())
                 .hasSize(2)
                 .satisfies(scores ->

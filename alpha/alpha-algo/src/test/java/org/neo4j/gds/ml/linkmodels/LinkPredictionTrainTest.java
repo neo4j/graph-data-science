@@ -161,7 +161,7 @@ class LinkPredictionTrainTest {
         // length of the linkFeatures
         assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
 
-        var customInfo = (LinkPredictionModelInfo) actualModel.customInfo();
+        var customInfo = actualModel.customInfo();
         var validationScores = customInfo.metrics().get(LinkMetric.AUCPR).validation();
 
         assertThat(validationScores).hasSize(2);
@@ -213,7 +213,7 @@ class LinkPredictionTrainTest {
 
         var model = linkPredictionTrain.compute();
 
-        var customInfo = (LinkPredictionModelInfo) model.customInfo();
+        var customInfo = model.customInfo();
         var validationScores = customInfo.metrics().get(LinkMetric.AUCPR).validation();
 
         assertThat(validationScores).hasSize(2);

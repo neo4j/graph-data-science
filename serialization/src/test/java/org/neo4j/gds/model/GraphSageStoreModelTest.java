@@ -19,21 +19,22 @@
  */
 package org.neo4j.gds.model;
 
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTrainConfig> {
+class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> {
 
     @Override
     void testLoadingData() throws IOException {
@@ -49,7 +50,7 @@ class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTra
     }
 
     @Override
-    Model<ModelData, GraphSageTrainConfig> model() {
+    Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model() {
         GraphSageTrainConfig trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL)
             .addFeatureProperties("a")

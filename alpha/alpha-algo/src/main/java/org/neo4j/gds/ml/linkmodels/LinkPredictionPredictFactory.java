@@ -62,7 +62,8 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
             configuration.username(),
             configuration.modelName(),
             LinkLogisticRegressionData.class,
-            LinkPredictionTrainConfig.class
+            LinkPredictionTrainConfig.class,
+            LinkPredictionModelInfo.class
         );
 
         var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
@@ -84,7 +85,8 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
             configuration.username(),
             configuration.modelName(),
             LinkLogisticRegressionData.class,
-            LinkPredictionTrainConfig.class
+            LinkPredictionTrainConfig.class,
+            LinkPredictionModelInfo.class
         );
         int linkFeatureDimension = model.data().weights().dimension(1);
         var nodeFeatureDimension = Math.max(model.trainConfig().featureProperties().size(), ASSUMED_MIN_NODE_FEATURES);

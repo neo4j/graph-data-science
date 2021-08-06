@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 
 import java.time.ZonedDateTime;
@@ -46,7 +46,7 @@ abstract class ModelCatalogProc extends BaseProc {
         public final ZonedDateTime creationTime;
         public final boolean shared;
 
-        public ModelResult(Model<?, ?> model) {
+        public ModelResult(Model<?, ?, ?> model) {
             shared = !model.sharedWith().isEmpty();
             modelInfo = Stream.concat(
                 Map.of(
