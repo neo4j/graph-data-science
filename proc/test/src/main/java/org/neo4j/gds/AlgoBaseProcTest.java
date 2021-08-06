@@ -184,8 +184,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     ));
             }
 
-            if (proc instanceof RelationshipStreamWriter) {
-                ((RelationshipStreamWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new RelationshipStreamExporter.Builder(
+            if (proc instanceof StreamOfRelationshipsWriter) {
+                ((StreamOfRelationshipsWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new RelationshipStreamExporter.Builder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction
