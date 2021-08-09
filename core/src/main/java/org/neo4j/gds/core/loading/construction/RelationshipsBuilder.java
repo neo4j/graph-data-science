@@ -21,22 +21,21 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.gds.core.loading.RelationshipImporter;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
+import org.neo4j.gds.core.loading.RelationshipImporter;
 import org.neo4j.gds.core.loading.RelationshipPropertiesBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP;
 
 public class RelationshipsBuilder {
 
@@ -207,7 +206,7 @@ public class RelationshipsBuilder {
         }
 
         void addRelationship(long source, long target) {
-            importer.buffer().add(source, target, NO_SUCH_RELATIONSHIP);
+            importer.buffer().add(source, target);
             if (importer.buffer().isFull()) {
                 flushBuffer();
             }
@@ -216,7 +215,12 @@ public class RelationshipsBuilder {
         void addRelationship(long source, long target, double relationshipPropertyValue) {
             importer
                 .buffer()
-                .add(source, target, NO_SUCH_RELATIONSHIP, Double.doubleToLongBits(relationshipPropertyValue));
+                .add(
+                    source,
+                    target,
+                    Double.doubleToLongBits(relationshipPropertyValue),
+                    Neo4jProxy.noPropertyReference()
+                );
             if (importer.buffer().isFull()) {
                 flushBuffer();
             }
@@ -224,7 +228,7 @@ public class RelationshipsBuilder {
 
         void addRelationship(long source, long target, double[] relationshipPropertyValues) {
             int nextRelationshipId = localRelationshipId++;
-            importer.buffer().add(source, target, NO_SUCH_RELATIONSHIP, nextRelationshipId);
+            importer.buffer().add(source, target, nextRelationshipId, Neo4jProxy.noPropertyReference());
             int[] keyIds = propertyKeyIds;
             for (int i = 0; i < keyIds.length; i++) {
                 propertiesBatchBuffer.add(nextRelationshipId, keyIds[i], relationshipPropertyValues[i]);

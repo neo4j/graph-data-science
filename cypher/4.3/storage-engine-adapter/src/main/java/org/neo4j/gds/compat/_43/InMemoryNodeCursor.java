@@ -17,19 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.compat._43;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
+import org.neo4j.token.TokenHolders;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
 
-class RelationshipsBatchBufferTest {
+    public InMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        super(graphStore, tokenHolders);
+    }
 
-    @Test
-    void flushBufferWhenFull() {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
-        buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
-        assertTrue(buffer.isFull());
+    @Override
+    public long propertiesReference() {
+        return getId();
+    }
+
+    @Override
+    public void properties(StoragePropertyCursor propertyCursor) {
+        propertyCursor.initNodeProperties(propertiesReference());
     }
 }

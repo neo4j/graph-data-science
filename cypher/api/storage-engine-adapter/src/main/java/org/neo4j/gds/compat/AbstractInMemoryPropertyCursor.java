@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
@@ -26,32 +26,16 @@ import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
-public class InMemoryPropertyCursor extends PropertyRecord implements StoragePropertyCursor {
+public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord implements StoragePropertyCursor {
 
-    private final GraphStore graphStore;
-    private final TokenHolders tokenHolders;
-    private DelegatePropertyCursor delegate;
+    protected final GraphStore graphStore;
+    protected final TokenHolders tokenHolders;
+    protected DelegatePropertyCursor delegate;
 
-    public InMemoryPropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryPropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
-    }
-
-    @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-        this.delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
-        this.delegate.initNodeProperties(reference);
-    }
-
-    @Override
-    public void initRelationshipProperties(long reference, long ownerReference) {
-
-    }
-
-    @Override
-    public void initRelationshipProperties(long reference) {
-
     }
 
     @Override

@@ -17,40 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.token.TokenHolders;
 
-public final class RelationshipRecordReference implements RelationshipReference {
+public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
 
-    private final RelationshipRecord record;
-
-    public RelationshipRecordReference(RelationshipRecord record) {
-        this.record = record;
+    public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        super(graphStore, tokenHolders);
     }
 
     @Override
-    public long relationshipId() {
-        return record.getId();
+    public void initNodeProperties(long reference, long ownerReference) {
+        setId(reference);
     }
 
     @Override
-    public int typeTokenId() {
-        return record.getType();
-    }
+    public void initRelationshipProperties(long reference, long ownerReference) {
 
-    @Override
-    public long sourceNodeReference() {
-        return record.getFirstNode();
-    }
-
-    @Override
-    public long targetNodeReference() {
-        return record.getSecondNode();
-    }
-
-    @Override
-    public long propertiesReference() {
-        return record.getNextProp();
     }
 }

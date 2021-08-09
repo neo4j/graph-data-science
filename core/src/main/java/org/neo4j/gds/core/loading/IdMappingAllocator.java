@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.compat.PropertyReference;
+
 public interface IdMappingAllocator {
 
     long startId();
@@ -28,7 +30,7 @@ public interface IdMappingAllocator {
         int length,
         PropertyAllocator propertyAllocator,
         NodeImporter.PropertyReader reader,
-        long[] properties,
+        PropertyReference[] properties,
         long[][] labelIds
     );
 
@@ -40,7 +42,7 @@ public interface IdMappingAllocator {
         int allocateProperties(
             NodeImporter.PropertyReader reader,
             long[] batch,
-            long[] properties,
+            PropertyReference[] properties,
             long[][] labelIds,
             int batchIndex,
             int length,

@@ -22,6 +22,8 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
@@ -38,7 +40,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     private final boolean skipOrphans;
 
     // property ids, consecutive
-    private final long[] properties;
+    private final PropertyReference[] properties;
 
     @Builder.Constructor
     NodesBatchBuffer(
@@ -50,7 +52,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         super(capacity);
         this.nodeLabelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         this.hasLabelInformation = hasLabelInformation.orElse(false);
-        this.properties = readProperty.orElse(false) ? new long[capacity] : null;
+        this.properties = readProperty.orElse(false) ? new PropertyReference[capacity] : null;
         this.labelIds = new long[capacity][];
         this.skipOrphans = SKIP_ORPHANS.isEnabled();
     }
@@ -61,7 +63,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
             return;
         }
         if (nodeLabelIds.isEmpty()) {
-            long propertiesReference = properties == null ? NO_ID : record.propertiesReference();
+            var propertiesReference = properties == null ? Neo4jProxy.noPropertyReference() : record.propertiesReference();
             add(record.nodeId(), propertiesReference, new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
@@ -75,24 +77,24 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
                 }
             }
             if (atLeastOneLabelFound) {
-                long propertiesReference = properties == null ? NO_ID : record.propertiesReference();
+                var propertiesReference = properties == null ? Neo4jProxy.noPropertyReference() : record.propertiesReference();
                 add(record.nodeId(), propertiesReference, labels);
             }
         }
     }
 
-    public void add(long nodeId, long propertiesIndex, long[] labels) {
+    public void add(long nodeId, PropertyReference propertyReference, long[] labels) {
         int len = length++;
         buffer[len] = nodeId;
         if (properties != null) {
-            properties[len] = propertiesIndex;
+            properties[len] = propertyReference;
         }
         if (labelIds != null) {
             labelIds[len] = labels;
         }
     }
 
-    public long[] properties() {
+    public PropertyReference[] properties() {
         return this.properties;
     }
 

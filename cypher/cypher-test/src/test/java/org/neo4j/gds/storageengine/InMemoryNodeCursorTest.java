@@ -25,7 +25,9 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.token.api.TokenNotFoundException;
@@ -42,11 +44,11 @@ class InMemoryNodeCursorTest extends CypherTest {
                                     ", (:A)" +
                                     ", (:A)";
 
-    InMemoryNodeCursor nodeCursor;
+    AbstractInMemoryNodeCursor nodeCursor;
 
     @Override
     protected void onSetup() {
-        this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
+        this.nodeCursor = StorageEngineProxy.inMemoryNodeCursor(graphStore, tokenHolders);
     }
 
     @Override
@@ -140,7 +142,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
-        var propertyCursor = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
+        var propertyCursor = StorageEngineProxy.inMemoryNodePropertyCursor(graphStore, tokenHolders);
         nodeCursor.properties(propertyCursor);
         assertThat(propertyCursor.next()).isTrue();
 

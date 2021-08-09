@@ -123,9 +123,33 @@ public interface Neo4jProxyApi {
 
     Path pagedFile(PagedFile pagedFile);
 
-    List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds, int batchSize);
+    List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    );
 
     PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
+
+    PropertyReference propertyReference(NodeCursor nodeCursor);
+
+    PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor);
+
+    PropertyReference noPropertyReference();
+
+    void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    );
+
+    void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    );
 
     NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction);
 

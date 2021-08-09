@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -97,7 +98,7 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
             int length,
             PropertyAllocator propertyAllocator,
             NodeImporter.PropertyReader reader,
-            long[] properties,
+            PropertyReference[] properties,
             long[][] labelIds
         ) {
             builder.set(nodeIds, 0, length);

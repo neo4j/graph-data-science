@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.Aggregation;
 
 public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.PropertyReader {
@@ -37,24 +38,24 @@ public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.P
 
     @Override
     public long[][] readProperty(
-        long[] batch,
-        int batchLength,
+        long[] relationshipReferences,
+        PropertyReference[] propertyReferences,
+        int numberOfReferences,
         int[] propertyKeyIds,
         double[] defaultValues,
         Aggregation[] aggregations,
         boolean atLeastOnePropertyToLoad
     ) {
-        int relationshipCount = batchLength / RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
-        long[][] resultBuffer = new long[propertyCount][relationshipCount];
+        long[][] resultBuffer = new long[propertyCount][numberOfReferences];
 
         for (int propertyKeyId = 0; propertyKeyId < propertyCount; propertyKeyId++) {
-            long[] propertyValues = new long[relationshipCount];
-            for (int relationshipOffset = 0; relationshipOffset < batchLength; relationshipOffset += RelationshipsBatchBuffer.BATCH_ENTRY_SIZE) {
-                int relationshipId = (int) batch[relationshipOffset + RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET];
+            long[] propertyValues = new long[numberOfReferences];
+            for (int relationshipOffset = 0; relationshipOffset < numberOfReferences; relationshipOffset++) {
+                int relationshipId = (int) relationshipReferences[relationshipOffset];
                 // We need to fill this consecutively indexed
                 // in the same order as the relationships are
                 // stored in the batch.
-                propertyValues[relationshipOffset >>> RelationshipsBatchBuffer.BATCH_ENTRY_SHIFT_SIZE] = buffer[propertyKeyId][relationshipId];
+                propertyValues[relationshipOffset] = buffer[propertyKeyId][relationshipId];
             }
             resultBuffer[propertyKeyId] = propertyValues;
         }

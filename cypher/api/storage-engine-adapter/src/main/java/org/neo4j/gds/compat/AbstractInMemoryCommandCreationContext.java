@@ -45,11 +45,6 @@ public abstract class AbstractInMemoryCommandCreationContext implements CommandC
     }
 
     @Override
-    public long reserveRelationship() {
-        throw new UnsupportedOperationException("Creating relationships is not supported");
-    }
-
-    @Override
     public long reserveSchema() {
         return schemaTokens.getAndIncrement();
     }

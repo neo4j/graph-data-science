@@ -24,8 +24,8 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
-import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -96,7 +96,27 @@ public final class StorageEngineProxy {
         return IMPL.startAndGetInMemoryDatabase(dbms, dbName);
     }
 
-    public static DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
+    public static DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(
+        DatabaseManagementServiceBuilder dbmsBuilder
+    ) {
         return IMPL.setSkipDefaultIndexesOnCreationSetting(dbmsBuilder);
+    }
+
+    public static AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        return IMPL.inMemoryNodeCursor(graphStore, tokenHolders);
+    }
+
+    public static AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
+        return IMPL.inMemoryNodePropertyCursor(graphStore, tokenHolders);
+    }
+
+    public static AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
+        return IMPL.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 }

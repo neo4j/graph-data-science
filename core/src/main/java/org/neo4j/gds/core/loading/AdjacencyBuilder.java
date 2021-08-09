@@ -24,9 +24,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
-import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,7 +148,7 @@ public final class AdjacencyBuilder {
                     continue;
                 }
 
-                long source = batch[startOffset << 2];
+                long source = batch[startOffset << 1];
                 int pageIndex = (int) (source >>> pageShift);
 
                 if (pageIndex > lastPageIndex) {

@@ -19,18 +19,18 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.gds.storageengine.InMemoryNodeCursor;
+import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.storageengine.api.AllNodeScan;
 
-public class InMemoryNodeScan extends BaseRecordScan<InMemoryNodeCursor> implements AllNodeScan {
+public class InMemoryNodeScan extends BaseRecordScan<AbstractInMemoryNodeCursor> implements AllNodeScan {
 
     @Override
-    boolean scanRange(InMemoryNodeCursor cursor, long start, long stopInclusive) {
+    boolean scanRange(AbstractInMemoryNodeCursor cursor, long start, long stopInclusive) {
         return cursor.scanRange(start, stopInclusive);
     }
 
     @Override
-    public boolean scanBatch(int sizeHint, InMemoryNodeCursor cursor) {
+    public boolean scanBatch(int sizeHint, AbstractInMemoryNodeCursor cursor) {
         return super.scanBatch(sizeHint, cursor);
     }
 }

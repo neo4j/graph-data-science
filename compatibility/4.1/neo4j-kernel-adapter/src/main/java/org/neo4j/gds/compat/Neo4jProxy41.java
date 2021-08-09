@@ -192,6 +192,49 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
+    public PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return LongPropertyReference.of(nodeCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return LongPropertyReference.of(relationshipScanCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference noPropertyReference() {
+        return LongPropertyReference.empty();
+    }
+
+    @Override
+    public void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        kernelTransaction.dataRead().nodeProperties(
+            nodeReference,
+            ((LongPropertyReference) reference).id,
+            cursor
+        );
+    }
+
+    @Override
+    public void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        kernelTransaction.dataRead().relationshipProperties(
+            relationshipReference,
+            ((LongPropertyReference) reference).id,
+            cursor
+        );
+    }
+
+    @Override
     public NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.pageCursorTracer());
     }

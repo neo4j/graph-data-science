@@ -17,19 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.compat;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
+public interface PropertyReference {
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-class RelationshipsBatchBufferTest {
-
-    @Test
-    void flushBufferWhenFull() {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
-        buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
-        assertTrue(buffer.isFull());
-    }
+    boolean isEmpty();
 }

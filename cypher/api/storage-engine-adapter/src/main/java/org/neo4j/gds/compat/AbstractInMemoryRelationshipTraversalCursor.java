@@ -17,20 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.RelationshipVisitor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
-public class InMemoryRelationshipTraversalCursor extends InMemoryRelationshipCursor implements StorageRelationshipTraversalCursor, RelationshipVisitor<RuntimeException> {
+public abstract class AbstractInMemoryRelationshipTraversalCursor extends InMemoryRelationshipCursor implements StorageRelationshipTraversalCursor, RelationshipVisitor<RuntimeException> {
 
     private long originNodeReference;
 
-    public InMemoryRelationshipTraversalCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryRelationshipTraversalCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders, NO_ID);
     }
 

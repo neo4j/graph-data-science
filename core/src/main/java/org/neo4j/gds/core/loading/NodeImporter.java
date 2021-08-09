@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -34,7 +35,7 @@ import java.util.Map;
 public class NodeImporter {
 
     public interface PropertyReader {
-        int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
+        int readProperty(long nodeReference, long[] labelIds, PropertyReference propertiesReference, long internalId);
     }
 
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
@@ -128,7 +129,7 @@ public class NodeImporter {
     private static int importProperties(
         NodeImporter.PropertyReader reader,
         long[] batch,
-        long[] properties,
+        PropertyReference[] properties,
         long[][] labelIds,
         int batchIndex,
         int length,

@@ -171,12 +171,46 @@ public final class Neo4jProxy {
         return IMPL.pagedFile(pagedFile);
     }
 
-    public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds, int batchSize) {
+    public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    ) {
         return IMPL.entityCursorScan(transaction, labelIds, batchSize);
     }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return IMPL.allocatePropertyCursor(kernelTransaction);
+    }
+
+    public static PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return IMPL.propertyReference(nodeCursor);
+    }
+
+    public static PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return IMPL.propertyReference(relationshipScanCursor);
+    }
+
+    public static PropertyReference noPropertyReference() {
+        return IMPL.noPropertyReference();
+    }
+
+    public static void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        IMPL.nodeProperties(kernelTransaction, nodeReference, reference, cursor);
+    }
+
+    public static void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        IMPL.relationshipProperties(kernelTransaction, relationshipReference, reference, cursor);
     }
 
     public static NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {

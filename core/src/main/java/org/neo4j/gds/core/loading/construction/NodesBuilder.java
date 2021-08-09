@@ -24,23 +24,24 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
-import org.neo4j.gds.core.loading.NodesBatchBuffer;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
+import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
+import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 
 import java.util.ArrayList;
@@ -55,11 +56,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.IGNORE;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodesBuilder {
 
@@ -282,7 +282,7 @@ public final class NodesBuilder {
             if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
-                buffer.add(originalId, NO_SUCH_PROPERTY_KEY, labels);
+                buffer.add(originalId, LongPropertyReference.empty(), labels);
                 if (buffer.isFull()) {
                     flushBuffer();
                     reset();
@@ -297,7 +297,7 @@ public final class NodesBuilder {
                 int propertyReference = batchNodeProperties.size();
                 batchNodeProperties.add(properties);
 
-                buffer.add(originalId, propertyReference, labels);
+                buffer.add(originalId, LongPropertyReference.of(propertyReference), labels);
                 if (buffer.isFull()) {
                     flushBuffer();
                     reset();
@@ -320,8 +320,9 @@ public final class NodesBuilder {
 
         private void flushBuffer() {
             this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
-                if (propertiesReference != NO_SUCH_PROPERTY_KEY) {
-                    Map<String, Value> properties = batchNodeProperties.get((int) propertiesReference);
+                if (!propertiesReference.isEmpty()) {
+                    var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
+                    Map<String, Value> properties = batchNodeProperties.get(propertyValueIndex);
                     MutableInt importedProperties = new MutableInt(0);
                     properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
                         internalId,

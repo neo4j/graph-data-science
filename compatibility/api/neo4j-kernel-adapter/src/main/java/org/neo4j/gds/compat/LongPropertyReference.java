@@ -17,19 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.compat;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
+public final class LongPropertyReference implements PropertyReference {
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+    private static final long NO_PROPERTY = -1;
+    private static final PropertyReference EMPTY = new LongPropertyReference(NO_PROPERTY);
 
-class RelationshipsBatchBufferTest {
+    public final long id;
 
-    @Test
-    void flushBufferWhenFull() {
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
-        buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
-        assertTrue(buffer.isFull());
+    private LongPropertyReference(long id) {
+        this.id = id;
+    }
+
+    public static PropertyReference of(long id) {
+        return id == NO_PROPERTY ? EMPTY : new LongPropertyReference(id);
+    }
+
+    public static PropertyReference empty() {
+        return EMPTY;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return id == NO_PROPERTY;
     }
 }

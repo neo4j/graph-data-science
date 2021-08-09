@@ -23,12 +23,13 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -61,17 +62,18 @@ public final class NativeNodePropertyImporter {
         this.buildersByNodeLabel = buildersByNodeLabel;
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyToken;
         this.containsAnyLabelProjection = containsAnyLabelProjection;
+        // TODO: create a union of all property keys for all labels and use that one to filter the property cursor on 4.4-dev
     }
 
     int importProperties(
         long nodeId,
         long neoNodeId,
         long[] labelIds,
-        long propertiesReference,
+        PropertyReference propertiesReference,
         KernelTransaction kernelTransaction
     ) {
         try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
-            kernelTransaction.dataRead().nodeProperties(neoNodeId, propertiesReference, pc);
+            Neo4jProxy.nodeProperties(kernelTransaction, neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
                 nodePropertiesRead += importProperty(nodeId, labelIds, pc);

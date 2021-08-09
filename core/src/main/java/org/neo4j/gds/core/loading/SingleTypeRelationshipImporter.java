@@ -133,7 +133,7 @@ public final class SingleTypeRelationshipImporter {
                 );
                 RelationshipImporter.PropertyReader propertyReader = loadProperties
                     ? importer.storeBackedPropertiesReader(kernelTransaction)
-                    : (batch, batchLength, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+                    : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
         }

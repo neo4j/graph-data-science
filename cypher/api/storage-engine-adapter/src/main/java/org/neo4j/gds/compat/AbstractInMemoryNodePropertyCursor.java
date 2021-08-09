@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -33,14 +33,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegatePropertyCursor {
+public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
 
     private String currentNodePropertyKey = null;
 
     private final Map<String, ValueGroup> propertyKeyToTypeMapping;
     private final Set<Integer> seenNodeReferences;
 
-    public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID, graphStore, tokenHolders);
         this.seenNodeReferences = new HashSet<>();
         this.propertyKeyToTypeMapping = new HashMap<>();
@@ -62,16 +62,6 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
 
             propertyKeyToTypeMapping.put(nodePropertyKey, valueGroup);
         });
-    }
-
-    @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-        setId(reference);
-    }
-
-    @Override
-    public void initRelationshipProperties(long reference, long ownerReference) {
-
     }
 
     @Override

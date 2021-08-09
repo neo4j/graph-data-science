@@ -35,6 +35,7 @@ import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -113,6 +114,7 @@ import org.neo4j.memory.MemoryPools;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.File;
@@ -216,6 +218,47 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         return kernelTransaction
             .cursors()
             .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+    }
+
+    @Override
+    public PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference noPropertyReference() {
+        return ReferencePropertyReference.empty();
+    }
+
+    @Override
+    public void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+    }
+
+    @Override
+    public void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .relationshipProperties(relationshipReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
     @Override

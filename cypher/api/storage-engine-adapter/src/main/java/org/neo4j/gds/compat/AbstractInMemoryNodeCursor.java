@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
@@ -36,7 +36,7 @@ import java.util.Set;
 
 import static java.lang.Math.min;
 
-public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor {
+public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements StorageNodeCursor {
 
     private long next;
     private long highMark;
@@ -45,7 +45,7 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
     private final TokenHolders tokenHolders;
     private final boolean hasProperties;
 
-    public InMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
@@ -142,15 +142,7 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
         return this.hasProperties;
     }
 
-    @Override
-    public long propertiesReference() {
-        return getId();
-    }
-
-    @Override
-    public void properties(StoragePropertyCursor propertyCursor) {
-        propertyCursor.initNodeProperties(propertiesReference());
-    }
+    public abstract void properties(StoragePropertyCursor propertyCursor);
 
     @Override
     public long entityReference() {

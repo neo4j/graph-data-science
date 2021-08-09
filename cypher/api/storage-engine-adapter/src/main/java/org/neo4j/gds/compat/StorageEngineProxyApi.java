@@ -64,4 +64,13 @@ public interface StorageEngineProxyApi {
     GraphDatabaseAPI startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName);
 
     DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder);
+
+    AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders);
+
+    AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders);
+
+    AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
+    );
 }

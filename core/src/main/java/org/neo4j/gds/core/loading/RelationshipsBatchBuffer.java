@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.compat.PropertyReference;
 
 import static org.neo4j.gds.utils.ExceptionUtil.validateSourceNodeIsLoaded;
 import static org.neo4j.gds.utils.ExceptionUtil.validateTargetNodeIsLoaded;
@@ -28,16 +29,16 @@ import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
-    public static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
-    public static final int PROPERTIES_REFERENCE_OFFSET = 3;
-    public static final int BATCH_ENTRY_SIZE = 4;
-    public static final int BATCH_ENTRY_SHIFT_SIZE = Integer.numberOfTrailingZeros(BATCH_ENTRY_SIZE);
-
     private final IdMapping idMap;
     private final int type;
     private final boolean throwOnUnMappedNodeIds;
 
-    private final long[] sortCopy;
+    private final long[] relationshipReferences;
+    private final PropertyReference[] propertyReferences;
+
+    private final long[] bufferCopy;
+    private final long[] relationshipReferencesCopy;
+    private final PropertyReference[] propertyReferencesCopy;
     private final int[] histogram;
 
     public RelationshipsBatchBuffer(
@@ -56,11 +57,15 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     ) {
         // For relationships: the buffer is divided into 4-long blocks
         // for each rel: source, target, rel-id, prop-id
-        super(Math.multiplyExact(4, capacity));
+        super(Math.multiplyExact(2, capacity));
         this.idMap = idMap;
         this.type = type;
         this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;
-        sortCopy = RadixSort.newCopy(buffer);
+        this.relationshipReferences = new long[capacity];
+        this.propertyReferences = new PropertyReference[capacity];
+        bufferCopy = RadixSort.newCopy(buffer);
+        relationshipReferencesCopy = RadixSort.newCopy(relationshipReferences);
+        propertyReferencesCopy = RadixSort.newCopy(propertyReferences);
         histogram = RadixSort.newHistogram(capacity);
     }
 
@@ -82,37 +87,62 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
         }
     }
 
-    public void add(long sourceId, long targetId, long relationshipReference) {
+    public void add(long sourceId, long targetId) {
         int position = this.length;
         long[] buffer = this.buffer;
         buffer[position] = sourceId;
         buffer[1 + position] = targetId;
-        buffer[2 + position] = relationshipReference;
-        this.length = 4 + position;
+        this.length = 2 + position;
     }
 
-    public void add(long sourceId, long targetId, long relationshipReference, long propertyReference) {
+    public void add(long sourceId, long targetId, long relationshipReference, PropertyReference propertyReference) {
         int position = this.length;
         long[] buffer = this.buffer;
         buffer[position] = sourceId;
         buffer[1 + position] = targetId;
-        buffer[2 + position] = relationshipReference;
-        buffer[3 + position] = propertyReference;
-        this.length = 4 + position;
+        this.relationshipReferences[position >> 1] = relationshipReference;
+        this.propertyReferences[position >> 1] = propertyReference;
+        this.length = 2 + position;
     }
 
     public long[] sortBySource() {
-        RadixSort.radixSort(buffer, sortCopy, histogram, length);
+        RadixSort.radixSort(
+            buffer,
+            bufferCopy,
+            relationshipReferences,
+            relationshipReferencesCopy,
+            propertyReferences,
+            propertyReferencesCopy,
+            histogram,
+            length
+        );
         return buffer;
     }
 
     public long[] sortByTarget() {
-        RadixSort.radixSort2(buffer, sortCopy, histogram, length);
+        RadixSort.radixSort2(
+            buffer,
+            bufferCopy,
+            relationshipReferences,
+            relationshipReferencesCopy,
+            propertyReferences,
+            propertyReferencesCopy,
+            histogram,
+            length
+        );
         return buffer;
     }
 
+    long[] relationshipReferences() {
+        return this.relationshipReferences;
+    }
+
+    PropertyReference[] propertyReferences() {
+        return this.propertyReferences;
+    }
+
     public long[] spareLongs() {
-        return sortCopy;
+        return bufferCopy;
     }
 
     public int[] spareInts() {

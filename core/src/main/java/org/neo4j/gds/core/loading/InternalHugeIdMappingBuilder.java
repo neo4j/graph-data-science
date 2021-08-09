@@ -20,10 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.utils.CloseableThreadLocal;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -127,7 +128,7 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
             int length,
             PropertyAllocator propertyAllocator,
             NodeImporter.PropertyReader reader,
-            long[] properties,
+            PropertyReference[] properties,
             long[][] labelIds
         ) {
             int importedProperties = 0;

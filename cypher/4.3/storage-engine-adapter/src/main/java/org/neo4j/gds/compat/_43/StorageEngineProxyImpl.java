@@ -25,8 +25,11 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
+import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
+import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.recordstorage.InMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader43;
@@ -103,5 +106,24 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
         return dbmsBuilder.setConfig(GraphDatabaseInternalSettings.skip_default_indexes_on_creation, true);
+    }
+
+    @Override
+    public AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        return new InMemoryNodeCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
+        GraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        return new InMemoryNodePropertyCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
+        GraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        return new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 }

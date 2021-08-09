@@ -25,6 +25,11 @@ import org.neo4j.io.pagecache.context.CursorContext;
 public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
 
     @Override
+    public long reserveRelationship() {
+        throw new UnsupportedOperationException("Creating relationships is not supported");
+    }
+
+    @Override
     public void initialize(CursorContext cursorContext) {
 
     }

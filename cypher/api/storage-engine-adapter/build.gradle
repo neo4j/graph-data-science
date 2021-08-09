@@ -12,7 +12,7 @@ dependencies {
     compileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.eclipse.collections', name: 'eclipse-collections', version: ver.'eclipse-collections'
     neodeps.each {
-        compileOnly(group: 'org.neo4j', name: it, version: neos.'4.3') {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }

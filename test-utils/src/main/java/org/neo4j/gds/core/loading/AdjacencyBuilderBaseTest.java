@@ -20,11 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
+import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
@@ -64,7 +64,7 @@ public abstract class AdjacencyBuilderBaseTest {
         Map<Long, Long> relationships = new HashMap<>();
         for (long i = 0; i < nodeCount; i++) {
             relationships.put(i, nodeCount - i);
-            relationshipsBatchBuffer.add(i, nodeCount - i, -1);
+            relationshipsBatchBuffer.add(i, nodeCount - i);
         }
 
         RelationshipImporter relationshipImporter = new RelationshipImporter(

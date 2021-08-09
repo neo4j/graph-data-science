@@ -19,21 +19,31 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.compat.AbstractInMemoryCommandCreationContext;
-import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.storageengine.api.cursor.StoreCursors;
+import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.storageengine.api.Reference;
 
-public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
+import java.util.Objects;
 
-    @Override
-    public long reserveRelationship(long sourceNode) {
-        throw new UnsupportedOperationException("Creating relationships is not supported");
+public final class ReferencePropertyReference implements PropertyReference {
+
+    private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
+
+    public final Reference reference;
+
+    private ReferencePropertyReference(Reference reference) {
+        this.reference = reference;
+    }
+
+    public static PropertyReference of(Reference reference) {
+        return new ReferencePropertyReference(Objects.requireNonNull(reference));
+    }
+
+    public static PropertyReference empty() {
+        return EMPTY;
     }
 
     @Override
-    public void initialize(
-        CursorContext cursorContext, StoreCursors storeCursors
-    ) {
-
+    public boolean isEmpty() {
+        return reference == null;
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.internal.kernel.api.NodeCursor;
 
 public final class NodeCursorReference implements NodeReference {
@@ -46,7 +47,7 @@ public final class NodeCursorReference implements NodeReference {
     }
 
     @Override
-    public long propertiesReference() {
-        return nodeCursor.propertiesReference();
+    public PropertyReference propertiesReference() {
+        return Neo4jProxy.propertyReference(nodeCursor);
     }
 }

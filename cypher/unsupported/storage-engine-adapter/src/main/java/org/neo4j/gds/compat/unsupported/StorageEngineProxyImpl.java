@@ -24,10 +24,13 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
+import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -88,6 +91,25 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
         return dbmsBuilder;
+    }
+
+    @Override
+    public AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
+        GraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
+        GraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
     }
 
     private UnsupportedOperationException cypherUnsupportedException() {

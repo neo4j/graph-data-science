@@ -23,7 +23,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.storageengine.api.RelationshipVisitor;
-import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -65,16 +64,6 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     @Override
     public boolean hasProperties() {
         return false;
-    }
-
-    @Override
-    public long propertiesReference() {
-        return 0;
-    }
-
-    @Override
-    public void properties(StoragePropertyCursor propertyCursor) {
-
     }
 
     @Override

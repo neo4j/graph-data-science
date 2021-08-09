@@ -34,8 +34,10 @@ import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.JobRunner;
+import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -214,6 +216,49 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         return kernelTransaction
             .cursors()
             .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+    }
+
+    @Override
+    public PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return LongPropertyReference.of(nodeCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return LongPropertyReference.of(relationshipScanCursor.propertiesReference());
+    }
+
+    @Override
+    public PropertyReference noPropertyReference() {
+        return LongPropertyReference.empty();
+    }
+
+    @Override
+    public void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        kernelTransaction.dataRead().nodeProperties(
+            nodeReference,
+            ((LongPropertyReference) reference).id,
+            cursor
+        );
+    }
+
+    @Override
+    public void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        kernelTransaction.dataRead().relationshipProperties(
+            relationshipReference,
+            ((LongPropertyReference) reference).id,
+            cursor
+        );
     }
 
     @Override

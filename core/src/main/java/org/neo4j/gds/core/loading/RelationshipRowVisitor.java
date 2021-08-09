@@ -23,6 +23,7 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -36,7 +37,6 @@ import static org.neo4j.gds.utils.ExceptionUtil.validateTargetNodeIsLoaded;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
-    private static final long NO_RELATIONSHIP_REFERENCE = -1L;
     private static final String SOURCE_COLUMN = "source";
     private static final String TARGET_COLUMN = "target";
     static final String TYPE_COLUMN = "type";
@@ -152,15 +152,14 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (noProperties) {
             importer.buffer().add(
                 sourceId,
-                targetId,
-                NO_RELATIONSHIP_REFERENCE
+                targetId
             );
         } else if (singleProperty) {
             importer.buffer().add(
                 sourceId,
                 targetId,
-                NO_RELATIONSHIP_REFERENCE,
-                Double.doubleToLongBits(readPropertyValue(row, singlePropertyKey))
+                Double.doubleToLongBits(readPropertyValue(row, singlePropertyKey)),
+                Neo4jProxy.noPropertyReference()
             );
         } else {
             // Instead of inlining the property
@@ -170,8 +169,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             importer.buffer().add(
                 sourceId,
                 targetId,
-                NO_RELATIONSHIP_REFERENCE,
-                nextRelationshipId
+                nextRelationshipId,
+                Neo4jProxy.noPropertyReference()
             );
             readPropertyValues(row, nextRelationshipId, localPropertiesBuffers.get(relationshipType));
             localRelationshipIds.put(relationshipType, nextRelationshipId + 1);

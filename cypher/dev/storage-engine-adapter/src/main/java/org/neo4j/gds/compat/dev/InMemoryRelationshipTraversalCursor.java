@@ -19,20 +19,27 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.compat.AbstractInMemoryCommandCreationContext;
-import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.storageengine.api.cursor.StoreCursors;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
+import org.neo4j.token.TokenHolders;
 
-public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
+public class InMemoryRelationshipTraversalCursor extends AbstractInMemoryRelationshipTraversalCursor {
 
-    @Override
-    public long reserveRelationship(long sourceNode) {
-        throw new UnsupportedOperationException("Creating relationships is not supported");
+    public InMemoryRelationshipTraversalCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+        super(graphStore, tokenHolders);
     }
 
     @Override
-    public void initialize(
-        CursorContext cursorContext, StoreCursors storeCursors
+    public Reference propertiesReference() {
+        return null;
+    }
+
+    @Override
+    public void properties(
+        StoragePropertyCursor propertyCursor, PropertySelection selection
     ) {
 
     }
