@@ -90,7 +90,11 @@ public class PipelineModelInfo implements Mappable {
     }
 
     void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
-        parameterList.forEach(trainParams -> LinkLogisticRegressionTrainConfig.of(ConcurrencyConfig.DEFAULT_CONCURRENCY, trainParams));
+        validateParameters(parameterList);
         this.parameterSpace = parameterList;
+    }
+
+    private void validateParameters(@NotNull List<Map<String, Object>> parameterList) {
+        parameterList.forEach(trainParams -> LinkLogisticRegressionTrainConfig.of(ConcurrencyConfig.DEFAULT_CONCURRENCY, trainParams));
     }
 }
