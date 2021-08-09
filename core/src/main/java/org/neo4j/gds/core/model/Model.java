@@ -79,7 +79,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         throw new RuntimeException("Only stored models can be unloaded.");
     }
 
-    default Model publish() {
+    default Model<DATA, CONFIG, INFO> publish() {
         return ImmutableModel.<DATA, CONFIG, INFO>builder()
             .from(this)
             .sharedWith(List.of(ALL_USERS))

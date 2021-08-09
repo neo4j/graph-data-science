@@ -189,7 +189,7 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
                 .featureProperties(featureProperties)
                 .negativeClassWeight(1d)
                 .build(),
-            LinkPredictionModelInfo.empty()
+            LinkPredictionModelInfo.defaultInfo()
         ));
     }
 }

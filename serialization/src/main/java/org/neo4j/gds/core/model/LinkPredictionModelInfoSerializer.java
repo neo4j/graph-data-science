@@ -35,13 +35,14 @@ import static org.neo4j.gds.config.ConfigSerializers.linkLogisticRegressionTrain
 
 public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<LinkPredictionModelInfo> {
 
-    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
-        LinkPredictionModelInfo linkPredictionModelInfo = (LinkPredictionModelInfo) mappable;
+    public GeneratedMessageV3 toSerializable(Model.Mappable info) {
+        var modelInfo = (LinkPredictionModelInfo) info;
+
         var builder = CommonML.LinkPredictionModelInfo.newBuilder()
-            .setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
+            .setBestParameters(linkLogisticRegressionTrainConfig(modelInfo.bestParameters()));
 
         ModelInfoSerializer.serializeMetrics(
-            linkPredictionModelInfo.metrics(),
+            modelInfo.metrics(),
             Enum::name,
             (paramsBuilder, modelStats) -> paramsBuilder.setLinkPredictionParams(linkLogisticRegressionTrainConfig(modelStats.params())),
             builder::putMetrics

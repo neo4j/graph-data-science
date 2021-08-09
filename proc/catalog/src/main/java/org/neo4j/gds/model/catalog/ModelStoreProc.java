@@ -70,7 +70,7 @@ public class ModelStoreProc extends BaseProc {
         return Stream.of(new ModelStoreResult(modelName, timer.getDuration()));
     }
 
-    static <CUSTOM_INFO extends Model.Mappable> void storeModel(GraphDatabaseService db, Model<?, ?, CUSTOM_INFO> model) throws IOException {
+    static void storeModel(GraphDatabaseService db, Model<?, ?, ?> model) throws IOException {
         var modelDir = createModelDir(db);
 
         ModelToFileExporter.toFile(

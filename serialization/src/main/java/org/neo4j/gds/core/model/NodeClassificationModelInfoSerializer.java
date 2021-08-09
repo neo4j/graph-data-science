@@ -39,8 +39,9 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
     public NodeClassificationModelInfoSerializer() {}
 
 
-    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
-        var modelInfo = (NodeClassificationModelInfo) mappable;
+    public GeneratedMessageV3 toSerializable(Model.Mappable info) {
+        var modelInfo = (NodeClassificationModelInfo) info;
+
         var builder = CommonML.NodeClassificationModelInfo.newBuilder()
             .addAllClasses(modelInfo.classes())
             .setBestParameters(multiClassNLRTrainConfig(modelInfo.bestParameters()));

@@ -27,8 +27,9 @@ import org.neo4j.gds.embeddings.graphsage.ImmutableGraphSageTrainMetrics;
 
 public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<GraphSageModelTrainer.GraphSageTrainMetrics> {
 
-    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
-        var modelInfo = (GraphSageModelTrainer.GraphSageTrainMetrics) mappable;
+    public GeneratedMessageV3 toSerializable(Model.Mappable info) {
+        var modelInfo = (GraphSageModelTrainer.GraphSageTrainMetrics) info;
+
         return GraphSageProto.GraphSageMetrics.newBuilder()
             .addAllEpochLosses(modelInfo.epochLosses())
             .setDidConverge(modelInfo.didConverge())

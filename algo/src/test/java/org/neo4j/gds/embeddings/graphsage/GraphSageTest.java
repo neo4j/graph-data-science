@@ -84,7 +84,7 @@ class GraphSageTest {
 
     @BeforeEach
     void setUp() {
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        graph = RandomGraphGenerator.builder()
             .nodeCount(NODE_COUNT)
             .averageDegree(3)
             .nodeLabelProducer(nodeId -> new NodeLabel[] {NodeLabel.of("P")})
@@ -96,8 +96,7 @@ class GraphSageTest {
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .allocationTracker(AllocationTracker.empty())
-            .build();
-        graph = randomGraphGenerator.generate();
+            .build().generate();
 
         long nodeCount = graph.nodeCount();
         features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
@@ -105,8 +104,7 @@ class GraphSageTest {
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
 
-        configBuilder = ImmutableGraphSageTrainConfig.builder()
-            .embeddingDimension(EMBEDDING_DIMENSION);
+        configBuilder = ImmutableGraphSageTrainConfig.builder().embeddingDimension(EMBEDDING_DIMENSION);
     }
 
     @ParameterizedTest
@@ -121,7 +119,7 @@ class GraphSageTest {
             .concurrency(4)
             .build();
 
-        SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
+        var trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
             trainConfig,
             Pools.DEFAULT,
@@ -156,8 +154,8 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var modelTrainer = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
-        ModelCatalog.set(modelTrainer.compute());
+        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
+        ModelCatalog.set(graphSageTrain.compute());
 
 
         int predictNodeCount = 2000;
@@ -171,7 +169,8 @@ class GraphSageTest {
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .allocationTracker(AllocationTracker.empty())
-            .build().generate();
+            .build()
+            .generate();
 
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()

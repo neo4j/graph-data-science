@@ -99,10 +99,9 @@ public final class ModelMetaDataSerializer {
 
     private static <INFO extends Model.Mappable> INFO deserializeCustomInfo(ModelProto.ModelMetaData protoModelMetaData) {
         try {
-            var serializable = ModelInfoSerializerFactory.modelInfoSerializer(protoModelMetaData.getAlgoType());
-            // TODO why unpacked here?
-            var unpacked = protoModelMetaData.getCustomInfo().unpack(serializable.serializableClass());
-            return (INFO) serializable.fromSerializable(unpacked);
+            var serializer = ModelInfoSerializerFactory.modelInfoSerializer(protoModelMetaData.getAlgoType());
+            var unpacked = protoModelMetaData.getCustomInfo().unpack(serializer.serializableClass());
+            return (INFO) serializer.fromSerializable(unpacked);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
