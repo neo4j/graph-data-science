@@ -63,7 +63,14 @@ class LinkFeaturePipelineConfigureParamsProcTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of(Map.of("minEpochs", 42L))
+                "parameterSpace", List.of(Map.of(
+                    "maxEpochs", 100,
+                    "minEpochs", 42,
+                    "penalty", 0.0,
+                    "patience", 1,
+                    "batchSize", 100,
+                    "tolerance", 0.001
+                ))
             ))
         );
     }
@@ -73,13 +80,21 @@ class LinkFeaturePipelineConfigureParamsProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
+            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4, concurrency: 2}])",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
-                "parameterSpace", List.of(Map.of("minEpochs", 4L))
+                "parameterSpace", List.of(Map.of(
+                    "maxEpochs", 100,
+                    "minEpochs", 4,
+                    "penalty", 0.0,
+                    "patience", 1,
+                    "batchSize", 100,
+                    "tolerance", 0.001,
+                    "concurrency", 2
+                ))
             ))
         );
     }

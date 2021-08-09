@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PipelineModelInfo implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
@@ -90,11 +91,20 @@ public class PipelineModelInfo implements Mappable {
     }
 
     void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
-        validateParameters(parameterList);
-        this.parameterSpace = parameterList;
-    }
+        this.parameterSpace = parameterList.stream()
+            .map(trainParams -> {
+                var validatedConfig = LinkLogisticRegressionTrainConfig.of(
+                    ConcurrencyConfig.DEFAULT_CONCURRENCY,
+                    trainParams
+                ).toMap();
 
-    private void validateParameters(@NotNull List<Map<String, Object>> parameterList) {
-        parameterList.forEach(trainParams -> LinkLogisticRegressionTrainConfig.of(ConcurrencyConfig.DEFAULT_CONCURRENCY, trainParams));
+                // The concurrency from `train` should be used
+                // if not specified otherwise by the user
+                if (!trainParams.containsKey(ConcurrencyConfig.CONCURRENCY_KEY)) {
+                    validatedConfig.remove(ConcurrencyConfig.CONCURRENCY_KEY);
+                }
+
+                return validatedConfig;
+            }).collect(Collectors.toList());
     }
 }
