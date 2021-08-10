@@ -42,21 +42,23 @@ public class PipelineExecutor {
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
+    private final String graphName;
 
     public PipelineExecutor(
         PipelineModelInfo pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
-        String userName
+        String userName,
+        String graphName
     ) {
         this.pipeline = pipeline;
         this.caller = caller;
         this.userName = userName;
         this.databaseId = databaseId;
+        this.graphName = graphName;
     }
 
     public HugeObjectArray<double[]> computeFeatures(
-        String graphName,
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
         int concurrency
@@ -74,16 +76,11 @@ public class PipelineExecutor {
         return LinkFeatureExtractor.of(graph, pipeline.featureSteps());
     }
 
-    public void executeNodePropertySteps(
-        String graphName,
-        Collection<NodeLabel> nodeLabels,
-        RelationshipType relationshipType
-    ) {
-        executeNodePropertySteps(graphName, nodeLabels, List.of(relationshipType));
+    public void executeNodePropertySteps(Collection<NodeLabel> nodeLabels, RelationshipType relationshipType) {
+        executeNodePropertySteps(nodeLabels, List.of(relationshipType));
     }
 
     public void executeNodePropertySteps(
-        String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes
     ) {
@@ -93,7 +90,6 @@ public class PipelineExecutor {
     }
 
     public void splitRelationships(
-        String graphName,
         GraphStore graphStore,
         List<String> relationshipTypes,
         List<String> nodeLabels,
@@ -106,7 +102,6 @@ public class PipelineExecutor {
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(
-            graphName,
             splitConfig.testRelationshipType(),
             testComplementRelationshipType,
             nodeLabels,
@@ -118,7 +113,6 @@ public class PipelineExecutor {
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(
-            graphName,
             splitConfig.trainRelationshipType(),
             splitConfig.featureInputRelationshipType(),
             nodeLabels,
@@ -131,7 +125,6 @@ public class PipelineExecutor {
     }
 
     private void relationshipSplit(
-        String graphName,
         String holdoutRelationshipType,
         String remainingRelationshipType,
         List<String> nodeLabels,

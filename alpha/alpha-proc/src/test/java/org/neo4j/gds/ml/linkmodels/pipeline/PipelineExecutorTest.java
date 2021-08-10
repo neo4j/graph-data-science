@@ -92,7 +92,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername())
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME)
             );
 
             var expected = HugeObjectArray.of(
@@ -124,8 +124,7 @@ class PipelineExecutorTest extends BaseProcTest {
         ));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()).executeNodePropertySteps(
-                GRAPH_NAME,
+            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
                 RelationshipType.of("REL")
             );
@@ -147,7 +146,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()));
+            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME));
 
             var expected = HugeObjectArray.of(
                 new double[]{3 * 1D, 2 * 1D, (42 * 1337 + 13 * 0D) / normA / normB}, // a-b
@@ -184,7 +183,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername())
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME)
             );
 
             var expected = HugeObjectArray.of(
@@ -211,7 +210,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername());
+            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME);
 
             assertThatThrownBy(() -> computePropertiesAndLinkFeatures(executor))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -221,8 +220,8 @@ class PipelineExecutorTest extends BaseProcTest {
     }
 
     private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(PipelineExecutor pipeline) {
-        pipeline.executeNodePropertySteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
-        return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"), 4);
+        pipeline.executeNodePropertySteps(List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+        return pipeline.computeFeatures(List.of(NodeLabel.of("N")), RelationshipType.of("REL"), 4);
     }
 
 }

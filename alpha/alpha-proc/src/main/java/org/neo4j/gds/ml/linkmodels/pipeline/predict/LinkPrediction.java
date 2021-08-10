@@ -41,7 +41,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
 
     private final LinkLogisticRegressionData modelData;
     private final PipelineExecutor pipelineExecutor;
-    private final String graphName;
     private final List<NodeLabel> nodeLabels;
     private final List<RelationshipType> relationshipTypes;
     private final Graph graph;
@@ -52,7 +51,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     public LinkPrediction(
         LinkLogisticRegressionData modelData,
         PipelineExecutor pipelineExecutor,
-        String graphName,
         List<NodeLabel> nodeLabels,
         List<RelationshipType> relationshipTypes,
         Graph graph,
@@ -63,7 +61,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     ) {
         this.modelData = modelData;
         this.pipelineExecutor = pipelineExecutor;
-        this.graphName = graphName;
         this.nodeLabels = nodeLabels;
         this.relationshipTypes = relationshipTypes;
         this.graph = graph;
@@ -80,7 +77,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     }
 
     private void computeNodeProperties() {
-        pipelineExecutor.executeNodePropertySteps(graphName, nodeLabels, relationshipTypes);
+        pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
     }
 
     private LinkPredictionResult predictLinks() {

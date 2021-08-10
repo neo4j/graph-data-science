@@ -90,11 +90,16 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
                 validatePipeline(pipeline);
 
                 return new LinkPredictionTrain(
-                    graphName,
                     graphStore,
                     trainConfig,
                     pipeline,
-                    new PipelineExecutor(pipeline, LinkPredictionPipelineTrainProc.this, databaseId(), username()),
+                    new PipelineExecutor(
+                        pipeline,
+                        LinkPredictionPipelineTrainProc.this,
+                        databaseId(),
+                        username(),
+                        graphName
+                    ),
                     ProgressTracker.EmptyProgressTracker.NULL_TRACKER
                 );
             }

@@ -135,11 +135,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
-                GRAPH_NAME,
                 graphStore,
                 trainConfig,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
                 ProgressTracker.NULL_TRACKER
             );
 
@@ -192,11 +191,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
-                "g",
                 graphStore,
                 config,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
                 ProgressTracker.NULL_TRACKER
             );
 

@@ -51,6 +51,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LinkPredictionTest extends BaseProcTest {
+    public static final String GRAPH_NAME = "g";
+
     @Neo4jGraph
     static String GDL = "CREATE " +
                         "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
@@ -77,7 +79,7 @@ class LinkPredictionTest extends BaseProcTest {
             .withNodeLabel("N")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .graphCreate("g")
+            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
@@ -100,8 +102,7 @@ class LinkPredictionTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var linkPrediction = new LinkPrediction(
                 modelData,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
-                "g",
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graph,

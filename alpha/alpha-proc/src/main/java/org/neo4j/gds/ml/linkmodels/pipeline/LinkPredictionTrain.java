@@ -59,7 +59,6 @@ public class LinkPredictionTrain
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 
-    private final String graphName;
     private final GraphStore graphStore;
     private final LinkPredictionTrainConfig trainConfig;
     private final PipelineExecutor pipelineExecutor;
@@ -67,14 +66,12 @@ public class LinkPredictionTrain
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
-        String graphName,
         GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
         PipelineModelInfo pipeline,
         PipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker
     ) {
-        this.graphName = graphName;
         this.graphStore = graphStore;
         this.trainConfig = trainConfig;
         this.pipelineExecutor = pipelineExecutor;
@@ -91,10 +88,9 @@ public class LinkPredictionTrain
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
-        pipelineExecutor.splitRelationships(graphName, graphStore, relationshipTypes, trainConfig.nodeLabels(), trainConfig.randomSeed());
+        pipelineExecutor.splitRelationships(graphStore, relationshipTypes, trainConfig.nodeLabels(), trainConfig.randomSeed());
 
         pipelineExecutor.executeNodePropertySteps(
-            graphName,
             trainConfig.nodeLabelIdentifiers(graphStore),
             RelationshipType.of(pipeline.splitConfig().featureInputRelationshipType())
         );
@@ -124,7 +120,6 @@ public class LinkPredictionTrain
 
     FeaturesAndTargets extractFeaturesAndTargets(String relationshipType) {
         var features = pipelineExecutor.computeFeatures(
-            graphName,
             trainConfig.nodeLabelIdentifiers(graphStore),
             RelationshipType.of(relationshipType),
             trainConfig.concurrency()
