@@ -141,4 +141,11 @@ public class PipelineModelInfo implements Mappable {
             throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
         }
     }
+
+    public void validate() {
+        if (featureSteps().isEmpty()) {
+            throw new IllegalArgumentException(
+                "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
+        }
+    }
 }

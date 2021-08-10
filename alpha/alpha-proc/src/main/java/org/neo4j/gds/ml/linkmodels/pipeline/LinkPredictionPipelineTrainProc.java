@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.logging.Log;
@@ -61,13 +62,6 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
         return LinkPredictionTrainConfig.of(username(), graphName, maybeImplicitCreate, config);
     }
 
-    private void validatePipeline(PipelineModelInfo pipeline) {
-        if (pipeline.featureSteps().size() == 0) {
-            throw new IllegalArgumentException(
-                "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
-        }
-    }
-
     @Override
     protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
@@ -86,8 +80,8 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
                 var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), username());
-                // TODO also depend on the existing graph properties?
-                validatePipeline(pipeline);
+
+                pipeline.validate();
 
                 return new LinkPredictionTrain(
                     graphStore,
@@ -106,7 +100,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
 
             @Override
             public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-                return MemoryEstimations.empty();
+                throw new MemoryEstimationNotImplementedException();
             }
         };
     }
