@@ -49,7 +49,7 @@ public class TaskProgressTracker implements ProgressTracker {
         ProgressEventTracker eventTracker
     ) {
         this.baseTask = baseTask;
-        this.progressLogger = new TaskProgressLogger(progressLogger);
+        this.progressLogger = new TaskProgressLogger(progressLogger, baseTask);
         this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
@@ -63,8 +63,7 @@ public class TaskProgressTracker implements ProgressTracker {
         }).orElse(baseTask);
         nextTask.start();
         eventTracker.addTaskProgressEvent(nextTask);
-        progressLogger.logStart(taskDescription(nextTask));
-        progressLogger.reset(nextTask.getProgress().volume());
+        progressLogger.beginSubTask(nextTask);
         currentTask = Optional.of(nextTask);
     }
 
@@ -72,7 +71,7 @@ public class TaskProgressTracker implements ProgressTracker {
     public void endSubTask() {
         var currentTask = requireCurrentTask();
         currentTask.finish();
-        progressLogger.logFinish(taskDescription(currentTask));
+        progressLogger.endSubTask(currentTask);
         this.currentTask = nestedTasks.isEmpty()
             ? Optional.empty()
             : Optional.of(nestedTasks.pop());
@@ -114,11 +113,5 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private Task requireCurrentTask() {
         return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
-    }
-
-    private String taskDescription(Task nextTask) {
-        return nextTask == baseTask
-            ? ""
-            : nextTask.description();
     }
 }

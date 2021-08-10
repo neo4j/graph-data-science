@@ -22,14 +22,32 @@ package org.neo4j.gds.core.utils.progress.v2.tasks;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.logging.Log;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TaskProgressLogger implements ProgressLogger {
 
     private final ProgressLogger progressLogger;
+    private final Task baseTask;
+    private final TaskVisitor loggingTaskStartVisitor;
+    private final TaskVisitor loggingTaskEndVisitor;
 
-    public TaskProgressLogger(ProgressLogger progressLogger) {
+    public TaskProgressLogger(ProgressLogger progressLogger, Task baseTask) {
         this.progressLogger = progressLogger;
+        this.baseTask = baseTask;
+        this.loggingTaskStartVisitor = new LoggingTaskVisitor(progressLogger::logStart);
+        this.loggingTaskEndVisitor = new LoggingTaskVisitor(progressLogger::logFinish);
+    }
+
+    public void beginSubTask(Task task) {
+        task.visit(loggingTaskStartVisitor);
+        progressLogger.reset(task.getProgress().volume());
+    }
+
+    public void endSubTask(Task task) {
+        task.visit(loggingTaskEndVisitor);
     }
 
     @Override
@@ -75,5 +93,70 @@ public class TaskProgressLogger implements ProgressLogger {
     @Override
     public void logProgress(double percentDone, Supplier<String> msg) {
         progressLogger.logProgress(percentDone, msg);
+    }
+
+    private final class LoggingTaskVisitor implements TaskVisitor {
+
+        private final Consumer<String> logMessageConsumer;
+
+        private LoggingTaskVisitor(Consumer<String> logMessageConsumer) {
+            this.logMessageConsumer = logMessageConsumer;
+        }
+
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            logMessageConsumer.accept(taskDescription(leafTask));
+        }
+
+        @Override
+        public void visitIntermediateTask(Task task) {
+            logMessageConsumer.accept(taskDescription(task));
+        }
+
+        @Override
+        public void visitIterativeTask(IterativeTask iterativeTask) {
+            var iterativeTaskMode = iterativeTask.mode();
+            String iterationTaskName;
+            switch (iterativeTaskMode) {
+                case DYNAMIC:
+                case FIXED:
+                    iterationTaskName = boundedIterationsTaskName(iterativeTask);
+                    break;
+                case OPEN:
+                    iterationTaskName = unboundedIterationsTaskName(iterativeTask);
+                    break;
+                default:
+                    throw new UnsupportedOperationException(formatWithLocale("Enum value %s is not supported", iterativeTaskMode));
+            }
+            logMessageConsumer.accept(iterationTaskName);
+        }
+
+        private String boundedIterationsTaskName(IterativeTask iterativeTask) {
+            var subTasksSize = iterativeTask.subTasks().size();
+            var currentIteration = iterativeTask.currentIteration();
+
+            return formatWithLocale(
+                "%s %d of %d",
+                taskDescription(iterativeTask),
+                currentIteration,
+                subTasksSize
+            );
+        }
+
+        private String unboundedIterationsTaskName(IterativeTask iterativeTask) {
+            var currentIteration = iterativeTask.currentIteration();
+
+            return formatWithLocale(
+                "%s %d",
+                taskDescription(iterativeTask),
+                currentIteration
+            );
+        }
+
+        private String taskDescription(Task nextTask) {
+            return nextTask == baseTask
+                ? ""
+                : nextTask.description();
+        }
     }
 }
