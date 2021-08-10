@@ -21,8 +21,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrain.MODEL_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineUtils {
@@ -43,5 +45,12 @@ public final class PipelineUtils {
         }
 
         return (PipelineModelInfo) model.customInfo();
+    }
+
+    public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> getLinkPredictionPipeline(
+        String pipelineName,
+        String username
+    ) {
+        return ModelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class);
     }
 }
