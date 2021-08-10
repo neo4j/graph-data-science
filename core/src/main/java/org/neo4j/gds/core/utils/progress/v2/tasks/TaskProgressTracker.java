@@ -30,7 +30,7 @@ import java.util.Stack;
 public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
-    private final ProgressLogger progressLogger;
+    private final TaskProgressLogger progressLogger;
     private final ProgressEventTracker eventTracker;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
@@ -49,7 +49,7 @@ public class TaskProgressTracker implements ProgressTracker {
         ProgressEventTracker eventTracker
     ) {
         this.baseTask = baseTask;
-        this.progressLogger = progressLogger;
+        this.progressLogger = new TaskProgressLogger(progressLogger);
         this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
