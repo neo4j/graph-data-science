@@ -61,7 +61,7 @@ public class PipelineModelInfo implements Mappable {
                 "nodePropertySteps", Mappable.toMap(nodePropertySteps),
                 "featureSteps", Mappable.toMap(featureSteps)
             ),
-            "splitConfig", splitConfig,
+            "splitConfig", splitConfig.toMap(),
             "parameterSpace", parameterSpace
         );
     }

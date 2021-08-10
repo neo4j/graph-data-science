@@ -35,6 +35,8 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
 
     Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics();
 
+    PipelineModelInfo trainingPipeline();
+
     @Override
     default Map<String, Object> toMap() {
         return Map.of(
@@ -42,14 +44,16 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
             "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().name(),
                 entry -> entry.getValue().toMap()
-            ))
+            )),
+            "trainingPipeline", trainingPipeline().toMap()
         );
     }
 
     static LinkPredictionModelInfo of(
         LinkLogisticRegressionTrainConfig bestParameters,
-        Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics
+        Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics,
+        PipelineModelInfo trainingPipeline
     ) {
-        return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics);
+        return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, trainingPipeline);
     }
 }

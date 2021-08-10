@@ -161,6 +161,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .usingRecursiveComparison()
                 .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
 
+            assertThat(customInfo.trainingPipeline())
+                .usingRecursiveComparison()
+                .isEqualTo(pipeline);
+
             assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL"));
         });
     }
