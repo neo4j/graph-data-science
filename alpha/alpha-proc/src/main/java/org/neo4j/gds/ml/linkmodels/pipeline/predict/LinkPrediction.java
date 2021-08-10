@@ -33,7 +33,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
@@ -41,8 +41,8 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
 
     private final LinkLogisticRegressionData modelData;
     private final PipelineExecutor pipelineExecutor;
-    private final List<NodeLabel> nodeLabels;
-    private final List<RelationshipType> relationshipTypes;
+    private final Collection<NodeLabel> nodeLabels;
+    private final Collection<RelationshipType> relationshipTypes;
     private final Graph graph;
     private final int concurrency;
     private final int topN;
@@ -51,8 +51,8 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     public LinkPrediction(
         LinkLogisticRegressionData modelData,
         PipelineExecutor pipelineExecutor,
-        List<NodeLabel> nodeLabels,
-        List<RelationshipType> relationshipTypes,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relationshipTypes,
         Graph graph,
         int concurrency,
         int topN,
