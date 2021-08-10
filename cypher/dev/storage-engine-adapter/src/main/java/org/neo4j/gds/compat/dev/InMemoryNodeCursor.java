@@ -24,7 +24,9 @@ import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
+import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
+import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
@@ -46,5 +48,19 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
     @Override
     public void properties(StoragePropertyCursor propertyCursor) {
         properties(propertyCursor, PropertySelection.ALL_PROPERTIES);
+    }
+
+    @Override
+    public boolean supportsFastRelationshipsTo() {
+        return false;
+    }
+
+    @Override
+    public void relationshipsTo(
+        StorageRelationshipTraversalCursor storageRelationshipTraversalCursor,
+        RelationshipSelection relationshipSelection,
+        long neighbourNodeReference
+    ) {
+        throw new UnsupportedOperationException();
     }
 }
