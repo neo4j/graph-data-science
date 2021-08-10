@@ -117,7 +117,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     private String taskDescription(Task nextTask) {
-        return nextTask.description().equals(baseTask.description())
+        return nextTask == baseTask
             ? ""
             : nextTask.description();
     }
