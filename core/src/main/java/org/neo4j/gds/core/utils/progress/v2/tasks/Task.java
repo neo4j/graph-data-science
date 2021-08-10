@@ -127,4 +127,8 @@ public class Task {
     public void logProgress(long value) {
         throw new UnsupportedOperationException("Should only be called on a leaf task");
     }
+
+    public void visit(TaskVisitor taskVisitor) {
+        taskVisitor.visitIntermediateTask(this);
+    }
 }

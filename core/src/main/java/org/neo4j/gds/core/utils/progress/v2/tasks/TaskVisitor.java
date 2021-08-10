@@ -19,37 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress.v2.tasks;
 
-import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
-
-public class LeafTask extends Task {
-
-    private long volume;
-    private final LongAdder currentProgress;
-
-    LeafTask(String description, long volume) {
-        super(description, List.of());
-        this.volume = volume;
-        this.currentProgress = new LongAdder();
-    }
-
-    @Override
-    public void setVolume(long volume) {
-        this.volume = volume;
-    }
-
-    @Override
-    public void logProgress(long value) {
-        currentProgress.add(value);
-    }
-
-    @Override
-    public Progress getProgress() {
-        return ImmutableProgress.of(currentProgress.longValue(), volume);
-    }
-
-    @Override
-    public void visit(TaskVisitor taskVisitor) {
-        taskVisitor.visitLeafTask(this);
-    }
+public interface TaskVisitor {
+    void visitLeafTask(LeafTask leafTask);
+    void visitIntermediateTask(Task task);
+    void visitIterativeTask(IterativeTask iterativeTask);
 }

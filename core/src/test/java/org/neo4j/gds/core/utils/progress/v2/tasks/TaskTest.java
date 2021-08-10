@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.progress.v2.tasks;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -189,5 +191,48 @@ class TaskTest {
         assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
         task.nextSubtask().setVolume(100);
         assertThat(task.getProgress().volume()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldVisitTasks() {
+        Task leafTask = Tasks.leaf("leaf");
+        Task intermediateTask = Tasks.task("root", leafTask);
+        Task iterativeTask = Tasks.iterativeFixed("iterative", () -> List.of(Tasks.leaf("iterationLeaf")), 2);
+
+        var taskVisitor = new CountingTaskVisitor();
+
+        assertThat(taskVisitor.visitIntermediateTaskInvocations).isEqualTo(0);
+        assertThat(taskVisitor.visitLeafTaskInvocations).isEqualTo(0);
+        assertThat(taskVisitor.visitIterativeTaskInvocations).isEqualTo(0);
+
+        leafTask.visit(taskVisitor);
+        intermediateTask.visit(taskVisitor);
+        iterativeTask.visit(taskVisitor);
+
+        assertThat(taskVisitor.visitIntermediateTaskInvocations).isEqualTo(1);
+        assertThat(taskVisitor.visitLeafTaskInvocations).isEqualTo(1);
+        assertThat(taskVisitor.visitIterativeTaskInvocations).isEqualTo(1);
+    }
+
+    static class CountingTaskVisitor implements TaskVisitor {
+
+        int visitLeafTaskInvocations = 0;
+        int visitIntermediateTaskInvocations = 0;
+        int visitIterativeTaskInvocations = 0;
+
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            visitLeafTaskInvocations++;
+        }
+
+        @Override
+        public void visitIntermediateTask(Task task) {
+            visitIntermediateTaskInvocations++;
+        }
+
+        @Override
+        public void visitIterativeTask(IterativeTask iterativeTask) {
+            visitIterativeTaskInvocations++;
+        }
     }
 }

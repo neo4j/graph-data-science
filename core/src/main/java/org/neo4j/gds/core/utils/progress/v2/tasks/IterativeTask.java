@@ -102,4 +102,12 @@ public class IterativeTask extends Task {
             .size();
     }
 
+    public Mode mode() {
+        return this.mode;
+    }
+
+    @Override
+    public void visit(TaskVisitor taskVisitor) {
+        taskVisitor.visitIterativeTask(this);
+    }
 }
