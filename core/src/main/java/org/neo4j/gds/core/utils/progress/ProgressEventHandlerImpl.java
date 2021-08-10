@@ -25,31 +25,26 @@ import org.neo4j.gds.compat.JobPromise;
 import org.neo4j.gds.compat.JobRunner;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
-import static java.util.Collections.emptyMap;
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toList;
-
-final class ProgressEventConsumer implements Runnable, ProgressEventStore {
+final class ProgressEventHandlerImpl extends LifecycleAdapter implements Runnable, ProgressEventHandler {
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
     private final Queue<LogEvent> queue;
 
     private volatile @Nullable JobPromise job;
-    private final Map<String, Map<JobId, List<LogEvent>>> events;
+    private final List<Consumer<LogEvent>> eventListeners;
 
-    ProgressEventConsumer(
+    ProgressEventHandlerImpl(
         Monitor monitor,
         JobScheduler jobScheduler,
         Queue<LogEvent> queue
@@ -58,14 +53,14 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     }
 
     @TestOnly
-    ProgressEventConsumer(
+    ProgressEventHandlerImpl(
         JobRunner jobRunner,
         Queue<LogEvent> queue
     ) {
         this(Monitor.EMPTY, jobRunner, queue);
     }
 
-    private ProgressEventConsumer(
+    private ProgressEventHandlerImpl(
         Monitor monitor,
         JobRunner jobRunner,
         Queue<LogEvent> queue
@@ -73,34 +68,12 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
         this.monitor = monitor;
         this.jobRunner = jobRunner;
         this.queue = queue;
-        events = new ConcurrentHashMap<>();
+        this.eventListeners = new ArrayList<>();
     }
 
     @Override
-    public List<LogEvent> query(String username) {
-        return events
-            .getOrDefault(username, emptyMap())
-            .values()
-            .stream()
-            .filter(not(List::isEmpty))
-            .map(items -> items.get(items.size() - 1))
-            .collect(toList());
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return events
-            .values()
-            .stream()
-            .flatMap(it -> it.values().stream())
-            .allMatch(List::isEmpty);
-    }
-
-    public Stream<List<LogEvent>> get() {
-        return events
-            .values()
-            .stream()
-            .flatMap(it -> it.values().stream());
+    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+        this.eventListeners.add(eventConsumer);
     }
 
     @Override
@@ -114,19 +87,11 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     }
 
     private void process(LogEvent event) {
-        if (event.isEndOfStream()) {
-            if (events.containsKey(event.username())) {
-                events.get(event.username()).remove(event.jobId());
-            }
-        } else {
-            events
-                .computeIfAbsent(event.username(), __ -> new ConcurrentHashMap<>())
-                .computeIfAbsent(event.jobId(), __ -> new ArrayList<>())
-                .add(event);
-        }
+        eventListeners.forEach(logEventConsumer -> logEventConsumer.accept(event));
     }
 
-    void start() {
+    @Override
+    public void start() {
         monitor.started();
         if (job != null) {
             throw new IllegalArgumentException("Already running");
@@ -134,7 +99,8 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
         job = jobRunner.scheduleAtInterval(this, 0, 100, TimeUnit.MILLISECONDS);
     }
 
-    void stop() {
+    @Override
+    public void stop() {
         monitor.stopped();
         // pull into field to avoid racing against another stop.
         // We might cancel multiple times, but we're not running into a sneaky NPE

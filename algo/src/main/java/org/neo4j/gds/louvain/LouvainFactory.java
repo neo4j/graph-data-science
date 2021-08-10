@@ -20,7 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -28,6 +27,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -65,7 +65,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new Louvain(
             graph,

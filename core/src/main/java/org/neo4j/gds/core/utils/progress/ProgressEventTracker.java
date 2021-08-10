@@ -19,11 +19,21 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-public interface ProgressEventTracker {
-    void addLogEvent(
-        String taskName,
-        String message
-    );
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+
+import java.util.Optional;
+
+public interface ProgressEventTracker extends ProgressEventHandler {
+    void addTaskProgressEvent(Task task);
+
+    default void addTaskProgressEvent(Optional<Task> task) {
+        if (task.isPresent()) {
+            addTaskProgressEvent(task.get());
+        } else {
+            addTaskProgressEvent(Tasks.empty());
+        }
+    }
 
     void release();
 }

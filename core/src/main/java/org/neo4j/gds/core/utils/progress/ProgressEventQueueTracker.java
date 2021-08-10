@@ -19,26 +19,41 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+
 import java.util.OptionalDouble;
 import java.util.Queue;
+import java.util.function.Consumer;
 
-final class ProgressEventQueueTracker implements ProgressEventTracker {
+final class ProgressEventQueueTracker extends LifecycleAdapter implements ProgressEventTracker {
 
     private final Queue<LogEvent> queue;
     private final String username;
+    private final ProgressEventHandler progressEventHandler;
 
     // for now a synthetic id, we can change to a more traceable one as and when
     private final JobId jobId = new JobId();
 
-    ProgressEventQueueTracker(Queue<LogEvent> queue, String username) {
+    ProgressEventQueueTracker(
+        Queue<LogEvent> queue,
+        String username,
+        ProgressEventHandler progressEventHandler
+    ) {
         this.queue = queue;
         this.username = username;
+        this.progressEventHandler = progressEventHandler;
     }
 
     @Override
-    public void addLogEvent(String taskName, String message) {
-        var logEvent = ImmutableLogEvent.of(username, jobId, taskName, message, OptionalDouble.empty());
+    public void addTaskProgressEvent(Task task) {
+        var logEvent = ImmutableLogEvent.of(username, jobId, task, OptionalDouble.empty());
         this.queue.offer(logEvent);
+    }
+
+    @Override
+    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+        progressEventHandler.registerProgressEventListener(eventConsumer);
     }
 
     @Override

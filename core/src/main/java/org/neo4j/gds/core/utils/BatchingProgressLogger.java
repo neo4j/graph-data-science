@@ -138,19 +138,18 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     private void logProgress(int nextPercentage) {
-        logAndTrack(task, formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage));
+        logInfo(formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage));
     }
 
     private void logProgressWithMessage(int nextPercentage, String msg) {
-        logAndTrack(
-            task,
+        logInfo(
             formatWithLocale("[%s] %s %d%% %s", Thread.currentThread().getName(), task, nextPercentage, msg)
         );
     }
 
     @Override
     public void logMessage(String msg) {
-        logAndTrack(task, formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), task, msg));
+        logInfo(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), task, msg));
     }
 
     @Override
@@ -158,8 +157,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         logMessage(Objects.requireNonNull(msg.get()));
     }
 
-    private void logAndTrack(String task, String message) {
-        progressTracker.addLogEvent(task, message);
+    private void logInfo(String message) {
         log.info(message);
     }
 

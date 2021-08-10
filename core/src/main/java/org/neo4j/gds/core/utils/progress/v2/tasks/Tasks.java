@@ -29,6 +29,12 @@ import java.util.stream.Stream;
 
 public final class Tasks {
 
+    private static final Task EMPTY_TASK = new Task("", List.of());
+
+    public static Task empty() {
+        return EMPTY_TASK;
+    }
+
     public static Task task(String description, Task firstChild, Task... children) {
         var childrenList = new ArrayList<Task>();
         childrenList.add(firstChild);

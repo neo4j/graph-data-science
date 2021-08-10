@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.logging.Log;
 
-final class LoggingProgressEventMonitor implements ProgressEventConsumer.Monitor {
+final class LoggingProgressEventMonitor implements ProgressEventHandlerImpl.Monitor {
     private final Log log;
 
     LoggingProgressEventMonitor(Log log) {

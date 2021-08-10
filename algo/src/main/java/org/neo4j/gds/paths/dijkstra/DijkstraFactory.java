@@ -21,8 +21,6 @@ package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -34,6 +32,8 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
 import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -61,7 +61,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        return new TaskProgressTracker(task, progressLogger(graph, log, eventTracker));
+        return new TaskProgressTracker(task, progressLogger(graph, log, eventTracker), eventTracker);
     }
 
     @NotNull

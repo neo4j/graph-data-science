@@ -33,4 +33,9 @@ enum EmptyProgressEventStore implements ProgressEventStore {
     public boolean isEmpty() {
         return true;
     }
+
+    @Override
+    public void accept(LogEvent logEvent) {
+
+    }
 }

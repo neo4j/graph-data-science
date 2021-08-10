@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-final class ProgressEventConsumerExtensionEnabledTest extends BaseProgressEventConsumerExtensionTest {
+final class ProgressEventHandlerExtensionEnabledTest extends BaseProgressEventHandlerExtensionTest {
 
     @Override
     boolean featureEnabled() {
@@ -32,6 +32,6 @@ final class ProgressEventConsumerExtensionEnabledTest extends BaseProgressEventC
 
     @Override
     void assertResult(List<String> result) {
-        assertThat(result).containsExactly("hello from any algo proc");
+        assertThat(result).containsExactly("foo");
     }
 }

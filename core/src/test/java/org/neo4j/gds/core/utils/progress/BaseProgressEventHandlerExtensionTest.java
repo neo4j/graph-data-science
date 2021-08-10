@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +38,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
+abstract class BaseProgressEventHandlerExtensionTest extends BaseTest {
     private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
 
     abstract boolean featureEnabled();
@@ -48,8 +50,8 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
-        builder.addExtension(new ProgressEventConsumerExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
+        builder.addExtension(new ProgressEventHandlerExtension(scheduler));
     }
 
     abstract void assertResult(List<String> result);
@@ -71,7 +73,7 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
-            progress.addLogEvent("foo", "hello from any algo proc");
+            progress.addTaskProgressEvent(Tasks.leaf("foo"));
             return Stream.empty();
         }
     }
@@ -82,7 +84,7 @@ abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.log")
         public Stream<Bar> foo() {
-            return progress.query("").stream().map(LogEvent::message).map(Bar::new);
+            return progress.query("").stream().map(LogEvent::task).map(Task::description).map(Bar::new);
         }
     }
 

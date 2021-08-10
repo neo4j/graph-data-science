@@ -24,21 +24,22 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.RenamesCurrentThread;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
+import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.RenamesCurrentThread;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventConsumerExtension;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -68,8 +69,8 @@ public class ListProgressProcTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
-        builder.addExtension(new ProgressEventConsumerExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
+        builder.addExtension(new ProgressEventHandlerExtension(scheduler));
     }
 
     @BeforeEach
@@ -77,99 +78,59 @@ public class ListProgressProcTest extends BaseTest {
         GraphDatabaseApiProxy.registerProcedures(
             db,
             ListProgressProc.class,
-            ProgressLoggingAlgoProc.class,
-            ProgressLoggingTestProc.class,
             GraphGenerateProc.class,
+            ProgressLoggingTestProc.class,
             ProgressLoggingTestFastRP.class
         );
     }
 
     @Test
     void canListProgressEvent() {
-        runQuery("CALL gds.test.pl('myAlgo', 'foo')");
+        runQuery("CALL gds.test.pl('foo')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD message RETURN message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
+            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
+            r -> r.<String>columnAs("taskName").stream().collect(toList())
         );
         assertThat(result).containsExactly("foo");
     }
 
     @Test
     void listOnlyLastProgressEvent() {
-        runQuery("CALL gds.test.pl('myAlgo1', 'foo', 'bar', 'baz')");
-        runQuery("CALL gds.test.pl('myAlgo2', 'quux', 'frazzle')");
+        runQuery("CALL gds.test.pl('foo')");
+        runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var progressEvents = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
             r -> r.stream().collect(Collectors.toList())
         );
         assertThat(progressEvents).hasSize(2);
         assertThat(progressEvents)
             .containsExactlyInAnyOrder(
-                Map.of("taskName", "myAlgo1", "message", "baz"),
-                Map.of("taskName", "myAlgo2", "message", "frazzle")
+                Map.of("taskName","foo"),
+                Map.of("taskName", "bar")
             );
     }
 
     @Test
     void progressIsListedFilteredByUser() {
-        runQuery("Alice", "CALL gds.test.pl('myAlgo', 'foo')");
-        runQuery("Bob", "CALL gds.test.pl('myAlgo','bar')");
+        runQuery("Alice", "CALL gds.test.pl('foo')");
+        runQuery("Bob", "CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
             r -> r.stream().collect(Collectors.toList())
         );
-        assertThat(aliceResult).containsExactlyInAnyOrder(Map.of("taskName", "myAlgo", "message", "foo"));
+        assertThat(aliceResult).containsExactlyInAnyOrder(Map.of("taskName", "foo"));
 
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
             r -> r.stream().collect(Collectors.toList())
         );
-        assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "myAlgo", "message", "bar"));
-    }
-
-    public static class ProgressLoggingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
-
-        @Procedure("gds.test.pl")
-        public Stream<Bar> foo(
-            @Name(value = "taskName") String taskName,
-            @Name(value = "message1") String message1,
-            @Name(value = "message2", defaultValue = "not set") String message2,
-            @Name(value = "message3", defaultValue = "not set") String message3
-        ) {
-            progress.addLogEvent(taskName, message1);
-            if (message2.equals("not set")) { return Stream.empty(); }
-            progress.addLogEvent(taskName, message2);
-            if (message3.equals("not set")) { return Stream.empty(); }
-            progress.addLogEvent(taskName, message3);
-            return Stream.empty();
-        }
-    }
-
-    @Test
-    void progressLoggerShouldEmitProgressEvents() {
-        try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
-            runQuery("CALL gds.test.logging_algo('foo', 'pagerank')");
-            runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
-            scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-            var result = runQuery(
-                "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
-                r -> r.stream().collect(Collectors.toList())
-            );
-
-            assertThat(result).hasSize(2);
-
-            assertThat(result).contains(Map.of("taskName", "pagerank", "message", "[Test worker] pagerank 100% hello foo"));
-            assertThat(result).contains(Map.of("taskName", "wcc", "message", "[Test worker] wcc 100% hello bar"));
-        }
+        assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "bar"));
     }
 
     @Test
@@ -180,55 +141,32 @@ public class ListProgressProcTest extends BaseTest {
             scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             List<Map<String, Object>> result = runQuery(
-                "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+                "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
                 r -> r.stream().collect(Collectors.toList())
             );
 
             assertThat(result).hasSize(1)
                 .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-                .hasEntrySatisfying("message", v -> assertThat(v).isEqualTo("[Test worker] FastRP FastRP :: Finished"))
                 .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
         }
     }
 
-    @Test
-    public void shouldShowProgressForIndividualAlgoRuns() {
-        runQuery("CALL gds.test.pl('algo1', 'msg1')");
-        runQuery("CALL gds.test.pl('algo1', 'msg2')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-        var progressItems = runQuery(
-            "CALL gds.beta.listProgress() YIELD id, taskName, message RETURN id, taskName, message",
-            r -> r.stream().collect(Collectors.toList())
-        );
-
-        assertThat(progressItems).hasSize(2);
-        assertThat(progressItems.get(0).get("id")).isNotEqualTo(progressItems.get(1).get("id"));
-        assertThat(progressItems.get(0).get("taskName")).isEqualTo(progressItems.get(1).get("taskName"));
-        assertThat(progressItems.stream().map(fields -> fields.get("message"))).containsExactlyInAnyOrder(
-            "msg1",
-            "msg2"
-        );
-    }
-
-    public static class ProgressLoggingAlgoProc extends BaseProc {
+    public static class ProgressLoggingTestProc extends BaseProc {
         @Context
         public ProgressEventTracker progress;
 
-        @Procedure("gds.test.logging_algo")
-        public Stream<Bar> bar(
-            @Name(value = "param") String param,
-            @Name(value = "source", defaultValue = "test") String source
+        @Procedure("gds.test.pl")
+        public Stream<Bar> foo(
+            @Name(value = "taskName") String taskName
         ) {
-            var progressLogger = new BatchingProgressLogger(log, 1, source, 2, progress);
-            progressLogger.logProgress(() -> "hello " + param);
+            progress.addTaskProgressEvent(Tasks.leaf(taskName));
             return Stream.empty();
         }
     }
 
     public static class ProgressLoggingTestFastRP extends FastRPStreamProc {
         @Context
-        public ProgressEventTracker progressTracker;
+        public ProgressEventTracker progressEventTracker;
 
         @Override
         @Procedure("gds.test.fastrp")
@@ -244,23 +182,7 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            var tracker = this.progressTracker;
-            this.progressTracker = new ProgressEventTracker() {
-                @Override
-                public void addLogEvent(String taskName, String message) {
-                    tracker.addLogEvent(taskName, message);
-                }
-
-                @Override
-                public void release() {
-                    // skip the release because we want to observe the messages after the algo is done
-                }
-            };
-            try {
-                return super.stream(graphNameOrConfig, configuration);
-            } finally {
-                this.progressTracker = tracker;
-            }
+            return super.stream(graphNameOrConfig, configuration);
         }
 
         @Override
@@ -282,10 +204,10 @@ public class ListProgressProcTest extends BaseTest {
                         "FastRP",
                         configuration.concurrency(),
                         // use the field, not the provided one
-                        progressTracker
+                        progressEventTracker
                     );
 
-                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, progressEventTracker);
 
                     var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
                     return new FastRP(

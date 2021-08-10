@@ -19,36 +19,19 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import java.util.List;
 
-import java.util.OptionalDouble;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@ValueClass
-public interface LogEvent {
+final class ProgressEventHandlerExtensionDisabledTest extends BaseProgressEventHandlerExtensionTest {
 
-    String username();
-
-    JobId jobId();
-
-    Task task();
-
-    OptionalDouble progress();
-
-    @Value.Default
-    @Value.Parameter(false)
-    default boolean isEndOfStream() {
+    @Override
+    boolean featureEnabled() {
         return false;
     }
 
-    static LogEvent endOfStreamEvent(String username, JobId jobId) {
-        return ImmutableLogEvent.builder()
-            .username(username)
-            .task(Tasks.empty())
-            .jobId(jobId)
-            .isEndOfStream(true)
-            .build();
+    @Override
+    void assertResult(List<String> result) {
+        assertThat(result).isEmpty();
     }
 }

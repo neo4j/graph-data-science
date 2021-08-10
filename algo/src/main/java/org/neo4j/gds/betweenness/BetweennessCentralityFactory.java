@@ -63,7 +63,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             configuration.concurrency()
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new BetweennessCentrality(
             graph,

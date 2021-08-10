@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,13 +33,12 @@ class ProgressEventQueueTrackerTest {
     void should() {
         var queue = new ConcurrentLinkedQueue<LogEvent>();
         var username = AuthSubject.ANONYMOUS.username();
-        var tracker = new ProgressEventQueueTracker(queue, username);
+        var tracker = new ProgressEventQueueTracker(queue, username, EmptyProgressEventHandler.INSTANCE);
         tracker.release();
         assertThat(queue.size()).isOne();
         var event = queue.remove();
         assertThat(event.isEndOfStream()).isTrue();
         assertThat(event.username()).isEqualTo(username);
-        assertThat(event.message()).isEqualTo(LogEvent.NO_MESSAGE);
-        assertThat(event.taskName()).isEqualTo(LogEvent.NO_TASK_NAME);
+        assertThat(event.task()).isEqualTo(Tasks.empty());
     }
 }

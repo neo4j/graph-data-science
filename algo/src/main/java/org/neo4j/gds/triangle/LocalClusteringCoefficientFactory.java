@@ -49,7 +49,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
 
         return new LocalClusteringCoefficient(
             graph,

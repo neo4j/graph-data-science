@@ -56,7 +56,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmF
             eventTracker
         );
 
-        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger, eventTracker);
         return new K1Coloring(
             graph,
             configuration.maxIterations(),
