@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Values;
 
@@ -80,11 +81,11 @@ public abstract class RelationshipExporterBuilder<T> {
     }
 
     public RelationshipExporterBuilder<T> withLog(Log log) {
-        return withLog(log, eventTracker);
-    }
-
-    public RelationshipExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
-        return withProgressLogger(new BatchingProgressLogger(log, taskVolume(), taskName(), DEFAULT_WRITE_CONCURRENCY, eventTracker));
+        return withProgressLogger(new BatchingProgressLogger(
+            log,
+            Tasks.leaf(taskName(), graph.relationshipCount()),
+            DEFAULT_WRITE_CONCURRENCY
+        ));
     }
 
     private RelationshipExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
@@ -94,9 +95,5 @@ public abstract class RelationshipExporterBuilder<T> {
 
     protected String taskName() {
         return "WriteRelationships";
-    }
-
-    protected long taskVolume() {
-        return graph.relationshipCount();
     }
 }

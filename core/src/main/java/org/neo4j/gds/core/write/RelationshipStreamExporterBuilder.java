@@ -25,8 +25,7 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -41,14 +40,12 @@ public abstract class RelationshipStreamExporterBuilder<T> {
     protected TerminationFlag terminationFlag;
     protected ProgressLogger progressLogger;
 
-    private final ProgressEventTracker eventTracker;
     private final int writeConcurrency;
 
     RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
-        this.eventTracker = EmptyProgressEventTracker.INSTANCE;
         this.batchSize = (int) NodePropertyExporter.MIN_BATCH_SIZE;
     }
 
@@ -66,7 +63,7 @@ public abstract class RelationshipStreamExporterBuilder<T> {
     }
 
     public RelationshipStreamExporterBuilder<T> withLog(Log log) {
-        return withLog(log, eventTracker);
+        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), writeConcurrency));
     }
 
     RelationshipStreamExporterBuilder<T> withRelationships(Stream<RelationshipStreamExporter.Relationship> relationships) {
@@ -81,17 +78,6 @@ public abstract class RelationshipStreamExporterBuilder<T> {
 
     String taskName() {
         return "WriteRelationshipStream";
-    }
-
-    long taskVolume() {
-        // We write relationships from a finite stream.
-        // The number of relationships is therefore not
-        // known upfront.
-        return 0;
-    }
-
-    private RelationshipStreamExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
-        return withProgressLogger(new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker));
     }
 
     private RelationshipStreamExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
