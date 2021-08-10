@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
 
@@ -53,6 +55,14 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return mutate(compute(graphNameOrConfig, configuration));
+    }
+
+    @Override
+    protected void validateConfigsBeforeLoad(
+        GraphCreateConfig graphCreateConfig, LinkPredictionPipelineMutateConfig config
+    ) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
@@ -75,16 +76,10 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
             GraphCreateProc.class,
             LinkPredictionPipelineMutateProc.class
         );
-        String createQuery = GdsCypher.call()
-            .withNodeLabel("N")
-            .withRelationshipType("T", Orientation.UNDIRECTED)
-            .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .graphCreate("g")
-            .yields();
 
         withModelInCatalog();
 
-        runQuery(createQuery);
+        runQuery(createQuery("g", Orientation.UNDIRECTED));
 
         graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getUnion();
     }
@@ -163,5 +158,32 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
                 ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
                 ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl
             ), actualGraph);
+    }
+
+    @Test
+    void requiresUndirectedGraph() {
+        runQuery(createQuery("g2", Orientation.NATURAL));
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g2")
+            .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED")
+            .addParameter("modelName", "model")
+            .addParameter("threshold", 0.5)
+            .addParameter("topN", 9)
+            .yields();
+
+        assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
+    }
+
+    private String createQuery(String graphName, Orientation orientation) {
+        return GdsCypher.call()
+            .withNodeLabel("N")
+            .withRelationshipType("T", orientation)
+            .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
+            .graphCreate(graphName)
+            .yields();
     }
 }
