@@ -109,32 +109,31 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
     @Test
     void trainsAModel() {
+        String modelName = "model";
+        var splitConfig = LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build();
+        PipelineModelInfo pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+        pipeline.setSplitConfig(splitConfig);
+        pipeline.setParameterSpace(List.of(
+            Map.of("penalty", 1000000),
+            Map.of("penalty", 1)
+        ));
+
+        LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfig
+            .builder()
+            .graphName(GRAPH_NAME)
+            .modelName(modelName)
+            .pipeline("DUMMY")
+            .negativeClassWeight(1)
+            .randomSeed(1337L)
+            .build();
+
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            String modelName = "model";
-            var splitConfig = LinkPredictionSplitConfig.builder()
-                .validationFolds(2)
-                .negativeSamplingRatio(1)
-                .trainFraction(0.5)
-                .testFraction(0.5)
-                .build();
-
-            PipelineModelInfo pipeline = new PipelineModelInfo();
-            pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
-            pipeline.setSplitConfig(splitConfig);
-            pipeline.setParameterSpace(List.of(
-                Map.of("penalty", 1000000),
-                Map.of("penalty", 1)
-            ));
-
-            LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfig
-                .builder()
-                .graphName(GRAPH_NAME)
-                .modelName(modelName)
-                .pipeline("DUMMY")
-                .negativeClassWeight(1)
-                .randomSeed(1337L)
-                .build();
-
             var linkPredictionTrain = new LinkPredictionTrain(
                 GRAPH_NAME,
                 graphStore,
@@ -170,28 +169,28 @@ class LinkPredictionTrainTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void seededTrain(int concurrency) {
+        var splitConfig = LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build();
+
+        var pipeline = new PipelineModelInfo();
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
+        pipeline.setSplitConfig(splitConfig);
+        pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));
+
+        LinkPredictionTrainConfig config = LinkPredictionTrainConfig
+            .builder()
+            .graphName(GRAPH_NAME)
+            .modelName("model")
+            .pipeline("DUMMY")
+            .negativeClassWeight(1)
+            .randomSeed(1337L)
+            .build();
+
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var splitConfig = LinkPredictionSplitConfig.builder()
-                .validationFolds(2)
-                .negativeSamplingRatio(1)
-                .trainFraction(0.5)
-                .testFraction(0.5)
-                .build();
-
-            var pipeline = new PipelineModelInfo();
-            pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
-            pipeline.setSplitConfig(splitConfig);
-            pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));
-
-            LinkPredictionTrainConfig config = LinkPredictionTrainConfig
-                .builder()
-                .graphName(GRAPH_NAME)
-                .modelName("model")
-                .pipeline("DUMMY")
-                .negativeClassWeight(1)
-                .randomSeed(1337L)
-                .build();
-
             var linkPredictionTrain = new LinkPredictionTrain(
                 "g",
                 graphStore,
