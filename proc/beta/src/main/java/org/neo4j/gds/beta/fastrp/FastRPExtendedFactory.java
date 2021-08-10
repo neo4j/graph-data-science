@@ -35,7 +35,7 @@ public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> exte
 
     @Override
     protected String taskName() {
-        return "FastRpExtended";
+        return "FastRPExtended";
     }
 
     @Override
