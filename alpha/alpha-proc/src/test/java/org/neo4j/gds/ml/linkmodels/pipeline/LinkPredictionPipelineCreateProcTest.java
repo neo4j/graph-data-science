@@ -29,14 +29,14 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
 
-public class LinkFeaturePipelineCreateProcTest extends BaseProcTest {
+public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkFeaturePipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineCreateProc.class);
     }
 
     @AfterEach

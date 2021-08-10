@@ -20,23 +20,29 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkFeaturePipelineConfigureParamsProc extends BaseProc {
+public class LinkPredictionPipelineConfigureSplitProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureParams", mode = READ)
-    @Description("Configures the parameters of the link prediction train pipeline.")
-    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parametersList") List<Map<String, Object>> parametersList) {
+    @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureSplit", mode = READ)
+    @Description("Configures the split of the link prediction pipeline.")
+    public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         var pipeline = PipelineUtils.getPipelineModelInfo(pipelineName, username());
-        pipeline.setParameterSpace(parametersList);
+
+        var cypherConfig = CypherMapWrapper.create(configMap);
+        var config = LinkPredictionSplitConfig.of(cypherConfig);
+
+        cypherConfig.requireOnlyKeysFrom(config.configKeys());
+
+        pipeline.setSplitConfig(config);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

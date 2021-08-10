@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkFeaturePipelineAddStepProcs extends BaseProc {
+public class LinkPredictionPipelineAddStepProcs extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")

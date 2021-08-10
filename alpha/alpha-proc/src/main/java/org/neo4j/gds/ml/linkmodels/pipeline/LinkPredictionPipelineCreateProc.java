@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkFeaturePipelineCreateProc extends BaseProc {
+public class LinkPredictionPipelineCreateProc extends BaseProc {
     public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
 
 

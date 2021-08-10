@@ -28,9 +28,9 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
 
-class LinkFeaturePipelineConfigureParamsProcTest extends BaseProcTest {
+class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(Map.of(
         "maxEpochs", 100,
@@ -44,7 +44,7 @@ class LinkFeaturePipelineConfigureParamsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkFeaturePipelineConfigureParamsProc.class, LinkFeaturePipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
     }

@@ -93,10 +93,10 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             LinkPredictionPipelineTrainProc.class,
-            LinkFeaturePipelineCreateProc.class,
-            LinkFeaturePipelineAddStepProcs.class,
-            LinkFeaturePipelineConfigureParamsProc.class,
-            LinkFeaturePipelineConfigureSplitProc.class,
+            LinkPredictionPipelineCreateProc.class,
+            LinkPredictionPipelineAddStepProcs.class,
+            LinkPredictionPipelineConfigureParamsProc.class,
+            LinkPredictionPipelineConfigureSplitProc.class,
             GraphCreateProc.class,
             GraphRemoveNodePropertiesProc.class,
             ModelDropProc.class

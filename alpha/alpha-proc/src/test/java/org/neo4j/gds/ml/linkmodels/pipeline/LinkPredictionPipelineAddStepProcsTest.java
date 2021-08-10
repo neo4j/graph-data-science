@@ -32,15 +32,15 @@ import org.neo4j.gds.model.catalog.TestTrainConfig;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeaturePipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
 
-class LinkFeaturePipelineAddStepProcsTest extends BaseProcTest {
+class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1);
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkFeaturePipelineAddStepProcs.class, LinkFeaturePipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineAddStepProcs.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
     }
