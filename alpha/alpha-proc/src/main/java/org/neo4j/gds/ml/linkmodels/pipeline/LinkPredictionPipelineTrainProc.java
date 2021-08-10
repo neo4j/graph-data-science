@@ -27,7 +27,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -46,10 +45,10 @@ import java.util.stream.Stream;
 public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train", mode = Mode.READ)
-    @Description("Trains a link prediction model")
-    public Stream<MLTrainResult> train(@Name(value = "graphName") String graphName, @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
+    @Description("Trains a link prediction model based on a pipeline")
+    public Stream<MLTrainResult> train(@Name(value = "graphName") Object graphNameOrConfig, @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
-        return trainAndStoreModelWithResult(graphName, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
+        return trainAndStoreModelWithResult(graphNameOrConfig, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
     }
 
     @Override
@@ -76,24 +75,26 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
                 String graphName = trainConfig
                     .graphName()
                     .orElseThrow(() -> new UnsupportedOperationException(
-                        "Pipelines cannot be used with anonymous graphs. Please load the graph before"));
+                        "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
                 var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), username());
 
                 pipeline.validate();
 
+                var pipelineExecutor = new PipelineExecutor(
+                    pipeline,
+                    LinkPredictionPipelineTrainProc.this,
+                    databaseId(),
+                    username(),
+                    graphName
+                );
+
                 return new LinkPredictionTrain(
                     graphStore,
                     trainConfig,
                     pipeline,
-                    new PipelineExecutor(
-                        pipeline,
-                        LinkPredictionPipelineTrainProc.this,
-                        databaseId(),
-                        username(),
-                        graphName
-                    ),
+                    pipelineExecutor,
                     ProgressTracker.EmptyProgressTracker.NULL_TRACKER
                 );
             }

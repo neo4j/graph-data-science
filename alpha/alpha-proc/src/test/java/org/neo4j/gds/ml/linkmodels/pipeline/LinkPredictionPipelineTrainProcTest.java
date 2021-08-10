@@ -25,15 +25,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 
@@ -58,6 +64,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(p:Ignore {noise: -1, z: -1, array: [1.0]}), " +
 
         "(a)-[:REL]->(b), " +
         "(a)-[:REL]->(c), " +
@@ -74,7 +81,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(k)-[:REL]->(l), " +
         "(m)-[:REL]->(n), " +
         "(m)-[:REL]->(o), " +
-        "(n)-[:REL]->(o) ";
+        "(n)-[:REL]->(o), " +
+        "(a)-[:REL]->(p), " +
+
+        "(a)-[:IGNORED]->(e), " +
+        "(m)-[:IGNORED]->(a), " +
+        "(m)-[:IGNORED]->(b), " +
+        "(m)-[:IGNORED]->(c) ";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -84,14 +97,17 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             LinkFeaturePipelineAddStepProcs.class,
             LinkFeaturePipelineConfigureParamsProc.class,
             LinkFeaturePipelineConfigureSplitProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            GraphRemoveNodePropertiesProc.class,
+            ModelDropProc.class
         );
 
         runQuery(GRAPH);
 
         String createQuery = GdsCypher.call()
-            .withNodeLabel("N")
+            .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
             .graphCreate(GRAPH_NAME)
             .yields();
@@ -129,13 +145,17 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     "configuration", aMapWithSize(9)
                 ))
         );
+
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("pr");
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).contains("pr");
     }
 
     @Test
     void failsWhenMissingFeatures() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
                     "   $graphName, " +
@@ -145,4 +165,79 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
     }
 
+    @Test
+    void failOnAnonymousGraph() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    ")",
+            "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
+        );
+    }
+
+    @Test
+    void trainOnNodeLabelFilteredGraph() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['array', 'pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
+            ")",
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of(
+                    "modelInfo", Matchers.allOf(
+                        Matchers.hasEntry("modelName", "trainedModel"),
+                        Matchers.hasEntry("modelType", "Link prediction pipeline"),
+                        Matchers.hasKey("bestParameters"),
+                        Matchers.hasKey("metrics")
+                    ),
+                    "trainMillis", greaterThan(-1L),
+                    "configuration", aMapWithSize(9)
+                ))
+        );
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("pr");
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
+    }
+
+    @Test
+    void trainOnRelationshipFilteredGraph() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+
+        String trainQuery =
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            ")";
+
+        Map<String, Object> firstModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+
+        runQuery("CALL gds.graph.removeNodeProperties($graphName, ['pr'])", Map.of("graphName", GRAPH_NAME));
+        runQuery("CALL gds.beta.model.drop('trainedModel')");
+
+        Map<String, Object> secondModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("REL")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+
+        assertThat(firstModelInfo).usingRecursiveComparison().isNotEqualTo(secondModelInfo);
+    }
 }
