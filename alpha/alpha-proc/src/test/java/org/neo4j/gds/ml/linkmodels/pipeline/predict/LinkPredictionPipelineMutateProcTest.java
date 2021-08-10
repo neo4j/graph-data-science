@@ -49,6 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrain.MODEL_TYPE;
@@ -158,6 +161,36 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
                 ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
                 ", (n4:N {a: 1.0, b: 0.9, c: 1.0})" + relationshipGdl
             ), actualGraph);
+    }
+
+    @Test
+    void checkYieldsAndMutatedTypeAndProperty() {
+        var graphStore = GraphStoreCatalog
+            .get(getUsername(), db.databaseId(), "g")
+            .graphStore();
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
+            .mutateMode()
+            .addParameter("mutateRelationshipType", "PREDICTED")
+            .addParameter("modelName", "model")
+            .addParameter("threshold", 0.0)
+            .addParameter("topN", 6)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "postProcessingMillis", 0L,
+            // we are writing undirected rels so we get 2x topN
+            "relationshipsWritten", 12L,
+            "configuration", isA(Map.class)
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
     }
 
     @Test
