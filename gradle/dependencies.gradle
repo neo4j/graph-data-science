@@ -12,13 +12,11 @@ ext {
     neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.2').toString().split('\\.')[0..1].join('.')
 
     neo_at_least_43 = [
-        '4.0'           : neos.'4.3',
-        '4.1'           : neos.'4.3',
-        '4.2'           : neos.'4.3',
-        '4.3'           : neos.'4.3',
-        '4.3.0-drop03.1': neos.'4.3',
-        '4.3.0-drop04.0': neos.'4.3',
-        'dev'           : neos.'dev',
+        '4.0': neos.'4.3',
+        '4.1': neos.'4.3',
+        '4.2': neos.'4.3',
+        '4.3': neos.'4.3',
+        '4.4': neos.'dev',
     ]
     scalas = [
         '4.0': '2.12.7',

@@ -30,6 +30,7 @@ import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.LongValue;
 
@@ -123,15 +124,19 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
-    void shouldHaveProperties() {
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    void shouldHaveProperties43() {
         nodeCursor.next();
         assertThat(nodeCursor.hasProperties()).isTrue();
-        assertThat(nodeCursor.propertiesReference()).isEqualTo(0);
+        assertThat(nodeCursor.propertiesReference()).isEqualTo(0L);
+    }
+
+    @Test
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
+    void shouldHavePropertiesDev() {
+        nodeCursor.next();
+        assertThat(nodeCursor.hasProperties()).isTrue();
+        assertThat(nodeCursor.propertiesReference()).hasFieldOrPropertyWithValue("id", 0L);
     }
 
     @Test
