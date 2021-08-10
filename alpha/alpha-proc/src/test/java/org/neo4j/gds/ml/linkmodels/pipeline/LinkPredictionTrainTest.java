@@ -141,8 +141,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 trainConfig,
                 pipeline,
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
-                ProgressTracker.NULL_TRACKER,
-                caller
+                ProgressTracker.NULL_TRACKER
             );
 
             var actualModel = linkPredictionTrain.compute();
@@ -199,8 +198,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 config,
                 pipeline,
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername()),
-                ProgressTracker.NULL_TRACKER,
-                caller
+                ProgressTracker.NULL_TRACKER
             );
 
             var modelWeights = linkPredictionTrain.compute().data().weights().data();

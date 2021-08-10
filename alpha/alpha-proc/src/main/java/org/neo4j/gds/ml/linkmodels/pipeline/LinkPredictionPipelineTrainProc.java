@@ -95,8 +95,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
                     trainConfig,
                     pipeline,
                     new PipelineExecutor(pipeline, LinkPredictionPipelineTrainProc.this, databaseId(), username()),
-                    ProgressTracker.EmptyProgressTracker.NULL_TRACKER,
-                    LinkPredictionPipelineTrainProc.this
+                    ProgressTracker.EmptyProgressTracker.NULL_TRACKER
                 );
             }
 

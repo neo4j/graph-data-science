@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
@@ -38,7 +37,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
@@ -67,7 +65,6 @@ public class LinkPredictionTrain
     private final PipelineExecutor pipelineExecutor;
     private final PipelineModelInfo pipeline;
     private final AllocationTracker allocationTracker;
-    private final BaseProc caller;
 
     public LinkPredictionTrain(
         String graphName,
@@ -75,8 +72,7 @@ public class LinkPredictionTrain
         LinkPredictionTrainConfig trainConfig,
         PipelineModelInfo pipeline,
         PipelineExecutor pipelineExecutor,
-        ProgressTracker progressTracker,
-        BaseProc caller
+        ProgressTracker progressTracker
     ) {
         this.graphName = graphName;
         this.graphStore = graphStore;
@@ -84,14 +80,18 @@ public class LinkPredictionTrain
         this.pipelineExecutor = pipelineExecutor;
         this.pipeline = pipeline;
         this.progressTracker = progressTracker;
-        this.caller = caller;
         this.allocationTracker = AllocationTracker.empty();
     }
 
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
+        List<String> relationshipTypes = trainConfig
+            .internalRelationshipTypes(graphStore)
+            .stream()
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
 
-        splitRelationships();
+        pipelineExecutor.splitRelationships(graphName, graphStore, relationshipTypes, trainConfig.nodeLabels(), trainConfig.randomSeed());
 
         pipelineExecutor.executeNodePropertySteps(
             graphName,
@@ -120,60 +120,6 @@ public class LinkPredictionTrain
             modelData,
             mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
         );
-    }
-
-    private void splitRelationships() {
-        List<String> relationshipTypes = trainConfig
-            .internalRelationshipTypes(graphStore)
-            .stream()
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
-
-        var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
-
-        // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
-        // 1. Split base graph into test, test-complement
-        //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(
-            graphName,
-            splitConfig.testRelationshipType(),
-            testComplementRelationshipType,
-            relationshipTypes,
-            splitConfig.testFraction()
-        );
-
-        // 2. Split test-complement into (labeled) train and feature-input.
-        //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(
-            graphName,
-            splitConfig.trainRelationshipType(),
-            splitConfig.featureInputRelationshipType(),
-            List.of(testComplementRelationshipType),
-            splitConfig.trainFraction()
-        );
-
-        graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
-    }
-
-    private void relationshipSplit(
-        String graphName,
-        String holdoutRelationshipType,
-        String remainingRelationshipType,
-        List<String> relationshipTypes,
-        double holdOutFraction
-    ) {
-        var splittingConfig = new HashMap<String, Object>() {{
-            put("holdoutRelationshipType", holdoutRelationshipType);
-            put("remainingRelationshipType", remainingRelationshipType);
-            put("nodeLabels", trainConfig.nodeLabels());
-            put("relationshipTypes", relationshipTypes);
-            put("holdOutFraction", holdOutFraction);
-            put("negativeSamplingRatio", pipeline.splitConfig().negativeSamplingRatio());
-            trainConfig.randomSeed().ifPresent(seed -> put("randomSeed", seed));
-        }};
-
-        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splittingConfig);
     }
 
     FeaturesAndTargets extractFeaturesAndTargets(String relationshipType) {

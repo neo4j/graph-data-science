@@ -143,7 +143,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     ")",
             Map.of("graphName", GRAPH_NAME),
             "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
-
     }
 
 }
