@@ -52,12 +52,6 @@ import java.util.UUID;
 
 public abstract class AbstractInMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    protected final AbstractInMemoryMetaDataProvider metadataProvider;
-
-    public AbstractInMemoryStorageEngineFactory(AbstractInMemoryMetaDataProvider inMemoryMetaDataProvider) {
-        metadataProvider = inMemoryMetaDataProvider;
-    }
-
     @Override
     public StoreVersionCheck versionCheck(
         FileSystemAbstraction fs,
@@ -109,14 +103,16 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         PageCache pageCache,
         CursorContext cursorContext
     ) {
-        return metadataProvider.transactionIdStore();
+        return metadataProvider().transactionIdStore();
     }
+
+    protected abstract AbstractInMemoryMetaDataProvider metadataProvider();
 
     @Override
     public LogVersionRepository readOnlyLogVersionRepository(
         DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
-        return metadataProvider.logVersionRepository();
+        return metadataProvider().logVersionRepository();
     }
 
     @Override
@@ -127,7 +123,7 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         PageCache pageCache,
         PageCacheTracer cacheTracer
     ) {
-        return metadataProvider;
+        return metadataProvider();
     }
 
     @Override

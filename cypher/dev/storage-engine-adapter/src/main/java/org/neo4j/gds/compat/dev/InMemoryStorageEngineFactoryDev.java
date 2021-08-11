@@ -52,9 +52,7 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
 
     public static final String IN_MEMORY_STORAGE_ENGINE_NAME_DEV = "in-memory-dev";
 
-    public InMemoryStorageEngineFactoryDev(AbstractInMemoryMetaDataProvider inMemoryMetaDataProvider) {
-        super(inMemoryMetaDataProvider);
-    }
+    private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
     public StorageEngine instantiate(
@@ -110,5 +108,10 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+    }
+
+    @Override
+    protected AbstractInMemoryMetaDataProvider metadataProvider() {
+        return metadataProvider;
     }
 }

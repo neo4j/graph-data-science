@@ -50,9 +50,7 @@ public class InMemoryStorageEngineFactory43 extends AbstractInMemoryStorageEngin
 
     public static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-43";
 
-    public InMemoryStorageEngineFactory43(AbstractInMemoryMetaDataProvider inMemoryMetaDataProvider) {
-        super(inMemoryMetaDataProvider);
-    }
+    private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
     public StorageEngine instantiate(
@@ -100,5 +98,10 @@ public class InMemoryStorageEngineFactory43 extends AbstractInMemoryStorageEngin
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_43;
+    }
+
+    @Override
+    protected AbstractInMemoryMetaDataProvider metadataProvider() {
+        return metadataProvider;
     }
 }
