@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress.v2.tasks;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
@@ -30,7 +31,7 @@ import java.util.Stack;
 public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
-    private final TaskProgressLogger progressLogger;
+    private final TaskProgressLogger taskProgressLogger;
     private final ProgressEventTracker eventTracker;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
@@ -49,7 +50,7 @@ public class TaskProgressTracker implements ProgressTracker {
         ProgressEventTracker eventTracker
     ) {
         this.baseTask = baseTask;
-        this.progressLogger = new TaskProgressLogger(progressLogger, baseTask);
+        this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);
         this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
@@ -63,15 +64,15 @@ public class TaskProgressTracker implements ProgressTracker {
         }).orElse(baseTask);
         nextTask.start();
         eventTracker.addTaskProgressEvent(nextTask);
-        progressLogger.beginSubTask(nextTask);
+        taskProgressLogger.logBeginSubTask(nextTask, parentTask());
         currentTask = Optional.of(nextTask);
     }
 
     @Override
     public void endSubTask() {
         var currentTask = requireCurrentTask();
+        taskProgressLogger.logEndSubTask(currentTask, parentTask());
         currentTask.finish();
-        progressLogger.endSubTask(currentTask);
         this.currentTask = nestedTasks.isEmpty()
             ? Optional.empty()
             : Optional.of(nestedTasks.pop());
@@ -81,20 +82,20 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void logProgress(long value) {
         requireCurrentTask().logProgress(value);
-        progressLogger.logProgress(value);
+        taskProgressLogger.logProgress(value);
         eventTracker.addTaskProgressEvent(this.currentTask);
     }
 
     @Override
     public void setVolume(long volume) {
         requireCurrentTask().setVolume(volume);
-        progressLogger.reset(volume);
+        taskProgressLogger.reset(volume);
         eventTracker.addTaskProgressEvent(this.currentTask);
     }
 
     @Override
     public ProgressLogger progressLogger() {
-        return progressLogger;
+        return taskProgressLogger.internalProgressLogger();
     }
 
     @Override
@@ -109,6 +110,11 @@ public class TaskProgressTracker implements ProgressTracker {
     @TestOnly
     Task currentSubTask() {
         return requireCurrentTask();
+    }
+
+    @Nullable
+    private Task parentTask() {
+        return nestedTasks.isEmpty() ? null : nestedTasks.peek();
     }
 
     private Task requireCurrentTask() {

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.progress.v2.tasks;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.logging.Log;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -31,23 +30,33 @@ public class TaskProgressLogger implements ProgressLogger {
 
     private final ProgressLogger progressLogger;
     private final Task baseTask;
-    private final TaskVisitor loggingTaskStartVisitor;
-    private final TaskVisitor loggingTaskEndVisitor;
 
     public TaskProgressLogger(ProgressLogger progressLogger, Task baseTask) {
         this.progressLogger = progressLogger;
         this.baseTask = baseTask;
-        this.loggingTaskStartVisitor = new LoggingTaskVisitor(progressLogger::logStart);
-        this.loggingTaskEndVisitor = new LoggingTaskVisitor(progressLogger::logFinish);
     }
 
-    public void beginSubTask(Task task) {
-        task.visit(loggingTaskStartVisitor);
+    void logBeginSubTask(Task task, Task parentTask) {
+        var taskName = taskDescription(task, parentTask);
+        if (parentTask == null) {
+            progressLogger.logStart(taskName);
+        } else {
+            progressLogger.startSubTask(taskName);
+        }
         progressLogger.reset(task.getProgress().volume());
     }
 
-    public void endSubTask(Task task) {
-        task.visit(loggingTaskEndVisitor);
+    void logEndSubTask(Task task, Task parentTask) {
+        var taskName = taskDescription(task, parentTask);
+        if (parentTask == null) {
+            progressLogger.logFinish(taskName);
+        } else {
+            progressLogger.finishSubTask(taskName);
+        }
+    }
+
+    ProgressLogger internalProgressLogger() {
+        return this.progressLogger;
     }
 
     @Override
@@ -95,68 +104,59 @@ public class TaskProgressLogger implements ProgressLogger {
         progressLogger.logProgress(percentDone, msg);
     }
 
-    private final class LoggingTaskVisitor implements TaskVisitor {
+    private String boundedIterationsTaskName(
+        IterativeTask iterativeTask,
+        Task task
+    ) {
+        var subTasksSize = iterativeTask.subTasks().size();
+        var currentIteration = iterativeTask.currentIteration() + 1;
 
-        private final Consumer<String> logMessageConsumer;
+        return formatWithLocale(
+            "%s %d of %d",
+            taskDescription(task),
+            currentIteration,
+            subTasksSize
+        );
+    }
 
-        private LoggingTaskVisitor(Consumer<String> logMessageConsumer) {
-            this.logMessageConsumer = logMessageConsumer;
-        }
+    private String unboundedIterationsTaskName(
+        IterativeTask iterativeTask,
+        Task task
+    ) {
+        var currentIteration = iterativeTask.currentIteration() + 1;
 
-        @Override
-        public void visitLeafTask(LeafTask leafTask) {
-            logMessageConsumer.accept(taskDescription(leafTask));
-        }
+        return formatWithLocale(
+            "%s %d",
+            taskDescription(task),
+            currentIteration
+        );
+    }
 
-        @Override
-        public void visitIntermediateTask(Task task) {
-            logMessageConsumer.accept(taskDescription(task));
-        }
-
-        @Override
-        public void visitIterativeTask(IterativeTask iterativeTask) {
-            var iterativeTaskMode = iterativeTask.mode();
-            String iterationTaskName;
+    private String taskDescription(Task task, Task parentTask) {
+        String taskName;
+        if (parentTask instanceof IterativeTask) {
+            var iterativeParentTask = (IterativeTask) parentTask;
+            var iterativeTaskMode = iterativeParentTask.mode();
             switch (iterativeTaskMode) {
                 case DYNAMIC:
                 case FIXED:
-                    iterationTaskName = boundedIterationsTaskName(iterativeTask);
+                    taskName = boundedIterationsTaskName(iterativeParentTask, task);
                     break;
                 case OPEN:
-                    iterationTaskName = unboundedIterationsTaskName(iterativeTask);
+                    taskName = unboundedIterationsTaskName(iterativeParentTask, task);
                     break;
                 default:
                     throw new UnsupportedOperationException(formatWithLocale("Enum value %s is not supported", iterativeTaskMode));
             }
-            logMessageConsumer.accept(iterationTaskName);
+        } else {
+            taskName = taskDescription(task);
         }
+        return taskName;
+    }
 
-        private String boundedIterationsTaskName(IterativeTask iterativeTask) {
-            var subTasksSize = iterativeTask.subTasks().size();
-            var currentIteration = iterativeTask.currentIteration();
-
-            return formatWithLocale(
-                "%s %d of %d",
-                taskDescription(iterativeTask),
-                currentIteration,
-                subTasksSize
-            );
-        }
-
-        private String unboundedIterationsTaskName(IterativeTask iterativeTask) {
-            var currentIteration = iterativeTask.currentIteration();
-
-            return formatWithLocale(
-                "%s %d",
-                taskDescription(iterativeTask),
-                currentIteration
-            );
-        }
-
-        private String taskDescription(Task nextTask) {
-            return nextTask == baseTask
-                ? ""
-                : nextTask.description();
-        }
+    private String taskDescription(Task nextTask) {
+        return nextTask == baseTask
+            ? ""
+            : nextTask.description();
     }
 }
