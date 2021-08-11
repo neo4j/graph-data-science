@@ -26,6 +26,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -92,6 +94,28 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     @Configuration.CollectKeys
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default SplitRelationshipsBaseConfig testSplit() {
+        return new SplitRelationshipsBaseConfigImpl(CypherMapWrapper.create(Map.of(
+            "holdoutRelationshipType", testRelationshipType(),
+            "remainingRelationshipType", testComplementRelationshipType(),
+            "holdOutFraction", testFraction(),
+            "negativeSamplingRatio", negativeSamplingRatio()
+        )));
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default SplitRelationshipsBaseConfig trainSplit() {
+        return new SplitRelationshipsBaseConfigImpl(CypherMapWrapper.create(Map.of(
+            "holdoutRelationshipType", trainRelationshipType(),
+            "remainingRelationshipType", featureInputRelationshipType(),
+            "holdOutFraction", trainFraction(),
+            "negativeSamplingRatio", negativeSamplingRatio()
+        )));
     }
 
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {

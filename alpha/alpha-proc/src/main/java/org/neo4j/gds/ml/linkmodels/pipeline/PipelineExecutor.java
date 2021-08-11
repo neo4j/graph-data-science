@@ -28,6 +28,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Collection;
@@ -101,47 +102,27 @@ public class PipelineExecutor {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(
-            splitConfig.testRelationshipType(),
-            testComplementRelationshipType,
-            nodeLabels,
-            relationshipTypes,
-            splitConfig.testFraction(),
-            randomSeed
-        );
+        relationshipSplit(splitConfig.testSplit(), nodeLabels, relationshipTypes, randomSeed);
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(
-            splitConfig.trainRelationshipType(),
-            splitConfig.featureInputRelationshipType(),
-            nodeLabels,
-            List.of(testComplementRelationshipType),
-            splitConfig.trainFraction(),
-            randomSeed
-        );
+        relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
     }
 
     private void relationshipSplit(
-        String holdoutRelationshipType,
-        String remainingRelationshipType,
+        SplitRelationshipsBaseConfig splitConfig,
         List<String> nodeLabels,
         List<String> relationshipTypes,
-        double holdOutFraction,
         Optional<Long> randomSeed
     ) {
-        var splittingConfig = new HashMap<String, Object>() {{
-            put("holdoutRelationshipType", holdoutRelationshipType);
-            put("remainingRelationshipType", remainingRelationshipType);
+        var splitRelationshipProcConfig = new HashMap<>(splitConfig.toSplitMap()) {{
             put("nodeLabels", nodeLabels);
             put("relationshipTypes", relationshipTypes);
-            put("holdOutFraction", holdOutFraction);
-            put("negativeSamplingRatio", pipeline.splitConfig().negativeSamplingRatio());
             randomSeed.ifPresent(seed -> put("randomSeed", seed));
         }};
 
-        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splittingConfig);
+        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splitRelationshipProcConfig);
     }
 }

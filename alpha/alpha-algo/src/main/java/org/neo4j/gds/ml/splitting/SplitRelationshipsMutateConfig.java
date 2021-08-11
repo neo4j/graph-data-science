@@ -38,32 +38,12 @@ import java.util.stream.Stream;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig, RandomSeedConfig {
-
-    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    double holdoutFraction();
-
-    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    double negativeSamplingRatio();
-
-    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
-    @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
-    RelationshipType holdoutRelationshipType();
-
-    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
-    @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
-    RelationshipType remainingRelationshipType();
-
-    @Value.Default
-    default List<String> nonNegativeRelationshipTypes() {
-        return List.of();
-    }
+public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig, SplitRelationshipsBaseConfig, RandomSeedConfig {
 
     @Configuration.Ignore
     @Value.Derived
     default List<RelationshipType> superGraphTypes() {
-        return Stream.concat(nonNegativeRelationshipTypes()
-            .stream(), relationshipTypes().stream())
+        return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
             .map(RelationshipType::of)
             .collect(Collectors.toList());
     }
