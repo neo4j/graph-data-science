@@ -24,7 +24,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrain.MODEL_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineUtils {
