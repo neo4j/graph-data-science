@@ -21,10 +21,11 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
@@ -36,15 +37,20 @@ import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.GraphStoreToCsvEstimationConfig;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil.exportLocation;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
@@ -62,6 +68,8 @@ public class GraphStoreExportProc extends BaseProc {
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
                 var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
+
+                validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
 
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
@@ -101,6 +109,8 @@ public class GraphStoreExportProc extends BaseProc {
         validateConfig(cypherConfig, exportConfig);
 
         var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
+        validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
+
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
 
         var result = GraphStoreExporterUtil.export(
@@ -160,6 +170,26 @@ public class GraphStoreExportProc extends BaseProc {
             exportConfig.additionalNodeProperties(),
             log
         );
+    }
+
+    private void validateAdditionalNodeProperties(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
+        var nodeProperties = graphStore
+            .nodePropertyKeys()
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+        var duplicateProperties = additionalNodeProperties
+            .stream()
+            .map(PropertyMapping::neoPropertyKey)
+            .filter(nodeProperties::contains)
+            .collect(Collectors.toList());
+        if (!duplicateProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The following provided additional node properties are already present in the in-memory graph: %s",
+                StringJoining.joinVerbose(duplicateProperties)
+            ));
+        }
     }
 
     @SuppressWarnings("unused")
