@@ -139,6 +139,34 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @Test
+    void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
+        createGraph();
+
+        var exportQuery = "CALL gds.graph.export(" +
+                          "  'test-graph', {" +
+                          "    dbName: 'test-db'," +
+                          "    additionalNodeProperties: [" +
+                          "      'prop3'," +
+                          "      'prop4'" +
+                          "    ]" +
+                          "  }" +
+                          ")";
+
+        runQueryWithRowConsumer(exportQuery, row -> {
+            assertEquals("test-db", row.getString("dbName"));
+            assertEquals(4, row.getNumber("nodeCount").longValue());
+            assertEquals(6, row.getNumber("relationshipCount").longValue());
+            assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
+            assertEquals(16, row.getNumber("nodePropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
+        });
+    }
+
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @Test
     void exportGraphWithAdditionalNodePropertiesDuplicateProperties() {
         createGraph();
 
