@@ -23,15 +23,15 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
+import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
+import org.neo4j.gds.ml.core.EmbeddingUtils;
 
 import java.util.Optional;
 import java.util.Random;

@@ -29,7 +29,7 @@ import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.model.proto.GraphSageProto;
 import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;

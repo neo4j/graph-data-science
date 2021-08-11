@@ -43,7 +43,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.test.TestPregelConfig;
 import org.neo4j.logging.Log;

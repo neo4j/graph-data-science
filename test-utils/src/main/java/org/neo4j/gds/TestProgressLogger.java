@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;

@@ -21,9 +21,6 @@ package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -32,7 +29,10 @@ import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.Comparator;

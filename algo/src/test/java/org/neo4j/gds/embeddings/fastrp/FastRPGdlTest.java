@@ -20,15 +20,15 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.fastrp.ImmutableFastRPExtendedStreamConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
 import java.util.Optional;

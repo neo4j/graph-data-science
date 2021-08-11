@@ -42,7 +42,7 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.id.IdGeneratorFactory;
 

@@ -37,7 +37,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.internal.kernel.api.security.AuthSubject;

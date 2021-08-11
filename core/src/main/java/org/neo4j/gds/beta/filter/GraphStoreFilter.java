@@ -31,7 +31,7 @@ import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 

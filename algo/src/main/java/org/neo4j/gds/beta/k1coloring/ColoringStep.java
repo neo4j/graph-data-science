@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public final class ColoringStep implements Runnable {
 

@@ -27,7 +27,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

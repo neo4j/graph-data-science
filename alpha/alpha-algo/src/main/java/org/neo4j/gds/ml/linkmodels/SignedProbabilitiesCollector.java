@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.function.Consumer;
 

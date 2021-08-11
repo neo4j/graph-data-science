@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;

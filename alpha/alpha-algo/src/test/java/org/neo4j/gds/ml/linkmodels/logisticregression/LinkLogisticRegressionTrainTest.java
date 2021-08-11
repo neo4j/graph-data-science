@@ -20,17 +20,17 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.math.L2Norm;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 import java.util.Map;

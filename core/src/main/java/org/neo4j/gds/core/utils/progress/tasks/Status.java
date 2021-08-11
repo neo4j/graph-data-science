@@ -17,13 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress.v2.tasks;
+package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.neo4j.gds.annotation.ValueClass;
-
-@ValueClass
-public interface Progress {
-    long progress();
-
-    long volume();
+public enum Status {
+    PENDING,
+    RUNNING,
+    FINISHED,
+    CANCELED
 }

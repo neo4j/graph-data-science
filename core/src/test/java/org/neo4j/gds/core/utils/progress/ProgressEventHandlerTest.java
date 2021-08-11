@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;
@@ -47,7 +47,7 @@ class ProgressEventHandlerTest {
         // initial set is empty
         assertThat(consumer.query(username)).isEmpty();
 
-        var event1 = ImmutableLogEvent.of(username, new JobId(), Tasks.leaf("foo"), 42.0);
+        var event1 = ImmutableProgressEvent.of(username, new JobId(), Tasks.leaf("foo"), 42.0);
         queue.add(event1);
 
         // nothing polled yet
@@ -59,7 +59,7 @@ class ProgressEventHandlerTest {
         assertThat(consumer.query(username)).containsExactly(event1);
 
         // add another event
-        var event2 = ImmutableLogEvent.of(username, new JobId(), Tasks.leaf("bar"), 1337.0);
+        var event2 = ImmutableProgressEvent.of(username, new JobId(), Tasks.leaf("bar"), 1337.0);
         queue.add(event2);
 
         // nothing is polled ...
@@ -88,7 +88,7 @@ class ProgressEventHandlerTest {
         // initial set is empty
         assertThat(consumer.isEmpty()).isTrue();
 
-        var event1 = ImmutableLogEvent.of(username, jobId, Tasks.leaf("foo"), 42.0);
+        var event1 = ImmutableProgressEvent.of(username, jobId, Tasks.leaf("foo"), 42.0);
         queue.add(event1);
 
         // nothing polled yet
@@ -100,7 +100,7 @@ class ProgressEventHandlerTest {
         assertThat(consumer.isEmpty()).isFalse();
 
         // add another event and advance time
-        var event2 = ImmutableLogEvent.of(username, jobId, Tasks.leaf("bar"), 1337.0);
+        var event2 = ImmutableProgressEvent.of(username, jobId, Tasks.leaf("bar"), 1337.0);
         queue.add(event2);
         fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
 

@@ -25,7 +25,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.neo4j.gds.labelpropagation.LabelPropagation.DEFAULT_WEIGHT;
 

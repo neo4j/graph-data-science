@@ -21,22 +21,22 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {
 

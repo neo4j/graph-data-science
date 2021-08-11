@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Random;
 import java.util.stream.LongStream;

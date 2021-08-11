@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.Optional;
 

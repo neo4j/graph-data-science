@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;

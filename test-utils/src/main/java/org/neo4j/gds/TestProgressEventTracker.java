@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
