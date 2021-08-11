@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 import java.util.OptionalDouble;
 
 @ValueClass
-public interface LogEvent {
+public interface ProgressEvent {
 
     String username();
 
@@ -43,7 +43,7 @@ public interface LogEvent {
         return false;
     }
 
-    static LogEvent endOfStreamEvent(String username, JobId jobId) {
+    static ProgressEvent endOfStreamEvent(String username, JobId jobId) {
         return ImmutableLogEvent.builder()
             .username(username)
             .task(Tasks.empty())

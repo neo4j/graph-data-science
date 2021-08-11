@@ -31,14 +31,14 @@ import static java.util.stream.Collectors.toList;
 
 public class ProgressEventStoreImpl implements ProgressEventStore {
 
-    private final Map<String, Map<JobId, List<LogEvent>>> events;
+    private final Map<String, Map<JobId, List<ProgressEvent>>> events;
 
     ProgressEventStoreImpl() {
         this.events = new HashMap<>();
     }
 
     @Override
-    public List<LogEvent> query(String username) {
+    public List<ProgressEvent> query(String username) {
         return events
             .getOrDefault(username, emptyMap())
             .values()
@@ -49,7 +49,7 @@ public class ProgressEventStoreImpl implements ProgressEventStore {
     }
 
     @Override
-    public void accept(LogEvent event) {
+    public void accept(ProgressEvent event) {
         if (event.isEndOfStream()) {
             if (events.containsKey(event.username())) {
                 events.get(event.username()).remove(event.jobId());

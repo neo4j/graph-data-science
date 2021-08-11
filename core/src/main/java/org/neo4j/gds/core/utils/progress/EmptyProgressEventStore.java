@@ -25,7 +25,7 @@ enum EmptyProgressEventStore implements ProgressEventStore {
     INSTANCE;
 
     @Override
-    public List<LogEvent> query(String username) {
+    public List<ProgressEvent> query(String username) {
         return List.of();
     }
 
@@ -35,7 +35,7 @@ enum EmptyProgressEventStore implements ProgressEventStore {
     }
 
     @Override
-    public void accept(LogEvent logEvent) {
+    public void accept(ProgressEvent progressEvent) {
 
     }
 }

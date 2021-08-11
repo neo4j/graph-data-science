@@ -25,7 +25,7 @@ public enum EmptyProgressEventHandler implements ProgressEventHandler {
     INSTANCE;
 
     @Override
-    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+    public void registerProgressEventListener(Consumer<ProgressEvent> eventConsumer) {
 
     }
 }

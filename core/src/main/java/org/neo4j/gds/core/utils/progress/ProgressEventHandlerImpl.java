@@ -39,15 +39,15 @@ final class ProgressEventHandlerImpl extends LifecycleAdapter implements Runnabl
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
-    private final Queue<LogEvent> queue;
+    private final Queue<ProgressEvent> queue;
 
     private volatile @Nullable JobPromise job;
-    private final List<Consumer<LogEvent>> eventListeners;
+    private final List<Consumer<ProgressEvent>> eventListeners;
 
     ProgressEventHandlerImpl(
         Monitor monitor,
         JobScheduler jobScheduler,
-        Queue<LogEvent> queue
+        Queue<ProgressEvent> queue
     ) {
         this(monitor, Neo4jProxy.runnerFromScheduler(jobScheduler, Group.DATA_COLLECTOR), queue);
     }
@@ -55,7 +55,7 @@ final class ProgressEventHandlerImpl extends LifecycleAdapter implements Runnabl
     @TestOnly
     ProgressEventHandlerImpl(
         JobRunner jobRunner,
-        Queue<LogEvent> queue
+        Queue<ProgressEvent> queue
     ) {
         this(Monitor.EMPTY, jobRunner, queue);
     }
@@ -63,7 +63,7 @@ final class ProgressEventHandlerImpl extends LifecycleAdapter implements Runnabl
     private ProgressEventHandlerImpl(
         Monitor monitor,
         JobRunner jobRunner,
-        Queue<LogEvent> queue
+        Queue<ProgressEvent> queue
     ) {
         this.monitor = monitor;
         this.jobRunner = jobRunner;
@@ -72,22 +72,22 @@ final class ProgressEventHandlerImpl extends LifecycleAdapter implements Runnabl
     }
 
     @Override
-    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
+    public void registerProgressEventListener(Consumer<ProgressEvent> eventConsumer) {
         this.eventListeners.add(eventConsumer);
     }
 
     @Override
     public void run() {
         try (var ignored = RenamesCurrentThread.renameThread("progress-event-consumer")) {
-            LogEvent event;
+            ProgressEvent event;
             while ((event = queue.poll()) != null && !Thread.interrupted()) {
                 process(event);
             }
         }
     }
 
-    private void process(LogEvent event) {
-        eventListeners.forEach(logEventConsumer -> logEventConsumer.accept(event));
+    private void process(ProgressEvent event) {
+        eventListeners.forEach(progressEventConsumer -> progressEventConsumer.accept(event));
     }
 
     @Override

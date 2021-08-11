@@ -31,7 +31,7 @@ class ProgressEventQueueTest {
 
     @Test
     void should() {
-        var queue = new ConcurrentLinkedQueue<LogEvent>();
+        var queue = new ConcurrentLinkedQueue<ProgressEvent>();
         var username = AuthSubject.ANONYMOUS.username();
         var tracker = new ProgressEventQueue(queue, username);
         tracker.release();

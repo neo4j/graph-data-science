@@ -38,7 +38,7 @@ final class ProgressEventHandlerComponent extends LifecycleAdapter implements Th
     private final Monitors globalMonitors;
     private final ProgressEventHandlerImpl.Monitor monitor;
     private final LoggingProgressEventMonitor loggingMonitor;
-    private final Queue<LogEvent> messageQueue;
+    private final Queue<ProgressEvent> messageQueue;
     private final ProgressEventStore progressEventStore;
     private volatile ProgressEventHandlerImpl progressEventHandler;
 

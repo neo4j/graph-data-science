@@ -39,7 +39,7 @@ class ProgressEventHandlerTest {
 
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
-        var queue = new ArrayBlockingQueue<LogEvent>(1);
+        var queue = new ArrayBlockingQueue<ProgressEvent>(1);
         var eventHandler = new ProgressEventHandlerImpl(runner, queue);
         var consumer = new ProgressEventStoreImpl();
         eventHandler.registerProgressEventListener(consumer);
@@ -78,7 +78,7 @@ class ProgressEventHandlerTest {
 
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
-        var queue = new ArrayBlockingQueue<LogEvent>(1);
+        var queue = new ArrayBlockingQueue<ProgressEvent>(1);
         var eventHandler = new ProgressEventHandlerImpl(runner, queue);
         var consumer = new ProgressEventStoreImpl();
         eventHandler.registerProgressEventListener(consumer);
@@ -108,7 +108,7 @@ class ProgressEventHandlerTest {
         assertThat(consumer.isEmpty()).isFalse();
 
         // add a terminal event and advance time
-        var endOfStreamEvent = LogEvent.endOfStreamEvent(username, jobId);
+        var endOfStreamEvent = ProgressEvent.endOfStreamEvent(username, jobId);
         queue.add(endOfStreamEvent);
         fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
 

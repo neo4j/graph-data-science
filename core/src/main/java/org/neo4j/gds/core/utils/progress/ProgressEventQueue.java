@@ -27,14 +27,14 @@ import java.util.Queue;
 
 final class ProgressEventQueue extends LifecycleAdapter implements ProgressEventTracker {
 
-    private final Queue<LogEvent> queue;
+    private final Queue<ProgressEvent> queue;
     private final String username;
 
     // for now a synthetic id, we can change to a more traceable one as and when
     private final JobId jobId = new JobId();
 
     ProgressEventQueue(
-        Queue<LogEvent> queue,
+        Queue<ProgressEvent> queue,
         String username
     ) {
         this.queue = queue;
@@ -43,12 +43,12 @@ final class ProgressEventQueue extends LifecycleAdapter implements ProgressEvent
 
     @Override
     public void addTaskProgressEvent(Task task) {
-        var logEvent = ImmutableLogEvent.of(username, jobId, task, OptionalDouble.empty());
-        this.queue.offer(logEvent);
+        var progressEvent = ImmutableLogEvent.of(username, jobId, task, OptionalDouble.empty());
+        this.queue.offer(progressEvent);
     }
 
     @Override
     public void release() {
-        queue.offer(LogEvent.endOfStreamEvent(username, jobId));
+        queue.offer(ProgressEvent.endOfStreamEvent(username, jobId));
     }
 }

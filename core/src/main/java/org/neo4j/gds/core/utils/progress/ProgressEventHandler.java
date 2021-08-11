@@ -22,5 +22,5 @@ package org.neo4j.gds.core.utils.progress;
 import java.util.function.Consumer;
 
 public interface ProgressEventHandler {
-    void registerProgressEventListener(Consumer<LogEvent> eventConsumer);
+    void registerProgressEventListener(Consumer<ProgressEvent> eventConsumer);
 }

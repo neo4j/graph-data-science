@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.LogEvent;
+import org.neo4j.gds.core.utils.progress.ProgressEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,9 +44,9 @@ public class ListProgressProc extends BaseProc {
         public String id;
         public String taskName;
 
-        ProgressResult(LogEvent logEvent) {
-            this.id = logEvent.jobId().asString();
-            this.taskName = logEvent.task().description();
+        ProgressResult(ProgressEvent progressEvent) {
+            this.id = progressEvent.jobId().asString();
+            this.taskName = progressEvent.task().description();
         }
     }
 

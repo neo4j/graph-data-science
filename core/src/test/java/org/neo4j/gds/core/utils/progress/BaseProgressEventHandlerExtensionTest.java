@@ -84,7 +84,7 @@ abstract class BaseProgressEventHandlerExtensionTest extends BaseTest {
 
         @Procedure("gds.test.log")
         public Stream<Bar> foo() {
-            return progress.query("").stream().map(LogEvent::task).map(Task::description).map(Bar::new);
+            return progress.query("").stream().map(ProgressEvent::task).map(Task::description).map(Bar::new);
         }
     }
 

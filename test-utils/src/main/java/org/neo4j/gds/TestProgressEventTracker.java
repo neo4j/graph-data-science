@@ -27,11 +27,11 @@ import java.util.List;
 
 public final class TestProgressEventTracker implements ProgressEventTracker {
     private int releaseCalls = 0;
-    private final List<Task> logEvents = new ArrayList<>();
+    private final List<Task> progressEvents = new ArrayList<>();
 
     @Override
     public void addTaskProgressEvent(Task task) {
-        logEvents.add(task);
+        progressEvents.add(task);
     }
 
     @Override
