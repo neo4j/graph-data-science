@@ -102,8 +102,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             ModelDropProc.class
         );
 
-        runQuery(GRAPH);
-
         String createQuery = GdsCypher.call()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
