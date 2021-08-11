@@ -116,7 +116,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .trainFraction(0.5)
             .testFraction(0.5)
             .build();
-        PipelineModelInfo pipeline = new PipelineModelInfo();
+        TrainingPipeline pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
         pipeline.setParameterSpace(List.of(
@@ -179,7 +179,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .testFraction(0.5)
             .build();
 
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
         pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));

@@ -39,7 +39,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineModelInfo;
+import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
@@ -90,7 +90,7 @@ class LinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(

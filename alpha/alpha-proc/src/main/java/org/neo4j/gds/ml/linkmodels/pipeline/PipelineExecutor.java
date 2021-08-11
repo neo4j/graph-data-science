@@ -39,14 +39,14 @@ import java.util.Optional;
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
 
 public class PipelineExecutor {
-    private final PipelineModelInfo pipeline;
+    private final TrainingPipeline pipeline;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
     private final String graphName;
 
     public PipelineExecutor(
-        PipelineModelInfo pipeline,
+        TrainingPipeline pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
         String userName,

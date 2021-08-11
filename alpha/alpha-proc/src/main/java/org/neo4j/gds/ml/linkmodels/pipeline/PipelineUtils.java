@@ -30,7 +30,7 @@ public final class PipelineUtils {
 
     private PipelineUtils() {}
 
-    static PipelineModelInfo getPipelineModelInfo(String pipelineName, String username) {
+    static TrainingPipeline getPipelineModelInfo(String pipelineName, String username) {
         Model<?, ?> model = ModelCatalog.getUntyped(username, pipelineName, true);
 
         assert model != null;
@@ -43,7 +43,7 @@ public final class PipelineUtils {
             ));
         }
 
-        return (PipelineModelInfo) model.customInfo();
+        return (TrainingPipeline) model.customInfo();
     }
 
     public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> getLinkPredictionPipeline(
