@@ -27,6 +27,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -41,6 +42,7 @@ import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
@@ -75,23 +77,29 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computationResult
     ) {
+        var concurrency = computationResult.config().concurrency();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(computationResult.graph())
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .concurrency(computationResult.config().concurrency())
+            .concurrency(concurrency)
             .executorService(Pools.DEFAULT)
             .tracker(allocationTracker())
             .build();
 
-        computationResult
-            .result()
-            .stream()
-            .forEach(predictedLink -> relationshipsBuilder.addFromInternal(predictedLink.sourceId(),
-                predictedLink.targetId(),
-                predictedLink.probability()
-            ));
+        ParallelUtil.parallelStreamConsume(
+            computationResult.result().stream(),
+            concurrency,
+            stream -> stream.forEach(predictedLink -> {
+                relationshipsBuilder.addFromInternal(
+                    predictedLink.sourceId(),
+                    predictedLink.targetId(),
+                    predictedLink.probability()
+                );
+            })
+        );
+
         var relationships = relationshipsBuilder.build();
 
         var config = computationResult.config();
