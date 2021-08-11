@@ -84,7 +84,7 @@ public abstract class AlphaSimilarityProcTest<
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
-            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
 
             func.accept(proc);
         }

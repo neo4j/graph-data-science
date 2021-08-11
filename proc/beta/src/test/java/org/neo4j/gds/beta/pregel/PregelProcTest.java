@@ -208,7 +208,7 @@ public class PregelProcTest extends BaseProcTest {
         var eventTracker = new TestProgressEventTracker();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
-            proc.progressTracker = eventTracker;
+            proc.progressEventTracker = eventTracker;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -231,7 +231,7 @@ public class PregelProcTest extends BaseProcTest {
         var eventTracker = new TestProgressEventTracker();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
-            proc.progressTracker = eventTracker;
+            proc.progressEventTracker = eventTracker;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -257,7 +257,7 @@ public class PregelProcTest extends BaseProcTest {
         var eventTracker = new TestProgressEventTracker();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
-            proc.progressTracker = eventTracker;
+            proc.progressEventTracker = eventTracker;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();

@@ -52,7 +52,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         var eventTracker = new TestProgressEventTracker();
 
         var proc = new TestProc();
-        proc.progressTracker = eventTracker;
+        proc.progressEventTracker = eventTracker;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test");
@@ -66,7 +66,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         var eventTracker = new TestProgressEventTracker();
 
         var proc = new TestProc();
-        proc.progressTracker = eventTracker;
+        proc.progressEventTracker = eventTracker;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);

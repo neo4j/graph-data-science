@@ -166,7 +166,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
-            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
 
             if (proc instanceof NodePropertiesWriter) {
                 ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(

@@ -20,16 +20,14 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphLoader;
@@ -47,6 +45,8 @@ import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -65,8 +65,8 @@ import java.util.function.Supplier;
 
 import static java.util.function.Predicate.isEqual;
 import static org.neo4j.gds.MemoryValidation.validateMemoryUsage;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class BaseProc {
 
@@ -91,7 +91,7 @@ public abstract class BaseProc {
     public AllocationTracker tracker;
 
     @Context
-    public ProgressEventTracker progressTracker;
+    public ProgressEventTracker progressEventTracker;
 
     protected BaseProc() {
         if (GdsEdition.instance().isInvalidLicense()) {
