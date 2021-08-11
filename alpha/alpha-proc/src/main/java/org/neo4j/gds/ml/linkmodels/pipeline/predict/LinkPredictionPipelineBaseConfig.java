@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -32,6 +33,9 @@ public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, ModelC
     @Configuration.IntegerRange(min = 1)
     int topN();
 
+    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
-    double threshold();
+    default double threshold() {
+        return 0.0;
+    }
 }
