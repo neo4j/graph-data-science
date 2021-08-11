@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -132,6 +133,30 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
+    }
+
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @Test
+    void exportGraphWithAdditionalNodePropertiesDuplicateProperties() {
+        createGraph();
+
+        var exportQuery = "CALL gds.graph.export(" +
+                          "  'test-graph', {" +
+                          "    dbName: 'test-db'," +
+                          "    additionalNodeProperties: [" +
+                          "      'prop1'," +
+                          "      'prop2'" +
+                          "    ]" +
+                          "  }" +
+                          ")";
+
+        assertThatCode(() -> runQuery(exportQuery))
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(
+                "The following provided additional node properties are already present in the in-memory graph: prop1 and prop2");
     }
 
     @Test
@@ -245,6 +270,31 @@ class GraphStoreExportProcTest extends BaseProcTest {
         assertThat(rootCause(exception)).hasMessage(
             "The configuration option 'gds.export.location' must be set."
         );
+    }
+
+
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @Test
+    void exportCsvWithAdditionalNodePropertiesDuplicateProperties() {
+        createGraph();
+
+        var exportQuery = "CALL gds.beta.graph.export.csv(" +
+                          "  'test-graph', {" +
+                          "    exportName: 'export'," +
+                          "    additionalNodeProperties: [" +
+                          "      'prop1'," +
+                          "      'prop2'" +
+                          "    ]" +
+                          "  }" +
+                          ")";
+
+        assertThatCode(() -> runQuery(exportQuery))
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(
+                "The following provided additional node properties are already present in the in-memory graph: prop1 and prop2");
     }
 
     @Test
