@@ -80,7 +80,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             .nodes(computationResult.graph())
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .concurrency(1)
+            .concurrency(computationResult.config().concurrency())
             .executorService(Pools.DEFAULT)
             .tracker(allocationTracker())
             .build();

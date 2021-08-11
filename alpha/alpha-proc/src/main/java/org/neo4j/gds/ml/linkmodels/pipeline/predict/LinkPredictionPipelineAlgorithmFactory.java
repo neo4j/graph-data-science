@@ -79,7 +79,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
             configuration.topN(),
             configuration.threshold(),
             progressTracker
-            );
+        );
     }
 
     @Override
