@@ -37,6 +37,7 @@ public class IterativeTask extends Task {
 
     private final Supplier<List<Task>> subTasksSupplier;
     private final Mode mode;
+    private final int maxIterations;
 
     /**
      * @param subTasks Requires an unrolled list of subtasks for modes DYNAMIC and FIXED.
@@ -50,6 +51,7 @@ public class IterativeTask extends Task {
         super(description, subTasks);
         this.subTasksSupplier = subTasksSupplier;
         this.mode = mode;
+        this.maxIterations = subTasks().size() / subTasksSupplier.get().size();
     }
 
     @Override
@@ -104,6 +106,10 @@ public class IterativeTask extends Task {
 
     public Mode mode() {
         return this.mode;
+    }
+
+    int maxIterations() {
+        return this.maxIterations;
     }
 
     @Override

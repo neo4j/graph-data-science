@@ -108,14 +108,14 @@ public class TaskProgressLogger implements ProgressLogger {
         IterativeTask iterativeTask,
         Task task
     ) {
-        var subTasksSize = iterativeTask.subTasks().size();
+        var maxIterations = iterativeTask.maxIterations();
         var currentIteration = iterativeTask.currentIteration() + 1;
 
         return formatWithLocale(
             "%s %d of %d",
             taskDescription(task),
             currentIteration,
-            subTasksSize
+            maxIterations
         );
     }
 
