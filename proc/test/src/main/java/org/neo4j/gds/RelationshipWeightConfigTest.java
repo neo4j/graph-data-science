@@ -167,37 +167,6 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
     }
 
     @Test
-    default void shouldFailWithInvalidRelationshipWeightProperty() {
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
-
-        applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-
-            GraphStoreCatalog.set(graphCreateConfig, graphStore);
-
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(
-                "relationshipWeightProperty",
-                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
-            ));
-            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in relationship types ['__ALL__']. Properties existing on all relationship types: []";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            if (supportsImplicitGraphCreate()) {
-                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-                assertMissingProperty(error, () -> proc.compute(
-                    implicitConfigMap,
-                    Collections.emptyMap()
-                ));
-            }
-        });
-    }
-
-    @Test
     default void shouldFailWithInvalidRelationshipWeightPropertyOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
 
