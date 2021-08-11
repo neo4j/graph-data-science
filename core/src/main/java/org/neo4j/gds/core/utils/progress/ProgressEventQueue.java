@@ -26,16 +26,15 @@ import java.util.OptionalDouble;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-final class ProgressEventQueueTracker extends LifecycleAdapter implements ProgressEventTracker {
+final class ProgressEventQueue extends LifecycleAdapter implements ProgressEventTracker {
 
     private final Queue<LogEvent> queue;
     private final String username;
-    private final ProgressEventHandler progressEventHandler;
 
     // for now a synthetic id, we can change to a more traceable one as and when
     private final JobId jobId = new JobId();
 
-    ProgressEventQueueTracker(
+    ProgressEventQueue(
         Queue<LogEvent> queue,
         String username,
         ProgressEventHandler progressEventHandler

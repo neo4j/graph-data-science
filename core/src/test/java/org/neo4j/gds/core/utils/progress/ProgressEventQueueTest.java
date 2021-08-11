@@ -27,13 +27,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProgressEventQueueTrackerTest {
+class ProgressEventQueueTest {
 
     @Test
     void should() {
         var queue = new ConcurrentLinkedQueue<LogEvent>();
         var username = AuthSubject.ANONYMOUS.username();
-        var tracker = new ProgressEventQueueTracker(queue, username, EmptyProgressEventHandler.INSTANCE);
+        var tracker = new ProgressEventQueue(queue, username);
         tracker.release();
         assertThat(queue.size()).isOne();
         var event = queue.remove();
