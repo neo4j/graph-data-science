@@ -24,11 +24,7 @@ import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
-    private final InMemoryTransactionIdStoreImpl transactionIdStore;
-
-    public InMemoryMetaDataProviderImpl(InMemoryTransactionIdStoreImpl transactionIdStore) {
-        this.transactionIdStore = transactionIdStore;
-    }
+    private final InMemoryTransactionIdStoreImpl transactionIdStore = new InMemoryTransactionIdStoreImpl();
 
     @Override
     public ClosedTransactionMetadata getLastClosedTransaction() {

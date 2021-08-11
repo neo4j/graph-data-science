@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvider {
-
     private final InMemoryLogVersionRepository logVersionRepository = new InMemoryLogVersionRepository();
     private final ExternalStoreId externalStoreId = new ExternalStoreId(UUID.randomUUID());
 

@@ -52,7 +52,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         return new InMemoryStorageEngineImpl.Builder(
             databaseLayout,
             tokenHolders,
-            new InMemoryMetaDataProviderImpl(new InMemoryTransactionIdStoreImpl())
+            new InMemoryMetaDataProviderImpl()
         );
     }
 
