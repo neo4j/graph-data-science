@@ -293,4 +293,32 @@ class GraphLoaderTest extends BaseTest {
             return true;
         });
     }
+
+    @AllGraphStoreFactoryTypesTest
+    void shouldFilterRelationshipType(TestSupport.FactoryType factoryType) {
+        clearDb();
+        String createQuery = "CREATE (a)-[:Foo]->(b)-[:Bar]->(c)-[:Foo]->(d)";
+        runQuery(createQuery);
+
+        var graph = TestGraphLoader.from(db)
+            .withRelationshipTypes("Foo")
+            .graph(factoryType);
+
+        assertGraphEquals(fromGdl("(a)-->(b), (c)-->(d)"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void shouldFilterRelationshipTypeAndApplyDefaultRelationshipProperty(TestSupport.FactoryType factoryType) {
+        clearDb();
+        String createQuery = "CREATE (a)-[:Foo { bar: 3.14 }]->(b)-[:Baz { bar: 2.71 }]->(c)-[:Foo]->(d)";
+        runQuery(createQuery);
+
+        var graph = TestGraphLoader.from(db)
+            .withRelationshipTypes("Foo")
+            .withRelationshipProperties(PropertyMappings.of(
+                PropertyMapping.of("bar", 1.61)
+            )).graph(factoryType);
+
+        assertGraphEquals(fromGdl("(a)-[{bar: 3.14D}]->(b), (c)-[{bar: 1.61D}]->(d)"), graph);
+    }
 }
