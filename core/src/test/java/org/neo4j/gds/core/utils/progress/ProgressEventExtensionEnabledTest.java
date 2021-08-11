@@ -19,13 +19,19 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import java.util.function.Consumer;
+import java.util.List;
 
-public enum EmptyProgressEventHandler implements ProgressEventHandler {
-    INSTANCE;
+import static org.assertj.core.api.Assertions.assertThat;
+
+final class ProgressEventExtensionEnabledTest extends BaseProgressEventExtensionTest {
 
     @Override
-    public void registerProgressEventListener(Consumer<ProgressEvent> eventConsumer) {
+    boolean featureEnabled() {
+        return true;
+    }
 
+    @Override
+    void assertResult(List<String> result) {
+        assertThat(result).containsExactly("foo");
     }
 }

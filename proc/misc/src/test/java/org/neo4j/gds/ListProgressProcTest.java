@@ -26,8 +26,7 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
-import org.neo4j.gds.core.utils.progress.LogEvent;
-import org.neo4j.gds.core.utils.progress.ProgressEventHandlerExtension;
+import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.v2.tasks.Task;
@@ -47,7 +46,6 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,8 +63,8 @@ public class ListProgressProcTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
-        builder.addExtension(new ProgressEventHandlerExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
+        builder.addExtension(new ProgressEventExtension(scheduler));
     }
 
     @BeforeEach
@@ -179,13 +177,7 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
             var tracker = this.progressEventTracker;
-            this.progressTracker = new ProgressEventTracker() {
-
-                @Override
-                public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
-                    throw new UnsupportedOperationException("I will go away soon.");
-                }
-
+            this.progressEventTracker = new ProgressEventTracker() {
                 @Override
                 public void addTaskProgressEvent(Task task) {
                     tracker.addTaskProgressEvent(task);
@@ -200,7 +192,7 @@ public class ListProgressProcTest extends BaseTest {
             try {
                 return super.stream(graphNameOrConfig, configuration);
             } finally {
-                this.progressTracker = tracker;
+                this.progressEventTracker = tracker;
             }
         }
 

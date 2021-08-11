@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-abstract class BaseProgressEventHandlerExtensionTest extends BaseTest {
+abstract class BaseProgressEventExtensionTest extends BaseTest {
     private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
 
     abstract boolean featureEnabled();
@@ -50,8 +50,8 @@ abstract class BaseProgressEventHandlerExtensionTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventHandlerExtension);
-        builder.addExtension(new ProgressEventHandlerExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
+        builder.addExtension(new ProgressEventExtension(scheduler));
     }
 
     abstract void assertResult(List<String> result);

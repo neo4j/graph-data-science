@@ -36,32 +36,32 @@ import org.neo4j.scheduler.JobScheduler;
 import java.util.Optional;
 
 @ServiceProvider
-public final class ProgressEventHandlerExtension extends ExtensionFactory<ProgressEventHandlerExtension.Dependencies> {
+public final class ProgressEventExtension extends ExtensionFactory<ProgressEventExtension.Dependencies> {
     private final @Nullable JobScheduler scheduler;
 
     @SuppressWarnings("unused - entry point for service loader")
-    public ProgressEventHandlerExtension() {
+    public ProgressEventExtension() {
         this(Optional.empty());
     }
 
     @TestOnly
-    public ProgressEventHandlerExtension(JobScheduler scheduler) {
+    public ProgressEventExtension(JobScheduler scheduler) {
         this(Optional.of(scheduler));
     }
 
-    private ProgressEventHandlerExtension(Optional<JobScheduler> maybeScheduler) {
+    private ProgressEventExtension(Optional<JobScheduler> maybeScheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
         this.scheduler = maybeScheduler.orElse(null);
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, ProgressEventHandlerExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext context, ProgressEventExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
             var scheduler = Optional.ofNullable(this.scheduler).orElseGet(dependencies::jobScheduler);
-            var progressEventConsumerComponent = new ProgressEventHandlerComponent(
-                dependencies.logService().getInternalLog(ProgressEventHandlerComponent.class),
+            var progressEventConsumerComponent = new ProgressEventComponent(
+                dependencies.logService().getInternalLog(ProgressEventComponent.class),
                 scheduler,
                 dependencies.globalMonitors()
             );

@@ -23,15 +23,15 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-final class ProgressEventHandlerExtensionEnabledTest extends BaseProgressEventHandlerExtensionTest {
+final class ProgressEventExtensionDisabledTest extends BaseProgressEventExtensionTest {
 
     @Override
     boolean featureEnabled() {
-        return true;
+        return false;
     }
 
     @Override
     void assertResult(List<String> result) {
-        assertThat(result).containsExactly("foo");
+        assertThat(result).isEmpty();
     }
 }

@@ -31,7 +31,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Queue;
 
-final class ProgressEventHandlerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
+final class ProgressEventComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
 
     private final Log log;
     private final JobScheduler jobScheduler;
@@ -42,7 +42,7 @@ final class ProgressEventHandlerComponent extends LifecycleAdapter implements Th
     private final ProgressEventStore progressEventStore;
     private volatile ProgressEventHandlerImpl progressEventHandler;
 
-    ProgressEventHandlerComponent(
+    ProgressEventComponent(
         Log log,
         JobScheduler jobScheduler,
         Monitors globalMonitors
