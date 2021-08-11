@@ -25,15 +25,16 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GraphCreateConfigSupport;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.nil.NullGraph;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Procedure;
@@ -53,15 +54,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 
 public abstract class AlphaSimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,
@@ -83,6 +84,7 @@ public abstract class AlphaSimilarityProcTest<
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
+            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
 
             func.accept(proc);
         }
