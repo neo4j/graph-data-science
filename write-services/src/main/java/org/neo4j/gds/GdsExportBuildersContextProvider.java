@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -39,10 +39,10 @@ final class GdsExportBuildersContextProvider extends LifecycleAdapter {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         globalProcedures.registerComponent(
             NodePropertyExporterBuilder.class,
-            GdsExportBuildersContextProvider::nodePropertyExporterBuilder,
+            GdsExportBuildersContextProvider::nativeNodePropertyExporterBuilder,
             true
         );
 
@@ -59,8 +59,8 @@ final class GdsExportBuildersContextProvider extends LifecycleAdapter {
         );
     }
 
-    private static NodePropertyExporterBuilder<?> nodePropertyExporterBuilder(Context ctx) {
-        return new NodePropertyExporter.Builder(transactionContext(ctx));
+    private static NodePropertyExporterBuilder<NativeNodePropertyExporter> nativeNodePropertyExporterBuilder(Context ctx) {
+        return new NativeNodePropertyExporter.Builder(transactionContext(ctx));
     }
 
     private static RelationshipStreamExporterBuilder<?> relationshipStreamExporterBuilder(Context ctx) {

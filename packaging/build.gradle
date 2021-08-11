@@ -6,6 +6,7 @@ group = 'com.neo4j.gds'
 
 dependencies {
     implementation project(':proc')
+    implementation project(':write-services')
 }
 
 task licenseFile {

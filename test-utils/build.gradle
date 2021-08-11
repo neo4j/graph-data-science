@@ -17,6 +17,7 @@ dependencies {
             platform(dep.junit5bom),
             dep.junit5jupiter,
             project(':algo'),
+            project(':write-services'),
             [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
             [group: 'org.neo4j',               name: 'neo4j',                   version: ver.'neo4j'],
