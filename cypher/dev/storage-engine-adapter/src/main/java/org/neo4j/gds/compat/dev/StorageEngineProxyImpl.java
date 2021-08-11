@@ -31,7 +31,6 @@ import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.internal.recordstorage.InMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -53,7 +52,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         return new InMemoryStorageEngineImpl.Builder(
             databaseLayout,
             tokenHolders,
-            new InMemoryMetaDataProvider()
+            new InMemoryMetaDataProviderImpl(new InMemoryTransactionIdStoreImpl())
         );
     }
 

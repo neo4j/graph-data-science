@@ -28,19 +28,19 @@ import org.neo4j.util.concurrent.OutOfOrderSequence;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class InMemoryTransactionIdStore implements TransactionIdStore {
+public abstract class AbstractTransactionIdStore implements TransactionIdStore {
     private final AtomicLong committingTransactionId;
-    private final OutOfOrderSequence closedTransactionId;
+    protected final OutOfOrderSequence closedTransactionId;
     private final AtomicReference<TransactionId> committedTransactionId;
     private final long previouslyCommittedTxId;
     private final int initialTransactionChecksum;
     private final long previouslyCommittedTxCommitTimestamp;
 
-    public InMemoryTransactionIdStore() {
+    public AbstractTransactionIdStore() {
         this(1L, -559063315, 0L, 0L, 64L);
     }
 
-    public InMemoryTransactionIdStore(
+    public AbstractTransactionIdStore(
         long previouslyCommittedTxId,
         int checksum,
         long previouslyCommittedTxCommitTimestamp,
@@ -105,10 +105,6 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
 
     public long getLastClosedTransactionId() {
         return this.closedTransactionId.getHighestGapFreeNumber();
-    }
-
-    public long[] getLastClosedTransaction() {
-        return this.closedTransactionId.get();
     }
 
     public void setLastCommittedAndClosedTransactionId(

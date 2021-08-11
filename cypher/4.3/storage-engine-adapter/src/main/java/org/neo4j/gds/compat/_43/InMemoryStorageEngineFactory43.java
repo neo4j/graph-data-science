@@ -26,6 +26,7 @@ import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
+import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader43;
 import org.neo4j.internal.schema.IndexConfigCompleter;
@@ -48,6 +49,10 @@ import org.neo4j.token.TokenHolders;
 public class InMemoryStorageEngineFactory43 extends AbstractInMemoryStorageEngineFactory {
 
     public static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-43";
+
+    public InMemoryStorageEngineFactory43(AbstractInMemoryMetaDataProvider inMemoryMetaDataProvider) {
+        super(inMemoryMetaDataProvider);
+    }
 
     @Override
     public StorageEngine instantiate(

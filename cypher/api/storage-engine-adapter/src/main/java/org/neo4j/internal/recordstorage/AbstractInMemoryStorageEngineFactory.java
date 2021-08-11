@@ -52,10 +52,10 @@ import java.util.UUID;
 
 public abstract class AbstractInMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    protected final InMemoryMetaDataProvider metadataProvider;
+    protected final AbstractInMemoryMetaDataProvider metadataProvider;
 
-    public AbstractInMemoryStorageEngineFactory() {
-        metadataProvider = new InMemoryMetaDataProvider();
+    public AbstractInMemoryStorageEngineFactory(AbstractInMemoryMetaDataProvider inMemoryMetaDataProvider) {
+        metadataProvider = inMemoryMetaDataProvider;
     }
 
     @Override

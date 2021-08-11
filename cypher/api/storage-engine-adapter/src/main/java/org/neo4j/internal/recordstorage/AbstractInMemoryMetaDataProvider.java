@@ -30,17 +30,12 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
-public class InMemoryMetaDataProvider implements MetadataProvider {
-    private final InMemoryTransactionIdStore transactionIdStore = new InMemoryTransactionIdStore();
+public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvider {
+
     private final InMemoryLogVersionRepository logVersionRepository = new InMemoryLogVersionRepository();
     private final ExternalStoreId externalStoreId = new ExternalStoreId(UUID.randomUUID());
 
-    public InMemoryMetaDataProvider() {
-    }
-
-    public InMemoryTransactionIdStore transactionIdStore() {
-        return transactionIdStore;
-    }
+    public abstract AbstractTransactionIdStore transactionIdStore();
 
     public InMemoryLogVersionRepository logVersionRepository() {
         return logVersionRepository;
@@ -92,45 +87,38 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
 
     @Override
     public long nextCommittingTransactionId() {
-        return this.transactionIdStore.nextCommittingTransactionId();
+        return this.transactionIdStore().nextCommittingTransactionId();
     }
 
     @Override
     public long committingTransactionId() {
-        return this.transactionIdStore.committingTransactionId();
+        return this.transactionIdStore().committingTransactionId();
     }
 
 
     @Override
-    public void transactionCommitted(
-        long transactionId, int checksum, long commitTimestamp, CursorContext cursorContext
-    ) {
-        this.transactionIdStore.transactionCommitted(transactionId, checksum, commitTimestamp, cursorContext);
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, CursorContext cursorContext) {
+        this.transactionIdStore().transactionCommitted(transactionId, checksum, commitTimestamp, cursorContext);
     }
 
     @Override
     public long getLastCommittedTransactionId() {
-        return this.transactionIdStore.getLastCommittedTransactionId();
+        return this.transactionIdStore().getLastCommittedTransactionId();
     }
 
     @Override
     public TransactionId getLastCommittedTransaction() {
-        return this.transactionIdStore.getLastCommittedTransaction();
+        return this.transactionIdStore().getLastCommittedTransaction();
     }
 
     @Override
     public TransactionId getUpgradeTransaction() {
-        return this.transactionIdStore.getUpgradeTransaction();
+        return this.transactionIdStore().getUpgradeTransaction();
     }
 
     @Override
     public long getLastClosedTransactionId() {
-        return this.transactionIdStore.getLastClosedTransactionId();
-    }
-
-    @Override
-    public long[] getLastClosedTransaction() {
-        return this.transactionIdStore.getLastClosedTransaction();
+        return this.transactionIdStore().getLastClosedTransactionId();
     }
 
     @Override
@@ -142,7 +130,7 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
         long logVersion,
         CursorContext cursorContext
     ) {
-        this.transactionIdStore.setLastCommittedAndClosedTransactionId(
+        this.transactionIdStore().setLastCommittedAndClosedTransactionId(
             transactionId,
             checksum,
             commitTimestamp,
@@ -156,14 +144,14 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
     public void transactionClosed(
         long transactionId, long logVersion, long byteOffset, CursorContext cursorContext
     ) {
-        this.transactionIdStore.transactionClosed(transactionId, logVersion, byteOffset, cursorContext);
+        this.transactionIdStore().transactionClosed(transactionId, logVersion, byteOffset, cursorContext);
     }
 
     @Override
     public void resetLastClosedTransaction(
         long transactionId, long logVersion, long byteOffset, boolean missingLogs, CursorContext cursorContext
     ) {
-        this.transactionIdStore.resetLastClosedTransaction(
+        this.transactionIdStore().resetLastClosedTransaction(
             transactionId,
             logVersion,
             byteOffset,
@@ -174,7 +162,7 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
 
     @Override
     public void flush(CursorContext cursorContext) {
-        this.transactionIdStore.flush(cursorContext);
+        this.transactionIdStore().flush(cursorContext);
     }
 
     @Override
