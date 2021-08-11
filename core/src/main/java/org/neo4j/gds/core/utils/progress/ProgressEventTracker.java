@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.progress.v2.tasks.Tasks;
 
 import java.util.Optional;
 
-public interface ProgressEventTracker extends ProgressEventHandler {
+public interface ProgressEventTracker {
     void addTaskProgressEvent(Task task);
 
     default void addTaskProgressEvent(Optional<Task> task) {

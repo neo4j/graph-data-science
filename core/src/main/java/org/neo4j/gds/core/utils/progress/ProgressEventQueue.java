@@ -24,7 +24,6 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 import java.util.OptionalDouble;
 import java.util.Queue;
-import java.util.function.Consumer;
 
 final class ProgressEventQueue extends LifecycleAdapter implements ProgressEventTracker {
 
@@ -36,23 +35,16 @@ final class ProgressEventQueue extends LifecycleAdapter implements ProgressEvent
 
     ProgressEventQueue(
         Queue<LogEvent> queue,
-        String username,
-        ProgressEventHandler progressEventHandler
+        String username
     ) {
         this.queue = queue;
         this.username = username;
-        this.progressEventHandler = progressEventHandler;
     }
 
     @Override
     public void addTaskProgressEvent(Task task) {
         var logEvent = ImmutableLogEvent.of(username, jobId, task, OptionalDouble.empty());
         this.queue.offer(logEvent);
-    }
-
-    @Override
-    public void registerProgressEventListener(Consumer<LogEvent> eventConsumer) {
-        progressEventHandler.registerProgressEventListener(eventConsumer);
     }
 
     @Override

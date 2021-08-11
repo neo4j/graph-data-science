@@ -83,6 +83,6 @@ final class ProgressEventHandlerComponent extends LifecycleAdapter implements Th
             throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
         }
         var username = context.securityContext().subject().username();
-        return new ProgressEventQueueTracker(messageQueue, username, progressEventHandler);
+        return new ProgressEventQueue(messageQueue, username);
     }
 }
