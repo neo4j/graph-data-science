@@ -183,7 +183,7 @@ class GraphSageModelTrainerTest {
             .addFeatureProperties(DUMMY_PROPERTY)
             .embeddingDimension(EMBEDDING_DIMENSION)
             .modelName("model")
-            .epochs(1)
+            .epochs(2)
             .maxIterations(1)
             .build();
 
@@ -203,10 +203,14 @@ class GraphSageModelTrainerTest {
             .extracting(removingThreadId())
             .containsExactly(
                 "GraphSageTrain :: Start",
-                "GraphSageTrain train epoch :: Start",
-                "GraphSageTrain batch task :: Start",
-                "GraphSageTrain batch task :: Finished",
-                "GraphSageTrain train epoch :: Finished",
+                "GraphSageTrain :: train epoch 1 of 2 :: Start",
+                "GraphSageTrain :: train epoch 1 of 2 :: batch task 1 of 1 :: Start",
+                "GraphSageTrain :: train epoch 1 of 2 :: batch task 1 of 1 :: Finished",
+                "GraphSageTrain :: train epoch 1 of 2 :: Finished",
+                "GraphSageTrain :: train epoch 2 of 2 :: Start",
+                "GraphSageTrain :: train epoch 2 of 2 :: batch task 1 of 1 :: Start",
+                "GraphSageTrain :: train epoch 2 of 2 :: batch task 1 of 1 :: Finished",
+                "GraphSageTrain :: train epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Finished"
             );
     }

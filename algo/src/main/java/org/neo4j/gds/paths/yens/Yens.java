@@ -24,17 +24,17 @@ import com.carrotsearch.hppc.LongObjectScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -113,6 +113,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         progressTracker.beginSubTask();
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
+        progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
         var shortestPath = computeDijkstra(config.sourceNode());
 
         // no shortest path has been found
@@ -121,13 +123,14 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             return new DijkstraResult(Stream.empty());
         }
 
+        progressTracker.endSubTask();
+
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
 
         PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
-        progressTracker.beginSubTask();
         for (int i = 1; i < config.k(); i++) {
-            // TODO: log iterations
+            progressTracker.beginSubTask();
             var prevPath = kShortestPaths.get(i - 1);
 
             for (int n = 0; n < prevPath.nodeCount() - 1; n++) {
@@ -176,6 +179,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                     candidates.add(rootPath);
                 }
             }
+
+            progressTracker.endSubTask();
 
             if (candidates.isEmpty()) {
                 break;

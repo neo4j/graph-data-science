@@ -105,6 +105,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void release() {
+        eventTracker.release();
     }
 
     @TestOnly

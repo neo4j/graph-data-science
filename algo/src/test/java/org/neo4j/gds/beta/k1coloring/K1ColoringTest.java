@@ -44,13 +44,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringTest {
 
@@ -207,7 +210,7 @@ class K1ColoringTest {
 
         var config = ImmutableK1ColoringStreamConfig.builder()
             .concurrency(concurrency)
-            .maxIterations(100)
+            .maxIterations(10)
             .build();
 
         var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
@@ -232,6 +235,12 @@ class K1ColoringTest {
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration -> {
+            assertThat(testLogger.getMessages(TestLog.INFO)).anyMatch(string -> {
+                var s = formatWithLocale("%d of %d", iteration, config.maxIterations());
+                return string.contains(s);
+            });
+        });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 

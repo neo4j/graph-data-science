@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class YensTest {
@@ -185,11 +185,22 @@ class YensTest {
             .compute()
             .pathSet();
 
-        assertEquals(9, testLogger.getProgresses().size());
+        assertEquals(12, testLogger.getProgresses().size());
 
         // once
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
+        assertThat(testLogger.containsMessage(TestLog.INFO, "Yens :: Start")).isTrue();
+        assertThat(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished")).isTrue();
+        // for each k
+        MutableInt iteration = new MutableInt(0);
+        for (int i = 1; i <= k; i++) {
+            iteration.setValue(i);
+            var expected = formatWithLocale("k %d of %d", iteration.getValue(), k);
+            assertThat(testLogger.containsMessage(TestLog.INFO, expected)).isTrue();
+        }
+        // multiple times within each k
+        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Start Dijkstra for spur node"))).isTrue();
+        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Start"))).isTrue();
+        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Finished"))).isTrue();
     }
 
     private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {

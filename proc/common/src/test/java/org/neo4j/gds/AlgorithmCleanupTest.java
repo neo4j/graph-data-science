@@ -23,8 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.test.TestProc;
 import org.neo4j.logging.NullLog;
 
 import java.util.Map;
@@ -58,8 +58,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-        // TODO: set to 1 once tracking is implemented
-        assertThat(eventTracker.releaseCalls()).isEqualTo(0);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     @Test
@@ -73,7 +72,6 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-        // TODO: set to 1 once tracking is implemented
-        assertThat(eventTracker.releaseCalls()).isEqualTo(0);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 }

@@ -42,10 +42,13 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Abst
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
             taskName(),
-            DijkstraFactory.dijkstraProgressTask(graph),
-            Tasks.iterativeOpen(
+            Tasks.iterativeDynamic(
                 "Searching path",
-                () -> List.of(DijkstraFactory.dijkstraProgressTask(graph))
+                () -> List.of(Tasks.iterativeOpen(
+                    "k",
+                    () -> List.of(DijkstraFactory.dijkstraProgressTask(graph))
+                )),
+                config.k()
             )
         );
     }
