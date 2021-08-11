@@ -48,12 +48,14 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.TestSupport.ids;
+import static org.neo4j.gds.beta.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
@@ -176,12 +178,12 @@ class ModularityOptimizationTest {
 
         compute(graph, 3, null, 3, 2, testLogger);
 
-        assertTrue(testLogger.containsMessage(INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "color nodes :: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "color nodes :: Finished"));
-        assertTrue(testLogger.containsMessage(INFO, "validate nodes :: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "validate nodes :: Finished"));
-        assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains(":: Start"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
+        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains(":: Finished"));
     }
 
     @ParameterizedTest

@@ -59,6 +59,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public final class ModularityOptimization extends Algorithm<ModularityOptimization, ModularityOptimization> {
 
+    public static final int K1COLORING_MAX_ITERATIONS = 5;
     private final int concurrency;
     private final int maxIterations;
     private final long nodeCount;
@@ -160,7 +161,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         K1ColoringStreamConfig k1Config = ImmutableK1ColoringStreamConfig
             .builder()
             .concurrency(concurrency)
-            .maxIterations(5)
+            .maxIterations(K1COLORING_MAX_ITERATIONS)
             .batchSize((int) minBatchSize)
             .build();
 

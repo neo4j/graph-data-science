@@ -57,11 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
@@ -678,7 +676,7 @@ final class NodeSimilarityTest {
                 AllocationTracker.empty()
             ).computeToStream()
         );
-        assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
+        assertThat(ex.getMessage()).contains("Direction BOTH is not supported");
     }
 
     @ParameterizedTest(name = "topK = {0}")
@@ -812,13 +810,13 @@ final class NodeSimilarityTest {
 
         nodeSimilarity.compute();
 
-        assertTrue(progressLog.hasMessages(INFO));
+        assertThat(progressLog.hasMessages(INFO)).isTrue();
 
-        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity prepare :: Start"));
-        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity prepare :: Finished"));
+        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: prepare :: Start")).isTrue();
+        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: prepare :: Finished")).isTrue();
 
-        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity compare :: Start"));
-        assertTrue(progressLog.containsMessage(INFO, "NodeSimilarity compare :: Finished"));
+        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: compare :: Start")).isTrue();
+        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: compare :: Finished")).isTrue();
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -848,4 +846,3 @@ final class NodeSimilarityTest {
         assertEquals(graph.relationshipCount(), progresses.get(1).get());
     }
 }
-
