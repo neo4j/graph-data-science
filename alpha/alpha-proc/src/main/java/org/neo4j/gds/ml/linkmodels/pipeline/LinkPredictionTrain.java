@@ -374,7 +374,7 @@ public class LinkPredictionTrain
             LinkPredictionModelInfo.of(
                 modelSelectResult.bestParameters(),
                 metrics,
-                pipeline
+                pipeline.copy()
             )
         );
     }

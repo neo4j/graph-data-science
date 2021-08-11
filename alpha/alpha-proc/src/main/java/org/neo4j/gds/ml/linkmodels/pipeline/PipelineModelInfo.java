@@ -54,6 +54,15 @@ public class PipelineModelInfo implements Mappable {
             .toMap());
     }
 
+    public PipelineModelInfo copy() {
+        var copied = new PipelineModelInfo();
+        copied.featureSteps.addAll(featureSteps);
+        copied.nodePropertySteps.addAll(nodePropertySteps);
+        copied.setParameterSpace(new ArrayList<>(parameterSpace));
+        copied.setSplitConfig(splitConfig);
+        return copied;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         return Map.of(
