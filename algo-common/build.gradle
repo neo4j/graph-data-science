@@ -20,5 +20,4 @@ dependencies {
     }
 
     testImplementation project(':test-utils')
-    testCompileOnly group: 'org.jetbrains', name: 'annotations',        version: ver.'jetbrains-annotations'
 }
