@@ -216,8 +216,4 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
     }
-
-    default CypherMapWrapper createMinimalConfigWithFilteredNodes(CypherMapWrapper config) {
-        return createMinimalConfig(config).withEntry(NODE_LABELS_KEY, Collections.singletonList("Label"));
-    }
 }
