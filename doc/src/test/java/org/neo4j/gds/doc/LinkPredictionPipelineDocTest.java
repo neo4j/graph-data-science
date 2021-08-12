@@ -26,10 +26,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplit
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineTrainProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.gds.pagerank.PageRankStatsProc;
-import org.neo4j.gds.pagerank.PageRankStreamProc;
-import org.neo4j.gds.pagerank.PageRankWriteProc;
 
 import java.util.Arrays;
 import java.util.List;
