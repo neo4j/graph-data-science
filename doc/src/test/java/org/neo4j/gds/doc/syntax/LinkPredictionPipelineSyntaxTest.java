@@ -26,7 +26,8 @@ class LinkPredictionPipelineSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE)
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE),
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT)
         );
     }
 

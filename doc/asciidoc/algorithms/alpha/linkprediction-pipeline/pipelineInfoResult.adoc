@@ -1,0 +1,10 @@
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name              | Type          | Description
+| name              | String        | Name of the pipeline.
+| nodePropertySteps | List of Map   | List of configurations for node property steps.
+| featureSteps      | List of Map   | List of configurations for feature steps.
+| splitConfig       | Map           | Configuration to define the split before the model training.
+| parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
+|===

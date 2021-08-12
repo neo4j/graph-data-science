@@ -71,16 +71,7 @@ YIELD
 | pipelineName    | String  | The name of the created pipeline.
 |===
 
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name              | Type          | Description
-| name              | String        | Name of the pipeline.
-| nodePropertySteps | List of Map   | List of configurations for node property steps.
-| featureSteps      | List of Map   | List of configurations for feature steps.
-| splitConfig       | Map           | Configuration to define the split before the model training.
-| parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
-|===
+include::pipelineInfoResult.adoc[]
 --
 
 === Example
@@ -135,9 +126,91 @@ The `train` and `test` relationship sets are used for:
 However, they are not used taken into account by the algorithms run in the node property steps.
 The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
 
+=== Syntax
+
+[.pipeline-configure-split-syntax]
+--
+.Configure the relationship split syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the pipeline.
+| configuration   | Map     | Configuration for splitting the relationships.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                  | Type    | Default | Description
+| validationFolds       | Integer | 3       | Number of divisions of the training graph used during model selection.
+| testFraction          | Double  | 0.1     | Portion of the graph reserved for testing. Must be in the range (0, 1).
+| trainFraction         | Double  | 0.1     | Portion of the graph reserved for training. Must be in the range (0, 1).
+| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
 == Configuring the model parameters
+
+=== Syntax
+
+[.pipeline-configure-params-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit(
+  pipelineName: String,
+  parameterSpace: List of Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| parameterSpace  | List of Map | The parameter space used to select the best model from. Each Map corresponds to potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+.Model configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                | Type    | Default         | Optional | Description
+| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
+| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
+| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
+| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
+| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
+| concurrency         | Integer | see description | yes      | Concurrency for training the model candidate. By default, the value of `concurrency` defined at training is used.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
 
 [[algorithms-ml-linkprediction-pipelines-train]]
 == Training and Evaluation
