@@ -68,7 +68,7 @@ YIELD
 | nodePropertySteps | List of Map   | List of configurations for node property steps.
 | featureSteps      | List of Map   | List of configurations for feature steps.
 | splitConfig       | Map           | Configuration to define the split before the model training.
-| parameterSpace    | List of Map   | List of parameter configurations used to select the best model during training from.
+| parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
 |===
 
 === Example
