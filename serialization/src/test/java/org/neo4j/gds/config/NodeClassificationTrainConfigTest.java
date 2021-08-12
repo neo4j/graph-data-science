@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
+import static org.neo4j.gds.utils.MetricUtil.allValidMetricSpecifications;
 
 class NodeClassificationTrainConfigTest {
 
     @ParameterizedTest
-    @MethodSource("allValidMetricSpecificationsProxy")
+    @MethodSource("org.neo4j.gds.utils.MetricUtil#allValidMetricSpecifications")
     void shouldSerializeConfig(String metric) {
         Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
@@ -216,10 +216,5 @@ class NodeClassificationTrainConfigTest {
         }
         return Collections.emptyMap();
     }
-
-    static List<String> allValidMetricSpecificationsProxy() {
-        return allValidMetricSpecifications();
-    }
-
 
 }

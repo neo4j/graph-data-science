@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
 
 @GdlExtension
 class NodeClassificationSerializerIntegrationTest {
@@ -63,7 +62,7 @@ class NodeClassificationSerializerIntegrationTest {
     TestGraph trainGraph;
 
     @ParameterizedTest
-    @MethodSource("allValidMetricSpecificationsProxy")
+    @MethodSource("org.neo4j.gds.utils.MetricUtil#allValidMetricSpecifications")
     void roundTripTest(String metric) throws IOException {
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
@@ -110,9 +109,5 @@ class NodeClassificationSerializerIntegrationTest {
             .metrics(List.of(MetricSpecification.parse(metric)))
             .params(modelCandidates)
             .build();
-    }
-
-    static List<String> allValidMetricSpecificationsProxy() {
-        return allValidMetricSpecifications();
     }
 }

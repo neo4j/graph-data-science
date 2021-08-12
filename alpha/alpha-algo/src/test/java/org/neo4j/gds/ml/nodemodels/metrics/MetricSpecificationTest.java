@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -110,18 +109,5 @@ public class MetricSpecificationTest {
 
     private static List<String> invalidSingleClassSpecifications() {
         return List.of("F 1 ( class=2 3 4)", "F 1 ( class=3)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)", "F1(class=$)");
-    }
-
-    public static List<String> allValidMetricSpecifications() {
-        var validExpressions = new LinkedList<String>();
-        var allClassExpressions = AllClassMetric.values();
-        for (AllClassMetric allClassExpression : allClassExpressions) {
-            validExpressions.add(allClassExpression.name());
-        }
-        for (String singleClassMetric : MetricSpecification.SINGLE_CLASS_METRIC_FACTORIES.keySet()) {
-            validExpressions.add(singleClassMetric + "(class=*)");
-            validExpressions.add(singleClassMetric + "(class=0)");
-        }
-        return validExpressions;
     }
 }

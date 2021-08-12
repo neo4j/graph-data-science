@@ -65,8 +65,6 @@ dependencies {
         }
     }
 
-    testImplementation project(':alpha-algo').sourceSets.test.output
-
     testImplementation project(':test-utils')
 
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
