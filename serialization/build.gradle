@@ -51,21 +51,9 @@ dependencies {
     // TEST DEPENDENCIES
 
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-    testAnnotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
-    testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'
-    testCompileOnly group: 'org.immutables',      name: 'builder',              version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',       name: 'annotations',          version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
-    neodeps.each {
-        testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
 
     testImplementation project(':test-utils')
-
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 }
