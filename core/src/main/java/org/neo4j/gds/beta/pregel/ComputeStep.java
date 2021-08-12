@@ -98,7 +98,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
                 computation.compute(computeContext, messages);
             }
         });
-        progressTracker().progressLogger().logProgress(nodeBatch.nodeCount());
+        progressTracker().logProgress(nodeBatch.nodeCount());
     }
 
     default void sendToNeighbors(long sourceNodeId, double message) {

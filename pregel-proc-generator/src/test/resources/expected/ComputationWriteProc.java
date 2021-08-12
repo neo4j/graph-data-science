@@ -37,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -92,6 +93,11 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
             @Override
             protected String taskName() {
                 return ComputationAlgorithm.class.getSimpleName();
+            }
+
+            @Override
+            public Task progressTask(Graph graph, PregelProcedureConfig configuration) {
+                return Pregel.progressTask(graph, configuration);
             }
 
             @Override

@@ -33,9 +33,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -46,11 +44,8 @@ import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 
 public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends AlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
-    static Task pagerankProgressTask(Graph graph) {
-        return Tasks.task(
-            "PageRank",
-            DegreeCentralityFactory.degreeCentralityProgressTask(graph)
-        );
+    static <CONFIG extends PageRankConfig> Task pagerankProgressTask(Graph graph, CONFIG config) {
+        return Pregel.progressTask(graph, config, "PageRank");
     }
 
     private static double averageDegree(Graph graph, int concurrency) {
@@ -97,8 +92,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
         var degreeFunction = degreeFunction(
             graph,
             configuration,
-            tracker,
-            progressTracker
+            tracker
         );
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
@@ -132,17 +126,15 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return pagerankProgressTask(graph);
+        return pagerankProgressTask(graph, config);
     }
 
     @NotNull
     private LongToDoubleFunction degreeFunction(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
-        ProgressTracker progressTracker
+        AllocationTracker tracker
     ) {
-        progressTracker.beginSubTask();
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(configuration.concurrency())
             .relationshipWeightProperty(configuration.relationshipWeightProperty())
@@ -152,12 +144,11 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
             graph,
             Pools.DEFAULT,
             config,
-            progressTracker,
+            ProgressTracker.NULL_TRACKER,
             tracker
         );
 
         var degrees = degreeCentrality.compute();
-        progressTracker.endSubTask();
         return degrees::get;
     }
 

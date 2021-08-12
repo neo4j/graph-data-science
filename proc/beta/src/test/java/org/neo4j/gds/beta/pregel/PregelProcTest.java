@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.test.TestPregelConfig;
 import org.neo4j.logging.NullLog;
@@ -331,6 +332,11 @@ public class PregelProcTest extends BaseProcTest {
                 public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
                 }
+
+                @Override
+                public Task progressTask(Graph graph, TestPregelConfig config) {
+                    return Pregel.progressTask(graph, config);
+                }
             };
         }
     }
@@ -389,6 +395,11 @@ public class PregelProcTest extends BaseProcTest {
                 public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
                 }
+
+                @Override
+                public Task progressTask(Graph graph, TestPregelConfig config) {
+                    return Pregel.progressTask(graph, config);
+                }
             };
         }
     }
@@ -445,6 +456,11 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
+                }
+
+                @Override
+                public Task progressTask(Graph graph, TestPregelConfig config) {
+                    return Pregel.progressTask(graph, config);
                 }
             };
         }
