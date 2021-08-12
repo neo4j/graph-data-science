@@ -25,14 +25,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.cli.AdminTool;
 import org.neo4j.cli.ExecutionContext;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.datasets.CommunityDbCreator;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.datasets.CommunityDbCreator;
 import org.neo4j.graphdb.ResultTransformer;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
@@ -139,7 +139,7 @@ abstract class DumpDatasetTest {
             confDir.toFile().mkdirs();
             confDir.resolve("neo4j.conf").toFile().createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+           throw new RuntimeException("Failed resolving the config directory", e);
         }
         var execute = AdminTool.execute(ctx, new String[]{"load", "--from=" + dumpPath, "--database=neo4j", "--force"});
         if (execute != 0) {

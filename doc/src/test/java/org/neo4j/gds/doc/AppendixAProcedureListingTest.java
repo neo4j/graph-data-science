@@ -53,13 +53,12 @@ class AppendixAProcedureListingTest extends BaseProcTest {
     );
 
     @BeforeEach
-    void setUp() {
-        PACKAGES_TO_SCAN.stream()
-            .map(this::createReflections)
-            .forEach(reflections -> {
-                registerProcedures(reflections);
-                registerFunctions(reflections);
-            });
+    void setUp() throws Exception {
+        for (String s : PACKAGES_TO_SCAN) {
+            Reflections reflections = createReflections(s);
+            registerProcedures(reflections);
+            registerFunctions(reflections);
+        }
     }
 
     @Test
@@ -121,34 +120,24 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         );
     }
 
-    private void registerProcedures(Reflections reflections) {
-        reflections
-            .getMethodsAnnotatedWith(Procedure.class)
-            .stream()
-            .map(Method::getDeclaringClass)
-            .distinct()
-            .forEach(procedureClass -> {
-                try {
-                    registerProcedures(procedureClass);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+    private void registerProcedures(Reflections reflections) throws Exception {
+        Set<Class<?>> uniqueValues = new HashSet<>();
+        for (Method method : reflections.getMethodsAnnotatedWith(Procedure.class)) {
+            Class<?> procedureClass = method.getDeclaringClass();
+            if (uniqueValues.add(procedureClass)) {
+                registerProcedures(procedureClass);
+            }
+        }
     }
 
-    private void registerFunctions(Reflections reflections) {
-        reflections
-            .getMethodsAnnotatedWith(UserFunction.class)
-            .stream()
-            .map(Method::getDeclaringClass)
-            .distinct()
-            .forEach(functionClass -> {
-                try {
-                    registerFunctions(functionClass);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+    private void registerFunctions(Reflections reflections) throws Exception {
+        Set<Class<?>> uniqueValues = new HashSet<>();
+        for (Method method : reflections.getMethodsAnnotatedWith(UserFunction.class)) {
+            Class<?> functionClass = method.getDeclaringClass();
+            if (uniqueValues.add(functionClass)) {
+                registerFunctions(functionClass);
+            }
+        }
     }
 
 }
