@@ -99,7 +99,7 @@ MATCH (n) RETURN n;
 == Example with additional node properties
 
 Suppose we have a graph `my-db-graph` in the Neo4j database that has a string node property `myproperty`, and that we have a corresponding in-memory graph called `my-in-memory-graph` which does not have the `myproperty` node property.
-If we want to export `my-in-memory-graph` but additionally add the `myproperty` properties from `my-db-graph` we could use the `additionalProperties` configuration parameter.
+If we want to export `my-in-memory-graph` but additionally add the `myproperty` properties from `my-db-graph` we can use the `additionalProperties` configuration parameter.
 
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` into a Neo4j database called `mydatabase`:
 [source, cypher, role=noplay]
