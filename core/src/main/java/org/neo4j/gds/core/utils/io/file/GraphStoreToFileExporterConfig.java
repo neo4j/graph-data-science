@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -32,13 +30,6 @@ import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
 public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
 
     String exportName();
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.ConvertWith("org.neo4j.gds.AbstractPropertyMappings#fromObject")
-    default PropertyMappings additionalNodeProperties() {
-        return PropertyMappings.of();
-    }
 
     static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
         return new GraphStoreToFileExporterConfigImpl(username, config);
