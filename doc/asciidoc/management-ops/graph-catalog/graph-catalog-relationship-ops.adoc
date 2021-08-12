@@ -286,6 +286,7 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 
 === Stream
 
+[[catalog-graph-stream-single-relationship-property-example]]
 ==== Single property
 
 The most basic case for streaming relationship information from a named graph is a single property.
@@ -375,6 +376,7 @@ ORDER BY source ASC, target ASC
 |===
 --
 
+[[catalog-graph-stream-relationship-properties-example]]
 ==== Multiple properties
 
 It is also possible to stream multiple relationship properties.
@@ -483,6 +485,7 @@ ORDER BY source ASC, target ASC
 
 NOTE: The properties we want to stream must exist for each specified relationship type.
 
+[[catalog-graph-write-relationship-example]]
 === Write
 
 We can write relationships stored in a named in-memory graph back to Neo4j.

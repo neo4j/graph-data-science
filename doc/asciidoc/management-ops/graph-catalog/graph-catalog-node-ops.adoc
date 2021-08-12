@@ -251,6 +251,7 @@ We can stream node properties stored in a named in-memory graph back to the user
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 This is similar to what an algorithm `stream` execution mode does, but allows more fine-grained control over the operations.
 
+[[catalog-graph-stream-single-node-property-example]]
 ==== Single property
 
 In the following, we stream the previously computed scores `score`.
@@ -307,7 +308,7 @@ ORDER BY score DESC
 
 It is required, that all specified node labels have the node property.
 
-
+[[catalog-graph-stream-node-properties-example]]
 ==== Multiple Properties
 
 We can also stream several properties at once.
@@ -342,6 +343,7 @@ When streaming multiple node properties, the name of each property is included i
 This adds with some overhead, as each property name must be repeated for each node in the result, but is necessary in order to distinguish properties.
 ====
 
+[[catalog-graph-write-node-properties-example]]
 === Write
 
 To write the 'score' property for all node labels in the social graph, we use the following query:
@@ -393,6 +395,7 @@ If the `nodeLabels` parameter is specified, it is required that _all_ given node
 --
 
 
+[[catalog-graph-remove-node-properties-example]]
 === Remove
 
 

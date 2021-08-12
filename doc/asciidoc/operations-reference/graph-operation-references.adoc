@@ -17,15 +17,15 @@
 | `gds.graph.exists`
 | `_gds.graph.exists_`
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
-|<<catalog-graph-write-node-properties, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
+|<<catalog-graph-remove-node-properties-example, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
 |<<catalog-graph-delete-rel-type, Delete relationships from a named graph>> | `gds.graph.deleteRelationships`
 |<<catalog-graph-drop, Remove a named graph from memory>> | `gds.graph.drop`
-|<<catalog-graph-stream-node-properties, Stream a single node property to the procedure caller>> | `gds.graph.streamNodeProperty`
-|<<catalog-graph-stream-node-properties, Stream node properties to the procedure caller>> | `gds.graph.streamNodeProperties`
-|<<catalog-graph-stream-relationship-properties, Stream a single relationship property to the procedure caller>> | `gds.graph.streamRelationshipProperty`
-|<<catalog-graph-stream-relationship-properties, Stream relationship properties to the procedure caller>> | `gds.graph.streamRelationshipProperties`
-|<<catalog-graph-write-node-properties, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
-|<<catalog-graph-write-relationship, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
+|<<catalog-graph-stream-single-node-property-example, Stream a single node property to the procedure caller>> | `gds.graph.streamNodeProperty`
+|<<catalog-graph-stream-node-properties-example, Stream node properties to the procedure caller>> | `gds.graph.streamNodeProperties`
+|<<catalog-graph-stream-single-relationship-property-example, Stream a single relationship property to the procedure caller>> | `gds.graph.streamRelationshipProperty`
+|<<catalog-graph-stream-relationship-properties-example, Stream relationship properties to the procedure caller>> | `gds.graph.streamRelationshipProperties`
+|<<catalog-graph-write-node-properties-example, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
+|<<catalog-graph-write-relationship-example, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
 |===
 

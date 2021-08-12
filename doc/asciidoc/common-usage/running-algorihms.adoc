@@ -47,7 +47,7 @@ This enables running multiple algorithms on the same in-memory graph without wri
 This execution mode is especially useful in three scenarios:
 
 * Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
-* Algorithm results can be written altogether (see <<catalog-graph-write-node-properties, write node properties>> and <<catalog-graph-write-relationship, write relationships>>).
+* Algorithm results can be written altogether (see <<catalog-graph-write-node-properties-example, write node properties>> and <<catalog-graph-write-relationship-example, write relationships>>).
 * Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `<<utility-functions-catalog, gds.util.nodeProperty>>`).
 
 A statistical summary of the computation is returned similar to the `stats` mode.
