@@ -75,12 +75,12 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
     @Description("Add a feature step to an existing link prediction pipeline.")
     public Stream<PipelineInfoResult> addFeature(
         @Name("pipelineName") String pipelineName,
-        @Name("featureName") String featureName,
-        @Name("config") Map<String, Object> config
+        @Name("linkFeatureCombiner") String linkFeatureCombiner,
+        @Name("configuration") Map<String, Object> config
     ) {
         var pipeline = getPipelineModelInfo(pipelineName, username());
 
-        pipeline.addFeatureStep(featureName, config);
+        pipeline.addFeatureStep(linkFeatureCombiner, config);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
