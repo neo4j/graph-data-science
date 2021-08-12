@@ -30,9 +30,6 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
-    implementation      group: 'com.google.protobuf',        name: 'protobuf-java',        version: ver.'protobuf'
-    implementation      group: 'com.fasterxml.jackson.core', name: 'jackson-databind',     version: '2.9.10.6'
-
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
@@ -42,30 +39,35 @@ dependencies {
         }
     }
 
-    implementation group: 'com.esotericsoftware', name: 'kryo', version: ver.'kryo'
-
     implementation project(':core')
     implementation project(':ml-core')
     implementation project(':algo')
     implementation project(':alpha-algo')
-    testImplementation project(':alpha-algo').sourceSets.test.output
 
-    testImplementation project(':test-utils')
+    implementation group: 'com.google.protobuf',        name: 'protobuf-java',    version: ver.'protobuf'
+    implementation group: 'com.esotericsoftware',       name: 'kryo',             version: ver.'kryo'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
+
+    // TEST DEPENDENCIES
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    testAnnotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+
     testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'
     testCompileOnly group: 'org.immutables',      name: 'builder',              version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',       name: 'annotations',          version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
-
     neodeps.each {
         testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
 
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
+    testImplementation project(':alpha-algo').sourceSets.test.output
 
-    testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-    testAnnotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+    testImplementation project(':test-utils')
+
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 }
