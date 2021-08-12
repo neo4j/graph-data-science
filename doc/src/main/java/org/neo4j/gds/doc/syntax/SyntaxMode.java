@@ -43,7 +43,12 @@ enum SyntaxMode {
     MODEL_PUBLISH("model-publish-syntax"),
     MODEL_STORE("model-store-syntax"),
     MODEL_LOAD("model-load-syntax"),
-    MODEL_DELETE("model-delete-syntax");
+    MODEL_DELETE("model-delete-syntax"),
+    PIPELINE_CREATE("pipeline-create-syntax"),
+    PIPELINE_ADD_NODE_PROPERTY("pipeline-add-node-property-syntax"),
+    PIPELINE_ADD_FEATURE("pipeline-add-feature-syntax"),
+    PIPELINE_CONFIGURE_SPLIT("pipeline-configure-split-syntax"),
+    PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax");
 
     private final String mode;
 

@@ -46,6 +46,10 @@ This stores a trainable model object in the model catalog of type `Link predicti
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
 The latter is also a model which is stored in the catalog with type `Link prediction pipeline`.
 
+=== Syntax
+
+[.pipeline-create-syntax]
+--
 .Create pipeline syntax
 [source, cypher, role=noplay]
 ----
@@ -60,6 +64,13 @@ YIELD
   parameterSpace: List of Map
 ----
 
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type   | Description
+| pipelineName    | String  | The name of the created pipeline.
+|===
+
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -70,6 +81,7 @@ YIELD
 | splitConfig       | Map           | Configuration to define the split before the model training.
 | parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
 |===
+--
 
 === Example
 
