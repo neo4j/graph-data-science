@@ -60,6 +60,18 @@ YIELD
   parameterSpace: List of Map
 ----
 
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name              | Type          | Description
+| name              | String        | Name of the pipeline.
+| nodePropertySteps | List of Map   | List of configurations for node property steps.
+| featureSteps      | List of Map   | List of configurations for node property steps.
+| splitConfig       | Map           | Configuration to define the split before the model training.
+| parameterSpace    | List of Map   | List of parameter configurations used to select the best model during training from.
+|===
+
+=== Example
 
 [role=query-example]
 --
@@ -78,6 +90,8 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
            | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
 |===
 --
+
+We can see, the newly created pipeline does not contain any steps yet and only has default for the split and train parameters
 
 
 [[algorithms-ml-linkprediction-configure-splits]]
