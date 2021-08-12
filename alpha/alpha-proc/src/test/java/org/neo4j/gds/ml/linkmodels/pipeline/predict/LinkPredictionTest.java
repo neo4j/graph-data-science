@@ -39,7 +39,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineModelInfo;
+import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
@@ -90,7 +90,7 @@ class LinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
@@ -124,6 +124,38 @@ class LinkPredictionTest extends BaseProcTest {
                 PredictedLink.of(2, 3, 2.810228605019867E-9)
             );
             assertThat(expectedLinks).containsAll(predictedLinks);
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"1, 0.3", "3, 0.05", "4, 0.002", "6, 0.00000000001", "6, 0.0"})
+    void shouldPredictWithThreshold(int expectedPredictions, double threshold) {
+        var pipeline = new TrainingPipeline();
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+
+        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
+            WEIGHTS,
+            1,
+            WEIGHTS.length
+        )));
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var linkPrediction = new LinkPrediction(
+                modelData,
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                List.of(NodeLabel.of("N")),
+                List.of(RelationshipType.of("T")),
+                graph,
+                4,
+                6,
+                threshold,
+                ProgressTracker.NULL_TRACKER
+            );
+            var predictionResult = linkPrediction.compute();
+            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+            assertThat(predictedLinks).hasSize(expectedPredictions);
+
+            assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
         });
     }
 }

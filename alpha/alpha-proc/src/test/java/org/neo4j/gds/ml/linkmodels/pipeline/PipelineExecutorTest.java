@@ -87,7 +87,7 @@ class PipelineExecutorTest extends BaseProcTest {
     // add several linkFeatureSteps + assert that linkFeatures computed correct
     @Test
     void singleLinkFeatureStep() {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
@@ -114,7 +114,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void dependentNodePropertySteps() {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
 
         pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
         pipeline.addNodePropertyStep("scaleProperties", Map.of(
@@ -135,7 +135,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void multipleLinkFeatureStep() {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
         pipeline.addFeatureStep(new CosineFeatureStep(List.of("noise", "z")));
 
@@ -167,7 +167,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void testProcedureAndLinkFeatures() {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addNodePropertyStep(new NodePropertyStep(
             "pageRank",
             Map.of("mutateProperty", "pageRank")
@@ -205,7 +205,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void validateLinkFeatureSteps() {
-        var pipeline = new PipelineModelInfo();
+        var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 

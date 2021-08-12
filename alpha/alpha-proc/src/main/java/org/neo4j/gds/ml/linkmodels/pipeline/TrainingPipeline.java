@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PipelineModelInfo implements Mappable {
+public class TrainingPipeline implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
     private final List<LinkFeatureStep> featureSteps;
     private LinkPredictionSplitConfig splitConfig;
@@ -45,13 +45,22 @@ public class PipelineModelInfo implements Mappable {
     // TODO resolve default/user-defined concurrency issue and store actual config objects
     private @NotNull List<Map<String, Object>> parameterSpace;
 
-    public PipelineModelInfo() {
+    public TrainingPipeline() {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
         this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.empty());
         this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig
             .of(ConcurrencyConfig.DEFAULT_CONCURRENCY, Map.of())
             .toMap());
+    }
+
+    public TrainingPipeline copy() {
+        var copied = new TrainingPipeline();
+        copied.featureSteps.addAll(featureSteps);
+        copied.nodePropertySteps.addAll(nodePropertySteps);
+        copied.setParameterSpace(new ArrayList<>(parameterSpace));
+        copied.setSplitConfig(splitConfig);
+        return copied;
     }
 
     @Override
@@ -61,7 +70,7 @@ public class PipelineModelInfo implements Mappable {
                 "nodePropertySteps", Mappable.toMap(nodePropertySteps),
                 "featureSteps", Mappable.toMap(featureSteps)
             ),
-            "splitConfig", splitConfig,
+            "splitConfig", splitConfig.toMap(),
             "parameterSpace", parameterSpace
         );
     }

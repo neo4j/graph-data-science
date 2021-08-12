@@ -62,13 +62,13 @@ public class LinkPredictionTrain
     private final GraphStore graphStore;
     private final LinkPredictionTrainConfig trainConfig;
     private final PipelineExecutor pipelineExecutor;
-    private final PipelineModelInfo pipeline;
+    private final TrainingPipeline pipeline;
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
         GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
-        PipelineModelInfo pipeline,
+        TrainingPipeline pipeline,
         PipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker
     ) {
@@ -373,7 +373,8 @@ public class LinkPredictionTrain
             trainConfig,
             LinkPredictionModelInfo.of(
                 modelSelectResult.bestParameters(),
-                metrics
+                metrics,
+                pipeline.copy()
             )
         );
     }
