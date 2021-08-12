@@ -32,7 +32,7 @@ import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -119,7 +119,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(NodeProperty nodeProperty) {
-        write(Collections.singletonList(nodeProperty));
+        write(List.of(nodeProperty));
     }
 
     @Override
