@@ -27,14 +27,9 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 
     testImplementation project(':test-utils')
-    testImplementation project(':algo')
-    testImplementation project(':algo').sourceSets.test.output
     testImplementation project(':ml-test-utils')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
 }
 
