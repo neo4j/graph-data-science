@@ -395,16 +395,15 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .addAllParameters(parameters)
             .yields("communityCount");
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(parameters.containsKey("seedProperty") ? 2L : 10L, row.getNumber("communityCount"));
-
-        });
+        runQueryWithRowConsumer(
+            query,
+            row -> assertEquals(parameters.containsKey("seedProperty") ? 2L : 10L, row.getNumber("communityCount"))
+        );
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + writeProp + ") AS communities ",
             row -> {
                 @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("communities");
-                System.out.println("actualComponents = " + actualComponents);
                 assertThat(actualComponents, containsInAnyOrder(expectedCommunityIds));
             }
         );
