@@ -32,14 +32,16 @@ The motivation for using pipelines are:
 
 The rest of this page is divided as follows:
 
-* <<algorithms-ml-linkprediction-building-a-pipeline, Building a pipeline>>
+* <<algorithms-ml-linkprediction-creating-a-pipeline, Creating a pipeline>>
+* <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>
+* <<algorithms-ml-linkprediction-adding-features, Adding link features>>
 * <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>
 * <<algorithms-ml-linkprediction-configure-model-parameters, Configuring the model parameters>>
 * <<algorithms-ml-linkprediction-pipelines-train, Training and Evaluation>>
 * <<algorithms-link-prediction-pipelines-predict, Applying a model for prediction>>
 
-[[algorithms-ml-linkprediction-building-a-pipeline]]
-== Building a pipeline
+[[algorithms-ml-linkprediction-creating-a-pipeline]]
+== Creating a pipeline
 
 The first step of building a new pipeline is to create it using `gds.alpha.ml.pipeline.linkPrediction.create`.
 This stores a trainable model object in the model catalog of type `Link prediction training pipeline`.
@@ -95,6 +97,52 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
 --
 
 We can see, the newly created pipeline does not contain any steps yet and only has default for the split and train parameters
+
+[[algorithms-ml-linkprediction-adding-node-properties]]
+== Adding node properties
+
+
+[[algorithms-ml-linkprediction-adding-features]]
+== Adding link features
+
+=== Syntax
+
+[.pipeline-add-feature-syntax]
+--
+.Adding a link feature to a pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.addFeature(
+  pipelineName: String,
+  linkFeatureCombiner: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type    | Description
+| pipelineName           | String  | The name of the pipeline.
+| linkFeatureCombiner    | String  | Link feature combiner is used to combine two node feature vectors into the feature vector for the training. Available combiners are `L2`, `HADAMARD` and `COSINE`.
+| configuration          | Map     | Configuration for splitting the relationships.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name              | Type              | Default | Description
+| nodeProperties    | List of String    | no      | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph given at train.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
 
 
 [[algorithms-ml-linkprediction-configure-splits]]
