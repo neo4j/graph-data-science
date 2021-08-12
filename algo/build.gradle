@@ -25,12 +25,11 @@ dependencies {
         }
     }
 
-    testImplementation project(':test-utils')
-    testImplementation project(':ml-core')
-    testImplementation project(':ml-test-utils')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+    // TEST DEPENDENCIES
 
-    testImplementation 'com.google.protobuf:protobuf-java:3.11.0'
+    testImplementation project(':test-utils')
+    testImplementation project(':ml-test-utils')
+    testImplementation group: 'com.google.protobuf', name: 'protobuf-java', version: ver.'protobuf'
+
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 }
