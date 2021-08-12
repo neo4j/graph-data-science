@@ -97,6 +97,33 @@ We can see, the newly created pipeline does not contain any steps yet and only h
 [[algorithms-ml-linkprediction-configure-splits]]
 == Configuring the relationship splits
 
+Link Prediction pipelines also manage splitting the relationships into several sets and also adds sampled negative relationships to some of these sets.
+Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
+
+The splitting of relationships proceeds internally in the following steps:
+
+1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
+2. The relationships remaining after filtering we call _positive_ and are split into a `test` set and remaining relationships.
+* The `test` set contains a `testFraction` fraction of the positive relationships.
+* To the `test` set also random negative relationships are added, where the number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* The negative relationships do not coincide with positive relationships.
+3. The remaining positive relationships are split into a `train` set and a `feature input` set.
+* The `train` set contains a `trainFraction` fraction of _all_ the positive relationships.
+** Therefore we require `trainFraction + testFraction < 1.0`.
+* To the `train` set also random negative relationships are added, where the number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* The negative relationships do not coincide with positive relationships, nor with test relationships.
+
+The `feature input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
+
+The `train` and `test` relationship sets are used for:
+
+* determining the label (positive or negative) for each training or test example
+* identifying the node pair for which link features are to be computed
+
+However, they are not used taken into account by the algorithms run in the node property steps.
+The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
+
+
 [[algorithms-ml-linkprediction-configure-model-parameters]]
 == Configuring the model parameters
 
