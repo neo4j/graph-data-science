@@ -23,12 +23,13 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Value.Default
     default int k() {
