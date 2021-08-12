@@ -118,6 +118,13 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
     <artifactId>alpha-proc</artifactId>
     <version>1.6.4</version>
 </dependency>
+
+<!-- Required by the Write procedures, this artifact is responsible for providing the various exporters -->
+<dependency>
+  <groupId>org.neo4j.gds</groupId>
+  <artifactId>write-services</artifactId>
+  <version>1.6.4</version>
+</dependency>
 ```
 
 
