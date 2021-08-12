@@ -282,6 +282,8 @@
             </d:tocentry>
             <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-linkprediction-pipelines"><?dbhtml filename="algorithms/ml-models/linkprediction-pipelines/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-auxiliary">
