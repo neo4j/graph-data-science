@@ -197,7 +197,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(AllocationTracker.class, "tracker")
                 .addParameter(ProgressTracker.class, "progressTracker")
                 .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, tracker, progressTracker.progressLogger())", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, tracker, progressTracker)", algorithmClassName)
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("taskName")

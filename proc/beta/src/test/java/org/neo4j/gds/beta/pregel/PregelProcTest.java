@@ -38,15 +38,12 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.test.TestPregelConfig;
-import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -306,6 +303,7 @@ public class PregelProcTest extends BaseProcTest {
 
         @Override
         protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+
             return new AlgorithmFactory<>() {
 
                 @Override
@@ -324,7 +322,7 @@ public class PregelProcTest extends BaseProcTest {
                         graph,
                         configuration,
                         tracker,
-                        log,
+                        progressTracker,
                         configuration.throwInCompute()
                     );
                 }
@@ -384,13 +382,7 @@ public class PregelProcTest extends BaseProcTest {
                     AllocationTracker tracker,
                     ProgressTracker progressTracker
                 ) {
-                    return new CompositeTestAlgorithm(
-                        graph,
-                        configuration,
-                        tracker,
-                        log,
-                        configuration.throwInCompute()
-                    );
+                    return new CompositeTestAlgorithm(graph, configuration, tracker, progressTracker, configuration.throwInCompute());
                 }
 
                 @Override
@@ -447,13 +439,7 @@ public class PregelProcTest extends BaseProcTest {
                     AllocationTracker tracker,
                     ProgressTracker progressTracker
                 ) {
-                    return new CompositeTestAlgorithm(
-                        graph,
-                        configuration,
-                        tracker,
-                        log,
-                        configuration.throwInCompute()
-                    );
+                    return new CompositeTestAlgorithm(graph, configuration, tracker, progressTracker, configuration.throwInCompute());
                 }
 
                 @Override
@@ -478,10 +464,9 @@ public class PregelProcTest extends BaseProcTest {
             Graph graph,
             PregelProcedureConfig configuration,
             AllocationTracker tracker,
-            Log log,
+            ProgressTracker progressTracker,
             boolean throwInCompute
         ) {
-            var progressLogger = new BatchingProgressLogger(log, Tasks.leaf("test", 42), 1);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override
@@ -505,7 +490,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, Pools.DEFAULT, tracker, progressLogger);
+            }, Pools.DEFAULT, tracker, progressTracker);
         }
 
         @Override

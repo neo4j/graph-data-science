@@ -20,9 +20,9 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,9 +42,9 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
         ForkJoinPool forkJoinPool,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        super(graph, computation, config, nodeValues, messenger, voteBits, progressLogger);
+        super(graph, computation, config, nodeValues, messenger, voteBits, progressTracker);
         this.forkJoinPool = forkJoinPool;
     }
 
@@ -67,7 +67,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             voteBits,
             null,
             sentMessage,
-            progressLogger
+            progressTracker
         );
     }
 

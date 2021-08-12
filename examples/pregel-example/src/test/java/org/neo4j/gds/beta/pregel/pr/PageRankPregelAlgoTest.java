@@ -22,9 +22,9 @@ package org.neo4j.gds.beta.pregel.pr;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -32,8 +32,8 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.HashMap;
 
-import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 import static org.neo4j.gds.TestSupport.assertDoubleValues;
+import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 @GdlExtension
 class PageRankPregelAlgoTest {
@@ -91,7 +91,7 @@ class PageRankPregelAlgoTest {
             new PageRankPregel(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         HugeDoubleArray nodeValues = pregelJob.run().nodeValues().doubleProperties(PAGE_RANK);

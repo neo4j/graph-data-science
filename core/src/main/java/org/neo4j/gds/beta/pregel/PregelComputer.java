@@ -21,8 +21,8 @@ package org.neo4j.gds.beta.pregel;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
@@ -36,7 +36,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
     final NodeValue nodeValues;
     final Messenger<?> messenger;
     final HugeAtomicBitSet voteBits;
-    final ProgressLogger progressLogger;
+    final ProgressTracker progressTracker;
 
     PregelComputer(
         Graph graph,
@@ -45,7 +45,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         NodeValue nodeValues,
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.computation = computation;
@@ -53,7 +53,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         this.nodeValues = nodeValues;
         this.messenger = messenger;
         this.voteBits = voteBits;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     abstract void initComputation();
@@ -77,7 +77,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
         ExecutorService executorService,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         if (config.useForkJoin()) {
             if (!(executorService instanceof ForkJoinPool)) {
@@ -95,7 +95,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
                 messenger,
                 voteBits,
                 (ForkJoinPool) executorService,
-                progressLogger
+                progressTracker
             );
         }
 
@@ -108,7 +108,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
             voteBits,
             config.concurrency(),
             executorService,
-            progressLogger
+            progressTracker
         );
     }
 }

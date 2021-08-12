@@ -20,16 +20,16 @@
 package org.neo4j.gds.beta.pregel.cc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 
@@ -88,7 +88,7 @@ class ConnectedComponentsPregelAlgoTest {
             new ConnectedComponentsPregel(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = pregelJob.run();

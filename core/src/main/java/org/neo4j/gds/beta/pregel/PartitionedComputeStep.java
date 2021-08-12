@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.beta.pregel.context.ComputeContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
     implements Runnable, ComputeStep<CONFIG, ITERATOR> {
 
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final Partition nodeBatch;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
@@ -51,7 +51,7 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.iteration = iteration;
@@ -61,7 +61,7 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         this.nodeBatch = nodeBatch;
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.initContext = new InitContext<>(this, config, graph);
     }
 
@@ -111,8 +111,8 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
     }
 
     @Override
-    public ProgressLogger progressLogger() {
-        return progressLogger;
+    public ProgressTracker progressTracker() {
+        return progressTracker;
     }
 
     @Override

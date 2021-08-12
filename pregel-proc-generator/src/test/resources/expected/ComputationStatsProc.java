@@ -86,7 +86,7 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
                                               AllocationTracker tracker, ProgressTracker progressTracker) {
-                return new ComputationAlgorithm(graph, configuration, tracker, progressTracker.progressLogger());
+                return new ComputationAlgorithm(graph, configuration, tracker, progressTracker);
             }
 
             @Override

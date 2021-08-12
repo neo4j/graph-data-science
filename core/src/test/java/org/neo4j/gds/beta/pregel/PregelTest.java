@@ -41,10 +41,11 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -101,7 +102,7 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -130,13 +131,11 @@ class PregelTest {
 
         var computation = new TestPregelComputation();
 
-        var progressLogger = new TestProgressLogger(
-            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
-            config.concurrency()
-        );
-
-        // TODO: this will be handles by the ProgressTracker
+        var task = Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount());
+        var progressLogger = new TestProgressLogger(task, config.concurrency());
         progressLogger.reset(graph.nodeCount());
+
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
 
         Pregel.create(
             graph,
@@ -144,7 +143,7 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            progressLogger
+            progressTracker
         ).run();
 
         assertThat(progressLogger.getProgresses()).allMatch(progress -> graph.nodeCount() == progress.get());
@@ -193,13 +192,10 @@ class PregelTest {
         var eventTracker = new TestProgressEventTracker();
         var computation = new TestPregelComputation();
 
-        var progressLogger =  new TestProgressLogger(
-            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
-            config.concurrency()
-        );
-
-        // TODO: this will be handles by the ProgressTracker
+        var task = Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount());
+        var progressLogger =  new TestProgressLogger(task, config.concurrency());
         progressLogger.reset(graph.nodeCount());
+        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker);
 
         var pregelAlgo = Pregel.create(
             graph,
@@ -207,14 +203,13 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            progressLogger
+            progressTracker
         );
 
         pregelAlgo.run();
         pregelAlgo.release();
 
-        // TODO: reactivate when event tracking is available again for pregel
-        // assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
@@ -271,7 +266,7 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         return pregelJob.run().nodeValues().doubleProperties(KEY);
@@ -292,7 +287,7 @@ class PregelTest {
             new TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -318,7 +313,7 @@ class PregelTest {
             new CompositeTestComputation(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = pregelJob.run().nodeValues();
@@ -357,7 +352,7 @@ class PregelTest {
             new TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -373,7 +368,7 @@ class PregelTest {
             new TestMasterCompute(2),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = pregelJob.run();
@@ -541,7 +536,7 @@ class PregelTest {
             new TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         ));
     }
 
@@ -565,7 +560,7 @@ class PregelTest {
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         // assertion is happening in the computation

@@ -22,10 +22,10 @@ package org.neo4j.gds.beta.pregel;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.LongConsumer;
 
@@ -47,7 +47,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
 
     ComputeContext<CONFIG> computeContext();
 
-    ProgressLogger progressLogger();
+    ProgressTracker progressTracker();
 
     int iteration();
 
@@ -98,7 +98,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
                 computation.compute(computeContext, messages);
             }
         });
-        progressLogger().logProgress(nodeBatch.nodeCount());
+        progressTracker().progressLogger().logProgress(nodeBatch.nodeCount());
     }
 
     default void sendToNeighbors(long sourceNodeId, double message) {

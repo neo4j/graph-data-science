@@ -22,12 +22,12 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 
@@ -48,7 +48,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final PregelComputer<CONFIG> computer;
 
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     private final ExecutorService executor;
 
@@ -58,7 +58,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         PregelComputation<CONFIG> computation,
         ExecutorService executor,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         // This prevents users from disabling concurrency
         // validation in custom PregelConfig implementations.
@@ -73,7 +73,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), tracker),
             executor,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -103,14 +103,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final NodeValue initialNodeValue,
         final ExecutorService executor,
         final AllocationTracker tracker,
-        final ProgressLogger progressLogger
+        final ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValue;
-        this.progressLogger = progressLogger;
         this.executor = executor;
+        this.progressTracker = progressTracker;
 
         var reducer = computation.reducer();
 
@@ -130,7 +130,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .executorService(config.useForkJoin()
                 ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
                 : executor)
-            .progressLogger(progressLogger)
+            .progressTracker(progressTracker)
             .build();
     }
 
@@ -165,28 +165,28 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     public void release() {
-        progressLogger.release();
+        progressTracker.release();
         messenger.release();
     }
 
     private boolean runMasterComputeStep(int iteration) {
-        progressLogger.startSubTask("Master Compute");
+        progressTracker.progressLogger().startSubTask("Master Compute");
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor);
         var didConverge = computation.masterCompute(context);
-        progressLogger.finishSubTask("Master Compute");
+        progressTracker.progressLogger().finishSubTask("Master Compute");
         return didConverge;
     }
 
     private void logIterationStart(int iteration) {
-        progressLogger
+        progressTracker.progressLogger()
             .startSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, config.maxIterations()));
     }
 
     private void logIterationFinish(int iteration, boolean didConverge) {
         var maxIterations = config.maxIterations();
-        progressLogger.finishSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, maxIterations));
+        progressTracker.progressLogger().finishSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, maxIterations));
         if (!didConverge && iteration < maxIterations - 1) {
-            progressLogger.reset(graph.nodeCount());
+            progressTracker.progressLogger().reset(graph.nodeCount());
         }
     }
 }

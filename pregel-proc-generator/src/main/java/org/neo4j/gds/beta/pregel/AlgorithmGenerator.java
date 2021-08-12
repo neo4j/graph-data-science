@@ -28,8 +28,8 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
@@ -88,7 +88,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(Graph.class, "graph")
             .addParameter(pregelSpec.configTypeName(), configurationVar)
             .addParameter(AllocationTracker.class, "tracker")
-            .addParameter(ProgressLogger.class, "progressLogger")
+            .addParameter(ProgressTracker.class, "progressTracker")
             .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.create(" +
@@ -97,7 +97,7 @@ class AlgorithmGenerator extends PregelGenerator {
                     "new $computation:T(), " +
                     "$pools:T.DEFAULT, " +
                     "tracker, " +
-                    "progressLogger" +
+                    "progressTracker" +
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
