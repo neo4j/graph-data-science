@@ -50,18 +50,10 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver['jackson']
 
-    testImplementation project(':test-utils')
-    testCompileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
-    testCompileOnly group: 'org.immutables',    name: 'builder',            version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
-    neodeps.each {
-        testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    // TEST DEPENDENCIES
 
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-    testAnnotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
+    testImplementation project(':test-utils')
 }
