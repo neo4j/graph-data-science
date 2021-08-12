@@ -9,6 +9,14 @@ dependencies {
 
     compileOnly project(':algo')
 
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    neodeps.each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
     api project(':alpha-core')
     api project(':ml-core')
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
@@ -17,14 +25,6 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
-
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    neodeps.each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
 
     testImplementation project(':test-utils')
     testImplementation project(':algo')

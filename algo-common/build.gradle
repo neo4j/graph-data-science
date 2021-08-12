@@ -7,10 +7,6 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
 
-    api(
-        project(':core')
-    )
-
     compileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
     neodeps.each {
@@ -18,6 +14,10 @@ dependencies {
             transitive = false
         }
     }
+
+    api(
+        project(':core')
+    )
 
     testImplementation project(':test-utils')
 }
