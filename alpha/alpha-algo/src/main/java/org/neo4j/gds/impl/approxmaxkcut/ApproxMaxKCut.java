@@ -61,6 +61,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private static final double DEFAULT_WEIGHT = 0.0D;
 
     private Graph graph;
+    private final Random random;
     private final ExecutorService executor;
     private final ApproxMaxKCutConfig config;
     private final ProgressLogger progressLogger;
@@ -81,6 +82,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         AllocationTracker tracker
     ) {
         this.graph = graph;
+        this.random = new Random(config.randomSeed().orElse(new Random().nextLong()));
         this.executor = executor;
         this.config = config;
         this.progressLogger = progressLogger;
@@ -271,7 +273,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
     // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
     // `min` is inclusive, and `max` is exclusive.
-    private long randomNonNegativeLong(Random random, long min, long max) {
+    private long randomNonNegativeLong(long min, long max) {
         assert min >= 0;
         assert max > min;
 
@@ -284,7 +286,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     }
 
     private void variableNeighborhoodSearch(int candidateIdx) {
-        var random = new Random();
         var bestCandidateSolution = candidateSolutions[candidateIdx];
         var bestCost = costs[candidateIdx];
         var neighborCost = new AtomicDoubleArray(1);
@@ -295,7 +296,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
             // Generate a neighboring candidate solution of the current order.
             for (int i = 0; i < order; i++) {
-                long nodeToFlip = randomNonNegativeLong(random, 0, graph.nodeCount());
+                long nodeToFlip = randomNonNegativeLong(0, graph.nodeCount());
                 // For `nodeToFlip`, move to a new random community not equal to its current community in
                 // `neighboringSolution`.
                 int rndNewCommunity = (neighboringSolution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config
@@ -341,9 +342,15 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
         @Override
         public void run() {
-            ThreadLocalRandom random = ThreadLocalRandom.current();
+            Random rand;
+            if (config.concurrency() > 1) {
+                rand = ThreadLocalRandom.current();
+            } else {
+                // We want the ability to obtain a deterministic result for single-threaded computations.
+                rand = random;
+            }
 
-            partition.consume(nodeId -> candidateSolution.set(nodeId, random.nextInt(config.k())));
+            partition.consume(nodeId -> candidateSolution.set(nodeId, rand.nextInt(config.k())));
         }
     }
 
