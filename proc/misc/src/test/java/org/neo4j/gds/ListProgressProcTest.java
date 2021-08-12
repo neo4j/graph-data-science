@@ -159,8 +159,6 @@ public class ListProgressProcTest extends BaseTest {
     }
 
     public static class ProgressLoggingTestFastRP extends FastRPStreamProc {
-        @Context
-        public ProgressEventTracker progressEventTracker;
 
         @Override
         @Procedure("gds.test.fastrp")
