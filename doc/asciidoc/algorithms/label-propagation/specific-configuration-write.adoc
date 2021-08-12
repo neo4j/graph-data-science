@@ -7,5 +7,5 @@
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null                   | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | <<common-configuration-seed-property,seedProperty>>                              | String  | n/a                    | yes      | The name of a node property that defines an initial numeric label.
 | consecutiveIds                                                                   | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
-| minCommunitySize                                                                 | Integer  | 0       | yes      | Only community ids with a size greater than or equal to the given value are written to Neo4j.
+| minCommunitySize                                                                 | Integer  | 0       | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
 |===
