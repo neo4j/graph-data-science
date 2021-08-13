@@ -235,12 +235,12 @@ class K1ColoringTest {
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration -> {
-            assertThat(testLogger.getMessages(TestLog.INFO)).anyMatch(string -> {
-                var s = formatWithLocale("%d of %d", iteration, config.maxIterations());
-                return string.contains(s);
-            });
-        });
+        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration ->
+            assertThat(testLogger.getMessages(TestLog.INFO)).anyMatch(message -> {
+                var expected = formatWithLocale("%d of %d", iteration, config.maxIterations());
+                return message.contains(expected);
+            })
+        );
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
@@ -257,6 +257,3 @@ class K1ColoringTest {
     }
 
 }
-
-
-
