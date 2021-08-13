@@ -20,9 +20,8 @@
 package org.neo4j.gds.core.utils.io;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -50,5 +49,10 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
-    PropertyMappings additionalNodeProperties();
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.gds.AbstractPropertyMappings#fromObject")
+    default org.neo4j.gds.PropertyMappings additionalNodeProperties() {
+        return org.neo4j.gds.PropertyMappings.of();
+    }
 }
