@@ -37,9 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOf;
 
 public interface MetricSpecification {
     SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
@@ -156,12 +156,18 @@ public interface MetricSpecification {
                 return asString();
             }
 
+
             @Override
             public boolean equals(Object obj) {
                 if (!(obj instanceof MetricSpecification)) {
                     return false;
                 }
                 return asString().equals(((MetricSpecification) obj).asString());
+            }
+
+            @Override
+            public int hashCode() {
+                return asString().hashCode();
             }
         };
     }

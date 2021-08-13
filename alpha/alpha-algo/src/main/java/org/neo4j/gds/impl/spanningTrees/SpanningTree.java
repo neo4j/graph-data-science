@@ -22,6 +22,9 @@ package org.neo4j.gds.impl.spanningTrees;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.gds.api.RelationshipConsumer;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * group of nodes that form a spanning tree
  */
@@ -75,4 +78,10 @@ public class SpanningTree {
             .isEquals();
     }
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(head, nodeCount, effectiveNodeCount);
+        result = 31 * result + Arrays.hashCode(parent);
+        return result;
+    }
 }
