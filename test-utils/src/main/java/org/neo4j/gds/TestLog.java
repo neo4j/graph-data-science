@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@SuppressWarnings("removal")
 public class TestLog extends AbstractLog {
     public static final String DEBUG = "debug";
     public static final String INFO = "info";
