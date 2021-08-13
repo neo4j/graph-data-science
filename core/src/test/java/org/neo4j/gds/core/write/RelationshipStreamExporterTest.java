@@ -70,7 +70,7 @@ class RelationshipStreamExporterTest extends BaseTest {
         );
 
         var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(secureTransaction, graph, exportRelationships.stream(), RUNNING_TRUE)
             .build();
 
@@ -89,7 +89,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             relationship("c", "d", Values.longValue(47L), Values.doubleValue(1337))
         );
 
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(
                 TestSupport.fullAccessTransaction(db),
                 graph,
@@ -143,7 +143,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             relationship("c", "d", Values.longArray(new long[]{1, 3, 3, 7}), Values.doubleArray(new double[]{4, 7}))
         );
 
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(
                 TestSupport.fullAccessTransaction(db),
                 graph,
@@ -192,7 +192,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             .range(0, relationshipCount)
             .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
             .build();
@@ -208,7 +208,7 @@ class RelationshipStreamExporterTest extends BaseTest {
 
     @Test
     void exportEmptyStream() {
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, Stream.empty(), TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -232,7 +232,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             .range(0, relationshipCount)
             .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
-        var exporter = RelationshipStreamExporter
+        var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
             .withLog(log)
@@ -254,7 +254,7 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
     }
 
-    RelationshipStreamExporter.Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
+    NativeRelationshipStreamExporter.Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
         return ImmutableRelationship.of(
             graph.toMappedNodeId(idFunction.of(sourceVariable)),
             graph.toMappedNodeId(idFunction.of(targetVariable)),

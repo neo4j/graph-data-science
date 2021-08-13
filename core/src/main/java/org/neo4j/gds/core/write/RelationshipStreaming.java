@@ -23,5 +23,5 @@ package org.neo4j.gds.core.write;
 import java.util.stream.Stream;
 
 public interface RelationshipStreaming {
-    Stream<RelationshipStreamExporter.Relationship> relationshipStream();
+    Stream<NativeRelationshipStreamExporter.Relationship> relationshipStream();
 }

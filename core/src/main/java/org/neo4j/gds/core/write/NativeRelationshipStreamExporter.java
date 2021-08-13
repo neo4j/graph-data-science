@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class RelationshipStreamExporter extends StatementApi {
+public final class NativeRelationshipStreamExporter extends StatementApi {
 
     private static final int QUEUE_CAPACITY = 2;
 
@@ -57,7 +57,7 @@ public final class RelationshipStreamExporter extends StatementApi {
         Value[] values();
     }
 
-    public static RelationshipStreamExporterBuilder<RelationshipStreamExporter> builder(
+    public static RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> builder(
         TransactionContext transactionContext,
         IdMapping idMapping,
         Stream<Relationship> relationships,
@@ -69,15 +69,15 @@ public final class RelationshipStreamExporter extends StatementApi {
             .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends RelationshipStreamExporterBuilder<RelationshipStreamExporter> {
+    public static final class Builder extends RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> {
 
         public Builder(TransactionContext transactionContext) {
             super(transactionContext);
         }
 
         @Override
-        public RelationshipStreamExporter build() {
-            return new RelationshipStreamExporter(
+        public NativeRelationshipStreamExporter build() {
+            return new NativeRelationshipStreamExporter(
                 transactionContext,
                 toOriginalId,
                 relationships,
@@ -88,7 +88,7 @@ public final class RelationshipStreamExporter extends StatementApi {
         }
     }
 
-    private RelationshipStreamExporter(
+    private NativeRelationshipStreamExporter(
         TransactionContext tx,
         LongUnaryOperator toOriginalId,
         Stream<Relationship> relationships,
