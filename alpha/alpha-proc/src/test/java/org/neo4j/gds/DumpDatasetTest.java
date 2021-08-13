@@ -44,7 +44,7 @@ import java.util.Map;
 
 abstract class DumpDatasetTest {
     abstract String dumpPath();
-    abstract List<Class> procedureAndFunctionClasses();
+    abstract List<Class<?>> procedureAndFunctionClasses();
 
     protected Path dbPath;
     protected GdsGraphDatabaseAPI api;
@@ -91,6 +91,7 @@ abstract class DumpDatasetTest {
         return makeDbmsAndApi();
     }
 
+    @SuppressWarnings("deprecation")
     private GdsGraphDatabaseAPI makeDbmsAndApi() {
         var dbms = new DatabaseManagementServiceBuilder(dbPath.toFile())
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))
