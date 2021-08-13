@@ -89,7 +89,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
             () -> List.of(
                 Tasks.iterativeDynamic(
                     "train epoch",
-                    () -> List.of(Tasks.leaf("batch task")),
+                    () -> List.of(Tasks.leaf("iteration")),
                     config.maxIterations()
                 )
             ),

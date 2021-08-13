@@ -184,7 +184,10 @@ class GraphSageModelTrainerTest {
             .embeddingDimension(EMBEDDING_DIMENSION)
             .modelName("model")
             .epochs(2)
-            .maxIterations(1)
+            .maxIterations(2)
+            .tolerance(1e-100)
+            .learningRate(0.001)
+            .randomSeed(42L)
             .build();
 
         var algo = new GraphSageTrainAlgorithmFactory(TestProgressLogger.FACTORY).build(
@@ -204,12 +207,16 @@ class GraphSageModelTrainerTest {
             .containsExactly(
                 "GraphSageTrain :: Start",
                 "GraphSageTrain :: train epoch 1 of 2 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: batch task 1 of 1 :: Start",
-                "GraphSageTrain :: train epoch 1 of 2 :: batch task 1 of 1 :: Finished",
+                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: Start",
+                "GraphSageTrain :: train epoch 1 of 2 :: iteration 1 of 2 :: Finished",
+                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Start",
+                "GraphSageTrain :: train epoch 1 of 2 :: iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: batch task 1 of 1 :: Start",
-                "GraphSageTrain :: train epoch 2 of 2 :: batch task 1 of 1 :: Finished",
+                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Start",
+                "GraphSageTrain :: train epoch 2 of 2 :: iteration 1 of 2 :: Finished",
+                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Start",
+                "GraphSageTrain :: train epoch 2 of 2 :: iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: train epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Finished"
             );
