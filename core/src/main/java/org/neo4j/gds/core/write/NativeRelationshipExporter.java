@@ -41,7 +41,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public final class NativeRelationshipExporter extends StatementApi {
+public final class NativeRelationshipExporter extends StatementApi implements RelationshipExporter {
 
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
@@ -111,17 +111,26 @@ public final class NativeRelationshipExporter extends StatementApi {
         this.executorService = Pools.DEFAULT_SINGLE_THREAD_POOL;
     }
 
+    @Override
     public void write(String relationshipType) {
         var relationshipToken = getOrCreateRelationshipToken(relationshipType);
         write(relationshipToken, NO_SUCH_PROPERTY_KEY, null);
     }
 
+    @Override
+    public void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
+        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
+        write(relationshipToken, NO_SUCH_PROPERTY_KEY, afterWriteConsumer);
+    }
+
+    @Override
     public void write(String relationshipType, String propertyKey) {
         var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
         var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
         write(relationshipTypeToken, propertyKeyToken, null);
     }
 
+    @Override
     public void write(
         String relationshipType,
         String propertyKey,

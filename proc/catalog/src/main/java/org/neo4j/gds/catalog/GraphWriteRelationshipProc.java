@@ -27,7 +27,7 @@ import org.neo4j.gds.config.GraphWriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +46,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteRelationshipProc extends CatalogProc {
 
     @Context
-    public RelationshipExporterBuilder<? extends NativeRelationshipExporter> relationshipExporterBuilder;
+    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")

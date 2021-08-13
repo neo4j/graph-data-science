@@ -34,7 +34,7 @@ import org.neo4j.values.storable.Values;
 import java.util.Objects;
 import java.util.function.LongUnaryOperator;
 
-public abstract class RelationshipExporterBuilder<T> {
+public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
 
     static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
