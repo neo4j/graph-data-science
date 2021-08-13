@@ -27,6 +27,7 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Value.Default

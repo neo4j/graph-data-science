@@ -27,6 +27,7 @@ import org.neo4j.gds.config.BaseConfig;
 import java.util.Optional;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface GraphDropConfig extends BaseConfig {
 
     @Value.Default

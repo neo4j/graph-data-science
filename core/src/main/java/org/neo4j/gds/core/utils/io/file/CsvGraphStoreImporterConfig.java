@@ -21,12 +21,13 @@ package org.neo4j.gds.core.utils.io.file;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface CsvGraphStoreImporterConfig extends ConcurrencyConfig, BaseConfig {
 
     static CsvGraphStoreImporterConfig of(String username, CypherMapWrapper config) {

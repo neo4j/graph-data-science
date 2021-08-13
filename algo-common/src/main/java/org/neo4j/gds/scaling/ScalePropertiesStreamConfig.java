@@ -26,8 +26,9 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@Configuration
 @ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
 interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
 
     static ScalePropertiesStreamConfig of(

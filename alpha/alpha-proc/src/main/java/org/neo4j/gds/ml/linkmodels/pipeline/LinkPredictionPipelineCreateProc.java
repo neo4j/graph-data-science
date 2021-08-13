@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
+@SuppressWarnings("immutables:subtype")
 public class LinkPredictionPipelineCreateProc extends BaseProc {
     public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
 

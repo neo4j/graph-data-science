@@ -88,6 +88,7 @@ public interface Expression {
         }
 
         @ValueClass
+        @SuppressWarnings("immutables:subtype")
         interface Property extends UnaryExpression {
 
             String propertyKey();
@@ -120,6 +121,7 @@ public interface Expression {
         }
 
         @ValueClass
+        @SuppressWarnings("immutables:subtype")
         interface HasLabelsOrTypes extends UnaryExpression {
             List<String> labelsOrTypes();
 

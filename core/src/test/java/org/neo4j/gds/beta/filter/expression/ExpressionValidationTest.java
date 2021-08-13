@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ExpressionValidationTest {
 
@@ -93,6 +93,7 @@ class ExpressionValidationTest {
     }
 
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     interface TestValidationContext extends ValidationContext {
         @Override
         @Value.Default

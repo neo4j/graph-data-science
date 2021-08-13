@@ -27,8 +27,9 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@Configuration
 @ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
 interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
 
     static ScalePropertiesMutateConfig of(
@@ -45,3 +46,4 @@ interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutateP
         );
     }
 }
+

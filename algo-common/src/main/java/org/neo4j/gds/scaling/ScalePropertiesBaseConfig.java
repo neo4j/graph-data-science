@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
     @Configuration.ConvertWith("parsePropertyNames")
