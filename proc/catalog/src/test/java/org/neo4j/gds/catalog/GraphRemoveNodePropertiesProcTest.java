@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.degree.DegreeCentralityMutateProc;
-import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
@@ -34,6 +32,8 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.degree.DegreeCentralityMutateProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -164,7 +164,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
             Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
-            "No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found."
+            "Expecting at least one node projection to contain property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3']."
         );
     }
     

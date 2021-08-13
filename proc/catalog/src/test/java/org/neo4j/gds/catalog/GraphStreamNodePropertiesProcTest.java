@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -35,16 +34,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.gds.functions.AsNodeFunc;
+
+import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
@@ -144,12 +140,9 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertiesForLabel() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2'], " +
-            "   ['A']" +
-            ")  YIELD nodeId, nodeProperty, propertyValue " +
-            "RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
+            "CALL gds.graph.streamNodeProperties('%s', ['newNodeProp1', 'newNodeProp2'], ['A'])" +
+            " YIELD nodeId, nodeProperty, propertyValue" +
+            " RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
         );
 
@@ -165,23 +158,19 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamLoadedNodePropertiesForLabelSubset() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2']" +
-            ")  YIELD nodeId, nodeProperty, propertyValue " +
-            "RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
-            TEST_GRAPH_DIFFERENT_PROPERTIES
-        );
-
-        assertCypherResult(graphWriteQuery, asList(
-            map("id", 0L, "nodeProperty", "newNodeProp1", "propertyValue", 0D),
-            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42L),
-            map("id", 1L, "nodeProperty", "newNodeProp1", "propertyValue", 1D),
-            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
-            map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
-            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L)
-        ));
+        assertCypherResult(
+            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2']) " +
+            " YIELD nodeId, nodeProperty, propertyValue " +
+            " RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
+            Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            asList(
+                map("id", 0L, "nodeProperty", "newNodeProp1", "propertyValue", 0D),
+                map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42L),
+                map("id", 1L, "nodeProperty", "newNodeProp1", "propertyValue", 1D),
+                map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
+                map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
+                map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L)
+            ));
     }
 
     @Test
@@ -214,43 +203,22 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperties() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamNodeProperties(" +
-                "   '%s', " +
-                "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No node projection with property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
+        assertError(
+            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting at least one node projection to contain property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']."
         );
     }
 
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamNodeProperties(" +
-                "   '%s', " +
-                "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
-                "   ['A'] " +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
+        assertError(
+            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], ['A'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting all specified node projections to have all given properties defined. " +
+            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
     }
 
     @Test
@@ -320,42 +288,21 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperty() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamNodeProperty(" +
-                "   '%s', " +
-                "   'newNodeProp3'" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No node projection with property key(s) ['newNodeProp3'] found")
+        assertError(
+            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3')",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting at least one node projection to contain property key(s) ['newNodeProp3']."
         );
     }
 
     @Test
     void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamNodeProperty(" +
-                "   '%s', " +
-                "   'newNodeProp3', " +
-                "   ['A'] " +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
+        assertError(
+            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', ['A'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting all specified node projections to have all given properties defined. " +
+            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Defined keys: ['newNodeProp1', 'newNodeProp2']"
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
     }
 }

@@ -61,26 +61,33 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
     default void validate(GraphStore graphStore) {
         if (!nodeLabels().contains(ElementProjection.PROJECT_ALL)) {
             // validate that all given labels have all the properties
-            nodeLabelIdentifiers(graphStore).forEach(nodeLabel ->
-                nodeProperties().forEach(nodeProperty -> {
-                    if (!graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)) {
+            nodeLabelIdentifiers(graphStore).forEach(nodeLabel -> {
+                    List<String> invalidProperties = nodeProperties()
+                        .stream()
+                        .filter(nodeProperty -> !graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty))
+                        .collect(Collectors.toList());
+
+                    if (!invalidProperties.isEmpty()) {
                         throw new IllegalArgumentException(formatWithLocale(
-                            "Node projection '%s' does not have property key '%s'. Available keys: %s.",
+                            "Expecting all specified node projections to have all given properties defined. " +
+                            "But could not find property key(s) %s for label %s. Defined keys: %s.",
+                            StringJoining.join(invalidProperties),
                             nodeLabel.name,
-                            nodeProperty,
                             StringJoining.join(graphStore.nodePropertyKeys(nodeLabel))
                         ));
                     }
-                }));
+                }
+            );
         } else {
             // validate that at least one label has all the properties
             boolean hasValidLabel = nodeLabelIdentifiers(graphStore).stream()
-                .anyMatch(nodeLabel -> nodeProperties().stream()
-                    .allMatch(nodeProperty -> graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)));
+                .anyMatch(nodeLabel -> graphStore
+                    .nodePropertyKeys(singletonList(nodeLabel))
+                    .containsAll(nodeProperties()));
 
             if (!hasValidLabel) {
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                    "No node projection with property key(s) %s found.",
+                    "Expecting at least one node projection to contain property key(s) %s.",
                     StringJoining.join(nodeProperties())
                 ));
             }

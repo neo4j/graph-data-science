@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Arrays;
@@ -49,7 +49,6 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
@@ -157,21 +156,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void writeLoadedNodePropertiesForLabel() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2'], " +
-            "   ['A']" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_SAME_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'], ['A'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", Arrays.asList("newNodeProp1", "newNodeProp2"),
+                "propertiesWritten", 6L
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
-            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
-            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
-            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(6L);
-        });
 
         String validationQuery =
             "MATCH (n) " +
@@ -193,20 +187,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void writeLoadedNodePropertiesForLabelSubset() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2']" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_DIFFERENT_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
+            Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
+                "nodeProperties", Arrays.asList("newNodeProp1", "newNodeProp2"),
+                "propertiesWritten", 6L
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
-            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_DIFFERENT_PROPERTIES);
-            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
-            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(6L);
-        });
 
         String validationQuery =
             "MATCH (n) " +
@@ -235,20 +225,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
         graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
 
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp3']" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_SAME_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp3'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("newNodeProp3"),
+                "propertiesWritten", expectedPropertyCount
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
-            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
-            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp3"));
-            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(expectedPropertyCount);
-        });
 
         String validationQuery =
             "MATCH (n) " +
@@ -303,35 +289,26 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperties() {
-        assertThatThrownBy(() -> runQuery(formatWithLocale(
-            "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
-            ")",
-            TEST_GRAPH_SAME_PROPERTIES
-            ))
-        )
-            .isInstanceOf(QueryExecutionException.class)
-            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "No node projection with property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found");
+        assertError(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting at least one node projection to contain property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']."
+        );
     }
 
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
-        assertThatThrownBy(() -> runQuery(formatWithLocale(
+        assertError(
             "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
+            "   $graph, " +
             "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
             "   ['A'] " +
             ")",
-            TEST_GRAPH_SAME_PROPERTIES
-            ))
-        ).isInstanceOf(QueryExecutionException.class)
-            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "Node projection 'A' does not have property key 'newNodeProp3'")
-            .hasMessageContaining("Available keys: ['newNodeProp1', 'newNodeProp2']");
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting all specified node projections to have all given properties defined. " +
+            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Defined keys: ['newNodeProp1', 'newNodeProp2']."
+        );
     }
 
     @Test
