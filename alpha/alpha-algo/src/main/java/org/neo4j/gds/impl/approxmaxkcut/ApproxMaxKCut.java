@@ -27,13 +27,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.AtomicDoubleArray;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +43,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /*
  * Implements a parallelized version of a GRASP (optionally with VNS) maximum k-cut approximation algorithm.
@@ -64,7 +66,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final Random random;
     private final ExecutorService executor;
     private final ApproxMaxKCutConfig config;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final AllocationTracker tracker;
     private final WeightTransformer weightTransformer;
     private final HugeIntArray[] candidateSolutions;
@@ -78,14 +80,14 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         Graph graph,
         ExecutorService executor,
         ApproxMaxKCutConfig config,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.random = new Random(config.randomSeed().orElse(new Random().nextLong()));
         this.executor = executor;
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
 
@@ -165,39 +167,26 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         // Keep track of which candidate solution is currently being used and which is best.
         byte currIdx = 0, bestIdx = 1;
 
+        progressTracker.beginSubTask();
+
         if (config.vnsMaxNeighborhoodOrder() > 0) {
             neighboringSolution = HugeIntArray.newArray(graph.nodeCount(), tracker);
         }
-
-        progressLogger.logStart();
 
         for (int i = 1; (i <= config.iterations()) && running(); i++) {
             var currCandidateSolution = candidateSolutions[currIdx];
             var currCost = costs[currIdx];
 
-            var assignmentTaskLog = "Iteration " + i + ": Randomly assign nodes to communities";
-            progressLogger.startSubTask(assignmentTaskLog);
+            progressTracker.progressLogger().logMessage(formatWithLocale(":: Starting iteration: %s", i));
 
             placeNodesRandomly(currCandidateSolution);
-
-            progressLogger.finishSubTask(assignmentTaskLog);
 
             if (!running()) break;
 
             if (config.vnsMaxNeighborhoodOrder() > 0) {
-                var vnsTaskLog = "Iteration " + i + ": Variable neighborhood search";
-                progressLogger.startSubTask(vnsTaskLog);
-
                 variableNeighborhoodSearch(currIdx);
-
-                progressLogger.finishSubTask(vnsTaskLog);
             } else {
-                var localSearchTaskLog = "Iteration " + i + ": Local search";
-                progressLogger.startSubTask(localSearchTaskLog);
-
                 localSearch(currCandidateSolution, currCost);
-
-                progressLogger.finishSubTask(localSearchTaskLog);
             }
 
             // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data
@@ -209,7 +198,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             }
         }
 
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
 
         return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get(0));
     }
@@ -221,7 +210,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             partition -> new PlaceNodesRandomly(candidateSolution, partition),
             Optional.of(config.minBatchSize())
         );
+        progressTracker.beginSubTask();
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        progressTracker.endSubTask();
     }
 
     /*
@@ -232,6 +223,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private void localSearch(HugeIntArray candidateSolution, AtomicDoubleArray cost) {
         var change = new AtomicBoolean(true);
 
+        progressTracker.beginSubTask();
+
+        progressTracker.beginSubTask();
         while (change.get() && running()) {
             nodeToCommunityWeights.setAll(0.0D);
             var nodeToCommunityWeightTasks = degreePartition.stream()
@@ -242,7 +236,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                         partition
                     )
                 ).collect(Collectors.toList());
+            progressTracker.beginSubTask();
             ParallelUtil.runWithConcurrency(config.concurrency(), nodeToCommunityWeightTasks, executor);
+            progressTracker.endSubTask();
 
             swapStatus.setAll(NodeSwapStatus.UNTOUCHED);
             change.set(false);
@@ -255,8 +251,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                         partition
                     )
                 ).collect(Collectors.toList());
+            progressTracker.beginSubTask();
             ParallelUtil.runWithConcurrency(config.concurrency(), swapTasks, executor);
+            progressTracker.endSubTask();
         }
+        progressTracker.endSubTask();
 
         cost.set(0, 0);
         var costTasks = degreePartition.stream()
@@ -268,7 +267,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     partition
                 )
             ).collect(Collectors.toList());
+        progressTracker.beginSubTask();
         ParallelUtil.runWithConcurrency(config.concurrency(), costTasks, executor);
+        progressTracker.endSubTask();
+
+        progressTracker.endSubTask();
     }
 
     // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
@@ -290,6 +293,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         var bestCost = costs[candidateIdx];
         var neighborCost = new AtomicDoubleArray(1);
         var order = 1;
+
+        progressTracker.beginSubTask();
 
         while ((order < config.vnsMaxNeighborhoodOrder()) && running()) {
             bestCandidateSolution.copyTo(neighboringSolution, graph.nodeCount());
@@ -325,6 +330,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             neighboringSolution = candidateSolutions[candidateIdx];
             candidateSolutions[candidateIdx] = bestCandidateSolution;
         }
+
+        progressTracker.endSubTask();
     }
 
     private final class PlaceNodesRandomly implements Runnable {
@@ -351,6 +358,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             }
 
             partition.consume(nodeId -> candidateSolution.set(nodeId, rand.nextInt(config.k())));
+
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
@@ -406,6 +415,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     nodeToCommunityWeights.getAndAdd(nodeId * config.k() + i, outgoingImprovementCosts[i]);
                 }
             });
+
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
@@ -483,6 +494,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             });
 
             if (localChange.getValue()) change.set(true);
+
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         private int bestCommunity(long nodeId, int currCommunity) {
@@ -539,6 +552,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                 );
             });
             cost.add(0, localCost.doubleValue());
+
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
