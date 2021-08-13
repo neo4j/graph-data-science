@@ -21,8 +21,10 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.List;
@@ -69,8 +71,11 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }
 
-    static NodeClassificationModelInfo empty() {
-        return NodeClassificationModelInfo.of(List.of(), NodeLogisticRegressionTrainConfig.empty(), Map.of());
+    static NodeClassificationModelInfo defaultConfig() {
+        return NodeClassificationModelInfo.of(List.of(),
+            new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of("penalty", 1))),
+            Map.of()
+        );
     }
 }
 

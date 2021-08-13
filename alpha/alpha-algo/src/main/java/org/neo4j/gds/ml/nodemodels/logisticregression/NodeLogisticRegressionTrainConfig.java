@@ -68,9 +68,4 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
     }
-
-    static NodeLogisticRegressionTrainConfig empty() {
-        return new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of("penalty", 1)));
-    }
-
 }

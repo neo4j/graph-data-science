@@ -61,7 +61,7 @@ public final class NodeClassificationPredictProcTestUtil {
                 .featureProperties(properties)
                 .addParam(Map.of("penalty", 1.0))
                 .build(),
-            NodeClassificationModelInfo.empty()
+            NodeClassificationModelInfo.defaultConfig()
         );
         ModelCatalog.set(model);
     }
