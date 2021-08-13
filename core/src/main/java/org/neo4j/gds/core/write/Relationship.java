@@ -19,9 +19,14 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.values.storable.Value;
 
-import java.util.stream.Stream;
+@ValueClass
+public interface Relationship {
+    long sourceNode();
 
-public interface RelationshipStreaming {
-    Stream<Relationship> relationshipStream();
+    long targetNode();
+
+    Value[] values();
 }

@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.values.storable.Value;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
@@ -47,15 +45,6 @@ public final class NativeRelationshipStreamExporter extends StatementApi {
     private final int batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
-
-    @ValueClass
-    public interface Relationship {
-        long sourceNode();
-
-        long targetNode();
-
-        Value[] values();
-    }
 
     public static RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> builder(
         TransactionContext transactionContext,

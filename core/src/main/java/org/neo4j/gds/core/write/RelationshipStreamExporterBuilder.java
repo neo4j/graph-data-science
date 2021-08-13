@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 public abstract class RelationshipStreamExporterBuilder<T> {
     protected final TransactionContext transactionContext;
-    protected Stream<NativeRelationshipStreamExporter.Relationship> relationships;
+    protected Stream<Relationship> relationships;
     protected int batchSize;
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
@@ -66,7 +66,7 @@ public abstract class RelationshipStreamExporterBuilder<T> {
         return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), writeConcurrency));
     }
 
-    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<NativeRelationshipStreamExporter.Relationship> relationships) {
+    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<Relationship> relationships) {
         this.relationships = relationships;
         return this;
     }

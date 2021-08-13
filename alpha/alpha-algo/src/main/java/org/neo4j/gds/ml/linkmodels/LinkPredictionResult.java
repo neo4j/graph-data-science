@@ -23,7 +23,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.core.write.ImmutableRelationship;
-import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
+import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -79,7 +79,7 @@ public class LinkPredictionResult implements RelationshipStreaming {
     }
 
     @Override
-    public Stream<NativeRelationshipStreamExporter.Relationship> relationshipStream() {
+    public Stream<Relationship> relationshipStream() {
         var natural = stream().map(link -> ImmutableRelationship.of(
             link.sourceId(),
             link.targetId(),

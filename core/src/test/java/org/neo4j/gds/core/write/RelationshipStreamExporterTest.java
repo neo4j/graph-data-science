@@ -254,7 +254,7 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
     }
 
-    NativeRelationshipStreamExporter.Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
+    Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
         return ImmutableRelationship.of(
             graph.toMappedNodeId(idFunction.of(sourceVariable)),
             graph.toMappedNodeId(idFunction.of(targetVariable)),
