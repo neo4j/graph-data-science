@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -38,19 +37,15 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
@@ -211,43 +206,19 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingRelationshipProperties() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamRelationshipProperties(" +
-                "   '%s', " +
-                "   ['newRelProp1', 'newRelProp2', 'newRelProp3']" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No relationship projection with property key(s) ['newRelProp1', 'newRelProp2', 'newRelProp3'] found")
+        assertError("CALL gds.graph.streamRelationshipProperties($graph, ['newRelProp1', 'newRelProp2', 'newRelProp3'])",
+                Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting at least one relationship projection to contain property key(s) ['newRelProp1', 'newRelProp2', 'newRelProp3']."
         );
     }
 
     @Test
     void shouldFailOnNonExistingRelationshipPropertiesForSpecificType() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamRelationshipProperties(" +
-                "   '%s', " +
-                "   ['relProp1', 'relProp2', 'relProp3'], " +
-                "   ['REL1'] " +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
+        assertError("CALL gds.graph.streamRelationshipProperties($graph, ['relProp1', 'relProp2', 'relProp3'], ['REL1'] )",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting all specified relationship projections to have all given properties defined. " +
+            "But could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Relationship projection 'REL1' does not have property key 'relProp3'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['relProp1', 'relProp2']"));
     }
 
     @Test
@@ -316,64 +287,30 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingRelationshipProperty() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamRelationshipProperty(" +
-                "   '%s', " +
-                "   'relProp3'" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No relationship projection with property key(s) ['relProp3'] found")
+        assertError(
+            "CALL gds.graph.streamRelationshipProperty($graph, 'relProp3')",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting at least one relationship projection to contain property key(s) ['relProp3']."
         );
     }
 
     @Test
     void shouldFailOnNonExistingRelationshipPropertyForSpecificType() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.streamRelationshipProperty(" +
-                "   '%s', " +
-                "   'relProp3', " +
-                "   ['REL1'] " +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
+        assertError(
+            "CALL gds.graph.streamRelationshipProperty($graph, 'relProp3', ['REL1'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Expecting all specified relationship projections to have all given properties defined. " +
+            "But could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Relationship projection 'REL1' does not have property key 'relProp3'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['relProp1', 'relProp2']"));
     }
 
     @Test
     void shouldFailOnDisjunctCombinationsOfRelationshipTypeAndProperty() {
-        String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperties(" +
-            "   '%s', " +
-            "   ['newRelProp1', 'newRelProp2']," +
-            "   ['REL2']" +
-            ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue",
-            TEST_GRAPH_DIFFERENT_PROPERTIES
+        assertError(
+            "CALL gds.graph.streamRelationshipProperties($graph, ['newRelProp1', 'newRelProp2'], ['REL2'])",
+            Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            "Expecting all specified relationship projections to have all given properties defined. " +
+            "But could not find property key(s) ['newRelProp2'] for label REL2. Defined keys: ['newRelProp1']"
         );
-
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(graphStreamQuery)
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Relationship projection 'REL2' does not have property key 'newRelProp2'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['newRelProp1']"));
     }
 }

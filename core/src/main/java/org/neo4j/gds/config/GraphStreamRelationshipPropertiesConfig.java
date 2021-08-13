@@ -70,26 +70,33 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
     default void validate(GraphStore graphStore) {
         if (!relationshipTypes().contains(ElementProjection.PROJECT_ALL)) {
             // validate that all given labels have all the properties
-            relationshipTypeIdentifiers(graphStore).forEach(relationshipType ->
-                relationshipProperties().forEach(relationshipProperty -> {
-                    if (!graphStore.hasRelationshipProperty(relationshipType, relationshipProperty)) {
+            relationshipTypeIdentifiers(graphStore).forEach(relationshipType -> {
+                    List<String> invalidProperties = relationshipProperties()
+                        .stream()
+                        .filter(relProperty -> !graphStore.hasRelationshipProperty(relationshipType, relProperty))
+                        .collect(Collectors.toList());
+
+                    if (!invalidProperties.isEmpty()) {
                         throw new IllegalArgumentException(formatWithLocale(
-                            "Relationship projection '%s' does not have property key '%s'. Available keys: %s.",
+                            "Expecting all specified relationship projections to have all given properties defined. " +
+                            "But could not find property key(s) %s for label %s. Defined keys: %s.",
+                            StringJoining.join(invalidProperties),
                             relationshipType.name,
-                            relationshipProperty,
                             StringJoining.join(graphStore.relationshipPropertyKeys(relationshipType))
                         ));
                     }
-                }));
+                }
+            );
         } else {
             // validate that at least one label has all the properties
             boolean hasValidType = relationshipTypeIdentifiers(graphStore).stream()
-                .anyMatch(relationshipType -> relationshipProperties().stream()
-                    .allMatch(relationshipProperty -> graphStore.hasRelationshipProperty(relationshipType, relationshipProperty)));
+                .anyMatch(relationshipType -> graphStore
+                    .relationshipPropertyKeys(relationshipType)
+                    .containsAll(relationshipProperties()));
 
             if (!hasValidType) {
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                    "No relationship projection with property key(s) %s found.",
+                    "Expecting at least one relationship projection to contain property key(s) %s.",
                     StringJoining.join(relationshipProperties())
                 ));
             }

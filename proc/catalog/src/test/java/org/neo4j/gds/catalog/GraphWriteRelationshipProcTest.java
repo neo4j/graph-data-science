@@ -28,17 +28,15 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.graphdb.QueryExecutionException;
+
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphWriteRelationshipProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_NAME = "testGraph";
@@ -147,41 +145,21 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingRelationshipType() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.writeRelationship(" +
-                "   '%s', " +
-                "   'NEW_REL42'" +
-                ")",
-                TEST_GRAPH_NAME
-            ))
+        assertError(
+            "CALL gds.graph.writeRelationship($graph, 'NEW_REL42')",
+            Map.of("graph", TEST_GRAPH_NAME),
+            "Relationship type `NEW_REL42` not found. " +
+            "Available types: ['NEW_REL1', 'NEW_REL2']"
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("`NEW_REL42` not found"));
-        assertThat(rootCause.getMessage(), containsString("['NEW_REL1', 'NEW_REL2']"));
     }
 
     @Test
     void shouldFailOnNonExistingRelationshipProperty() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.writeRelationship(" +
-                "   '%s', " +
-                "   'NEW_REL1', " +
-                "   'nonExisting'" +
-                ")",
-                TEST_GRAPH_NAME
-            ))
+        assertError(
+            "CALL gds.graph.writeRelationship($graph, 'NEW_REL1', 'nonExisting')",
+            Map.of("graph", TEST_GRAPH_NAME),
+            "Relationship property `nonExisting` not found for relationship type 'NEW_REL1'. " +
+            "Available properties: ['newRelProp1', 'newRelProp2']"
         );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("`nonExisting` not found for relationship type 'NEW_REL1'"));
-        assertThat(rootCause.getMessage(), containsString("['newRelProp1', 'newRelProp2']"));
     }
-
 }
