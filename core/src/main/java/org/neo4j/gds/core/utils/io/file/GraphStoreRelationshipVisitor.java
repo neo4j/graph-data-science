@@ -26,10 +26,10 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -127,7 +127,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     @ValueClass
     interface RelationshipVisitorResult {
         Map<RelationshipType, Relationships.Topology> relationshipTypesWithTopology();
-        Map<? extends RelationshipType,? extends RelationshipPropertyStore> propertyStores();
+        Map<RelationshipType, RelationshipPropertyStore> propertyStores();
         long relationshipCount();
     }
 }
