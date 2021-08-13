@@ -171,32 +171,6 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
         });
     }
 
-    @Test
-    default void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {
-        if (supportsImplicitGraphCreate()) {
-            runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-            runQuery(graphDb(), CREATE_QUERY);
-
-            String labelString = "Label";
-
-            CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
-                NODE_PROJECTION_KEY, NodeProjections.builder()
-                    .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
-                    .build(),
-                RELATIONSHIP_PROJECTION_KEY, "*",
-                "relationshipProperties", "weight1"
-            ));
-            CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
-
-            applyOnProcedure((proc) -> {
-                CONFIG config = proc.newConfig(Optional.empty(), algoConfig);
-                Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.empty());
-                Graph graph = proc.createGraph(configAndName);
-                assertGraphEquals(fromGdl("(a:Label)-->(b:Label)-->(c:Label)-->(a)-->(c)"), graph);
-            });
-        }
-    }
-
     default void loadExplicitGraphWithRelationshipWeights(String graphName, NodeProjections nodeProjections, RelationshipProjections relationshipProjections) {
         GraphDatabaseAPI db = emptyDb();
 

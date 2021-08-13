@@ -162,10 +162,6 @@ public abstract class AlgoBaseProc<
         return Tuples.pair(config, graphName);
     }
 
-    public Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
-    }
-
     protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig,
         CONFIG config
