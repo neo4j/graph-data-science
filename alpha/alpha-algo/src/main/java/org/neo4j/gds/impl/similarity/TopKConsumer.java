@@ -61,6 +61,7 @@ public class TopKConsumer<T> implements Function<T, Integer> {
         Comparator<SimilarityResult> comparator = topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         topK = Math.abs(topK);
 
+        @SuppressWarnings("rawtypes")
         TopKConsumer<SimilarityResult>[] results = new TopKConsumer[length];
         for (int i = 0; i < results.length; i++) results[i] = new TopKConsumer<>(topK, comparator);
         return results;
