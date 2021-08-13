@@ -120,7 +120,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
             progressTracker.endSubTask();
-            return new DijkstraResult(Stream.empty());
+            progressTracker.endSubTask();
+            return new DijkstraResult(Stream.empty(), progressTracker::endSubTask);
         }
 
         progressTracker.endSubTask();

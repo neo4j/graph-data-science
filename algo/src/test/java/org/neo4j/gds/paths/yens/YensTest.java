@@ -53,6 +53,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -203,6 +204,38 @@ class YensTest {
         assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Finished"))).isTrue();
     }
 
+    @Test
+    void shouldCloseProgressTasksOnEmptyResult() {
+        var config = defaultSourceTargetConfigBuilder()
+            .sourceNode(idFunction.of("h"))
+            .targetNode(idFunction.of("c"))
+            .k(1)
+            .build();
+
+        var progressTask = new YensFactory<>().progressTask(graph, config);
+        var testLogger = new TestProgressLogger(progressTask, 1);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+
+        Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
+            .compute()
+            .pathSet();
+
+        var messages = testLogger.getMessages(TestLog.INFO);
+
+        assertThat(messages)
+            .extracting(removingThreadId())
+            .containsExactly(
+                "Yens :: Start",
+                "Yens :: Searching path :: Start",
+                "Yens :: Searching path :: k 1 of 1 :: Start",
+                "Yens :: Searching path :: k 1 of 1 :: Start Dijkstra for spur node " + idFunction.of("h"),
+                "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Start",
+                "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Finished",
+                "Yens :: Searching path :: k 1 of 1 :: Finished",
+                "Yens :: Searching path :: Finished",
+                "Yens :: Finished"
+            );
+    }
     private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {
         var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
 
