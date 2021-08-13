@@ -41,7 +41,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public final class RelationshipExporter extends StatementApi {
+public final class NativeRelationshipExporter extends StatementApi {
 
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
@@ -50,7 +50,7 @@ public final class RelationshipExporter extends StatementApi {
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporterBuilder<RelationshipExporter> builder(
+    public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
         TransactionContext transactionContext,
         Graph graph,
         TerminationFlag terminationFlag
@@ -63,7 +63,7 @@ public final class RelationshipExporter extends StatementApi {
         );
     }
 
-    public static RelationshipExporterBuilder<RelationshipExporter> builder(
+    public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
         TransactionContext transactionContext,
         IdMapping idMapping,
         Graph graph,
@@ -75,15 +75,15 @@ public final class RelationshipExporter extends StatementApi {
             .withTerminationFlag(terminationFlag);
     }
 
-    public static final class Builder extends RelationshipExporterBuilder<RelationshipExporter> {
+    public static final class Builder extends RelationshipExporterBuilder<NativeRelationshipExporter> {
 
         public Builder(TransactionContext transactionContext) {
             super(transactionContext);
         }
 
         @Override
-        public RelationshipExporter build() {
-            return new RelationshipExporter(
+        public NativeRelationshipExporter build() {
+            return new NativeRelationshipExporter(
                 transactionContext,
                 graph,
                 toOriginalId,
@@ -94,7 +94,7 @@ public final class RelationshipExporter extends StatementApi {
         }
     }
 
-    private RelationshipExporter(
+    private NativeRelationshipExporter(
         TransactionContext transactionContext,
         Graph graph,
         LongUnaryOperator toOriginalId,

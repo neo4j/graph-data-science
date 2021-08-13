@@ -51,7 +51,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.core.utils.TerminationFlag.RUNNING_TRUE;
 
-class RelationshipExporterTest extends BaseTest {
+class NativeRelationshipExporterTest extends BaseTest {
 
     private static final String NODE_QUERY_PART =
         "CREATE" +
@@ -85,7 +85,7 @@ class RelationshipExporterTest extends BaseTest {
             .graph();
 
         var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
-        var exporter = RelationshipExporter.builder(secureTransaction, graph, RUNNING_TRUE).build();
+        var exporter = NativeRelationshipExporter.builder(secureTransaction, graph, RUNNING_TRUE).build();
 
         assertThatExceptionOfType(AuthorizationViolationException.class)
             .isThrownBy(() -> exporter.write("OUT_TYPE"));
@@ -93,7 +93,7 @@ class RelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationships() {
-        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
     }
@@ -112,7 +112,7 @@ class RelationshipExporterTest extends BaseTest {
             .build()
             .graphStore();
 
-        RelationshipExporter
+        NativeRelationshipExporter
             .builder(
                 TestSupport.fullAccessTransaction(db),
                 graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
@@ -129,7 +129,7 @@ class RelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithoutProperties() {
-        RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
         exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
 
@@ -143,7 +143,7 @@ class RelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsExcludePresentProperties() {
-        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
 
@@ -157,7 +157,7 @@ class RelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithAfterWriteConsumer() {
-        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         MutableInt count = new MutableInt();
         exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
@@ -169,7 +169,7 @@ class RelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
-        RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
+        NativeRelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
         MutableInt count = new MutableInt();
         exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
@@ -187,7 +187,7 @@ class RelationshipExporterTest extends BaseTest {
 
         // with a rel exporter
         var log = new TestLog();
-        var exporterBuilder = RelationshipExporter
+        var exporterBuilder = NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withLog(log);
 
@@ -225,7 +225,7 @@ class RelationshipExporterTest extends BaseTest {
             );
     }
 
-    private RelationshipExporter setupExportTest(boolean includeProperties) {
+    private NativeRelationshipExporter setupExportTest(boolean includeProperties) {
         // create graph to export
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
@@ -243,7 +243,7 @@ class RelationshipExporterTest extends BaseTest {
 
 
         // export into new database
-        return RelationshipExporter
+        return NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
             .build();
     }
