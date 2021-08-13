@@ -116,15 +116,4 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             return data.stream().map(Model.Mappable::toMap).collect(Collectors.toList());
         }
     }
-
-    class SerializableMappable implements Mappable {
-        private final Map<String, Object> map;
-
-        public SerializableMappable(Map<String, Object> map) {this.map = map;}
-
-        @Override
-        public Map<String, Object> toMap() {
-            return map;
-        }
-    }
 }
