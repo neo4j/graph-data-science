@@ -30,5 +30,5 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
 
-    testImplementation 'com.google.protobuf:protobuf-java:3.11.0'
+    testImplementation group: 'com.google.protobuf', name: 'protobuf-java', version: ver.'protobuf'
 }
