@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class RelationshipStreamExporterBuilder<T> {
+public abstract class RelationshipStreamExporterBuilder<T extends RelationshipStreamExporter> {
     protected final TransactionContext transactionContext;
     protected Stream<Relationship> relationships;
     protected int batchSize;

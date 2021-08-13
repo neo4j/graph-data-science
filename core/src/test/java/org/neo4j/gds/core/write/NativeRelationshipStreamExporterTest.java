@@ -48,7 +48,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.core.utils.TerminationFlag.RUNNING_TRUE;
 
-class RelationshipStreamExporterTest extends BaseTest {
+class NativeRelationshipStreamExporterTest extends BaseTest {
 
     private static final List<String> nodeVariables = List.of("a", "b", "c", "d");
 

@@ -17,16 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.procedure.Context;
-
-public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO, ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig>
-    extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
-
-    @Context
-    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
+public interface RelationshipStreamExporter {
+    long write(String relationshipType, String... propertyKeys);
 }

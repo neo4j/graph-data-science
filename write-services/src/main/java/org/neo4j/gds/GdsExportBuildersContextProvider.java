@@ -25,6 +25,7 @@ import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -63,7 +64,7 @@ final class GdsExportBuildersContextProvider extends LifecycleAdapter {
         return new NativeNodePropertyExporter.Builder(transactionContext(ctx));
     }
 
-    private static RelationshipStreamExporterBuilder<?> relationshipStreamExporterBuilder(Context ctx) {
+    private static RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder(Context ctx) {
         return new NativeRelationshipStreamExporter.Builder(transactionContext(ctx));
     }
 

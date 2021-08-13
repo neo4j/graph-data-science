@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class NativeRelationshipStreamExporter extends StatementApi {
+public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
 
     private static final int QUEUE_CAPACITY = 2;
 
@@ -93,6 +93,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi {
         this.progressLogger = progressLogger;
     }
 
+    @Override
     public long write(String relationshipType, String... propertyKeys) {
         var relationshipToken = getOrCreateRelationshipToken(relationshipType);
         var propertyTokens = Arrays.stream(propertyKeys).mapToInt(this::getOrCreatePropertyToken).toArray();
