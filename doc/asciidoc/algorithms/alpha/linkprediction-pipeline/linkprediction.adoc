@@ -382,6 +382,26 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will configure the parameter space of the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe',
+  [{tolerance: 0.001}, {tolerance: 0.01}, {maxEpochs: 500}]
+) YIELD parameterSpace
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| parameterSpace
+| [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}, {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.01}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
+|===
+--
+
 include::trainAndEval.adoc[]
 
 include::predict.adoc[]
