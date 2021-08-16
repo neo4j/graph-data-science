@@ -330,7 +330,7 @@ include::pipelineInfoResult.adoc[]
 .The following will configure the splitting of the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {testFraction: 0.3, validationFolds: 7})
+CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {testFraction: 0.3, trainFraction: 0.3, validationFolds: 7})
 YIELD splitConfig
 ----
 
@@ -338,7 +338,7 @@ YIELD splitConfig
 [opts="header",cols="1"]
 |===
 | splitConfig
-| {negativeSamplingRatio=1.0, testFraction=0.3, validationFolds=7, trainFraction=0.1}
+| {negativeSamplingRatio=1.0, testFraction=0.3, validationFolds=7, trainFraction=0.3}
 |===
 --
 
