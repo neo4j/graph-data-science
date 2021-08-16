@@ -1,6 +1,8 @@
 [[algorithms-ml-linkprediction-pipelines-train]]
 == Training and Evaluation
 
+=== Syntax
+
 [.include-with-train]
 --
 .Run Link Prediction in train mode on a named graph:
@@ -17,15 +19,18 @@ CALL gds.alpha.ml.linkPrediction.train(
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-train-configuration-named-graph.adoc[]
-
-.Algorithm specific configuration
+.Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                  | Type      | Default | Optional | Description
-| negativeClassWeight   | Float     | n/a     | no       | Weight of negative examples in model evaluation. Positive examples have weight 1.
-| randomSeed            | Integer   | n/a     | yes      | Seed for the random number generator used during training.
+| Name                                                          | Type              | Default | Optional | Description
+| modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
+| negativeClassWeight                                           | Float             | n/a     | no       | Weight of negative examples in model evaluation. Positive examples have weight 1.
+| randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
 |===
+
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -42,9 +47,10 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Model info fields
 [opts="header",cols="1,1,6"]
 |===
-| Name           | Type          | Description
-| bestParameters | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics        | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+| Name                    | Type          | Description
+| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics                 | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+| trainingPipeline        | Map           | The pipeline used for the training.
 |===
 
 
@@ -54,11 +60,12 @@ The structure of `modelInfo` is:
 ----
 {
     bestParameters: Map,        // <1>
-    metrics: {                  // <2>
+    trainingPipeline: Map       // <2>
+    metrics: {                  // <3>
         AUCPR: {
-            test: Float,        // <3>
-            outerTrain: Float,  // <4>
-            train: [{           // <5>
+            test: Float,        // <4>
+            outerTrain: Float,  // <5>
+            train: [{           // <6>
                 avg: Float,
                 max: Float,
                 min: Float,
@@ -72,7 +79,7 @@ The structure of `modelInfo` is:
             },
             ...
             ],
-            validation: [{      // <6>
+            validation: [{      // <7>
                 avg: Float,
                 max: Float,
                 min: Float,
@@ -91,10 +98,11 @@ The structure of `modelInfo` is:
 }
 ----
 <1> The best scoring model candidate configuration.
-<2> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
-<3> Numeric value for the evaluation of the best model on the test set.
-<4> Numeric value for the evaluation of the best model on the outer train set.
-<5> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
-<6> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+<2> The pipeline used for the training.
+<3> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
+<4> Numeric value for the evaluation of the best model on the test set.
+<5> Numeric value for the evaluation of the best model on the outer train set.
+<6> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+<7> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
 --
 
