@@ -224,7 +224,7 @@ include::pipelineInfoResult.adoc[]
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit(
+CALL gds.alpha.ml.pipeline.linkPrediction.configureParams(
   pipelineName: String,
   parameterSpace: List of Map
 )

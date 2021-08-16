@@ -34,9 +34,9 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureParams", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")
-    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parametersList") List<Map<String, Object>> parametersList) {
+    public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
         var pipeline = PipelineUtils.getPipelineModelInfo(pipelineName, username());
-        pipeline.setParameterSpace(parametersList);
+        pipeline.setParameterSpace(parameterSpace);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
