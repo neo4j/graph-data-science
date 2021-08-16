@@ -24,7 +24,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 | Name                                                          | Type              | Default | Optional | Description
 | modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
-| negativeClassWeight                                           | Float             | n/a     | no       | Weight of negative examples in model evaluation. Positive examples have weight 1.
+| negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1.
 | randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
 | <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
