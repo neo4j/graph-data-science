@@ -13,6 +13,7 @@ def allowList = [
                 [name: 'BSD 3-clause'],
                 [name: 'BSD 3-Clause License'],
                 [name: 'BSD Licence 3'],
+                [name: 'BSD License 3'],
                 [name: 'New BSD License'],
                 [name: 'New BSD license'],
                 [name: 'The New BSD License'],
