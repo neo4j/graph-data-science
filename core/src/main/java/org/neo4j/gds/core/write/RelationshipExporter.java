@@ -31,7 +31,7 @@ public interface RelationshipExporter {
 
     void write(
         String relationshipType,
-        String propertyKey,
+        @Nullable String propertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     );
 }
