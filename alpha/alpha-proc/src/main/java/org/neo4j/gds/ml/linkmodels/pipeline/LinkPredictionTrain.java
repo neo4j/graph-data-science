@@ -386,8 +386,9 @@ public class LinkPredictionTrain
             splitConfig.testRelationshipType(),
             splitConfig.featureInputRelationshipType()
         );
-
         trainRelTypes.forEach(relType -> graphStore.deleteRelationships(RelationshipType.of(relType)));
+
+        pipelineExecutor.removeNodeProperties(graphStore, trainConfig.nodeLabelIdentifiers(graphStore));
     }
 
     @Override

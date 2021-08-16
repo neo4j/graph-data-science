@@ -30,7 +30,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -98,7 +97,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             LinkPredictionPipelineConfigureParamsProc.class,
             LinkPredictionPipelineConfigureSplitProc.class,
             GraphCreateProc.class,
-            GraphRemoveNodePropertiesProc.class,
             ModelDropProc.class
         );
 
@@ -147,8 +145,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
 
-        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("pr");
-        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).contains("pr");
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
     }
 
     @Test
@@ -205,7 +203,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         );
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
 
-        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("pr");
+        assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
     }
 
@@ -229,7 +227,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             row -> (Map<String, Object>) row.next().get("modelInfo")
         );
 
-        runQuery("CALL gds.graph.removeNodeProperties($graphName, ['pr'])", Map.of("graphName", GRAPH_NAME));
         runQuery("CALL gds.beta.model.drop('trainedModel')");
 
         Map<String, Object> secondModelInfo = runQuery(

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
 
 public class PipelineExecutor {
@@ -109,6 +110,15 @@ public class PipelineExecutor {
         relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
+    }
+
+    public void removeNodeProperties(GraphStore graphstore, Collection<NodeLabel> nodeLabels) {
+        pipeline.nodePropertySteps().forEach(step -> {
+            var intermediateProperty = step.config.get(MUTATE_PROPERTY_KEY);
+            if (intermediateProperty instanceof String) {
+                nodeLabels.forEach(label -> graphstore.removeNodeProperty(label, ((String) intermediateProperty)));
+            }
+        });
     }
 
     private void relationshipSplit(
