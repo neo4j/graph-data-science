@@ -29,7 +29,7 @@ import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeWeightConfigProcTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -62,7 +62,6 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
     SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
-    RelationshipWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
     HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
 
@@ -70,7 +69,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     Stream<DynamicTest> configTests() {
         return Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig())
+            NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig()),
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

@@ -22,13 +22,15 @@ package org.neo4j.gds.wcc;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -43,7 +45,9 @@ import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,9 +58,15 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Wcc, CONFIG, DisjointSetStruct>,
     SeedConfigTest<Wcc, CONFIG, DisjointSetStruct>,
-    RelationshipWeightConfigTest<Wcc, CONFIG, DisjointSetStruct>,
     MemoryEstimateTest<Wcc, CONFIG, DisjointSetStruct>,
     HeapControlTest<Wcc, CONFIG, DisjointSetStruct> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     private static final String GRAPH_NAME = "myGraph";
 

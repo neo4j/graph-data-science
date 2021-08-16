@@ -21,7 +21,9 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,7 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
@@ -46,6 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -65,8 +68,14 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
     MemoryEstimateTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
-    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
-    RelationshipWeightConfigTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
+    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Neo4jGraph
     public static final String DB_CYPHER =

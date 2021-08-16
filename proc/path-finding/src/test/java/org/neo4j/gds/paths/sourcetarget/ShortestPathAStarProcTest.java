@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -65,7 +64,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
     MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
     HeapControlTest<AStar, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<AStar, CONFIG, DijkstraResult>,
     SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
     TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
@@ -214,7 +212,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
 
     @Override
     public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper baseMap) {
-        baseMap = RelationshipWeightConfigTest.super.createMinimalImplicitConfig(baseMap);
+        baseMap = MemoryEstimateTest.super.createMinimalImplicitConfig(baseMap);
         if (baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
             baseMap = baseMap
                 .withEntry(NODE_PROJECTION_KEY, NodeProjections.builder()

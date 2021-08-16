@@ -20,12 +20,14 @@
 package org.neo4j.gds.degree;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.extension.IdFunction;
@@ -34,6 +36,9 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
@@ -41,9 +46,14 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     implements
     AlgoBaseProcTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
     MemoryEstimateTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
-    RelationshipWeightConfigTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
     HeapControlTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
 {
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     static final String DEFAULT_RESULT_PROPERTY = "degreeScore";
     static final String GRAPH_NAME = "dcGraph";

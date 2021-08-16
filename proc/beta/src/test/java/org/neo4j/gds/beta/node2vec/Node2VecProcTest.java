@@ -20,10 +20,12 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
@@ -33,13 +35,22 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends
     BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
     MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
-    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
-    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
+    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +

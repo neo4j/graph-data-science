@@ -28,7 +28,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.ToleranceConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -61,7 +61,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
     SeedConfigTest<Louvain, CONFIG, Louvain>,
-    RelationshipWeightConfigTest<Louvain, CONFIG, Louvain>,
     MemoryEstimateTest<Louvain, CONFIG, Louvain>,
     HeapControlTest<Louvain, CONFIG, Louvain> {
 
@@ -69,7 +68,8 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     Stream<DynamicTest> configTests() {
         return Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            ToleranceConfigProcTest.test(proc(), createMinimalConfig())
+            ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

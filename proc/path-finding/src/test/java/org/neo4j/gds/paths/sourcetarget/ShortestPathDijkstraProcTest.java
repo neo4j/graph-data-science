@@ -22,11 +22,13 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -40,6 +42,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
@@ -48,9 +53,15 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>,
     SourceNodeConfigTest<Dijkstra, CONFIG, DijkstraResult>,
     TargetNodeConfigTest<Dijkstra, CONFIG, DijkstraResult> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     protected static final String GRAPH_NAME = "graph";
     long idA, idC, idD, idE, idF;

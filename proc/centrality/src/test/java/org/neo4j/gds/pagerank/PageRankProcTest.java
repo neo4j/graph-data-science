@@ -31,7 +31,7 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SourceNodesConfigTest;
 import org.neo4j.gds.ToleranceConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -65,7 +65,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcTest implements
     AlgoBaseProcTest<PageRankAlgorithm, CONFIG, PageRankResult>,
-    RelationshipWeightConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
@@ -74,7 +73,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     Stream<DynamicTest> configTests() {
         return Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            ToleranceConfigProcTest.test(proc(), createMinimalConfig())
+            ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
