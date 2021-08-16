@@ -1,0 +1,397 @@
+[[alpha-algorithms-approx-max-k-cut]]
+[.alpha]
+= Approximate Maximum k-cut
+:entity: node
+:result: approximate maximum k-cut
+:algorithm: Approximate Maximum k-cut
+
+[abstract]
+--
+This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-approx-max-k-cut-intro]]
+== Introduction
+
+A k-cut of a graph is an assignment of its nodes into k disjoint communities.
+So for example a 2-cut of a graph with nodes `a,b,c,d` could be the communities `{a,b,c}` and `{d}`.
+
+A Maximum k-cut is a k-cut such that the total weight of relationships between nodes from different communities in the k-cut is maximized.
+That is, a k-cut that maximizes the sum of weights of relationships whose source and target nodes are assigned to different communities in the k-cut.
+Suppose in the simple `a,b,c,d` node set example above we only had one relationship `b->c` and it was of weight `1.0`.
+The 2-cut we outlined above would then not be a maximum 2-cut (with a cut cost of `0.0`), whereas for example the 2-cut with communities `{a,b}` and `{c,d}` would be one (with a cut cost of `1.0`).
+
+[NOTE]
+====
+Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum Cut] when `k = 2`.
+====
+
+Finding the maximum k-cut for a graph has several applications.
+It could for example be used to find communities of entities between which the sum of Bitcoin transfers is maximized.
+
+
+=== Approximation
+
+Maximum k-cut is a NP-hard problem meaning that the time complexity is exponential for any known algorithm that solves the problem.
+Consequently, one has to settle for an approximate solution when solving the problem in practice.
+
+The approximate heuristic algorithm implemented in GDS is a parallelized https://en.wikipedia.org/wiki/Greedy_randomized_adaptive_search_procedure[GRASP] style algorithm optionally enhanced (via config) with https://en.wikipedia.org/wiki/Variable_neighborhood_search[variable neighborhood search (VNS)].
+
+For detailed information about a serial version of the algorithm, with a slightly different construction phase, when `k = 2` see `GRASP+VNR` in the paper:
+
+* http://www2.ic.uff.br/~celso/artigos/fprr02.pdf[Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.]
+
+To see how the algorithm above performs in terms of solution quality compared to other algorithms when `k = 2` see `FES02GV` in the paper:
+
+* http://www-personal.umich.edu/~josilber/SECM_clean.pdf[Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.]
+
+[NOTE]
+====
+By the stochastic nature of the algorithm, the results it yields will not be deterministic unless running single-threaded (`concurrency = 1`) and using the same random seed (`randomSeed = SOME_FIXED_VALUE`).
+====
+
+
+=== Relationship weights
+
+The algorithm can be applied to either weighted or unweighted graphs.
+In the former case relationships without the specified weight property are given the weight `0.0`.
+In the unweighted case the all relationships are treated as weighted with weight `1.0`.
+
+A graph is considered weighted when the `relationshipWeightProperty` config parameter is set to define which relationship property represents weight.
+
+include::../alpha-note.adoc[]
+
+
+[[algorithms-approx-max-k-cut-tuning]]
+== Tuning the algorithm parameters
+
+There are two important algorithm specific parameters which lets you trade solution quality for shorter runtime.
+
+
+[[algorithms-approx-max-k-cut-iterations]]
+=== Iterations
+GRASP style algorithms are iterative by nature.
+Every iteration they run the same well-defined steps to derive a solution, but each time with a different random seed yielding solutions that (highly likely) are different too.
+The best solution among those derived from all the iterations is then chosen as the final solution.
+
+
+[[algorithms-approx-max-k-cut-vns-order]]
+=== VNS max neighborhood order
+Variable neighborhood search (VNS) works by slightly perturbing a locally optimal solution derived from the previous steps in an iteration of the algorithm, followed by locally optimizing this perturbed solution.
+Perturb in this case means to randomly move some nodes from their current (locally optimal) community to another community.
+
+VNS will in turn move `1,2,...,vnsMaxNeighborhoodOrder` random nodes and using each of the resulting solutions try to find a new locally optimal solution that's better.
+This means that although potentially better solutions can be derived using VNS it will take more time, and additionally some more memory will be needed to temporarily store the perturbed solutions.
+
+VNS is off (`vnsMaxNeighborhoodOrder = 0`) by default. To use it, experimenting with a maximum order equal to `20` is a good place to start.
+
+
+[[algorithms-approx-max-k-cut-syntax]]
+== Syntax
+
+include::../../shared/syntax-intro-named-graph.adoc[]
+
+.Approximate Maximum k-cut syntax per mode
+[.tabbed-example]
+====
+
+
+[.include-with-stream]
+======
+.Run Approximate Maximum k-cut in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  communityId: Integer
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID.
+| communityId | Integer | Community ID.
+|===
+======
+
+
+[.include-with-mutate]
+======
+.Run Approximate Maximum k-cut in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  cutCost: Float,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| cutCost                | Float     | Sum of the weights of all relationships connecting nodes from different communities.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-approx-max-k-cut-examples]]
+== Examples
+
+In this section we will show examples of running the Approximate Maximum k-cut algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+We will do this on a small graph of transactions between people.
+Using Approximate Maximum k-cut we can find clusters of people between which there are a lot of transactions.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bridget:Person {name: 'Bridget'}),
+  (charles:Person {name: 'Charles'}),
+  (doug:Person {name: 'Doug'}),
+  (eric:Person {name: 'Eric'}),
+  (fiona:Person {name: 'Fiona'}),
+  (george:Person {name: 'George'}),
+  (alice)-[:TRANSACTION {value: 81.0}]->(bridget),
+  (alice)-[:TRANSACTION {value: 7.0}]->(doug),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(doug),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(eric),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(fiona),
+  (bridget)-[:TRANSACTION {value: 1.0}]->(george),
+  (charles)-[:TRANSACTION {value: 45.0}]->(bridget),
+  (charles)-[:TRANSACTION {value: 3.0}]->(eric),
+  (doug)-[:TRANSACTION {value: 3.0}]->(charles),
+  (doug)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (eric)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (fiona)-[:TRANSACTION {value: 3.0}]->(alice),
+  (fiona)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (george)-[:TRANSACTION {value: 1.0}]->(bridget),
+  (george)-[:TRANSACTION {value: 4.0}]->(charles)
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `TRANSACTION` relationships.
+
+.The following statement will create a graph store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Person',
+  {
+    TRANSACTION: {
+      properties: ['value']
+    }
+  }
+)
+----
+
+
+[[algorithms-approx-max-k-cut-mutate-unweighted-example]]
+=== Mutate
+
+include::../../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.mutate('myGraph', {mutateProperty: 'community'})
+YIELD cutCost, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| cutCost | nodePropertiesWritten
+| 13.0    | 7
+|===
+--
+
+We can see that when relationship weight is not taken into account we derive a cut into two (since we didn't override the default `k = 2`) communities of cost `13.0`.
+The total cost is represented by the `cutCost` column here.
+This is the value we want to be as high as possible.
+Additionally, the graph 'myGraph' now has a node property `community` which stores the community to which each node belongs.
+
+To inspect which community each node belongs to we can <<catalog-graph-stream-single-node-property-example, stream node properties>>.
+
+[role=query-example]
+--
+.Stream node properties:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperty('myGraph', 'community')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS community
+----
+
+.Results
+[opts="header"]
+|===
+| name      | community
+| "Alice"   | 0
+| "Bridget" | 0
+| "Charles" | 0
+| "Doug"    | 1
+| "Eric"    | 1
+| "Fiona"   | 1
+| "George"  | 1
+|===
+--
+
+Looking at our graph topology we can see that there are no relationships between the nodes of community `1`, and two relationships between the nodes of community `0`, namely `Alice -> Bridget` and `Charles -> Bridget`.
+However, since there are a total of eight relationships between `Bridget` and nodes of community `1`, and our graph is unweighted assigning `Bridget` to community `1` would not yield a cut of a higher total weight.
+Thus, since the number of relationships connecting nodes of different communities greatly outnumber the number of relationships connecting nodes of the same community it seems like a good solution.
+In fact, this is the maximum 2-cut for this graph.
+
+[NOTE]
+====
+Because of the inherent randomness in the Approximate Maximum k-Cut algorithm (unless having `concurrency = 1` and fixed `randomSeed`), running it another time might yield a different solution.
+For our case here it would be equally plausible to get the inverse solution, i.e. when our community `0` nodes are mapped to community `1` instead, and vice versa.
+Note however, that for that solution the cut cost would remain the same.
+====
+
+
+=== Mutate with relationship weights
+
+In this example we will have a look at how adding relationship weight can affect our solution.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode, diving our nodes into two communities once again:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.mutate(
+   'myGraph',
+   {
+        relationshipWeightProperty: 'value',
+        mutateProperty: 'weightedCommunity'
+    }
+)
+YIELD cutCost, nodePropertiesWritten
+----
+
+
+.Results
+[opts="header"]
+|===
+| cutCost | nodePropertiesWritten
+| 146.0   | 7
+|===
+--
+
+Since the `value` properties on our `TRANSACTION` relationships were all at least `1.0` and several of a larger value it's not surprising that we obtain a cut with a larger cost in the weighted case.
+
+Let us now <<catalog-graph-stream-single-node-property-example, stream node properties>> to once again inspect the node community distribution.
+
+[role=query-example]
+--
+.Stream node properties:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperties('myGraph', 'weightedCommunity')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
+----
+
+.Results
+[opts="header"]
+|===
+| name      | weightedCommunity
+| "Alice"   | 0
+| "Bridget" | 1
+| "Charles" | 0
+| "Doug"    | 1
+| "Eric"    | 1
+| "Fiona"   | 1
+| "George"  | 1
+|===
+--
+
+Comparing this result with that of <<algorithms-approx-max-k-cut-mutate-unweighted-example, unweighted case>> we can see that `Bridget` has moved to another community but the output is otherwise the same.
+Indeed, this makes sense by looking at our graph.
+`Bridget` is connected to nodes of community `1` by eight relationships, but these relationships all have weight `1.0`.
+And although `Bridget` is only connected to two community `0` nodes, these relationships are of weight `81.0` and `45.0`.
+Moving `Bridget` back to community `0` would lower the total cut cost of `81.0 + 45.0 - 8 * 1.0 = 118.0`.
+Hence, it does make sense that `Bridget` is now in community `1`.
+In fact, this is the maximum 2-cut in the weighted case.
+
+[NOTE]
+====
+Because of the inherent randomness in the Approximate Maximum k-Cut algorithm (unless having `concurrency = 1` and fixed `randomSeed`), running it another time might yield a different solution.
+For our case here it would be equally plausible to get the inverse solution, i.e. when our community `0` nodes are mapped to community `1` instead, and vice versa.
+Note however, that for that solution the cut cost would remain the same.
+====
+
+[[algorithms-approx-max-k-cut-stream-unweighted-example]]
+=== Stream
+
+include::../../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using default configuration parameters:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.stream('myGraph')
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+----
+
+
+.Results
+[opts="header"]
+|===
+| name      | communityId
+| "Alice"   | 0
+| "Bridget" | 0
+| "Charles" | 0
+| "Doug"    | 1
+| "Eric"    | 1
+| "Fiona"   | 1
+| "George"  | 1
+|===
+--
+
+We can see that the result is what we expect, namely the same as in the <<algorithms-approx-max-k-cut-mutate-unweighted-example, mutate unweighted>> example.
+
+[NOTE]
+====
+Because of the inherent randomness in the Approximate Maximum k-Cut algorithm (unless having `concurrency = 1` and fixed `randomSeed`), running it another time might yield a different solution.
+For our case here it would be equally plausible to get the inverse solution, i.e. when our community `0` nodes are mapped to community `1` instead, and vice versa.
+Note however, that for that solution the cut cost would remain the same.
+====
