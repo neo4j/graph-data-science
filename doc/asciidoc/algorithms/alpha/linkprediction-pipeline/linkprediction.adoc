@@ -210,25 +210,6 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
-=== Example
-
-[role=query-example,group=lp]
---
-.The following will add a feature step to the pipeline:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {nodeProperties: ['embedding']})
-YIELD featureSteps
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| featureSteps
-| [{name=HADAMARD, config={nodeProperties=[embedding]}}]
-|===
---
-
 [[algorithms-ml-linkprediction-supported-features]]
 === Supported feature types
 
@@ -247,6 +228,25 @@ The supported types of features can then be described as follows:
 | COSINE                 | f[0] = cosine similarity of vectors a and b
 |===
 
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will add a feature step to the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
+  nodeProperties: ['embedding']
+}) YIELD featureSteps
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| featureSteps
+| [{name=HADAMARD, config={nodeProperties=[embedding]}}]
+|===
+--
 
 [[algorithms-ml-linkprediction-configure-splits]]
 == Configuring the relationship splits
