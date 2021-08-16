@@ -260,12 +260,6 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
-[[algorithms-ml-linkprediction-pipelines-train]]
-== Training and Evaluation
+include::trainAndEval.adoc[]
 
-[[algorithms-link-prediction-pipelines-predict]]
-== Applying a model for prediction
-// ---------------------------------------------------
-//TODO
-//Link Prediction can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
-
+include::predict.adoc[]

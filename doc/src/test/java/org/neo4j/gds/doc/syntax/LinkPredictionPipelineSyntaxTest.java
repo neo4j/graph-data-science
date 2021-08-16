@@ -29,7 +29,8 @@ class LinkPredictionPipelineSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE),
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT),
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_PARAMS),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_FEATURE)
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_FEATURE),
+            SyntaxModeMeta.of(SyntaxMode.TRAIN)
         );
     }
 
