@@ -54,6 +54,15 @@ public final class FloatVectorOperations {
         }
     }
 
+    public static float l2Norm(float[] data) {
+        float sum = 0.0f;
+        for (double value : data) {
+            sum += value * value;
+        }
+
+        return (float) Math.sqrt(sum);
+    }
+
     public static void l2Normalize(float[] array) {
         float sum = 0.0f;
         for (float value : array) {
