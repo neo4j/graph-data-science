@@ -1,4 +1,62 @@
 [[algorithms-link-prediction-pipelines-predict]]
 == Applying a model for prediction
-// ---------------------------------------------------
-//Link Prediction can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
+
+
+=== Syntax
+
+.Link Prediction syntax per mode
+[.tabbed-example, caption = ]
+====
+[.include-with-mutate]
+======
+.Run Link Prediction in mutate mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,2m,1,5"]
+|===
+| Name                                                          | Type              | Default           | Optional | Description
+| modelName                                                     | String            | n/a               | no       | The name of a Link Prediction model in the model catalog.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']             | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']             | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
+| mutateRelationshipType                                        | String            | n/a               | no       | The relationship type used for the new relationships written to the in-memory graph.
+| mutateProperty                                                | String            | 'probability'     | yes      | The relationship property in the GDS graph to which the result is written.
+|===
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name      | Type    | Default | Optional | Description
+| topN      | Integer | n/a     | no       | Limit on predicted relationships to output.
+| threshold | Float   | 0.0     | yes       | Minimum predicted probability on relationships to output.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| createMillis         | Integer | Milliseconds for creating the graph.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the global metrics.
+| mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten | Integer | Number of relationships created.
+| configuration        | Map     | Configuration used for running the algorithm.
+|===
+======
+====
