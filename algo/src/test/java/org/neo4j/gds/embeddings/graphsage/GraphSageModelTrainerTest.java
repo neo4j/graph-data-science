@@ -65,7 +65,7 @@ class GraphSageModelTrainerTest {
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_DIMENSION = 64;
 
-    @SuppressFBWarnings
+    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
