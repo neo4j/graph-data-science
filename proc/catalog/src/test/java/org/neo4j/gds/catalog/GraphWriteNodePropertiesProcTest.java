@@ -306,7 +306,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             ")",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
-            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
     }

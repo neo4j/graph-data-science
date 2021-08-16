@@ -217,7 +217,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         assertError("CALL gds.graph.streamRelationshipProperties($graph, ['relProp1', 'relProp2', 'relProp3'], ['REL1'] )",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
-            "But could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
+            "Could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
         );
     }
 
@@ -300,7 +300,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "CALL gds.graph.streamRelationshipProperty($graph, 'relProp3', ['REL1'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
-            "But could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
+            "Could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
         );
     }
 
@@ -310,7 +310,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "CALL gds.graph.streamRelationshipProperties($graph, ['newRelProp1', 'newRelProp2'], ['REL2'])",
             Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
-            "But could not find property key(s) ['newRelProp2'] for label REL2. Defined keys: ['newRelProp1']"
+            "Could not find property key(s) ['newRelProp2'] for label REL2. Defined keys: ['newRelProp1']"
         );
     }
 }

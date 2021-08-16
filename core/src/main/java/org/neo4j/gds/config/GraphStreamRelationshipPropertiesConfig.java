@@ -79,7 +79,7 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
                     if (!invalidProperties.isEmpty()) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Expecting all specified relationship projections to have all given properties defined. " +
-                            "But could not find property key(s) %s for label %s. Defined keys: %s.",
+                            "Could not find property key(s) %s for label %s. Defined keys: %s.",
                             StringJoining.join(invalidProperties),
                             relationshipType.name,
                             StringJoining.join(graphStore.relationshipPropertyKeys(relationshipType))

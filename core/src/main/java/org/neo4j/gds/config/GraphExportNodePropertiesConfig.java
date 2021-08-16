@@ -70,7 +70,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
                     if (!invalidProperties.isEmpty()) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Expecting all specified node projections to have all given properties defined. " +
-                            "But could not find property key(s) %s for label %s. Defined keys: %s.",
+                            "Could not find property key(s) %s for label %s. Defined keys: %s.",
                             StringJoining.join(invalidProperties),
                             nodeLabel.name,
                             StringJoining.join(graphStore.nodePropertyKeys(nodeLabel))

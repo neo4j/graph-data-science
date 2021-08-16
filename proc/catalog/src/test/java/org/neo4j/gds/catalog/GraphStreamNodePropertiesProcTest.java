@@ -216,7 +216,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
-            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
     }
@@ -301,7 +301,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
-            "But could not find property key(s) ['newNodeProp3'] for label A. " +
+            "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']"
         );
     }
