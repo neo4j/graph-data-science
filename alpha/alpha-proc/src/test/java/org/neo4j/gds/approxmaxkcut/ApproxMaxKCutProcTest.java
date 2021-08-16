@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
@@ -42,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
     AlgoBaseProcTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
 
-    private static final String GRAPH_NAME = "myGraph";
+    static final String GRAPH_NAME = "myGraph";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -53,7 +54,8 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
     //     {a, b, c}, {d, e, f, g} if the graph is unweighted.
     //     {a, c}, {b, d, e, f, g} if the graph is weighted.
     @Neo4jGraph
-    private static final @Language("Cypher")
+    @Language("Cypher")
+    private static final
     String DB_CYPHER =
         "CREATE" +
         "  (a:Label1)" +
@@ -87,6 +89,13 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
+
+        String createQuery = GdsCypher.call()
+            .loadEverything()
+            .graphCreate(GRAPH_NAME)
+            .yields();
+
+        runQuery(createQuery);
     }
 
     @AfterEach

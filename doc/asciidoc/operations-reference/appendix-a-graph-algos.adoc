@@ -223,8 +223,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 |Algorithm name | Operation
 .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
-.1+<.^|Approximate Max k-Cut
+.2+<.^|Approximate Max k-Cut
 | `gds.alpha.maxkcut.mutate`
+| `gds.alpha.maxkcut.stream`
 .1+<.^|<<algorithms-bfs, Breadth First Search>>
 | `gds.alpha.bfs.stream`
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
