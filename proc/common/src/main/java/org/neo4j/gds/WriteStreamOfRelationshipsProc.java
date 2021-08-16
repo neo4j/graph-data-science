@@ -26,11 +26,8 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.write.RelationshipStreamExporter;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.procedure.Context;
 
 import java.util.stream.Stream;
 
@@ -39,9 +36,6 @@ public abstract class WriteStreamOfRelationshipsProc<
     ALGO_RESULT extends RelationshipStreaming,
     PROC_RESULT,
     CONFIG extends WriteRelationshipConfig & WritePropertyConfig & AlgoBaseConfig> extends StreamOfRelationshipsWriter<ALGO, ALGO_RESULT, CONFIG> {
-
-    @Context
-    public RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder;
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
