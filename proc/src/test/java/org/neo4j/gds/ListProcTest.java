@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMutateProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedStatsProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedStreamProc;
@@ -156,6 +157,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.closeness.harmonic.write",
         "gds.alpha.closeness.harmonic.stream",
 
+        "gds.alpha.approxmaxkcut.mutate",
         "gds.alpha.dfs.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
@@ -485,6 +487,7 @@ class ListProcTest extends BaseProcTest {
 
             // alpha
             AllShortestPathsProc.class,
+            ApproxMaxKCutMutateProc.class,
             ApproxNearestNeighborsProc.class,
             ClosenessCentralityProc.class,
             HarmonicCentralityProc.class,

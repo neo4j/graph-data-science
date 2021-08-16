@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 
 import java.util.List;
 
@@ -95,6 +96,6 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
     // TODO: Implement.
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new MemoryEstimationNotImplementedException();
     }
 }
