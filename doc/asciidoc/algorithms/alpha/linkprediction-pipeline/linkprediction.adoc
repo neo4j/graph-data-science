@@ -207,7 +207,7 @@ YIELD
 [opts="header",cols="1,1,1,4"]
 |===
 | Name              | Type              | Default | Description
-| nodeProperties    | List of String    | no      | The names of the node properties that should be used as input. All property names must exist in the in-memory graph given at train.
+| nodeProperties    | List of String    | no      | The names of the node properties that should be used as input.
 |===
 
 include::pipelineInfoResult.adoc[]
@@ -239,7 +239,7 @@ The supported types of features can then be described as follows:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
-  nodeProperties: ['embedding']
+  nodeProperties: ['embedding', 'numberOfPosts']
 }) YIELD featureSteps
 ----
 
@@ -247,8 +247,11 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 [opts="header",cols="1"]
 |===
 | featureSteps
-| [{name=HADAMARD, config={nodeProperties=[embedding]}}]
+| [{name=HADAMARD, config={nodeProperties=[embedding, numberOfPosts]}}]
 |===
+
+When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
+For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to be present at train and predict time.
 --
 
 [[algorithms-ml-linkprediction-configure-splits]]
