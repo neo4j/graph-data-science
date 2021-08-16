@@ -16,6 +16,7 @@ This section describes Link Prediction Pipelines in the Neo4j Graph Data Science
 == Introduction
 
 Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
+More precisely, the input of the machine learning model are _examples_ of node pairs which are labeled as connected or not connected.
 The GDS library provides Link prediction, see <<algorithms-ml-linkprediction,here>>.
 Here we describe an additional method that provides an end-to-end Link prediction experience.
 In addition to managing a predictive model, it also manages:
@@ -105,13 +106,13 @@ A link prediction pipeline can execute one or several GDS algorithms in mutate m
 Such steps producing node properties can be chained one after another and created properties can also be used to <<algorithms-ml-linkprediction-adding-features, add features>>.
 Moreover, the node property steps that are added to the pipeline will be executed both when <<algorithms-ml-linkprediction-pipelines-train, training>> a model and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
 
-//Link Prediction can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
+It can be favorable to include <<algorithms-ml-models-preprocessing, pre-processing algorithms>> as node property steps.
 
 === Example
 
 [role=query-example,group=lp]
 --
-.The following will create a pipeline:
+.The following will add a node property step to the pipeline:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mutateProperty: 'embedding', embeddingDimension: 256})
@@ -131,6 +132,13 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mut
 
 [[algorithms-ml-linkprediction-adding-features]]
 == Adding link features
+
+A Link Prediction pipeline executes a sequence of steps to compute the features used by a machine learning model.
+A feature step computes a vector of features for given node pairs.
+For each node pair, the results are concatenated into a single _link feature vector_.
+The order of the features in the link feature vector follows the order of the feature steps.
+Like with node property steps, the feature steps are also executed both at <<algorithms-ml-linkprediction-pipelines-train, training>> and <<algorithms-link-prediction-pipelines-predict, prediction>> time.
+The supported methods for obtaining features are described <<algorithms-ml-linkprediction-supported-features, below>>
 
 === Syntax
 
@@ -157,7 +165,7 @@ YIELD
 |===
 | Name                   | Type    | Description
 | pipelineName           | String  | The name of the pipeline.
-| featureType            | String  | The featureType determines the method used for adding the link feature. Available featureTypes are `L2`, `HADAMARD` and `COSINE`.
+| featureType            | String  | The featureType determines the method used for computing the link feature. See <<algorithms-ml-linkprediction-supported-features, supported types>>.
 | configuration          | Map     | Configuration for splitting the relationships.
 |===
 
@@ -170,6 +178,43 @@ YIELD
 
 include::pipelineInfoResult.adoc[]
 --
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will add a feature step to the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {nodeProperties: ['embedding']})
+YIELD featureSteps
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| featureSteps
+| [{name=HADAMARD, config={nodeProperties=[embedding]}}]
+|===
+--
+
+[[algorithms-ml-linkprediction-supported-features]]
+=== Supported feature types
+
+A feature step can use node properties that exist in the input graph or are added by the pipeline.
+For each node in a node pair of interest, the values of `nodeProperties` are concatenated, in the configured order, into a vector.
+We denote the entries of the vectors of a pair by `a[i]` and `b[i]`, and we take `f[i]` to be the `i`-th entry of the output of a feature step.
+
+The supported types of features can then be described as follows:
+
+.Supported feature types
+[opts="header",cols="1,4"]
+|===
+| Feature Type           | Formula / Description
+| L2                     | f[i] = (a[i] - b[i])^2
+| HADAMARD               | f[i] = a[i] * b[i]
+| COSINE                 | f[0] = cosine similarity of vectors a and b
+|===
 
 
 [[algorithms-ml-linkprediction-configure-splits]]
