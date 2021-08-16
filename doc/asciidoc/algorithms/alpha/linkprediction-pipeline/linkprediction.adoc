@@ -108,6 +108,37 @@ Moreover, the node property steps that are added to the pipeline will be execute
 
 It can be favorable to include <<algorithms-ml-models-preprocessing, pre-processing algorithms>> as node property steps.
 
+=== Syntax
+
+[.pipeline-add-node-property-syntax]
+--
+.Add node property syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty(
+  pipelineName: String,
+  procedureName: String,
+  procedureConfiguration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| pipelineName              | String  | The name of the pipeline.
+| procedureName             | String  | The name of the the procedure to be added to the pipeline.
+| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
 === Example
 
 [role=query-example,group=lp]
