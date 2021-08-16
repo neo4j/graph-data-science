@@ -116,11 +116,6 @@ public final class RelationshipExporter extends StatementApi {
         write(relationshipToken, NO_SUCH_PROPERTY_KEY, null);
     }
 
-    public void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
-        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        write(relationshipToken, NO_SUCH_PROPERTY_KEY, afterWriteConsumer);
-    }
-
     public void write(String relationshipType, String propertyKey) {
         var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
         var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
