@@ -22,9 +22,9 @@ package org.neo4j.gds.compat.dev;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
@@ -34,6 +34,7 @@ import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageCommand;
+import org.neo4j.storageengine.api.StorageLocks;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
@@ -107,6 +108,11 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
     @Override
     public StoreCursors createStorageCursors(CursorContext initialContext) {
         return StoreCursors.NULL;
+    }
+
+    @Override
+    public StorageLocks createStorageLocks(ResourceLocker locker) {
+        return new InMemoryStorageLocksImpl(locker);
     }
 
     @Override

@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.lock.LockTracer;
-import org.neo4j.lock.ResourceLocker;
 import org.neo4j.storageengine.api.CommandCreationContext;
-import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,32 +59,6 @@ public abstract class AbstractInMemoryCommandCreationContext implements CommandC
     @Override
     public int reserveRelationshipTypeTokenId() {
         throw new UnsupportedOperationException("Creating relationship types is not supported");
-    }
-
-    @Override
-    public void acquireRelationshipCreationLock(
-        ReadableTransactionState txState, ResourceLocker locker, LockTracer lockTracer, long sourceNode, long targetNode
-    ) {
-
-    }
-
-    @Override
-    public void acquireRelationshipDeletionLock(
-        ReadableTransactionState txState,
-        ResourceLocker locker,
-        LockTracer lockTracer,
-        long sourceNode,
-        long targetNode,
-        long relationship
-    ) {
-        throw new UnsupportedOperationException("Creating relationships is not supported");
-    }
-
-    @Override
-    public void acquireNodeDeletionLock(
-        ReadableTransactionState txState, ResourceLocker locker, LockTracer lockTracer, long node
-    ) {
-        throw new UnsupportedOperationException("Creating nodes is not supported");
     }
 
     @Override
