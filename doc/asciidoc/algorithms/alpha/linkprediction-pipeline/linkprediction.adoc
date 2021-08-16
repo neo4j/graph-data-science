@@ -38,8 +38,8 @@ The rest of this page is divided as follows:
 * <<algorithms-ml-linkprediction-adding-features, Adding link features>>
 * <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>
 * <<algorithms-ml-linkprediction-configure-model-parameters, Configuring the model parameters>>
-* <<algorithms-ml-linkprediction-pipelines-train, Training and Evaluation>>
-* <<algorithms-link-prediction-pipelines-predict, Applying a model for prediction>>
+* <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>
+* <<algorithms-link-prediction-pipelines-predict, Applying a trained model for prediction>>
 
 [[algorithms-ml-linkprediction-creating-a-pipeline]]
 == Creating a pipeline
@@ -408,6 +408,6 @@ CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe',
 |===
 --
 
-include::trainAndEval.adoc[]
+include::training.adoc[]
 
 include::predict.adoc[]

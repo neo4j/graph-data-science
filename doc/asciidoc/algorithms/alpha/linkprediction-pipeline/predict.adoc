@@ -1,5 +1,5 @@
 [[algorithms-link-prediction-pipelines-predict]]
-== Applying a model for prediction
+== Applying a trained model for prediction
 
 
 === Syntax

@@ -1,5 +1,5 @@
 [[algorithms-ml-linkprediction-pipelines-train]]
-== Training and Evaluation
+== Training the pipeline
 
 === Syntax
 
@@ -24,6 +24,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 | Name                                                          | Type              | Default | Optional | Description
 | modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
+| pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
 | negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1.
 | randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
 | <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
@@ -106,3 +107,90 @@ The structure of `modelInfo` is:
 <7> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
 --
 
+=== Example
+
+In this example we will create a small graph and train the pipeline we have built up thus far.
+The graph consists of a handful nodes connected in a particular pattern.
+The example graph looks like this:
+
+image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query, group=lp]
+----
+CREATE
+  (alice:Person {name: 'Alice', numberOfPosts: 38}),
+  (michael:Person {name: 'Michael', numberOfPosts: 67}),
+  (karin:Person {name: 'Karin', numberOfPosts: 30}),
+  (chris:Person {name: 'Chris', numberOfPosts: 132}),
+  (will:Person {name: 'Will', numberOfPosts: 6}),
+  (mark:Person {name: 'Mark', numberOfPosts: 32}),
+  (greg:Person {name: 'Greg', numberOfPosts: 29}),
+  (veselin:Person {name: 'Veselin', numberOfPosts: 3}),
+
+  (alice)-[:KNOWS]->(michael),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(greg),
+  (will)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (greg)-[:KNOWS]->(chris),
+  (veselin)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(veselin),
+  (chris)-[:KNOWS]->(karin);
+----
+
+With the graph in Neo4j we can now project it into the graph catalog.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We will also project the `numberOfPosts` property, so it can be used when creating link features.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Link Prediction pipelines are defined only for undirected graphs.
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query, group=lp]
+----
+CALL gds.graph.create(
+  'myGraph',
+  {
+    Person: {
+      properties: ['numberOfPosts']
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+
+
+//TODO add model.list call to show how pipeline looks?
+
+[role=query-example,group=lp]
+--
+.The following will train a model using a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.train('myGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model',
+  randomSeed: 42
+}) YIELD modelInfo
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  round(modelInfo.metrics.AUCPR.outerTrain, 4) AS trainGraphScore,
+  round(modelInfo.metrics.AUCPR.test, 4) AS testGraphScore
+----
+
+.Results
+[opts="header", cols="6, 2, 2"]
+|===
+| winningModel                                                                                         | trainGraphScore     | testGraphScore
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4} | 0.4167             | 0.7639
+|===
+--
