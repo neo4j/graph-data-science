@@ -21,13 +21,15 @@ package org.neo4j.gds.doc;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.SafeMode;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.values.storable.Values;
 
 import java.io.File;
@@ -45,6 +47,9 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 abstract class DocTestBase extends BaseProcTest {
+
+    @TempDir
+    File workDir;
 
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
     private List<String> beforeEachQueries;
@@ -64,10 +69,15 @@ abstract class DocTestBase extends BaseProcTest {
         var treeProcessor = new QueryCollectingTreeProcessor();
         asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
 
-        var file = docFile();
-        assertThat(file).exists().canRead();
+        var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
+        assertThat(docFile).exists().canRead();
 
-        asciidoctor.loadFile(file, OptionsBuilder.options().sourcemap(true).asMap());
+        var options = OptionsBuilder.options()
+            .toDir(workDir) // Make sure we don't write anything in the project.
+            .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
+
+        asciidoctor.convertFile(docFile, options);
+
         beforeEachQueries = treeProcessor.beforeEachQueries();
         queryExampleGroups = treeProcessor.queryExamples();
 
@@ -117,10 +127,6 @@ abstract class DocTestBase extends BaseProcTest {
 
     Runnable cleanup() {
         return GraphStoreCatalog::removeAllLoadedGraphs;
-    }
-
-    File docFile(){
-        return ASCIIDOC_PATH.resolve(adocFile()).toFile();
     }
 
     private void runQueryExample(QueryExample queryExample) {
