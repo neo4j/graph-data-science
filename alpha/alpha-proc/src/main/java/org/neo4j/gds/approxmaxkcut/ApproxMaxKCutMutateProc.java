@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateProc.MutateResult, ApproxMaxKCutMutateConfig> {
 
-    @Procedure(value = "gds.alpha.approxmaxkcut.mutate", mode = READ)
+    @Procedure(value = "gds.alpha.maxkcut.mutate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,

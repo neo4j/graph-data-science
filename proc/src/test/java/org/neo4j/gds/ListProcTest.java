@@ -157,7 +157,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.closeness.harmonic.write",
         "gds.alpha.closeness.harmonic.stream",
 
-        "gds.alpha.approxmaxkcut.mutate",
+        "gds.alpha.maxkcut.mutate",
         "gds.alpha.dfs.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
