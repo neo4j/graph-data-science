@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.shortestpath;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
@@ -28,6 +28,8 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
@@ -143,13 +145,26 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
 
     @Override
     protected AlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            InputNodeValidator.validateStartNode(configuration.startNode(), graph);
-            return new ShortestPathDeltaStepping(
-                graph,
-                configuration.startNode(),
-                configuration.delta()
-            );
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "ShortestPathDeltaStepping";
+            }
+
+            @Override
+            protected ShortestPathDeltaStepping build(
+                Graph graph,
+                ShortestPathDeltaSteppingConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                InputNodeValidator.validateStartNode(configuration.startNode(), graph);
+                return new ShortestPathDeltaStepping(
+                    graph,
+                    configuration.startNode(),
+                    configuration.delta()
+                );
+            }
         };
     }
 }

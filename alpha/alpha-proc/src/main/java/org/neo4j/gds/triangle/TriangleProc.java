@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
-import org.neo4j.gds.impl.triangle.TriangleStream;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -83,8 +85,22 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>) (graph, configuration, tracker, log, eventTracker) ->
-            TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "TriangleStream";
+            }
+
+            @Override
+            protected TriangleStream build(
+                Graph graph,
+                TriangleCountBaseConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
+        };
     }
 }

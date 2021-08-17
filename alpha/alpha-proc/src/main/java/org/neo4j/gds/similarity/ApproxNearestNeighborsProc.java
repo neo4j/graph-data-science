@@ -21,14 +21,23 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
+import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfigImpl;
 import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.CosineConfig;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
+import org.neo4j.gds.impl.similarity.ImmutableCosineConfig;
+import org.neo4j.gds.impl.similarity.ImmutableEuclideanConfig;
+import org.neo4j.gds.impl.similarity.ImmutableJaccardConfig;
+import org.neo4j.gds.impl.similarity.ImmutablePearsonConfig;
 import org.neo4j.gds.impl.similarity.JaccardAlgorithm;
 import org.neo4j.gds.impl.similarity.JaccardConfig;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
@@ -39,15 +48,6 @@ import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.results.ApproxSimilaritySummaryResult;
 import org.neo4j.gds.results.SimilarityExporter;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfigImpl;
-import org.neo4j.gds.impl.similarity.ImmutableCosineConfig;
-import org.neo4j.gds.impl.similarity.ImmutableEuclideanConfig;
-import org.neo4j.gds.impl.similarity.ImmutableJaccardConfig;
-import org.neo4j.gds.impl.similarity.ImmutablePearsonConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -113,6 +113,11 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
             Pools.DEFAULT,
             tracker
         );
+    }
+
+    @Override
+    String taskName() {
+        return "ApproximateNearestNeighbors";
     }
 
     SimilarityAlgorithm<?, ? extends SimilarityInput> similarityAlgorithm(ApproximateNearestNeighborsConfig config) {

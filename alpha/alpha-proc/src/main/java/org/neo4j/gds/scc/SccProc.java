@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
@@ -160,9 +161,19 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
 
     @Override
     protected AlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<SccAlgorithm, SccConfig>) (graph, configuration, tracker, log, eventTracker) ->
-            new SccAlgorithm(graph, tracker)
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "Scc";
+            }
+
+            @Override
+            protected SccAlgorithm build(
+                Graph graph, SccConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+            ) {
+                return new SccAlgorithm(graph, tracker).withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
+        };
     }
 
     @SuppressWarnings("unused")

@@ -19,16 +19,18 @@
  */
 package org.neo4j.gds.influenceΜaximization;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.influenceMaximization.CELF;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -97,14 +99,29 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
 
     @Override
     protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<CELF, InfluenceMaximizationConfig>) (graph, configuration, tracker, log, eventTracker) -> new CELF(
-            graph,
-            configuration.seedSetSize(),
-            configuration.propagationProbability(),
-            configuration.monteCarloSimulations(),
-            Pools.DEFAULT,
-            configuration.concurrency(),
-            tracker
-        );
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "CELF";
+            }
+
+            @Override
+            protected CELF build(
+                Graph graph,
+                InfluenceMaximizationConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                return new CELF(
+                    graph,
+                    configuration.seedSetSize(),
+                    configuration.propagationProbability(),
+                    configuration.monteCarloSimulations(),
+                    Pools.DEFAULT,
+                    configuration.concurrency(),
+                    tracker
+                );
+            }
+        };
     }
 }

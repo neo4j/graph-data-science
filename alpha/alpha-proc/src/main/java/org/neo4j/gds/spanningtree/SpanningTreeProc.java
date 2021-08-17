@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.impl.spanningTrees.Prim;
@@ -135,9 +137,22 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
 
     @Override
     protected AlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<Prim, SpanningTreeConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-            return new Prim(graph, graph, minMax, configuration.startNodeId());
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "SpanningTree";
+            }
+
+            @Override
+            protected Prim build(
+                Graph graph,
+                SpanningTreeConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
+                return new Prim(graph, graph, minMax, configuration.startNodeId());
+            }
         };
     }
 }

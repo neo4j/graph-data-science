@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.similarity;
 
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
+import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.results.SimilarityStatsResult;
 import org.neo4j.gds.results.SimilaritySummaryResult;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -83,5 +83,10 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
     @Override
     EuclideanAlgorithm newAlgo(EuclideanConfig config, AllocationTracker tracker) {
         return new EuclideanAlgorithm(config, api);
+    }
+
+    @Override
+    String taskName() {
+        return "Euclidean-similarity";
     }
 }

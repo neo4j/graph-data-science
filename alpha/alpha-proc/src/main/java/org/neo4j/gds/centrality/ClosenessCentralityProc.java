@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
@@ -126,12 +128,27 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
 
     @Override
     protected AlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig>) (graph, configuration, tracker, log, eventTracker) ->
-            new MSClosenessCentrality(
-                graph,
-                tracker,
-                configuration.concurrency(),
-                Pools.DEFAULT, configuration.improved()
-            );
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "MSClosenessCentrality";
+            }
+
+            @Override
+            protected MSClosenessCentrality build(
+                Graph graph,
+                ClosenessCentralityConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                return new MSClosenessCentrality(
+                    graph,
+                    tracker,
+                    configuration.concurrency(),
+                    Pools.DEFAULT,
+                    configuration.improved()
+                );
+            }
+        };
     }
 }

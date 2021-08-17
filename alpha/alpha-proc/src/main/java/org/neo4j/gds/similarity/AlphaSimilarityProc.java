@@ -21,9 +21,19 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.eclipse.collections.api.tuple.Pair;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
@@ -33,14 +43,6 @@ import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.results.SimilarityStatsResult;
 import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.Optional;
@@ -135,15 +137,25 @@ abstract class AlphaSimilarityProc
     }
     abstract ALGO newAlgo(CONFIG config, AllocationTracker tracker);
 
+    abstract String taskName();
+
     @Override
     protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ALGO, CONFIG>) (graph, configuration, tracker, log, eventTracker) -> {
-            removeGraph();
-            return newAlgo(configuration, tracker);
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return AlphaSimilarityProc.this.taskName();
+            }
+
+            @Override
+            protected ALGO build(
+                Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+            ) {
+                removeGraph();
+                return newAlgo(configuration, tracker);
+            }
         };
     }
-
-
 
     // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override

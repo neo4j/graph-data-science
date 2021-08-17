@@ -19,14 +19,17 @@
  */
 package org.neo4j.gds.centrality;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
@@ -139,13 +142,27 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
 
     @Override
     protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig>) (graph, configuration, tracker, log, eventTracker) ->
-            new HarmonicCentrality(
-                graph,
-                tracker,
-                configuration.concurrency(),
-                Pools.DEFAULT
-            );
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "HarmonicCentrality";
+            }
+
+            @Override
+            protected HarmonicCentrality build(
+                Graph graph,
+                HarmonicCentralityConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                return new HarmonicCentrality(
+                    graph,
+                    tracker,
+                    configuration.concurrency(),
+                    Pools.DEFAULT
+                );
+            }
+        };
     }
 
     @SuppressWarnings("unused")

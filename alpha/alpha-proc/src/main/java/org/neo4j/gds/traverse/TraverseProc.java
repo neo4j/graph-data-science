@@ -19,15 +19,18 @@
  */
 package org.neo4j.gds.traverse;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.traverse.Traverse;
 import org.neo4j.gds.impl.traverse.TraverseConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -81,34 +84,44 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
     @Override
     protected AlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<Traverse, TraverseConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            Traverse.ExitPredicate exitFunction;
-            Traverse.Aggregator aggregatorFunction;
-            // target node given; terminate if target is reached
-            if (!configuration.targetNodes().isEmpty()) {
-                List<Long> mappedTargets = configuration.targetNodes().stream()
-                    .map(graph::toMappedNodeId)
-                    .collect(Collectors.toList());
-                exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
-                aggregatorFunction = (s, t, w) -> .0;
-                // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
-            } else if (configuration.maxDepth() != -1) {
-                exitFunction = (s, t, w) -> w > configuration.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-                aggregatorFunction = (s, t, w) -> w + 1.;
-                // do complete BFS until all nodes have been visited
-            } else {
-                exitFunction = (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW;
-                aggregatorFunction = (s, t, w) -> .0;
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "Traverse";
             }
 
-            validateStartNode(configuration.startNode(), graph);
-            configuration.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
+            @Override
+            protected Traverse build(
+                Graph graph, TraverseConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+            ) {
+                Traverse.ExitPredicate exitFunction;
+                Traverse.Aggregator aggregatorFunction;
+                // target node given; terminate if target is reached
+                if (!configuration.targetNodes().isEmpty()) {
+                    List<Long> mappedTargets = configuration.targetNodes().stream()
+                        .map(graph::toMappedNodeId)
+                        .collect(Collectors.toList());
+                    exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
+                    aggregatorFunction = (s, t, w) -> .0;
+                    // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
+                } else if (configuration.maxDepth() != -1) {
+                    exitFunction = (s, t, w) -> w > configuration.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
+                    aggregatorFunction = (s, t, w) -> w + 1.;
+                    // do complete BFS until all nodes have been visited
+                } else {
+                    exitFunction = (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW;
+                    aggregatorFunction = (s, t, w) -> .0;
+                }
 
-            var mappedStartNodeId = graph.toMappedNodeId(configuration.startNode());
+                validateStartNode(configuration.startNode(), graph);
+                configuration.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
 
-            return isBfs
-                ? Traverse.bfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction)
-                : Traverse.dfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction);
+                var mappedStartNodeId = graph.toMappedNodeId(configuration.startNode());
+
+                return isBfs
+                    ? Traverse.bfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction)
+                    : Traverse.dfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction);
+            }
         };
     }
 

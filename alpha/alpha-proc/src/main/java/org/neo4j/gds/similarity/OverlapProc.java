@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
-import org.neo4j.gds.impl.similarity.OverlapConfig;
-import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
+import org.neo4j.gds.impl.similarity.OverlapConfig;
 import org.neo4j.gds.impl.similarity.OverlapConfigImpl;
+import org.neo4j.gds.results.SimilarityResult;
+import org.neo4j.gds.results.SimilarityStatsResult;
+import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -83,5 +83,10 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
     @Override
     OverlapAlgorithm newAlgo(OverlapConfig config, AllocationTracker tracker) {
         return new OverlapAlgorithm(config, api);
+    }
+
+    @Override
+    String taskName() {
+        return "Overlap-similarity";
     }
 }

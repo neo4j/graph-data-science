@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
@@ -29,6 +29,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
 import org.neo4j.gds.impl.spanningTrees.Prim;
@@ -139,9 +141,22 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
 
     @Override
     protected AlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<KSpanningTree, KSpanningTreeConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-            return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k());
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "KSpanningTree";
+            }
+
+            @Override
+            protected KSpanningTree build(
+                Graph graph,
+                KSpanningTreeConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
+                return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k());
+            }
         };
     }
 }

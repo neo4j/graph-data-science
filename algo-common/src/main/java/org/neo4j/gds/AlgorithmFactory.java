@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
 public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
@@ -46,7 +47,9 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
      * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
      * @see MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
      */
-    MemoryEstimation memoryEstimation(CONFIG configuration);
+    default MemoryEstimation memoryEstimation(CONFIG configuration) {
+        throw new MemoryEstimationNotImplementedException();
+    }
 
     default Task progressTask(Graph graph, CONFIG config) {
         var configName = config.getClass().getSimpleName();

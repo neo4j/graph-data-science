@@ -19,17 +19,20 @@
  */
 package org.neo4j.gds.shortestpaths;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.gds.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -73,22 +76,35 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
 
     @Override
     protected AlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            if (configuration.hasRelationshipWeightProperty()) {
-                return new WeightedAllShortestPaths(
-                    graph,
-                    Pools.DEFAULT,
-                    configuration.concurrency()
-                )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            } else {
-                return new MSBFSAllShortestPaths(
-                    graph,
-                    tracker,
-                    configuration.concurrency(),
-                    Pools.DEFAULT
-                )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "MSBFSASPAlgorithm";
+            }
+
+            @Override
+            protected MSBFSASPAlgorithm build(
+                Graph graph,
+                AllShortestPathsConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
+            ) {
+                if (configuration.hasRelationshipWeightProperty()) {
+                    return new WeightedAllShortestPaths(
+                        graph,
+                        Pools.DEFAULT,
+                        configuration.concurrency()
+                    )
+                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                } else {
+                    return new MSBFSAllShortestPaths(
+                        graph,
+                        tracker,
+                        configuration.concurrency(),
+                        Pools.DEFAULT
+                    )
+                        .withTerminationFlag(TerminationFlag.wrap(transaction));
+                }
             }
         };
     }

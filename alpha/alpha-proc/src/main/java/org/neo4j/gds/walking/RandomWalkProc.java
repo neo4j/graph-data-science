@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.walking;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.walking.RandomWalk;
 import org.neo4j.gds.impl.walking.RandomWalkConfig;
 import org.neo4j.gds.impl.walking.WalkPath;
 import org.neo4j.gds.impl.walking.WalkResult;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -87,36 +89,46 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
 
     @Override
     protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>) (graph, configuration, tracker, log, eventTracker) -> {
-            Number returnParam = configuration.returnKey();
-            Number inOut = configuration.inOut();
+        return new AbstractAlgorithmFactory<>() {
+            @Override
+            protected String taskName() {
+                return "RandomWalk";
+            }
 
-            RandomWalk.NextNodeStrategy strategy = configuration.mode().equalsIgnoreCase("random") ?
-                new RandomWalk.RandomNextNodeStrategy(graph, graph) :
-                new RandomWalk.Node2VecStrategy(graph, graph, returnParam.doubleValue(), inOut.doubleValue());
+            @Override
+            protected RandomWalk build(
+                Graph graph, RandomWalkConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+            ) {
+                Number returnParam = configuration.returnKey();
+                Number inOut = configuration.inOut();
 
-            int limit = (configuration.walks() == -1)
-                ? Math.toIntExact(graph.nodeCount())
-                : Math.toIntExact(configuration.walks());
+                RandomWalk.NextNodeStrategy strategy = configuration.mode().equalsIgnoreCase("random") ?
+                    new RandomWalk.RandomNextNodeStrategy(graph, graph) :
+                    new RandomWalk.Node2VecStrategy(graph, graph, returnParam.doubleValue(), inOut.doubleValue());
 
-            PrimitiveIterator.OfInt idStream = parallelStream(
-                IntStream.range(0, limit).unordered(),
-                configuration.concurrency(),
-                stream -> stream
-                    .flatMap((s) -> idStream(configuration.start(), graph, limit))
-                    .limit(limit)
-                    .iterator()
-            );
+                int limit = (configuration.walks() == -1)
+                    ? Math.toIntExact(graph.nodeCount())
+                    : Math.toIntExact(configuration.walks());
 
-            return new RandomWalk(
-                graph,
-                (int) configuration.steps(),
-                strategy,
-                configuration.concurrency(),
-                limit,
-                idStream
-            )
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+                PrimitiveIterator.OfInt idStream = parallelStream(
+                    IntStream.range(0, limit).unordered(),
+                    configuration.concurrency(),
+                    stream -> stream
+                        .flatMap((s) -> idStream(configuration.start(), graph, limit))
+                        .limit(limit)
+                        .iterator()
+                );
+
+                return new RandomWalk(
+                    graph,
+                    (int) configuration.steps(),
+                    strategy,
+                    configuration.concurrency(),
+                    limit,
+                    idStream
+                )
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
         };
     }
 
