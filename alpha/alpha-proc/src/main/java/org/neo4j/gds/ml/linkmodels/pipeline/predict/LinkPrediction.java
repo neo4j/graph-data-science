@@ -99,6 +99,9 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
             result,
             progressTracker
         ));
+
+        pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
+
         return result;
     }
 
