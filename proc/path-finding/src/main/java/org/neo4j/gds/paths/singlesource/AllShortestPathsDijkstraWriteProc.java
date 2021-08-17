@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.paths.singlesource;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -27,7 +28,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -71,7 +71,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
     }
 
     @Override
-    protected AlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

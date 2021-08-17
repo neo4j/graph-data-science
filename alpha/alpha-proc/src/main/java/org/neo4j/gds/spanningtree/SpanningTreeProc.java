@@ -21,7 +21,6 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -136,7 +135,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     }
 
     @Override
-    protected AlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
         return new AbstractAlgorithmFactory<>() {
             @Override
             protected String taskName() {

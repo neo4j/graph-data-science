@@ -20,20 +20,20 @@
 package org.neo4j.gds.walking;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.impl.walking.CollapsePath;
-import org.neo4j.gds.impl.walking.CollapsePathConfig;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.ImmutableComputationResult;
+import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.impl.walking.CollapsePath;
+import org.neo4j.gds.impl.walking.CollapsePathConfig;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -169,7 +169,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected AlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
         throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
     }
 

@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -78,7 +78,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

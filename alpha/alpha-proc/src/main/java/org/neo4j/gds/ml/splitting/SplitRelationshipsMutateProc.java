@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -69,11 +66,20 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected AlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected AbstractAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
+        return new AbstractAlgorithmFactory<>() {
+
             @Override
-            public SplitRelationships build(
-                Graph graph, SplitRelationshipsMutateConfig configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker
+            protected String taskName() {
+                return "SplitRelationships";
+            }
+
+            @Override
+            protected SplitRelationships build(
+                Graph graph,
+                SplitRelationshipsMutateConfig configuration,
+                AllocationTracker tracker,
+                ProgressTracker progressTracker
             ) {
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
@@ -85,11 +91,6 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                     );
                 }
                 return new SplitRelationships(graph, masterGraph, configuration);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(SplitRelationshipsMutateConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
             }
         };
 

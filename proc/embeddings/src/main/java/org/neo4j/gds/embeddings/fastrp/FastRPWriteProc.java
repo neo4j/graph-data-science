@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -73,7 +73,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -97,7 +97,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 

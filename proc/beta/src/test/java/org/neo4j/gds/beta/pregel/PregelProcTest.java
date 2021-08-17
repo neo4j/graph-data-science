@@ -23,8 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestProgressEventTracker;
@@ -42,7 +42,7 @@ import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.test.TestPregelConfig;
@@ -305,13 +305,20 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AlgorithmFactory<>() {
+        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AbstractAlgorithmFactory<>() {
+
                 @Override
-                public CompositeTestAlgorithm build(
+                protected String taskName() {
+                    return "CompositeTestAlgorithm";
+                }
+
+                @Override
+                protected CompositeTestAlgorithm build(
                     Graph graph,
-                    TestPregelConfig configuration, AllocationTracker tracker, Log log,
-                    ProgressEventTracker eventTracker
+                    TestPregelConfig configuration,
+                    AllocationTracker tracker,
+                    ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
@@ -362,13 +369,20 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AlgorithmFactory<>() {
+        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AbstractAlgorithmFactory<>() {
+
                 @Override
-                public CompositeTestAlgorithm build(
+                protected String taskName() {
+                    return "CompositeTestAlgorithm";
+                }
+
+                @Override
+                protected CompositeTestAlgorithm build(
                     Graph graph,
-                    TestPregelConfig configuration, AllocationTracker tracker, Log log,
-                    ProgressEventTracker eventTracker
+                    TestPregelConfig configuration,
+                    AllocationTracker tracker,
+                    ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
@@ -418,15 +432,20 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AlgorithmFactory<>() {
+        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AbstractAlgorithmFactory<>() {
+
                 @Override
-                public CompositeTestAlgorithm build(
+                protected String taskName() {
+                    return "CompositeTestAlgorithm";
+                }
+
+                @Override
+                protected CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
                     AllocationTracker tracker,
-                    Log log,
-                    ProgressEventTracker eventTracker
+                    ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,

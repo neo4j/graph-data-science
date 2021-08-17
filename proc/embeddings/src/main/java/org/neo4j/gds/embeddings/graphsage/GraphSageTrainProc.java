@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -79,7 +79,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
         return new GraphSageTrainAlgorithmFactory();
     }
 

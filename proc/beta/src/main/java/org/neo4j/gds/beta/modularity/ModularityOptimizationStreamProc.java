@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -57,7 +57,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     }
 
     @Override
-    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

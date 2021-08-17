@@ -25,9 +25,13 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
 public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> implements AlgorithmFactory<ALGO, CONFIG> {
@@ -63,6 +67,22 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
             eventTracker
         );
         return build(graph, configuration, tracker, progressTracker);
+    }
+
+    /**
+     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
+     * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
+     *
+     * @return memory estimation
+     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
+     * @see org.neo4j.gds.core.utils.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
+     */
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
+    protected Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName());
     }
 
     /**

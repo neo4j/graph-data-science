@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -91,7 +91,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 }

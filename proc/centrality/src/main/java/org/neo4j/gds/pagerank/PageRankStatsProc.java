@@ -20,12 +20,12 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
@@ -87,7 +87,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected AlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

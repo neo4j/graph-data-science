@@ -20,7 +20,6 @@
 package org.neo4j.gds.shortestpath;
 
 import org.neo4j.gds.AbstractAlgorithmFactory;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
@@ -144,7 +143,7 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
     }
 
     @Override
-    protected AlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
         return new AbstractAlgorithmFactory<>() {
             @Override
             protected String taskName() {

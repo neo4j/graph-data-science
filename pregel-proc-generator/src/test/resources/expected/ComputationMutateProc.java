@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -82,7 +81,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
     }
 
     @Override
-    protected AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
         return new AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,

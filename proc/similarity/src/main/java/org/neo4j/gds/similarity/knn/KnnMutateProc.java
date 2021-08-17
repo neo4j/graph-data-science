@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -86,7 +86,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

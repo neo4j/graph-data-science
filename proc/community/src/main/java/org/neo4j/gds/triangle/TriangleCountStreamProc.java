@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -105,7 +105,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

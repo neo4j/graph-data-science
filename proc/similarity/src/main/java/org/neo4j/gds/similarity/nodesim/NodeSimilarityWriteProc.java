@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -75,7 +75,7 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityWriteConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<NodeSimilarity, NodeSimilarityWriteConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

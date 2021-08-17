@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityStatsResult;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -77,7 +77,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -70,7 +70,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

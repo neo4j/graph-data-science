@@ -21,7 +21,6 @@ package org.neo4j.gds.influenceΜaximization;
 
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -98,7 +97,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     }
 
     @Override
-    protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
         return new AbstractAlgorithmFactory<>() {
             @Override
             protected String taskName() {

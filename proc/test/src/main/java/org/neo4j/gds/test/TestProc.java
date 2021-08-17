@@ -19,18 +19,15 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -81,26 +78,26 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     }
 
     @Override
-    protected AlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+    protected AbstractAlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
+        return new AbstractAlgorithmFactory<>() {
+
             @Override
-            public TestAlgorithm build(
-                Graph graph, TestConfig configuration, AllocationTracker tracker, Log log,
-                ProgressEventTracker eventTracker
+            protected String taskName() {
+                return "TestALgorithm";
+            }
+
+            @Override
+            protected TestAlgorithm build(
+                Graph graph, TestConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
             ) {
                 return new TestAlgorithm(
                     graph,
                     allocationTracker(),
                     0L,
                     log,
-                    eventTracker,
+                    progressTracker.progressEventTracker(),
                     configuration.throwInCompute()
                 );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(TestConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
             }
         };
     }

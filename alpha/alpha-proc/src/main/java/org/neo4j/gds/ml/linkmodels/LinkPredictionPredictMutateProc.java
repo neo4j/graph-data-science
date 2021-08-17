@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -43,8 +43,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
@@ -88,7 +88,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
     }
 

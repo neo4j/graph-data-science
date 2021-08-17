@@ -27,7 +27,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AbstractAlgorithmFactory;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
@@ -222,7 +221,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
             .returns(ParameterizedTypeName.get(
-                ClassName.get(AlgorithmFactory.class),
+                ClassName.get(AbstractAlgorithmFactory.class),
                 algorithmClassName,
                 pregelSpec.configTypeName()
             ))

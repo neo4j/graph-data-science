@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateProc;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -70,7 +70,7 @@ public class ShortestPathAStarMutateProc extends ShortestPathMutateProc<AStar, S
     }
 
     @Override
-    protected AlgorithmFactory<AStar, ShortestPathAStarMutateConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<AStar, ShortestPathAStarMutateConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

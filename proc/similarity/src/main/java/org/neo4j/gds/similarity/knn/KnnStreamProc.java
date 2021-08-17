@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -90,7 +90,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     }
 
     @Override
-    protected AlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Knn, KnnStreamConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 }

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 final class WccProc {
 
@@ -34,7 +34,7 @@ final class WccProc {
 
     private WccProc() {}
 
-    static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
+    static <CONFIG extends WccBaseConfig> AbstractAlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
         return new WccAlgorithmFactory<>();
     }
 

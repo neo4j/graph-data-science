@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -79,7 +79,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

@@ -22,11 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
 public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
@@ -38,25 +34,4 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
         Log log,
         ProgressEventTracker eventTracker
     );
-
-    /**
-     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
-     * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
-     *
-     * @return memory estimation
-     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
-     * @see MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
-     */
-    default MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException();
-    }
-
-    default Task progressTask(Graph graph, CONFIG config) {
-        var configName = config.getClass().getSimpleName();
-        var algoName = configName.replaceAll(
-            "(Mutate|Stream|Write|Stats)*Config",
-            ""
-        );
-        return Tasks.leaf(algoName);
-    }
 }

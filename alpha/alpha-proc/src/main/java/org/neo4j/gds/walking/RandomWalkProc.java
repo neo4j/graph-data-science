@@ -21,7 +21,6 @@ package org.neo4j.gds.walking;
 
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -88,7 +87,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
     }
 
     @Override
-    protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
         return new AbstractAlgorithmFactory<>() {
             @Override
             protected String taskName() {

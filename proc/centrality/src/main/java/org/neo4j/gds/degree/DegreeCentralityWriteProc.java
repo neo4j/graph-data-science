@@ -20,15 +20,15 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -78,7 +78,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected AlgorithmFactory<DegreeCentrality, DegreeCentralityWriteConfig> algorithmFactory() {
+    protected AbstractAlgorithmFactory<DegreeCentrality, DegreeCentralityWriteConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 
