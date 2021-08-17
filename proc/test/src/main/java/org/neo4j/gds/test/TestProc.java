@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -78,8 +78,8 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     }
 
     @Override
-    protected AbstractAlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<>() {
+    protected AlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
+        return new AlgorithmFactory<>() {
 
             @Override
             protected String taskName() {

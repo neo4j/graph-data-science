@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -124,7 +124,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LinkPrediction, LinkPredictionPipelineMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPrediction, LinkPredictionPipelineMutateConfig> algorithmFactory() {
         return new LinkPredictionPipelineAlgorithmFactory<>(this, databaseId());
     }
 

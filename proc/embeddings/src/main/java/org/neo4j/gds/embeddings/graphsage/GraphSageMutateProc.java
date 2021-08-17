@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.GraphStore;
@@ -97,7 +97,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    protected AbstractAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 

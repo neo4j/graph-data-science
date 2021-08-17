@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressLogger;
@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 
-public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AbstractAlgorithmFactory<NodeClassificationPredict, CONFIG> {
+public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
     public NodeClassificationPredictAlgorithmFactory() {
         super();

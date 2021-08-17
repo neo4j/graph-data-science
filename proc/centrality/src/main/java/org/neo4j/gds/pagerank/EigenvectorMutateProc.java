@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -56,7 +56,7 @@ public class EigenvectorMutateProc extends PageRankMutateProc {
     }
 
     @Override
-    protected AbstractAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
 

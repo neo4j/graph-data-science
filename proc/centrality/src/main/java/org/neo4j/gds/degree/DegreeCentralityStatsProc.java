@@ -20,7 +20,7 @@
 package org.neo4j.gds.degree;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -72,7 +72,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected AbstractAlgorithmFactory<DegreeCentrality, DegreeCentralityStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<DegreeCentrality, DegreeCentralityStatsConfig> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

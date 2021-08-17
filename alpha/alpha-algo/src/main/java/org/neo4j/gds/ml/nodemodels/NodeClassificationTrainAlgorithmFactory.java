@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> {
+public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> {
 
     @Override
     public NodeClassificationTrain build(

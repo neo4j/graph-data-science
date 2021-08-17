@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AbstractAlgorithmFactory<ModularityOptimization, T> {
+public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
 
     public static final MemoryEstimation MEMORY_ESTIMATION =
         MemoryEstimations.builder(ModularityOptimization.class)

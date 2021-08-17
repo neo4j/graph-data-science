@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteStreamOfRelationshipsProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -80,7 +80,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -87,7 +87,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected AbstractAlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

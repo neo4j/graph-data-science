@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -82,7 +82,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected AbstractAlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

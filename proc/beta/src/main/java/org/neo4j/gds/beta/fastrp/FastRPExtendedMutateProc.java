@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.fastrp;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -83,7 +83,7 @@ public class FastRPExtendedMutateProc extends MutatePropertyProc<FastRP, FastRP.
     }
 
     @Override
-    protected AbstractAlgorithmFactory<FastRP, FastRPExtendedMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPExtendedMutateConfig> algorithmFactory() {
         return new FastRPExtendedFactory<>();
     }
 

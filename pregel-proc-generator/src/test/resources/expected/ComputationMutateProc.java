@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
@@ -81,8 +81,8 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
     }
 
     @Override
-    protected AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
+    protected AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        return new AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
                                               AllocationTracker tracker, ProgressTracker progressTracker) {

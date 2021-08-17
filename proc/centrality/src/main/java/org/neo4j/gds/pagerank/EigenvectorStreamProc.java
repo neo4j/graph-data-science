@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -57,7 +57,7 @@ public class EigenvectorStreamProc extends PageRankStreamProc {
     }
 
     @Override
-    protected AbstractAlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
 

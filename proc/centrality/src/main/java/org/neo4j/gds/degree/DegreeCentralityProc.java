@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
@@ -31,7 +31,7 @@ public final class DegreeCentralityProc {
 
     private DegreeCentralityProc() {}
 
-    static <CONFIG extends DegreeCentralityConfig> AbstractAlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {
+    static <CONFIG extends DegreeCentralityConfig> AlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

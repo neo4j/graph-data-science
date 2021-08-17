@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -87,7 +87,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     }
 
     @Override
-    protected AbstractAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

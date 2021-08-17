@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -70,7 +70,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     }
 
     @Override
-    protected AbstractAlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

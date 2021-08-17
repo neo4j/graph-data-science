@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -71,7 +71,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     }
 
     @Override
-    protected AbstractAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

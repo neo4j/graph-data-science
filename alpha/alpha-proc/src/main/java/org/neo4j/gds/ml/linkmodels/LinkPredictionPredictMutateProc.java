@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -88,7 +88,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
     }
 

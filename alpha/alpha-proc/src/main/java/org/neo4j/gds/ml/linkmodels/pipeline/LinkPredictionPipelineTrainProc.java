@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -60,8 +60,8 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<>() {
+    protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
+        return new AlgorithmFactory<>() {
             @Override
             public LinkPredictionTrain build(
                 Graph graph,

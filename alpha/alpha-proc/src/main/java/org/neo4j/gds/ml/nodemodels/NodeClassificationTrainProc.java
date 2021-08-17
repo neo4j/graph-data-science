@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
@@ -103,7 +103,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected AbstractAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
         return new NodeClassificationTrainAlgorithmFactory();
     }
 

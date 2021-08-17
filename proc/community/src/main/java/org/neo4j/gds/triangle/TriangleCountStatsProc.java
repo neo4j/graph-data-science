@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -84,7 +84,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected AbstractAlgorithmFactory<IntersectingTriangleCount, TriangleCountStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStatsConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

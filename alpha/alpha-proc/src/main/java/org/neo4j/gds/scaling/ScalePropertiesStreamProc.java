@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -67,7 +67,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    protected AbstractAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
         return new ScalePropertiesFactory<>();
     }
 

@@ -195,7 +195,7 @@ public class ListProgressProcTest extends BaseTest {
         }
 
         @Override
-        protected AbstractAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+        protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
             return new FastRPFactory<>();
         }
     }

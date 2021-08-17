@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -70,7 +70,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

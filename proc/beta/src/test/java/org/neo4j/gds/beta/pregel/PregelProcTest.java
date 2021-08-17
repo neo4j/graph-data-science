@@ -23,8 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestProgressEventTracker;
@@ -305,8 +305,8 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AbstractAlgorithmFactory<>() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AlgorithmFactory<>() {
 
                 @Override
                 protected String taskName() {
@@ -369,8 +369,8 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AbstractAlgorithmFactory<>() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AlgorithmFactory<>() {
 
                 @Override
                 protected String taskName() {
@@ -432,8 +432,8 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractAlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
-            return new AbstractAlgorithmFactory<>() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
+            return new AlgorithmFactory<>() {
 
                 @Override
                 protected String taskName() {

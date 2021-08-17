@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.astar;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 
-public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends AbstractAlgorithmFactory<AStar, CONFIG> {
+public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends AlgorithmFactory<AStar, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {

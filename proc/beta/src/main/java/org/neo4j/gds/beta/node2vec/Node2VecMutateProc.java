@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
@@ -79,7 +79,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 

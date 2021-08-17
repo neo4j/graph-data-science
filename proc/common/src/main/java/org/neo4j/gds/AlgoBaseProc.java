@@ -129,7 +129,7 @@ public abstract class AlgoBaseProc<
         CypherMapWrapper config
     );
 
-    protected abstract AbstractAlgorithmFactory<ALGO, CONFIG> algorithmFactory();
+    protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
 
     public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         CONFIG config;

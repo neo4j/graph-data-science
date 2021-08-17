@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,7 +33,7 @@ import java.util.List;
 import static java.lang.Math.multiplyExact;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends AbstractAlgorithmFactory<Node2Vec, CONFIG> {
+public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends AlgorithmFactory<Node2Vec, CONFIG> {
 
     @Override
     protected String taskName() {

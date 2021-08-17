@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.fastrp;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -73,7 +73,7 @@ public class FastRPExtendedWriteProc extends WriteProc<FastRP, FastRP.FastRPResu
     }
 
     @Override
-    protected AbstractAlgorithmFactory<FastRP, FastRPExtendedWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPExtendedWriteConfig> algorithmFactory() {
         return new FastRPExtendedFactory<>();
     }
 

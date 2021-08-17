@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -36,7 +36,7 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AbstractAlgorithmFactory<NodeSimilarity, CONFIG> {
+public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
     protected String taskName() {

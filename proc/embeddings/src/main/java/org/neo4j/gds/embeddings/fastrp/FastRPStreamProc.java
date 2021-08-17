@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -85,7 +85,7 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     }
 
     @Override
-    protected AbstractAlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

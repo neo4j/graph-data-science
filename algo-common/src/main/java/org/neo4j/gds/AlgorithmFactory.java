@@ -34,16 +34,16 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
+public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
     private final ProgressLogger.ProgressLoggerFactory loggerFactory;
 
-    protected AbstractAlgorithmFactory() {
+    protected AlgorithmFactory() {
         this(BatchingProgressLogger.FACTORY);
     }
 
     @TestOnly
-    protected AbstractAlgorithmFactory(ProgressLogger.ProgressLoggerFactory loggerFactory) {
+    protected AlgorithmFactory(ProgressLogger.ProgressLoggerFactory loggerFactory) {
         this.loggerFactory = loggerFactory;
     }
 

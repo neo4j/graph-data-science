@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -342,7 +342,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         var proc = new GraphSageTrainProc() {
             @Override
-            protected AbstractAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
+            protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
                 return fail("Created the train algo factory with an invalid model, should have thrown that model already exists.");
             }
         };

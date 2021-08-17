@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -77,7 +77,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

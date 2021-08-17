@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -61,7 +61,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
     }
 
     @Override
-    protected AbstractAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
         return new ScalePropertiesFactory<>();
     }
 

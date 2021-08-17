@@ -20,7 +20,7 @@
 package org.neo4j.gds.walking;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
@@ -169,7 +169,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected AbstractAlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+    protected AlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
         throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
     }
 

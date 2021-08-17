@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -83,7 +83,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

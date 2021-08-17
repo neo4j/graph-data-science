@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AbstractAlgorithmFactory<IntersectingTriangleCount, CONFIG> {
+public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     @Override
     protected String taskName() {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -85,7 +85,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected AbstractAlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

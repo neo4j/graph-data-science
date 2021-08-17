@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -77,7 +77,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

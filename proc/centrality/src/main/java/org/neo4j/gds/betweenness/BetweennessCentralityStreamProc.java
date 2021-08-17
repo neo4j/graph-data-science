@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
@@ -91,7 +91,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected AbstractAlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 }

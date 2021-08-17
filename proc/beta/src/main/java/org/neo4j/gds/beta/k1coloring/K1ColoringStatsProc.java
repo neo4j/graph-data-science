@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -72,7 +72,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected AbstractAlgorithmFactory<K1Coloring, K1ColoringStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<K1Coloring, K1ColoringStatsConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

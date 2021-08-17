@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathStreamProc;
@@ -70,7 +70,7 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
     }
 
     @Override
-    protected AbstractAlgorithmFactory<AStar, ShortestPathAStarStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<AStar, ShortestPathAStarStreamConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

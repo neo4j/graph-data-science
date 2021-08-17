@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
@@ -71,7 +71,7 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Yens, ShortestPathYensWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<Yens, ShortestPathYensWriteConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -87,7 +87,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
     }
 
     @Override
-    protected AbstractAlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

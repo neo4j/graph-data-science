@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.ShortestPathBaseConfig;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends AbstractAlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends AlgorithmFactory<Dijkstra, T> {
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {

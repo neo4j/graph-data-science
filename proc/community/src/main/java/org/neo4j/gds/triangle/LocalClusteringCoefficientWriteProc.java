@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -78,7 +78,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

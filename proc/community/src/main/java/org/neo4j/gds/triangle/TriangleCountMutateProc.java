@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -80,7 +80,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @Override
-    protected AbstractAlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

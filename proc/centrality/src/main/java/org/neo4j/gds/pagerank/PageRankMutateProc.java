@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -73,7 +73,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @Override
-    protected AbstractAlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankMutateConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>();
     }
 

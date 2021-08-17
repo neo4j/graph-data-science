@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -77,7 +77,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

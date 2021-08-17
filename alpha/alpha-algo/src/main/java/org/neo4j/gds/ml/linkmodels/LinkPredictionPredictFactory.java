@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressLogger;
@@ -35,7 +35,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPred
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 
-class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfig> extends AbstractAlgorithmFactory<LinkPredictionPredict, CONFIG> {
+class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfig> extends AlgorithmFactory<LinkPredictionPredict, CONFIG> {
 
     public LinkPredictionPredictFactory() {
         super();

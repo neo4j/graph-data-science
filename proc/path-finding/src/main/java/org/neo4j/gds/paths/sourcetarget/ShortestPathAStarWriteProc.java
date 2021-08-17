@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
@@ -71,7 +71,7 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
     }
 
     @Override
-    protected AbstractAlgorithmFactory<AStar, ShortestPathAStarWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<AStar, ShortestPathAStarWriteConfig> algorithmFactory() {
         return new AStarFactory<>();
     }
 }

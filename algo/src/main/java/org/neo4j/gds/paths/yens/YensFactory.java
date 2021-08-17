@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -31,7 +31,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
 import java.util.List;
 
-public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends AbstractAlgorithmFactory<Yens, CONFIG> {
+public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends AlgorithmFactory<Yens, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {

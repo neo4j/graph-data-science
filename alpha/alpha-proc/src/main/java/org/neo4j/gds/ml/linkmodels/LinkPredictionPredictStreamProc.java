@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -93,7 +93,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected AbstractAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
     }
 

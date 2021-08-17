@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.MutateResult;
@@ -70,7 +70,7 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Yens, ShortestPathYensMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<Yens, ShortestPathYensMutateConfig> algorithmFactory() {
         return new YensFactory<>();
     }
 }

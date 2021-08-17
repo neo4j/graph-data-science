@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -72,7 +72,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

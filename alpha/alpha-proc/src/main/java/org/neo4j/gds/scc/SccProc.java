@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
@@ -159,8 +159,8 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     }
 
     @Override
-    protected AbstractAlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<>() {
+    protected AlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
+        return new AlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "Scc";

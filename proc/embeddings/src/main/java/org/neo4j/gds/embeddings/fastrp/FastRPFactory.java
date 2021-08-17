@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -30,7 +30,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
 
-public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AbstractAlgorithmFactory<FastRP, CONFIG> {
+public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AlgorithmFactory<FastRP, CONFIG> {
 
     @Override
     protected String taskName() {

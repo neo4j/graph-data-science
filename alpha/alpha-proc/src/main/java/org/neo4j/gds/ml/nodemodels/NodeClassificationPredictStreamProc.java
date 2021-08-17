@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
@@ -116,7 +116,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected AbstractAlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory<>();
     }
 

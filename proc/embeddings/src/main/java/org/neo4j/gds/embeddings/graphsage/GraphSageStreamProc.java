@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.GraphStore;
@@ -107,7 +107,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected AbstractAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 

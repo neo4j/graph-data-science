@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.traverse;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -82,8 +82,8 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<>() {
+    protected AlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
+        return new AlgorithmFactory<>() {
             @Override
             protected String taskName() {
                 return "Traverse";

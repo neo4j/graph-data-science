@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
@@ -71,7 +71,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
         return DijkstraFactory.singleSource();
     }
 }

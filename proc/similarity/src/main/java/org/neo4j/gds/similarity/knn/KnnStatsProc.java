@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -77,7 +77,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<Knn, KnnStatsConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -76,7 +76,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
     }
 
     @Override
-    protected AbstractAlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 

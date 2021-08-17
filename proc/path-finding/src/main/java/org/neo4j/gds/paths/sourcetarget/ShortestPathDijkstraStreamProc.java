@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathStreamProc;
@@ -70,7 +70,7 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Dijkstra, ShortestPathDijkstraStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<Dijkstra, ShortestPathDijkstraStreamConfig> algorithmFactory() {
         return DijkstraFactory.sourceTarget();
     }
 }

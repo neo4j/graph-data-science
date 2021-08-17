@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -67,7 +67,7 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected AbstractAlgorithmFactory<K1Coloring, K1ColoringStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<K1Coloring, K1ColoringStreamConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

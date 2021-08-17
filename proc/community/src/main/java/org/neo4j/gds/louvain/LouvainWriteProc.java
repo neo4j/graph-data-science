@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -87,7 +87,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

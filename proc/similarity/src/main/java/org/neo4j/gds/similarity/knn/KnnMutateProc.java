@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
@@ -86,7 +86,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
     }
 
     @Override
-    protected AbstractAlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<Knn, KnnMutateConfig> algorithmFactory() {
         return new KnnFactory<>();
     }
 

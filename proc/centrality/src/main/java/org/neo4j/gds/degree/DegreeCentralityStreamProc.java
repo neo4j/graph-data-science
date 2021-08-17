@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.AbstractAlgorithmFactory;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
@@ -68,7 +68,7 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
     }
 
     @Override
-    protected AbstractAlgorithmFactory<DegreeCentrality, DegreeCentralityStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<DegreeCentrality, DegreeCentralityStreamConfig> algorithmFactory() {
         return DegreeCentralityProc.algorithmFactory();
     }
 
