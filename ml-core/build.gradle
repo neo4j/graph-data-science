@@ -20,10 +20,6 @@ dependencies {
 
     api(project(':algo-common'))
 
-    implementation(
-        project(":annotations")
-    )
-
     // TEST DEPENDENCIES
 
     testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'
