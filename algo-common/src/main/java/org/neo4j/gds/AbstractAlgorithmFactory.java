@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> implements AlgorithmFactory<ALGO, CONFIG> {
+public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
     private final ProgressLogger.ProgressLoggerFactory loggerFactory;
 
@@ -47,7 +47,6 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
         this.loggerFactory = loggerFactory;
     }
 
-    @Override
     public final ALGO build(
         Graph graph,
         CONFIG configuration,
