@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.impl.approxmaxkcut;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AbstractAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,6 +33,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import java.util.List;
 
 public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends AbstractAlgorithmFactory<ApproxMaxKCut, CONFIG> {
+
+    ApproxMaxKCutFactory() {
+        super();
+    }
+
     @Override
     protected String taskName() {
         return "ApproxMaxKCut";
@@ -45,31 +52,25 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Ab
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        Task computeTask;
-        if (config.vnsMaxNeighborhoodOrder() > 0) {
-            computeTask = Tasks.iterativeDynamic(
-                "compute",
-                () -> List.of(
-                    Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                    Tasks.iterativeOpen(
-                        "variable neighborhood search",
-                        () -> List.of(localSearchTask(graph.nodeCount()))
-                    )
-                ),
-                config.iterations()
-            );
-        } else {
-            computeTask = Tasks.iterativeDynamic(
-                "compute",
-                () -> List.of(
-                    Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                    localSearchTask(graph.nodeCount())
-                ),
-                config.iterations()
+        return Tasks.iterativeFixed(
+            "compute",
+            () -> List.of(
+                Tasks.leaf("place nodes randomly", graph.nodeCount()),
+                searchTask(graph.nodeCount(), config.vnsMaxNeighborhoodOrder())
+            ),
+            config.iterations()
+        );
+    }
+
+    private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {
+        if (vnsMaxNeighborhoodOrder > 0) {
+            return Tasks.iterativeOpen(
+                "variable neighborhood search",
+                () -> List.of(localSearchTask(nodeCount))
             );
         }
 
-        return computeTask;
+        return localSearchTask(nodeCount);
     }
 
     private static Task localSearchTask(long nodeCount) {
@@ -84,6 +85,11 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Ab
             ),
             Tasks.leaf("compute current solution cost", nodeCount)
         );
+    }
+
+    @TestOnly
+    ApproxMaxKCutFactory(ProgressLogger.ProgressLoggerFactory factory) {
+        super(factory);
     }
 
     // TODO: Implement.

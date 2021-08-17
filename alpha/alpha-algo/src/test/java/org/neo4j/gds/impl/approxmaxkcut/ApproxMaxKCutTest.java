@@ -28,19 +28,20 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.logging.NullLog;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -162,143 +163,136 @@ final class ApproxMaxKCutTest {
 
         var config = configBuilder.build();
 
-        var progressTask = new ApproxMaxKCutFactory<>().progressTask(graph, config);
-        TestProgressLogger progressLogger = new TestProgressLogger(progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
-
-        var approxMaxKCut = new ApproxMaxKCut(
+        var approxMaxKCut = new ApproxMaxKCutFactory<>(TestProgressLogger.FACTORY).build(
             graph,
-            Pools.DEFAULT,
             config,
-            progressTracker,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            NullLog.getInstance(),
+            EmptyProgressEventTracker.INSTANCE
         );
-
         approxMaxKCut.compute();
 
-        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Start"));
-        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Finish"));
+        var progressLogger = (TestProgressLogger)approxMaxKCut.getProgressTracker().progressLogger();
+
+        assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Start")).isTrue();
+        assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
 
         for (int i = 1; i <= config.iterations(); i++) {
-            assertTrue(progressLogger.containsMessage(
-                TestLog.INFO,
-                String.format(formatWithLocale(":: Starting iteration: %s", i))
-            ));
-            assertTrue(progressLogger.containsMessage(
+            assertThat(progressLogger.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s :: Start", i, config.iterations())
-            ));
-            assertTrue(progressLogger.containsMessage(
+            )).isTrue();
+            assertThat(progressLogger.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s 100%%", i, config.iterations())
-            ));
-            assertTrue(progressLogger.containsMessage(
+            )).isTrue();
+            assertThat(progressLogger.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s :: Finished", i, config.iterations())
-            ));
+            )).isTrue();
 
             if (vnsMaxNeighborhoodOrder == 0) {
-                assertTrue(progressLogger.containsMessage(
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: Start", i, config.iterations())
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: Finished", i, config.iterations())
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: improvement loop :: Start", i, config.iterations())
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: improvement loop :: Finished", i, config.iterations())
-                ));
+                )).isTrue();
 
                 // May occur several times but we don't know.
-                assertTrue(progressLogger.containsMessage(
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Start",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 100%%",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Finished",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Start",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 100%%",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Finished",
                         i,
                         config.iterations()
                     )
-                ));
+                )).isTrue();
 
-                assertTrue(progressLogger.containsMessage(
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost :: Start",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost 100%%",
                         i,
                         config.iterations()
                     )
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost :: Finished",
                         i,
                         config.iterations()
                     )
-                ));
+                )).isTrue();
             } else {
                 // We merely check that VNS is indeed run. The rest is very similar to the non-VNS case.
-                assertTrue(progressLogger.containsMessage(
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("variable neighborhood search %s of %s :: Start", i, config.iterations())
-                ));
-                assertTrue(progressLogger.containsMessage(
+                )).isTrue();
+                assertThat(progressLogger.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("variable neighborhood search %s of %s :: Finished", i, config.iterations())
-                ));
+                )).isTrue();
             }
         }
     }

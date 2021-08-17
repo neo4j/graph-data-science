@@ -44,8 +44,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 /*
  * Implements a parallelized version of a GRASP (optionally with VNS) maximum k-cut approximation algorithm.
  *
@@ -66,7 +64,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final Random random;
     private final ExecutorService executor;
     private final ApproxMaxKCutConfig config;
-    private final ProgressTracker progressTracker;
     private final AllocationTracker tracker;
     private final WeightTransformer weightTransformer;
     private final HugeIntArray[] candidateSolutions;
@@ -176,8 +173,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         for (int i = 1; (i <= config.iterations()) && running(); i++) {
             var currCandidateSolution = candidateSolutions[currIdx];
             var currCost = costs[currIdx];
-
-            progressTracker.progressLogger().logMessage(formatWithLocale(":: Starting iteration: %s", i));
 
             placeNodesRandomly(currCandidateSolution);
 
