@@ -93,7 +93,6 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
         super(factory);
     }
 
-    // TODO: Implement.
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();
