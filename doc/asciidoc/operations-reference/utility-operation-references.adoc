@@ -20,4 +20,5 @@
 | <<utility-functions-catalog, Accessing a node property in a named graph>> | `_gds.util.nodeProperty_`
 | <<alpha-algorithms-one-hot-encoding>> | `_gds.alpha.ml.oneHotEncoding_`
 | Status of the system                                                      | `gds.debug.sysInfo`
+| Create a database backed by a named in-memory graph             | `gds.alpha.create.cypherdb`
 |===
