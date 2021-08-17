@@ -260,6 +260,8 @@ For example, the `embedding` property could be created by the previous example, 
 Link Prediction pipelines also manage splitting the relationships into several sets and also adds sampled negative relationships to some of these sets.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 
+The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
+
 The splitting of relationships proceeds internally in the following steps:
 
 1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
@@ -345,6 +347,16 @@ YIELD splitConfig
 [[algorithms-ml-linkprediction-configure-model-parameters]]
 == Configuring the model parameters
 
+The `gds.alpha.ml.pipeline.linkPrediction.configureParams` mode is used to setup the train mode with a list of configurations of logistic regression models.
+The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
+The parameter space can be configured by passing this procedure a list of maps, where each map configures the training of one logistic regression model.
+In <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>, we explain further how the configured model candiates are trained, evaluated and compared.
+
+The allowed model parameters are listed in the table <<linkprediction-pipelines-model-configuration-table>>.
+
+If `configureParams` is not used, then a single model with defaults for all the model parameters is used.
+The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
 === Syntax
 
 [.pipeline-configure-params-syntax]
@@ -372,6 +384,7 @@ YIELD
 | parameterSpace  | List of Map | The parameter space used to select the best model from. Each Map corresponds to potential model. The allowed parameters for a model are defined in the next table.
 |===
 
+[[linkprediction-pipelines-model-configuration-table]]
 .Model configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
