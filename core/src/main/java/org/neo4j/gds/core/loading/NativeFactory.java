@@ -171,8 +171,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         );
 
         var scanningNodesImporter = IdMapImplementations.useBitIdMap()
-            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker.progressLogger(), concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
-            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker.progressLogger(), concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
+            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker, concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
+            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker, concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
 
         return scanningNodesImporter.call(loadingContext.log());
     }
@@ -212,7 +212,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             graphCreateConfig,
             loadingContext,
             dimensions,
-            progressTracker.progressLogger(),
+            progressTracker,
             idsAndProperties.idMap(),
             allBuilders,
             concurrency
