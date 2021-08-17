@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
@@ -41,6 +42,7 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
             LinkPredictionPipelineAddStepProcs.class,
             LinkPredictionPipelineConfigureSplitProc.class,
             LinkPredictionPipelineConfigureParamsProc.class,
+            GraphStreamRelationshipPropertiesProc.class,
             GraphCreateProc.class
         );
     }

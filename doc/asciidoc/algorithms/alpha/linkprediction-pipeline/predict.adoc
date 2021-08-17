@@ -60,3 +60,67 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 ======
 ====
+
+=== Example
+
+In this example we will show how to use a trained model to predict new relationships in your in-memory graph.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<algorithms-ml-linkprediction-pipeline-examples-train-query, train example>> which we gave the name `lp-pipeline-model`.
+The algorithm excludes predictions for existing relationships in the graph.
+
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
+  modelName: 'lp-pipeline-model',
+  mutateRelationshipType: 'KNOWS_PREDICTED',
+  topN: 5,
+  threshold: 0.45
+}) YIELD relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 10
+|===
+--
+
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
+
+
+In the following, we will inspect the predicted relationships:
+
+[role=query-example, group=lp]
+--
+.Stream the predicted relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('myGraph', 'probability', ['KNOWS_PREDICTED'])
+YIELD
+  sourceNodeId, targetNodeId, propertyValue
+RETURN
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, round(toFloat(propertyValue), 3) AS probability
+ORDER BY source ASC, target ASC
+----
+
+.Results
+[opts="header"]
+|===
+| source  | target      | probability
+| "Alice"   | "Chris"   | 0.541
+| "Alice"   | "Greg"    | 0.511
+| "Alice"   | "Karin"   | 0.511
+| "Alice"   | "Mark"    | 0.512
+| "Chris"   | "Alice"   | 0.541
+| "Chris"   | "Mark"    | 0.535
+| "Greg"    | "Alice"   | 0.511
+| "Karin"   | "Alice"   | 0.511
+| "Mark"    | "Alice"   | 0.512
+| "Mark"    | "Chris"   | 0.535
+|===
+--

@@ -170,7 +170,7 @@ WARNING: The Link Prediction model requires the graph to be created using the `U
 
 
 //TODO add model.list call to show how pipeline looks?
-
+[[algorithms-ml-linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --
 .The following will train a model using a pipeline:
