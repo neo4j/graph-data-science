@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
@@ -34,6 +35,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
@@ -43,7 +45,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     private final PipelineExecutor pipelineExecutor;
     private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relationshipTypes;
-    private final Graph graph;
+    private final GraphStore graphStore;
     private final int concurrency;
     private final int topN;
     private final double threshold;
@@ -53,7 +55,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         PipelineExecutor pipelineExecutor,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
-        Graph graph,
+        GraphStore graphStore,
         int concurrency,
         int topN,
         double threshold,
@@ -63,7 +65,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         this.pipelineExecutor = pipelineExecutor;
         this.nodeLabels = nodeLabels;
         this.relationshipTypes = relationshipTypes;
-        this.graph = graph;
+        this.graphStore = graphStore;
         this.concurrency = concurrency;
         this.topN = topN;
         this.threshold = threshold;
@@ -81,12 +83,18 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     }
 
     private LinkPredictionResult predictLinks() {
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
+        var featureExtractor = pipelineExecutor.linkFeatureExtractor(graph);
+
+        assert featureExtractor.featureDimension() == modelData.weights().data().totalSize() : "Model must contain a weight for each feature.";
+
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
+
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
             graph.concurrentCopy(),
-            pipelineExecutor.linkFeatureExtractor(graph),
+            featureExtractor,
             predictor,
             result,
             progressTracker

@@ -74,7 +74,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
             pipelineExecutor,
             nodeLabels,
             relationshipTypes,
-            graph,
+            graphStore,
             configuration.concurrency(),
             configuration.topN(),
             configuration.threshold(),
