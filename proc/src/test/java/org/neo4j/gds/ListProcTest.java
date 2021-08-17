@@ -53,6 +53,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.centrality.ClosenessCentralityProc;
 import org.neo4j.gds.centrality.HarmonicCentralityProc;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.cypher.GraphCreateCypherDbProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
@@ -141,6 +142,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
+        "gds.alpha.create.cypherdb",
+
         "gds.alpha.model.delete",
         "gds.alpha.model.load",
         "gds.alpha.model.store",
@@ -489,6 +492,7 @@ class ListProcTest extends BaseProcTest {
             KSpanningTreeProc.class,
             CosineProc.class,
             EuclideanProc.class,
+            GraphCreateCypherDbProc.class,
             NodeClassificationTrainProc.class,
             OverlapProc.class,
             PearsonProc.class,
