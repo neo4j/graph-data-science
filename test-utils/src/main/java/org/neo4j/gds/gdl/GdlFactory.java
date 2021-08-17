@@ -21,10 +21,10 @@ package org.neo4j.gds.gdl;
 
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -43,9 +43,9 @@ import org.neo4j.gds.core.loading.IdsAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -139,8 +139,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     @Override
-    protected ProgressLogger initProgressLogger() {
-        return ProgressLogger.NULL_LOGGER;
+    protected ProgressTracker initProgressTracker() {
+        return ProgressTracker.NULL_TRACKER;
     }
 
     @Override

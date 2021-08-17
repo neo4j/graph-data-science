@@ -40,8 +40,9 @@ import org.neo4j.gds.core.GraphDimensionsCypherReader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -169,12 +170,14 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
     }
 
     @Override
-    protected ProgressLogger initProgressLogger() {
-        return new BatchingProgressLogger(
+    protected ProgressTracker initProgressTracker() {
+        var task = Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + dimensions.maxRelCount());
+        var progressLogger = new BatchingProgressLogger(
             loadingContext.log(),
-            Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + dimensions.maxRelCount()),
+            task,
             graphCreateConfig.readConcurrency()
         );
+        return new TaskProgressTracker(task, progressLogger);
     }
 
     private String nodeQuery() {

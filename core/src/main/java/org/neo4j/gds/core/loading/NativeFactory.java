@@ -35,10 +35,11 @@ import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
@@ -122,7 +123,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     }
 
     @Override
-    protected ProgressLogger initProgressLogger() {
+    protected ProgressTracker initProgressTracker() {
         long relationshipCount = graphCreateConfig
             .relationshipProjections()
             .projections()
@@ -138,11 +139,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
-        return new BatchingProgressLogger(
+        var task = Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + relationshipCount);
+        var progressLogger = new BatchingProgressLogger(
             loadingContext.log(),
-            Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + relationshipCount),
+            task,
             graphCreateConfig.readConcurrency()
         );
+        return new TaskProgressTracker(task, progressLogger);
     }
 
     @Override
@@ -168,8 +171,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         );
 
         var scanningNodesImporter = IdMapImplementations.useBitIdMap()
-            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
-            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
+            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker.progressLogger(), concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
+            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker.progressLogger(), concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
 
         return scanningNodesImporter.call(loadingContext.log());
     }
@@ -209,7 +212,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             graphCreateConfig,
             loadingContext,
             dimensions,
-            progressLogger,
+            progressTracker.progressLogger(),
             idsAndProperties.idMap(),
             allBuilders,
             concurrency
