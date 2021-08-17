@@ -28,7 +28,6 @@ import org.neo4j.gds.catalog.CatalogProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.storageengine.GraphStoreSettings;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -57,9 +56,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
                 MutableLong createMillis = new MutableLong(0);
                 try (ProgressTimer ignored = ProgressTimer.start(createMillis::setValue)) {
                     var dbms = GraphDatabaseApiProxy.resolveDependency(api, DatabaseManagementService.class);
-                    var config = Config.defaults();
-                    config.set(GraphStoreSettings.graph_name, graphName);
-                    StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, config);
+                    StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, Config.defaults());
                 }
 
                 return new CreateCypherDbResult(dbName, graphName, createMillis.getValue());
