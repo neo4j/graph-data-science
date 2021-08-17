@@ -35,7 +35,7 @@ import java.util.List;
 
 public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends AlgorithmFactory<ApproxMaxKCut, CONFIG> {
 
-    ApproxMaxKCutFactory() {
+    public ApproxMaxKCutFactory() {
         super();
     }
 

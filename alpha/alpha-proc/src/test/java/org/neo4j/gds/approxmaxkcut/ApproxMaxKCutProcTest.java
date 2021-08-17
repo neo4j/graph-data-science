@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.RelationshipWeightConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
@@ -41,8 +40,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult>,
-    RelationshipWeightConfigTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
+    AlgoBaseProcTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
 
     private static final String GRAPH_NAME = "myGraph";
 
