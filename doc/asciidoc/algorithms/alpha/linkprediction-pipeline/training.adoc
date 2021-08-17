@@ -183,14 +183,16 @@ CALL gds.alpha.ml.pipeline.linkPrediction.train('myGraph', {
 }) YIELD modelInfo
 RETURN
   modelInfo.bestParameters AS winningModel,
-  round(modelInfo.metrics.AUCPR.outerTrain, 4) AS trainGraphScore,
-  round(modelInfo.metrics.AUCPR.test, 4) AS testGraphScore
+  modelInfo.metrics.AUCPR.outerTrain AS trainGraphScore,
+  modelInfo.metrics.AUCPR.test AS testGraphScore
 ----
 
 .Results
 [opts="header", cols="6, 2, 2"]
 |===
 | winningModel                                                                                         | trainGraphScore     | testGraphScore
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4} | 0.4167             | 0.7639
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4} | 0.41666666666666663 | 0.7638888888888888
 |===
+
+We can see the model configuration with the `tolerance = 0.001` was selected and had a score of `0.76` on the test set.
 --

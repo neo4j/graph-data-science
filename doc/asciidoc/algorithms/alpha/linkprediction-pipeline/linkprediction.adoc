@@ -136,7 +136,7 @@ YIELD
 |===
 | Name                      | Type    | Description
 | pipelineName              | String  | The name of the pipeline.
-| procedureName             | String  | The name of the the procedure to be added to the pipeline.
+| procedureName             | String  | The name of the procedure to be added to the pipeline.
 | procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
 |===
 
@@ -161,6 +161,9 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mut
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
 |===
+
+The pipeline will now execute the <<algorithms-embeddings-fastrp,fastRP algorithm>> in mutate mode both before <<algorithms-ml-linkprediction-pipelines-train, training>> a model, and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
+This ensures the `embedding` property can be used as an input for link features.
 --
 
 
@@ -332,7 +335,11 @@ include::pipelineInfoResult.adoc[]
 .The following will configure the splitting of the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {testFraction: 0.3, trainFraction: 0.3, validationFolds: 7})
+CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {
+  testFraction: 0.3,
+  trainFraction: 0.3,
+  validationFolds: 7
+})
 YIELD splitConfig
 ----
 
@@ -342,6 +349,8 @@ YIELD splitConfig
 | splitConfig
 | {negativeSamplingRatio=1.0, testFraction=0.3, validationFolds=7, trainFraction=0.3}
 |===
+
+We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-linkprediction-pipelines-train, training>>.
 --
 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
@@ -419,6 +428,9 @@ CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe',
 | parameterSpace
 | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}, {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.01}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
+
+The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.
+Each specified model configuration will be tried out during the model selection in <<algorithms-ml-linkprediction-pipelines-train, training>>.
 --
 
 include::training.adoc[]

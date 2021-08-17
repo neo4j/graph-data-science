@@ -92,7 +92,6 @@ CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
-
 In the following, we will inspect the predicted relationships:
 
 [role=query-example, group=lp]
@@ -103,8 +102,9 @@ In the following, we will inspect the predicted relationships:
 CALL gds.graph.streamRelationshipProperty('myGraph', 'probability', ['KNOWS_PREDICTED'])
 YIELD
   sourceNodeId, targetNodeId, propertyValue
+WHERE sourceNodeId < targetNodeId
 RETURN
-  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, round(toFloat(propertyValue), 3) AS probability
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, propertyValue AS probability
 ORDER BY source ASC, target ASC
 ----
 
@@ -112,15 +112,12 @@ ORDER BY source ASC, target ASC
 [opts="header"]
 |===
 | source  | target      | probability
-| "Alice"   | "Chris"   | 0.541
-| "Alice"   | "Greg"    | 0.511
-| "Alice"   | "Karin"   | 0.511
-| "Alice"   | "Mark"    | 0.512
-| "Chris"   | "Alice"   | 0.541
-| "Chris"   | "Mark"    | 0.535
-| "Greg"    | "Alice"   | 0.511
-| "Karin"   | "Alice"   | 0.511
-| "Mark"    | "Alice"   | 0.512
-| "Mark"    | "Chris"   | 0.535
+| "Alice"   | "Chris"   | 0.5416134109649615
+| "Alice"   | "Greg"    | 0.5114214657668055
+| "Alice"   | "Karin"   | 0.5116783521370275
+| "Alice"   | "Mark"    | 0.5123752811873264
+| "Chris"   | "Mark"    | 0.5358186088801173
 |===
+
+We can see, that our model predicts the most likely link is between Alice and Chris.
 --
