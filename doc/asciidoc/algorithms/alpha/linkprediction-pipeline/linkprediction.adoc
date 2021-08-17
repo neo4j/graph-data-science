@@ -149,14 +149,14 @@ include::pipelineInfoResult.adoc[]
 .The following will add a node property step to the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mutateProperty: 'embedding', embeddingDimension: 256})
+CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mutateProperty: 'embedding', embeddingDimension: 256, randomSeed: 42})
 ----
 
 .Results
 [opts="header",cols="1,1,1,1,1"]
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
-| "pipe"   | [{name=fastRP, config={embeddingDimension=256, mutateProperty=embedding}}]
+| "pipe"   | [{name=fastRP, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
