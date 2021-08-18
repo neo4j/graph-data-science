@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat.unsupported;
 
+import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
@@ -109,6 +110,11 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     public AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
         GraphStore graphStore, TokenHolders tokenHolders
     ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public Edition dbmsEdition(GraphDatabaseAPI api) {
         throw cypherUnsupportedException();
     }
 

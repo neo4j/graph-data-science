@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
@@ -73,4 +74,6 @@ public interface StorageEngineProxyApi {
         GraphStore graphStore,
         TokenHolders tokenHolders
     );
+
+    Edition dbmsEdition(GraphDatabaseAPI api);
 }

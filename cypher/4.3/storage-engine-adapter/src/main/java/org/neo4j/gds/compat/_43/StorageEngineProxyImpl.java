@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
+import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseInternalSettings;
 import org.neo4j.counts.CountsAccessor;
@@ -128,5 +129,10 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         GraphStore graphStore, TokenHolders tokenHolders
     ) {
         return new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public Edition dbmsEdition(GraphDatabaseAPI api) {
+        return api.dbmsInfo().edition;
     }
 }

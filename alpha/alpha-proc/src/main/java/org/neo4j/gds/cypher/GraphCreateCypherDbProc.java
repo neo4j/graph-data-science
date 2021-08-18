@@ -79,7 +79,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
     }
 
     private void validateNeo4jEnterpriseEdition() {
-        var edition = api.dbmsInfo().edition;
+        var edition = StorageEngineProxy.dbmsEdition(api);
         if (!(edition == Edition.ENTERPRISE)) {
             throw new DatabaseManagementException(formatWithLocale(
                 "Requires Neo4j %s version, but found %s",
