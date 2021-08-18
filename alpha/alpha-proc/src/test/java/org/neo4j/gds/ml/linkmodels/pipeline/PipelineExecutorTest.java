@@ -264,6 +264,38 @@ class PipelineExecutorTest extends BaseProcTest {
         });
     }
 
+    @Test
+    void failOnExistingSplitRelTypes() {
+        var graphName = "invalidGraph";
+
+        String createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("_TEST_", "REL")
+            .withRelationshipType("_TEST_COMPLEMENT_", "IGNORE")
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(createQuery);
+
+        var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
+
+        var pipeline = new TrainingPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), graphName);
+
+            assertThatThrownBy(() -> executor.splitRelationships(
+                invalidGraphStore,
+                List.of("*"),
+                List.of(NODE_LABEL.name),
+                Optional.of(42L)
+            ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The relationship types ['_TEST_', '_TEST_COMPLEMENT_'] are in the input graph, but are reserved for splitting.");
+        });
+    }
+
     private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(PipelineExecutor pipeline) {
         pipeline.executeNodePropertySteps(List.of(NODE_LABEL), RELATIONSHIP_TYPE);
         return pipeline.computeFeatures(List.of(NODE_LABEL), RELATIONSHIP_TYPE, 4);

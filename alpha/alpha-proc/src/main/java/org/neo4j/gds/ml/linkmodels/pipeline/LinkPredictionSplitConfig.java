@@ -22,16 +22,21 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -139,6 +144,27 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
             throw new IllegalArgumentException(formatWithLocale(
                 "Sum of fractions for test and train set must be smaller than or equal to 1.0. But got %s.",
                 fractionSum
+            ));
+        }
+    }
+
+    @Configuration.Ignore
+    default void validateAgainstGraphStore(GraphStore graphStore) {
+        var reservedTypes = Stream.of(
+            testRelationshipType(),
+            trainRelationshipType(),
+            featureInputRelationshipType(),
+            testComplementRelationshipType()
+        );
+
+        var invalidTypes = reservedTypes
+            .filter(reservedType -> graphStore.hasRelationshipType(RelationshipType.of(reservedType)))
+            .collect(Collectors.toList());
+
+        if (!invalidTypes.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The relationship types %s are in the input graph, but are reserved for splitting.",
+                StringJoining.join(invalidTypes)
             ));
         }
     }

@@ -101,6 +101,8 @@ public class PipelineExecutor {
         Optional<Long> randomSeed
     ) {
         LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
+        splitConfig.validateAgainstGraphStore(graphStore);
+
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
