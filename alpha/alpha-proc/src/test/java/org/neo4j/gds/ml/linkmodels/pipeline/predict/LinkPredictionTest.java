@@ -194,11 +194,11 @@ class LinkPredictionTest extends BaseProcTest {
 
             var expectedLinks = List.of(
                 PredictedLink.of(0, 4, 0.9818363089715674),
-            PredictedLink.of(0, 1, 0.8765329524347759),
-            PredictedLink.of(0, 3, 0.11920292202211766),
-            PredictedLink.of(1, 4, 0.11815697780926958),
-            PredictedLink.of(0, 2, 0.011096137997457569),
-            PredictedLink.of(2, 3, 2.810228605019867E-9)
+                PredictedLink.of(0, 1, 0.8765329524347759),
+                PredictedLink.of(0, 3, 0.11920292202211766),
+                PredictedLink.of(1, 4, 0.11815697780926958),
+                PredictedLink.of(0, 2, 0.011096137997457569),
+                PredictedLink.of(2, 3, 2.810228605019867E-9)
             );
 
             assertThat(predictedLinks).containsAll(expectedLinks);
