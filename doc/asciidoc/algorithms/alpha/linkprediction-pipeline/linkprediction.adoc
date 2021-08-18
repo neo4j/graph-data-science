@@ -26,8 +26,8 @@ In addition to managing a predictive model, it also manages:
 
 The motivation for using pipelines are:
 
-* easier to getting splits right and prevent data leakage
-* ensuring that the same feature creation steps are applied in predict and train time
+* easier to get splits right and prevent data leakage
+* ensuring that the same feature creation steps are applied at predict and train time
 * applying the trained model with a single procedure call
 * persisting the pipeline as a whole
 
@@ -44,7 +44,7 @@ The rest of this page is divided as follows:
 [[algorithms-ml-linkprediction-creating-a-pipeline]]
 == Creating a pipeline
 
-The first step of building a new pipeline is to create it using `gds.alpha.ml.pipeline.linkPrediction.create`.
+The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.linkPrediction.create`.
 This stores a trainable model object in the model catalog of type `Link prediction training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
 The latter is also a model which is stored in the catalog with type `Link prediction pipeline`.
@@ -97,7 +97,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
 |===
 --
 
-We can see, the newly created pipeline does not contain any steps yet and only has default for the split and train parameters
+This show that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
 [[algorithms-ml-linkprediction-adding-node-properties]]
 == Adding node properties
@@ -109,7 +109,7 @@ Moreover, the node property steps that are added to the pipeline will be execute
 The name of the procedure that should be added can be a fully GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
-It can be favorable to include <<algorithms-ml-models-preprocessing, pre-processing algorithms>> as node property steps.
+For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> can be used as node property steps.
 
 === Syntax
 
@@ -260,7 +260,7 @@ For example, the `embedding` property could be created by the previous example, 
 [[algorithms-ml-linkprediction-configure-splits]]
 == Configuring the relationship splits
 
-Link Prediction pipelines also manage splitting the relationships into several sets and also adds sampled negative relationships to some of these sets.
+Link Prediction pipelines manage splitting the relationships into several sets and add sampled negative relationships to some of these sets.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 
 The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
@@ -268,7 +268,7 @@ The splitting configuration of a pipeline can be inspected by using `gds.beta.mo
 The splitting of relationships proceeds internally in the following steps:
 
 1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
-2. The relationships remaining after filtering we call _positive_ and are split into a `test` set and remaining relationships.
+2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships.
 * The `test` set contains a `testFraction` fraction of the positive relationships.
 * To the `test` set also random negative relationships are added, where the number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
