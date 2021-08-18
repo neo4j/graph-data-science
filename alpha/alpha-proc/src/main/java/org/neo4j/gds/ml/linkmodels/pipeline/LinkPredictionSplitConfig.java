@@ -39,6 +39,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 public interface LinkPredictionSplitConfig extends Model.Mappable {
 
+    String TEST_FRACTION_KEY = "testFraction";
+    String TRAIN_FRACTION_KEY = "trainFraction";
+
     @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int validationFolds() {
@@ -46,12 +49,14 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
     }
 
     @Value.Default
+    @Configuration.Key(TEST_FRACTION_KEY)
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double testFraction() {
         return 0.1;
     }
 
     @Value.Default
+    @Configuration.Key(TRAIN_FRACTION_KEY)
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double trainFraction() {
         return 0.1;
