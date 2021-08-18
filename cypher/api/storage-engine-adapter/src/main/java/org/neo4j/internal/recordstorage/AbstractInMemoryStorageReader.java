@@ -82,12 +82,12 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     @Override
     public IndexDescriptor indexGetForName(String name) {
-        return IndexDescriptor.NO_INDEX;
+        return null;
     }
 
     @Override
     public ConstraintDescriptor constraintGetForName(String name) {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
