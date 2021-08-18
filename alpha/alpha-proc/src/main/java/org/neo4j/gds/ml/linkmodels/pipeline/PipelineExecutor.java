@@ -173,6 +173,7 @@ public class PipelineExecutor {
             randomSeed.ifPresent(seed -> put("randomSeed", seed));
         }};
 
-        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, "splitRelationships", splitRelationshipProcConfig);
+        var procReflection = ProcedureReflection.INSTANCE;
+        procReflection.invokeProc(caller, graphName, procReflection.findProcedureMethod("splitRelationships"), splitRelationshipProcConfig);
     }
 }

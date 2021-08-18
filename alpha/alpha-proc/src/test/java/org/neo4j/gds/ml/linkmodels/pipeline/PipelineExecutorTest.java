@@ -175,7 +175,7 @@ class PipelineExecutorTest extends BaseProcTest {
     @Test
     void testProcedureAndLinkFeatures() {
         var pipeline = new TrainingPipeline();
-        pipeline.addNodePropertyStep(new NodePropertyStep(
+        pipeline.addNodePropertyStep(NodePropertyStep.of(
             "pageRank",
             Map.of("mutateProperty", "pageRank")
         ));

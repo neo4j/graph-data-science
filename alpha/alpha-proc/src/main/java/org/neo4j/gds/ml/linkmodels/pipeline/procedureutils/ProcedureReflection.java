@@ -92,7 +92,7 @@ public final class ProcedureReflection {
         return normalizedFullName.endsWith(normalizedShortName);
     }
 
-    private String procedureName(Method method) {
+    public String procedureName(Method method) {
         var annotation = method.getAnnotation(Procedure.class);
         return annotation.name().isEmpty() ? annotation.value() : annotation.name();
     }
@@ -114,11 +114,10 @@ public final class ProcedureReflection {
         return proc;
     }
 
-    public void invokeProc(BaseProc caller, String graphName, String procName, Map<String, Object> config) {
-        var method = findProcedureMethod(procName);
-        AlgoBaseProc<?, ?, ?> procedure = createProcedure(caller, method);
+    public void invokeProc(BaseProc caller, String graphName, Method procMethod, Map<String, Object> config) {
+        AlgoBaseProc<?, ?, ?> procedure = createProcedure(caller, procMethod);
         try {
-            method.invoke(procedure, graphName, config);
+            procMethod.invoke(procedure, graphName, config);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

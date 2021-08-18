@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -57,7 +56,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
-                        "name", "pageRank",
+                        "name", "gds.pageRank.mutate",
                         "config", Map.of("mutateProperty", "pr")
                     )),
                 "featureSteps", List.of(),
@@ -98,7 +97,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
-                        "name", "pageRank",
+                        "name", "gds.pageRank.mutate",
                         "config", Map.of("mutateProperty", "pr")
                     )),
                 "featureSteps", List.of(
@@ -124,11 +123,11 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                 "splitConfig",DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(
                     Map.of(
-                        "name", "pageRank",
+                        "name", "gds.pageRank.mutate",
                         "config", Map.of("mutateProperty", "pr")
                     ),
                     Map.of(
-                        "name", "pageRank",
+                        "name", "gds.pageRank.mutate",
                         "config", Map.of("mutateProperty", "pr2")
                     )),
                 "featureSteps", List.of(),
@@ -153,7 +152,6 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         );
     }
 
-    @Disabled
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
         assertError(

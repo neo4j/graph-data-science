@@ -19,25 +19,32 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NodePropertyStep implements Model.Mappable {
-    public final String taskName;
+    public final Method procMethod;
     public final Map<String, Object> config;
 
-    NodePropertyStep(String taskName, Map<String, Object> config) {
-        this.taskName = taskName;
+    private NodePropertyStep(Method procMethod, Map<String, Object> config) {
+        this.procMethod = procMethod;
         this.config = config;
+    }
+
+    public static NodePropertyStep of(String procName,  Map<String, Object> config) {
+        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(procName);
+
+        return new NodePropertyStep(procedureMethod, config);
     }
 
     public void execute(BaseProc caller, String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relTypes) {
@@ -50,16 +57,12 @@ public class NodePropertyStep implements Model.Mappable {
         execute(caller, graphName, configCopy);
     }
 
-    public void execute(BaseProc caller, String graphName) {
-        execute(caller, graphName, config);
-    }
-
     private void execute(BaseProc caller, String graphName, Map<String, Object> config) {
-        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, taskName, config);
+        ProcedureReflection.INSTANCE.invokeProc(caller, graphName, procMethod, config);
     }
 
     @Override
     public Map<String, Object> toMap() {
-        return Map.of("name", taskName, "config", config);
+        return Map.of("name", ProcedureReflection.INSTANCE.procedureName(procMethod), "config", config);
     }
 }

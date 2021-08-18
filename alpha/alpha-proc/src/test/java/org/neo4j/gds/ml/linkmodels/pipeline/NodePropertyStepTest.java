@@ -21,12 +21,15 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,9 +64,9 @@ class NodePropertyStepTest extends BaseProcTest {
 
     @Test
     void testInvokeProc() {
-        var step = new NodePropertyStep("pageRank", Map.of("mutateProperty", "foo"));
+        var step = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "foo"));
         applyOnProcedure(db, proc -> {
-            step.execute(proc, "g");
+            step.execute(proc, "g", List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS));
         });
         String streamQuery = "CALL gds.graph.streamNodeProperties('g', ['foo'])";
         runQueryWithResultConsumer(streamQuery, result -> {
