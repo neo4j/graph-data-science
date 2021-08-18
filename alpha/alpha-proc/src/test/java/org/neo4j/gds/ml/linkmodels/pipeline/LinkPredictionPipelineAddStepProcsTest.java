@@ -31,6 +31,7 @@ import org.neo4j.gds.model.catalog.TestTrainConfig;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
 
 class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
@@ -85,6 +86,26 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     void failsWhenAddFeatureStepIsMissingNodeProperties() {
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {mutateProperty: 'pr'})",
             "No value specified for the mandatory configuration parameter `nodeProperties"
+        );
+    }
+
+    @Test
+    void failOnIncompleteNodePropertyStepConfig() {
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'fastRP', {})"
+        ))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .getRootCause()
+            .hasMessageContaining("Multiple errors in configuration arguments:")
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `embeddingDimension`")
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `mutateProperty`");
+    }
+
+    @Test
+    void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', destroyEverything: true})",
+            "Unexpected configuration key: destroyEverything"
         );
     }
 

@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -30,6 +32,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -112,6 +115,22 @@ public final class ProcedureReflection {
             throw new RuntimeException(e);
         }
         return proc;
+    }
+
+    public Optional<AlgoBaseConfig> createAlgoConfig(BaseProc caller, Method procMethod, CypherMapWrapper config) {
+        try {
+            var proc = createProcedure(caller, procMethod);
+            var newConfigMethod = proc.getClass().getDeclaredMethod("newConfig", String.class, Optional.class, Optional.class, CypherMapWrapper.class);
+            // make protected `newConfig` method accessible
+            newConfigMethod.setAccessible(true);
+            // validate mandatory algo specific fields are given
+            return Optional.of((AlgoBaseConfig) newConfigMethod.invoke(proc, "", Optional.empty(), Optional.empty(), config));
+        } catch (InvocationTargetException e) {
+            // propagate IllegalArgument exception
+            throw new IllegalArgumentException(e.getTargetException().getMessage(), e.getTargetException().getCause());
+        } catch (NoSuchMethodException | IllegalAccessException ignored) {
+            return Optional.empty();
+        }
     }
 
     public void invokeProc(BaseProc caller, String graphName, Method procMethod, Map<String, Object> config) {

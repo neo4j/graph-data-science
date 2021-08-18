@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -28,6 +30,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
@@ -52,6 +55,15 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
                 StringJoining.join(reservedConfigKeys)
             ));
         }
+
+        var wrappedConfig = CypherMapWrapper.create(procedureConfig);
+        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(taskName);
+        Optional<AlgoBaseConfig> typedConfig = ProcedureReflection.INSTANCE.createAlgoConfig(
+            this,
+            procedureMethod,
+            wrappedConfig
+        );
+        typedConfig.ifPresent(config -> wrappedConfig.requireOnlyKeysFrom(config.configKeys()));
 
         NodePropertyStep step = NodePropertyStep.of(taskName, procedureConfig);
         pipeline.addNodePropertyStep(step);
