@@ -123,12 +123,12 @@ class PipelineExecutorTest extends BaseProcTest {
     void dependentNodePropertySteps() {
         var pipeline = new TrainingPipeline();
 
-        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
-        pipeline.addNodePropertyStep("scaleProperties", Map.of(
+        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+        pipeline.addNodePropertyStep(NodePropertyStep.of("scaleProperties", Map.of(
             "mutateProperty", "nodeFeatures",
             "nodeProperties", "degree",
             "scaler", "MEAN"
-        ));
+        )));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME).executeNodePropertySteps(

@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
+import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
@@ -164,7 +165,7 @@ class LinkPredictionTest extends BaseProcTest {
     @Test
     void shouldPredictWithPipelineContainingNodePropertySteps() {
         var pipeline = new TrainingPipeline();
-        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
         double[] weights = {-2.0, -1.0, 3.0, 1.0};
@@ -208,7 +209,7 @@ class LinkPredictionTest extends BaseProcTest {
     @Test
     void shouldPredictTwice() {
         var pipeline = new TrainingPipeline();
-        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
         double[] weights = {-2.0, -1.0, 3.0, 1.0};

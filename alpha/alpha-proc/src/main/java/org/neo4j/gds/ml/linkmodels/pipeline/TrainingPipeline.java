@@ -79,10 +79,6 @@ public class TrainingPipeline implements Mappable {
         return nodePropertySteps;
     }
 
-    public void addNodePropertyStep(String name, Map<String, Object> config) {
-        this.addNodePropertyStep(NodePropertyStep.of(name, config));
-    }
-
     public void addNodePropertyStep(NodePropertyStep step) {
         this.nodePropertySteps.add(step);
     }
