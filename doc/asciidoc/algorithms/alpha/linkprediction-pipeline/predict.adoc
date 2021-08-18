@@ -1,10 +1,10 @@
 [[algorithms-link-prediction-pipelines-predict]]
 == Applying a trained model for prediction
 
-In the previous sections we have seen how to build up a Link Prediction training pipeline and run it produce a runnable model.
+In the previous sections we have seen how to build up a Link Prediction training pipeline and train it to produce a predictive model.
 After <<algorithms-ml-linkprediction-pipelines-train, training>>, the runnable model is of type `Link prediction pipeline` and resides in the model catalog.
 
-The model can then be applied to a graph in the graph catalog to create a new relationship type containing the predicted links.
+The trained model can then be applied to a graph in the graph catalog to create a new relationship type containing the predicted links.
 The relationships also have a property which stores the predicted probability of the link, which can be seen as a relative measure of the model's prediction confidence.
 
 Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.

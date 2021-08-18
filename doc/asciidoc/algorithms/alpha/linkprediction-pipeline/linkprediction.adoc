@@ -280,9 +280,12 @@ The number of negative relationships is the number of positive ones multiplied b
 3. The remaining positive relationships are split into a `train` set and a `feature input` set.
 * The `train` set contains a `trainFraction` fraction of _all_ the positive relationships.
 ** Therefore we require `trainFraction + testFraction < 1.0`.
+** The `feature input` set contains the remaining `1.0 - (trainFraction + testFraction)` fraction of the positive relationships.
 * Random negative relationships are added to the `train` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
+
+The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
 The `feature input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
 
