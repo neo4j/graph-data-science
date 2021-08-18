@@ -204,4 +204,50 @@ class LinkPredictionTest extends BaseProcTest {
             assertThat(predictedLinks).containsAll(expectedLinks);
         });
     }
+
+    @Test
+    void shouldPredictTwice() {
+        var pipeline = new TrainingPipeline();
+        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
+
+        double[] weights = {-2.0, -1.0, 3.0, 1.0};
+
+        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
+            weights,
+            1,
+            weights.length
+        )));
+
+        var expectedLinks = List.of(
+            PredictedLink.of(0, 4, 0.9818363089715674),
+            PredictedLink.of(0, 1, 0.8765329524347759),
+            PredictedLink.of(0, 3, 0.11920292202211766),
+            PredictedLink.of(1, 4, 0.11815697780926958),
+            PredictedLink.of(0, 2, 0.011096137997457569),
+            PredictedLink.of(2, 3, 2.810228605019867E-9)
+        );
+
+        for (int i = 0; i < 2; i++) {
+            ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+                var linkPrediction = new LinkPrediction(
+                    modelData,
+                    new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                    List.of(NodeLabel.of("N")),
+                    List.of(RelationshipType.of("T")),
+                    graphStore,
+                    4,
+                    6,
+                    0D,
+                    ProgressTracker.NULL_TRACKER
+                );
+
+                var predictionResult = linkPrediction.compute();
+                var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+                assertThat(predictedLinks).hasSize(6);
+
+                assertThat(predictedLinks).containsAll(expectedLinks);
+            });
+        }
+    }
 }
