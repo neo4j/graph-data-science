@@ -106,7 +106,7 @@ public final class NativeNodePropertyImporter {
                 continue;
             }
 
-            IntObjectMap<List<NodePropertiesFromStoreBuilder>> buildersByPropertyId = buildersByLabelTokenAndPropertyToken.get((int) label);
+            BuildersByPropertyToken buildersByPropertyId = buildersByLabelTokenAndPropertyToken.get((int) label);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
@@ -133,7 +133,7 @@ public final class NativeNodePropertyImporter {
         long nodeId,
         PropertyCursor propertyCursor,
         int propertyToken,
-        IntObjectMap<List<NodePropertiesFromStoreBuilder>> buildersByPropertyId
+        BuildersByPropertyToken buildersByPropertyId
     ) {
         int propertiesImported = 0;
 
@@ -161,11 +161,10 @@ public final class NativeNodePropertyImporter {
             return builders.entrySet();
         }
 
-        void putIfAbsent(NodeLabel nodeLabel, HashMap<PropertyMapping, NodePropertiesFromStoreBuilder> thing) {
-            builders.putIfAbsent(nodeLabel, thing);
-        }
-
         void put(NodeLabel nodeLabel, PropertyMapping propertyMapping, NodePropertiesFromStoreBuilder builder) {
+            builders
+                .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
+                .computeIfAbsent(propertyMapping, __ -> builder);
             builders.get(nodeLabel).put(propertyMapping, builder);
         }
 
@@ -175,7 +174,7 @@ public final class NativeNodePropertyImporter {
     }
 
     static final class BuildersByLabelTokenAndPropertyToken {
-        private final IntObjectMap<IntObjectMap<List<NodePropertiesFromStoreBuilder>>> builders;
+        private final IntObjectMap<BuildersByPropertyToken> builders;
 
         BuildersByLabelTokenAndPropertyToken() {
             this.builders = new IntObjectHashMap<>();
@@ -185,21 +184,35 @@ public final class NativeNodePropertyImporter {
             return builders.containsKey(labelId);
         }
 
-        IntObjectMap<List<NodePropertiesFromStoreBuilder>> get(int labelId) {
+        BuildersByPropertyToken get(int labelId) {
             return builders.get(labelId);
         }
 
         void put(int labelId, int propertyToken, NodePropertiesFromStoreBuilder builder) {
             if (!builders.containsKey(labelId)) {
-                builders.put(labelId, new IntObjectHashMap<>());
+                builders.put(labelId, new BuildersByPropertyToken());
             }
-            var buildersByPropertyToken = builders.get(labelId);
-            if (!buildersByPropertyToken.containsKey(propertyToken)) {
-                buildersByPropertyToken.put(propertyToken, new ArrayList<>());
-            }
-            buildersByPropertyToken.get(propertyToken).add(builder);
+            builders.get(labelId).add(propertyToken, builder);
+        }
+    }
+
+    static final class BuildersByPropertyToken {
+        private final IntObjectMap<List<NodePropertiesFromStoreBuilder>> builders;
+
+        BuildersByPropertyToken() {
+            this.builders = new IntObjectHashMap<>();
         }
 
+        List<NodePropertiesFromStoreBuilder> get(int propertyToken) {
+            return builders.get(propertyToken);
+        }
+
+        void add(int propertyToken, NodePropertiesFromStoreBuilder builder) {
+            if (!builders.containsKey(propertyToken)) {
+                builders.put(propertyToken, new ArrayList<>());
+            }
+            builders.get(propertyToken).add(builder);
+        }
     }
 
     public static final class Builder {
@@ -246,7 +259,6 @@ public final class NativeNodePropertyImporter {
             var builders = new BuildersByNodeLabel();
             propertyMappingsByLabel.forEach((nodeLabel, propertyMappings) -> {
                 if (propertyMappings.numberOfMappings() > 0) {
-                    builders.putIfAbsent(nodeLabel, new HashMap<>());
                     for (PropertyMapping propertyMapping : propertyMappings) {
                         NodePropertiesFromStoreBuilder builder = NodePropertiesFromStoreBuilder.of(
                             nodeCount, tracker, propertyMapping.defaultValue()
