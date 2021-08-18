@@ -20,17 +20,22 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddStepProcs extends BaseProc {
+    private static final List<String> reservedConfigKeys = List.of(AlgoBaseConfig.NODE_LABELS_KEY, AlgoBaseConfig.RELATIONSHIP_TYPES_KEY);
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")
@@ -40,7 +45,16 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
         var pipeline = getPipelineModelInfo(pipelineName, username());
-        pipeline.addNodePropertyStep(taskName, procedureConfig);
+
+        if (reservedConfigKeys.stream().anyMatch(procedureConfig::containsKey)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Cannot configure %s for an individual node property step, but can only be configured at `train` and `predict` mode.",
+                StringJoining.join(reservedConfigKeys)
+            ));
+        }
+
+        NodePropertyStep step = NodePropertyStep.of(taskName, procedureConfig);
+        pipeline.addNodePropertyStep(step);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

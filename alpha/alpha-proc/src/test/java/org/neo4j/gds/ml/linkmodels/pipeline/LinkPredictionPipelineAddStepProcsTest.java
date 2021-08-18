@@ -161,6 +161,14 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
+    void failOnConfiguringReservedConfigFields() {
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {nodeLabels: ['LABEL'], mutateProperty: 'pr'})",
+            "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step, but can only be configured at `train` and `predict` mode."
+        );
+    }
+
+    @Test
     void shouldThrowInvalidFeatureStepName() {
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'juggleSpoons', {mutateProperty: 'pr'})",

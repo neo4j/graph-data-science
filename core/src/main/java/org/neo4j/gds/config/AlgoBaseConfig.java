@@ -21,9 +21,9 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
@@ -35,11 +35,13 @@ import java.util.stream.Collectors;
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
 
     String NODE_LABELS_KEY = "nodeLabels";
+    String RELATIONSHIP_TYPES_KEY = "relationshipTypes";
 
     @Configuration.Parameter
     Optional<String> graphName();
 
     @Value.Default
+    @Configuration.Key(RELATIONSHIP_TYPES_KEY)
     default List<String> relationshipTypes() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
@@ -52,6 +54,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
     }
 
     @Value.Default
+    @Configuration.Key(NODE_LABELS_KEY)
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
