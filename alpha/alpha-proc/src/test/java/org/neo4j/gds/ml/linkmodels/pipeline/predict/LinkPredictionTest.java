@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.AlgoBaseProc;
@@ -29,7 +30,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -39,12 +40,13 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
+import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -67,7 +69,7 @@ class LinkPredictionTest extends BaseProcTest {
 
     private static final double[] WEIGHTS = new double[]{-2.0, -1.0, 3.0};
 
-    private Graph graph;
+    private GraphStore graphStore;
 
     @BeforeEach
     void setup() throws Exception {
@@ -84,7 +86,7 @@ class LinkPredictionTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getUnion();
+        graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore();
     }
 
     @ParameterizedTest
@@ -105,7 +107,7 @@ class LinkPredictionTest extends BaseProcTest {
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
-                graph,
+                graphStore,
                 concurrency,
                 topN,
                 0D,
@@ -145,7 +147,7 @@ class LinkPredictionTest extends BaseProcTest {
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
-                graph,
+                graphStore,
                 4,
                 6,
                 threshold,
@@ -156,6 +158,50 @@ class LinkPredictionTest extends BaseProcTest {
             assertThat(predictedLinks).hasSize(expectedPredictions);
 
             assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
+        });
+    }
+
+    @Test
+    void shouldPredictWithPipelineContainingNodePropertySteps() {
+        var pipeline = new TrainingPipeline();
+        pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
+
+        double[] weights = {-2.0, -1.0, 3.0, 1.0};
+
+        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
+            weights,
+            1,
+            weights.length
+        )));
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var linkPrediction = new LinkPrediction(
+                modelData,
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                List.of(NodeLabel.of("N")),
+                List.of(RelationshipType.of("T")),
+                graphStore,
+                4,
+                6,
+                0D,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            var predictionResult = linkPrediction.compute();
+            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+            assertThat(predictedLinks).hasSize(6);
+
+            var expectedLinks = List.of(
+                PredictedLink.of(0, 4, 0.9818363089715674),
+                PredictedLink.of(0, 1, 0.8765329524347759),
+                PredictedLink.of(0, 3, 0.11920292202211766),
+                PredictedLink.of(1, 4, 0.11815697780926958),
+                PredictedLink.of(0, 2, 0.011096137997457569),
+                PredictedLink.of(2, 3, 2.810228605019867E-9)
+            );
+
+            assertThat(predictedLinks).containsAll(expectedLinks);
         });
     }
 }
