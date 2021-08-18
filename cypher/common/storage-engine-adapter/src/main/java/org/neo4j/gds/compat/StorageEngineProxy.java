@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
@@ -118,5 +119,9 @@ public final class StorageEngineProxy {
         TokenHolders tokenHolders
     ) {
         return IMPL.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
+    }
+
+    public static Edition dbmsEdition(GraphDatabaseAPI api) {
+        return IMPL.dbmsEdition(api);
     }
 }
