@@ -22,8 +22,8 @@ package org.neo4j.gds.pregel;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -72,7 +72,7 @@ class SpeakerListenerLPATest {
             new SpeakerListenerLPA(42),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var resultCommunities = pregelJob.run().nodeValues().longArrayProperties(LABELS_PROPERTY);
@@ -120,7 +120,7 @@ class SpeakerListenerLPATest {
             new SpeakerListenerLPA(42),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var resultCommunities = pregelJob.run().nodeValues().longArrayProperties(LABELS_PROPERTY);

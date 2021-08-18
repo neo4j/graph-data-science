@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -76,7 +76,7 @@ class LabelPropagationPregelAlgoTest {
             new LabelPropagationPregel(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run()
@@ -115,7 +115,7 @@ class LabelPropagationPregelAlgoTest {
             weightedLabelPropagation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run()

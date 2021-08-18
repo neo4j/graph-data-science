@@ -35,6 +35,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -197,7 +198,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(AllocationTracker.class, "tracker")
                 .addParameter(ProgressTracker.class, "progressTracker")
                 .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, tracker, progressTracker.progressLogger())", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, tracker, progressTracker)", algorithmClassName)
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("taskName")
@@ -205,6 +206,15 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addModifiers(Modifier.PROTECTED)
                 .returns(String.class)
                 .addStatement("return $T.class.getSimpleName()", algorithmClassName)
+                .build()
+            )
+            .addMethod(MethodSpec.methodBuilder("progressTask")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(Graph.class, "graph")
+                .addParameter(pregelSpec.configTypeName(), "configuration")
+                .returns(Task.class)
+                .addStatement("return Pregel.progressTask(graph, configuration)", algorithmClassName)
                 .build())
             .addMethod(MethodSpec.methodBuilder("memoryEstimation")
                 .addAnnotation(Override.class)

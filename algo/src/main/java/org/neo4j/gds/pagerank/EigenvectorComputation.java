@@ -21,7 +21,6 @@ package org.neo4j.gds.pagerank;
 
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
@@ -33,6 +32,7 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.scaling.ScalarScaler;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;

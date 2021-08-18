@@ -20,13 +20,13 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.BitUtil;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,7 +51,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     private final int iteration;
     private boolean hasSendMessage;
     private final AtomicBoolean sentMessage;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     ForkJoinComputeStep(
         Graph graph,
@@ -64,7 +64,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         HugeAtomicBitSet voteBits,
         @Nullable CountedCompleter<Void> parent,
         AtomicBoolean sentMessage,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         super(parent);
         this.graph = graph;
@@ -77,7 +77,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
         this.sentMessage = sentMessage;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.initContext = new InitContext<>(this, config, graph);
     }
 
@@ -107,7 +107,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
                 voteBits,
                 this,
                 sentMessage,
-                progressLogger
+                progressTracker
             );
 
             this.nodeBatch = rightBatch;
@@ -164,8 +164,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     }
 
     @Override
-    public ProgressLogger progressLogger() {
-        return progressLogger;
+    public ProgressTracker progressTracker() {
+        return progressTracker;
     }
 
     @Override

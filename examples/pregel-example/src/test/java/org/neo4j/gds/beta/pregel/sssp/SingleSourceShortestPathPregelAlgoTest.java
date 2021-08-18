@@ -22,9 +22,9 @@ package org.neo4j.gds.beta.pregel.sssp;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -32,8 +32,8 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Map;
 
-import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
 import static org.neo4j.gds.TestSupport.assertLongValues;
+import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
 
 @GdlExtension
 class SingleSourceShortestPathPregelAlgoTest {
@@ -82,7 +82,7 @@ class SingleSourceShortestPathPregelAlgoTest {
             new SingleSourceShortestPathPregel(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(DISTANCE);

@@ -23,9 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,9 +49,9 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         HugeAtomicBitSet voteBits,
         int concurrency,
         ExecutorService executorService,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        super(graph, computation, config, nodeValues, messenger, voteBits, progressLogger);
+        super(graph, computation, config, nodeValues, messenger, voteBits, progressTracker);
         this.executorService = executorService;
         this.concurrency = concurrency;
     }
@@ -94,7 +94,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             nodeValues,
             messenger,
             voteBits,
-            progressLogger
+            progressTracker
         );
 
         switch (config.partitioning()) {

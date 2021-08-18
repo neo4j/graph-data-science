@@ -170,13 +170,13 @@ class PageRankTest {
                 .maxIterations(maxIterations)
                 .build();
 
-            var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph);
-            var testLogger = new TestProgressLogger(progressTask, config.concurrency());
-            var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+            var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph, config);
+            var progressLogger = new TestProgressLogger(progressTask, config.concurrency());
+            var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
 
             runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
 
-            var progresses = testLogger.getProgresses().stream()
+            var progresses = progressLogger.getProgresses().stream()
                 .filter(it -> it.get() > 0)
                 .collect(Collectors.toList());
 
@@ -188,23 +188,41 @@ class PageRankTest {
                 assertThat(progress.get()).isIn(List.of(graph.nodeCount(), graph.nodeCount() * 2));
             });
 
+            var messages = progressLogger.getMessages(TestLog.INFO);
+
             LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
-                assertThat(testLogger.getMessages(TestLog.INFO))
+                assertThat(messages)
                     // avoid asserting on the thread id
                     .extracting(removingThreadId())
                     .contains(
                         formatWithLocale(
-                            "PageRank :: Iteration %d/%d :: Start",
+                            "PageRank :: Compute iteration %d of %d :: Start",
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
-                            "PageRank :: Iteration %d/%d :: Finished",
+                            "PageRank :: Compute iteration %d of %d :: Finished",
+                            iteration,
+                            config.maxIterations()
+                        ),
+                        formatWithLocale(
+                            "PageRank :: Master compute iteration %d of %d :: Start",
+                            iteration,
+                            config.maxIterations()
+                        ),
+                        formatWithLocale(
+                            "PageRank :: Master compute iteration %d of %d :: Finished",
                             iteration,
                             config.maxIterations()
                         )
                     )
             );
+            assertThat(messages)
+                .extracting(removingThreadId())
+                .contains(
+                    "PageRank :: Start",
+                    "PageRank :: Finished"
+                );
         }
     }
 

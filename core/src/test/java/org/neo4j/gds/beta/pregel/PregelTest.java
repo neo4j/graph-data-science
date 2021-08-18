@@ -41,11 +41,11 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -53,6 +53,7 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -101,7 +102,7 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -130,13 +131,10 @@ class PregelTest {
 
         var computation = new TestPregelComputation();
 
-        var progressLogger = new TestProgressLogger(
-            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
-            config.concurrency()
-        );
+        var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
+        var progressLogger = new TestProgressLogger(task, config.concurrency());
 
-        // TODO: this will be handles by the ProgressTracker
-        progressLogger.reset(graph.nodeCount());
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
 
         Pregel.create(
             graph,
@@ -144,32 +142,34 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            progressLogger
+            progressTracker
         ).run();
 
-        assertThat(progressLogger.getProgresses()).allMatch(progress -> graph.nodeCount() == progress.get());
+        assertThat(progressLogger.getProgresses())
+            .extracting(AtomicLong::get)
+            .allMatch(progress -> progress == 0 || progress == graph.nodeCount());
 
         assertThat(progressLogger.getMessages(TestLog.INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .contains(
-                "TestPregelComputation :: Iteration 1/2 :: Start",
-                "TestPregelComputation :: Iteration 1/2 25%",
-                "TestPregelComputation :: Iteration 1/2 50%",
-                "TestPregelComputation :: Iteration 1/2 75%",
-                "TestPregelComputation :: Iteration 1/2 100%",
-                "TestPregelComputation :: Iteration 1/2 :: Master Compute :: Start",
-                "TestPregelComputation :: Iteration 1/2 :: Master Compute :: Finished",
-                "TestPregelComputation :: Iteration 1/2 :: Finished",
+                "TestPregelComputation :: Compute iteration 1 of 2 :: Start",
+                "TestPregelComputation :: Compute iteration 1 of 2 25%",
+                "TestPregelComputation :: Compute iteration 1 of 2 50%",
+                "TestPregelComputation :: Compute iteration 1 of 2 75%",
+                "TestPregelComputation :: Compute iteration 1 of 2 100%",
+                "TestPregelComputation :: Compute iteration 1 of 2 :: Finished",
+                "TestPregelComputation :: Master compute iteration 1 of 2 :: Start",
+                "TestPregelComputation :: Master compute iteration 1 of 2 :: Finished",
 
-                "TestPregelComputation :: Iteration 2/2 :: Start",
-                "TestPregelComputation :: Iteration 2/2 25%",
-                "TestPregelComputation :: Iteration 2/2 50%",
-                "TestPregelComputation :: Iteration 2/2 75%",
-                "TestPregelComputation :: Iteration 2/2 100%",
-                "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Start",
-                "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Finished",
-                "TestPregelComputation :: Iteration 2/2 :: Finished"
+                "TestPregelComputation :: Compute iteration 2 of 2 :: Start",
+                "TestPregelComputation :: Compute iteration 2 of 2 25%",
+                "TestPregelComputation :: Compute iteration 2 of 2 50%",
+                "TestPregelComputation :: Compute iteration 2 of 2 75%",
+                "TestPregelComputation :: Compute iteration 2 of 2 100%",
+                "TestPregelComputation :: Compute iteration 2 of 2 :: Finished",
+                "TestPregelComputation :: Master compute iteration 2 of 2 :: Start",
+                "TestPregelComputation :: Master compute iteration 2 of 2 :: Finished"
             );
     }
 
@@ -193,13 +193,9 @@ class PregelTest {
         var eventTracker = new TestProgressEventTracker();
         var computation = new TestPregelComputation();
 
-        var progressLogger =  new TestProgressLogger(
-            Tasks.leaf(computation.getClass().getSimpleName(), graph.nodeCount()),
-            config.concurrency()
-        );
-
-        // TODO: this will be handles by the ProgressTracker
-        progressLogger.reset(graph.nodeCount());
+        var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
+        var progressLogger =  new TestProgressLogger(task, config.concurrency());
+        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker);
 
         var pregelAlgo = Pregel.create(
             graph,
@@ -207,14 +203,13 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            progressLogger
+            progressTracker
         );
 
         pregelAlgo.run();
         pregelAlgo.release();
 
-        // TODO: reactivate when event tracking is available again for pregel
-        // assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
@@ -271,7 +266,7 @@ class PregelTest {
             computation,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         return pregelJob.run().nodeValues().doubleProperties(KEY);
@@ -292,7 +287,7 @@ class PregelTest {
             new TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -318,7 +313,7 @@ class PregelTest {
             new CompositeTestComputation(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = pregelJob.run().nodeValues();
@@ -357,7 +352,7 @@ class PregelTest {
             new TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -373,7 +368,7 @@ class PregelTest {
             new TestMasterCompute(2),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = pregelJob.run();
@@ -541,7 +536,7 @@ class PregelTest {
             new TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         ));
     }
 
@@ -565,7 +560,7 @@ class PregelTest {
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         // assertion is happening in the computation

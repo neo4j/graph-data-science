@@ -22,16 +22,17 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
@@ -48,7 +49,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final PregelComputer<CONFIG> computer;
 
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     private final ExecutorService executor;
 
@@ -58,7 +59,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         PregelComputation<CONFIG> computation,
         ExecutorService executor,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         // This prevents users from disabling concurrency
         // validation in custom PregelConfig implementations.
@@ -73,7 +74,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), tracker),
             executor,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -96,6 +97,26 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return estimationBuilder.build();
     }
 
+    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, String taskName) {
+        return Tasks.iterativeDynamic(
+            taskName,
+            () -> List.of(
+                Tasks.leaf("Compute iteration", graph.nodeCount()),
+                Tasks.leaf("Master compute iteration", graph.nodeCount())
+            ),
+            config.maxIterations()
+        );
+    }
+
+    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config) {
+        var configName = config.getClass().getSimpleName();
+        var taskName = configName.replaceAll(
+            "(Mutate|Stream|Write|Stats)*Config",
+            ""
+        );
+        return progressTask(graph, config, taskName);
+    }
+
     private Pregel(
         final Graph graph,
         final CONFIG config,
@@ -103,14 +124,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final NodeValue initialNodeValue,
         final ExecutorService executor,
         final AllocationTracker tracker,
-        final ProgressLogger progressLogger
+        final ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValue;
-        this.progressLogger = progressLogger;
         this.executor = executor;
+        this.progressTracker = progressTracker;
 
         var reducer = computation.reducer();
 
@@ -130,7 +151,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .executorService(config.useForkJoin()
                 ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
                 : executor)
-            .progressLogger(progressLogger)
+            .progressTracker(progressTracker)
             .build();
     }
 
@@ -139,23 +160,24 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         computer.initComputation();
 
+        progressTracker.beginSubTask();
         int iteration = 0;
         for (; iteration < config.maxIterations(); iteration++) {
-            logIterationStart(iteration);
-
+            progressTracker.beginSubTask();
             computer.initIteration(iteration);
             messenger.initIteration(iteration);
-
             computer.runIteration();
+            progressTracker.endSubTask();
 
+            progressTracker.beginSubTask();
             didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
-
-            logIterationFinish(iteration, didConverge);
+            progressTracker.endSubTask();
 
             if (didConverge) {
                 break;
             }
         }
+        progressTracker.endSubTask();
 
         return ImmutablePregelResult.builder()
             .nodeValues(nodeValues)
@@ -165,28 +187,13 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     public void release() {
-        progressLogger.release();
+        progressTracker.release();
         messenger.release();
     }
 
     private boolean runMasterComputeStep(int iteration) {
-        progressLogger.startSubTask("Master Compute");
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor);
         var didConverge = computation.masterCompute(context);
-        progressLogger.finishSubTask("Master Compute");
         return didConverge;
-    }
-
-    private void logIterationStart(int iteration) {
-        progressLogger
-            .startSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, config.maxIterations()));
-    }
-
-    private void logIterationFinish(int iteration, boolean didConverge) {
-        var maxIterations = config.maxIterations();
-        progressLogger.finishSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, maxIterations));
-        if (!didConverge && iteration < maxIterations - 1) {
-            progressLogger.reset(graph.nodeCount());
-        }
     }
 }

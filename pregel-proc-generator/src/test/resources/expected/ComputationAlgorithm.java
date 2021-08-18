@@ -26,16 +26,16 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 @Generated("org.neo4j.gds.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
-                         AllocationTracker tracker, ProgressLogger progressLogger) {
-        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, tracker, progressLogger);
+                         AllocationTracker tracker, ProgressTracker progressTracker) {
+        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, tracker, progressTracker);
     }
 
     @Override
