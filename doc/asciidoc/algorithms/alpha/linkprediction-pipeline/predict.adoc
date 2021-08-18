@@ -9,11 +9,12 @@ The relationships also have a property which stores the predicted probability of
 
 Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.
 As during training, intermediate node properties created by the node property steps in the feature pipeline are transient and not visible after execution.
-When running the prediction mode, the relationships of the input graph are used in two ways.
-First, the input graph is fed into the feature pipeline and therefore influences the predictions if there is at least step in the pipeline which uses the input relationships (typically any node property step does).
-Second, the predictions are carried out on each node pair that are not connected via a relationship in the input graph.
 
-The predictions are sorted by score before the ones having score below the configured `threshold` are discarded.
+When using the model for prediction, the relationships of the input graph are used in two ways.
+First, the input graph is fed into the feature pipeline and therefore influences predictions if there is at least one step in the pipeline which uses the input relationships (typically any node property step does).
+Second, predictions are carried out on each node pair that is not connected in the input graph.
+
+The predicted links are sorted by score before the ones having score below the configured `threshold` are discarded.
 Finally, the configured `topN` predictions are stored back to the in-memory graph.
 
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
@@ -61,7 +62,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 | Name      | Type    | Default | Optional | Description
 | topN      | Integer | n/a     | no       | Limit on predicted relationships to output.
-| threshold | Float   | 0.0     | yes       | Minimum predicted probability on relationships to output.
+| threshold | Float   | 0.0     | yes      | Minimum predicted probability on relationships to output.
 |===
 
 .Results

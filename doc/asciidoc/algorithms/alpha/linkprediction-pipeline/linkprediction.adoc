@@ -274,12 +274,14 @@ The splitting of relationships proceeds internally in the following steps:
 1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
 2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships.
 * The `test` set contains a `testFraction` fraction of the positive relationships.
-* To the `test` set also random negative relationships are added, where the number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* Random negative relationships are added to the `test` set.
+The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
 3. The remaining positive relationships are split into a `train` set and a `feature input` set.
 * The `train` set contains a `trainFraction` fraction of _all_ the positive relationships.
 ** Therefore we require `trainFraction + testFraction < 1.0`.
-* To the `train` set also random negative relationships are added, where the number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* Random negative relationships are added to the `train` set.
+The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
 
 The `feature input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
