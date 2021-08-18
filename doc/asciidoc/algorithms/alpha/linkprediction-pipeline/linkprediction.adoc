@@ -106,7 +106,7 @@ A link prediction pipeline can execute one or several GDS algorithms in mutate m
 Such steps producing node properties can be chained one after another and created properties can also be used to <<algorithms-ml-linkprediction-adding-features, add features>>.
 Moreover, the node property steps that are added to the pipeline will be executed both when <<algorithms-ml-linkprediction-pipelines-train, training>> a model and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
 
-The name of the procedure that should be added can be a fully GDS procedure name ending with `.mutate`.
+The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
 For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> can be used as node property steps.
@@ -149,7 +149,11 @@ include::pipelineInfoResult.adoc[]
 .The following will add a node property step to the pipeline:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {mutateProperty: 'embedding', embeddingDimension: 256, randomSeed: 42})
+CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42
+})
 ----
 
 .Results
@@ -175,7 +179,7 @@ A feature step computes a vector of features for given node pairs.
 For each node pair, the results are concatenated into a single _link feature vector_.
 The order of the features in the link feature vector follows the order of the feature steps.
 Like with node property steps, the feature steps are also executed both at <<algorithms-ml-linkprediction-pipelines-train, training>> and <<algorithms-link-prediction-pipelines-predict, prediction>> time.
-The supported methods for obtaining features are described <<algorithms-ml-linkprediction-supported-features, below>>
+The supported methods for obtaining features are described <<algorithms-ml-linkprediction-supported-features, below>>.
 
 === Syntax
 
@@ -254,7 +258,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 |===
 
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
-For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to be present at train and predict time.
+For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
 --
 
 [[algorithms-ml-linkprediction-configure-splits]]
@@ -285,7 +289,7 @@ The `train` and `test` relationship sets are used for:
 * determining the label (positive or negative) for each training or test example
 * identifying the node pair for which link features are to be computed
 
-However, they are not used taken into account by the algorithms run in the node property steps.
+However, they are not used by the algorithms run in the node property steps.
 The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
 
 === Syntax
@@ -319,7 +323,7 @@ YIELD
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                  | Type    | Default | Description
-| validationFolds       | Integer | 3       | Number of divisions of the training graph used during model selection.
+| validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-linkprediction-pipelines-train,model selection>>.
 | testFraction          | Double  | 0.1     | Portion of the graph reserved for testing. Must be in the range (0, 1).
 | trainFraction         | Double  | 0.1     | Portion of the graph reserved for training. Must be in the range (0, 1).
 | negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set.
@@ -356,10 +360,10 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 [[algorithms-ml-linkprediction-configure-model-parameters]]
 == Configuring the model parameters
 
-The `gds.alpha.ml.pipeline.linkPrediction.configureParams` mode is used to setup the train mode with a list of configurations of logistic regression models.
+The `gds.alpha.ml.pipeline.linkPrediction.configureParams` mode is used to set up the train mode with a list of configurations of logistic regression models.
 The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
 The parameter space can be configured by passing this procedure a list of maps, where each map configures the training of one logistic regression model.
-In <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>, we explain further how the configured model candiates are trained, evaluated and compared.
+In <<algorithms-ml-linkprediction-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The allowed model parameters are listed in the table <<linkprediction-pipelines-model-configuration-table>>.
 
