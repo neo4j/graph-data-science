@@ -1,6 +1,33 @@
 [[algorithms-ml-linkprediction-pipelines-train]]
 == Training the pipeline
 
+The train mode, `gds.alpha.ml.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
+Running this mode results in a `Link prediction pipeline` model being stored in the model catalog along with metrics collected during the training.
+The trained pipeline can be <<algorithms-link-prediction-pipelines-predict, applied>> to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
+
+More precisely, the procedure will in order:
+
+//Note: asciidoc will number these correctly
+0. apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
+0. create a relationship split of the graph into `test`, `train` and `feature input` as described in <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>.
+These graphs are transient and not visible after the procedure has finished.
+0. apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature input` graph.
+0. apply the feature steps, added according to <<algorithms-ml-linkprediction-adding-features, Adding link features>>, to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
+0. split the training instances using stratified k-fold crossvalidation.
+The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
+0. train each model candidate given by the <<algorithms-ml-linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
+The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
+0. declare as winner the model with the highest average metric across the folds.
+0. re-trained the winning model on the whole training set and evaluate it on both `train` and `test`.
+In order to evaluate on `test`, the feature pipeline is first applied again as for the `train` set.
+0. registered the winning model in the <<model-catalog-ops, Model Catalog>>.
+
+NOTE: The above steps describe what the procedure does logically.
+The actual steps in the implementation may differ.
+
+NOTE: The order of execution of node property steps and feature steps is not guaranteed.
+However, execution may fail if a step is added before another step that it depends on.
+
 === Syntax
 
 [.include-with-train]
@@ -8,7 +35,7 @@
 .Run Link Prediction in train mode on a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.linkPrediction.train(
+CALL gds.alpha.ml.pipeline.linkPrediction.train(
   graphName: String,
   configuration: Map
 ) YIELD
