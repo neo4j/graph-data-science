@@ -30,11 +30,12 @@ Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum C
 Finding the maximum k-cut for a graph has several applications.
 It could for example be used to find communities of entities between which the sum of Bitcoin transfers is maximized.
 
+include::../alpha-note.adoc[]
+
 
 === Approximation
 
-Maximum k-cut is a NP-hard problem meaning that the time complexity is exponential for any known algorithm that solves the problem.
-Consequently, one has to settle for an approximate solution when solving the problem in practice.
+In practice, finding the best cut is not feasible for larger graphs and only an approximation can be computed in reasonable time.
 
 The approximate heuristic algorithm implemented in GDS is a parallelized https://en.wikipedia.org/wiki/Greedy_randomized_adaptive_search_procedure[GRASP] style algorithm optionally enhanced (via config) with https://en.wikipedia.org/wiki/Variable_neighborhood_search[variable neighborhood search (VNS)].
 
@@ -52,17 +53,6 @@ By the stochastic nature of the algorithm, the results it yields will not be det
 ====
 
 
-=== Relationship weights
-
-The algorithm can be applied to either weighted or unweighted graphs.
-In the former case relationships without the specified weight property are given the weight `0.0`.
-In the unweighted case the all relationships are treated as weighted with weight `1.0`.
-
-A graph is considered weighted when the `relationshipWeightProperty` config parameter is set to define which relationship property represents weight.
-
-include::../alpha-note.adoc[]
-
-
 [[algorithms-approx-max-k-cut-tuning]]
 == Tuning the algorithm parameters
 
@@ -73,7 +63,7 @@ There are two important algorithm specific parameters which lets you trade solut
 === Iterations
 GRASP style algorithms are iterative by nature.
 Every iteration they run the same well-defined steps to derive a solution, but each time with a different random seed yielding solutions that (highly likely) are different too.
-The best solution among those derived from all the iterations is then chosen as the final solution.
+In the end the highest scoring solution is picked as the winner.
 
 
 [[algorithms-approx-max-k-cut-vns-order]]
@@ -84,7 +74,8 @@ Perturb in this case means to randomly move some nodes from their current (local
 VNS will in turn move `1,2,...,vnsMaxNeighborhoodOrder` random nodes and using each of the resulting solutions try to find a new locally optimal solution that's better.
 This means that although potentially better solutions can be derived using VNS it will take more time, and additionally some more memory will be needed to temporarily store the perturbed solutions.
 
-VNS is off (`vnsMaxNeighborhoodOrder = 0`) by default. To use it, experimenting with a maximum order equal to `20` is a good place to start.
+By default, VNS is not used (`vnsMaxNeighborhoodOrder = 0`).
+To use it, experimenting with a maximum order equal to `20` is a good place to start.
 
 
 [[algorithms-approx-max-k-cut-syntax]]
@@ -154,7 +145,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| cutCost                | Float     | Sum of the weights of all relationships connecting nodes from different communities.
+| cutCost                | Float     | Sum of weights of all relationships connecting nodes from different communities.
 | createMillis           | Integer   | Milliseconds for creating the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
