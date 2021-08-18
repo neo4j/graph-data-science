@@ -19,31 +19,50 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.LinkFeatureStepConfigurationImpl;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum LinkFeatureStepFactory {
-    HADAMARD(HadamardFeatureStep::new, HadamardFeatureStep::validateConfig),
-    COSINE(CosineFeatureStep::new, CosineFeatureStep::validateConfig),
-    L2(L2FeatureStep::new, L2FeatureStep::validateConfig);
+    HADAMARD {
+        @Override
+        public LinkFeatureStep create(CypherMapWrapper config) {
+            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            config.requireOnlyKeysFrom(typedConfig.configKeys());
 
-    private final Function<Map<String, Object>, LinkFeatureStep> buildFunction;
-    private final Validation validation;
+            return new HadamardFeatureStep(typedConfig.nodeProperties());
+        }
+    },
+    COSINE {
+        @Override
+        protected LinkFeatureStep create(CypherMapWrapper config) {
+            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            config.requireOnlyKeysFrom(typedConfig.configKeys());
 
-    LinkFeatureStepFactory(Function<Map<String, Object>, LinkFeatureStep> buildFunction, Validation validation) {
-        this.buildFunction = buildFunction;
-        this.validation = validation;
-    }
+            return new CosineFeatureStep(typedConfig.nodeProperties());
+        }
+    },
+    L2 {
+        @Override
+        protected LinkFeatureStep create(CypherMapWrapper config) {
+            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            config.requireOnlyKeysFrom(typedConfig.configKeys());
+
+            return new L2FeatureStep(typedConfig.nodeProperties());
+        }
+    };
+
+    protected abstract LinkFeatureStep create(CypherMapWrapper config);
 
     public static final List<String> VALUES = Arrays
         .stream(LinkFeatureStepFactory.values())
@@ -66,11 +85,6 @@ public enum LinkFeatureStepFactory {
 
     public static LinkFeatureStep create(String taskName, Map<String, Object> config) {
         LinkFeatureStepFactory factory = parse(taskName);
-        factory.validation.validateConfig(config);
-        return factory.buildFunction.apply(config);
-    }
-
-    interface Validation {
-        void validateConfig(Map<String, Object> config);
+        return factory.create(CypherMapWrapper.create(config));
     }
 }

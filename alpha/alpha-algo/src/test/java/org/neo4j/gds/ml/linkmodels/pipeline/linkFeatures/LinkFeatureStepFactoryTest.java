@@ -76,7 +76,7 @@ final class LinkFeatureStepFactoryTest {
     public void shouldFailOnMissingFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of()))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("is missing `nodeProperties`");
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `nodeProperties`");
     }
 
     @ParameterizedTest
@@ -84,7 +84,7 @@ final class LinkFeatureStepFactoryTest {
     public void shouldFailOnEmptyFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("requires a non-empty list of strings for `nodeProperties`");
+            .hasMessageContaining("`nodeProperties` must be non-empty.");
     }
 
     @ParameterizedTest
@@ -92,14 +92,22 @@ final class LinkFeatureStepFactoryTest {
     public void shouldFailOnNotListFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, Map.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("expects `nodeProperties` to be a list of strings");
+            .hasMessage("The value of `nodeProperties` must be of type `List` but was `MapN`.");
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
+    public void shouldFailOnUnexpectedConfigurationKey(LinkFeatureStepFactory factory) {
+        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES,  List.of("noise", "z", "array"), "otherThing", 1)))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Unexpected configuration key: otherThing");
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnListOfNonStringsFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of("foo", 3))))
+        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of("foo", List.of(), "  "))))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("expects `nodeProperties` to be a list of strings");
+            .hasMessage("Invalid property names defined in `nodeProperties`: ['  ', '[]']. Expecting a String with at least one non-white space character.");
     }
 }

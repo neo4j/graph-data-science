@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 
 import java.util.List;
 import java.util.Map;
@@ -38,14 +38,6 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     public CosineFeatureStep(List<String> nodeProperties) {
         this.nodeProperties = nodeProperties;
-    }
-
-    public CosineFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(LinkFeatureStep.INPUT_NODE_PROPERTIES));
-    }
-
-    public static void validateConfig(Map<String, Object> config) {
-        LinkFeatureStepValidation.validateConfig("Cosine link feature", config);
     }
 
     @TestOnly

@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 
 import java.util.List;
 import java.util.Map;
@@ -37,14 +37,6 @@ public class HadamardFeatureStep implements LinkFeatureStep {
 
     public HadamardFeatureStep(List<String> nodeProperties) {
         this.nodeProperties = nodeProperties;
-    }
-
-    public HadamardFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(LinkFeatureStep.INPUT_NODE_PROPERTIES));
-    }
-
-    public static void validateConfig(Map<String, Object> config) {
-        LinkFeatureStepValidation.validateConfig("Hadamard link feature", config);
     }
 
     @Override

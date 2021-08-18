@@ -84,7 +84,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void failsWhenAddFeatureStepIsMissingNodeProperties() {
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {mutateProperty: 'pr'})",
-            "Configuration for Hadamard link feature is missing `nodeProperties`"
+            "No value specified for the mandatory configuration parameter `nodeProperties"
         );
     }
 
