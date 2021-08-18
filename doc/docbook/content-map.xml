@@ -147,9 +147,6 @@
         </d:tocentry>
         <d:tocentry linkend="algorithms-community">
             <?dbhtml filename="algorithms/community/index.html"?>
-            <d:tocentry linkend="alpha-algorithms-approx-max-k-cut">
-                <?dbhtml filename="algorithms/alpha/approx-max-k-cut/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="algorithms-louvain">
                 <?dbhtml filename="algorithms/louvain/index.html"?>
             </d:tocentry>
@@ -176,6 +173,9 @@
             </d:tocentry>
             <d:tocentry linkend="algorithms-sllpa">
                 <?dbhtml filename="algorithms/sllpa/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-approx-max-k-cut">
+                <?dbhtml filename="algorithms/alpha/approx-max-k-cut/index.html"?>
             </d:tocentry>
         </d:tocentry>
 
