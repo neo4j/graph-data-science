@@ -71,6 +71,7 @@ class KnnTest {
     void shouldRun() {
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("knn")
+            .randomSeed(19L)
             .topK(1)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
