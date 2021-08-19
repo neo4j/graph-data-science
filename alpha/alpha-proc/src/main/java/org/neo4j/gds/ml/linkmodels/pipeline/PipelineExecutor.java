@@ -38,8 +38,11 @@ import java.util.Optional;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PipelineExecutor {
+    public static final String SPLIT_ERROR_TEMPLATE = "%s graph contains no relationships. Consider increasing the `%s` or provide a larger graph";
+
     private final TrainingPipeline pipeline;
     private final String userName;
     private final NamedDatabaseId databaseId;
@@ -98,18 +101,55 @@ public class PipelineExecutor {
         Optional<Long> randomSeed
     ) {
         LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
+        splitConfig.validateAgainstGraphStore(graphStore);
+
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(splitConfig.testSplit(), nodeLabels, relationshipTypes, randomSeed);
+        validateTestSplit(graphStore);
+
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed);
+        validateTrainSplit(graphStore);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
+    }
+
+    private void validateTestSplit(GraphStore graphStore) {
+        String testRelationshipType = pipeline.splitConfig().testRelationshipType();
+        if (graphStore.getGraph(RelationshipType.of(testRelationshipType)).relationshipCount() <= 0) {
+            throw new IllegalStateException(formatWithLocale(
+                SPLIT_ERROR_TEMPLATE,
+                "Test",
+                LinkPredictionSplitConfig.TEST_FRACTION_KEY
+            ));
+        }
+    }
+
+    private void validateTrainSplit(GraphStore graphStore) {
+        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
+
+        if (graphStore.getGraph(RelationshipType.of(splitConfig.trainRelationshipType())).relationshipCount() <= 0) {
+            throw new IllegalStateException(formatWithLocale(
+                SPLIT_ERROR_TEMPLATE,
+                "Train",
+                LinkPredictionSplitConfig.TRAIN_FRACTION_KEY
+            ));
+        }
+
+        if (graphStore
+                .getGraph(RelationshipType.of(splitConfig.featureInputRelationshipType()))
+                .relationshipCount() <= 0)
+            throw new IllegalStateException(formatWithLocale(
+                "Feature graph contains no relationships. Consider decreasing %s or %s or provide a larger graph.",
+                LinkPredictionSplitConfig.TEST_FRACTION_KEY,
+                LinkPredictionSplitConfig.TRAIN_FRACTION_KEY
+            ));
     }
 
     public void removeNodeProperties(GraphStore graphstore, Collection<NodeLabel> nodeLabels) {

@@ -21,6 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -39,7 +42,9 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardF
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -61,6 +66,8 @@ class PipelineExecutorTest extends BaseProcTest {
         "(a)-[:REL]->(d)";
 
     public static final String GRAPH_NAME = "g";
+    public static final NodeLabel NODE_LABEL = NodeLabel.of("N");
+    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.of("REL");
 
     private GraphStore graphStore;
 
@@ -126,10 +133,10 @@ class PipelineExecutorTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
-                RelationshipType.of("REL")
+                RELATIONSHIP_TYPE
             );
 
-            assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("degree", "nodeFeatures");
+            assertThat(graphStore.nodePropertyKeys(NODE_LABEL)).contains("degree", "nodeFeatures");
         });
     }
 
@@ -219,9 +226,79 @@ class PipelineExecutorTest extends BaseProcTest {
         });
     }
 
+    public static Stream<Arguments> invalidSplits() {
+        return Stream.of(
+            Arguments.of(
+                LinkPredictionSplitConfig.builder().testFraction(0.01).build(),
+                "Test graph contains no relationships. Consider increasing the `testFraction` or provide a larger graph"
+            ),
+            Arguments.of(
+                LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build(),
+                "Train graph contains no relationships. Consider increasing the `trainFraction` or provide a larger graph"
+            )
+            // If the trainFraction is scaled to the total relationship count, this will fail
+//            Arguments.of(
+//                LinkPredictionSplitConfig.builder().trainFraction(0.5).testFraction(0.5).build(),
+//                "Feature graph contains no relationships. Consider decreasing `testFraction` or `trainFraction` or provide a larger graph."
+//            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSplits")
+    void failOnEmptySplitGraph(LinkPredictionSplitConfig splitConfig, String expectedError) {
+        var pipeline = new TrainingPipeline();
+        pipeline.setSplitConfig(splitConfig);
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME);
+
+            assertThatThrownBy(() -> executor.splitRelationships(
+                graphStore,
+                List.of("*"),
+                List.of(NODE_LABEL.name),
+                Optional.of(42L)
+            ))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(expectedError);
+        });
+    }
+
+    @Test
+    void failOnExistingSplitRelTypes() {
+        var graphName = "invalidGraph";
+
+        String createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("_TEST_", "REL")
+            .withRelationshipType("_TEST_COMPLEMENT_", "IGNORE")
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(createQuery);
+
+        var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
+
+        var pipeline = new TrainingPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
+
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), graphName);
+
+            assertThatThrownBy(() -> executor.splitRelationships(
+                invalidGraphStore,
+                List.of("*"),
+                List.of(NODE_LABEL.name),
+                Optional.of(42L)
+            ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The relationship types ['_TEST_', '_TEST_COMPLEMENT_'] are in the input graph, but are reserved for splitting.");
+        });
+    }
+
     private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(PipelineExecutor pipeline) {
-        pipeline.executeNodePropertySteps(List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
-        return pipeline.computeFeatures(List.of(NodeLabel.of("N")), RelationshipType.of("REL"), 4);
+        pipeline.executeNodePropertySteps(List.of(NODE_LABEL), RELATIONSHIP_TYPE);
+        return pipeline.computeFeatures(List.of(NODE_LABEL), RELATIONSHIP_TYPE, 4);
     }
 
 }
