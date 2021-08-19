@@ -37,7 +37,7 @@ public enum LinkFeatureStepFactory {
     HADAMARD {
         @Override
         public LinkFeatureStep create(CypherMapWrapper config) {
-            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
             config.requireOnlyKeysFrom(typedConfig.configKeys());
 
             return new HadamardFeatureStep(typedConfig.nodeProperties());
@@ -46,7 +46,7 @@ public enum LinkFeatureStepFactory {
     COSINE {
         @Override
         protected LinkFeatureStep create(CypherMapWrapper config) {
-            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
             config.requireOnlyKeysFrom(typedConfig.configKeys());
 
             return new CosineFeatureStep(typedConfig.nodeProperties());
@@ -55,7 +55,7 @@ public enum LinkFeatureStepFactory {
     L2 {
         @Override
         protected LinkFeatureStep create(CypherMapWrapper config) {
-            LinkFeatureStepConfigurationImpl typedConfig = new LinkFeatureStepConfigurationImpl(config);
+            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
             config.requireOnlyKeysFrom(typedConfig.configKeys());
 
             return new L2FeatureStep(typedConfig.nodeProperties());

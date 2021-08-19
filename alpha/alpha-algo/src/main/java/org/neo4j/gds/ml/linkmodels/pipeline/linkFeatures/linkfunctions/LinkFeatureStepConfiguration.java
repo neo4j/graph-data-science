@@ -46,7 +46,7 @@ public interface LinkFeatureStepConfiguration {
 
             List<String> invalidProperties = nodePropertiesList
                 .stream()
-                .filter(property -> !(property instanceof String) || ((String) property).trim().isEmpty())
+                .filter(property -> !(property instanceof String) || ((String) property).isBlank())
                 .map(Object::toString)
                 .collect(Collectors.toList());
 
