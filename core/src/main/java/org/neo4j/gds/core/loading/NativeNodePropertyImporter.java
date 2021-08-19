@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -48,8 +47,8 @@ import static org.neo4j.gds.core.GraphDimensions.IGNORE;
 
 public final class NativeNodePropertyImporter {
 
-    private final BuildersByNodeLabel buildersByNodeLabel;
-    private final BuildersByLabelTokenAndPropertyToken buildersByLabelTokenAndPropertyToken;
+    private final BuildersByLabel buildersByLabel;
+    private final BuildersByLabelIdAndPropertyId buildersByLabelIdAndPropertyId;
     private final boolean containsAnyLabelProjection;
 
     public static Builder builder() {
@@ -57,13 +56,12 @@ public final class NativeNodePropertyImporter {
     }
 
     private NativeNodePropertyImporter(
-        BuildersByNodeLabel buildersByNodeLabel,
-        BuildersByLabelTokenAndPropertyToken buildersByLabelTokenAndPropertyToken,
-        boolean containsAnyLabelProjection
+        BuildersByLabel buildersByLabel,
+        BuildersByLabelIdAndPropertyId buildersByLabelIdAndPropertyId
     ) {
-        this.buildersByNodeLabel = buildersByNodeLabel;
-        this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyToken;
-        this.containsAnyLabelProjection = containsAnyLabelProjection;
+        this.buildersByLabel = buildersByLabel;
+        this.buildersByLabelIdAndPropertyId = buildersByLabelIdAndPropertyId;
+        this.containsAnyLabelProjection = buildersByLabelIdAndPropertyId.containsAnyLabelProjection();
         // TODO: create a union of all property keys for all labels and use that one to filter the property cursor on 4.4-dev
     }
 
@@ -85,28 +83,19 @@ public final class NativeNodePropertyImporter {
     }
 
     public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result() {
-        return buildersByNodeLabel
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    builderEntry -> builderEntry.getValue().build()
-                ))
-            ));
+        return buildersByLabel.build();
     }
 
-    private int importProperty(long nodeId, long[] labels, PropertyCursor propertyCursor) {
+    private int importProperty(long nodeId, long[] labelIds, PropertyCursor propertyCursor) {
         int propertiesImported = 0;
         int propertyKey = propertyCursor.propertyKey();
 
-        for (long label : labels) {
-            if (label == IGNORE || label == ANY_LABEL) {
+        for (long labelId : labelIds) {
+            if (labelId == IGNORE || labelId == ANY_LABEL) {
                 continue;
             }
 
-            BuildersByPropertyToken buildersByPropertyId = buildersByLabelTokenAndPropertyToken.get((int) label);
+            var buildersByPropertyId = buildersByLabelIdAndPropertyId.get((int) labelId);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
@@ -122,7 +111,7 @@ public final class NativeNodePropertyImporter {
                 nodeId,
                 propertyCursor,
                 propertyKey,
-                buildersByLabelTokenAndPropertyToken.get(ANY_LABEL)
+                buildersByLabelIdAndPropertyId.get(ANY_LABEL)
             );
         }
 
@@ -132,12 +121,12 @@ public final class NativeNodePropertyImporter {
     private int setPropertyValue(
         long nodeId,
         PropertyCursor propertyCursor,
-        int propertyToken,
-        BuildersByPropertyToken buildersByPropertyId
+        int propertyId,
+        BuildersByPropertyId buildersByPropertyId
     ) {
         int propertiesImported = 0;
 
-        List<NodePropertiesFromStoreBuilder> builders = buildersByPropertyId.get(propertyToken);
+        List<NodePropertiesFromStoreBuilder> builders = buildersByPropertyId.get(propertyId);
         if (builders != null) {
             Value value = propertyCursor.propertyValue();
 
@@ -150,74 +139,9 @@ public final class NativeNodePropertyImporter {
         return propertiesImported;
     }
 
-    static final class BuildersByNodeLabel {
-        private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> builders;
-
-        BuildersByNodeLabel() {
-            this.builders = new HashMap<>();
-        }
-
-        Set<Map.Entry<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>>> entrySet() {
-            return builders.entrySet();
-        }
-
-        void put(NodeLabel nodeLabel, PropertyMapping propertyMapping, NodePropertiesFromStoreBuilder builder) {
-            builders
-                .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
-                .computeIfAbsent(propertyMapping, __ -> builder);
-            builders.get(nodeLabel).put(propertyMapping, builder);
-        }
-
-        void forEach(BiConsumer<? super NodeLabel, ? super Map<PropertyMapping, NodePropertiesFromStoreBuilder>> action) {
-            builders.forEach(action);
-        }
-    }
-
-    static final class BuildersByLabelTokenAndPropertyToken {
-        private final IntObjectMap<BuildersByPropertyToken> builders;
-
-        BuildersByLabelTokenAndPropertyToken() {
-            this.builders = new IntObjectHashMap<>();
-        }
-
-        boolean containsKey(int labelId) {
-            return builders.containsKey(labelId);
-        }
-
-        BuildersByPropertyToken get(int labelId) {
-            return builders.get(labelId);
-        }
-
-        void put(int labelId, int propertyToken, NodePropertiesFromStoreBuilder builder) {
-            if (!builders.containsKey(labelId)) {
-                builders.put(labelId, new BuildersByPropertyToken());
-            }
-            builders.get(labelId).add(propertyToken, builder);
-        }
-    }
-
-    static final class BuildersByPropertyToken {
-        private final IntObjectMap<List<NodePropertiesFromStoreBuilder>> builders;
-
-        BuildersByPropertyToken() {
-            this.builders = new IntObjectHashMap<>();
-        }
-
-        List<NodePropertiesFromStoreBuilder> get(int propertyToken) {
-            return builders.get(propertyToken);
-        }
-
-        void add(int propertyToken, NodePropertiesFromStoreBuilder builder) {
-            if (!builders.containsKey(propertyToken)) {
-                builders.put(propertyToken, new ArrayList<>());
-            }
-            builders.get(propertyToken).add(builder);
-        }
-    }
-
     public static final class Builder {
         private long nodeCount;
-        private Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
+        private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
         private AllocationTracker tracker = AllocationTracker.empty();
 
@@ -231,7 +155,7 @@ public final class NativeNodePropertyImporter {
         }
 
         public Builder propertyMappings(Map<NodeLabel, PropertyMappings> propertyMappingsByLabel) {
-            this.propertyMappingsByLabel = propertyMappingsByLabel;
+            this.propertyMappings = propertyMappingsByLabel;
             return this;
         }
 
@@ -246,58 +170,151 @@ public final class NativeNodePropertyImporter {
         }
 
         public NativeNodePropertyImporter build() {
-            BuildersByNodeLabel nodePropertyBuilders = initializeNodePropertyBuilders();
-            BuildersByLabelTokenAndPropertyToken buildersByLabelIdAndPropertyId = buildersByLabelIdAndPropertyId(nodePropertyBuilders);
-            return new NativeNodePropertyImporter(
+            var nodePropertyBuilders = BuildersByLabel.create(propertyMappings, nodeCount, tracker);
+            var buildersByLabelIdAndPropertyId = BuildersByLabelIdAndPropertyId.create(
                 nodePropertyBuilders,
-                buildersByLabelIdAndPropertyId,
-                buildersByLabelIdAndPropertyId.containsKey(ANY_LABEL)
+                // TODO: We align on `id` over `token` in this class but need to carry that change on to the rest of
+                //       the loading logic
+                dimensions.tokenNodeLabelMapping(),
+                dimensions.nodePropertyTokens()
             );
+            return new NativeNodePropertyImporter(nodePropertyBuilders, buildersByLabelIdAndPropertyId);
         }
+    }
 
-        private BuildersByNodeLabel initializeNodePropertyBuilders() {
-            var builders = new BuildersByNodeLabel();
-            propertyMappingsByLabel.forEach((nodeLabel, propertyMappings) -> {
-                if (propertyMappings.numberOfMappings() > 0) {
-                    for (PropertyMapping propertyMapping : propertyMappings) {
-                        NodePropertiesFromStoreBuilder builder = NodePropertiesFromStoreBuilder.of(
-                            nodeCount, tracker, propertyMapping.defaultValue()
-                        );
-                        builders.put(nodeLabel, propertyMapping, builder);
-                    }
+    static final class BuildersByLabel {
+
+        static BuildersByLabel create(
+            Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
+            long nodeCount,
+            AllocationTracker tracker
+        ) {
+            var instance = new BuildersByLabel();
+            for (var label : propertyMappingsByLabel.keySet()) {
+                for (var propertyMapping : propertyMappingsByLabel.get(label)) {
+                    var builder = NodePropertiesFromStoreBuilder.of(
+                        nodeCount,
+                        tracker,
+                        propertyMapping.defaultValue()
+                    );
+                    instance.put(label, propertyMapping, builder);
                 }
-            });
-            return builders;
+            }
+            return instance;
         }
 
-        private BuildersByLabelTokenAndPropertyToken buildersByLabelIdAndPropertyId(BuildersByNodeLabel buildersByIdentifier) {
-            Map<NodeLabel, Integer> inverseIdentifierIdMapping = inverseIdentifierIdMapping();
+        private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> builders;
 
-            var buildersByLabelIdAndPropertyId = new BuildersByLabelTokenAndPropertyToken();
-            buildersByIdentifier.forEach((labelIdentifier, builders) -> {
-                int labelId = inverseIdentifierIdMapping.get(labelIdentifier);
+        private BuildersByLabel() {
+            this.builders = new HashMap<>();
+        }
+
+        private void put(NodeLabel label, PropertyMapping propertyMapping, NodePropertiesFromStoreBuilder builder) {
+            builders
+                .computeIfAbsent(label, __ -> new HashMap<>())
+                .computeIfAbsent(propertyMapping, __ -> builder);
+        }
+
+        void forEach(BiConsumer<NodeLabel, Map<PropertyMapping, NodePropertiesFromStoreBuilder>> action) {
+            builders.forEach(action);
+        }
+
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build() {
+            return builders
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        builderEntry -> builderEntry.getValue().build()
+                    ))
+                ));
+        }
+    }
+
+    static final class BuildersByLabelIdAndPropertyId {
+
+        static BuildersByLabelIdAndPropertyId create(
+            BuildersByLabel buildersByLabel,
+            IntObjectMap<List<NodeLabel>> labelsByLabelId,
+            Map<String, Integer> propertyIds
+        ) {
+            var labelIdByLabel = LabelIdByLabel.create(labelsByLabelId);
+
+            var instance = new BuildersByLabelIdAndPropertyId();
+            buildersByLabel.forEach((labelIdentifier, builders) -> {
+                int labelId = labelIdByLabel.get(labelIdentifier);
                 builders.forEach((propertyMapping, builder) -> {
-                    int propertyToken = dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey());
-                    buildersByLabelIdAndPropertyId.put(labelId, propertyToken, builder);
+                    int propertyId = propertyIds.get(propertyMapping.neoPropertyKey());
+                    instance.put(labelId, propertyId, builder);
                 });
             });
 
-            return buildersByLabelIdAndPropertyId;
+            return instance;
         }
 
-        private Map<NodeLabel, Integer> inverseIdentifierIdMapping() {
-            HashMap<NodeLabel, Integer> inverseLabelIdentifierMapping = new HashMap<>();
+        private final IntObjectMap<BuildersByPropertyId> builders;
 
-            IntObjectProcedure<List<NodeLabel>> listIntObjectProcedure = (labelId, elementIdentifiers) -> {
-                elementIdentifiers.forEach(identifier -> inverseLabelIdentifierMapping.put(identifier, labelId));
-            };
-
-            dimensions.tokenNodeLabelMapping().forEach(listIntObjectProcedure);
-
-            return inverseLabelIdentifierMapping;
+        boolean containsAnyLabelProjection() {
+            return builders.containsKey(ANY_LABEL);
         }
 
+        BuildersByPropertyId get(int labelId) {
+            return builders.get(labelId);
+        }
+
+        void put(int labelId, int propertyId, NodePropertiesFromStoreBuilder builder) {
+            if (!builders.containsKey(labelId)) {
+                builders.put(labelId, new BuildersByPropertyId());
+            }
+            builders.get(labelId).add(propertyId, builder);
+        }
+
+        private BuildersByLabelIdAndPropertyId() {
+            this.builders = new IntObjectHashMap<>();
+        }
     }
 
+    static final class BuildersByPropertyId {
+        private final IntObjectMap<List<NodePropertiesFromStoreBuilder>> builders;
 
+        List<NodePropertiesFromStoreBuilder> get(int propertyId) {
+            return builders.get(propertyId);
+        }
+
+        void add(int propertyId, NodePropertiesFromStoreBuilder builder) {
+            if (!builders.containsKey(propertyId)) {
+                builders.put(propertyId, new ArrayList<>());
+            }
+            builders.get(propertyId).add(builder);
+        }
+
+        private BuildersByPropertyId() {
+            this.builders = new IntObjectHashMap<>();
+        }
+    }
+
+    static final class LabelIdByLabel {
+
+        static LabelIdByLabel create(IntObjectMap<List<NodeLabel>> mapping) {
+            var instance = new LabelIdByLabel();
+            for (IntObjectCursor<List<NodeLabel>> cursor : mapping) {
+                for (NodeLabel label : cursor.value) {
+                    instance.labelIdByLabel.put(label, cursor.key);
+                }
+            }
+            return instance;
+        }
+
+        private final Map<NodeLabel, Integer> labelIdByLabel;
+
+        int get(NodeLabel label) {
+            return labelIdByLabel.get(label);
+        }
+
+        private LabelIdByLabel() {
+            labelIdByLabel = new HashMap<>();
+        }
+    }
 }
