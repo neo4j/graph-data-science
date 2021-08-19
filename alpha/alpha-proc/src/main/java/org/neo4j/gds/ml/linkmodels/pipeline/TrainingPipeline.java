@@ -107,7 +107,7 @@ public class TrainingPipeline implements Mappable {
         return parameterSpace;
     }
 
-    void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
+    public void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
         this.parameterSpace = parameterList.stream()
             .map(trainParams -> {
                 var validatedConfig = LinkLogisticRegressionTrainConfig.of(

@@ -83,6 +83,8 @@ public class LinkPredictionTrain
 
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
+        progressTracker.beginSubTask();
+
         List<String> relationshipTypes = trainConfig
             .internalRelationshipTypes(graphStore)
             .stream()
@@ -108,7 +110,10 @@ public class LinkPredictionTrain
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(bestParameters.maxEpochs());
         var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
+        progressTracker.endSubTask();
 
         // evaluate the best model on the training and test graphs
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
@@ -116,11 +121,15 @@ public class LinkPredictionTrain
 
         cleanUpGraphStore();
 
-        return createModel(
+        var model = createModel(
             modelSelectResult,
             modelData,
             mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
         );
+
+        progressTracker.endSubTask();
+
+        return model;
     }
 
     FeaturesAndTargets extractFeaturesAndTargets(String relationshipType) {
@@ -161,6 +170,7 @@ public class LinkPredictionTrain
         FeaturesAndTargets trainData,
         HugeLongArray trainRelationshipIds
     ) {
+        progressTracker.beginSubTask();
 
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
@@ -195,6 +205,8 @@ public class LinkPredictionTrain
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
+
+            progressTracker.logProgress();
         });
 
         // 5. pick the best-scoring model candidate, according to the main metric
@@ -204,10 +216,14 @@ public class LinkPredictionTrain
 
         var bestConfig = winner.params();
 
+        progressTracker.endSubTask();
+
         return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
+        progressTracker.beginSubTask();
+
         var testData = extractFeaturesAndTargets(pipeline.splitConfig().testRelationshipType());
 
         var result = computeMetric(
@@ -216,6 +232,8 @@ public class LinkPredictionTrain
             new BatchQueue(testData.size()),
             progressTracker
         );
+
+        progressTracker.endSubTask();
 
         return result;
     }
@@ -289,9 +307,8 @@ public class LinkPredictionTrain
             progressTracker,
             terminationFlag
         );
-        var model = llrTrain.compute();
 
-        return model;
+        return llrTrain.compute();
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(
@@ -309,6 +326,8 @@ public class LinkPredictionTrain
         BatchQueue evaluationQueue,
         ProgressTracker progressTracker
     ) {
+        progressTracker.beginSubTask();
+
         progressTracker.setVolume(inputData.size());
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
@@ -324,9 +343,13 @@ public class LinkPredictionTrain
                     var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;
                     signedProbabilities.add(signedProbability);
                 }
+
+                progressTracker.logProgress(batch.size());
             },
             terminationFlag
         );
+
+        progressTracker.endSubTask();
 
         return trainConfig.metrics().stream().collect(Collectors.toMap(
             Function.identity(),

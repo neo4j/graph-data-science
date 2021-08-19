@@ -66,7 +66,14 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
         );
         var graphStore = GraphStoreCatalog.get(configuration.username(), databaseId, graphName).graphStore();
         var customInfo = (LinkPredictionModelInfo) model.customInfo();
-        var pipelineExecutor = new PipelineExecutor(customInfo.trainingPipeline(), caller, databaseId, configuration.username(), graphName);
+        var pipelineExecutor = new PipelineExecutor(
+            customInfo.trainingPipeline(),
+            caller,
+            databaseId,
+            configuration.username(),
+            graphName,
+            progressTracker
+        );
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
         return new LinkPrediction(

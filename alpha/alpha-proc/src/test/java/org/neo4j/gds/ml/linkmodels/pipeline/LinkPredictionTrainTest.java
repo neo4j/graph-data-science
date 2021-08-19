@@ -138,7 +138,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 graphStore,
                 trainConfig,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
                 ProgressTracker.NULL_TRACKER
             );
 
@@ -198,7 +198,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 graphStore,
                 config,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
                 ProgressTracker.NULL_TRACKER
             );
 

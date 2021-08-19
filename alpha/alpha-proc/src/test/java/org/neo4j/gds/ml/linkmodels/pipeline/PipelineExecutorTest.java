@@ -36,6 +36,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
@@ -99,7 +100,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME)
+                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER)
             );
 
             var expected = HugeObjectArray.of(
@@ -131,7 +132,7 @@ class PipelineExecutorTest extends BaseProcTest {
         )));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME).executeNodePropertySteps(
+            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
                 RELATIONSHIP_TYPE
             );
@@ -153,7 +154,14 @@ class PipelineExecutorTest extends BaseProcTest {
 
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME));
+            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            ));
 
             var expected = HugeObjectArray.of(
                 new double[]{3 * 1D, 2 * 1D, (42 * 1337 + 13 * 0D) / normA / normB}, // a-b
@@ -189,9 +197,14 @@ class PipelineExecutorTest extends BaseProcTest {
         );
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var actual = computePropertiesAndLinkFeatures(
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME)
-            );
+            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            ));
 
             var expected = HugeObjectArray.of(
                 new double[]{expectedPageRanks.get(0) * expectedPageRanks.get(1)},
@@ -217,7 +230,14 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME);
+            var executor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
 
             assertThatThrownBy(() -> computePropertiesAndLinkFeatures(executor))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -251,7 +271,14 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(splitConfig);
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME);
+            var executor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
 
             assertThatThrownBy(() -> executor.splitRelationships(
                 graphStore,
@@ -283,7 +310,14 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
-            var executor = new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), graphName);
+            var executor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                graphName,
+                ProgressTracker.NULL_TRACKER
+            );
 
             assertThatThrownBy(() -> executor.splitRelationships(
                 invalidGraphStore,

@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
@@ -41,7 +41,7 @@ final class HadamardLinkFeatureStepTest extends FeatureStepBaseTest {
             "hadamard",
             Map.of("nodeProperties", List.of("noise", "z", "array"))
         );
-        HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4);
+        var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER);
 
         var delta = 0.0001D;
 
@@ -57,7 +57,7 @@ final class HadamardLinkFeatureStepTest extends FeatureStepBaseTest {
             Map.of("nodeProperties", List.of("zeros"))
         );
 
-        var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4);
+        var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER);
 
         for (long i = 0; i < linkFeatures.size(); i++) {
             assertThat(linkFeatures.get(i)).containsOnly(0.0);
@@ -71,7 +71,7 @@ final class HadamardLinkFeatureStepTest extends FeatureStepBaseTest {
             Map.of("nodeProperties", List.of("invalidValue", "z"))
         );
 
-        assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4))
+        assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER))
             .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the hadamard feature vector. " +
                         "Either define a default value if its a stored property or check the nodePropertyStep");
     }

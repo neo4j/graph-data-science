@@ -24,6 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
@@ -33,13 +41,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +85,8 @@ class LinkLogisticRegressionObjectiveTest {
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(new L2FeatureStep(features)),
-            4
+            4,
+            ProgressTracker.NULL_TRACKER
         );
         this.objective = new LinkLogisticRegressionObjective(
             LinkLogisticRegressionData.from(features.size()),
