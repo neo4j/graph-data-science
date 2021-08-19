@@ -7,26 +7,24 @@ The trained pipeline can be <<algorithms-link-prediction-pipelines-predict, appl
 
 More precisely, the procedure will in order:
 
-//Note: asciidoc will number these correctly
-0. apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
-0. create a relationship split of the graph into `test`, `train` and `feature input` sets as described in <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>.
+. apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
+. create a relationship split of the graph into `test`, `train` and `feature input` sets as described in <<algorithms-ml-linkprediction-configure-splits, Configuring the relationship splits>>.
 These graphs are internally managed and exist only for the duration of the training.
-0. apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature input` graph.
-0. apply the feature steps, added according to <<algorithms-ml-linkprediction-adding-features, Adding link features>>, to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
-0. split the training instances using stratified k-fold crossvalidation.
+. apply the node property steps, added according to <<algorithms-ml-linkprediction-adding-node-properties, Adding node properties>>, on the `feature input` graph.
+. apply the feature steps, added according to <<algorithms-ml-linkprediction-adding-features, Adding link features>>, to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
+. split the training instances using stratified k-fold crossvalidation.
 The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
-0. train each model candidate given by the <<algorithms-ml-linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
+. train each model candidate given by the <<algorithms-ml-linkprediction-configure-model-parameters,parameter space>> for each of the folds and evaluate the model on the respective validation set.
 The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
-0. declare as winner the model with the highest average metric across the folds.
-0. re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
+. declare as winner the model with the highest average metric across the folds.
+. re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
-0. register the winning model in the <<model-catalog-ops, Model Catalog>>.
+. register the winning model in the <<model-catalog-ops, Model Catalog>>.
 
 NOTE: The above steps describe what the procedure does logically.
-The actual steps in the implementation may differ.
+The actual steps as well as their ordering in the implementation may differ.
 
-NOTE: The order of execution of node property steps and feature steps is not guaranteed.
-However, a step may not use node properties produced by steps added after it.
+NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
 === Syntax
 
