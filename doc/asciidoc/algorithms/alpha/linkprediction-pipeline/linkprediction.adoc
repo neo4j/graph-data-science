@@ -160,7 +160,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 [opts="header",cols="1,1,1,1,1"]
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
-| "pipe"   | [{name=fastRP, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
+| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
