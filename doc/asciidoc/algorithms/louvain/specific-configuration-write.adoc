@@ -2,7 +2,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                             | Type     | Default | Optional | Description
-| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String   | null    | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String   | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | <<common-configuration-seed-property,seedProperty>>                              | String   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | maxLevels                                                                        | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
 | <<common-configuration-max-iterations,maxIterations>>                            | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.

@@ -100,6 +100,8 @@ In algorithms that support node weights this parameter defines the node property
 [[common-configuration-relationship-weight-property]]
 relationshipWeightProperty - String::
 In algorithms that support relationship weights this parameter defines the relationship property that contains the weights.
+The specified property is required to exist in the specified graph on all specified <<common-configuration-relationship-types, relationship types>>.
+The values must be numeric, and some algorithms may have additional value restrictions, such as requiring only positive weights.
 
 [[common-configuration-max-iterations]]
 maxIterations - Integer::

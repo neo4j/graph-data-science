@@ -2,7 +2,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                             | Type    | Default | Optional | Description
-| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null    | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | defaultValue                                                                     | Float   | null    | yes      | The default value of the relationship weight in case it is missing or invalid.
 | <<common-configuration-seed-property,seedProperty>>                              | String  | n/a     | yes      | Used to set the initial component for a node. The property value needs to be a number.
 | threshold                                                                        | Float   | null    | yes      | The value of the weight above which the relationship is considered in the computation.

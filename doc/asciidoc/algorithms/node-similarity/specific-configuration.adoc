@@ -8,5 +8,5 @@
 | bottomK                                                                          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
 | topN                                                                             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | bottomN                                                                          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null    | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===

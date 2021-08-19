@@ -47,11 +47,11 @@ YIELD nodeCount, loadDuration, evalDuration, writeDuration
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                       | Type    | Default  | Optional | Description
-| startNode                  | Node    | null     | no       | The start node
-| relationshipWeightProperty | String  | null     | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
-| delta                      | Float   | null     | yes      | The grade of concurrency to use.
-| writeProperty              | String  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
+| Name                                                                             | Type    | Default  | Optional | Description
+| startNode                                                                        | Node    | null     | no       | The start node
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null     | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| delta                                                                            | Float   | null     | yes      | The grade of concurrency to use.
+| writeProperty                                                                    | String  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
 |===
 
 .Results
@@ -75,10 +75,10 @@ YIELD nodeId, distance
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                       | Type   | Default  | Optional | Description
-| startNode                  | Node   | null     | no       | The start node
-| delta                      | Float  | null     | no       | The grade of concurrency to use.
-| relationshipWeightProperty | String | null     | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| Name                                                                             | Type   | Default  | Optional | Description
+| startNode                                                                        | Node   | null     | no       | The start node
+| delta                                                                            | Float  | null     | no       | The grade of concurrency to use.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String | null     | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results
