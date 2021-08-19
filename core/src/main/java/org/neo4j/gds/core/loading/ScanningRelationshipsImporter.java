@@ -43,7 +43,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
     private final GraphCreateConfig graphCreateConfig;
     private final GraphLoaderContext loadingContext;
-    private final ProgressTracker progressTracker;
 
     private final IdMapping idMap;
     private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
@@ -63,11 +62,11 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             "Relationship",
             loadingContext,
             dimensions,
+            progressTracker,
             concurrency
         );
         this.graphCreateConfig = graphCreateConfig;
         this.loadingContext = loadingContext;
-        this.progressTracker = progressTracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
         this.allRelationshipCounters = new HashMap<>();

@@ -154,8 +154,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker tracker = loadingContext.tracker();
+        progressTracker.beginSubTask();
         IdsAndProperties nodes = loadNodes(concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
+        progressTracker.endSubTask();
         CSRGraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
 
         logLoadingSummary(graphStore, Optional.of(tracker));
@@ -174,7 +176,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker, concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
             : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressTracker, concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
 
-        return scanningNodesImporter.call(loadingContext.log());
+        return scanningNodesImporter.call();
     }
 
     @NotNull
@@ -216,7 +218,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             idsAndProperties.idMap(),
             allBuilders,
             concurrency
-        ).call(loadingContext.log());
+        ).call();
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
     }

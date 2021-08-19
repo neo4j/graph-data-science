@@ -153,7 +153,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                 );
                 int batchImportedNodes = RawValues.getHead(imported);
                 int batchImportedProperties = RawValues.getTail(imported);
-                progressTracker.progressLogger().logProgress(batchImportedNodes);
+                progressTracker.logProgress(batchImportedNodes);
                 nodesImported += batchImportedNodes;
                 propertiesImported += batchImportedProperties;
             }

@@ -33,7 +33,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.logging.Log;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,7 +49,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
     private final GraphCreateFromStoreConfig graphCreateConfig;
-    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final IndexPropertyMappings.LoadablePropertyMappings properties;
     private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
@@ -72,15 +70,15 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log()),
+            scannerFactory(loadingContext.transactionContext(), dimensions, progressTracker),
             "Node",
             loadingContext,
             dimensions,
+            progressTracker,
             concurrency
         );
 
         this.graphCreateConfig = graphCreateConfig;
-        this.progressTracker = progressTracker;
         this.terminationFlag = loadingContext.terminationFlag();
         this.properties = properties;
         this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
@@ -90,13 +88,13 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     private static StoreScanner.Factory<NodeReference> scannerFactory(
         TransactionContext transaction,
         GraphDimensions dimensions,
-        Log log
+        ProgressTracker progressTracker
     ) {
         var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
         int[] labelIds = tokenNodeLabelMapping.keys().toArray();
-        return NodeScannerFactory.create(transaction, labelIds, log);
+        return NodeScannerFactory.create(transaction, labelIds, progressTracker);
     }
 
     @Override

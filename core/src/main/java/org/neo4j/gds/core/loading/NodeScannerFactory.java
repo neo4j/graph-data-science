@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 
@@ -34,12 +34,12 @@ public final class NodeScannerFactory {
     public static StoreScanner.Factory<NodeReference> create(
         TransactionContext transactionContext,
         int[] labelIds,
-        Log log
+        ProgressTracker progressTracker
     ) {
         var hasNodeLabelIndex = hasNodeLabelIndex(transactionContext);
 
         if (!hasNodeLabelIndex && labelIds.length > 0) {
-            log.info("Attempted to use node label index, but no index was found. Falling back to node store scan.");
+            progressTracker.progressLogger().getLog().info("Attempted to use node label index, but no index was found. Falling back to node store scan.");
         }
 
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex) {
