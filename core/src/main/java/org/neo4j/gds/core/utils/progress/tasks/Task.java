@@ -117,7 +117,10 @@ public class Task {
     }
 
     public void setVolume(long volume) {
-        throw new UnsupportedOperationException("Should only be called on a leaf task");
+        throw new UnsupportedOperationException(formatWithLocale(
+            "Should only be called on a leaf task, but task `%s` is not a leaf",
+            description
+        ));
     }
 
     public void logProgress() {
@@ -125,7 +128,10 @@ public class Task {
     }
 
     public void logProgress(long value) {
-        throw new UnsupportedOperationException("Should only be called on a leaf task");
+        throw new UnsupportedOperationException(formatWithLocale(
+            "Should only be called on a leaf task, but task `%s` is not a leaf",
+            description
+        ));
     }
 
     public void visit(TaskVisitor taskVisitor) {
