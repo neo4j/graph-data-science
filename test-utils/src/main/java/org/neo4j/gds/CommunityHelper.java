@@ -122,8 +122,10 @@ public final class CommunityHelper {
             .collect(toList());
 
         assertCommunities(communityDataList, expectedCommunitiesList);
-        for (Long label : expectedCommunities.keySet()) {
-            long[] community = expectedCommunities.get(label);
+        for (Map.Entry<Long, long[]> entry : expectedCommunities.entrySet()) {
+            long label = entry.getKey();
+            long[] community = entry.getValue();
+
             for (Long nodeId : community) {
                 assertEquals(label, communityData[nodeId.intValue()],
                     formatWithLocale(
