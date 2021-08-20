@@ -34,8 +34,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Value.Default
-    @Configuration.IntegerRange(min = 2)
-    default int k() {
+    @Configuration.IntegerRange(min = 2, max = Byte.MAX_VALUE)
+    default byte k() {
         return 2;
     }
 

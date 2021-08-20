@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.AtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -66,12 +66,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final ApproxMaxKCutConfig config;
     private final AllocationTracker tracker;
     private final WeightTransformer weightTransformer;
-    private final HugeIntArray[] candidateSolutions;
+    private final HugeByteArray[] candidateSolutions;
     private final AtomicDoubleArray[] costs;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
     private final HugeAtomicByteArray swapStatus;
     private final List<Partition> degreePartition;
-    private HugeIntArray neighboringSolution;
+    private HugeByteArray neighboringSolution;
 
     public ApproxMaxKCut(
         Graph graph,
@@ -89,9 +89,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
 
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
-        this.candidateSolutions = new HugeIntArray[]{
-            HugeIntArray.newArray(graph.nodeCount(), tracker),
-            HugeIntArray.newArray(graph.nodeCount(), tracker)
+        this.candidateSolutions = new HugeByteArray[]{
+            HugeByteArray.newArray(graph.nodeCount(), tracker),
+            HugeByteArray.newArray(graph.nodeCount(), tracker)
         };
 
         // TODO: Should we create a dedicated AtomicDouble class using `AtomicReference` or `VarHandle` to avoid the
@@ -120,12 +120,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     @ValueClass
     public interface CutResult {
         // Value at index `i` is the idx of the community to which node with id `i` belongs.
-        HugeIntArray candidateSolution();
+        HugeByteArray candidateSolution();
 
         double cutCost();
 
         static CutResult of(
-            HugeIntArray candidateSolution,
+            HugeByteArray candidateSolution,
             double cutCost
         ) {
             return ImmutableCutResult
@@ -167,7 +167,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         progressTracker.beginSubTask();
 
         if (config.vnsMaxNeighborhoodOrder() > 0) {
-            neighboringSolution = HugeIntArray.newArray(graph.nodeCount(), tracker);
+            neighboringSolution = HugeByteArray.newArray(graph.nodeCount(), tracker);
         }
 
         for (int i = 1; (i <= config.iterations()) && running(); i++) {
@@ -198,7 +198,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get(0));
     }
 
-    private void placeNodesRandomly(HugeIntArray candidateSolution) {
+    private void placeNodesRandomly(HugeByteArray candidateSolution) {
         var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
@@ -215,7 +215,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
      * loop whenever anything has changed in the candidate solution we try to continue as long as we can in order to
      * avoid the overhead of rescheduling our tasks on threads and possibly losing hot caches.
      */
-    private void localSearch(HugeIntArray candidateSolution, AtomicDoubleArray cost) {
+    private void localSearch(HugeByteArray candidateSolution, AtomicDoubleArray cost) {
         var change = new AtomicBoolean(true);
 
         progressTracker.beginSubTask();
@@ -299,8 +299,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                 long nodeToFlip = randomNonNegativeLong(0, graph.nodeCount());
                 // For `nodeToFlip`, move to a new random community not equal to its current community in
                 // `neighboringSolution`.
-                int rndNewCommunity = (neighboringSolution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config
-                    .k();
+                byte rndNewCommunity = (byte) ((neighboringSolution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config
+                    .k());
                 neighboringSolution.set(nodeToFlip, rndNewCommunity);
             }
 
@@ -331,11 +331,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
     private final class PlaceNodesRandomly implements Runnable {
 
-        private final HugeIntArray candidateSolution;
+        private final HugeByteArray candidateSolution;
         private final Partition partition;
 
         PlaceNodesRandomly(
-            HugeIntArray candidateSolution,
+            HugeByteArray candidateSolution,
             Partition partition
         ) {
             this.candidateSolution = candidateSolution;
@@ -352,7 +352,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                 rand = random;
             }
 
-            partition.consume(nodeId -> candidateSolution.set(nodeId, rand.nextInt(config.k())));
+            partition.consume(nodeId -> candidateSolution.set(nodeId, (byte) rand.nextInt(config.k())));
 
             progressTracker.logProgress(partition.nodeCount());
         }
@@ -361,12 +361,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final class ComputeNodeToCommunityWeights implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray candidateSolution;
+        private final HugeByteArray candidateSolution;
         private final Partition partition;
 
         ComputeNodeToCommunityWeights(
             Graph graph,
-            HugeIntArray candidateSolution,
+            HugeByteArray candidateSolution,
             Partition partition
         ) {
             this.graph = graph;
@@ -418,13 +418,13 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final class SwapForLocalImprovements implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray candidateSolution;
+        private final HugeByteArray candidateSolution;
         private final AtomicBoolean change;
         private final Partition partition;
 
         SwapForLocalImprovements(
             Graph graph,
-            HugeIntArray candidateSolution,
+            HugeByteArray candidateSolution,
             AtomicBoolean change,
             Partition partition
         ) {
@@ -440,8 +440,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             var localChange = new MutableBoolean(false);
 
             partition.consume(nodeId -> {
-                int currCommunity = candidateSolution.get(nodeId);
-                int bestCommunity = bestCommunity(nodeId, currCommunity);
+                byte currCommunity = candidateSolution.get(nodeId);
+                byte bestCommunity = bestCommunity(nodeId, currCommunity);
 
                 if (bestCommunity == currCommunity) return;
 
@@ -493,12 +493,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             progressTracker.logProgress(partition.nodeCount());
         }
 
-        private int bestCommunity(long nodeId, int currCommunity) {
+        private byte bestCommunity(long nodeId, byte currCommunity) {
             final long NODE_OFFSET = nodeId * config.k();
-            int bestCommunity = currCommunity;
+            byte bestCommunity = currCommunity;
             double smallestCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + currCommunity);
 
-            for (int i = 0; i < config.k(); i++) {
+            for (byte i = 0; i < config.k(); i++) {
                 var nodeToCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + i);
                 if (nodeToCommunityWeight < smallestCommunityWeight) {
                     bestCommunity = i;
@@ -513,13 +513,13 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final class ComputeCost implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray candidateSolution;
+        private final HugeByteArray candidateSolution;
         private final AtomicDoubleArray cost;
         private final Partition partition;
 
         ComputeCost(
             Graph graph,
-            HugeIntArray candidateSolution,
+            HugeByteArray candidateSolution,
             AtomicDoubleArray cost,
             Partition partition
         ) {
