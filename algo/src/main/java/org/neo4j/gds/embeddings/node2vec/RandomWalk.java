@@ -57,7 +57,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final AtomicLong nodeIndex;
     private final long randomSeed;
     private final AllocationTracker tracker;
-    private final ProgressTracker progressTracker;
 
     private RandomWalk(
         Graph graph,
