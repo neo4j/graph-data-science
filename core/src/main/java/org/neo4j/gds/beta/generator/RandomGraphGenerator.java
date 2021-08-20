@@ -20,10 +20,10 @@
 package org.neo4j.gds.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
@@ -262,7 +262,7 @@ public final class RandomGraphGenerator {
 
                 var nodeLabelToProperties = nodeLabels
                     .stream()
-                    .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> nodeProperties));
+                    .collect(Collectors.toMap(Function.identity(), nodeLabel -> nodeProperties));
 
                 return new UnionNodeProperties(idMap, nodeLabelToProperties);
             }

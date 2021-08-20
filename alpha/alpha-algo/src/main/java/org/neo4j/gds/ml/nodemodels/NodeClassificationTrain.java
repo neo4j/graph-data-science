@@ -50,6 +50,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -339,7 +340,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         Map<Metric, Double> testMetrics
     ) {
         return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
-            metric -> metric,
+            Function.identity(),
             metric ->
                 MetricData.of(
                     modelSelectResult.trainStats().get(metric),
@@ -384,7 +385,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
         var localTargets = makeLocalTargets(evaluationSet);
         return metrics.stream().collect(Collectors.toMap(
-            metric -> metric,
+            Function.identity(),
             metric -> metric.compute(localTargets, predictedClasses, globalClassCounts)
         ));
     }

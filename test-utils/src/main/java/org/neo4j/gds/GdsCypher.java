@@ -125,7 +125,7 @@ public abstract class GdsCypher {
 
         default ImplicitCreationBuildStage withNodeLabels(String... labels) {
             return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
-                label -> label,
+                Function.identity(),
                 label -> NodeProjection.builder().label(label).build()
             )));
         }

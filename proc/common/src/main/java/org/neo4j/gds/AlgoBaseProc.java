@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -363,7 +364,7 @@ public abstract class AlgoBaseProc<
         return Stream.concat(config.internalRelationshipTypes(graphStore).stream(), Stream.of(RelationshipType.ALL_RELATIONSHIPS))
             .distinct()
             .collect(Collectors.toMap(
-                key -> key,
+                Function.identity(),
                 key -> key == RelationshipType.ALL_RELATIONSHIPS
                     ? relCount
                     : filteredGraph

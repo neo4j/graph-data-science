@@ -22,14 +22,9 @@ package org.neo4j.gds.beta.filter;
 import com.carrotsearch.hppc.AbstractIterator;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
-import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
-import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeMapping;
@@ -40,14 +35,19 @@ import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapImplementations;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.DoubleNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.InnerNodePropertiesBuilder;
+import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
+import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeMergeSort;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
@@ -55,10 +55,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.paged.SparseLongArray.SUPER_BLOCK_SHIFT;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class NodesFilter {
 
@@ -141,7 +142,7 @@ final class NodesFilter {
             internalIdFunction = (id) -> id;
 
             partitions = PartitionUtils
-                .rangePartition(concurrency, graphStore.nodeCount(), partition -> partition, Optional.empty())
+                .rangePartition(concurrency, graphStore.nodeCount(), Function.identity(), Optional.empty())
                 .iterator();
         }
 
@@ -220,7 +221,7 @@ final class NodesFilter {
             .availableNodeLabels()
             .stream()
             .collect(Collectors.toMap(
-                nodeLabel -> nodeLabel,
+                Function.identity(),
                 nodeLabel -> {
                     var propertyKeys = inputGraphStore.nodePropertyKeys(nodeLabel);
 

@@ -19,24 +19,24 @@
  */
 package org.neo4j.gds.beta.filter;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.RelationshipProperty;
+import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.beta.filter.expression.EvaluationContext;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.values.storable.NumberType;
 
@@ -45,11 +45,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class RelationshipsFilter {
 
@@ -170,7 +171,7 @@ final class RelationshipsFilter {
         var propertyIndices = IntStream
             .range(0, propertyKeys.size())
             .boxed()
-            .collect(Collectors.toMap(propertyKeys::get, idx -> idx));
+            .collect(Collectors.toMap(propertyKeys::get, Function.identity()));
 
         var relationshipFilterTasks = PartitionUtils.rangePartition(concurrency, outputNodes.nodeCount(), partition ->
             new RelationshipFilterTask(

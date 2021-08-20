@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -153,7 +154,7 @@ public class LinkPredictionTrain
         Map<LinkMetric, Double> testMetrics
     ) {
         return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
-            metric -> metric,
+            Function.identity(),
             metric ->
                 MetricData.of(
                     modelSelectResult.trainStats().get(metric),
@@ -256,7 +257,7 @@ public class LinkPredictionTrain
         ));
 
         return config.metrics().stream().collect(Collectors.toMap(
-            metric -> metric,
+            Function.identity(),
             metric -> metric.compute(signedProbabilities, config.negativeClassWeight())
         ));
     }
