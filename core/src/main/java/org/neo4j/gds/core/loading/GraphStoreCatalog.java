@@ -22,9 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
@@ -346,7 +346,7 @@ public final class GraphStoreCatalog {
                     graphStoreWithConfig.graphStore().release();
                     removeDegreeDistribution(userCatalogKey);
                     graphsByName.remove(userCatalogKey);
-                    return true;
+                    return Boolean.TRUE;
                 })
                 .orElse(Boolean.FALSE);
         }
