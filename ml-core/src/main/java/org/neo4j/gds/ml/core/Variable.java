@@ -51,7 +51,7 @@ public interface Variable<T extends Tensor<T>> {
             sb.append("|-- ");
         }
 
-        sb.append(variable.toString());
+        sb.append(variable);
         sb.append(System.lineSeparator());
 
         variable.parents().forEach(component -> render(sb, component, depth + 1));

@@ -116,10 +116,10 @@ public class ComputationContext {
         StringBuilder result = new StringBuilder();
 
         data.forEach((variable, dataEntry) -> {
-            result.append(variable.toString())
+            result.append(variable)
                 .append(System.lineSeparator())
                 .append("\t data: ")
-                .append(dataEntry.toString())
+                .append(dataEntry)
                 .append(System.lineSeparator());
 
             var gradient = Optional.ofNullable(gradients.get(variable)).map(Tensor::toString);
@@ -144,8 +144,8 @@ public class ComputationContext {
             result.append("Found gradients but no data for: ");
             unmatchedGradients.forEach(entry -> result
                 .append(System.lineSeparator())
-                .append(entry.getKey().toString())
-                .append(entry.getValue().toString())
+                .append(entry.getKey())
+                .append(entry.getValue())
             );
         }
     }

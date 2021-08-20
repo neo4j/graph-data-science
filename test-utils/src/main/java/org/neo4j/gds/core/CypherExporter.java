@@ -89,11 +89,11 @@ public final class CypherExporter {
                         relStatements.add(relBuilder);
                     });
                 });
-                sb.append(relStatements.toString()).append(";");
+                sb.append(relStatements).append(";");
             });
 
             sb.append(System.lineSeparator());
-            out.println(sb.toString());
+            out.println(sb);
         } finally {
 
             out.flush();
