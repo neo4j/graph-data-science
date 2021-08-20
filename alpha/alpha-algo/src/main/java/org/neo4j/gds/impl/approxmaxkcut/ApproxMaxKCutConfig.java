@@ -26,6 +26,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -47,5 +49,17 @@ public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightC
     @Configuration.IntegerRange(min = 0)
     default int vnsMaxNeighborhoodOrder() {
         return 0;
+    }
+
+    @Value.Check
+    default void validate() {
+        randomSeed().ifPresent(unused -> {
+            if (concurrency() > 1) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Configuration parameter 'randomSeed' may only be set if parameter 'concurrency' is equal to 1, but got %d.",
+                    concurrency()
+                ));
+            }
+        });
     }
 }

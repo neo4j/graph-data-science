@@ -140,7 +140,12 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
 
     @Test
     void testRandomSeed() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("randomSeed", 42L)));
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            "randomSeed",
+            42L,
+            "concurrency",
+            1
+        )));
         applyOnProcedure(proc -> {
             CONFIG approxMaxKCutConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(42L, approxMaxKCutConfig.randomSeed().get());

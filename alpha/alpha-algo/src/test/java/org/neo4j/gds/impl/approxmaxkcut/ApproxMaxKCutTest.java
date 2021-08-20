@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.approxmaxkcut;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -42,6 +43,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -102,7 +104,7 @@ final class ApproxMaxKCutTest {
 
     @ParameterizedTest
     @MethodSource("maxKCutParameters")
-    void shouldComputeCorrectResults(
+    void computeCorrectResults(
         boolean weighted,
         Map<String, Long> expectedMapping,
         double expectedCost,
@@ -155,9 +157,17 @@ final class ApproxMaxKCutTest {
         });
     }
 
+    @Test
+    void invalidRandomParameters() {
+        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+            .concurrency(4)
+            .randomSeed(1337L);
+        assertThrows(IllegalArgumentException.class, configBuilder::build);
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {0, 2})
-    void testProgressLogging(int vnsMaxNeighborhoodOrder) {
+    void progressLogging(int vnsMaxNeighborhoodOrder) {
         var configBuilder = ImmutableApproxMaxKCutConfig.builder();
         configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
 
@@ -172,7 +182,7 @@ final class ApproxMaxKCutTest {
         );
         approxMaxKCut.compute();
 
-        var progressLogger = (TestProgressLogger)approxMaxKCut.getProgressTracker().progressLogger();
+        var progressLogger = (TestProgressLogger) approxMaxKCut.getProgressTracker().progressLogger();
 
         assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Start")).isTrue();
         assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
