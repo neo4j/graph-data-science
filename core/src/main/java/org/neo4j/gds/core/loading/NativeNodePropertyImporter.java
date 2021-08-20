@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
@@ -95,7 +97,7 @@ public final class NativeNodePropertyImporter {
                 continue;
             }
 
-            var buildersByPropertyId = buildersByLabelIdAndPropertyId.get((int) labelId);
+            var buildersByPropertyId = buildersByLabelIdAndPropertyId.get(labelId);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
@@ -254,13 +256,13 @@ public final class NativeNodePropertyImporter {
             return instance;
         }
 
-        private final IntObjectMap<BuildersByPropertyId> builders;
+        private final LongObjectMap<BuildersByPropertyId> builders;
 
         boolean containsAnyLabelProjection() {
             return builders.containsKey(ANY_LABEL);
         }
 
-        BuildersByPropertyId get(int labelId) {
+        BuildersByPropertyId get(long labelId) {
             return builders.get(labelId);
         }
 
@@ -272,7 +274,7 @@ public final class NativeNodePropertyImporter {
         }
 
         private BuildersByLabelIdAndPropertyId() {
-            this.builders = new IntObjectHashMap<>();
+            this.builders = new LongObjectHashMap<>();
         }
     }
 
