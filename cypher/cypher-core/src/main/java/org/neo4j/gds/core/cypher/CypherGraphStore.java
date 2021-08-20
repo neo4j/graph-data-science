@@ -25,7 +25,7 @@ import org.neo4j.gds.api.NodeMapping;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
-    CypherNodeMapping cypherNodeMapping;
+    private final CypherNodeMapping cypherNodeMapping;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
