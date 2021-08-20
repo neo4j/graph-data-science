@@ -75,10 +75,7 @@ public class NodeClassificationPredictWriteProc
         var classProperties = result.predictedClasses().asNodeProperties();
         var nodeProperties = new ArrayList<NodeProperty>();
         nodeProperties.add(NodeProperty.of(writeProperty, classProperties));
-        if (result.predictedProbabilities().isPresent()) {
-            var probabilityPropertyKey = config.predictedProbabilityProperty().orElseThrow();
-            var probabilityProperties = result.predictedProbabilities().get();
-
+        result.predictedProbabilities().ifPresent((probabilityProperties) -> {
             var properties = new DoubleArrayNodeProperties() {
                 @Override
                 public long size() {
@@ -92,10 +89,11 @@ public class NodeClassificationPredictWriteProc
             };
 
             nodeProperties.add(NodeProperty.of(
-                probabilityPropertyKey,
+                config.predictedProbabilityProperty().orElseThrow(),
                 properties
             ));
-        }
+        });
+
         return nodeProperties;
     }
 

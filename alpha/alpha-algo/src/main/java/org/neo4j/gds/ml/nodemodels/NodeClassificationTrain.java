@@ -76,8 +76,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
         var maxBatchSize = config.params().stream()
-            .map(params -> NodeLogisticRegressionTrainConfig.of(config.featureProperties(), config.targetProperty(), config.concurrency(), params).batchSize())
-            .mapToInt(i -> i)
+            .mapToInt(params -> NodeLogisticRegressionTrainConfig.of(config.featureProperties(), config.targetProperty(), config.concurrency(), params).batchSize())
             .max()
             .getAsInt();
         var fudgedClassCount = 1000;
@@ -239,9 +238,10 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
         var paramConfigCounter = 1;
+        var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", paramConfigCounter++, config.paramsConfig().size());
+
         progressTracker.beginSubTask();
         for (var modelParams : config.paramsConfig()) {
-            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", paramConfigCounter++, config.paramsConfig().size());
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             for (int j = 0; j < splits.size(); j++) {
