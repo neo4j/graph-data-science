@@ -40,12 +40,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class GraphStoreAdapter implements GraphStore {
+public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     private final GraphStore graphStore;
 
     protected GraphStoreAdapter(GraphStore graphStore) {
         this.graphStore = graphStore;
+    }
+
+    @Override
+    public GraphStore innerGraphStore() {
+        return graphStore;
     }
 
     @Override
