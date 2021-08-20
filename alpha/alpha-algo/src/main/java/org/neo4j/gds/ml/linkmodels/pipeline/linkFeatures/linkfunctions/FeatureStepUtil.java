@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.ml.core.tensor.TensorFunctions;
 
 import java.util.List;
 
@@ -54,6 +56,19 @@ final class FeatureStepUtil {
         }
 
         return dimension;
+    }
 
+    static boolean isNaN(long nodeId, NodeProperties nodeProperty) {
+        switch (nodeProperty.valueType()) {
+            case DOUBLE:
+                return Double.isNaN(nodeProperty.doubleValue(nodeId));
+            case DOUBLE_ARRAY:
+            case FLOAT_ARRAY:
+                return TensorFunctions.anyMatch(nodeProperty.doubleArrayValue(nodeId), Double::isNaN);
+            case UNKNOWN:
+                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
+            default:
+                return false;
+        }
     }
 }

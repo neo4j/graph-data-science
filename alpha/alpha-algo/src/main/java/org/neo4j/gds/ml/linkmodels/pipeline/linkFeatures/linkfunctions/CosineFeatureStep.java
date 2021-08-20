@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -38,11 +39,6 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     public CosineFeatureStep(List<String> nodeProperties) {
         this.nodeProperties = nodeProperties;
-    }
-
-    @TestOnly
-    public List<String> nodeProperties() {
-        return nodeProperties;
     }
 
     @Override
@@ -89,8 +85,33 @@ public class CosineFeatureStep implements LinkFeatureStep {
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }
-            linkFeatures[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
+            double l2Norm = Math.sqrt(sourceSquareNorm * targetSquareNorm);
+
+             if (isValidL2Norm(graph, source, target, l2Norm)) {
+                linkFeatures[offset] /= l2Norm;
+            }
         };
+    }
+
+    private boolean isValidL2Norm(Graph graph, long source, long target, double l2Norm) {
+        if (Double.isNaN(l2Norm)) {
+            this.nodeProperties.forEach(propertyKey -> {
+                var property = graph.nodeProperties(propertyKey);
+                var nanNodes = Stream
+                    .of(source, target)
+                    .filter(node -> !FeatureStepUtil.isNaN(node, property))
+                    .map(Object::toString);
+
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Encountered NaN in the nodeProperty %s for nodes %s when computing the cosine feature vector. " +
+                    "Either define a default value if its a stored property or check the nodePropertyStep",
+                    propertyKey,
+                    StringJoining.join(nanNodes)
+                ));
+            });
+        }
+
+        return l2Norm != 0.0;
     }
 
     @Override
