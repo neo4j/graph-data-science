@@ -20,13 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 
@@ -37,24 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
-@GdlExtension
-final class CosineLinkFeatureStepTest {
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
-    static String GRAPH =
-        "(a:N {noise: 42, z: 13, array: [3.0,2.0], zeros: [.0, .0], invalidValue: NaN}), " +
-        "(b:N {noise: 1337, z: 0, array: [1.0,1.0], zeros: [.0, .0], invalidValue: 1.0}), " +
-        "(c:N {noise: 42, z: 2, array: [8.0,2.3], zeros: [.0, .0], invalidValue: 3.0}), " +
-        "(d:N {noise: 42, z: 9, array: [0.1,91.0], zeros: [.0, .0], invalidValue: 4.0}), " +
-
-        "(a)-[:REL]->(b), " +
-        "(a)-[:REL]->(c), " +
-        "(a)-[:REL]->(d)";
-
-    @Inject
-    GraphStore graphStore;
-
-    @Inject
-    Graph graph;
+final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
 
     @Test
     public void runCosineLinkFeatureStep() {
@@ -103,7 +80,7 @@ final class CosineLinkFeatureStepTest {
         );
 
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4))
-            .hasMessage("Encountered NaN in the nodeProperty invalidValue for nodes ['1'] when computing the cosine feature vector. " +
+            .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the cosine feature vector. " +
                         "Either define a default value if its a stored property or check the nodePropertyStep");
     }
 }

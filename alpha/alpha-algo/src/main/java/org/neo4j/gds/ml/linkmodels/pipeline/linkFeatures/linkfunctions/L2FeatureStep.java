@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.FeatureStepUtil.throwNanError;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class L2FeatureStep implements LinkFeatureStep {
@@ -42,8 +43,8 @@ public class L2FeatureStep implements LinkFeatureStep {
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
-        return (source, target, linkFeatures, offset) -> {
-            var offset1 = offset;
+        return (source, target, linkFeatures, startOffset) -> {
+            var offset = startOffset;
 
             for (NodeProperties props : properties) {
                 var propertyType = props.valueType();
@@ -54,7 +55,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.doubleArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset1++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                            linkFeatures[offset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                         }
                         break;
                     }
@@ -63,18 +64,26 @@ public class L2FeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.longArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset1++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                            linkFeatures[offset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                         }
                         break;
                     }
                     case LONG:
                     case DOUBLE:
-                        linkFeatures[offset1++] = Math.pow(props.doubleValue(source) - props.doubleValue(target), 2);
+                        linkFeatures[offset++] = Math.pow(props.doubleValue(source) - props.doubleValue(target), 2);
                         break;
                     case UNKNOWN:
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }
+
+            FeatureStepUtil.validateComputedFeatures(linkFeatures, startOffset, offset, () -> throwNanError(
+                "L2",
+                graph,
+                this.nodeProperties,
+                source,
+                target
+            ));
         };
     }
 
