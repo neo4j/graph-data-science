@@ -104,7 +104,7 @@ public class GraphSageModelTrainer {
         this.executor = executor;
         this.progressTracker = progressTracker;
         this.useWeights = config.hasRelationshipWeightProperty();
-        this.randomSeed = config.randomSeed().orElse(ThreadLocalRandom.current().nextLong());
+        this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {

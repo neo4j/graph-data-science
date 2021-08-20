@@ -78,7 +78,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                     .forEach(label -> builder.addProperty(label, key, ValueType.STRING))
                 );
             return builder.build();
-        }).orElse(builder.build());
+        }).orElseGet(() -> builder.build());
 
         return GraphStoreToFileExporter.of(
             graphStore,

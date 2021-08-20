@@ -111,7 +111,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
                     config.projectedFeatureDimension().orElseThrow(),
                     e.getValue(),
                     WEIGHT_BOUND,
-                    config.randomSeed().orElse(ThreadLocalRandom.current().nextLong())
+                    config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong())
                 )
             ));
     }

@@ -59,7 +59,7 @@ public class MeanAggregator implements Aggregator {
                 relationshipWeightsFunction,
                 subGraph
             )
-        ).orElse(
+        ).orElseGet(() ->
             new MultiMean(
                 previousLayerRepresentations,
                 subGraph.adjacency,

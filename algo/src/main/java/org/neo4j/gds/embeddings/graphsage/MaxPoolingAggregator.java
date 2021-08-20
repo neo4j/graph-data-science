@@ -76,7 +76,7 @@ public class MaxPoolingAggregator implements Aggregator {
             relationshipWeightsFunction ->
                 // Weighted with respect to the Relationship Weights
                 new WeightedElementwiseMax(neighborhoodActivations, relationshipWeightsFunction, subGraph)
-        ).orElse(new ElementWiseMax(neighborhoodActivations, subGraph.adjacency));
+        ).orElseGet(() -> new ElementWiseMax(neighborhoodActivations, subGraph.adjacency));
 
 
         Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
