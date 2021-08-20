@@ -32,16 +32,19 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Value.Default
+    @Configuration.IntegerRange(min = 2)
     default int k() {
         return 2;
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int iterations() {
         return 8;
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 0)
     default int vnsMaxNeighborhoodOrder() {
         return 0;
     }
