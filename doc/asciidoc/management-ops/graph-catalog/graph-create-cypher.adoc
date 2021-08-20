@@ -514,3 +514,67 @@ YIELD
 | "existingNumberOfPages" | 5      | 2
 |===
 --
+
+=== Further usage of parameters
+
+The parameters can also be used to directly pass in a list of nodes or a list of relationships.
+For example, pre-computing the list of nodes can be useful if the node filter is expensive.
+
+.Project `Person` nodes younger than 17 and their name not beginning with _V_, and `KNOWS` relationships:
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'personSubset',
+  'MATCH (n)
+    WHERE n.age < 20 AND NOT n.name STARTS WITH "V"
+    RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    WHERE (n.age < 20 AND NOT n.name STARTS WITH "V") AND
+          (m.age < 20 AND NOT m.name STARTS WITH "V")
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages',
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph          | nodes  | rels
+| "personSubset" | 2      | 1
+|===
+--
+
+By using passing the relevant Persons as a parameter, the above query can be simplified into:
+
+.Project `Person` nodes younger than 20 and their name not beginning with _V_, and `KNOWS` relationships by using parameters:
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+MATCH (n)
+WHERE n.age < 20 AND NOT n.name STARTS WITH "V"
+WITH collect(n) AS olderPersons
+CALL gds.graph.create.cypher(
+  'personSubsetViaParameters',
+  'UNWIND $nodes AS n RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:KNOWS]->(m)
+    WHERE (n IN $nodes) AND (m IN $nodes)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages',
+  { parameters: { nodes: olderPersons} }
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+RETURN graph, nodes, rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph          | nodes  | rels
+| "personSubset" | 2      | 1
+|===
+--
+
