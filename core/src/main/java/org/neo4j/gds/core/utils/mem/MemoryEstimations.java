@@ -374,6 +374,24 @@ public final class MemoryEstimations {
         }
 
         /**
+         * Adds a new sub-component to the builder.
+         *
+         * The memory consumption (in bytes) is being computed by the supplied function.
+         * The input to that function is the number of nodes times within the graph times the vector size.
+         *
+         * @param description  description of the sub-component
+         * @param sizeOfVector number elements in each node vector
+         * @param fn           function to compute memory consumption in bytes
+         * @return this builder
+         */
+        public Builder perNodeVector(final String description, long sizeOfVector, final LongUnaryOperator fn) {
+            components.add(new LeafEstimation(
+                description,
+                (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions.nodeCount() * sizeOfVector))));
+            return this;
+        }
+
+        /**
          * Adds a {@link MemoryEstimation} as a sub-component to the builder.
          *
          * The given memory estimation is multiplied by the number of nodes in the graph.
@@ -401,10 +419,7 @@ public final class MemoryEstimations {
          * @return this builder
          */
         public Builder perNode(final String description, final LongUnaryOperator fn) {
-            components.add(new LeafEstimation(
-                    description,
-                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions.nodeCount()))));
-            return this;
+            return perNodeVector(description, 1, fn);
         }
 
         /**

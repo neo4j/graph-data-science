@@ -29,6 +29,10 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -44,6 +48,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -113,7 +118,7 @@ final class ApproxMaxKCutTest {
     ) {
         var configBuilder = ImmutableApproxMaxKCutConfig.builder()
             .concurrency(concurrency)
-            .k((byte)2)
+            .k((byte) 2)
             .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
             // We should not need as many iterations if we do VNS.
             .iterations(vnsMaxNeighborhoodOrder > 0 ? 100 : 25);
@@ -305,5 +310,64 @@ final class ApproxMaxKCutTest {
                 )).isTrue();
             }
         }
+    }
+
+    static long memUsageHelper(long nodeCount, int k, boolean vns) {
+        var memUsage = 0;
+
+        memUsage += MemoryUsage.sizeOfInstance(ApproxMaxKCut.class);
+        // Candidate solutions.
+        memUsage += 2 * HugeByteArray.memoryEstimation(nodeCount);
+        // Improvement costs cache.
+        memUsage += HugeAtomicDoubleArray.memoryEstimation(nodeCount * k);
+        // Set swap status cache.
+        memUsage += HugeAtomicByteArray.memoryEstimation(nodeCount);
+
+        if (vns) {
+            // VNS neighbor candidate solution.
+            memUsage += HugeByteArray.memoryEstimation(nodeCount);
+        }
+
+        return memUsage;
+    }
+
+    static Stream<Arguments> configParamsForMemoryEstimationTest() {
+        return TestSupport.crossArguments(
+            // node count
+            () -> Stream.of(Arguments.of(10_000L), Arguments.of(40_000L)),
+            // k
+            () -> Stream.of(Arguments.of((byte) 2), Arguments.of((byte) 5)),
+            // Using relationship weight
+            () -> Stream.of(Arguments.of(true), Arguments.of(false)),
+            // VNS max neighborhood order (0 means VNS not used)
+            () -> Stream.of(Arguments.of(0), Arguments.of(4)),
+            // concurrency
+            () -> Stream.of(Arguments.of(1), Arguments.of(4))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("configParamsForMemoryEstimationTest")
+    void memoryEstimation(long nodeCount, byte k, boolean weighted, int vnsMaxNeighborhoodOrder, int concurrency) {
+        var configBuilder = ImmutableApproxMaxKCutConfig.builder();
+
+        configBuilder.k(k);
+        if (weighted) {
+            configBuilder.relationshipWeightProperty("weight");
+        }
+        configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
+        configBuilder.concurrency(concurrency);
+
+        var config = configBuilder.build();
+
+        var expectedMemory = memUsageHelper(nodeCount, k, vnsMaxNeighborhoodOrder > 0);
+
+        assertMemoryEstimation(
+            () -> new ApproxMaxKCutFactory<>().memoryEstimation(config),
+            nodeCount,
+            concurrency,
+            expectedMemory,
+            expectedMemory
+        );
     }
 }
