@@ -20,9 +20,6 @@
 package org.neo4j.gds.core.utils.io.file;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.compat.CompatInput;
-import org.neo4j.gds.compat.CompatPropertySizeCalculator;
-import org.neo4j.gds.core.utils.io.file.csv.CsvImportUtil;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -31,6 +28,9 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.core.utils.io.file.csv.CsvImportUtil;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -96,7 +96,7 @@ public final class FileInput implements CompatInput {
     }
 
     @Override
-    public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) throws IOException {
+    public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) {
         return null;
     }
 
