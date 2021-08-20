@@ -22,9 +22,9 @@ package org.neo4j.gds.config;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.Optional;
 import java.util.Set;
@@ -70,9 +70,8 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
                 join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
             ));
         }
-        if (relationshipProperty().isPresent()) {
+        relationshipProperty().ifPresent(relProperty -> {
             Set<String> availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType()));
-            String relProperty = relationshipProperty().get();
             if (!availableProperties.contains(relProperty)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Relationship property `%s` not found for relationship type '%s'. Available properties: %s",
@@ -81,6 +80,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
                     StringJoining.join(availableProperties)
                 ));
             }
-        }
+        });
     }
 }

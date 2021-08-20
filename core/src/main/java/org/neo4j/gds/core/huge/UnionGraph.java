@@ -29,9 +29,9 @@ import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,13 +56,13 @@ public final class UnionGraph implements CSRGraph {
             throw new IllegalArgumentException("no graphs");
         }
         if (graphs.size() == 1) {
-            return graphs.iterator().next();
+            return graphs.get(0);
         }
         return new UnionGraph(graphs);
     }
 
     private UnionGraph(List<? extends CSRGraph> graphs) {
-        first = graphs.iterator().next();
+        first = graphs.get(0);
         this.graphs = graphs;
         this.relationshipTypeTopologies = new HashMap<>();
         graphs.forEach(graph -> relationshipTypeTopologies.putAll(graph.relationshipTopologies()));

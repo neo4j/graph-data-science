@@ -751,7 +751,7 @@ final class GenerateConfiguration {
                 builder.addStatement("return $T.emptyMap()", Collections.class);
                 break;
             case 1:
-                ConfigParser.Member singleConfigMember = configMembers.iterator().next();
+                ConfigParser.Member singleConfigMember = configMembers.get(0);
                 String parameter = singleConfigMember.lookupKey();
                 builder.addStatement(
                     "return $T.singletonMap($S, $L)",

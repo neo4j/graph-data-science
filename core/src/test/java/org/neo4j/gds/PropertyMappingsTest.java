@@ -39,7 +39,7 @@ class PropertyMappingsTest {
         PropertyMappings mappings = PropertyMappings.fromObject(Collections.singletonMap("foo", (Object) "bar"));
         assertEquals(mappings.numberOfMappings(), 1);
 
-        PropertyMapping propertyMapping = mappings.iterator().next();
+        PropertyMapping propertyMapping = mappings.mappings().get(0);
         assertEquals(propertyMapping.propertyKey(), "foo");
         assertEquals(propertyMapping.neoPropertyKey(), "bar");
     }

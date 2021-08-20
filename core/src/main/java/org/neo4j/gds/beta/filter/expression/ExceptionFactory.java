@@ -40,7 +40,7 @@ class ExceptionFactory implements ASTExceptionFactory {
         var message = formatWithLocale(
             "Invalid input '%s': expected %s",
             got,
-            expected.size() == 1 ? expected.stream().findFirst().get() : StringJoining.join(expected)
+            expected.size() == 1 ? expected.get(0) : StringJoining.join(expected)
         );
 
         return new IllegalArgumentException(message);
