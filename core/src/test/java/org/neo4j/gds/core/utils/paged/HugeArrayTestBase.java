@@ -50,7 +50,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
             int value = integer(42, 1337);
 
             array.boxedSet(index, box(value));
-            assertEquals(value, get(array, index));
+            assertEquals(narrowConversion(value), get(array, index));
         });
     }
 
@@ -60,7 +60,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         testArray(size, array -> {
             array.boxedSetAll(i -> box(1 << i));
             for (int index = 0; index < size; index++) {
-                assertEquals(1L << index, get(array, index));
+                assertEquals(narrowConversion(1L << index), get(array, index));
             }
         });
     }
@@ -72,7 +72,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         testArray(size, array -> {
             array.boxedFill(box(value));
             for (int index = 0; index < size; index++) {
-                assertEquals(value, get(array, index));
+                assertEquals(narrowConversion(value), get(array, index));
             }
         });
     }
@@ -298,7 +298,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         while (cursor.next()) {
             for (int i = cursor.offset; i < cursor.limit; i++, expected++) {
                 Box value = (Box) java.lang.reflect.Array.get(cursor.array, i);
-                assertEquals(expected, unbox(value));
+                assertEquals(narrowConversion(expected), unbox(value));
             }
         }
         assertEquals(expected, end + 42L);
@@ -323,7 +323,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
             }
 
             long sum = ((long) size * (long) (size + 1)) / 2L;
-            assertEquals(actual, sum);
+            assertEquals(narrowConversion(actual), narrowConversion(sum));
         });
     }
 
@@ -514,8 +514,23 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
             arrayType = Long.TYPE;
         } else if (arrayType == Double.class) {
             arrayType = Double.TYPE;
+        } else if (arrayType == Byte.class) {
+            arrayType = Byte.TYPE;
         }
         return (Array) java.lang.reflect.Array.newInstance(arrayType, size);
+    }
+
+
+    // Should be used whenever comparing a value that may have been truncated when inserted into an array of a smaller
+    // data type.
+    private long narrowConversion(long value) {
+        Class<?> arrayType = box(42).getClass();
+        if (arrayType == Integer.class) {
+            return (int) value;
+        } else if (arrayType == Byte.class) {
+            return (byte)value;
+        }
+        return value;
     }
 
     private void setAll(Array array, IntFunction<Box> gen) {
