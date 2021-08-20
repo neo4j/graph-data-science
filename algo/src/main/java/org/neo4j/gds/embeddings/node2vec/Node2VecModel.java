@@ -135,8 +135,11 @@ public class Node2VecModel {
             nodeCount,
             tracker
         );
+
+        var random = new Random();
+
         for (var i = 0L; i < nodeCount; i++) {
-            var data = new Random()
+            var data = random
                 .doubles(embeddingDimensions, -1, 1)
                 .collect(
                     () -> new FloatConsumer(embeddingDimensions),
