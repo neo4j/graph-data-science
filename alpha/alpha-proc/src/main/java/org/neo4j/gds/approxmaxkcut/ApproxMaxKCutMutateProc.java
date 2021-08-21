@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,6 +49,15 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return mutate(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ)
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

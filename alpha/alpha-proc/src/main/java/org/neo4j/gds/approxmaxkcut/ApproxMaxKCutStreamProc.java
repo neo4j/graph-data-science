@@ -26,6 +26,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,6 +47,15 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return stream(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(value = "gds.alpha.maxkcut.stream.estimate", mode = READ)
+    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

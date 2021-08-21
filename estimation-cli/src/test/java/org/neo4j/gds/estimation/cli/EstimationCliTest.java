@@ -28,6 +28,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMutateProc;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutStreamProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedStatsProc;
 import org.neo4j.gds.beta.fastrp.FastRPExtendedStreamProc;
@@ -476,6 +478,9 @@ final class EstimationCliTest {
 
     private static Stream<Pair<String, MemoryEstimateResult>> communityDetectionEstimations() {
         return sorted(Stream.of(
+            runEstimation(ApproxMaxKCutMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(ApproxMaxKCutStreamProc.class, "estimate"),
+
             runEstimation(K1ColoringMutateProc.class, "mutateEstimate", "mutateProperty", "foo"),
             runEstimation(K1ColoringStatsProc.class, "estimate"),
             runEstimation(K1ColoringStreamProc.class, "estimate"),

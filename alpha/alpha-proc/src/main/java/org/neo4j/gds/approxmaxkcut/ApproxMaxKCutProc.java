@@ -28,7 +28,7 @@ import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
 
 public final class ApproxMaxKCutProc {
 
-    static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the weight of the resulting trans-community relationships.";
+    static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
 
     private ApproxMaxKCutProc() {}
 

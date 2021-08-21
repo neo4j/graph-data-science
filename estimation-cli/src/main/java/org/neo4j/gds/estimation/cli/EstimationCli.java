@@ -128,6 +128,7 @@ public class EstimationCli implements Runnable {
     private static Map<Category, List<String>> mapCategoriesToProcedures() {
         var map = new EnumMap<Category, List<String>>(Category.class);
         map.put(Category.COMMUNITY_DETECTION, List.of(
+            "gds.alpha.maxkcut",
             "gds.beta.k1coloring",
             "gds.beta.modularityOptimization",
             "gds.labelPropagation",
