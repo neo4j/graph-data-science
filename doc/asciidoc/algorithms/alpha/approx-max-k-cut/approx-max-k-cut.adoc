@@ -211,6 +211,29 @@ CALL gds.graph.create(
 ----
 
 
+=== Memory Estimation
+
+:mode: mutate
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.maxkcut.mutate.estimate('myGraph', {mutateProperty: 'community'})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 15                | 488      | 488      | "488 Bytes"
+|===
+--
+
+
 [[algorithms-approx-max-k-cut-mutate-unweighted-example]]
 === Mutate
 
