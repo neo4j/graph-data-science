@@ -26,7 +26,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class IterativeTask extends Task {
 
-    enum Mode {
+    public enum Mode {
         // upper bound but can terminate early
         DYNAMIC,
         // unbounded

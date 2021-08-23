@@ -43,7 +43,7 @@ public class Task {
         return description;
     }
 
-    List<Task> subTasks() {
+    public List<Task> subTasks() {
         return subTasks;
     }
 
