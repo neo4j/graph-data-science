@@ -12,6 +12,7 @@ dependencies {
 
     implementation             project(':annotations')
     implementation             project(':proc-common')
+    implementation             project(':pregel')
 
     implementation             group: 'org.neo4j',                name: 'neo4j-logging',        version: ver.'neo4j'
     implementation             group: 'org.neo4j',                name: 'neo4j-procedure-api',  version: ver.'neo4j'

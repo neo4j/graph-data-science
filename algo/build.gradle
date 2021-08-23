@@ -23,7 +23,8 @@ dependencies {
 
     implementation(
         project(":annotations"),
-        project(":ml-core")
+        project(":ml-core"),
+        project(':pregel')
     )
 
     // TEST DEPENDENCIES

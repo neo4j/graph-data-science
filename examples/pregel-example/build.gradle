@@ -12,7 +12,8 @@ dependencies {
     api project(':proc-common')
 
     implementation(
-            project(':neo4j-adapter')
+        project(':neo4j-adapter'),
+        project(':pregel')
     )
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
