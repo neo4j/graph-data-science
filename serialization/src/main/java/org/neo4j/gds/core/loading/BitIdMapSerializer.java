@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
+import java.util.HashMap;
 
 public final class BitIdMapSerializer extends Serializer<BitIdMap> {
 
@@ -59,7 +60,7 @@ public final class BitIdMapSerializer extends Serializer<BitIdMap> {
     public void write(Kryo kryo, Output output, BitIdMap idMap) {
         kryo.register(NodeLabel.class, new NodeLabelSerializer());
 
-        kryo.writeObject(output, idMap.labelInformation());
+        kryo.writeObject(output, idMap.labelInformation().labelInformationMap());
 
         kryo.writeObject(output, idMap.sparseLongArray(), new SparseLongArraySerializer());
     }
@@ -68,7 +69,7 @@ public final class BitIdMapSerializer extends Serializer<BitIdMap> {
     public BitIdMap read(Kryo kryo, Input input, Class<? extends BitIdMap> type) {
         kryo.register(NodeLabel.class, new NodeLabelSerializer());
 
-        LabelInformation labelInformation = kryo.readObject(input, LabelInformation.class);
+        LabelInformation labelInformation = LabelInformation.from(kryo.readObject(input, HashMap.class));
         SparseLongArray sparseLongArray = kryo.readObject(
             input,
             SparseLongArray.class,

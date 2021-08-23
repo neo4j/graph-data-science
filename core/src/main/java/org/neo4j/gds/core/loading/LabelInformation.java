@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +52,10 @@ public final class LabelInformation {
 
     private LabelInformation(Map<NodeLabel, BitSet> labelInformation) {
         this.labelInformation = labelInformation;
+    }
+
+    public Map<NodeLabel, BitSet> labelInformationMap() {
+        return this.labelInformation;
     }
 
     public boolean isEmpty() {
