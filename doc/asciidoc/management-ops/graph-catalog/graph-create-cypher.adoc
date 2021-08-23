@@ -530,24 +530,24 @@ CALL gds.graph.create.cypher(
   'MATCH (n)
     WHERE n.age < 20 AND NOT n.name STARTS WITH "V"
     RETURN id(n) AS id, labels(n) AS labels',
-  'MATCH (n)-[r:READ]->(m)
+  'MATCH (n)-[r:KNOWS]->(m)
     WHERE (n.age < 20 AND NOT n.name STARTS WITH "V") AND
           (m.age < 20 AND NOT m.name STARTS WITH "V")
-    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages',
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
 )
 YIELD
-  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+  graphName, nodeCount AS nodes, relationshipCount AS rels
 ----
 
 .Results
 [opts="header", cols="1,1,1"]
 |===
-| graph          | nodes  | rels
+| graphName      | nodes  | rels
 | "personSubset" | 2      | 1
 |===
 --
 
-By using passing the relevant Persons as a parameter, the above query can be simplified into:
+By passing the relevant Persons as a parameter, the above query can be transformed into the following:
 
 .Project `Person` nodes younger than 20 and their name not beginning with _V_, and `KNOWS` relationships by using parameters:
 [role=query-example]
@@ -565,16 +565,16 @@ CALL gds.graph.create.cypher(
     RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages',
   { parameters: { nodes: olderPersons} }
 )
-YIELD
-  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
-RETURN graph, nodes, rels
+ YIELD
+  graphName, nodeCount AS nodes, relationshipCount AS rels
+ RETURN graphName, nodes, rels
 ----
 
 .Results
 [opts="header", cols="1,1,1"]
 |===
-| graph          | nodes  | rels
-| "personSubset" | 2      | 1
+| graphName                   | nodes  | rels
+| "personSubsetViaParameters" | 2      | 1
 |===
 --
 
