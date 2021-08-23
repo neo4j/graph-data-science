@@ -17,29 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Optional;
+public abstract class AbstractPregelResultBuilder<RESULT> extends AbstractResultBuilder<RESULT> {
 
-@Configuration
-public interface TestPregelConfig extends PregelProcedureConfig {
+    protected long ranIterations;
+    protected boolean didConverge;
 
-    @Value.Default
-    default boolean throwInCompute() {
-        return false;
+    public AbstractPregelResultBuilder<RESULT> withRanIterations(long ranIterations) {
+        this.ranIterations = ranIterations;
+        return this;
     }
 
-    static TestPregelConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+    public AbstractPregelResultBuilder<RESULT> didConverge(boolean didConverge) {
+        this.didConverge = didConverge;
+        return this;
     }
+
 }

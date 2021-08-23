@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.core.write.NodeProperty;
 
-public abstract class AbstractPregelResultBuilder<RESULT> extends AbstractResultBuilder<RESULT> {
+import java.util.List;
 
-    protected long ranIterations;
-    protected boolean didConverge;
+public abstract class PregelWriteProc<
+    ALGO extends Algorithm<ALGO, PregelResult>,
+    CONFIG extends PregelProcedureConfig>
+    extends WriteProc<ALGO, PregelResult, PregelWriteResult, CONFIG> {
 
-    public AbstractPregelResultBuilder<RESULT> withRanIterations(long ranIterations) {
-        this.ranIterations = ranIterations;
-        return this;
+    @Override
+    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
+        return PregelBaseProc.nodeProperties(computationResult, computationResult.config().writeProperty());
     }
-
-    public AbstractPregelResultBuilder<RESULT> didConverge(boolean didConverge) {
-        this.didConverge = didConverge;
-        return this;
-    }
-
 }

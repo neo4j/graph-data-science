@@ -17,35 +17,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PregelStatsResult extends StandardStatsResult {
+public final class PregelMutateResult extends StandardMutateResult {
 
+    public final long nodePropertiesWritten;
     public final long ranIterations;
     public final boolean didConverge;
 
-    private PregelStatsResult(
+    private PregelMutateResult(
+        long nodePropertiesWritten,
         long createMillis,
         long computeMillis,
+        long mutateMillis,
         long ranIterations,
         boolean didConverge,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, 0L, configuration);
+        super(createMillis, computeMillis, 0L, mutateMillis, configuration);
+        this.nodePropertiesWritten = nodePropertiesWritten;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
     }
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelStatsResult> {
+    public static class Builder extends AbstractPregelResultBuilder<PregelMutateResult> {
 
         @Override
-        public PregelStatsResult build() {
-            return new PregelStatsResult(createMillis, computeMillis, ranIterations, didConverge, config.toMap());
+        public PregelMutateResult build() {
+            return new PregelMutateResult(
+                nodePropertiesWritten,
+                createMillis,
+                computeMillis,
+                mutateMillis,
+                ranIterations,
+                didConverge,
+                config.toMap()
+            );
         }
     }
 }

@@ -17,21 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.GraphCreateConfig;
 
-import java.util.List;
+import java.util.Optional;
 
-public abstract class PregelWriteProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelProcedureConfig>
-    extends WriteProc<ALGO, PregelResult, PregelWriteResult, CONFIG> {
+@Configuration
+public interface TestPregelConfig extends PregelProcedureConfig {
 
-    @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
-        return PregelBaseProc.nodeProperties(computationResult, computationResult.config().writeProperty());
+    @Value.Default
+    default boolean throwInCompute() {
+        return false;
+    }
+
+    static TestPregelConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }

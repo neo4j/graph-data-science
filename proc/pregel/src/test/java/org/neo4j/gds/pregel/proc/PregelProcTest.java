@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +32,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
+import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Partitioning;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;

@@ -20,6 +20,8 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.proc.PregelMutateProc;
+import org.neo4j.gds.pregel.proc.PregelMutateResult;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
