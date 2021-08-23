@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.impl.approxmaxkcut;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,7 +42,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -155,14 +153,6 @@ final class ApproxMaxKCutTest {
                 }
             });
         });
-    }
-
-    @Test
-    void invalidRandomParameters() {
-        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
-            .concurrency(4)
-            .randomSeed(1337L);
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
     }
 
     @ParameterizedTest
