@@ -282,7 +282,8 @@ public class LinkPredictionTrain
             trainData.features(),
             trainData.targets(),
             llrConfig,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         var model = llrTrain.compute();
 

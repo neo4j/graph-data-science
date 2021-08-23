@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -36,6 +37,7 @@ public class NodeLogisticRegressionTrain {
     private final HugeLongArray trainSet;
     private final NodeLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
+    private TerminationFlag terminationFlag;
 
     public static MemoryEstimation memoryEstimation(
         int numberOfClasses,
@@ -58,12 +60,14 @@ public class NodeLogisticRegressionTrain {
         Graph graph,
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
         this.config = config;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public NodeLogisticRegressionData compute() {
@@ -79,7 +83,7 @@ public class NodeLogisticRegressionTrain {
             config.targetProperty(),
             config.penalty()
         );
-        var training = new Training(config, progressTracker, graph.nodeCount());
+        var training = new Training(config, progressTracker, graph.nodeCount(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
 

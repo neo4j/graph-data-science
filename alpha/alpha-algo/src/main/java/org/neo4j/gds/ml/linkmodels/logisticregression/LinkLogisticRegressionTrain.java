@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Training;
@@ -37,19 +38,22 @@ public class LinkLogisticRegressionTrain {
     private final List<FeatureExtractor> extractors;
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
+    private TerminationFlag terminationFlag;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
         HugeLongArray trainSet,
         List<FeatureExtractor> extractors,
         LinkLogisticRegressionTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
         this.extractors = extractors;
         this.config = config;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public LinkLogisticRegressionData compute() {
@@ -65,7 +69,7 @@ public class LinkLogisticRegressionTrain {
             config.penalty(),
             graph
         );
-        var training = new Training(config, progressTracker, graph.nodeCount());
+        var training = new Training(config, progressTracker, graph.nodeCount(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
         return objective.modelData;

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml;
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -33,11 +34,13 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TrainingTest {
 
@@ -49,8 +52,8 @@ class TrainingTest {
             .maxEpochs(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
-        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
+        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L, TerminationFlag.RUNNING_TRUE);
+        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, 100L, TerminationFlag.RUNNING_TRUE);
 
         var objective = new TestTrainingObjective();
         var singleThreadedObjective = new TestTrainingObjective();
@@ -61,6 +64,25 @@ class TrainingTest {
         singleThreadedTraining.train(singleThreadedObjective, queueSupplier, 1);
 
         assertThat(objective.weights()).usingRecursiveComparison().isEqualTo(singleThreadedObjective.weights());
+    }
+
+    @Test
+    void checksTerminationFlag() {
+        TerminationFlag terminationFlag = () -> false;
+
+        var config = ImmutableTestTrainingConfig
+            .builder()
+            .patience(10)
+            .maxEpochs(10)
+            .build();
+
+        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L, terminationFlag);
+
+        var objective = new TestTrainingObjective();
+
+        assertThatThrownBy(() -> training.train(objective, () -> new BatchQueue(100, 10), 4))
+            .isInstanceOf(TransactionTerminatedException.class)
+            .hasMessageContaining("The transaction has been terminated.");
     }
 
     public static class TestTrainingObjective implements Objective<Long> {

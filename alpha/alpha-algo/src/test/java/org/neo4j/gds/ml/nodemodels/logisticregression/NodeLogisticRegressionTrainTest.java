@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -67,7 +68,13 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
+        var algo = new NodeLogisticRegressionTrain(
+            graph,
+            nodeIds,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
         var result = algo.compute();
 
         var data = result.weights().data().data();
@@ -100,7 +107,13 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
+        var algo = new NodeLogisticRegressionTrain(
+            graph,
+            nodeIds,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
 
@@ -141,7 +154,13 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
+        var algo = new NodeLogisticRegressionTrain(
+            graph,
+            nodeIds,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = algo.compute();
 

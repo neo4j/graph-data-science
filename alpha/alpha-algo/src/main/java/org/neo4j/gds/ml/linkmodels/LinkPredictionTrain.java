@@ -273,7 +273,8 @@ public class LinkPredictionTrain
             trainSet,
             trainExtractors,
             llrConfig,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return llrTrain.compute();

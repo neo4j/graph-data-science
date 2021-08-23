@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -36,19 +37,22 @@ public class LinkLogisticRegressionTrain {
     private final HugeDoubleArray linkTargets;
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     public LinkLogisticRegressionTrain(
         HugeLongArray trainSet,
         HugeObjectArray<double[]> linkFeatures,
         HugeDoubleArray linkTargets,
         LinkLogisticRegressionTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.trainSet = trainSet;
         this.linkFeatures = linkFeatures;
         this.linkTargets = linkTargets;
         this.config = config;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public LinkLogisticRegressionData compute() {
@@ -56,7 +60,7 @@ public class LinkLogisticRegressionTrain {
 
         var llrData = LinkLogisticRegressionData.from(linkFeatures.get(0).length);
         var objective = new LinkLogisticRegressionObjective(llrData, config.penalty(), linkFeatures, linkTargets);
-        var training = new Training(config, progressTracker, linkFeatures.size());
+        var training = new Training(config, progressTracker, linkFeatures.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
 
         training.train(objective, queueSupplier, config.concurrency());

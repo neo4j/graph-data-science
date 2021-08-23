@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -82,7 +83,14 @@ class LinkLogisticRegressionTrainTest {
     void shouldComputeWithStreakStopper() {
         var config = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4));
 
-        var linearRegression = new LinkLogisticRegressionTrain(trainSet, linkFeatures, targets, config, ProgressTracker.NULL_TRACKER);
+        var linearRegression = new LinkLogisticRegressionTrain(
+            trainSet,
+            linkFeatures,
+            targets,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = linearRegression.compute();
 
@@ -93,7 +101,13 @@ class LinkLogisticRegressionTrainTest {
     @Test
     void shouldComputeWithStreakStopperConcurrently() {
         var config = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1.0, "maxEpochs", 100, "tolerance", 1e-10, "batchSize", 1));
-        var linearRegression = new LinkLogisticRegressionTrain(trainSet, linkFeatures, targets, config, ProgressTracker.NULL_TRACKER);
+        var linearRegression = new LinkLogisticRegressionTrain(trainSet,
+            linkFeatures,
+            targets,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var result = linearRegression.compute();
 
@@ -106,12 +120,24 @@ class LinkLogisticRegressionTrainTest {
         var config = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4));
         var configWithPenalty = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4,  "penalty", 1));
 
-        Matrix result = new LinkLogisticRegressionTrain(trainSet,  linkFeatures, targets, config, ProgressTracker.NULL_TRACKER)
+        Matrix result = new LinkLogisticRegressionTrain(trainSet,
+            linkFeatures,
+            targets,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .weights()
             .data();
 
-        Matrix resultWithPenality = new LinkLogisticRegressionTrain(trainSet,  linkFeatures, targets, configWithPenalty, ProgressTracker.NULL_TRACKER)
+        Matrix resultWithPenality = new LinkLogisticRegressionTrain(trainSet,
+            linkFeatures,
+            targets,
+            configWithPenalty,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        )
             .compute()
             .weights()
             .data();

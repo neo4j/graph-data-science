@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml;
 
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -46,11 +47,18 @@ public class Training {
     private final TrainingConfig config;
     private final ProgressTracker progressTracker;
     private final long trainSize;
+    private final TerminationFlag terminationFlag;
 
-    public Training(TrainingConfig config, ProgressTracker progressTracker, long trainSize) {
+    public Training(
+        TrainingConfig config,
+        ProgressTracker progressTracker,
+        long trainSize,
+        TerminationFlag terminationFlag
+    ) {
         this.config = config;
         this.progressTracker = progressTracker;
         this.trainSize = trainSize;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -74,6 +82,8 @@ public class Training {
         double lastLoss = initialLoss;
 
         while (!stopper.terminated()) {
+            terminationFlag.assertRunning();
+
             trainEpoch(objective, queueSupplier.get(), concurrency, updater);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);

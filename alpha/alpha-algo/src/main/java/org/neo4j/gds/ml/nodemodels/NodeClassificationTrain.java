@@ -355,7 +355,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker);
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker, terminationFlag);
         return train.compute();
     }
 
