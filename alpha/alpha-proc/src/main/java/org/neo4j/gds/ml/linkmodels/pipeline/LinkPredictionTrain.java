@@ -91,10 +91,14 @@ public class LinkPredictionTrain
 
         pipelineExecutor.splitRelationships(graphStore, relationshipTypes, trainConfig.nodeLabels(), trainConfig.randomSeed());
 
+        assertRunning();
+
         pipelineExecutor.executeNodePropertySteps(
             trainConfig.nodeLabelIdentifiers(graphStore),
             RelationshipType.of(pipeline.splitConfig().featureInputRelationshipType())
         );
+
+        assertRunning();
 
         var trainData = extractFeaturesAndTargets(pipeline.splitConfig().trainRelationshipType());
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
@@ -312,8 +316,7 @@ public class LinkPredictionTrain
         var targets = inputData.targets();
         var features = inputData.features();
 
-        evaluationQueue.parallelConsume(trainConfig.concurrency(), thread ->
-            (batch) -> {
+        evaluationQueue.parallelConsume(trainConfig.concurrency(), thread -> (batch) -> {
                 for (Long relationshipIdx : batch.nodeIds()) {
                     double predictedProbability = predictor.predictedProbability(features.get(relationshipIdx));
                     boolean isEdge = targets.get(relationshipIdx) == 1.0D;
@@ -321,7 +324,8 @@ public class LinkPredictionTrain
                     var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;
                     signedProbabilities.add(signedProbability);
                 }
-            }
+            },
+            terminationFlag
         );
 
         return trainConfig.metrics().stream().collect(Collectors.toMap(

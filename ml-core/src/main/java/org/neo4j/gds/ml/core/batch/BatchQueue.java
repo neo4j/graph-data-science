@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.core.batch;
 
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class BatchQueue {
         );
     }
 
-    public synchronized Optional<Batch> pop() {
+    synchronized Optional<Batch> pop() {
         if (currentBatch * batchSize >= nodeCount) {
             return Optional.empty();
         }
@@ -63,24 +64,24 @@ public class BatchQueue {
         return Optional.of(batch);
     }
 
-    public void parallelConsume(Consumer<Batch> consumer, int concurrency) {
-        parallelConsume(concurrency, ignore -> consumer);
+    public void parallelConsume(Consumer<Batch> consumer, int concurrency, TerminationFlag terminationFlag) {
+        parallelConsume(concurrency, ignore -> consumer, terminationFlag);
     }
 
-    public void parallelConsume(int concurrency, List<? extends Consumer<Batch>> consumers) {
+    public void parallelConsume(int concurrency, List<? extends Consumer<Batch>> consumers, TerminationFlag terminationFlag) {
         assert consumers.size() == concurrency;
 
         var tasks = consumers.stream().map(ConsumerTask::new).collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
     }
 
-    public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier) {
+    public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier, TerminationFlag terminationFlag) {
         var consumers = IntStream
             .range(0, concurrency)
             .mapToObj(consumerSupplier::apply)
             .collect(Collectors.toList());
 
-        parallelConsume(concurrency, consumers);
+        parallelConsume(concurrency, consumers, terminationFlag);
     }
 
     private class ConsumerTask implements Runnable {

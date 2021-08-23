@@ -38,7 +38,7 @@ public class LinkLogisticRegressionTrain {
     private final List<FeatureExtractor> extractors;
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag;
+    private final TerminationFlag terminationFlag;
 
     public LinkLogisticRegressionTrain(
         Graph graph,

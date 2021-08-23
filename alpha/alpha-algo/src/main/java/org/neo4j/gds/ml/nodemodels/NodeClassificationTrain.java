@@ -381,7 +381,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         );
 
         var queue = new BatchQueue(evaluationSet.size());
-        queue.parallelConsume(consumer, config.concurrency());
+        queue.parallelConsume(consumer, config.concurrency(), terminationFlag);
 
         var localTargets = makeLocalTargets(evaluationSet);
         return metrics.stream().collect(Collectors.toMap(

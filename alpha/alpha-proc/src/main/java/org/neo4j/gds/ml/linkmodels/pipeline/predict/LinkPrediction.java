@@ -75,6 +75,8 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     @Override
     public LinkPredictionResult compute() {
         computeNodeProperties();
+        assertRunning();
+
         return predictLinks();
     }
 
@@ -93,12 +95,14 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
 
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
-            graph.concurrentCopy(),
-            featureExtractor,
-            predictor,
-            result,
-            progressTracker
-        ));
+                graph.concurrentCopy(),
+                featureExtractor,
+                predictor,
+                result,
+                progressTracker
+            ),
+            terminationFlag
+        );
 
         pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
 

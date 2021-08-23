@@ -75,11 +75,13 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
-            graph.concurrentCopy(),
-            predictor,
-            result,
-            progressTracker
-        ));
+                graph.concurrentCopy(),
+                predictor,
+                result,
+                progressTracker
+            ),
+            terminationFlag
+        );
         progressTracker.endSubTask();
         return result;
     }

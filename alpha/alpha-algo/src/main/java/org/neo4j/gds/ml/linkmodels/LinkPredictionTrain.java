@@ -250,11 +250,13 @@ public class LinkPredictionTrain
         progressTracker.setVolume(evaluationGraph.nodeCount());
         var queue = new HugeBatchQueue(evaluationSet);
         queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
-            evaluationGraph.concurrentCopy(),
-            predictor,
-            signedProbabilities,
-            progressTracker
-        ));
+                evaluationGraph.concurrentCopy(),
+                predictor,
+                signedProbabilities,
+                progressTracker
+            ),
+            terminationFlag
+        );
 
         return config.metrics().stream().collect(Collectors.toMap(
             Function.identity(),

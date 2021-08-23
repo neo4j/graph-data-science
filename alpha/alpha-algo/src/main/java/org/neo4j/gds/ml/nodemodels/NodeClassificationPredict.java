@@ -93,7 +93,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             progressTracker
         );
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
-        batchQueue.parallelConsume(consumer, concurrency);
+        batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
         progressTracker.endSubTask();
         return NodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
     }

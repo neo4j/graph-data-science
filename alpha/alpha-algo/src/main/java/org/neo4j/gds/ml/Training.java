@@ -110,7 +110,8 @@ public class Training {
                 totalLoss,
                 trainSize
             ),
-            concurrency
+            concurrency,
+            terminationFlag
         );
 
         return totalLoss.doubleValue();
@@ -127,7 +128,7 @@ public class Training {
             consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
         }
 
-        batches.parallelConsume(concurrency, consumers);
+        batches.parallelConsume(concurrency, consumers, terminationFlag);
 
         List<? extends List<? extends Tensor<?>>> localGradientSums = consumers
             .stream()

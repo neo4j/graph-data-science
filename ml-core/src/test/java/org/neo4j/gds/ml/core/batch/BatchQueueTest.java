@@ -20,8 +20,11 @@
 package org.neo4j.gds.ml.core.batch;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.graphdb.TransactionTerminatedException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class BatchQueueTest {
     @Test
@@ -58,5 +61,15 @@ class BatchQueueTest {
         }
         assertThat(batchQueue.pop().orElseThrow().size()).isEqualTo(23);
         assertThat(batchQueue.pop()).isEmpty();
+    }
+
+    @Test
+    void checkTerminationFlag() {
+        TerminationFlag flag = () -> false;
+        BatchQueue batchQueue = new BatchQueue(101, 1, 4);
+
+        assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::nodeIds, 4, flag))
+            .isInstanceOf(TransactionTerminatedException.class)
+            .hasMessageContaining("The transaction has been terminated.");
     }
 }
