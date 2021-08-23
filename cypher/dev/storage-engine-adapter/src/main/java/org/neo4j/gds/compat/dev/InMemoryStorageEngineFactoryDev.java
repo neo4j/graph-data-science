@@ -29,6 +29,7 @@ import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
+import org.neo4j.internal.recordstorage.InMemoryStoreVersion;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -45,6 +46,8 @@ import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.StorageEngine;
+import org.neo4j.storageengine.api.StoreId;
+import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.token.TokenHolders;
 
 @ServiceProvider
@@ -108,6 +111,11 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+    }
+
+    @Override
+    public StoreVersion versionInformation(StoreId storeId) {
+        return new InMemoryStoreVersion();
     }
 
     @Override
