@@ -100,8 +100,8 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(ApproxMaxKCut.class);
 
-        builder.perNode("solution candidate 1", HugeByteArray::memoryEstimation);
-        builder.perNode("solution candidate 2", HugeByteArray::memoryEstimation);
+        builder.perNode("best solution candidate", HugeByteArray::memoryEstimation);
+        builder.perNode("solution workspace", HugeByteArray::memoryEstimation);
         builder.perNodeVector(
             "local search improvement costs cache",
             configuration.k(),
