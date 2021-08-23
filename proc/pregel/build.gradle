@@ -1,0 +1,28 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Pregel :: Procedures'
+
+dependencies {
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+
+    implementation(
+        project(':pregel'),
+        project(':proc-common')
+    )
+
+    (neodeps + ['neo4j-unsafe']).each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    testAnnotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+
+    testImplementation project(':test-utils')
+    testImplementation project(':proc-catalog')
+}
