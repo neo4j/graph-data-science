@@ -95,14 +95,14 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var progressEvents = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, stage RETURN taskName, stage",
+            "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, stage, progress",
             r -> r.stream().collect(Collectors.toList())
         );
         assertThat(progressEvents).hasSize(2);
         assertThat(progressEvents)
             .containsExactlyInAnyOrder(
-                Map.of("taskName","foo", "stage", "0 of 1"),
-                Map.of("taskName", "bar", "stage", "0 of 1")
+                Map.of("taskName","foo", "stage", "0 of 1", "progress", "33.33%"),
+                Map.of("taskName", "bar", "stage", "0 of 1", "progress", "33.33%")
             );
     }
 
@@ -135,14 +135,14 @@ public class ListProgressProcTest extends BaseTest {
             scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             List<Map<String, Object>> result = runQuery(
-                "CALL gds.beta.listProgress() YIELD taskName, stage RETURN taskName, stage",
+                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, stage, progress",
                 r -> r.stream().collect(Collectors.toList())
             );
 
             assertThat(result).hasSize(1)
                 .element(0, InstanceOfAssertFactories.map(String.class, String.class))
                 .containsExactlyInAnyOrderEntriesOf(
-                    Map.of("taskName", "FastRP", "stage", "6 of 6")
+                    Map.of("taskName", "FastRP", "stage", "6 of 6", "progress", "100%")
                 );
         }
     }
@@ -155,7 +155,9 @@ public class ListProgressProcTest extends BaseTest {
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName
         ) {
-            progress.addTaskProgressEvent(Tasks.leaf(taskName));
+            var task = Tasks.leaf(taskName, 3);
+            task.logProgress(1);
+            progress.addTaskProgressEvent(task);
             return Stream.empty();
         }
     }

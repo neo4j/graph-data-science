@@ -31,6 +31,9 @@ import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -49,14 +52,18 @@ public class ListProgressProc extends BaseProc {
     @SuppressWarnings("unused")
     public static class ProgressResult {
 
+        private static final String UNKNOWN = "n/a";
+
         public String id;
         public String taskName;
         public String stage;
+        public String progress;
 
         ProgressResult(ProgressEvent progressEvent) {
             this.id = progressEvent.jobId().asString();
             this.taskName = progressEvent.task().description();
             this.stage = computeStage(progressEvent.task());
+            this.progress = computeProgress(progressEvent.task());
         }
 
         private String computeStage(Task baseTask) {
@@ -67,8 +74,22 @@ public class ListProgressProc extends BaseProc {
             String stageResult;
 
             return subTaskCountingVisitor.containsUnresolvedOpenTask()
-                ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), "n/a")
+                ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
+        }
+
+        private String computeProgress(Task baseTask) {
+            var progressContainer = baseTask.getProgress();
+            var volume = progressContainer.volume();
+            var progress = progressContainer.progress();
+
+            if (volume == Task.UNKNOWN_VOLUME) {
+                return UNKNOWN;
+            }
+
+            var progressPercentage = (double) progress / (double) volume;
+            var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+            return decimalFormat.format(progressPercentage);
         }
     }
 
