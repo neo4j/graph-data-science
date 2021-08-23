@@ -237,11 +237,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     }
 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
-        var paramConfigCounter = 1;
-        var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", paramConfigCounter++, config.paramsConfig().size());
-
         progressTracker.beginSubTask();
-        for (var modelParams : config.paramsConfig()) {
+
+        for (int i = 0; i < config.paramsConfig().size(); i++) {
+            var modelParams = config.paramsConfig().get(i);
+            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.paramsConfig().size());
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             for (int j = 0; j < splits.size(); j++) {

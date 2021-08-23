@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -213,25 +212,85 @@ class NodeClassificationTrainTest {
 
         algorithm.compute();
 
-        var messagesInOrder = log.getMessages(INFO);
-
-        // something is logged
-        assertThat(messagesInOrder).hasSizeGreaterThan(20);
-
-        //  something should log percentage
-        assertThat(messagesInOrder.stream().filter(s -> s.contains("%"))).isNotEmpty();
-
-        //  logging percentages should never exceed 100
-        var pattern = Pattern.compile("^.*(100|[1-9]\\d|[1-9])%$");
-        messagesInOrder.stream()
-            .filter(s -> s.contains("%"))
-            .forEach(s -> assertThat(s).matches(pattern));
-
-        assertThat(messagesInOrder)
-            // avoid asserting on the thread id
+        assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
-            .as("All messages should start with the correct task name")
-            .allMatch(s -> s.startsWith(factory.taskName()));
+            .containsExactly(
+                "NCTrain :: Start",
+                "NCTrain :: ShuffleAndSplit :: Start",
+                "NCTrain :: ShuffleAndSplit :: Finished",
+                "NCTrain :: SelectBestModel :: Start",
+                "NCTrain :: SelectBestModel :: Train 1 :: Start",
+                "NCTrain :: SelectBestModel :: Train 1 :: Model Candidate 1 of 2 :: Split 1 of 2 :: Train :: Max iterations: 100",
+                "NCTrain :: SelectBestModel :: Train 1 1%",
+                "NCTrain :: SelectBestModel :: Train 1 2%",
+                "NCTrain :: SelectBestModel :: Train 1 3%",
+                "NCTrain :: SelectBestModel :: Train 1 4%",
+                "NCTrain :: SelectBestModel :: Train 1 5%",
+                "NCTrain :: SelectBestModel :: Train 1 6%",
+                "NCTrain :: SelectBestModel :: Train 1 7%",
+                "NCTrain :: SelectBestModel :: Train 1 8%",
+                "NCTrain :: SelectBestModel :: Train 1 :: Finished",
+                "NCTrain :: SelectBestModel :: Evaluate 1 :: Start",
+                "NCTrain :: SelectBestModel :: Evaluate 1 50%",
+                "NCTrain :: SelectBestModel :: Evaluate 1 100%",
+                "NCTrain :: SelectBestModel :: Evaluate 1 :: Finished",
+                "NCTrain :: SelectBestModel :: Train 2 :: Start",
+                "NCTrain :: SelectBestModel :: Train 2 :: Model Candidate 1 of 2 :: Split 2 of 2 :: Train :: Max iterations: 100",
+                "NCTrain :: SelectBestModel :: Train 2 1%",
+                "NCTrain :: SelectBestModel :: Train 2 2%",
+                "NCTrain :: SelectBestModel :: Train 2 3%",
+                "NCTrain :: SelectBestModel :: Train 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Evaluate 2 :: Start",
+                "NCTrain :: SelectBestModel :: Evaluate 2 50%",
+                "NCTrain :: SelectBestModel :: Evaluate 2 100%",
+                "NCTrain :: SelectBestModel :: Evaluate 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Train 3 :: Start",
+                "NCTrain :: SelectBestModel :: Train 3 :: Model Candidate 2 of 2 :: Split 1 of 2 :: Train :: Max iterations: 100",
+                "NCTrain :: SelectBestModel :: Train 3 1%",
+                "NCTrain :: SelectBestModel :: Train 3 2%",
+                "NCTrain :: SelectBestModel :: Train 3 3%",
+                "NCTrain :: SelectBestModel :: Train 3 4%",
+                "NCTrain :: SelectBestModel :: Train 3 5%",
+                "NCTrain :: SelectBestModel :: Train 3 6%",
+                "NCTrain :: SelectBestModel :: Train 3 7%",
+                "NCTrain :: SelectBestModel :: Train 3 8%",
+                "NCTrain :: SelectBestModel :: Train 3 :: Finished",
+                "NCTrain :: SelectBestModel :: Evaluate 3 :: Start",
+                "NCTrain :: SelectBestModel :: Evaluate 3 50%",
+                "NCTrain :: SelectBestModel :: Evaluate 3 100%",
+                "NCTrain :: SelectBestModel :: Evaluate 3 :: Finished",
+                "NCTrain :: SelectBestModel :: Train 4 :: Start",
+                "NCTrain :: SelectBestModel :: Train 4 :: Model Candidate 2 of 2 :: Split 2 of 2 :: Train :: Max iterations: 100",
+                "NCTrain :: SelectBestModel :: Train 4 1%",
+                "NCTrain :: SelectBestModel :: Train 4 2%",
+                "NCTrain :: SelectBestModel :: Train 4 3%",
+                "NCTrain :: SelectBestModel :: Train 4 :: Finished",
+                "NCTrain :: SelectBestModel :: Evaluate 4 :: Start",
+                "NCTrain :: SelectBestModel :: Evaluate 4 50%",
+                "NCTrain :: SelectBestModel :: Evaluate 4 100%",
+                "NCTrain :: SelectBestModel :: Evaluate 4 :: Finished",
+                "NCTrain :: SelectBestModel :: Finished",
+                "NCTrain :: SelectModel :: Start",
+                "NCTrain :: SelectModel :: Finished",
+                "NCTrain :: TrainSelectedOnRemainder :: Start",
+                "NCTrain :: TrainSelectedOnRemainder 1%",
+                "NCTrain :: TrainSelectedOnRemainder 2%",
+                "NCTrain :: TrainSelectedOnRemainder 3%",
+                "NCTrain :: TrainSelectedOnRemainder 4%",
+                "NCTrain :: TrainSelectedOnRemainder 5%",
+                "NCTrain :: TrainSelectedOnRemainder :: Finished",
+                "NCTrain :: EvaluateSelectedModel :: Start",
+                "NCTrain :: EvaluateSelectedModel 33%",
+                "NCTrain :: EvaluateSelectedModel 100%",
+                "NCTrain :: EvaluateSelectedModel :: Finished",
+                "NCTrain :: RetrainSelectedModel :: Start",
+                "NCTrain :: RetrainSelectedModel 1%",
+                "NCTrain :: RetrainSelectedModel 2%",
+                "NCTrain :: RetrainSelectedModel 3%",
+                "NCTrain :: RetrainSelectedModel 4%",
+                "NCTrain :: RetrainSelectedModel :: Finished",
+                "NCTrain :: Finished"
+            );
     }
     
     @ParameterizedTest
