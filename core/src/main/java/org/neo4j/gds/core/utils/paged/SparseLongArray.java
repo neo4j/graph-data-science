@@ -21,14 +21,14 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.BitUtil;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.ArrayLayout;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
+import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
@@ -202,23 +202,6 @@ public final class SparseLongArray {
         // IdMap implementation returns in that case.
         return 0;
     }
-
-    long[] array() {
-        return array;
-    }
-
-    long[] blockOffsets() {
-        return blockOffsets;
-    }
-
-    long[] sortedBlockOffsets() {
-        return sortedBlockOffsets;
-    }
-
-    int[] blockMapping() {
-        return blockMapping;
-    }
-
 
     private static int pageId(long originalId) {
         return (int) (originalId >>> BLOCK_SHIFT);

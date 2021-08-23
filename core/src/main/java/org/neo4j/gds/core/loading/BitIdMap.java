@@ -177,14 +177,6 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         );
     }
 
-    public LabelInformation labelInformation() {
-        return labelInformation;
-    }
-
-    public SparseLongArray sparseLongArray() {
-        return sparseLongArray;
-    }
-
     private static class FilteredIdMap extends BitIdMap {
 
         private final long rootNodeCount;

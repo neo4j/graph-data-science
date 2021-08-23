@@ -54,10 +54,6 @@ public final class LabelInformation {
         this.labelInformation = labelInformation;
     }
 
-    public Map<NodeLabel, BitSet> labelInformationMap() {
-        return this.labelInformation;
-    }
-
     public boolean isEmpty() {
         return labelInformation.isEmpty();
     }
