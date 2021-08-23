@@ -90,19 +90,19 @@ public class ListProgressProcTest extends BaseTest {
     }
 
     @Test
-    void listOnlyLastProgressEvent() {
+    void listOnlyFirstProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
         runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var progressEvents = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
+            "CALL gds.beta.listProgress() YIELD taskName, stage RETURN taskName, stage",
             r -> r.stream().collect(Collectors.toList())
         );
         assertThat(progressEvents).hasSize(2);
         assertThat(progressEvents)
             .containsExactlyInAnyOrder(
-                Map.of("taskName","foo"),
-                Map.of("taskName", "bar")
+                Map.of("taskName","foo", "stage", "0 of 1"),
+                Map.of("taskName", "bar", "stage", "0 of 1")
             );
     }
 
@@ -135,13 +135,15 @@ public class ListProgressProcTest extends BaseTest {
             scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             List<Map<String, Object>> result = runQuery(
-                "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
+                "CALL gds.beta.listProgress() YIELD taskName, stage RETURN taskName, stage",
                 r -> r.stream().collect(Collectors.toList())
             );
 
             assertThat(result).hasSize(1)
                 .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-                .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
+                .containsExactlyInAnyOrderEntriesOf(
+                    Map.of("taskName", "FastRP", "stage", "6 of 6")
+                );
         }
     }
 
