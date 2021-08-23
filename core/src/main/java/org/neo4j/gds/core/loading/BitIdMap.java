@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.NodeIterator;
@@ -35,13 +34,8 @@ import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -58,8 +52,6 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
                 MemoryRange.of(dimensions.estimationNodeLabelCount() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
         )
         .build();
-
-    private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     private final AllocationTracker tracker;
 
@@ -145,52 +137,27 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return labelInformation.isEmpty()
-            ? ALL_NODES_LABELS
-            : labelInformation.labelSet();
+        return labelInformation.availableNodeLabels();
     }
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        if (labelInformation.isEmpty()) {
-            return ALL_NODES_LABELS;
-        } else {
-            Set<NodeLabel> set = new HashSet<>();
-            labelInformation.forEach((nodeLabel, bitSet) -> {
-                if (bitSet.get(nodeId)) {
-                    set.add(nodeLabel);
-                }
-                return true;
-            });
-            return set;
-        }
+        return labelInformation.nodeLabelsForNodeId(nodeId);
     }
 
     @Override
     public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        if (labelInformation.isEmpty()) {
-            consumer.accept(NodeLabel.ALL_NODES);
-        } else {
-            labelInformation.forEach((nodeLabel, bitSet) -> {
-                if (bitSet.get(nodeId)) {
-                    return consumer.accept(nodeLabel);
-                }
-                return true;
-            });
-        }
+        labelInformation.forEachNodeLabel(nodeId, consumer);
     }
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
-        if (labelInformation.isEmpty() && label.equals(NodeLabel.ALL_NODES)) {
-            return true;
-        }
         return labelInformation.hasLabel(nodeId, label);
     }
 
     @Override
     public BitIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
-        validateNodeLabelFilter(nodeLabels, labelInformation);
+        labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {
             return this;
@@ -216,20 +183,6 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     public SparseLongArray sparseLongArray() {
         return sparseLongArray;
-    }
-
-    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, LabelInformation labelInformation) {
-        List<ElementIdentifier> invalidLabels = nodeLabels
-            .stream()
-            .filter(label -> !new HashSet<>(labelInformation.labelSet()).contains(label))
-            .collect(Collectors.toList());
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Specified labels %s do not correspond to any of the node projections %s.",
-                invalidLabels,
-                labelInformation.labelSet()
-            ));
-        }
     }
 
     private static class FilteredIdMap extends BitIdMap {

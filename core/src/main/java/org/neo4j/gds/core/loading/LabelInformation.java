@@ -21,7 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
@@ -35,8 +37,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LabelInformation {
+
+    private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     public static LabelInformation from(Map<NodeLabel, BitSet> labelInformation) {
         return new LabelInformation(labelInformation);
@@ -77,8 +82,59 @@ public final class LabelInformation {
     }
 
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
+        if (labelInformation.isEmpty() && nodeLabel.equals(NodeLabel.ALL_NODES)) {
+            return true;
+        }
         var bitSet = labelInformation.get(nodeLabel);
         return bitSet != null && bitSet.get(nodeId);
+    }
+
+    public Set<NodeLabel> availableNodeLabels() {
+        return labelInformation.isEmpty()
+            ? ALL_NODES_LABELS
+            : labelSet();
+    }
+
+    public Set<NodeLabel> nodeLabelsForNodeId(long nodeId) {
+        if (isEmpty()) {
+            return ALL_NODES_LABELS;
+        } else {
+            Set<NodeLabel> set = new HashSet<>();
+            forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    set.add(nodeLabel);
+                }
+                return true;
+            });
+            return set;
+        }
+    }
+
+    public void forEachNodeLabel(long nodeId, NodeMapping.NodeLabelConsumer consumer) {
+        if (isEmpty()) {
+            consumer.accept(NodeLabel.ALL_NODES);
+        } else {
+            forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    return consumer.accept(nodeLabel);
+                }
+                return true;
+            });
+        }
+    }
+
+    void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
+        List<ElementIdentifier> invalidLabels = nodeLabels
+            .stream()
+            .filter(label -> !new HashSet<>(labelSet()).contains(label))
+            .collect(Collectors.toList());
+        if (!invalidLabels.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Specified labels %s do not correspond to any of the node projections %s.",
+                invalidLabels,
+                labelSet()
+            ));
+        }
     }
 
     public interface LabelInformationConsumer {
