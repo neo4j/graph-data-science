@@ -58,12 +58,15 @@ public class ListProgressProc extends BaseProc {
         public String taskName;
         public String stage;
         public String progress;
+        public String status;
 
         ProgressResult(ProgressEvent progressEvent) {
             this.id = progressEvent.jobId().asString();
-            this.taskName = progressEvent.task().description();
-            this.stage = computeStage(progressEvent.task());
-            this.progress = computeProgress(progressEvent.task());
+            var task = progressEvent.task();
+            this.taskName = task.description();
+            this.stage = computeStage(task);
+            this.progress = computeProgress(task);
+            this.status = task.status().name();
         }
 
         private String computeStage(Task baseTask) {
