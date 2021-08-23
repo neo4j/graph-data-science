@@ -24,6 +24,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.BitIdMap;
+import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -122,7 +123,7 @@ class UnionNodePropertiesTest {
         bitSets.put(label, bitSet);
 
         return new UnionNodeProperties(
-            new BitIdMap(sparseLongArray, bitSets, AllocationTracker.empty()),
+            new BitIdMap(sparseLongArray, LabelInformation.from(bitSets), AllocationTracker.empty()),
             propertiesMap
         );
     }

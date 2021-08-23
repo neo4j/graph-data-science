@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.NodeIterator;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -38,7 +37,6 @@ import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -65,7 +63,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private final AllocationTracker tracker;
 
-    private final Map<NodeLabel, BitSet> labelInformation;
+    private final LabelInformation labelInformation;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -78,7 +76,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
      */
     public BitIdMap(
         SparseLongArray sparseLongArray,
-        Map<NodeLabel, BitSet> labelInformation,
+        LabelInformation labelInformation,
         AllocationTracker tracker
     ) {
         this.sparseLongArray = sparseLongArray;
@@ -149,7 +147,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     public Set<NodeLabel> availableNodeLabels() {
         return labelInformation.isEmpty()
             ? ALL_NODES_LABELS
-            : labelInformation.keySet();
+            : labelInformation.labelSet();
     }
 
     @Override
@@ -158,11 +156,12 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             return ALL_NODES_LABELS;
         } else {
             Set<NodeLabel> set = new HashSet<>();
-            for (var labelAndBitSet : labelInformation.entrySet()) {
-                if (labelAndBitSet.getValue().get(nodeId)) {
-                    set.add(labelAndBitSet.getKey());
+            labelInformation.forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    set.add(nodeLabel);
                 }
-            }
+                return true;
+            });
             return set;
         }
     }
@@ -172,13 +171,12 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         if (labelInformation.isEmpty()) {
             consumer.accept(NodeLabel.ALL_NODES);
         } else {
-            for (var labelAndBitSet : labelInformation.entrySet()) {
-                if (labelAndBitSet.getValue().get(nodeId)) {
-                    if (!consumer.accept(labelAndBitSet.getKey())) {
-                        break;
-                    }
+            labelInformation.forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    return consumer.accept(nodeLabel);
                 }
-            }
+                return true;
+            });
         }
     }
 
@@ -187,8 +185,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         if (labelInformation.isEmpty() && label.equals(NodeLabel.ALL_NODES)) {
             return true;
         }
-        BitSet bitSet = labelInformation.get(label);
-        return bitSet != null && bitSet.get(nodeId);
+        return labelInformation.hasLabel(nodeId, label);
     }
 
     @Override
@@ -199,14 +196,11 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             return this;
         }
 
-        var unionBitSet = new BitSet(nodeCount());
-        nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
+        var unionBitSet = labelInformation.unionBitSet(nodeLabels, nodeCount());
 
         var sparseLongArray = SparseLongArray.fromExistingBuilder(unionBitSet.bits).build();
 
-        Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
-            .stream()
-            .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
+        LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
 
         return new FilteredIdMap(
             rootNodeCount(),
@@ -216,7 +210,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         );
     }
 
-    public Map<NodeLabel, BitSet> labelInformation() {
+    public LabelInformation labelInformation() {
         return labelInformation;
     }
 
@@ -224,16 +218,16 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         return sparseLongArray;
     }
 
-    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
+    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, LabelInformation labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
-            .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
+            .filter(label -> !new HashSet<>(labelInformation.labelSet()).contains(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
-                labelInformation.keySet()
+                labelInformation.labelSet()
             ));
         }
     }
@@ -245,10 +239,10 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         FilteredIdMap(
             long rootNodeCount,
             SparseLongArray sparseLongArray,
-            Map<NodeLabel, BitSet> filteredLabelMap,
+            LabelInformation filteredLabelInformation,
             AllocationTracker tracker
         ) {
-            super(sparseLongArray, filteredLabelMap, tracker);
+            super(sparseLongArray, filteredLabelInformation, tracker);
             this.rootNodeCount = rootNodeCount;
         }
 

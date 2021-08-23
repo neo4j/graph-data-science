@@ -24,13 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class NodeImporter {
 
@@ -39,22 +36,19 @@ public class NodeImporter {
     }
 
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
-    final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
-    final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
-    private final AllocationTracker tracker;
+    private final LabelInformation.Builder labelInformationBuilder;
+    private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final IdMappingAllocator.PropertyAllocator propertyAllocator;
 
     public NodeImporter(
         InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
+        LabelInformation.Builder labelInformationBuilder,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        boolean loadsProperties,
-        AllocationTracker tracker
+        boolean loadsProperties
     ) {
         this.idMapBuilder = idMapBuilder;
-        this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
+        this.labelInformationBuilder = labelInformationBuilder;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
-        this.tracker = tracker;
         this.propertyAllocator = loadsProperties
             ? NodeImporter::importProperties
             : IdMappingAllocator.PropertyAllocator.EMPTY;
@@ -115,12 +109,7 @@ public class NodeImporter {
                     Collections.emptyList()
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    nodeLabelBitSetMapping
-                        .computeIfAbsent(
-                            elementIdentifier,
-                            (ignored) -> HugeAtomicBitSet.create(idMapBuilder.capacity(), tracker)
-                        )
-                        .set(startIndex + i);
+                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, startIndex + i, idMapBuilder.capacity());
                 }
             }
         }

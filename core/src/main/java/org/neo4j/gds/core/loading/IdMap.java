@@ -22,22 +22,21 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
-import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -73,7 +72,7 @@ public class IdMap implements NodeMapping {
     private final long highestNeoId;
     private final AllocationTracker tracker;
 
-    private final Map<NodeLabel, BitSet> labelInformation;
+    private final LabelInformation labelInformation;
 
     private final HugeLongArray graphIds;
     private final HugeSparseLongArray nodeToGraphIds;
@@ -88,7 +87,7 @@ public class IdMap implements NodeMapping {
     public IdMap(
         HugeLongArray graphIds,
         HugeSparseLongArray nodeToGraphIds,
-        Map<NodeLabel, BitSet> labelInformation,
+        LabelInformation labelInformation,
         long nodeCount,
         long highestNeoId,
         AllocationTracker tracker
@@ -164,7 +163,7 @@ public class IdMap implements NodeMapping {
     public Set<NodeLabel> availableNodeLabels() {
         return labelInformation.isEmpty()
             ? ALL_NODES_LABELS
-            : labelInformation.keySet();
+            : labelInformation.labelSet();
     }
 
     @Override
@@ -173,11 +172,12 @@ public class IdMap implements NodeMapping {
             return ALL_NODES_LABELS;
         } else {
             Set<NodeLabel> set = new HashSet<>();
-            for (var labelAndBitSet : labelInformation.entrySet()) {
-                if (labelAndBitSet.getValue().get(nodeId)) {
-                    set.add(labelAndBitSet.getKey());
+            labelInformation.forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    set.add(nodeLabel);
                 }
-            }
+                return true;
+            });
             return set;
         }
     }
@@ -187,13 +187,12 @@ public class IdMap implements NodeMapping {
         if (labelInformation.isEmpty()) {
             consumer.accept(NodeLabel.ALL_NODES);
         } else {
-            for (var labelAndBitSet : labelInformation.entrySet()) {
-                if (labelAndBitSet.getValue().get(nodeId)) {
-                    if (!consumer.accept(labelAndBitSet.getKey())) {
-                        break;
-                    }
+            labelInformation.forEach((nodeLabel, bitSet) -> {
+                if (bitSet.get(nodeId)) {
+                    return consumer.accept(nodeLabel);
                 }
-            }
+                return true;
+            });
         }
     }
 
@@ -202,8 +201,7 @@ public class IdMap implements NodeMapping {
         if (labelInformation.isEmpty() && label.equals(NodeLabel.ALL_NODES)) {
             return true;
         }
-        BitSet bitSet = labelInformation.get(label);
-        return bitSet != null && bitSet.get(nodeId);
+        return labelInformation.hasLabel(nodeId, label);
     }
 
     @Override
@@ -214,8 +212,7 @@ public class IdMap implements NodeMapping {
             return this;
         }
 
-        BitSet unionBitSet = new BitSet(nodeCount());
-        nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
+        BitSet unionBitSet = labelInformation.unionBitSet(nodeLabels, nodeCount());
 
         long nodeId = -1L;
         long cursor = 0L;
@@ -235,9 +232,7 @@ public class IdMap implements NodeMapping {
             tracker
         );
 
-        Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
-            .stream()
-            .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
+        LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
 
         return new FilteredIdMap(
             rootNodeCount(),
@@ -250,16 +245,16 @@ public class IdMap implements NodeMapping {
         );
     }
 
-    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
+    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, LabelInformation labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
-            .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
+            .filter(label -> !new HashSet<>(labelInformation.labelSet()).contains(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
-                labelInformation.keySet()
+                labelInformation.labelSet()
             ));
         }
     }
@@ -272,12 +267,12 @@ public class IdMap implements NodeMapping {
             long rootNodeCount,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
-            Map<NodeLabel, BitSet> filteredLabelMap,
+            LabelInformation filteredLabelInformation,
             long nodeCount,
             long highestNeoId,
             AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, highestNeoId, tracker);
+            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, tracker);
             this.rootNodeCount = rootNodeCount;
         }
 

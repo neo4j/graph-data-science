@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 public final class IdMapImplementations {
 
@@ -29,9 +29,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
             idMapBuilder,
-            labelInformation,
+            labelInformationBuilder,
             tracker
         );
     }
@@ -41,9 +41,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalSequentialBitIdMappingBuilder> sequentialBitIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
             idMapBuilder,
-            labelInformation,
+            labelInformationBuilder,
             tracker
         );
     }
@@ -53,9 +53,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> checkDuplicateIds
-            ? IdMapBuilder.buildChecked(idMapBuilder, labelInformation, graphDimensions, concurrency, tracker)
-            : IdMapBuilder.build(idMapBuilder, labelInformation, graphDimensions, concurrency, tracker);
+        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> checkDuplicateIds
+            ? IdMapBuilder.buildChecked(idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, tracker)
+            : IdMapBuilder.build(idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, tracker);
     }
 
     public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {

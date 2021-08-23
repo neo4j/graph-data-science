@@ -20,62 +20,45 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.utils.BiLongConsumer;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
-import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
     public static BitIdMap build(
         InternalBitIdMappingBuilder idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        LabelInformation.Builder labelInformationBuilder,
         AllocationTracker tracker
     ) {
-        SparseLongArray graphIds = idMapBuilder.build();
-        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> e.getValue().toBitSet()
-        ));
-
         return new BitIdMap(
-            graphIds,
-            convertedLabelInformation,
+            idMapBuilder.build(),
+            labelInformationBuilder.build(),
             tracker
         );
     }
 
     public static BitIdMap build(
         InternalSequentialBitIdMappingBuilder idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        LabelInformation.Builder labelInformationBuilder,
         AllocationTracker tracker
     ) {
-        SparseLongArray graphIds = idMapBuilder.build();
-        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> e.getValue().toBitSet()
-        ));
-
         return new BitIdMap(
-            graphIds,
-            convertedLabelInformation,
+            idMapBuilder.build(),
+            labelInformationBuilder.build(),
             tracker
         );
     }
 
     public static IdMap build(
         InternalHugeIdMappingBuilder idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
@@ -89,15 +72,10 @@ public final class IdMapBuilder {
             tracker
         );
 
-        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> e.getValue().toBitSet()
-        ));
-
         return new IdMap(
             graphIds,
             nodeToGraphIds,
-            convertedLabelInformation,
+            labelInformationBuilder.build(),
             idMapBuilder.size(),
             highestNodeId,
             tracker
@@ -106,7 +84,7 @@ public final class IdMapBuilder {
 
     static IdMap buildChecked(
         InternalHugeIdMappingBuilder idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
@@ -120,12 +98,7 @@ public final class IdMapBuilder {
             tracker
         );
 
-        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> e.getValue().toBitSet()
-        ));
-
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), idMapBuilder.capacity(), tracker);
+        return new IdMap(graphIds, nodeToGraphIds, labelInformationBuilder.build(), idMapBuilder.size(), idMapBuilder.capacity(), tracker);
     }
 
     @NotNull

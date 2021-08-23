@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.IntStream;
@@ -152,7 +151,6 @@ public final class GraphFactory {
                 nodes,
                 threadCount,
                 new ObjectIntScatterMap<>(),
-                new ConcurrentHashMap<>(),
                 new IntObjectHashMap<>(),
                 new IntObjectHashMap<>(),
                 nodeMappingBuilder,
@@ -202,7 +200,6 @@ public final class GraphFactory {
             nodeCount,
             concurrency,
             elementIdentifierLabelTokenMapping,
-            new ConcurrentHashMap<>(nodeLabels.size()),
             labelTokenNodeLabelMapping,
             builderByLabelTokenAndPropertyToken,
             nodeMappingBuilder,
