@@ -20,43 +20,23 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @GdlExtension
-final class HadamardLinkFeatureStepTest {
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
-    static String GRAPH =
-        "(a:N {noise: 42, z: 13, array: [3.0,2.0]}), " +
-        "(b:N {noise: 1337, z: 0, array: [1.0,1.0]}), " +
-        "(c:N {noise: 42, z: 2, array: [8.0,2.3]}), " +
-        "(d:N {noise: 42, z: 9, array: [0.1,91.0]}), " +
-
-        "(a)-[:REL]->(b), " +
-        "(a)-[:REL]->(c), " +
-        "(a)-[:REL]->(d)";
-
-    @Inject
-    GraphStore graphStore;
-
-    @Inject
-    Graph graph;
+final class HadamardLinkFeatureStepTest extends FeatureStepBaseTest {
 
     @Test
     public void runHadamardLinkFeatureStep() {
-
         var step = LinkFeatureStepFactory.create(
             "hadamard",
             Map.of("nodeProperties", List.of("noise", "z", "array"))
@@ -68,5 +48,31 @@ final class HadamardLinkFeatureStepTest {
         assertArrayEquals(new double[]{42 * 1337, 13 * 0D, 3 * 1D, 2 * 1D}, linkFeatures.get(0), delta);
         assertArrayEquals(new double[]{42 * 42, 13 * 2, 3 * 8, 2 * 2.3D}, linkFeatures.get(1), delta);
         assertArrayEquals(new double[]{42 * 42, 13 * 9, 3 * 0.1D, 2 * 91.0D}, linkFeatures.get(2), delta);
+    }
+
+    @Test
+    public void handlesZeroVectors() {
+        var step = LinkFeatureStepFactory.create(
+            "hadamard",
+            Map.of("nodeProperties", List.of("zeros"))
+        );
+
+        var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4);
+
+        for (long i = 0; i < linkFeatures.size(); i++) {
+            assertThat(linkFeatures.get(i)).containsOnly(0.0);
+        }
+    }
+
+    @Test
+    public void failsOnNaNValues() {
+        var step = LinkFeatureStepFactory.create(
+            "hadamard",
+            Map.of("nodeProperties", List.of("invalidValue", "z"))
+        );
+
+        assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4))
+            .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the hadamard feature vector. " +
+                        "Either define a default value if its a stored property or check the nodePropertyStep");
     }
 }

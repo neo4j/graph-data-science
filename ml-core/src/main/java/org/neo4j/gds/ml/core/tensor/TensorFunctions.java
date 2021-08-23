@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
+import com.carrotsearch.hppc.predicates.DoublePredicate;
+
 import java.util.List;
 
 public final class TensorFunctions {
@@ -55,5 +57,17 @@ public final class TensorFunctions {
         }
 
         return meanTensors;
+    }
+
+    // copy of org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch
+    public static boolean anyMatch(double[] vector, DoublePredicate predicate) {
+        boolean anyMatch = false;
+        for (double v : vector) {
+            if (predicate.apply(v)) {
+                anyMatch = true;
+                break;
+            }
+        }
+        return anyMatch;
     }
 }

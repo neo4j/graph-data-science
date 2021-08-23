@@ -20,8 +20,12 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.ml.core.tensor.TensorFunctions;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -54,6 +58,51 @@ final class FeatureStepUtil {
         }
 
         return dimension;
+    }
 
+    static boolean isNaN(long nodeId, NodeProperties nodeProperty) {
+        switch (nodeProperty.valueType()) {
+            case DOUBLE:
+                return Double.isNaN(nodeProperty.doubleValue(nodeId));
+            case DOUBLE_ARRAY:
+            case FLOAT_ARRAY:
+                return TensorFunctions.anyMatch(nodeProperty.doubleArrayValue(nodeId), Double::isNaN);
+            case UNKNOWN:
+                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
+            default:
+                return false;
+        }
+    }
+
+    static void validateComputedFeatures(double[] linkFeatures, int startOffset, int endOffset, Runnable throwError) {
+        for (int offset = startOffset; offset < endOffset; offset++) {
+            if (Double.isNaN(linkFeatures[offset])) {
+                throwError.run();
+            }
+        }
+    }
+
+    static void throwNanError(
+        String featureStep,
+        Graph graph,
+        List<String> nodeProperties,
+        long source,
+        long target
+    ) {
+        nodeProperties.forEach(propertyKey -> {
+            var property = graph.nodeProperties(propertyKey);
+            var nanNodes = Stream
+                .of(source, target)
+                .filter(node -> !isNaN(node, property))
+                .map(Object::toString);
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Encountered NaN in the nodeProperty `%s` for nodes %s when computing the %s feature vector. " +
+                "Either define a default value if its a stored property or check the nodePropertyStep",
+                propertyKey,
+                StringJoining.join(nanNodes),
+                featureStep
+            ));
+        });
     }
 }

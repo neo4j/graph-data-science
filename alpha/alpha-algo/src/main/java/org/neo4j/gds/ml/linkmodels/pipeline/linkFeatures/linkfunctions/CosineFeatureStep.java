@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
@@ -38,11 +37,6 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     public CosineFeatureStep(List<String> nodeProperties) {
         this.nodeProperties = nodeProperties;
-    }
-
-    @TestOnly
-    public List<String> nodeProperties() {
-        return nodeProperties;
     }
 
     @Override
@@ -89,7 +83,13 @@ public class CosineFeatureStep implements LinkFeatureStep {
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }
-            linkFeatures[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
+            double l2Norm = Math.sqrt(sourceSquareNorm * targetSquareNorm);
+
+            if (Double.isNaN(l2Norm)) {
+                FeatureStepUtil.throwNanError("cosine", graph, this.nodeProperties, source, target);
+            } else if (l2Norm != 0.0) {
+                linkFeatures[offset] /= l2Norm;
+            }
         };
     }
 

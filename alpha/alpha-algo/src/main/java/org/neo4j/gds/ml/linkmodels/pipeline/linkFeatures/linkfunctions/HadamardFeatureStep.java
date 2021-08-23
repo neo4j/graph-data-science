@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.FeatureStepUtil.throwNanError;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class HadamardFeatureStep implements LinkFeatureStep {
@@ -42,8 +43,8 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
-        return (source, target, linkFeatures, offset) -> {
-            var offset1 = offset;
+        return (source, target, linkFeatures, startOffset) -> {
+            var localOffset = startOffset;
             for (NodeProperties props : properties) {
                 var propertyType = props.valueType();
                 switch (propertyType) {
@@ -53,7 +54,7 @@ public class HadamardFeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.doubleArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset1++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
                         }
                         break;
                     }
@@ -62,18 +63,26 @@ public class HadamardFeatureStep implements LinkFeatureStep {
                         var targetArrayPropValues = props.longArrayValue(target);
                         assert sourceArrayPropValues.length == targetArrayPropValues.length;
                         for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[offset1++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
                         }
                         break;
                     }
                     case LONG:
                     case DOUBLE:
-                        linkFeatures[offset1++] = props.doubleValue(source) * props.doubleValue(target);
+                        linkFeatures[localOffset++] = props.doubleValue(source) * props.doubleValue(target);
                         break;
                     case UNKNOWN:
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }
+
+            FeatureStepUtil.validateComputedFeatures(linkFeatures, startOffset, localOffset, () -> throwNanError(
+                "hadamard",
+                graph,
+                this.nodeProperties,
+                source,
+                target
+            ));
         };
     }
 
