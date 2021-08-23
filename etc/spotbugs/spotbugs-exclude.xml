@@ -385,4 +385,296 @@
         <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
     </Match>
 
+    <!-- Exclusions for rules defined in SpotBugs extension fb-contrib -->
+    <!-- See https://github.com/mebigfatguy/fb-contrib -->
+
+    <Match>
+        <Bug pattern="AI_ANNOTATION_ISSUES_NEEDS_NULLABLE"/>
+    </Match>
+    <Match>
+        <Bug pattern="BED_BOGUS_EXCEPTION_DECLARATION"/>
+    </Match>
+    <Match>
+        <Bug pattern="BL_BURYING_LOGIC"/>
+    </Match>
+    <Match>
+        <Bug pattern="CFS_CONFUSING_FUNCTION_SEMANTICS"/>
+    </Match>
+    <Match>
+        <Bug pattern="CNC_COLLECTION_NAMING_CONFUSION"/>
+    </Match>
+    <Match>
+        <Bug pattern="DLC_DUBIOUS_LIST_COLLECTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="DMC_DUBIOUS_MAP_COLLECTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="DRE_DECLARED_RUNTIME_EXCEPTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="EXS_EXCEPTION_SOFTENING_NO_CHECKED"/>
+    </Match>
+    <Match>
+        <Bug pattern="EXS_EXCEPTION_SOFTENING_HAS_CHECKED"/>
+    </Match>
+    <Match>
+        <Bug pattern="EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"/>
+    </Match>
+    <Match>
+        <Bug pattern="FCCD_FIND_CLASS_CIRCULAR_DEPENDENCY"/>
+    </Match>
+    <Match>
+        <Bug pattern="FII_USE_METHOD_REFERENCE"/>
+    </Match>
+    <Match>
+        <Bug pattern="FII_USE_FUNCTION_IDENTITY"/>
+    </Match>
+    <Match>
+        <Bug pattern="FII_COMBINE_FILTERS"/>
+    </Match>
+    <Match>
+        <Bug pattern="FPL_FLOATING_POINT_LOOPS"/>
+    </Match>
+    <Match>
+        <Bug pattern="HES_EXECUTOR_OVERWRITTEN_WITHOUT_SHUTDOWN"/>
+    </Match>
+    <Match>
+        <Bug pattern="HES_EXECUTOR_NEVER_SHUTDOWN"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_BAD_SERIALVERSIONUID"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_NO_TOSTRING"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_NO_EQUALS"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_WRONG_FIELD_ORDER"/>
+    </Match>
+    <Match>
+        <Bug pattern="ITC_INHERITANCE_TYPE_CHECKING"/>
+    </Match>
+    <Match>
+        <Bug pattern="LEST_LOST_EXCEPTION_STACK_TRACE"/>
+    </Match>
+    <Match>
+        <Bug pattern="LSC_LITERAL_STRING_COMPARISON"/>
+    </Match>
+    <Match>
+        <Bug pattern="LUI_USE_GET0"/>
+    </Match>
+    <Match>
+        <Bug pattern="MDM_RANDOM_SEED"/>
+    </Match>
+    <Match>
+        <Bug pattern="MDM_WAIT_WITHOUT_TIMEOUT"/>
+    </Match>
+    <Match>
+        <Bug pattern="MDM_LOCK_ISLOCKED"/>
+    </Match>
+    <Match>
+        <Bug pattern="MOM_MISLEADING_OVERLOAD_MODEL"/>
+    </Match>
+    <Match>
+        <Bug pattern="MRC_METHOD_RETURNS_CONSTANT"/>
+    </Match>
+    <Match>
+        <Bug pattern="MUI_CALLING_SIZE_ON_SUBCONTAINER"/>
+    </Match>
+    <Match>
+        <Bug pattern="MUI_CONTAINSKEY_BEFORE_GET"/>
+    </Match>
+    <Match>
+        <Bug pattern="NAB_NEEDLESS_BOXING_VALUEOF"/>
+    </Match>
+    <Match>
+        <Bug pattern="NAB_NEEDLESS_BOX_TO_CAST"/>
+    </Match>
+    <Match>
+        <Bug pattern="NAB_NEEDLESS_BOOLEAN_CONSTANT_CONVERSION"/>
+    </Match>
+    <Match>
+        <Bug pattern="OCP_OVERLY_CONCRETE_PARAMETER"/>
+    </Match>
+    <Match>
+        <Bug pattern="OI_OPTIONAL_ISSUES_PRIMITIVE_VARIANT_PREFERRED"/>
+    </Match>
+    <Match>
+        <Bug pattern="OI_OPTIONAL_ISSUES_USES_IMMEDIATE_EXECUTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="OPM_OVERLY_PERMISSIVE_METHOD"/>
+    </Match>
+    <Match>
+        <Bug pattern="PCOA_PARTIALLY_CONSTRUCTED_OBJECT_ACCESS"/>
+    </Match>
+    <Match>
+        <Bug pattern="PDP_POORLY_DEFINED_PARAMETER"/>
+    </Match>
+    <Match>
+        <Bug pattern="PL_PARALLEL_LISTS"/>
+    </Match>
+    <Match>
+        <Bug pattern="PMB_INSTANCE_BASED_THREAD_LOCAL"/>
+    </Match>
+    <Match>
+        <Bug pattern="PME_POOR_MANS_ENUM"/>
+    </Match>
+    <Match>
+        <Bug pattern="PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS"/>
+    </Match>
+    <Match>
+        <Bug pattern="PSC_PRESIZE_COLLECTIONS"/>
+    </Match>
+    <Match>
+        <Bug pattern="SCII_SPOILED_CHILD_INTERFACE_IMPLEMENTOR"/>
+    </Match>
+    <Match>
+        <Bug pattern="SEO_SUBOPTIMAL_EXPRESSION_ORDER"/>
+    </Match>
+    <Match>
+        <Bug pattern="SPP_USE_GET0"/>
+    </Match>
+    <Match>
+        <Bug pattern="SUA_SUSPICIOUS_UNINITIALIZED_ARRAY"/>
+    </Match>
+    <Match>
+        <Bug pattern="UMTP_UNBOUND_METHOD_TEMPLATE_PARAMETER"/>
+    </Match>
+    <Match>
+        <Bug pattern="UP_UNUSED_PARAMETER"/>
+    </Match>
+    <Match>
+        <Bug pattern="URV_CHANGE_RETURN_TYPE"/>
+    </Match>
+    <Match>
+        <Bug pattern="USBR_UNNECESSARY_STORE_BEFORE_RETURN"/>
+    </Match>
+    <Match>
+        <Bug pattern="UVA_USE_VAR_ARGS"/>
+    </Match>
+    <Match>
+        <Bug pattern="WEM_WEAK_EXCEPTION_MESSAGING"/>
+    </Match>
+    <Match>
+        <Bug pattern="CE_CLASS_ENVY"/>
+    </Match>
+    <Match>
+        <Bug pattern="CLI_CONSTANT_LIST_INDEX"/>
+    </Match>
+    <Match>
+        <Bug pattern="FCBL_FIELD_COULD_BE_LOCAL"/>
+    </Match>
+    <Match>
+        <Bug pattern="HES_LOCAL_EXECUTOR_SERVICE"/>
+    </Match>
+    <Match>
+        <Bug pattern="IICU_INCORRECT_INTERNAL_CLASS_USE"/>
+    </Match>
+    <Match>
+        <Bug pattern="MDM_THREAD_YIELD"/>
+    </Match>
+    <Match>
+        <Bug pattern="RFI_SET_ACCESSIBLE"/>
+    </Match>
+    <Match>
+        <Bug pattern="SACM_STATIC_ARRAY_CREATED_IN_METHOD"/>
+    </Match>
+    <Match>
+        <Bug pattern="SEC_SIDE_EFFECT_CONSTRUCTOR"/>
+    </Match>
+    <Match>
+        <Bug pattern="SPP_USE_MATH_CONSTANT"/>
+    </Match>
+    <Match>
+        <Bug pattern="UCPM_USE_CHARACTER_PARAMETERIZED_METHOD"/>
+    </Match>
+    <Match>
+        <Bug pattern="NOS_NON_OWNED_SYNCHRONIZATION"/>
+    </Match>
+    <Match>
+        <Bug pattern="NSE_NON_SYMMETRIC_EQUALS"/>
+    </Match>
+    <Match>
+        <Bug pattern="PCAIL_POSSIBLE_CONSTANT_ALLOCATION_IN_LOOP"/>
+    </Match>
+    <Match>
+        <Bug pattern="SNG_SUSPICIOUS_NULL_FIELD_GUARD"/>
+    </Match>
+    <Match>
+        <Bug pattern="STT_TOSTRING_STORED_IN_FIELD"/>
+    </Match>
+    <Match>
+        <Bug pattern="TR_TAIL_RECURSION"/>
+    </Match>
+    <Match>
+        <Bug pattern="ACEM_ABSTRACT_CLASS_EMPTY_METHODS"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_UPPER_PACKAGE"/>
+    </Match>
+    <Match>
+        <Bug pattern="ISB_TOSTRING_APPENDING"/>
+    </Match>
+    <Match>
+        <Bug pattern="LII_LIST_INDEXED_ITERATING"/>
+    </Match>
+    <Match>
+        <Bug pattern="LUI_USE_SINGLETON_LIST"/>
+    </Match>
+    <Match>
+        <Bug pattern="SPP_USE_ISEMPTY"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMC_IMMATURE_CLASS_PRINTSTACKTRACE"/>
+    </Match>
+    <Match>
+        <Bug pattern="LO_EMBEDDED_SIMPLE_STRING_FORMAT_IN_FORMAT_STRING"/>
+    </Match>
+    <Match>
+        <Bug pattern="UAC_UNNECESSARY_API_CONVERSION_FILE_TO_PATH"/>
+    </Match>
+    <Match>
+        <Bug pattern="PMB_POSSIBLE_MEMORY_BLOAT"/>
+    </Match>
+    <Match>
+        <Bug pattern="WOC_WRITE_ONLY_COLLECTION_FIELD"/>
+    </Match>
+    <Match>
+        <Bug pattern="STT_STRING_PARSING_A_FIELD"/>
+    </Match>
+    <Match>
+        <Bug pattern="UCC_UNRELATED_COLLECTION_CONTENTS"/>
+    </Match>
+    <Match>
+        <Bug pattern="WOC_WRITE_ONLY_COLLECTION_LOCAL"/>
+    </Match>
+    <Match>
+        <Bug pattern="URV_UNRELATED_RETURN_VALUES"/>
+    </Match>
+    <Match>
+        <Bug pattern="OC_OVERZEALOUS_CASTING"/>
+    </Match>
+    <Match>
+        <Bug pattern="EXS_EXCEPTION_SOFTENING_RETURN_FALSE"/>
+    </Match>
+    <Match>
+        <Bug pattern="LO_STUTTERED_MESSAGE"/>
+    </Match>
+    <Match>
+        <Bug pattern="IOI_USE_OF_FILE_STREAM_CONSTRUCTORS"/>
+    </Match>
+    <Match>
+        <Bug pattern="COM_COPIED_OVERRIDDEN_METHOD"/>
+    </Match>
+    <Match>
+        <Bug pattern="MDM_INETADDRESS_GETLOCALHOST"/>
+    </Match>
+    <Match>
+        <Bug pattern="SSCU_SUSPICIOUS_SHADED_CLASS_USE"/>
+    </Match>
+
 </FindBugsFilter>
