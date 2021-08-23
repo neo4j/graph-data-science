@@ -44,7 +44,7 @@ public class ProgressEventStoreImpl implements ProgressEventStore {
             .values()
             .stream()
             .filter(not(List::isEmpty))
-            .map(items -> items.get(items.size() - 1))
+            .map(items -> items.get(0))
             .collect(toList());
     }
 
