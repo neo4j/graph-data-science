@@ -75,7 +75,7 @@ public class TrainingPipeline implements Mappable {
         );
     }
 
-    List<NodePropertyStep> nodePropertySteps() {
+    public List<NodePropertyStep> nodePropertySteps() {
         return nodePropertySteps;
     }
 
@@ -83,7 +83,7 @@ public class TrainingPipeline implements Mappable {
         this.nodePropertySteps.add(step);
     }
 
-    List<LinkFeatureStep> featureSteps() {
+    public List<LinkFeatureStep> featureSteps() {
         return featureSteps;
     }
 

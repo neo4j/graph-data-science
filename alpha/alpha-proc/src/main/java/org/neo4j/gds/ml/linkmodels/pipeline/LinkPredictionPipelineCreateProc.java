@@ -60,7 +60,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
 
     @ValueClass
     @Configuration
-    interface PipelineDummyTrainConfig extends BaseConfig, ModelConfig {
+    public interface PipelineDummyTrainConfig extends BaseConfig, ModelConfig {
         static PipelineDummyTrainConfig of(String username) {
             return ImmutablePipelineDummyTrainConfig.of(username, "");
         }
