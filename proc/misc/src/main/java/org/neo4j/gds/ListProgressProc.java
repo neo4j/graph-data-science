@@ -66,7 +66,7 @@ public class ListProgressProc extends BaseProc {
             String stageTemplate = "%s of %s";
             String stageResult;
 
-            return subTaskCountingVisitor.containsOpenTask()
+            return subTaskCountingVisitor.containsUnresolvedOpenTask()
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), "n/a")
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
         }
@@ -74,7 +74,7 @@ public class ListProgressProc extends BaseProc {
 
     public static class SubTaskCountingVisitor implements TaskVisitor {
 
-        private boolean containsOpenTask = false;
+        private boolean containsUnresolvedOpenTask = false;
         private int numSubTasks = 0;
         private int numFinishedSubTasks = 0;
 
@@ -86,15 +86,15 @@ public class ListProgressProc extends BaseProc {
             return numFinishedSubTasks;
         }
 
-        boolean containsOpenTask() {
-            return containsOpenTask;
+        boolean containsUnresolvedOpenTask() {
+            return containsUnresolvedOpenTask;
         }
 
         @TestOnly
         void reset() {
             this.numSubTasks = 0;
             this.numFinishedSubTasks = 0;
-            this.containsOpenTask = false;
+            this.containsUnresolvedOpenTask = false;
         }
 
         @Override
@@ -115,8 +115,15 @@ public class ListProgressProc extends BaseProc {
                 case FIXED:
                 case DYNAMIC:
                     visitRecursively(iterativeTask);
+                    break;
                 case OPEN:
-                    containsOpenTask = true;
+                    if (iterativeTask.status() == Status.FINISHED) {
+                        incrementCounters(iterativeTask);
+                        containsUnresolvedOpenTask = false;
+                    } else {
+                        containsUnresolvedOpenTask = true;
+                    }
+                    break;
             }
         }
 

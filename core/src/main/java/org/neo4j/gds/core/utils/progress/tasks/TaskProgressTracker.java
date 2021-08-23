@@ -109,7 +109,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @TestOnly
-    Task currentSubTask() {
+    public Task currentSubTask() {
         return requireCurrentTask();
     }
 

@@ -85,6 +85,23 @@ public class SubTaskCountingVisitorTest {
 
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(1);
         assertThat(subTaskCountingVisitor.numFinishedSubTasks()).isEqualTo(0);
-        assertThat(subTaskCountingVisitor.containsOpenTask()).isTrue();
+        assertThat(subTaskCountingVisitor.containsUnresolvedOpenTask()).isTrue();
+    }
+
+    @Test
+    void shouldDetectFinishedOpenTask() {
+        var baseTask = Tasks.iterativeOpen("open", () -> List.of(Tasks.leaf("leaf")));
+        baseTask.start();
+        var leafTask = baseTask.nextSubtask();
+        leafTask.start();
+        leafTask.finish();
+        baseTask.finish();
+
+        var subTaskCountingVisitor = new ListProgressProc.SubTaskCountingVisitor();
+        baseTask.visit(subTaskCountingVisitor);
+
+        assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(2);
+        assertThat(subTaskCountingVisitor.numFinishedSubTasks()).isEqualTo(2);
+        assertThat(subTaskCountingVisitor.containsUnresolvedOpenTask()).isFalse();
     }
 }
