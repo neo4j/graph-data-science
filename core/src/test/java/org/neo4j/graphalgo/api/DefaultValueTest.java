@@ -96,6 +96,32 @@ class DefaultValueTest {
         assertThat(e.getMessage()).contains("Cannot safely convert 42.42 into an long value");
     }
 
+    static Stream<Arguments> defaultValueArrayParams() {
+        return Stream.of(
+            Arguments.of(DefaultValue.of(new float[] {1337F})),
+            Arguments.of(DefaultValue.of(new double[] {1337D})),
+            Arguments.of(DefaultValue.of(new long[] {1337L}))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultValueArrayParams")
+    void shouldAcceptArrayAsDoubleArray(DefaultValue value) {
+        assertThat(value.doubleArrayValue()).usingComparatorWithPrecision(1e-3).containsExactly(1337D);
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultValueArrayParams")
+    void shouldAcceptArrayAsFloatArray(DefaultValue value) {
+        assertThat(value.floatArrayValue()).usingComparatorWithPrecision(1e-3F).containsExactly(1337F);
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultValueArrayParams")
+    void shouldAcceptArrayAsLongArray(DefaultValue value) {
+        assertThat(value.longArrayValue()).containsExactly(1337L);
+    }
+
     static Stream<Arguments> validDoubleValues() {
         return Stream.of(
             arguments(42, 42.0D),

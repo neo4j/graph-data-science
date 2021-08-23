@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.utils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -82,6 +84,47 @@ class ValueConversionTest {
             arguments(Values.stringValue("42L"), null),
             arguments(Values.doubleArray(new double[]{42.0}), null),
             arguments(Values.longValue(1L << 54 + 1), null)
+        );
+    }
+
+    static float getFloatValue(Value value) {
+        if (value instanceof FloatingPointValue) {
+            var doubleValue = ((FloatingPointValue) value).doubleValue();
+            return ValueConversion.notOverflowingDoubleToFloat(doubleValue);
+        } else if (value instanceof IntegralValue) {
+            return ValueConversion.exactLongToFloat(((IntegralValue) value).longValue());
+        } else {
+            throw new UnsupportedOperationException("Failed to convert to float");
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("floatConversion")
+    void testGettingAFloat(Value value, Float expected) {
+        if (expected != null) {
+            assertEquals(expected, getFloatValue(value), 0.1);
+        } else {
+            assertThrows(UnsupportedOperationException.class, () -> getFloatValue(value));
+        }
+    }
+
+    static Stream<Arguments> floatConversion() {
+        return Stream.of(
+            arguments(Values.floatValue(42.1F), 42.1F),
+            arguments(Values.doubleValue(42.1D), 42.1F),
+            arguments(Values.longValue(42L), 42.0F),
+            arguments(Values.intValue(42), 42.0F),
+            arguments(Values.shortValue((short) 42), 42.0F),
+            arguments(Values.byteValue((byte) 42), 42.0F),
+
+            arguments(Values.stringValue("42L"), null),
+            arguments(Values.doubleArray(new double[]{42.0}), null),
+            arguments(Values.longArray(new long[]{42}), null),
+            arguments(Values.floatArray(new float[]{42.0F}), null),
+            arguments(Values.longValue(Long.MAX_VALUE), null),
+            arguments(Values.longValue(Long.MIN_VALUE), null),
+            arguments(Values.doubleValue(Float.MAX_VALUE * 2.0D), null),
+            arguments(Values.doubleValue(-Float.MAX_VALUE * 2.0D), null)
         );
     }
 

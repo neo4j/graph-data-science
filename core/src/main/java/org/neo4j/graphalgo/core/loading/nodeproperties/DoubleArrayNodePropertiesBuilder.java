@@ -60,7 +60,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
 
     static class DoubleArrayStoreNodeProperties implements DoubleArrayNodeProperties {
         private final HugeObjectArray<double[]> propertyValues;
-        private final DefaultValue defaultValue;
+        private final double[] defaultArray;
         private final long size;
 
         DoubleArrayStoreNodeProperties(
@@ -69,7 +69,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
             long size
         ) {
             this.propertyValues = propertyValues;
-            this.defaultValue = defaultValue;
+            this.defaultArray = defaultValue.doubleArrayValue();
             this.size = size;
         }
 
@@ -77,7 +77,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
         public double[] doubleArrayValue(long nodeId) {
             double[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.doubleArrayValue();
+                return defaultArray;
             }
             return data;
         }

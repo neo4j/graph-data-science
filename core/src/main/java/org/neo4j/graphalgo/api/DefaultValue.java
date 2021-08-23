@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.utils.ValueConversion;
 
 import java.util.List;
 import java.util.Objects;
@@ -155,26 +156,88 @@ public final class DefaultValue {
         throw getInvalidTypeException(Double.class);
     }
 
-    public long[] longArrayValue() {
-        return getArray(long[].class);
+    public float[] floatArrayValue() {
+        float[] floatArray = null;
+
+        if (defaultValue == null) {
+            return null;
+        } else if (defaultValue instanceof float[]) {
+            return (float[]) defaultValue;
+        } else if (defaultValue instanceof double[]) {
+            var doubleArray = (double[]) defaultValue;
+            floatArray = new float[doubleArray.length];
+
+            for (int i = 0; i < doubleArray.length; i++) {
+                floatArray[i] = ValueConversion.notOverflowingDoubleToFloat(doubleArray[i]);
+            }
+        } else if (defaultValue instanceof long[]) {
+            var longArray = (long[]) defaultValue;
+            floatArray = new float[longArray.length];
+
+            for (int i = 0; i < longArray.length; i++) {
+                floatArray[i] = ValueConversion.exactLongToFloat(longArray[i]);
+            }
+        } else {
+            throw getInvalidTypeException(float[].class);
+        }
+
+        return floatArray;
     }
 
     public double[] doubleArrayValue() {
-        return getArray(double[].class);
-    }
+        double[] doubleArray = null;
 
-    public float[] floatArrayValue() {
-        return getArray(float[].class);
-    }
-
-    private <T> T getArray(Class<T> arrayType) {
         if (defaultValue == null) {
             return null;
-        } else if (arrayType.isAssignableFrom(defaultValue.getClass())) {
-            return arrayType.cast(defaultValue);
+        } else if (defaultValue instanceof double[]) {
+            return (double[]) defaultValue;
+        } else if (defaultValue instanceof float[]) {
+            var floatArray = (float[]) defaultValue;
+            doubleArray = new double[floatArray.length];
+
+            for (int i = 0; i < floatArray.length; i++) {
+                doubleArray[i] = floatArray[i];
+            }
+        } else if (defaultValue instanceof long[]) {
+            var longArray = (long[]) defaultValue;
+            doubleArray = new double[longArray.length];
+
+            for (int i = 0; i < longArray.length; i++) {
+                doubleArray[i] = ValueConversion.exactLongToDouble(longArray[i]);
+            }
         } else {
-            throw getInvalidTypeException(arrayType);
+            throw getInvalidTypeException(double[].class);
         }
+
+        return doubleArray;
+    }
+
+    public long[] longArrayValue() {
+        long[] longArray = null;
+
+        if (defaultValue == null) {
+            return null;
+        } else if (defaultValue instanceof long[]) {
+            return (long[]) defaultValue;
+        } else if (defaultValue instanceof float[]) {
+            var floatArray = (float[]) defaultValue;
+            longArray = new long[floatArray.length];
+
+            for (int i = 0; i < floatArray.length; i++) {
+                longArray[i] = ValueConversion.exactDoubleToLong(floatArray[i]);
+            }
+        } else if (defaultValue instanceof double[]) {
+            var doubleArray = (double[]) defaultValue;
+            longArray = new long[doubleArray.length];
+
+            for (int i = 0; i < doubleArray.length; i++) {
+                longArray[i] = ValueConversion.exactDoubleToLong(doubleArray[i]);
+            }
+        } else {
+            throw getInvalidTypeException(long[].class);
+        }
+
+        return longArray;
     }
 
     public @Nullable Object getObject() {
