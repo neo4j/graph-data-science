@@ -32,11 +32,15 @@ public class Task {
     private final String description;
     private final List<Task> subTasks;
     private Status status;
+    private long startTime;
+    private long finishTime;
 
     Task(String description, List<Task> subTasks) {
         this.description = description;
         this.subTasks = subTasks;
         this.status = Status.PENDING;
+        this.startTime = -1L;
+        this.finishTime = -1L;
     }
 
     public String description() {
@@ -72,6 +76,7 @@ public class Task {
             ));
         }
         this.status = Status.RUNNING;
+        this.startTime = System.currentTimeMillis();
     }
 
     public void finish() {
@@ -83,6 +88,7 @@ public class Task {
             ));
         }
         this.status = Status.FINISHED;
+        this.finishTime = System.currentTimeMillis();
     }
 
     public void cancel() {
@@ -136,5 +142,13 @@ public class Task {
 
     public void visit(TaskVisitor taskVisitor) {
         taskVisitor.visitIntermediateTask(this);
+    }
+
+    public long startTime() {
+        return this.startTime;
+    }
+
+    public long finishTime() {
+        return this.finishTime;
     }
 }

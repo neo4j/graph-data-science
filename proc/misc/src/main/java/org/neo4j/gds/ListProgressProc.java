@@ -30,9 +30,13 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskVisitor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.LocalTimeValue;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -59,6 +63,7 @@ public class ListProgressProc extends BaseProc {
         public String stage;
         public String progress;
         public String status;
+        public LocalTimeValue timeStarted;
 
         ProgressResult(ProgressEvent progressEvent) {
             this.id = progressEvent.jobId().asString();
@@ -67,6 +72,7 @@ public class ListProgressProc extends BaseProc {
             this.stage = computeStage(task);
             this.progress = computeProgress(task);
             this.status = task.status().name();
+            this.timeStarted = localTimeValue(task);
         }
 
         private String computeStage(Task baseTask) {
@@ -93,6 +99,13 @@ public class ListProgressProc extends BaseProc {
             var progressPercentage = (double) progress / (double) volume;
             var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
             return decimalFormat.format(progressPercentage);
+        }
+
+        private LocalTimeValue localTimeValue(Task task) {
+            return LocalTimeValue.localTime(LocalTime.ofInstant(
+                Instant.ofEpochMilli(task.startTime()),
+                ZoneId.systemDefault()
+            ));
         }
     }
 

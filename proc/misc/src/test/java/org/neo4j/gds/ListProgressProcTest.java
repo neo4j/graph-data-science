@@ -43,6 +43,7 @@ import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 public class ListProgressProcTest extends BaseTest {
 
@@ -95,15 +97,30 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var progressEvents = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, stage, progress, status RETURN taskName, stage, progress, status",
+            "CALL gds.beta.listProgress() YIELD taskName, stage, progress, status, timeStarted RETURN taskName, stage, progress, status, timeStarted",
             r -> r.stream().collect(Collectors.toList())
         );
-        assertThat(progressEvents).hasSize(2);
-        assertThat(progressEvents)
-            .containsExactlyInAnyOrder(
-                Map.of("taskName","foo", "stage", "0 of 1", "progress", "33.33%", "status", "RUNNING"),
-                Map.of("taskName", "bar", "stage", "0 of 1", "progress", "33.33%", "status", "RUNNING")
-            );
+        assertCypherResult(
+            "CALL gds.beta.listProgress() " +
+            "YIELD taskName, stage, progress, status, timeStarted " +
+            "RETURN taskName, stage, progress, status, timeStarted " +
+            "ORDER BY taskName",
+            List.of(
+                Map.of("taskName", "bar",
+                    "stage", "0 of 1",
+                    "progress", "33.33%",
+                    "status", "RUNNING",
+                    "timeStarted", instanceOf(LocalTime.class)
+                ),
+                Map.of(
+                    "taskName","foo",
+                    "stage", "0 of 1",
+                    "progress", "33.33%",
+                    "status", "RUNNING",
+                    "timeStarted", instanceOf(LocalTime.class)
+                )
+            )
+        );
     }
 
     @Test
