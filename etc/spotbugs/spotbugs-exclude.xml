@@ -385,8 +385,4 @@
         <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
     </Match>
 
-<!--    <Match>-->
-<!--        <Bug pattern="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION"/>-->
-<!--    </Match>-->
-
 </FindBugsFilter>
