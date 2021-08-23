@@ -58,17 +58,22 @@ public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<No
     public Task progressTask(
         Graph graph, NodeClassificationTrainConfig config
     ) {
+
         return Tasks.task(
             taskName(),
             Tasks.leaf("ShuffleAndSplit"),
-            Tasks.iterativeOpen(
+            Tasks.iterativeFixed(
                 "SelectBestModel",
-                () -> List.of(
-                    Tasks.leaf("Train"),
-                    Tasks.leaf("Evaluate")
-                )
+                () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
+                        Tasks.task(
+                            "Split",
+                            Tasks.leaf("Train"),
+                            Tasks.leaf("Evaluate")
+                        )
+                    ), config.validationFolds())
+                ),
+                config.params().size()
             ),
-            Tasks.leaf("SelectModel"),
             Tasks.leaf("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
             Tasks.leaf("RetrainSelectedModel")

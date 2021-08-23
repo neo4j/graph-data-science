@@ -58,7 +58,6 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
@@ -220,6 +219,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     @Override
     public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         progressTracker.beginSubTask();
+
         progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
         var outerSplit = new FractionSplitter(allocationTracker).split(nodeIds, 1 - config.holdoutFraction());
@@ -231,34 +231,26 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
 
         var retrainedModelData = retrainBestModel(bestParameters);
-
         progressTracker.endSubTask();
+
         return createModel(bestParameters, metricResults, retrainedModelData);
     }
 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
         progressTracker.beginSubTask();
-
-        for (int i = 0; i < config.paramsConfig().size(); i++) {
-            var modelParams = config.paramsConfig().get(i);
-            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.paramsConfig().size());
+        for (NodeLogisticRegressionTrainConfig modelParams : config.paramsConfig()) {
+            progressTracker.beginSubTask();
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
-            for (int j = 0; j < splits.size(); j++) {
-                var split = splits.get(j);
-                var candidateAndSplitMessage = formatWithLocale(candidateMessage + " :: Split %s of %s", j + 1, splits.size());
+
+            for (NodeSplit split : splits) {
+                progressTracker.beginSubTask();
 
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
                 progressTracker.beginSubTask();
-                // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
-                int maxEpochs = modelParams.maxEpochs();
-                progressTracker.progressLogger().logMessage(formatWithLocale(
-                    candidateAndSplitMessage + " :: Train :: Max iterations: %s",
-                    maxEpochs
-                ));
-                progressTracker.setVolume(maxEpochs);
+                progressTracker.setVolume(modelParams.maxEpochs());
                 var modelData = trainModel(trainSet, modelParams);
                 progressTracker.endSubTask();
 
@@ -267,7 +259,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
                 computeMetrics(classCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
                 progressTracker.endSubTask();
+
+                progressTracker.endSubTask();
             }
+            progressTracker.endSubTask();
+
             metrics.forEach(metric -> {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
@@ -275,10 +271,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         }
         progressTracker.endSubTask();
 
-        progressTracker.beginSubTask();
         var mainMetric = metrics.get(0);
         var bestModelStats = validationStats.pickBestModelStats(mainMetric);
-        progressTracker.endSubTask();
 
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
