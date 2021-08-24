@@ -20,12 +20,12 @@
 package org.neo4j.gds.core.utils.progress;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.Collections.emptyMap;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
@@ -40,12 +40,24 @@ public class ProgressEventStoreImpl implements ProgressEventStore {
     @Override
     public List<ProgressEvent> query(String username) {
         return events
-            .getOrDefault(username, emptyMap())
+            .getOrDefault(username, Collections.emptyMap())
             .values()
             .stream()
             .filter(not(List::isEmpty))
             .map(items -> items.get(0))
             .collect(toList());
+    }
+
+    @Override
+    public ProgressEvent query(String username, JobId jobId) {
+        var progressEvents = events
+            .getOrDefault(username, Collections.emptyMap())
+            .getOrDefault(jobId, Collections.emptyList());
+
+        return progressEvents.isEmpty()
+            ? ProgressEvent.endOfStreamEvent(username, jobId)
+            : progressEvents.get(0);
+
     }
 
     @Override

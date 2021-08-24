@@ -30,6 +30,12 @@ enum EmptyProgressEventStore implements ProgressEventStore {
     }
 
     @Override
+    public ProgressEvent query(String username, JobId jobId) {
+        return ProgressEvent.endOfStreamEvent(username, jobId);
+    }
+
+
+    @Override
     public boolean isEmpty() {
         return true;
     }
