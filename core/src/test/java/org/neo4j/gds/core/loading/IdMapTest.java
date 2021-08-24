@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,13 +81,14 @@ class IdMapTest {
         int length = 1337;
         int highestNeoId = length - 1;
         var hugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(length, AllocationTracker.empty());
-        var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, Map.of(), highestNeoId, 1, AllocationTracker.empty());
+        var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
+        var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, emptyLabelInformationBuilder, highestNeoId, 1, AllocationTracker.empty());
 
         var bitIdMappingBuilder = InternalBitIdMappingBuilder.of(length, AllocationTracker.empty());
-        var bitIdMap = IdMapBuilder.build(bitIdMappingBuilder, Map.of(), AllocationTracker.empty());
+        var bitIdMap = IdMapBuilder.build(bitIdMappingBuilder, emptyLabelInformationBuilder, AllocationTracker.empty());
 
         var sequentialBitIdMappingBuilder = InternalSequentialBitIdMappingBuilder.of(length, AllocationTracker.empty());
-        var sequentialBitIdMap = IdMapBuilder.build(sequentialBitIdMappingBuilder, Map.of(), AllocationTracker.empty());
+        var sequentialBitIdMap = IdMapBuilder.build(sequentialBitIdMappingBuilder, emptyLabelInformationBuilder, AllocationTracker.empty());
 
         assertThat(hugeIdMap.highestNeoId()).isEqualTo(highestNeoId);
         assertThat(bitIdMap.highestNeoId()).isEqualTo(highestNeoId);

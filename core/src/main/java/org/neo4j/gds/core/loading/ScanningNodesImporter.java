@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
@@ -28,27 +27,24 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.logging.Log;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 
 public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
@@ -63,7 +59,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
     private BUILDER idMapBuilder;
-    private Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
+    private LabelInformation.Builder labelInformationBuilder;
 
     public ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
@@ -113,11 +109,11 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping =
+        labelInformationBuilder =
             graphCreateConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? Collections.emptyMap()
-                : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
+                ? LabelInformation.emptyBuilder(tracker)
+                : LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, tracker);
 
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
@@ -128,10 +124,9 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             progressLogger,
             new NodeImporter(
                 idMapBuilder,
-                nodeLabelBitSetMapping,
+                labelInformationBuilder,
                 labelTokenNodeLabelMapping,
-                nodePropertyImporter != null,
-                tracker
+                nodePropertyImporter != null
             ),
             nodePropertyImporter,
             terminationFlag
@@ -142,7 +137,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     public IdsAndProperties build() {
         var nodeMapping = nodeMappingBuilder.build(
             idMapBuilder,
-            nodeLabelBitSetMapping,
+            labelInformationBuilder,
             dimensions.highestNeoId(),
             concurrency,
             false,
@@ -234,30 +229,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             recordsPerSecond
         ));
         progressLogger.reset(remainingVolume);
-    }
-
-    @NotNull
-    private Map<NodeLabel, HugeAtomicBitSet> initializeLabelBitSets(
-        long nodeCount,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
-    ) {
-        var nodeLabelBitSetMap = StreamSupport.stream(
-            labelTokenNodeLabelMapping.values().spliterator(),
-            false
-        )
-            .flatMap(cursor -> cursor.value.stream())
-            .distinct()
-            .collect(Collectors.toMap(
-                nodeLabel -> nodeLabel,
-                nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker))
-            );
-
-        // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            nodeLabelBitSetMap.get(starLabel).set(0, nodeCount);
-        }
-
-        return nodeLabelBitSetMap;
     }
 
     @Nullable

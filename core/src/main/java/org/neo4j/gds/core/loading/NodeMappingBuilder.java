@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-
-import java.util.Map;
 
 public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? extends IdMappingAllocator>> {
 
     NodeMapping build(
         BUILDER idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
         boolean checkDuplicateIds,
@@ -38,9 +34,9 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
     );
 
     default Capturing capture(BUILDER idMapBuilder) {
-        return ((labelInformation, highestNodeId, concurrency, checkDuplicateIds, tracker) -> this.build(
+        return ((labelInformationBuilder, highestNodeId, concurrency, checkDuplicateIds, tracker) -> this.build(
             idMapBuilder,
-            labelInformation,
+            labelInformationBuilder,
             highestNodeId,
             concurrency,
             checkDuplicateIds,
@@ -51,7 +47,7 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
     interface Capturing {
 
         NodeMapping build(
-            Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+            LabelInformation.Builder labelInformationBuilder,
             long highestNodeId,
             int concurrency,
             boolean checkDuplicateIds,

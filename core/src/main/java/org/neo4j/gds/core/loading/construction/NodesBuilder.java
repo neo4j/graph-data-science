@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
+import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
@@ -73,7 +74,7 @@ public final class NodesBuilder {
 
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
-    private final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap;
+    private final LabelInformation.Builder labelInformationBuilder;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
@@ -91,7 +92,6 @@ public final class NodesBuilder {
         long nodeCount,
         int concurrency,
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
-        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
         NodeMappingBuilder.Capturing nodeMappingBuilder,
@@ -104,7 +104,7 @@ public final class NodesBuilder {
         this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
-        this.nodeLabelBitSetMap = nodeLabelBitSetMap;
+        this.labelInformationBuilder = LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, tracker);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
         this.nextLabelId = 0;
@@ -116,10 +116,9 @@ public final class NodesBuilder {
 
         this.nodeImporter = new NodeImporter(
             internalIdMappingBuilder,
-            nodeLabelBitSetMap,
+            labelInformationBuilder,
             labelTokenNodeLabelMapping,
-            hasProperties,
-            tracker
+            hasProperties
         );
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
@@ -166,7 +165,7 @@ public final class NodesBuilder {
         this.threadLocalBuilder.close();
 
         var nodeMapping = this.nodeMappingBuilder.build(
-            nodeLabelBitSetMap,
+            labelInformationBuilder,
             highestNeoId,
             concurrency,
             checkDuplicateIds,

@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.neo4j.gds.core.utils.paged.SparseLongArraySerializer;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.core.utils.paged.SparseLongArraySerializer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Map;
 
 public final class BitIdMapSerializer extends Serializer<BitIdMap> {
 
@@ -62,7 +60,7 @@ public final class BitIdMapSerializer extends Serializer<BitIdMap> {
     public void write(Kryo kryo, Output output, BitIdMap idMap) {
         kryo.register(NodeLabel.class, new NodeLabelSerializer());
 
-        kryo.writeObject(output, idMap.labelInformation());
+        kryo.writeObject(output, idMap.labelInformation().labelInformationMap());
 
         kryo.writeObject(output, idMap.sparseLongArray(), new SparseLongArraySerializer());
     }
@@ -71,7 +69,7 @@ public final class BitIdMapSerializer extends Serializer<BitIdMap> {
     public BitIdMap read(Kryo kryo, Input input, Class<? extends BitIdMap> type) {
         kryo.register(NodeLabel.class, new NodeLabelSerializer());
 
-        Map<NodeLabel, BitSet> labelInformation = kryo.readObject(input, HashMap.class);
+        LabelInformation labelInformation = LabelInformation.from(kryo.readObject(input, HashMap.class));
         SparseLongArray sparseLongArray = kryo.readObject(
             input,
             SparseLongArray.class,

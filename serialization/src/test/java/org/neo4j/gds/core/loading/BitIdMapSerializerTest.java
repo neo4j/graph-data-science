@@ -61,7 +61,7 @@ class BitIdMapSerializerTest extends BaseTest {
         barBitSet.set(1, nodeCount);
         labelInformation.put(NodeLabel.of("Bar"), barBitSet);
 
-        BitIdMap bitIdMap = new BitIdMap(sparseLongArray, labelInformation, AllocationTracker.empty());
+        BitIdMap bitIdMap = new BitIdMap(sparseLongArray, LabelInformation.from(labelInformation), AllocationTracker.empty());
         BitIdMapSerializer.serialize(bitIdMap, tempDir);
 
         var deserializedIdMap = BitIdMapSerializer.deserialize(tempDir);
