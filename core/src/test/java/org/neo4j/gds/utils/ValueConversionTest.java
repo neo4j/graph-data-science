@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -86,13 +88,24 @@ class ValueConversionTest {
         );
     }
 
+    static float getFloatValue(Value value) {
+        if (value instanceof FloatingPointValue) {
+            var doubleValue = ((FloatingPointValue) value).doubleValue();
+            return ValueConversion.notOverflowingDoubleToFloat(doubleValue);
+        } else if (value instanceof IntegralValue) {
+            return ValueConversion.exactLongToFloat(((IntegralValue) value).longValue());
+        } else {
+            throw new UnsupportedOperationException("Failed to convert to float");
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatConversion")
     void testGettingAFloat(Value value, Float expected) {
         if (expected != null) {
-            assertEquals(expected, ValueConversion.getFloatValue(value), 0.1);
+            assertEquals(expected, getFloatValue(value), 0.1);
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getFloatValue(value));
+            assertThrows(UnsupportedOperationException.class, () -> getFloatValue(value));
         }
     }
 

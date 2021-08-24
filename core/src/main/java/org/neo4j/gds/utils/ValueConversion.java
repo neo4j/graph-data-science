@@ -41,17 +41,6 @@ public final class ValueConversion {
         }
     }
 
-    public static float getFloatValue(Value value) {
-        if (value instanceof FloatingPointValue) {
-            var doubleValue = ((FloatingPointValue) value).doubleValue();
-            return notOverflowingDoubleToFloat(doubleValue);
-        } else if (value instanceof IntegralValue) {
-            return exactLongToFloat(((IntegralValue) value).longValue());
-        } else {
-            throw conversionError(value, "Float");
-        }
-    }
-
     public static double getDoubleValue(Value value) {
         if (value instanceof FloatingPointValue) {
             return ((FloatingPointValue) value).doubleValue();
