@@ -19,11 +19,17 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
+import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.LocalTimeValue;
@@ -34,12 +40,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ListProgressProc extends BaseProc {
+
+    static final String TASK_BRANCH_TOKEN = "|-- ";
+    static final String TASK_LEVEL_INDENTATION = "    ";
 
     @Context
     public ProgressEventStore progress;
@@ -48,6 +59,14 @@ public class ListProgressProc extends BaseProc {
     @Description("List progress events for currently running tasks.")
     public Stream<ProgressResult> listProgress() {
         return progress.query(username()).stream().map(ProgressResult::new);
+    }
+
+    @Procedure("gds.beta.listProgressDetail")
+    @Description("List detailed progress events for the specified job id.")
+    public Stream<JobProgressRow> listProgressDetail(
+        @Name(value = "jobId") String jobId
+    ) {
+        return new JobProgressResult(progress.query(username(), JobId.fromString(jobId))).stream();
     }
 
     @SuppressWarnings("unused")
@@ -117,4 +136,66 @@ public class ListProgressProc extends BaseProc {
         }
     }
 
+    public static class JobProgressResult {
+
+        private final List<JobProgressRow> jobProgressRows;
+
+        JobProgressResult(ProgressEvent progressEvent) {
+            var task = progressEvent.task();
+            var jobProgressVisitor = new JobProgressVisitor();
+            TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
+            this.jobProgressRows = jobProgressVisitor.progressRows();
+        }
+
+        public Stream<JobProgressRow> stream() {
+            return this.jobProgressRows.stream();
+        }
+    }
+
+    public static class JobProgressRow {
+        public String taskName;
+
+        public JobProgressRow(String taskName) {
+            this.taskName = taskName;
+        }
+    }
+
+    public static class JobProgressVisitor extends DepthAwareTaskVisitor {
+
+        private final List<JobProgressRow> progressRows;
+
+        JobProgressVisitor() {
+            this.progressRows = new ArrayList<>();
+        }
+
+        List<JobProgressRow> progressRows() {
+            return this.progressRows;
+        }
+
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            addProgressRow(leafTask);
+        }
+
+        @Override
+        public void visitIntermediateTask(Task task) {
+            addProgressRow(task);
+        }
+
+        @Override
+        public void visitIterativeTask(IterativeTask iterativeTask) {
+            addProgressRow(iterativeTask);
+        }
+
+        private void addProgressRow(Task task) {
+            String treeViewTaskName = treeViewTaskName(task);
+            progressRows.add(new JobProgressRow(treeViewTaskName));
+        }
+
+        private String treeViewTaskName(Task task) {
+            return TASK_LEVEL_INDENTATION.repeat(depth) +
+                   TASK_BRANCH_TOKEN +
+                   task.description();
+        }
+    }
 }

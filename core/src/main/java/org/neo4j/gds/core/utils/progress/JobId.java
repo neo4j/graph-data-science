@@ -23,7 +23,19 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class JobId {
-    private final UUID value = UUID.randomUUID();
+    private final UUID value;
+
+    public static JobId fromString(String id) {
+        return new JobId(UUID.fromString(id));
+    }
+
+    public JobId() {
+        this.value = UUID.randomUUID();
+    }
+
+    private JobId(UUID id) {
+        this.value = id;
+    }
 
     public String asString() {
         return value.toString();
