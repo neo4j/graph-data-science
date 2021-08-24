@@ -262,7 +262,8 @@ class CypherFactoryTest extends BaseTest {
             });
             return true;
         });
-        assertThat(actual).containsExactlyElementsOf(expectation);
+
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expectation);
     }
 
     @Test
