@@ -87,6 +87,36 @@ class ValueConversionTest {
     }
 
     @ParameterizedTest
+    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatConversion")
+    void testGettingAFloat(Value value, Float expected) {
+        if (expected != null) {
+            assertEquals(expected, ValueConversion.getFloatValue(value), 0.1);
+        } else {
+            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getFloatValue(value));
+        }
+    }
+
+    static Stream<Arguments> floatConversion() {
+        return Stream.of(
+            arguments(Values.floatValue(42.1F), 42.1F),
+            arguments(Values.doubleValue(42.1D), 42.1F),
+            arguments(Values.longValue(42L), 42.0F),
+            arguments(Values.intValue(42), 42.0F),
+            arguments(Values.shortValue((short) 42), 42.0F),
+            arguments(Values.byteValue((byte) 42), 42.0F),
+
+            arguments(Values.stringValue("42L"), null),
+            arguments(Values.doubleArray(new double[]{42.0}), null),
+            arguments(Values.longArray(new long[]{42}), null),
+            arguments(Values.floatArray(new float[]{42.0F}), null),
+            arguments(Values.longValue(Long.MAX_VALUE), null),
+            arguments(Values.longValue(Long.MIN_VALUE), null),
+            arguments(Values.doubleValue(Float.MAX_VALUE * 2.0D), null),
+            arguments(Values.doubleValue(-Float.MAX_VALUE * 2.0D), null)
+        );
+    }
+
+    @ParameterizedTest
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longArrayConversion")
     void testGettingALongArray(Value value, long[] expected) {
         if (expected != null) {

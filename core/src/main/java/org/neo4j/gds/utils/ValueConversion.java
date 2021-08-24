@@ -41,6 +41,17 @@ public final class ValueConversion {
         }
     }
 
+    public static float getFloatValue(Value value) {
+        if (value instanceof FloatingPointValue) {
+            var doubleValue = ((FloatingPointValue) value).doubleValue();
+            return notOverflowingDoubleToFloat(doubleValue);
+        } else if (value instanceof IntegralValue) {
+            return exactLongToFloat(((IntegralValue) value).longValue());
+        } else {
+            throw conversionError(value, "Float");
+        }
+    }
+
     public static double getDoubleValue(Value value) {
         if (value instanceof FloatingPointValue) {
             return ((FloatingPointValue) value).doubleValue();
@@ -95,6 +106,30 @@ public final class ValueConversion {
                 l
             ));
         }
+    }
+
+    public static float exactLongToFloat(long l) {
+        // Math.ulp() tells us that integer precision for float is > 1.0
+        // for the values checked for below.
+        if (l >= 1L << 24 || l <= -(1L << 24)) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot safely convert %d into a float value",
+                l
+            ));
+        }
+
+        return (float) l;
+    }
+
+    public static float notOverflowingDoubleToFloat(double d) {
+        if (d > Float.MAX_VALUE || d < -Float.MAX_VALUE) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot safely convert %.2f into a float value",
+                d
+            ));
+        }
+
+        return (float) d;
     }
 
     @NotNull

@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.ValueConversion;
 
 import java.util.List;
 import java.util.Objects;
@@ -167,14 +168,14 @@ public final class DefaultValue {
             floatArray = new float[doubleArray.length];
 
             for (int i = 0; i < doubleArray.length; i++) {
-                floatArray[i] = (float) doubleArray[i];
+                floatArray[i] = ValueConversion.notOverflowingDoubleToFloat(doubleArray[i]);
             }
         } else if (defaultValue instanceof long[]) {
             var longArray = (long[]) defaultValue;
             floatArray = new float[longArray.length];
 
             for (int i = 0; i < longArray.length; i++) {
-                floatArray[i] = (float) longArray[i];
+                floatArray[i] = ValueConversion.exactLongToFloat(longArray[i]);
             }
         } else {
             throw getInvalidTypeException(float[].class);
@@ -202,7 +203,7 @@ public final class DefaultValue {
             doubleArray = new double[longArray.length];
 
             for (int i = 0; i < longArray.length; i++) {
-                doubleArray[i] = (double) longArray[i];
+                doubleArray[i] = ValueConversion.exactLongToDouble(longArray[i]);
             }
         } else {
             throw getInvalidTypeException(double[].class);
@@ -223,14 +224,14 @@ public final class DefaultValue {
             longArray = new long[floatArray.length];
 
             for (int i = 0; i < floatArray.length; i++) {
-                longArray[i] = (long) floatArray[i];
+                longArray[i] = ValueConversion.exactDoubleToLong(floatArray[i]);
             }
         } else if (defaultValue instanceof double[]) {
             var doubleArray = (double[]) defaultValue;
             longArray = new long[doubleArray.length];
 
             for (int i = 0; i < doubleArray.length; i++) {
-                longArray[i] = (long) doubleArray[i];
+                longArray[i] = ValueConversion.exactDoubleToLong(doubleArray[i]);
             }
         } else {
             throw getInvalidTypeException(long[].class);
