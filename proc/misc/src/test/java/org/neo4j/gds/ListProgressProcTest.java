@@ -42,6 +42,7 @@ import org.neo4j.procedure.Procedure;
 import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
+import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -96,28 +97,26 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.pl('foo')");
         runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
-        var progressEvents = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, stage, progress, status, timeStarted RETURN taskName, stage, progress, status, timeStarted",
-            r -> r.stream().collect(Collectors.toList())
-        );
         assertCypherResult(
             "CALL gds.beta.listProgress() " +
-            "YIELD taskName, stage, progress, status, timeStarted " +
-            "RETURN taskName, stage, progress, status, timeStarted " +
+            "YIELD taskName, stage, progress, status, timeStarted, elapsedTime " +
+            "RETURN taskName, stage, progress, status, timeStarted, elapsedTime " +
             "ORDER BY taskName",
             List.of(
                 Map.of("taskName", "bar",
                     "stage", "0 of 1",
                     "progress", "33.33%",
                     "status", "RUNNING",
-                    "timeStarted", instanceOf(LocalTime.class)
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class)
                 ),
                 Map.of(
                     "taskName","foo",
                     "stage", "0 of 1",
                     "progress", "33.33%",
                     "status", "RUNNING",
-                    "timeStarted", instanceOf(LocalTime.class)
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class)
                 )
             )
         );

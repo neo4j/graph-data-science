@@ -30,10 +30,12 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskVisitor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.LocalTimeValue;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -64,6 +66,7 @@ public class ListProgressProc extends BaseProc {
         public String progress;
         public String status;
         public LocalTimeValue timeStarted;
+        public DurationValue elapsedTime;
 
         ProgressResult(ProgressEvent progressEvent) {
             this.id = progressEvent.jobId().asString();
@@ -73,6 +76,17 @@ public class ListProgressProc extends BaseProc {
             this.progress = computeProgress(task);
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
+            this.elapsedTime = computeElapsedTime(task);
+        }
+
+        private DurationValue computeElapsedTime(Task baseTask) {
+            var finishTime = baseTask.finishTime();
+            var finishTimeOrNow = finishTime != -1
+                ? finishTime
+                : System.currentTimeMillis();
+            var elapsedTime = finishTimeOrNow - baseTask.startTime();
+            var duration = Duration.ofMillis(elapsedTime);
+            return DurationValue.duration(duration);
         }
 
         private String computeStage(Task baseTask) {
