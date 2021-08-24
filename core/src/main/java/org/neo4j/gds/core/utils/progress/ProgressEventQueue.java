@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import java.util.OptionalDouble;
 import java.util.Queue;
 
 final class ProgressEventQueue extends LifecycleAdapter implements ProgressEventTracker {
@@ -43,7 +42,7 @@ final class ProgressEventQueue extends LifecycleAdapter implements ProgressEvent
 
     @Override
     public void addTaskProgressEvent(Task task) {
-        var progressEvent = ImmutableProgressEvent.of(username, jobId, task, OptionalDouble.empty());
+        var progressEvent = ImmutableProgressEvent.of(username, jobId, task);
         this.queue.offer(progressEvent);
     }
 

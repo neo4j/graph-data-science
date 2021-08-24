@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-import java.util.OptionalDouble;
-
 @ValueClass
 public interface ProgressEvent {
 
@@ -34,8 +32,6 @@ public interface ProgressEvent {
     JobId jobId();
 
     Task task();
-
-    OptionalDouble progress();
 
     @Value.Default
     @Value.Parameter(false)
