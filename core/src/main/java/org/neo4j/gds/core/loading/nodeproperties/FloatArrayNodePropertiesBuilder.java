@@ -60,7 +60,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
 
     static class FloatArrayStoreNodeProperties implements FloatArrayNodeProperties {
         private final HugeObjectArray<float[]> propertyValues;
-        private final DefaultValue defaultValue;
+        private final float[] defaultFloatArray;
         private final long size;
 
         FloatArrayStoreNodeProperties(
@@ -69,7 +69,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
             long size
         ) {
             this.propertyValues = propertyValues;
-            this.defaultValue = defaultValue;
+            this.defaultFloatArray = defaultValue.floatArrayValue();
             this.size = size;
         }
 
@@ -77,7 +77,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         public float[] floatArrayValue(long nodeId) {
             float[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.floatArrayValue();
+                return defaultFloatArray;
             }
             return data;
         }

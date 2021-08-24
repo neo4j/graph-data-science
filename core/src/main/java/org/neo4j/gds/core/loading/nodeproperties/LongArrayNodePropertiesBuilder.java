@@ -64,7 +64,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     static class LongArrayStoreNodeProperties implements LongArrayNodeProperties {
         private final HugeObjectArray<long[]> propertyValues;
-        private final DefaultValue defaultValue;
+        private final long[] defaultLongArray;
         private final long size;
 
         LongArrayStoreNodeProperties(
@@ -73,7 +73,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             long size
         ) {
             this.propertyValues = propertyValues;
-            this.defaultValue = defaultValue;
+            this.defaultLongArray= defaultValue.longArrayValue();
             this.size = size;
         }
 
@@ -81,7 +81,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         public long[] longArrayValue(long nodeId) {
             long[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.longArrayValue();
+                return defaultLongArray;
             }
             return data;
         }
