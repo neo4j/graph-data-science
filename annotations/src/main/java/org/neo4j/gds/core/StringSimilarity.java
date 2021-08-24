@@ -52,7 +52,7 @@ public final class StringSimilarity {
                 ));
 
         suffix.ifPresent(prettySuggestion -> result
-            .append(" ")
+            .append(' ')
             .append(prettySuggestion));
 
         return result.toString();

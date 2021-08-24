@@ -89,7 +89,7 @@ public final class CypherExporter {
                         relStatements.add(relBuilder);
                     });
                 });
-                sb.append(relStatements).append(";");
+                sb.append(relStatements).append(';');
             });
 
             sb.append(System.lineSeparator());
@@ -120,7 +120,7 @@ public final class CypherExporter {
             PropertiesLike<? super T, C> props,
             StringBuilder s) {
         s.append("  (n").append(rel.startId(item)).append(")-[");
-        rel.type(item).ifPresent(type -> s.append(":").append(type));
+        rel.type(item).ifPresent(type -> s.append(':').append(type));
         s.append(props(item, context, props, s))
                 .append("]->")
                 .append("(n")

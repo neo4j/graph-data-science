@@ -590,9 +590,6 @@
         <Bug pattern="SPP_USE_MATH_CONSTANT"/>
     </Match>
     <Match>
-        <Bug pattern="UCPM_USE_CHARACTER_PARAMETERIZED_METHOD"/>
-    </Match>
-    <Match>
         <Bug pattern="NOS_NON_OWNED_SYNCHRONIZATION"/>
     </Match>
     <Match>
