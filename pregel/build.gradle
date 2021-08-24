@@ -13,18 +13,12 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
-    neodeps.each { dep ->
-        compileOnly(group: 'org.neo4j', name: dep, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
-
     api project(":core")
-
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
+    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
     testImplementation project(':test-utils')
 }
