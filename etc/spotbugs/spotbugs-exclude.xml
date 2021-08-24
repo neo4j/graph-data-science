@@ -124,11 +124,6 @@
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
 
-    <!-- Boxed value is unboxed and then immediately reboxed -->
-    <Match>
-        <Bug pattern="BX_UNBOXING_IMMEDIATELY_REBOXED"/>
-    </Match>
-
     <!-- Method does not release lock on all exception paths -->
     <Match>
         <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH"/>
