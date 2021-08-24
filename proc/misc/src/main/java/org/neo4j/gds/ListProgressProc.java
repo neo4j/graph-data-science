@@ -63,7 +63,11 @@ public class ListProgressProc extends BaseProc {
     public Stream<JobProgressRow> listProgressDetail(
         @Name(value = "jobId") String jobId
     ) {
-        return new JobProgressResult(progress.query(username(), JobId.fromString(jobId))).stream();
+        var progressEvent = progress.query(username(), JobId.fromString(jobId));
+        var task = progressEvent.task();
+        var jobProgressVisitor = new JobProgressVisitor();
+        TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
+        return jobProgressVisitor.progressRows().stream();
     }
 
     public static class CommonProgressResult {
@@ -124,22 +128,6 @@ public class ListProgressProc extends BaseProc {
             return subTaskCountingVisitor.containsUnresolvedOpenTask()
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
-        }
-    }
-
-    public static class JobProgressResult {
-
-        private final List<JobProgressRow> jobProgressRows;
-
-        JobProgressResult(ProgressEvent progressEvent) {
-            var task = progressEvent.task();
-            var jobProgressVisitor = new JobProgressVisitor();
-            TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
-            this.jobProgressRows = jobProgressVisitor.progressRows();
-        }
-
-        public Stream<JobProgressRow> stream() {
-            return this.jobProgressRows.stream();
         }
     }
 
