@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.Orientation;

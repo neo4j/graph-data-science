@@ -37,11 +37,11 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromGraphConfig;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -78,7 +78,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterNodesOnLabels(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
@@ -91,7 +91,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMultipleNodesOnLabels(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
@@ -107,7 +107,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterNodeProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL(
@@ -123,7 +123,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMultipleNodeProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL(
@@ -136,7 +136,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterPropertiesAndLabels(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B {prop: 84}), (:C)");
@@ -148,7 +148,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMissingNodeProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B)");
@@ -160,7 +160,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void keepAllNodeProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var gdl = "(:A {long: 42L, double: 42.0D, longArray: [42L], floatArray: [42.0F], doubleArray: [42.0D]})";
@@ -174,7 +174,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void removeEmptyNodeSchemaEntries(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(:A {aProp: 42L}), (:B {bProp: 42L})");
@@ -192,7 +192,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterRelationshipTypes(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
@@ -205,7 +205,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMultipleRelationshipTypes(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
@@ -221,7 +221,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterRelationshipProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL(
@@ -240,7 +240,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMultipleRelationshipProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL(
@@ -256,7 +256,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterMissingRelationshipProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(a)-[{prop1: 42}]->(b), (a)-[]->(b)");
@@ -268,7 +268,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void keepAllRelationshipProperties(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var gdl = "()-[:A {double: 42.0D, anotherDouble: 42.0D, yetAnotherDouble: 42.0D}]->()";
@@ -282,7 +282,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void removeEmptyRelationshipSchemaEntries(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
@@ -300,7 +300,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void filterOnStar(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
@@ -312,7 +312,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void supportSeparateIdSpaces(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var nextId = new MutableLong(42_1337L);
@@ -332,7 +332,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void supportNonOverlappingNodeIdSpace(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {        // nodes will end up having ids 0, 1, 2, 3 ..
             var graphStore = graphStoreFromGDL("(:A),(:A),(a:B),(a)-->(:B)");
@@ -345,7 +345,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void logProgress(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var relType = RelationshipType.of("REL1");
@@ -425,7 +425,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void testMultiThreadedFiltering(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var labelA = new NodeLabel[]{NodeLabel.of("A")};
@@ -461,7 +461,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void testNonOverlappingNodeIdSpace(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var nodeCount = 10_000;
