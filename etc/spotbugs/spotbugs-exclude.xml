@@ -531,9 +531,6 @@
         <Bug pattern="SEO_SUBOPTIMAL_EXPRESSION_ORDER"/>
     </Match>
     <Match>
-        <Bug pattern="SPP_USE_GET0"/>
-    </Match>
-    <Match>
         <Bug pattern="SUA_SUSPICIOUS_UNINITIALIZED_ARRAY"/>
     </Match>
     <Match>
