@@ -22,17 +22,23 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 
 @ValueClass
 public interface LinkLogisticRegressionData {
 
     Weights<Matrix> weights();
+    Weights<Scalar> bias();
 
     static LinkLogisticRegressionData from(
         int numberOfLinkFeatures
     ) {
         var weights = Weights.ofMatrix(1, numberOfLinkFeatures);
-        return ImmutableLinkLogisticRegressionData.builder().weights(weights).build();
+        var bias = Weights.ofScalar();
+        return ImmutableLinkLogisticRegressionData.builder()
+            .weights(weights)
+            .bias(bias)
+            .build();
     }
 
 }

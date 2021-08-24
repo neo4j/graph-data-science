@@ -101,7 +101,7 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
             weights,
             1,
             weights.length
-        )));
+        )), Weights.ofScalar());
 
         ModelCatalog.set(Model.of(
             getUsername(),

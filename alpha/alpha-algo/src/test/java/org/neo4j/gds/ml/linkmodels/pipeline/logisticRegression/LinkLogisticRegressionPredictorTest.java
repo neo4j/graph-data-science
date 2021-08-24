@@ -51,7 +51,7 @@ class LinkLogisticRegressionPredictorTest {
     @MethodSource("inputs")
     @ParameterizedTest
     void computesProbability(double[] features, double expectedResult) {
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)));
+        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)), Weights.ofScalar());
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
 

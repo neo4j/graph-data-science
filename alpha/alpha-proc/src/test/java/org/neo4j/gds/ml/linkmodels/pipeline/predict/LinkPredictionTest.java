@@ -100,7 +100,7 @@ class LinkPredictionTest extends BaseProcTest {
             WEIGHTS,
             1,
             WEIGHTS.length
-        )));
+        )), Weights.ofScalar());
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
@@ -148,7 +148,7 @@ class LinkPredictionTest extends BaseProcTest {
             WEIGHTS,
             1,
             WEIGHTS.length
-        )));
+        )), Weights.ofScalar());
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
@@ -190,7 +190,7 @@ class LinkPredictionTest extends BaseProcTest {
             weights,
             1,
             weights.length
-        )));
+        )), Weights.ofScalar());
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
@@ -242,7 +242,7 @@ class LinkPredictionTest extends BaseProcTest {
             weights,
             1,
             weights.length
-        )));
+        )), Weights.ofScalar());
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.9818363089715674),
