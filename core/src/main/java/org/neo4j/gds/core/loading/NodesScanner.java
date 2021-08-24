@@ -22,10 +22,10 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         TransactionContext tx,
         StoreScanner<NodeReference> scanner,
         LongSet labels,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         TerminationFlag terminationFlag
@@ -46,7 +46,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                 tx,
                 scanner,
                 labels,
-                progressLogger,
+                progressTracker,
                 importer,
                 nodePropertyImporter,
                 terminationFlag);
@@ -56,7 +56,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final NodeImporter importer;
         private final NativeNodePropertyImporter nodePropertyImporter;
         private final TerminationFlag terminationFlag;
@@ -65,7 +65,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
             TransactionContext tx,
             StoreScanner<NodeReference> scanner,
             LongSet labels,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             NodeImporter importer,
             @Nullable NativeNodePropertyImporter nodePropertyImporter,
             TerminationFlag terminationFlag
@@ -73,7 +73,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
             this.tx = tx;
             this.scanner = scanner;
             this.labels = labels;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             this.importer = importer;
             this.nodePropertyImporter = nodePropertyImporter;
             this.terminationFlag = terminationFlag;
@@ -87,7 +87,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                     scanner,
                     labels,
                     index,
-                    progressLogger,
+                    progressTracker,
                     importer,
                     nodePropertyImporter
             );
@@ -104,7 +104,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     private final StoreScanner<NodeReference> scanner;
     private final LongSet labels;
     private final int scannerIndex;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final NodeImporter importer;
     private final NativeNodePropertyImporter nodePropertyImporter;
     private long propertiesImported;
@@ -116,7 +116,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         StoreScanner<NodeReference> scanner,
         LongSet labels,
         int threadIndex,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter
     ) {
@@ -125,7 +125,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         this.scanner = scanner;
         this.labels = labels;
         this.scannerIndex = threadIndex;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.importer = importer;
         this.nodePropertyImporter = nodePropertyImporter;
     }
@@ -153,7 +153,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                 );
                 int batchImportedNodes = RawValues.getHead(imported);
                 int batchImportedProperties = RawValues.getTail(imported);
-                progressLogger.logProgress(batchImportedNodes);
+                progressTracker.logProgress(batchImportedNodes);
                 nodesImported += batchImportedNodes;
                 propertiesImported += batchImportedProperties;
             }

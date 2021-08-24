@@ -24,7 +24,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.InternalImporter.ImportResult;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -32,6 +32,7 @@ import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class ScanningRecordsImporter<Record, T> {
 
@@ -44,6 +45,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
     protected final AllocationTracker tracker;
+    protected final ProgressTracker progressTracker;
     protected final int concurrency;
 
     public ScanningRecordsImporter(
@@ -51,6 +53,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
         String label,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
+        ProgressTracker progressTracker,
         int concurrency
     ) {
         this.factory = factory;
@@ -59,16 +62,20 @@ public abstract class ScanningRecordsImporter<Record, T> {
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
         this.tracker = loadingContext.tracker();
+        this.progressTracker = progressTracker;
         this.concurrency = concurrency;
     }
 
-    public final T call(Log log) {
+    public final T call() {
         long nodeCount = dimensions.nodeCount();
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
         try (StoreScanner<Record> scanner = factory.newScanner(StoreScanner.DEFAULT_PREFETCH_SIZE, transaction)) {
-            log.debug("%s Store Scan: Start using %s", label, scanner.getClass().getSimpleName());
+            progressTracker
+                .progressLogger()
+                .getLog()
+                .debug("%s Store Scan: Start using %s", label, scanner.getClass().getSimpleName());
 
             InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
             InternalImporter importer = new InternalImporter(numberOfThreads, creator);
@@ -86,7 +93,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
                 .divide(bigNanos)
                 .longValueExact();
 
-            log.info(
+            progressTracker.progressLogger().logMessage(
+                formatWithLocale(
                     "%s Store Scan (%s): Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
                     label,
                     scanner.getClass().getSimpleName(),
@@ -101,6 +109,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
                     (double) recordsImported / tookInSeconds / numberOfThreads,
                     humanReadable(bytesPerSecond / numberOfThreads),
                     bytesPerSecond / numberOfThreads
+                )
             );
         }
 

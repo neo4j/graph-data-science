@@ -25,8 +25,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Map;
 
@@ -48,8 +48,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     protected final CONFIG graphCreateConfig;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
-    // TODO use progress tracker here
-    protected final ProgressLogger progressLogger;
+    protected final ProgressTracker progressTracker;
 
     public GraphStoreFactory(
         CONFIG graphCreateConfig,
@@ -59,7 +58,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         this.graphCreateConfig = graphCreateConfig;
         this.loadingContext = loadingContext;
         this.dimensions = dimensions;
-        this.progressLogger = initProgressLogger();
+        this.progressTracker = initProgressTracker();
     }
 
     public abstract ImportResult<STORE> build();
@@ -74,7 +73,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         return dimensions;
     }
 
-    protected abstract ProgressLogger initProgressLogger();
+    protected abstract ProgressTracker initProgressTracker();
 
     @ValueClass
     public interface ImportResult<STORE extends GraphStore> {

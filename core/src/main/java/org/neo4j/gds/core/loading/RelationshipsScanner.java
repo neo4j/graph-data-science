@@ -20,12 +20,12 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
 
     public static InternalImporter.CreateScanner of(
         GraphLoaderContext loadingContext,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         IdMapping idMap,
         StoreScanner<RelationshipReference> scanner,
         Collection<SingleTypeRelationshipImporter.Builder> importerBuilders
@@ -52,7 +52,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         }
         return new RelationshipsScanner.Creator(
             loadingContext.transactionContext(),
-            progressLogger,
+            progressTracker,
             idMap,
             scanner,
             builders,
@@ -62,7 +62,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
 
     static final class Creator implements InternalImporter.CreateScanner {
         private final TransactionContext tx;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final IdMapping idMap;
         private final StoreScanner<RelationshipReference> scanner;
         private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
@@ -70,13 +70,13 @@ public final class RelationshipsScanner extends StatementAction implements Recor
 
         Creator(
                 TransactionContext tx,
-                ProgressLogger progressLogger,
+                ProgressTracker progressTracker,
                 IdMapping idMap,
                 StoreScanner<RelationshipReference> scanner,
                 List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
                 TerminationFlag terminationFlag) {
             this.tx = tx;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             this.idMap = idMap;
             this.scanner = scanner;
             this.importerBuilders = importerBuilders;
@@ -88,7 +88,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
             return new RelationshipsScanner(
                     tx,
                     terminationFlag,
-                    progressLogger,
+                    progressTracker,
                     idMap,
                     scanner,
                     index,
@@ -105,7 +105,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
     }
 
     private final TerminationFlag terminationFlag;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final IdMapping idMap;
     private final StoreScanner<RelationshipReference> scanner;
     private final int scannerIndex;
@@ -117,14 +117,14 @@ public final class RelationshipsScanner extends StatementAction implements Recor
     private RelationshipsScanner(
             TransactionContext tx,
             TerminationFlag terminationFlag,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             IdMapping idMap,
             StoreScanner<RelationshipReference> scanner,
             int threadIndex,
             List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
         super(tx);
         this.terminationFlag = terminationFlag;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.idMap = idMap;
         this.scanner = scanner;
         this.scannerIndex = threadIndex;
@@ -160,7 +160,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
                 }
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);
-                progressLogger.logProgress(importedRels);
+                progressTracker.progressLogger().logProgress(importedRels);
                 allImportedRels += importedRels;
                 allImportedWeights += importedWeights;
             }

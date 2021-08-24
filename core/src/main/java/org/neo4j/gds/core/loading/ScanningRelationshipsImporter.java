@@ -22,13 +22,13 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +43,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
     private final GraphCreateConfig graphCreateConfig;
     private final GraphLoaderContext loadingContext;
-    private final ProgressLogger progressLogger;
 
     private final IdMapping idMap;
     private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
@@ -53,7 +52,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         GraphCreateConfig graphCreateConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         IdMapping idMap,
         Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders,
         int concurrency
@@ -63,11 +62,11 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             "Relationship",
             loadingContext,
             dimensions,
+            progressTracker,
             concurrency
         );
         this.graphCreateConfig = graphCreateConfig;
         this.loadingContext = loadingContext;
-        this.progressLogger = progressLogger;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
         this.allRelationshipCounters = new HashMap<>();
@@ -105,7 +104,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
 
         return RelationshipsScanner.of(
             loadingContext,
-            progressLogger,
+            progressTracker,
             idMap,
             scanner,
             importerBuilders

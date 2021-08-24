@@ -22,22 +22,27 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.List;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
@@ -96,6 +101,25 @@ class GraphLoaderTest extends BaseTest {
             .withNodeProperties(multipleProperties)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1L, prop2: 42L})-->(b:Node2 {prop1: 42L, prop2: 2L})"), graph);
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var log = new TestLog();
+        new StoreLoaderBuilder()
+            .api(db)
+            .graphName("graph")
+            .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
+            .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))
+            .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
+            .log(log)
+            .build()
+            .graph();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .anyMatch(message -> message.matches("LOADING \\d\\d%"))
+            .anyMatch(message -> message.startsWith("LOADING Node Store Scan (NodeCursorBasedScanner): Imported 3 records and 1 properties"))
+            .anyMatch(message -> message.startsWith("LOADING Relationship Store Scan (RelationshipScanCursorBasedScanner): Imported 4 records and 0 properties"));
     }
 
     @AllGraphStoreFactoryTypesTest

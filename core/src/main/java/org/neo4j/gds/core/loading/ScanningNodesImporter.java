@@ -30,8 +30,8 @@ import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
@@ -50,7 +50,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
     private final GraphCreateFromStoreConfig graphCreateConfig;
-    private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
     private final IndexPropertyMappings.LoadablePropertyMappings properties;
     private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
@@ -65,22 +64,23 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         GraphCreateFromStoreConfig graphCreateConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
+        Log log,
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings properties,
         InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log()),
+            scannerFactory(loadingContext.transactionContext(), dimensions, log),
             "Node",
             loadingContext,
             dimensions,
+            progressTracker,
             concurrency
         );
 
         this.graphCreateConfig = graphCreateConfig;
-        this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
         this.properties = properties;
         this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
@@ -121,7 +121,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             transaction,
             scanner,
             dimensions.nodeLabelTokens(),
-            progressLogger,
+            progressTracker,
             new NodeImporter(
                 idMapBuilder,
                 labelInformationBuilder,
@@ -160,7 +160,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
         long indexStart = System.nanoTime();
-        progressLogger.logMessage("Property Index Scan :: Start");
+        progressTracker.progressLogger().logMessage("Property Index Scan :: Start");
 
         var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
         // In order to avoid a race between preparing the importers and the flag being toggled,
@@ -185,7 +185,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                     mappingAndIndex.property(),
                     mappingAndIndex.index(),
                     nodeMapping,
-                    progressLogger,
+                    progressTracker,
                     terminationFlag,
                     threadPool,
                     tracker
@@ -193,7 +193,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             ).collect(Collectors.toList());
 
         var expectedProperties = ((long) indexScanningImporters.size()) * nodeMapping.nodeCount();
-        var remainingVolume = progressLogger.reset(expectedProperties);
+        var remainingVolume = progressTracker.progressLogger().reset(expectedProperties);
 
         if (!parallelIndexScan) {
             // While we don't scan the index in parallel, try to at least scan all properties in parallel
@@ -222,13 +222,13 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
             .doubleValue();
 
-        progressLogger.logMessage(formatWithLocale(
+        progressTracker.progressLogger().logMessage(formatWithLocale(
             "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
             recordsImported,
             tookInSeconds,
             recordsPerSecond
         ));
-        progressLogger.reset(remainingVolume);
+        progressTracker.progressLogger().reset(remainingVolume);
     }
 
     @Nullable

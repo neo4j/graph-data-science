@@ -21,19 +21,19 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.StatementAction;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.core.utils.StatementAction;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -55,7 +55,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private final IndexDescriptor index;
     private final Optional<CompatIndexQuery> indexQuery;
     private final IdMapping idMap;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final @Nullable ExecutorService executorService;
     private final int propertyId;
@@ -70,7 +70,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         PropertyMapping mapping,
         IndexDescriptor index,
         IdMapping idMap,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         @Nullable ExecutorService executorService,
         AllocationTracker tracker
@@ -83,7 +83,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             index,
             Optional.empty(),
             idMap,
-            progressLogger,
+            progressTracker,
             terminationFlag,
             executorService,
             index.schema().getPropertyId(),
@@ -104,7 +104,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             from.index,
             Optional.of(indexQuery),
             from.idMap,
-            from.progressLogger,
+            from.progressTracker,
             from.terminationFlag,
             from.executorService,
             from.propertyId,
@@ -120,7 +120,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         IndexDescriptor index,
         Optional<CompatIndexQuery> indexQuery,
         IdMapping idMap,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         @Nullable ExecutorService executorService,
         int propertyId,
@@ -133,7 +133,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         this.index = index;
         this.indexQuery = indexQuery;
         this.idMap = idMap;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.executorService = executorService;
         this.propertyId = propertyId;
@@ -260,7 +260,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                     propertiesBuilder.set(nodeId, propertyValue);
                     imported += 1;
                     if ((imported & 0x1_FFFFL) == 0L) {
-                        progressLogger.logProgress(imported - logged);
+                        progressTracker.progressLogger().logProgress(imported - logged);
                         logged = imported;
                         terminationFlag.assertRunning();
                     }
