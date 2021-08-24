@@ -22,6 +22,8 @@ package org.neo4j.gds.beta.pregel;
 import com.squareup.javapoet.MethodSpec;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
+import org.neo4j.gds.pregel.proc.PregelStreamProc;
+import org.neo4j.gds.pregel.proc.PregelStreamResult;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;

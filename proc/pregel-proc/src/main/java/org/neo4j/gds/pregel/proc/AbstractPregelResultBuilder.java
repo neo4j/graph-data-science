@@ -17,20 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-@ValueClass
-interface Element {
+public abstract class AbstractPregelResultBuilder<RESULT> extends AbstractResultBuilder<RESULT> {
 
-    String propertyKey();
+    protected long ranIterations;
+    protected boolean didConverge;
 
-    @Value.Auxiliary
-    ValueType propertyType();
+    public AbstractPregelResultBuilder<RESULT> withRanIterations(long ranIterations) {
+        this.ranIterations = ranIterations;
+        return this;
+    }
 
-    @Value.Auxiliary
-    PregelSchema.Visibility visibility();
+    public AbstractPregelResultBuilder<RESULT> didConverge(boolean didConverge) {
+        this.didConverge = didConverge;
+        return this;
+    }
+
 }

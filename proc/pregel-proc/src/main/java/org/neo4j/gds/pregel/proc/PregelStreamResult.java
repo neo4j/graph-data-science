@@ -17,30 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.test;
+package org.neo4j.gds.pregel.proc;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import java.util.Map;
 
-import java.util.Optional;
+@SuppressWarnings("unused")
+public class PregelStreamResult {
+    public final long nodeId;
 
-@Configuration
-public interface TestPregelConfig extends PregelProcedureConfig {
+    public Map<String, Object> values;
 
-    @Value.Default
-    default boolean throwInCompute() {
-        return false;
-    }
-
-    static TestPregelConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+    public PregelStreamResult(long nodeId, Map<String, Object> values) {
+        this.nodeId = nodeId;
+        this.values = values;
     }
 }

@@ -10,4 +10,5 @@ dependencies {
     api project(':proc-common')
     api project(':test-utils')
     api project(':proc-catalog')
+    implementation project(':pregel')
 }

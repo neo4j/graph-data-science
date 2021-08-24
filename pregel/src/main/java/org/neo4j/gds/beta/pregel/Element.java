@@ -19,12 +19,18 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.StatsProc;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
-public abstract class PregelStatsProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelProcedureConfig>
-    extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
+@ValueClass
+public interface Element {
 
+    String propertyKey();
+
+    @Value.Auxiliary
+    ValueType propertyType();
+
+    @Value.Auxiliary
+    PregelSchema.Visibility visibility();
 }

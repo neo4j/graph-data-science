@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.beta.pregel.Element;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.beta.pregel.PregelSchema;
 
 import java.util.Map;
 import java.util.stream.Collectors;

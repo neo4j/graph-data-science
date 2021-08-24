@@ -22,6 +22,8 @@ package org.neo4j.gds.beta.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import org.neo4j.gds.pregel.proc.PregelWriteProc;
+import org.neo4j.gds.pregel.proc.PregelWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;

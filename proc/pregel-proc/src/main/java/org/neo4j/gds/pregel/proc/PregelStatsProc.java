@@ -17,23 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.pregel;
+package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 
-public abstract class AbstractPregelResultBuilder<RESULT> extends AbstractResultBuilder<RESULT> {
-
-    protected long ranIterations;
-    protected boolean didConverge;
-
-    public AbstractPregelResultBuilder<RESULT> withRanIterations(long ranIterations) {
-        this.ranIterations = ranIterations;
-        return this;
-    }
-
-    public AbstractPregelResultBuilder<RESULT> didConverge(boolean didConverge) {
-        this.didConverge = didConverge;
-        return this;
-    }
+public abstract class PregelStatsProc<
+    ALGO extends Algorithm<ALGO, PregelResult>,
+    CONFIG extends PregelProcedureConfig>
+    extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
 
 }
