@@ -60,7 +60,7 @@ public class ListProgressProc extends BaseProc {
 
     @Procedure("gds.beta.listProgressDetail")
     @Description("List detailed progress events for the specified job id.")
-    public Stream<JobProgressRow> listProgressDetail(
+    public Stream<JobProgressResult> listProgressDetail(
         @Name(value = "jobId") String jobId
     ) {
         var progressEvent = progress.query(username(), JobId.fromString(jobId));
@@ -131,37 +131,37 @@ public class ListProgressProc extends BaseProc {
         }
     }
 
-    public static class JobProgressRow extends CommonProgressResult {
+    public static class JobProgressResult extends CommonProgressResult {
         public String taskName;
         public String progressBar;
 
-        public JobProgressRow(Task task, String taskName, String progressBar) {
+        public JobProgressResult(Task task, String taskName, String progressBar) {
             super(task);
             this.taskName = taskName;
             this.progressBar = progressBar;
         }
 
-        static JobProgressRow fromTaskWithDepth(Task task, int depth) {
+        static JobProgressResult fromTaskWithDepth(Task task, int depth) {
             var progressContainer = task.getProgress();
             var volume = progressContainer.volume();
             var progress = progressContainer.progress();
 
             var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
             var progressBar = StructuredOutputHelper.progressBar(progress, volume, PROGRESS_BAR_LENGTH);
-            return new JobProgressRow(task, treeViewTaskName, progressBar);
+            return new JobProgressResult(task, treeViewTaskName, progressBar);
         }
 
     }
 
     public static class JobProgressVisitor extends DepthAwareTaskVisitor {
 
-        private final List<JobProgressRow> progressRows;
+        private final List<JobProgressResult> progressRows;
 
         JobProgressVisitor() {
             this.progressRows = new ArrayList<>();
         }
 
-        List<JobProgressRow> progressRows() {
+        List<JobProgressResult> progressRows() {
             return this.progressRows;
         }
 
@@ -181,7 +181,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private void addProgressRow(Task task) {
-            progressRows.add(JobProgressRow.fromTaskWithDepth(task, depth()));
+            progressRows.add(JobProgressResult.fromTaskWithDepth(task, depth()));
         }
     }
 }
