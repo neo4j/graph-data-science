@@ -41,7 +41,6 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;

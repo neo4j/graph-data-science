@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.LongPredicate;
 
 /**
