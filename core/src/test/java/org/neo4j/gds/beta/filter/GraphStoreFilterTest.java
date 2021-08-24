@@ -22,12 +22,10 @@ package org.neo4j.gds.beta.filter;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestLog;
-import org.neo4j.gds.core.loading.construction.TestMethodRunner;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.GraphStore;
@@ -42,9 +40,10 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
-import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.logging.NullLog;
@@ -355,7 +354,7 @@ class GraphStoreFilterTest {
                 .averageDegree(10)
                 .seed(42)
                 .nodeLabelProducer(nodeId ->
-                    (nodeId % 2 == 0)
+                    (nodeId % 3 == 0)
                         ? new NodeLabel[]{NodeLabel.of("A")}
                         : new NodeLabel[]{NodeLabel.of("B")}
                 )
@@ -389,27 +388,15 @@ class GraphStoreFilterTest {
 
             GraphStoreFilter.filter(
                 graphStore,
-                config("n:A", "*", 1),
+                config("n:B", "*", 1),
                 Pools.DEFAULT,
                 log,
                 AllocationTracker.empty()
             );
 
-            if (IdMapImplementations.useBitIdMap()) {
-                assertThat(log.getMessages(TestLog.INFO))
-                    // avoid asserting on the thread id
-                    .extracting(removingThreadId())
-                    .contains(
-                        "GraphStore Filter :: Prepare node ids :: Start",
-                        "GraphStore Filter :: Prepare node ids :: Create id array :: Start",
-                        "GraphStore Filter :: Prepare node ids :: Create id array :: Finished",
-                        "GraphStore Filter :: Prepare node ids :: Sort id array :: Start",
-                        "GraphStore Filter :: Prepare node ids :: Sort id array :: Finished",
-                        "GraphStore Filter :: Prepare node ids :: Finished"
-                    );
-            }
+            var messages = log.getMessages(TestLog.INFO);
 
-            assertThat(log.getMessages(TestLog.INFO))
+            assertThat(messages)
                 // avoid asserting on the thread id
                 .extracting(removingThreadId())
                 .contains(
@@ -418,21 +405,11 @@ class GraphStoreFilterTest {
                     "GraphStore Filter :: Nodes 100%",
                     "GraphStore Filter :: Nodes :: Finished",
                     "GraphStore Filter :: Node properties :: Start",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Start",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 1 of 2 :: Start",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 1 of 2 98%",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 1 of 2 :: Finished",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 2 of 2 :: Start",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 2 of 2 98%",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Property 2 of 2 :: Finished",
-                    "GraphStore Filter :: Node properties :: Label 1 of 1 :: Finished",
+                    "GraphStore Filter :: Node properties 32%",
                     "GraphStore Filter :: Node properties :: Finished",
-                    "GraphStore Filter :: Relationship types 1 of 2 :: Start",
-                    "GraphStore Filter :: Relationship types 1 of 2 87%",
-                    "GraphStore Filter :: Relationship types 1 of 2 :: Finished",
-                    "GraphStore Filter :: Relationship types 2 of 2 :: Start",
-                    "GraphStore Filter :: Relationship types 2 of 2 86%",
-                    "GraphStore Filter :: Relationship types 2 of 2 :: Finished",
+                    "GraphStore Filter :: Relationships :: Start",
+                    "GraphStore Filter :: Relationships 92%",
+                    "GraphStore Filter :: Relationships :: Finished",
                     "GraphStore Filter :: Finished"
                 );
         });

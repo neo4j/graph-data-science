@@ -34,10 +34,11 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.ArrayList;
@@ -50,7 +51,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class RelationshipsFilter {
 
@@ -69,23 +69,15 @@ final class RelationshipsFilter {
         NodeMapping outputNodes,
         int concurrency,
         ExecutorService executorService,
-        ProgressLogger progressLogger,
+        TaskProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
 
-        var relTypeCount = graphStore.relationshipTypes().size();
-        var current = 1;
+        progressTracker.beginSubTask();
 
         for (RelationshipType relType : graphStore.relationshipTypes()) {
-            var taskMessage = formatWithLocale(
-                "Relationship types %d of %d",
-                current++,
-                relTypeCount
-            );
-
-            progressLogger.startSubTask(taskMessage).reset(graphStore.relationshipCount(relType));
 
             var outputRelationships = filterRelationshipType(
                 graphStore,
@@ -95,7 +87,7 @@ final class RelationshipsFilter {
                 relType,
                 concurrency,
                 executorService,
-                progressLogger,
+                progressTracker,
                 allocationTracker
             );
 
@@ -122,9 +114,9 @@ final class RelationshipsFilter {
             });
 
             relPropertyStores.put(relType, propertyStoreBuilder.build());
-
-            progressLogger.finishSubTask(taskMessage);
         }
+
+        progressTracker.endSubTask();
 
         return ImmutableFilteredRelationships.builder()
             .topology(topologies)
@@ -149,7 +141,7 @@ final class RelationshipsFilter {
         RelationshipType relType,
         int concurrency,
         ExecutorService executorService,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
         var propertyKeys = new ArrayList<>(graphStore.relationshipPropertyKeys(relType));
@@ -183,7 +175,7 @@ final class RelationshipsFilter {
                 relationshipsBuilder,
                 relType,
                 propertyIndices,
-                progressLogger
+                progressTracker
             ),
             Optional.empty()
         );
@@ -212,7 +204,7 @@ final class RelationshipsFilter {
         private final Partition partition;
         private final Expression expression;
         private final EvaluationContext.RelationshipEvaluationContext evaluationContext;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final CompositeRelationshipIterator relationshipIterator;
         private final NodeMapping inputNodes;
         private final NodeMapping outputNodes;
@@ -228,7 +220,7 @@ final class RelationshipsFilter {
             RelationshipsBuilder relationshipsBuilder,
             RelationshipType relType,
             Map<String, Integer> propertyIndices,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.partition = partition;
             this.expression = expression;
@@ -238,7 +230,7 @@ final class RelationshipsFilter {
             this.relationshipsBuilder = relationshipsBuilder;
             this.relType = relType;
             this.evaluationContext = new EvaluationContext.RelationshipEvaluationContext(propertyIndices);
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -269,7 +261,7 @@ final class RelationshipsFilter {
                     return true;
                 });
 
-                progressLogger.logProgress(relationshipIterator.degree(node));
+                progressTracker.logProgress(relationshipIterator.degree(node));
             });
         }
     }

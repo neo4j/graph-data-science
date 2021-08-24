@@ -31,10 +31,12 @@ import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
@@ -49,23 +51,39 @@ public final class GraphStoreFilter {
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
-        var inputNodes = graphStore.nodes();
+        var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
 
-        // TODO use TaskProgressTracker here
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            Tasks.leaf("GraphStore Filter", inputNodes.nodeCount()),
-            config.concurrency()
+        var nodesTask = Tasks.leaf("Nodes", graphStore.nodeCount());
+        var nodePropertiesTask = Tasks.leaf(
+            "Node properties",
+            graphStore.nodeCount() * nodePropertyCount
+        );
+        var relationshipsTask = Tasks.leaf("Relationships", graphStore.relationshipCount());
+
+        var task = Tasks.task(
+            "GraphStore Filter",
+            nodesTask,
+            nodePropertiesTask,
+            relationshipsTask
         );
 
-        progressLogger.logStart();
+        var inputNodes = graphStore.nodes();
+
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            task,
+            config.concurrency()
+        );
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
+
+        progressTracker.beginSubTask();
 
         var filteredNodes = NodesFilter.filterNodes(
             graphStore,
             expressions.nodeExpression(),
             config.concurrency(),
             executorService,
-            progressLogger,
+            progressTracker,
             tracker
         );
 
@@ -76,11 +94,11 @@ public final class GraphStoreFilter {
             filteredNodes.nodeMapping(),
             config.concurrency(),
             executorService,
-            progressLogger,
+            progressTracker,
             tracker
         );
 
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
 
         return CSRGraphStore.of(
             graphStore.databaseId(),

@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.filter;
 
 import com.carrotsearch.hppc.AbstractIterator;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
@@ -43,12 +42,12 @@ import org.neo4j.gds.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder
 import org.neo4j.gds.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -59,7 +58,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.paged.SparseLongArray.SUPER_BLOCK_SHIFT;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class NodesFilter {
 
@@ -75,7 +73,7 @@ final class NodesFilter {
         Expression expression,
         int concurrency,
         ExecutorService executorService,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
         // Depending on the type of the id map we need to construct
@@ -99,7 +97,6 @@ final class NodesFilter {
             .tracker(allocationTracker);
 
         if (IdMapImplementations.useBitIdMap()) {
-            progressLogger.startSubTask("Prepare node ids");
             // If we need to construct a BitIdMap, we need to make
             // sure that each thread processes a disjoint, ordered
             // subset of original node ids. We therefore produce a
@@ -108,7 +105,6 @@ final class NodesFilter {
                 graphStore,
                 concurrency,
                 executorService,
-                progressLogger,
                 allocationTracker
             );
             // Each thread processes a non-overlapping, consecutive
@@ -133,7 +129,6 @@ final class NodesFilter {
                 partition -> partition
             );
 
-            progressLogger.finishSubTask("Prepare node ids");
         } else {
             // If we need to construct a regular IdMap, we can just
             // delegate to the input node id mapping and use the
@@ -155,24 +150,24 @@ final class NodesFilter {
             originalIdFunction,
             internalIdFunction,
             nodesBuilder,
-            progressLogger
+            progressTracker
         );
 
-        progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
+        progressTracker.beginSubTask();
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
-        progressLogger.finishSubTask("Nodes");
+        progressTracker.endSubTask();
 
         var nodeMappingAndProperties = nodesBuilder.build();
         var filteredNodeMapping = nodeMappingAndProperties.nodeMapping();
 
-        progressLogger.startSubTask("Node properties");
+        progressTracker.beginSubTask();
         var filteredNodePropertyStores = filterNodeProperties(
             filteredNodeMapping,
             graphStore,
             concurrency,
-            progressLogger
+            progressTracker
         );
-        progressLogger.finishSubTask("Node properties");
+        progressTracker.endSubTask();
 
         return ImmutableFilteredNodes.builder()
             .nodeMapping(filteredNodeMapping)
@@ -184,10 +179,8 @@ final class NodesFilter {
         GraphStore graphStore,
         int concurrency,
         ExecutorService executorService,
-        ProgressLogger progressLogger,
         AllocationTracker allocationTracker
     ) {
-        progressLogger.startSubTask("Create id array");
         var originalIds = HugeLongArray.newArray(graphStore.nodeCount(), allocationTracker);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -199,11 +192,8 @@ final class NodesFilter {
             Optional.empty()
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
-        progressLogger.finishSubTask("Create id array");
 
-        progressLogger.startSubTask("Sort id array");
         HugeMergeSort.sort(originalIds, concurrency, allocationTracker);
-        progressLogger.finishSubTask("Sort id array");
 
         return originalIds;
     }
@@ -212,11 +202,8 @@ final class NodesFilter {
         NodeMapping filteredNodeMapping,
         GraphStore inputGraphStore,
         int concurrency,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        var totalLabelCount = filteredNodeMapping.availableNodeLabels().size();
-        var current = new MutableInt(1);
-
         return filteredNodeMapping
             .availableNodeLabels()
             .stream()
@@ -225,24 +212,16 @@ final class NodesFilter {
                 nodeLabel -> {
                     var propertyKeys = inputGraphStore.nodePropertyKeys(nodeLabel);
 
-                    var taskName = formatWithLocale("Label %d of %d", current.getAndIncrement(), totalLabelCount);
-                    progressLogger.startSubTask(taskName);
-
-                    var nodePropertyStore = createNodePropertyStore(
+                    return createNodePropertyStore(
                         inputGraphStore,
                         filteredNodeMapping,
                         nodeLabel,
                         propertyKeys,
                         concurrency,
-                        progressLogger
+                        progressTracker
                     );
-
-                    progressLogger.finishSubTask(taskName);
-
-                    return nodePropertyStore;
                 }
-                )
-            );
+            ));
     }
 
     private static NodePropertyStore createNodePropertyStore(
@@ -251,16 +230,13 @@ final class NodesFilter {
         NodeLabel nodeLabel,
         Collection<String> propertyKeys,
         int concurrency,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var builder = NodePropertyStore.builder();
         var filteredNodeCount = filteredMapping.nodeCount();
         var inputMapping = inputGraphStore.nodes();
 
         var allocationTracker = AllocationTracker.empty();
-
-        var propertyCount = propertyKeys.size();
-        var current = new MutableInt(1);
 
         propertyKeys.forEach(propertyKey -> {
             var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);
@@ -272,20 +248,15 @@ final class NodesFilter {
                 nodeProperties
             );
 
-            var taskMessage = formatWithLocale("Property %d of %d", current.getAndIncrement(), propertyCount);
-            progressLogger.startSubTask(taskMessage).reset(filteredNodeCount);
-
             ParallelUtil.parallelForEachNode(
                 filteredNodeCount,
                 concurrency,
                 filteredNode -> {
                     var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);
-                    progressLogger.logProgress();
+                    progressTracker.logProgress();
                 }
             );
-
-            progressLogger.finishSubTask(taskMessage);
 
             builder.putNodeProperty(
                 propertyKey,
@@ -388,7 +359,7 @@ final class NodesFilter {
         private final Partition partition;
         private final Expression expression;
         private final EvaluationContext.NodeEvaluationContext nodeContext;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final GraphStore graphStore;
         private final LongToLongFunction originalIdFunction;
         private final LongToLongFunction internalIdFunction;
@@ -401,7 +372,7 @@ final class NodesFilter {
             LongToLongFunction originalIdFunction,
             LongToLongFunction internalIdFunction,
             NodesBuilder nodesBuilder,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             return new AbstractIterator<>() {
                 @Override
@@ -417,7 +388,7 @@ final class NodesFilter {
                         originalIdFunction,
                         internalIdFunction,
                         nodesBuilder,
-                        progressLogger
+                        progressTracker
                     );
                 }
             };
@@ -430,7 +401,7 @@ final class NodesFilter {
             LongToLongFunction originalIdFunction,
             LongToLongFunction internalIdFunction,
             NodesBuilder nodesBuilder,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.partition = partition;
             this.expression = expression;
@@ -439,7 +410,7 @@ final class NodesFilter {
             this.internalIdFunction = internalIdFunction;
             this.nodesBuilder = nodesBuilder;
             this.nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -455,7 +426,7 @@ final class NodesFilter {
                     NodeLabel[] labels = nodeMapping.nodeLabels(internalId).toArray(NodeLabel[]::new);
                     nodesBuilder.addNode(originalId, labels);
                 }
-                progressLogger.logProgress();
+                progressTracker.logProgress();
             });
         }
     }
