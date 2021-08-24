@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
@@ -36,12 +37,16 @@ import org.neo4j.procedure.Procedure;
 import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
+import org.neo4j.values.storable.DurationValue;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 public class ListProgressDetailProcTest extends BaseTest {
 
@@ -78,14 +83,49 @@ public class ListProgressDetailProcTest extends BaseTest {
         );
         assertCypherResult(
             "CALL gds.beta.listProgressDetail('" + jobIdRef.get().asString() + "')" +
-            "YIELD taskName, progressBar, progress " +
-            "RETURN taskName, progressBar, progress ",
+            "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status " +
+            "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status ",
             List.of(
-                Map.of("taskName", "|-- root", "progressBar", "[####~~~~~~]", "progress", "42.86%"),
-                Map.of("taskName", "    |-- iterative", "progressBar", "[#######~~~]", "progress", "75%"),
-                Map.of("taskName", "        |-- leafIterative", "progressBar", "[##########]", "progress", "100%"),
-                Map.of("taskName", "        |-- leafIterative", "progressBar", "[#####~~~~~]", "progress", "50%"),
-                Map.of("taskName", "    |-- leaf", "progressBar", "[~~~~~~~~~~]", "progress", "0%")
+                Map.of(
+                    "taskName", "|-- root",
+                    "progressBar", "[####~~~~~~]",
+                    "progress", "42.86%",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class),
+                    "status", Status.RUNNING.name()
+                ),
+                Map.of(
+                    "taskName", "    |-- iterative",
+                    "progressBar", "[#######~~~]",
+                    "progress", "75%",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class),
+                    "status", Status.RUNNING.name()
+                ),
+                Map.of(
+                    "taskName", "        |-- leafIterative",
+                    "progressBar", "[##########]",
+                    "progress", "100%",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class),
+                    "status", Status.FINISHED.name()
+                ),
+                Map.of(
+                    "taskName", "        |-- leafIterative",
+                    "progressBar", "[#####~~~~~]",
+                    "progress", "50%",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class),
+                    "status", Status.RUNNING.name()
+                ),
+                Map.of(
+                    "taskName", "    |-- leaf",
+                    "progressBar", "[~~~~~~~~~~]",
+                    "progress", "0%",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class),
+                    "status", Status.PENDING.name()
+                )
             )
         );
     }

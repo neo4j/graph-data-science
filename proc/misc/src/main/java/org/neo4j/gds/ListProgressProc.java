@@ -66,28 +66,26 @@ public class ListProgressProc extends BaseProc {
         return new JobProgressResult(progress.query(username(), JobId.fromString(jobId))).stream();
     }
 
-    @SuppressWarnings("unused")
-    public static class ProgressResult {
-
-        public String id;
-        public String taskName;
-        public String stage;
+    public static class CommonProgressResult {
         public String progress;
         public String status;
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
 
-        ProgressResult(ProgressEvent progressEvent) {
-            var task = progressEvent.task();
-            var progress = task.getProgress();
+        public CommonProgressResult(Task task) {
+            var progressContainer = task.getProgress();
 
-            this.id = progressEvent.jobId().asString();
-            this.taskName = task.description();
-            this.stage = computeStage(task);
-            this.progress = StructuredOutputHelper.computeProgress(progress.progress(), progress.volume());
+            this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
             this.elapsedTime = computeElapsedTime(task);
+        }
+
+        private LocalTimeValue localTimeValue(Task task) {
+            return LocalTimeValue.localTime(LocalTime.ofInstant(
+                Instant.ofEpochMilli(task.startTime()),
+                ZoneId.systemDefault()
+            ));
         }
 
         private DurationValue computeElapsedTime(Task baseTask) {
@@ -99,6 +97,23 @@ public class ListProgressProc extends BaseProc {
             var duration = Duration.ofMillis(elapsedTime);
             return DurationValue.duration(duration);
         }
+    }
+
+    @SuppressWarnings("unused")
+    public static class ProgressResult extends CommonProgressResult {
+
+        public String id;
+        public String taskName;
+        public String stage;
+
+        ProgressResult(ProgressEvent progressEvent) {
+            super(progressEvent.task());
+
+            var task = progressEvent.task();
+            this.id = progressEvent.jobId().asString();
+            this.taskName = task.description();
+            this.stage = computeStage(task);
+        }
 
         private String computeStage(Task baseTask) {
             var subTaskCountingVisitor = new SubTaskCountingVisitor();
@@ -109,13 +124,6 @@ public class ListProgressProc extends BaseProc {
             return subTaskCountingVisitor.containsUnresolvedOpenTask()
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
-        }
-
-        private LocalTimeValue localTimeValue(Task task) {
-            return LocalTimeValue.localTime(LocalTime.ofInstant(
-                Instant.ofEpochMilli(task.startTime()),
-                ZoneId.systemDefault()
-            ));
         }
     }
 
@@ -135,15 +143,14 @@ public class ListProgressProc extends BaseProc {
         }
     }
 
-    public static class JobProgressRow {
+    public static class JobProgressRow extends CommonProgressResult {
         public String taskName;
         public String progressBar;
-        public String progress;
 
-        public JobProgressRow(String taskName, String progressBar, String progress) {
+        public JobProgressRow(Task task, String taskName, String progressBar) {
+            super(task);
             this.taskName = taskName;
             this.progressBar = progressBar;
-            this.progress = progress;
         }
 
         static JobProgressRow fromTaskWithDepth(Task task, int depth) {
@@ -153,8 +160,7 @@ public class ListProgressProc extends BaseProc {
 
             var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
             var progressBar = StructuredOutputHelper.progressBar(progress, volume, PROGRESS_BAR_LENGTH);
-            var progressString = StructuredOutputHelper.computeProgress(progress, volume);
-            return new JobProgressRow(treeViewTaskName, progressBar, progressString);
+            return new JobProgressRow(task, treeViewTaskName, progressBar);
         }
 
     }
