@@ -28,7 +28,7 @@ public final class TaskTraversal {
     }
 
     private static void visitPreOrderWithDepth(Task task, DepthAwareTaskVisitor visitor, int depth) {
-        visitor.depth = depth;
+        visitor.setDepth(depth);
         task.visit(visitor);
         task.subTasks().forEach(subTask -> visitPreOrderWithDepth(subTask, visitor, depth + 1));
     }

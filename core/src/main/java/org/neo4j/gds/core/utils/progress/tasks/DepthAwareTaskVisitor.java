@@ -20,5 +20,13 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 public abstract class DepthAwareTaskVisitor implements TaskVisitor {
-    protected int depth;
+    private int depth;
+
+    void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public int depth() {
+        return this.depth;
+    }
 }

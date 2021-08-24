@@ -59,7 +59,7 @@ class TaskTraversalTest {
         }
 
         private void storeDepthInformation() {
-            depthInformation.add(depth);
+            depthInformation.add(depth());
         }
     }
 

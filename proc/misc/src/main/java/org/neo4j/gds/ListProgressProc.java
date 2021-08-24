@@ -193,7 +193,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private void addProgressRow(Task task) {
-            progressRows.add(JobProgressRow.fromTaskWithDepth(task, depth));
+            progressRows.add(JobProgressRow.fromTaskWithDepth(task, depth()));
         }
     }
 }
