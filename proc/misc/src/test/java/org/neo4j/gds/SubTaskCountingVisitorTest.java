@@ -33,7 +33,7 @@ public class SubTaskCountingVisitorTest {
         var leaf1 = Tasks.leaf("leaf1");
         var baseTask = Tasks.task("base", leaf1, Tasks.leaf("leaf2"));
 
-        var subTaskCountingVisitor = new ListProgressProc.SubTaskCountingVisitor();
+        var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
 
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(3);
@@ -55,7 +55,7 @@ public class SubTaskCountingVisitorTest {
             Tasks.iterativeFixed("iterative", () -> List.of(Tasks.leaf("leaf1"), Tasks.leaf("leaf2")), 2)
         );
 
-        var subTaskCountingVisitor = new ListProgressProc.SubTaskCountingVisitor();
+        var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
 
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(6);
@@ -80,7 +80,7 @@ public class SubTaskCountingVisitorTest {
     void shouldDetectOpenIterativeTask() {
         var baseTask = Tasks.iterativeOpen("open", () -> List.of(Tasks.leaf("leaf")));
 
-        var subTaskCountingVisitor = new ListProgressProc.SubTaskCountingVisitor();
+        var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
 
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(1);
@@ -97,7 +97,7 @@ public class SubTaskCountingVisitorTest {
         leafTask.finish();
         baseTask.finish();
 
-        var subTaskCountingVisitor = new ListProgressProc.SubTaskCountingVisitor();
+        var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
 
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(2);
