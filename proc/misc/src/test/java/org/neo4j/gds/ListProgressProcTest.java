@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -155,11 +154,12 @@ public class ListProgressProcTest extends BaseTest {
                 r -> r.stream().collect(Collectors.toList())
             );
 
-            assertThat(result).hasSize(1)
-                .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-                .containsExactlyInAnyOrderEntriesOf(
+            assertCypherResult(
+                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, stage, progress",
+                List.of(
                     Map.of("taskName", "FastRP", "stage", "6 of 6", "progress", "100%")
-                );
+                )
+            );
         }
     }
 

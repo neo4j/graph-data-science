@@ -89,7 +89,6 @@ public class ListProgressProc extends BaseProc {
             baseTask.visit(subTaskCountingVisitor);
 
             String stageTemplate = "%s of %s";
-            String stageResult;
 
             return subTaskCountingVisitor.containsUnresolvedOpenTask()
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
