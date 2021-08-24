@@ -35,7 +35,7 @@ import java.io.IOException;
 public final class GraphSageModelSerializer implements ModelSerializer {
 
     @Override
-    public GeneratedMessageV3 toSerializable(Object data) throws IOException {
+    public GeneratedMessageV3 toSerializable(Object data) {
         var modelData = (ModelData) data;
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < modelData.layers().length; i++) {

@@ -57,7 +57,7 @@ final class ProgressEventComponent extends LifecycleAdapter implements ThrowingF
     }
 
     @Override
-    public void start() throws Exception {
+    public void start() {
         globalMonitors.addMonitorListener(loggingMonitor);
         progressEventHandler = new ProgressEventHandlerImpl(monitor, jobScheduler, messageQueue);
         progressEventHandler.registerProgressEventListener(progressEventStore);
@@ -66,7 +66,7 @@ final class ProgressEventComponent extends LifecycleAdapter implements ThrowingF
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         progressEventHandler.stop();
         progressEventHandler = null;
         globalMonitors.removeMonitorListener(loggingMonitor);

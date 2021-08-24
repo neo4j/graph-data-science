@@ -392,7 +392,7 @@
         <Bug pattern="AI_ANNOTATION_ISSUES_NEEDS_NULLABLE"/>
     </Match>
     <Match>
-        <Bug pattern="BED_BOGUS_EXCEPTION_DECLARATION"/>
+        <Source name="~.*_jcstress.java$"/>
     </Match>
     <Match>
         <Bug pattern="BL_BURYING_LOGIC"/>

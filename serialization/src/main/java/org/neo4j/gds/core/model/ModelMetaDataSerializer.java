@@ -29,13 +29,11 @@ import org.neo4j.gds.core.model.proto.ModelProto;
 import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 
-import java.io.IOException;
-
 public final class ModelMetaDataSerializer {
 
     private ModelMetaDataSerializer() {}
 
-    public static ModelProto.ModelMetaData toSerializable(Model<?, ?, ?> model) throws IOException {
+    public static ModelProto.ModelMetaData toSerializable(Model<?, ?, ?> model) {
         var builder = ModelProto.ModelMetaData.newBuilder();
         serializableTrainConfig(model, builder);
         serializeCustomInfo(model, builder);
