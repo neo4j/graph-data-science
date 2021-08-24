@@ -33,6 +33,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
+import org.neo4j.logging.Log;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -64,13 +65,14 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        Log log,
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings properties,
         InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(loadingContext.transactionContext(), dimensions, progressTracker),
+            scannerFactory(loadingContext.transactionContext(), dimensions, log),
             "Node",
             loadingContext,
             dimensions,
@@ -88,13 +90,13 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     private static StoreScanner.Factory<NodeReference> scannerFactory(
         TransactionContext transaction,
         GraphDimensions dimensions,
-        ProgressTracker progressTracker
+        Log log
     ) {
         var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
         int[] labelIds = tokenNodeLabelMapping.keys().toArray();
-        return NodeScannerFactory.create(transaction, labelIds, progressTracker);
+        return NodeScannerFactory.create(transaction, labelIds, log);
     }
 
     @Override
