@@ -76,20 +76,16 @@ public class ListProgressDetailProcTest extends BaseTest {
             "CALL gds.beta.listProgress() YIELD id RETURN id",
             row -> jobIdRef.set(JobId.fromString(row.getString("id")))
         );
-//        System.out.println(runQuery(
-//            "CALL gds.beta.listProgressDetail('" + jobIdRef.get().asString() + "') YIELD taskName RETURN taskName ",
-//            Result::resultAsString
-//        ));
         assertCypherResult(
             "CALL gds.beta.listProgressDetail('" + jobIdRef.get().asString() + "')" +
-            "YIELD taskName " +
-            "RETURN taskName ",
+            "YIELD taskName, progressBar, progress " +
+            "RETURN taskName, progressBar, progress ",
             List.of(
-                Map.of("taskName", "|-- root"),
-                Map.of("taskName", "    |-- iterative"),
-                Map.of("taskName", "        |-- leafIterative"),
-                Map.of("taskName", "        |-- leafIterative"),
-                Map.of("taskName", "    |-- leaf")
+                Map.of("taskName", "|-- root", "progressBar", "[####~~~~~~]", "progress", "42.86%"),
+                Map.of("taskName", "    |-- iterative", "progressBar", "[#######~~~]", "progress", "75%"),
+                Map.of("taskName", "        |-- leafIterative", "progressBar", "[##########]", "progress", "100%"),
+                Map.of("taskName", "        |-- leafIterative", "progressBar", "[#####~~~~~]", "progress", "50%"),
+                Map.of("taskName", "    |-- leaf", "progressBar", "[~~~~~~~~~~]", "progress", "0%")
             )
         );
     }

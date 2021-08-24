@@ -34,23 +34,20 @@ import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.LocalTimeValue;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.StructuredOutputHelper.UNKNOWN;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ListProgressProc extends BaseProc {
 
-    static final String TASK_BRANCH_TOKEN = "|-- ";
-    static final String TASK_LEVEL_INDENTATION = "    ";
+    static final int PROGRESS_BAR_LENGTH = 10;
 
     @Context
     public ProgressEventStore progress;
@@ -72,8 +69,6 @@ public class ListProgressProc extends BaseProc {
     @SuppressWarnings("unused")
     public static class ProgressResult {
 
-        private static final String UNKNOWN = "n/a";
-
         public String id;
         public String taskName;
         public String stage;
@@ -83,11 +78,13 @@ public class ListProgressProc extends BaseProc {
         public DurationValue elapsedTime;
 
         ProgressResult(ProgressEvent progressEvent) {
-            this.id = progressEvent.jobId().asString();
             var task = progressEvent.task();
+            var progress = task.getProgress();
+
+            this.id = progressEvent.jobId().asString();
             this.taskName = task.description();
             this.stage = computeStage(task);
-            this.progress = computeProgress(task);
+            this.progress = StructuredOutputHelper.computeProgress(progress.progress(), progress.volume());
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
             this.elapsedTime = computeElapsedTime(task);
@@ -112,20 +109,6 @@ public class ListProgressProc extends BaseProc {
             return subTaskCountingVisitor.containsUnresolvedOpenTask()
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
-        }
-
-        private String computeProgress(Task baseTask) {
-            var progressContainer = baseTask.getProgress();
-            var volume = progressContainer.volume();
-            var progress = progressContainer.progress();
-
-            if (volume == Task.UNKNOWN_VOLUME) {
-                return UNKNOWN;
-            }
-
-            var progressPercentage = (double) progress / (double) volume;
-            var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-            return decimalFormat.format(progressPercentage);
         }
 
         private LocalTimeValue localTimeValue(Task task) {
@@ -154,10 +137,26 @@ public class ListProgressProc extends BaseProc {
 
     public static class JobProgressRow {
         public String taskName;
+        public String progressBar;
+        public String progress;
 
-        public JobProgressRow(String taskName) {
+        public JobProgressRow(String taskName, String progressBar, String progress) {
             this.taskName = taskName;
+            this.progressBar = progressBar;
+            this.progress = progress;
         }
+
+        static JobProgressRow fromTaskWithDepth(Task task, int depth) {
+            var progressContainer = task.getProgress();
+            var volume = progressContainer.volume();
+            var progress = progressContainer.progress();
+
+            var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
+            var progressBar = StructuredOutputHelper.progressBar(progress, volume, PROGRESS_BAR_LENGTH);
+            var progressString = StructuredOutputHelper.computeProgress(progress, volume);
+            return new JobProgressRow(treeViewTaskName, progressBar, progressString);
+        }
+
     }
 
     public static class JobProgressVisitor extends DepthAwareTaskVisitor {
@@ -188,14 +187,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private void addProgressRow(Task task) {
-            String treeViewTaskName = treeViewTaskName(task);
-            progressRows.add(new JobProgressRow(treeViewTaskName));
-        }
-
-        private String treeViewTaskName(Task task) {
-            return TASK_LEVEL_INDENTATION.repeat(depth) +
-                   TASK_BRANCH_TOKEN +
-                   task.description();
+            progressRows.add(JobProgressRow.fromTaskWithDepth(task, depth));
         }
     }
 }
