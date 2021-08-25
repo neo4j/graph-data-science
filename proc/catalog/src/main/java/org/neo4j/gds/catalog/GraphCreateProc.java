@@ -211,7 +211,8 @@ public class GraphCreateProc extends CatalogProc {
             config,
             Pools.DEFAULT,
             log,
-            allocationTracker()
+            allocationTracker(),
+            progressEventTracker
         );
 
         GraphStoreCatalog.set(config, graphStore);
