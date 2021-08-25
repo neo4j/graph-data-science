@@ -32,11 +32,13 @@ import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 public class BaseProgressTest extends BaseTest {
 
     protected final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
+    protected static final OptionalLong MAX_MEMORY_USAGE = OptionalLong.of(10);
 
     @Override
     @ExtensionCallback
@@ -55,10 +57,14 @@ public class BaseProgressTest extends BaseTest {
 
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(
-            @Name(value = "taskName") String taskName
+            @Name(value = "taskName") String taskName,
+            @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation
         ) {
             var leaf = Tasks.leaf("leaf", 3);
             var baseTask = Tasks.task(taskName, leaf);
+            if (withMemoryEstimation) {
+                baseTask.setMaxMemoryUsage(MAX_MEMORY_USAGE);
+            }
             baseTask.start();
             progress.addTaskProgressEvent(baseTask);
             leaf.start();

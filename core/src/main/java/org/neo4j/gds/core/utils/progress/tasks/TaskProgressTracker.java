@@ -61,6 +61,11 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public Task baseTask() {
+        return baseTask;
+    }
+
+    @Override
     public void beginSubTask() {
         var nextTask = currentTask.map(task -> {
             nestedTasks.add(task);

@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -202,7 +203,7 @@ public abstract class AlgoBaseProc<
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
 
-        validateMemoryUsageIfImplemented(config);
+        var maybeMaxMemoryUsage = validateMemoryUsageIfImplemented(config);
 
         GraphStore graphStore;
         Graph graph;
@@ -225,6 +226,8 @@ public abstract class AlgoBaseProc<
         }
 
         ALGO algo = newAlgorithm(graph, config, tracker);
+
+        algo.progressTracker.baseTask().setMaxMemoryUsage(maybeMaxMemoryUsage);
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",
@@ -374,15 +377,15 @@ public abstract class AlgoBaseProc<
             );
     }
 
-    private void validateMemoryUsageIfImplemented(CONFIG config) {
+    private OptionalLong validateMemoryUsageIfImplemented(CONFIG config) {
         var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);
 
         if (sudoImplicitCreate) {
             log.debug("Sudo mode: Won't check for available memory.");
-            return;
+            return OptionalLong.empty();
         }
 
-        tryValidateMemoryUsage(config, this::memoryEstimation);
+        return tryValidateMemoryUsage(config, this::memoryEstimation);
     }
 
     @ValueClass

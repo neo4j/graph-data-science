@@ -59,6 +59,7 @@ import org.neo4j.procedure.Context;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -210,31 +211,34 @@ public abstract class BaseProc {
         }
     }
 
-    protected <C extends BaseConfig> void tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
-        tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
+    protected <C extends BaseConfig> OptionalLong tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
+        return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }
 
-    public <C extends BaseConfig> void tryValidateMemoryUsage(
+    public <C extends BaseConfig> OptionalLong tryValidateMemoryUsage(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
         FreeMemoryInspector inspector
     ) {
         if (config.sudo()) {
             log.debug("Sudo mode: Won't check for available memory.");
-            return;
+            return OptionalLong.empty();
         }
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
         try {
-            memoryTreeWithDimensions = runEstimation.apply(config);
+            var memoryTreeWithDimensions = runEstimation.apply(config);
+
+            if (memoryTreeWithDimensions != null) {
+                var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+                var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
+                validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
+
+                return OptionalLong.of(memoryTreeWithDimensions.memoryTree.memoryUsage().max);
+            }
         } catch (MemoryEstimationNotImplementedException ignored) {
         }
 
-        if (memoryTreeWithDimensions != null) {
-            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
-            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
-        }
+        return OptionalLong.empty();
     }
 
     protected MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {

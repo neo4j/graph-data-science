@@ -27,6 +27,8 @@ public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
+    Task baseTask();
+
     void beginSubTask();
 
     void beginSubTask(long taskVolume);
@@ -52,6 +54,11 @@ public interface ProgressTracker {
     void release();
 
     class EmptyProgressTracker implements ProgressTracker {
+        @Override
+        public Task baseTask() {
+            return Tasks.empty();
+        }
+
         @Override
         public void beginSubTask() {
         }

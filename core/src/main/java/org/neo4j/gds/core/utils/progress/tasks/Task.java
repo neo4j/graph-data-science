@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.util.List;
+import java.util.OptionalLong;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -36,6 +37,8 @@ public class Task {
     private Status status;
     private long startTime;
     private long finishTime;
+
+    private OptionalLong maxMemoryUsage = OptionalLong.empty();
 
     Task(String description, List<Task> subTasks) {
         this.description = description;
@@ -152,5 +155,13 @@ public class Task {
 
     public long finishTime() {
         return this.finishTime;
+    }
+
+    public OptionalLong maxMemoryUsage() {
+        return this.maxMemoryUsage;
+    }
+
+    public void setMaxMemoryUsage(OptionalLong usage) {
+        this.maxMemoryUsage = usage;
     }
 }

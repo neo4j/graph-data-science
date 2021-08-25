@@ -50,7 +50,8 @@ class SystemMonitorProcTest extends BaseProgressTest {
     @GdsEditionTest(Edition.EE)
     void shouldGiveProgressOfOngoingProcs() {
         runQuery("Alice", "CALL gds.test.pl('foo')");
-        runQuery("Bob", "CALL gds.test.pl('bar')");
+        // Use a non-default mock memory estimation.
+        runQuery("Bob", "CALL gds.test.pl('bar', true)");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         assertCypherResult(
@@ -68,8 +69,8 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 aMapWithSize(4),
                 "ongoingGdsProcedures",
                 containsInAnyOrder(
-                    Map.of("taskName", "bar", "progress", "33.33%"),
-                    Map.of("taskName", "foo", "progress", "33.33%")
+                    Map.of("taskName", "foo", "progress", "33.33%","memoryEstimation", "n/a"),
+                    Map.of("taskName", "bar", "progress", "33.33%", "memoryEstimation", MAX_MEMORY_USAGE.getAsLong() + " Bytes")
                 )
             ))
         );
