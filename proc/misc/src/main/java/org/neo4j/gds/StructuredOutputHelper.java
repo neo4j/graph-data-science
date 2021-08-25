@@ -44,7 +44,7 @@ public final class StructuredOutputHelper {
             return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
         var percentage = progress / (volume / 100D);
-        var scaledPercentage = (int) percentage / progressBarLength;
+        var scaledPercentage = (int) ((percentage / 100D) * progressBarLength);
 
         var filledProgressBar = "#".repeat(scaledPercentage);
         var remainingProgressBar = "~".repeat(progressBarLength - scaledPercentage);
