@@ -110,10 +110,7 @@ public class LinkPredictionTrain
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(bestParameters.maxEpochs());
         var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
-        progressTracker.endSubTask();
 
         // evaluate the best model on the training and test graphs
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
@@ -299,6 +296,9 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(llrConfig.maxEpochs());
+
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
             trainData.features(),
@@ -308,7 +308,11 @@ public class LinkPredictionTrain
             terminationFlag
         );
 
-        return llrTrain.compute();
+        var modelData= llrTrain.compute();
+
+        progressTracker.endSubTask();
+
+        return modelData;
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(

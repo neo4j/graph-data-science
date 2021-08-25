@@ -73,6 +73,7 @@ public final class LinkFeatureExtractor {
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
+        progressTracker.setVolume(graph.relationshipCount());
 
         var extractor = of(graph, linkFeatureSteps);
 
@@ -102,8 +103,6 @@ public final class LinkFeatureExtractor {
             ));
             relationshipOffset += partition.totalDegree();
         }
-
-        progressTracker.setVolume(graph.relationshipCount());
 
         ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
 
