@@ -226,14 +226,17 @@ final class NodesFilter {
 
     private static NodePropertyStore createNodePropertyStore(
         GraphStore inputGraphStore,
-        IdMapping filteredMapping,
+        IdMapping filteredNodeMapping,
         NodeLabel nodeLabel,
         Collection<String> propertyKeys,
         int concurrency,
         ProgressTracker progressTracker
     ) {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(filteredNodeMapping.nodeCount() * propertyKeys.size());
+
         var builder = NodePropertyStore.builder();
-        var filteredNodeCount = filteredMapping.nodeCount();
+        var filteredNodeCount = filteredNodeMapping.nodeCount();
         var inputMapping = inputGraphStore.nodes();
 
         var allocationTracker = AllocationTracker.empty();
@@ -252,7 +255,7 @@ final class NodesFilter {
                 filteredNodeCount,
                 concurrency,
                 filteredNode -> {
-                    var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
+                    var inputNode = inputMapping.toMappedNodeId(filteredNodeMapping.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);
                     progressTracker.logProgress();
                 }
@@ -263,7 +266,7 @@ final class NodesFilter {
                 NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount))
             );
         });
-
+        progressTracker.endSubTask();
         return builder.build();
     }
 

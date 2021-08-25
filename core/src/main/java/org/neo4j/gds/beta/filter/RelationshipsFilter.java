@@ -79,6 +79,7 @@ final class RelationshipsFilter {
 
         for (RelationshipType relType : graphStore.relationshipTypes()) {
 
+            progressTracker.beginSubTask();
             var outputRelationships = filterRelationshipType(
                 graphStore,
                 expression,
@@ -93,6 +94,7 @@ final class RelationshipsFilter {
 
             // Drop relationship types that have been completely filtered out.
             if (outputRelationships.topology().elementCount() == 0) {
+                progressTracker.endSubTask();
                 continue;
             }
 
@@ -114,6 +116,7 @@ final class RelationshipsFilter {
             });
 
             relPropertyStores.put(relType, propertyStoreBuilder.build());
+            progressTracker.endSubTask();
         }
 
         progressTracker.endSubTask();

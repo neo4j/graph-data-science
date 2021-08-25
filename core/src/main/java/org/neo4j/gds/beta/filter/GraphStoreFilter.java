@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -51,14 +52,23 @@ public final class GraphStoreFilter {
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
-        var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
-
         var nodesTask = Tasks.leaf("Nodes", graphStore.nodeCount());
-        var nodePropertiesTask = Tasks.leaf(
+
+        var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
+        var nodePropertiesTask = Tasks.iterativeOpen(
             "Node properties",
-            graphStore.nodeCount() * nodePropertyCount
+            () -> List.of(
+                Tasks.leaf("Label", graphStore.nodeCount() * nodePropertyCount)
+            )
         );
-        var relationshipsTask = Tasks.leaf("Relationships", graphStore.relationshipCount());
+
+        var relationshipsTask = Tasks.iterativeFixed(
+            "Relationships",
+            () -> List.of(
+                Tasks.leaf("Relationship type", graphStore.relationshipCount())
+            ),
+            graphStore.relationshipTypes().size()
+        );
 
         var task = Tasks.task(
             "GraphStore Filter",
