@@ -42,9 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.StructuredOutputHelper.UNKNOWN;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public class ListProgressProc extends BaseProc {
 
     static final int PROGRESS_BAR_LENGTH = 10;
@@ -108,7 +105,6 @@ public class ListProgressProc extends BaseProc {
 
         public String id;
         public String taskName;
-        public String stage;
 
         ProgressResult(ProgressEvent progressEvent) {
             super(progressEvent.task());
@@ -116,18 +112,6 @@ public class ListProgressProc extends BaseProc {
             var task = progressEvent.task();
             this.id = progressEvent.jobId().asString();
             this.taskName = task.description();
-            this.stage = computeStage(task);
-        }
-
-        private String computeStage(Task baseTask) {
-            var subTaskCountingVisitor = new SubTaskCountingVisitor();
-            baseTask.visit(subTaskCountingVisitor);
-
-            String stageTemplate = "%s of %s";
-
-            return subTaskCountingVisitor.containsUnresolvedOpenTask()
-                ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
-                : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
         }
     }
 

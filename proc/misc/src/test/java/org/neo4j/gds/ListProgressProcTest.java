@@ -98,12 +98,11 @@ public class ListProgressProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertCypherResult(
             "CALL gds.beta.listProgress() " +
-            "YIELD taskName, stage, progress, status, timeStarted, elapsedTime " +
-            "RETURN taskName, stage, progress, status, timeStarted, elapsedTime " +
+            "YIELD taskName, progress, status, timeStarted, elapsedTime " +
+            "RETURN taskName, progress, status, timeStarted, elapsedTime " +
             "ORDER BY taskName",
             List.of(
                 Map.of("taskName", "bar",
-                    "stage", "0 of 1",
                     "progress", "33.33%",
                     "status", "RUNNING",
                     "timeStarted", instanceOf(LocalTime.class),
@@ -111,7 +110,6 @@ public class ListProgressProcTest extends BaseTest {
                 ),
                 Map.of(
                     "taskName","foo",
-                    "stage", "0 of 1",
                     "progress", "33.33%",
                     "status", "RUNNING",
                     "timeStarted", instanceOf(LocalTime.class),
@@ -149,15 +147,10 @@ public class ListProgressProcTest extends BaseTest {
             runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
             scheduler.forward(100, TimeUnit.MILLISECONDS);
 
-            List<Map<String, Object>> result = runQuery(
-                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, stage, progress",
-                r -> r.stream().collect(Collectors.toList())
-            );
-
             assertCypherResult(
-                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, stage, progress",
+                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, progress",
                 List.of(
-                    Map.of("taskName", "FastRP", "stage", "6 of 6", "progress", "100%")
+                    Map.of("taskName", "FastRP", "progress", "100%")
                 )
             );
         }
