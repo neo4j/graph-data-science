@@ -17,7 +17,7 @@ dependencies {
     implementation project(':proc-path-finding')
     implementation project(':proc-similarity')
     implementation project(':pregel')
-    implementation project(':pregel-proc')
+    implementation project(':proc-pregel')
 
     api project(':alpha-algo')
     api project(':storage-engine-adapter')

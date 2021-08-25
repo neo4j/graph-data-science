@@ -26,7 +26,7 @@ dependencies {
     // We depend on the proc artifact of the GDS library
     compileOnly "org.neo4j.gds:proc:$gdsVersion"
     compileOnly "org.neo4j.gds:core:$gdsVersion"
-    compileOnly "org.neo4j.gds:pregel-proc:$gdsVersion"
+    compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
@@ -42,7 +42,7 @@ dependencies {
     // We need to provide GDS for the test as well, along with some test helpers
     testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
     testImplementation "org.neo4j.gds:proc:$gdsVersion"
-    testImplementation "org.neo4j.gds:pregel-proc:$gdsVersion"
+    testImplementation "org.neo4j.gds:proc-pregel:$gdsVersion"
 
     // Use JUnit Jupiter API for testing.
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
