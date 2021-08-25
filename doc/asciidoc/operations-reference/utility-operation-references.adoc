@@ -8,7 +8,6 @@
 | Description                                                     | Operation
 | <<logging-progress-logging, List all operations in GDS>>        | `_gds.list_`
 | <<logging-progress-logging, List logged progress>>              | `gds.beta.listProgress`
-| List progress detail                                            | `gds.beta.listProgressDetail`
 | <<utility-functions, The version of the installed GDS>>         | `_gds.version_`
 .2+<.^| <<utility-functions-node-path>>
 | `_gds.util.asNode_`

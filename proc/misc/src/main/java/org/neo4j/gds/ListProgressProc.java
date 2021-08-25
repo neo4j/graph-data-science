@@ -51,20 +51,24 @@ public class ListProgressProc extends BaseProc {
 
     @Procedure("gds.beta.listProgress")
     @Description("List progress events for currently running tasks.")
-    public Stream<ProgressResult> listProgress() {
+    public Stream<ProgressResult> listProgress(
+        @Name(value = "jobId", defaultValue = "") String jobId
+    ) {
+        return jobId.isBlank()
+            ? jobsSummaryView()
+            : jobDetailView(jobId);
+    }
+
+    private Stream<ProgressResult> jobsSummaryView() {
         return progress.query(username()).stream().map(ProgressResult::fromProgressEvent);
     }
 
-    @Procedure("gds.beta.listProgressDetail")
-    @Description("List detailed progress events for the specified job id.")
-    public Stream<ProgressResult> listProgressDetail(
-        @Name(value = "jobId") String jobId
-    ) {
+    private Stream<ProgressResult> jobDetailView(String jobId) {
         var progressEvent = progress.query(username(), JobId.fromString(jobId));
         var task = progressEvent.task();
         var jobProgressVisitor = new JobProgressVisitor(progressEvent.jobId());
         TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
-        return jobProgressVisitor.progressRows().stream();
+        return jobProgressVisitor.progressRowsStream();
     }
 
     public static class ProgressResult {
@@ -126,8 +130,8 @@ public class ListProgressProc extends BaseProc {
             this.progressRows = new ArrayList<>();
         }
 
-        List<ProgressResult> progressRows() {
-            return this.progressRows;
+        Stream<ProgressResult> progressRowsStream() {
+            return this.progressRows.stream();
         }
 
         @Override

@@ -83,7 +83,7 @@ public class ListProgressDetailProcTest extends BaseTest {
         );
         var jobId = jobIdRef.get().asString();
         assertCypherResult(
-            "CALL gds.beta.listProgressDetail('" + jobId + "')" +
+            "CALL gds.beta.listProgress('" + jobId + "')" +
             "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
             "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId ",
             List.of(

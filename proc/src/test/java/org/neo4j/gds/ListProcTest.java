@@ -244,7 +244,6 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.knn.write.estimate",
 
         "gds.beta.listProgress",
-        "gds.beta.listProgressDetail",
 
         "gds.beta.model.drop",
         "gds.beta.model.exists",
