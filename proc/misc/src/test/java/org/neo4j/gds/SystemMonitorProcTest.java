@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 
 class SystemMonitorProcTest extends BaseProgressTest {
@@ -45,8 +47,9 @@ class SystemMonitorProcTest extends BaseProgressTest {
 
     @Test
     @GdsEditionTest(Edition.EE)
-    void shouldGiveSaneSystemStatus() {
-        runQuery("CALL gds.test.pl('foo')");
+    void shouldGiveProgressOfOngoingProcs() {
+        runQuery("Alice", "CALL gds.test.pl('foo')");
+        runQuery("Bob", "CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         assertCypherResult(
@@ -63,7 +66,32 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "jvmStatusDescription",
                 aMapWithSize(4),
                 "ongoingGdsProcedures",
-                List.of(Map.of("taskName", "foo", "progress", "33.33%"))
+                containsInAnyOrder(
+                    Map.of("taskName", "bar", "progress", "33.33%"),
+                    Map.of("taskName", "foo", "progress", "33.33%")
+                )
+            ))
+        );
+    }
+
+    @Test
+    @GdsEditionTest(Edition.EE)
+    void shouldGiveSaneJvmStatus() {
+        assertCypherResult(
+            "CALL gds.alpha.systemMonitor()",
+            List.of(Map.of(
+                "jvmFreeMemory",
+                greaterThan(0L),
+                "jvmTotalMemory",
+                greaterThan(0L),
+                "jvmMaxMemory",
+                greaterThan(0L),
+                "jvmAvailableProcessors",
+                greaterThan(0L),
+                "jvmStatusDescription",
+                aMapWithSize(4),
+                "ongoingGdsProcedures",
+                Matchers.empty()
             ))
         );
     }
