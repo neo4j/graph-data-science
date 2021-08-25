@@ -49,7 +49,6 @@ public class BaseProgressTest extends BaseTest {
         builder.addExtension(new ProgressEventExtension(scheduler));
     }
 
-
     public static class ProgressTestProc {
         @Context
         public ProgressEventTracker progress;

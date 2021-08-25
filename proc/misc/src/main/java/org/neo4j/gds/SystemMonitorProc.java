@@ -38,7 +38,7 @@ public class SystemMonitorProc extends BaseProc {
     @Context
     public ProgressEventStore progress;
 
-    private static final String DESCRIPTION = "Gives an overview of the system's resources and how they are currently being used.";
+    private static final String DESCRIPTION = "Get an overview of the system's workload and available resources";
 
     @Procedure(name = "gds.alpha.systemMonitor", mode = READ)
     @Description(DESCRIPTION)
