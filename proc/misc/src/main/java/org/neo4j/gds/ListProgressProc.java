@@ -69,6 +69,7 @@ public class ListProgressProc extends BaseProc {
 
     public static class CommonProgressResult {
         public String progress;
+        public String progressBar;
         public String status;
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
@@ -77,6 +78,7 @@ public class ListProgressProc extends BaseProc {
             var progressContainer = task.getProgress();
 
             this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
+            this.progressBar = StructuredOutputHelper.progressBar(progressContainer.progress(), progressContainer.volume(), PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
             this.elapsedTime = computeElapsedTime(task);
@@ -116,23 +118,17 @@ public class ListProgressProc extends BaseProc {
     }
 
     public static class JobProgressResult extends CommonProgressResult {
-        public String taskName;
-        public String progressBar;
 
-        public JobProgressResult(Task task, String taskName, String progressBar) {
+        public String taskName;
+
+        public JobProgressResult(Task task, String taskName) {
             super(task);
             this.taskName = taskName;
-            this.progressBar = progressBar;
         }
 
         static JobProgressResult fromTaskWithDepth(Task task, int depth) {
-            var progressContainer = task.getProgress();
-            var volume = progressContainer.volume();
-            var progress = progressContainer.progress();
-
             var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
-            var progressBar = StructuredOutputHelper.progressBar(progress, volume, PROGRESS_BAR_LENGTH);
-            return new JobProgressResult(task, treeViewTaskName, progressBar);
+            return new JobProgressResult(task, treeViewTaskName);
         }
 
     }

@@ -87,12 +87,13 @@ public class ListProgressProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertCypherResult(
             "CALL gds.beta.listProgress() " +
-            "YIELD taskName, progress, status, timeStarted, elapsedTime " +
-            "RETURN taskName, progress, status, timeStarted, elapsedTime ",
+            "YIELD taskName, progress, progressBar, status, timeStarted, elapsedTime " +
+            "RETURN taskName, progress, progressBar, status, timeStarted, elapsedTime ",
             List.of(
                 Map.of(
                     "taskName","foo",
                     "progress", "33.33%",
+                    "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class)
@@ -144,7 +145,7 @@ public class ListProgressProcTest extends BaseTest {
             scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             assertCypherResult(
-                "CALL gds.beta.listProgress() YIELD taskName, stage, progress RETURN taskName, progress",
+                "CALL gds.beta.listProgress() YIELD taskName, progress RETURN taskName, progress",
                 List.of(
                     Map.of("taskName", "FastRP", "progress", "100%")
                 )
