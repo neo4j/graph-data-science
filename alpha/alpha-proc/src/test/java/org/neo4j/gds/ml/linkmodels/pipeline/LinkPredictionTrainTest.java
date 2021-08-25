@@ -204,10 +204,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
             var modelData = linkPredictionTrain.compute().data();
             var modelWeights = modelData.weights().data();
-            var modelBias = modelData.bias().data().value();
+            var modelBias = modelData.bias().get().data().value();
             var modelDataRepeated = linkPredictionTrain.compute().data();
             var modelWeightsRepeated = modelDataRepeated.weights().data();
-            var modelBiasRepeated = modelDataRepeated.bias().data().value();
+            var modelBiasRepeated = modelDataRepeated.bias().get().data().value();
 
             assertThat(modelWeights).matches(modelWeightsRepeated::equals);
             assertThat(modelBias).isEqualTo(modelBiasRepeated);

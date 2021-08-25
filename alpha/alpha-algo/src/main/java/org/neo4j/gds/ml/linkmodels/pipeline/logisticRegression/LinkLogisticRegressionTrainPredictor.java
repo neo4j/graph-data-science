@@ -21,8 +21,11 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+
+import java.util.Optional;
 
 /**
  * Responsible for producing predictions on a specific graph.
@@ -30,7 +33,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
  */
 public class LinkLogisticRegressionTrainPredictor {
     private final Matrix weights;
-    private final Scalar bias;
+    private final Optional<Scalar> bias;
     private final HugeObjectArray<double[]> linkFeatures;
 
     public LinkLogisticRegressionTrainPredictor(
@@ -39,15 +42,16 @@ public class LinkLogisticRegressionTrainPredictor {
     ) {
         this.weights = modelData.weights().data();
         // since tensors are mutable, extracting the double value here can lead to a stale value
-        this.bias = modelData.bias().data();
+        this.bias = modelData.bias().map(Weights::data);
         this.linkFeatures = linkFeatures;
     }
 
     public double predictedProbabilities(long relationshipIdx) {
         var features = linkFeatures.get(relationshipIdx);
         var affinity = 0D;
+        double biasValue = bias.map(Scalar::value).orElse(0d);
         for (int i = 0; i < features.length; i++) {
-            affinity += weights.dataAt(i) * features[i] + bias.value();
+            affinity += weights.dataAt(i) * features[i] + biasValue;
         }
         return Sigmoid.sigmoid(affinity);
     }

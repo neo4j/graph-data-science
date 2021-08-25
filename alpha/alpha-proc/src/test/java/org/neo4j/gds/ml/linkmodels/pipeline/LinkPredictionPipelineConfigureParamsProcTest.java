@@ -39,6 +39,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
         "patience", 1,
         "batchSize", 100,
         "tolerance", 0.001,
+        "useBiasFeature", true,
         "concurrency", 4
     ));
 
@@ -69,6 +70,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "penalty", 0.0,
                     "patience", 1,
                     "batchSize", 100,
+                    "useBiasFeature", true,
                     "tolerance", 0.001
                 ))
             ))
@@ -93,6 +95,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "patience", 1,
                     "batchSize", 100,
                     "tolerance", 0.001,
+                    "useBiasFeature", true,
                     "concurrency", 2
                 ))
             ))

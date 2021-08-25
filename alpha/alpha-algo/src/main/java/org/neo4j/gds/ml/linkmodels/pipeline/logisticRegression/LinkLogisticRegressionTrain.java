@@ -58,7 +58,7 @@ public class LinkLogisticRegressionTrain {
     public LinkLogisticRegressionData compute() {
         assert linkFeatures.size() != 0;
 
-        var llrData = LinkLogisticRegressionData.from(linkFeatures.get(0).length);
+        var llrData = LinkLogisticRegressionData.from(linkFeatures.get(0).length, config.useBiasFeature());
         var objective = new LinkLogisticRegressionObjective(llrData, config.penalty(), linkFeatures, linkTargets);
         var training = new Training(config, progressTracker, linkFeatures.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());

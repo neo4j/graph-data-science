@@ -24,21 +24,35 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 
+import java.util.Optional;
+
 @ValueClass
 public interface LinkLogisticRegressionData {
 
     Weights<Matrix> weights();
-    Weights<Scalar> bias();
+    Optional<Weights<Scalar>> bias();
 
-    static LinkLogisticRegressionData from(
-        int numberOfLinkFeatures
+    private static LinkLogisticRegressionData from(
+        int numberOfLinkFeatures,
+        Optional<Weights<Scalar>> bias
     ) {
         var weights = Weights.ofMatrix(1, numberOfLinkFeatures);
-        var bias = Weights.ofScalar();
         return ImmutableLinkLogisticRegressionData.builder()
             .weights(weights)
             .bias(bias)
             .build();
+    }
+
+    static LinkLogisticRegressionData from(
+        int numberOfLinkFeatures,
+        boolean useBias
+    ) {
+        return LinkLogisticRegressionData.from(
+            numberOfLinkFeatures,
+            useBias
+                ? Optional.of(Weights.ofScalar())
+                : Optional.empty()
+        );
     }
 
 }

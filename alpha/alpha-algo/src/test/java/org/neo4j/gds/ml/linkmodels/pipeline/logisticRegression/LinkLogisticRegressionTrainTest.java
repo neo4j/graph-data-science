@@ -100,7 +100,7 @@ class LinkLogisticRegressionTrainTest {
         assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
 
         var expectedBias = -0.17217994185059912;
-        assertThat(result.bias().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
+        assertThat(result.bias().get().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
     }
 
     @Test
@@ -120,7 +120,7 @@ class LinkLogisticRegressionTrainTest {
         assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
 
         var expectedBias = 0.027877045803993247;
-        assertThat(result.bias().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
+        assertThat(result.bias().get().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
     }
 
     @Test

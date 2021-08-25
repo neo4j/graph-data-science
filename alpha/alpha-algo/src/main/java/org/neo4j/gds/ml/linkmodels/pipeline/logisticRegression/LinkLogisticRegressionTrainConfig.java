@@ -35,6 +35,10 @@ public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
         return 0.0;
     }
 
+    default boolean useBiasFeature() {
+        return true;
+    }
+
     @Configuration.ToMap
     Map<String, Object> toMap();
 

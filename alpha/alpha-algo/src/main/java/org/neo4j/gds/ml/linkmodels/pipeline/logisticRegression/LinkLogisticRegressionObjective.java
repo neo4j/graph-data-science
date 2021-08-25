@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.LogisticLoss;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.ml.core.functions.NoGradient;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -62,19 +61,27 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(modelData.weights(), modelData.bias());
+        if (modelData.bias().isPresent()) {
+            return List.of(modelData.weights(), modelData.bias().get());
+        } else {
+            return List.of(modelData.weights());
+        }
     }
 
     @Override
     public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
         Constant<Matrix> features = features(relationshipBatch, linkFeatures);
         Variable<Matrix> weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights());
-        var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, modelData.bias());
-        Variable<Matrix> predictions = new NoGradient<>(new Sigmoid<>(weightedFeaturesWithBias));
+        var weightedFeaturesMaybeWithBias = modelData.bias().isPresent()
+            ? new EWiseAddMatrixScalar(weightedFeatures, modelData.bias().get())
+            : weightedFeatures;
+        Variable<Matrix> predictions = new Sigmoid<>(weightedFeaturesMaybeWithBias);
 
         Constant<Vector> targets = makeTargetsArray(relationshipBatch);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), relationshipBatch.size() * penalty / trainSize);
-        var unpenalizedLoss = new LogisticLoss(modelData.weights(), modelData.bias(), predictions, features, targets);
+        var unpenalizedLoss = modelData.bias().isPresent()
+            ? new LogisticLoss(modelData.weights(), modelData.bias().get(), predictions, features, targets)
+            : new LogisticLoss(modelData.weights(), predictions, features, targets);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
