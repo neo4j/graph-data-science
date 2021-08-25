@@ -52,12 +52,12 @@ public class ListProgressProc extends BaseProc {
     @Procedure("gds.beta.listProgress")
     @Description("List progress events for currently running tasks.")
     public Stream<ProgressResult> listProgress() {
-        return progress.query(username()).stream().map(ProgressResult::new);
+        return progress.query(username()).stream().map(ProgressResult::fromProgressEvent);
     }
 
     @Procedure("gds.beta.listProgressDetail")
     @Description("List detailed progress events for the specified job id.")
-    public Stream<JobProgressResult> listProgressDetail(
+    public Stream<ProgressResult> listProgressDetail(
         @Name(value = "jobId") String jobId
     ) {
         var progressEvent = progress.query(username(), JobId.fromString(jobId));
@@ -67,18 +67,30 @@ public class ListProgressProc extends BaseProc {
         return jobProgressVisitor.progressRows().stream();
     }
 
-    public static class CommonProgressResult {
+    public static class ProgressResult {
         public String jobId;
+        public String taskName;
         public String progress;
         public String progressBar;
         public String status;
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
 
-        public CommonProgressResult(Task task, JobId jobId) {
+        static ProgressResult fromProgressEvent(ProgressEvent progressEvent) {
+            var task = progressEvent.task();
+            return new ProgressResult(task, progressEvent.jobId(), task.description());
+        }
+
+        static ProgressResult fromTaskWithDepth(Task task, JobId jobId, int depth) {
+            var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
+            return new ProgressResult(task, jobId, treeViewTaskName);
+        }
+
+        public ProgressResult(Task task, JobId jobId, String taskName) {
             var progressContainer = task.getProgress();
 
             this.jobId = jobId.asString();
+            this.taskName = taskName;
             this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
             this.progressBar = StructuredOutputHelper.progressBar(progressContainer.progress(), progressContainer.volume(), PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
@@ -104,46 +116,17 @@ public class ListProgressProc extends BaseProc {
         }
     }
 
-    @SuppressWarnings("unused")
-    public static class ProgressResult extends CommonProgressResult {
-
-        public String taskName;
-
-        ProgressResult(ProgressEvent progressEvent) {
-            super(progressEvent.task(), progressEvent.jobId());
-
-            var task = progressEvent.task();
-            this.taskName = task.description();
-        }
-    }
-
-    public static class JobProgressResult extends CommonProgressResult {
-
-        public String taskName;
-
-        JobProgressResult(Task task, JobId jobId, String taskName) {
-            super(task, jobId);
-            this.taskName = taskName;
-        }
-
-        static JobProgressResult fromTaskWithDepth(Task task, JobId jobId, int depth) {
-            var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
-            return new JobProgressResult(task, jobId, treeViewTaskName);
-        }
-
-    }
-
     public static class JobProgressVisitor extends DepthAwareTaskVisitor {
 
         private final JobId jobId;
-        private final List<JobProgressResult> progressRows;
+        private final List<ProgressResult> progressRows;
 
         JobProgressVisitor(JobId jobId) {
             this.jobId = jobId;
             this.progressRows = new ArrayList<>();
         }
 
-        List<JobProgressResult> progressRows() {
+        List<ProgressResult> progressRows() {
             return this.progressRows;
         }
 
@@ -163,7 +146,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private void addProgressRow(Task task) {
-            progressRows.add(JobProgressResult.fromTaskWithDepth(task, jobId, depth()));
+            progressRows.add(ProgressResult.fromTaskWithDepth(task, jobId, depth()));
         }
     }
 }
