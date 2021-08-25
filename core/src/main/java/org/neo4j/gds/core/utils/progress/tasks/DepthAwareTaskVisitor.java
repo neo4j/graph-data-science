@@ -17,31 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.core.utils.progress.tasks;
 
-import java.util.List;
+public abstract class DepthAwareTaskVisitor implements TaskVisitor {
+    private int depth;
 
-enum EmptyProgressEventStore implements ProgressEventStore {
-    INSTANCE;
-
-    @Override
-    public List<ProgressEvent> query(String username) {
-        return List.of();
+    void setDepth(int depth) {
+        this.depth = depth;
     }
 
-    @Override
-    public ProgressEvent query(String username, JobId jobId) {
-        return ProgressEvent.endOfStreamEvent(username, jobId);
-    }
-
-
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public void accept(ProgressEvent progressEvent) {
-
+    public int depth() {
+        return this.depth;
     }
 }

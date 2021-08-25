@@ -19,27 +19,35 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
+import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.LocalTimeValue;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.StructuredOutputHelper.UNKNOWN;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ListProgressProc extends BaseProc {
+
+    static final int PROGRESS_BAR_LENGTH = 10;
 
     @Context
     public ProgressEventStore progress;
@@ -50,28 +58,38 @@ public class ListProgressProc extends BaseProc {
         return progress.query(username()).stream().map(ProgressResult::new);
     }
 
-    @SuppressWarnings("unused")
-    public static class ProgressResult {
+    @Procedure("gds.beta.listProgressDetail")
+    @Description("List detailed progress events for the specified job id.")
+    public Stream<JobProgressResult> listProgressDetail(
+        @Name(value = "jobId") String jobId
+    ) {
+        var progressEvent = progress.query(username(), JobId.fromString(jobId));
+        var task = progressEvent.task();
+        var jobProgressVisitor = new JobProgressVisitor();
+        TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
+        return jobProgressVisitor.progressRows().stream();
+    }
 
-        private static final String UNKNOWN = "n/a";
-
-        public String id;
-        public String taskName;
-        public String stage;
+    public static class CommonProgressResult {
         public String progress;
         public String status;
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
 
-        ProgressResult(ProgressEvent progressEvent) {
-            this.id = progressEvent.jobId().asString();
-            var task = progressEvent.task();
-            this.taskName = task.description();
-            this.stage = computeStage(task);
-            this.progress = computeProgress(task);
+        public CommonProgressResult(Task task) {
+            var progressContainer = task.getProgress();
+
+            this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
             this.elapsedTime = computeElapsedTime(task);
+        }
+
+        private LocalTimeValue localTimeValue(Task task) {
+            return LocalTimeValue.localTime(LocalTime.ofInstant(
+                Instant.ofEpochMilli(task.startTime()),
+                ZoneId.systemDefault()
+            ));
         }
 
         private DurationValue computeElapsedTime(Task baseTask) {
@@ -82,6 +100,23 @@ public class ListProgressProc extends BaseProc {
             var elapsedTime = finishTimeOrNow - baseTask.startTime();
             var duration = Duration.ofMillis(elapsedTime);
             return DurationValue.duration(duration);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class ProgressResult extends CommonProgressResult {
+
+        public String id;
+        public String taskName;
+        public String stage;
+
+        ProgressResult(ProgressEvent progressEvent) {
+            super(progressEvent.task());
+
+            var task = progressEvent.task();
+            this.id = progressEvent.jobId().asString();
+            this.taskName = task.description();
+            this.stage = computeStage(task);
         }
 
         private String computeStage(Task baseTask) {
@@ -94,27 +129,59 @@ public class ListProgressProc extends BaseProc {
                 ? formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), UNKNOWN)
                 : formatWithLocale(stageTemplate, subTaskCountingVisitor.numFinishedSubTasks(), subTaskCountingVisitor.numSubTasks());
         }
+    }
 
-        private String computeProgress(Task baseTask) {
-            var progressContainer = baseTask.getProgress();
+    public static class JobProgressResult extends CommonProgressResult {
+        public String taskName;
+        public String progressBar;
+
+        public JobProgressResult(Task task, String taskName, String progressBar) {
+            super(task);
+            this.taskName = taskName;
+            this.progressBar = progressBar;
+        }
+
+        static JobProgressResult fromTaskWithDepth(Task task, int depth) {
+            var progressContainer = task.getProgress();
             var volume = progressContainer.volume();
             var progress = progressContainer.progress();
 
-            if (volume == Task.UNKNOWN_VOLUME) {
-                return UNKNOWN;
-            }
-
-            var progressPercentage = (double) progress / (double) volume;
-            var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-            return decimalFormat.format(progressPercentage);
+            var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
+            var progressBar = StructuredOutputHelper.progressBar(progress, volume, PROGRESS_BAR_LENGTH);
+            return new JobProgressResult(task, treeViewTaskName, progressBar);
         }
 
-        private LocalTimeValue localTimeValue(Task task) {
-            return LocalTimeValue.localTime(LocalTime.ofInstant(
-                Instant.ofEpochMilli(task.startTime()),
-                ZoneId.systemDefault()
-            ));
-        }
     }
 
+    public static class JobProgressVisitor extends DepthAwareTaskVisitor {
+
+        private final List<JobProgressResult> progressRows;
+
+        JobProgressVisitor() {
+            this.progressRows = new ArrayList<>();
+        }
+
+        List<JobProgressResult> progressRows() {
+            return this.progressRows;
+        }
+
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            addProgressRow(leafTask);
+        }
+
+        @Override
+        public void visitIntermediateTask(Task task) {
+            addProgressRow(task);
+        }
+
+        @Override
+        public void visitIterativeTask(IterativeTask iterativeTask) {
+            addProgressRow(iterativeTask);
+        }
+
+        private void addProgressRow(Task task) {
+            progressRows.add(JobProgressResult.fromTaskWithDepth(task, depth()));
+        }
+    }
 }

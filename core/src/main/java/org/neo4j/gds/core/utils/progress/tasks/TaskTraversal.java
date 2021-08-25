@@ -17,31 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.core.utils.progress.tasks;
 
-import java.util.List;
+public final class TaskTraversal {
 
-enum EmptyProgressEventStore implements ProgressEventStore {
-    INSTANCE;
+    private TaskTraversal() {}
 
-    @Override
-    public List<ProgressEvent> query(String username) {
-        return List.of();
+    public static void visitPreOrderWithDepth(Task task, DepthAwareTaskVisitor visitor) {
+        visitPreOrderWithDepth(task, visitor, 0);
     }
 
-    @Override
-    public ProgressEvent query(String username, JobId jobId) {
-        return ProgressEvent.endOfStreamEvent(username, jobId);
-    }
-
-
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public void accept(ProgressEvent progressEvent) {
-
+    private static void visitPreOrderWithDepth(Task task, DepthAwareTaskVisitor visitor, int depth) {
+        visitor.setDepth(depth);
+        task.visit(visitor);
+        task.subTasks().forEach(subTask -> visitPreOrderWithDepth(subTask, visitor, depth + 1));
     }
 }

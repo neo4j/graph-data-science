@@ -25,5 +25,7 @@ import java.util.function.Consumer;
 public interface ProgressEventStore extends Consumer<ProgressEvent> {
     List<ProgressEvent> query(String username);
 
+    ProgressEvent query(String username, JobId jobId);
+
     boolean isEmpty();
 }
