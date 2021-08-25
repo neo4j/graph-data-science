@@ -202,10 +202,15 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
 
-            var modelWeights = linkPredictionTrain.compute().data().weights().data();
-            var modelWeightsRepeated = linkPredictionTrain.compute().data().weights().data();
+            var modelData = linkPredictionTrain.compute().data();
+            var modelWeights = modelData.weights().data();
+            var modelBias = modelData.bias().data().value();
+            var modelDataRepeated = linkPredictionTrain.compute().data();
+            var modelWeightsRepeated = modelDataRepeated.weights().data();
+            var modelBiasRepeated = modelDataRepeated.bias().data().value();
 
             assertThat(modelWeights).matches(modelWeightsRepeated::equals);
+            assertThat(modelBias).isEqualTo(modelBiasRepeated);
         });
     }
 }

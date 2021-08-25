@@ -20,23 +20,25 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
+import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.LogisticLoss;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.NoGradient;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 
@@ -60,17 +62,19 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(modelData.weights());
+        return List.of(modelData.weights(), modelData.bias());
     }
 
     @Override
     public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
         Constant<Matrix> features = features(relationshipBatch, linkFeatures);
-        var predictions = new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
+        Variable<Matrix> weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights());
+        var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, modelData.bias());
+        Variable<Matrix> predictions = new NoGradient<>(new Sigmoid<>(weightedFeaturesWithBias));
 
         Constant<Vector> targets = makeTargetsArray(relationshipBatch);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), relationshipBatch.size() * penalty / trainSize);
-        var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);
+        var unpenalizedLoss = new LogisticLoss(modelData.weights(), modelData.bias(), predictions, features, targets);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
