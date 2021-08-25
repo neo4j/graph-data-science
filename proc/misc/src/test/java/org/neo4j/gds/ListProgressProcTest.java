@@ -24,11 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
@@ -50,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
@@ -84,11 +85,20 @@ public class ListProgressProcTest extends BaseTest {
     void canListProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
-        var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName",
-            r -> r.<String>columnAs("taskName").stream().collect(toList())
+        assertCypherResult(
+            "CALL gds.beta.listProgress() " +
+            "YIELD taskName, progress, status, timeStarted, elapsedTime " +
+            "RETURN taskName, progress, status, timeStarted, elapsedTime ",
+            List.of(
+                Map.of(
+                    "taskName","foo",
+                    "progress", "33.33%",
+                    "status", "RUNNING",
+                    "timeStarted", instanceOf(LocalTime.class),
+                    "elapsedTime", instanceOf(DurationValue.class)
+                )
+            )
         );
-        assertThat(result).containsExactly("foo");
     }
 
     @Test
@@ -97,24 +107,10 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.pl('bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertCypherResult(
-            "CALL gds.beta.listProgress() " +
-            "YIELD taskName, progress, status, timeStarted, elapsedTime " +
-            "RETURN taskName, progress, status, timeStarted, elapsedTime " +
-            "ORDER BY taskName",
+            "CALL gds.beta.listProgress() YIELD taskName RETURN taskName ORDER BY taskName",
             List.of(
-                Map.of("taskName", "bar",
-                    "progress", "33.33%",
-                    "status", "RUNNING",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class)
-                ),
-                Map.of(
-                    "taskName","foo",
-                    "progress", "33.33%",
-                    "status", "RUNNING",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class)
-                )
+                Map.of("taskName", "bar"),
+                Map.of("taskName","foo")
             )
         );
     }
@@ -164,10 +160,11 @@ public class ListProgressProcTest extends BaseTest {
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName
         ) {
-            var task = Tasks.leaf(taskName, 3);
-            task.start();
-            task.logProgress(1);
-            progress.addTaskProgressEvent(task);
+            var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress);
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.logProgress(1);
             return Stream.empty();
         }
     }
