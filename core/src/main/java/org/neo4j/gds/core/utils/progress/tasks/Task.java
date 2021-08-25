@@ -28,6 +28,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class Task {
 
     public static final int UNKNOWN_VOLUME = -1;
+    public static final long NOT_STARTED = -1L;
+    public static final long NOT_FINISHED = -1L;
 
     private final String description;
     private final List<Task> subTasks;
@@ -39,8 +41,8 @@ public class Task {
         this.description = description;
         this.subTasks = subTasks;
         this.status = Status.PENDING;
-        this.startTime = -1L;
-        this.finishTime = -1L;
+        this.startTime = NOT_STARTED;
+        this.finishTime = NOT_FINISHED;
     }
 
     public String description() {

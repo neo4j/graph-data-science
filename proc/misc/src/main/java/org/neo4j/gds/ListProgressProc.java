@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
+import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 import org.neo4j.procedure.Context;
@@ -103,18 +104,24 @@ public class ListProgressProc extends BaseProc {
         }
 
         private LocalTimeValue localTimeValue(Task task) {
+            if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
+                return LocalTimeValue.MIN_VALUE;
+            }
             return LocalTimeValue.localTime(LocalTime.ofInstant(
                 Instant.ofEpochMilli(task.startTime()),
                 ZoneId.systemDefault()
             ));
         }
 
-        private DurationValue computeElapsedTime(Task baseTask) {
-            var finishTime = baseTask.finishTime();
+        private DurationValue computeElapsedTime(Task task) {
+            if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
+                return DurationValue.ZERO;
+            }
+            var finishTime = task.finishTime();
             var finishTimeOrNow = finishTime != -1
                 ? finishTime
                 : System.currentTimeMillis();
-            var elapsedTime = finishTimeOrNow - baseTask.startTime();
+            var elapsedTime = finishTimeOrNow - task.startTime();
             var duration = Duration.ofMillis(elapsedTime);
             return DurationValue.duration(duration);
         }

@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 public class ListProgressDetailProcTest extends BaseTest {
@@ -63,6 +64,8 @@ public class ListProgressDetailProcTest extends BaseTest {
         builder.addExtension(new ProgressEventExtension(scheduler));
     }
 
+    String jobId;
+
     @BeforeEach
     void setUp() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(
@@ -70,10 +73,7 @@ public class ListProgressDetailProcTest extends BaseTest {
             ListProgressProc.class,
             ProgressTrackingTestProc.class
         );
-    }
 
-    @Test
-    void shouldReturnProgressDetail() {
         runQuery("CALL gds.test.track");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
@@ -81,7 +81,11 @@ public class ListProgressDetailProcTest extends BaseTest {
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
             row -> jobIdRef.set(JobId.fromString(row.getString("jobId")))
         );
-        var jobId = jobIdRef.get().asString();
+        this.jobId = jobIdRef.get().asString();
+    }
+
+    @Test
+    void shouldReturnProgressDetail() {
         assertCypherResult(
             "CALL gds.beta.listProgress('" + jobId + "')" +
             "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
@@ -134,6 +138,22 @@ public class ListProgressDetailProcTest extends BaseTest {
                 )
             )
         );
+    }
+
+    @Test
+    void shouldReturnZeroTimesWhenTaskHasNotStarted() {
+        var query = "CALL gds.beta.listProgress('" + jobId + "') " +
+                    "YIELD status, timeStarted, elapsedTime " +
+                    "WHERE status = 'PENDING' " +
+                    "RETURN timeStarted, elapsedTime";
+
+        runQueryWithRowConsumer(query, row -> {
+            LocalTime timeStarted = (LocalTime) row.get("timeStarted");
+            DurationValue elapsedTime = (DurationValue) row.get("elapsedTime");
+
+            assertThat(timeStarted.toNanoOfDay()).isEqualTo(0L);
+            assertThat(elapsedTime.compareTo(DurationValue.duration(0, 0, 0, 0))).isEqualTo(0);
+        });
     }
 
     public static class ProgressTrackingTestProc extends BaseProc {
