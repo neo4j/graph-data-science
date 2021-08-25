@@ -78,13 +78,14 @@ public class ListProgressDetailProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
         runQueryWithRowConsumer(
-            "CALL gds.beta.listProgress() YIELD id RETURN id",
-            row -> jobIdRef.set(JobId.fromString(row.getString("id")))
+            "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
+            row -> jobIdRef.set(JobId.fromString(row.getString("jobId")))
         );
+        var jobId = jobIdRef.get().asString();
         assertCypherResult(
-            "CALL gds.beta.listProgressDetail('" + jobIdRef.get().asString() + "')" +
-            "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status " +
-            "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status ",
+            "CALL gds.beta.listProgressDetail('" + jobId + "')" +
+            "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
+            "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId ",
             List.of(
                 Map.of(
                     "taskName", "|-- root",
@@ -92,7 +93,8 @@ public class ListProgressDetailProcTest extends BaseTest {
                     "progress", "42.86%",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class),
-                    "status", Status.RUNNING.name()
+                    "status", Status.RUNNING.name(),
+                    "jobId", jobId
                 ),
                 Map.of(
                     "taskName", "    |-- iterative",
@@ -100,7 +102,8 @@ public class ListProgressDetailProcTest extends BaseTest {
                     "progress", "75%",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class),
-                    "status", Status.RUNNING.name()
+                    "status", Status.RUNNING.name(),
+                    "jobId", jobId
                 ),
                 Map.of(
                     "taskName", "        |-- leafIterative",
@@ -108,7 +111,8 @@ public class ListProgressDetailProcTest extends BaseTest {
                     "progress", "100%",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class),
-                    "status", Status.FINISHED.name()
+                    "status", Status.FINISHED.name(),
+                    "jobId", jobId
                 ),
                 Map.of(
                     "taskName", "        |-- leafIterative",
@@ -116,7 +120,8 @@ public class ListProgressDetailProcTest extends BaseTest {
                     "progress", "50%",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class),
-                    "status", Status.RUNNING.name()
+                    "status", Status.RUNNING.name(),
+                    "jobId", jobId
                 ),
                 Map.of(
                     "taskName", "    |-- leaf",
@@ -124,7 +129,8 @@ public class ListProgressDetailProcTest extends BaseTest {
                     "progress", "0%",
                     "timeStarted", instanceOf(LocalTime.class),
                     "elapsedTime", instanceOf(DurationValue.class),
-                    "status", Status.PENDING.name()
+                    "status", Status.PENDING.name(),
+                    "jobId", jobId
                 )
             )
         );

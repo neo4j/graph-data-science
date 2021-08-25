@@ -62,21 +62,23 @@ public class ListProgressProc extends BaseProc {
     ) {
         var progressEvent = progress.query(username(), JobId.fromString(jobId));
         var task = progressEvent.task();
-        var jobProgressVisitor = new JobProgressVisitor();
+        var jobProgressVisitor = new JobProgressVisitor(progressEvent.jobId());
         TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
         return jobProgressVisitor.progressRows().stream();
     }
 
     public static class CommonProgressResult {
+        public String jobId;
         public String progress;
         public String progressBar;
         public String status;
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
 
-        public CommonProgressResult(Task task) {
+        public CommonProgressResult(Task task, JobId jobId) {
             var progressContainer = task.getProgress();
 
+            this.jobId = jobId.asString();
             this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
             this.progressBar = StructuredOutputHelper.progressBar(progressContainer.progress(), progressContainer.volume(), PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
@@ -105,14 +107,12 @@ public class ListProgressProc extends BaseProc {
     @SuppressWarnings("unused")
     public static class ProgressResult extends CommonProgressResult {
 
-        public String id;
         public String taskName;
 
         ProgressResult(ProgressEvent progressEvent) {
-            super(progressEvent.task());
+            super(progressEvent.task(), progressEvent.jobId());
 
             var task = progressEvent.task();
-            this.id = progressEvent.jobId().asString();
             this.taskName = task.description();
         }
     }
@@ -121,23 +121,25 @@ public class ListProgressProc extends BaseProc {
 
         public String taskName;
 
-        public JobProgressResult(Task task, String taskName) {
-            super(task);
+        JobProgressResult(Task task, JobId jobId, String taskName) {
+            super(task, jobId);
             this.taskName = taskName;
         }
 
-        static JobProgressResult fromTaskWithDepth(Task task, int depth) {
+        static JobProgressResult fromTaskWithDepth(Task task, JobId jobId, int depth) {
             var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
-            return new JobProgressResult(task, treeViewTaskName);
+            return new JobProgressResult(task, jobId, treeViewTaskName);
         }
 
     }
 
     public static class JobProgressVisitor extends DepthAwareTaskVisitor {
 
+        private final JobId jobId;
         private final List<JobProgressResult> progressRows;
 
-        JobProgressVisitor() {
+        JobProgressVisitor(JobId jobId) {
+            this.jobId = jobId;
             this.progressRows = new ArrayList<>();
         }
 
@@ -161,7 +163,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private void addProgressRow(Task task) {
-            progressRows.add(JobProgressResult.fromTaskWithDepth(task, depth()));
+            progressRows.add(JobProgressResult.fromTaskWithDepth(task, jobId, depth()));
         }
     }
 }

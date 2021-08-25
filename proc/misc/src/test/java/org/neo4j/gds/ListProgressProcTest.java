@@ -26,6 +26,7 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -54,6 +55,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class ListProgressProcTest extends BaseTest {
 
@@ -99,6 +101,17 @@ public class ListProgressProcTest extends BaseTest {
                     "elapsedTime", instanceOf(DurationValue.class)
                 )
             )
+        );
+    }
+
+    @Test
+    void shouldReturnValidJobId() {
+        runQuery("CALL gds.test.pl('foo')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        runQueryWithRowConsumer(
+            "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
+            Map.of(),
+            row -> assertDoesNotThrow(() -> JobId.fromString(row.getString("jobId")))
         );
     }
 
