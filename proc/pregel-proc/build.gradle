@@ -11,10 +11,9 @@ dependencies {
         }
     }
 
-    implementation(
-        project(':pregel'),
-        project(':proc-common')
-    )
+    implementation project(':proc-common')
+
+    api project(':pregel')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
