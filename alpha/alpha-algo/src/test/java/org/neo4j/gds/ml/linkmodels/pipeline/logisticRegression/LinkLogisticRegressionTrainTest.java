@@ -75,7 +75,8 @@ class LinkLogisticRegressionTrainTest {
         this.linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(new L2FeatureStep(features)),
-            4
+            4,
+            ProgressTracker.NULL_TRACKER
         );
     }
 

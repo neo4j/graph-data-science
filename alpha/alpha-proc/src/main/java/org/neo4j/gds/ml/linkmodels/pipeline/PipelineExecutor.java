@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
@@ -48,19 +49,22 @@ public class PipelineExecutor {
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
     private final String graphName;
+    private final ProgressTracker progressTracker;
 
     public PipelineExecutor(
         TrainingPipeline pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
         String userName,
-        String graphName
+        String graphName,
+        ProgressTracker progressTracker
     ) {
         this.pipeline = pipeline;
         this.caller = caller;
         this.userName = userName;
         this.databaseId = databaseId;
         this.graphName = graphName;
+        this.progressTracker = progressTracker;
     }
 
     public HugeObjectArray<double[]> computeFeatures(
@@ -74,7 +78,7 @@ public class PipelineExecutor {
 
         pipeline.validate(graph);
 
-        return extractFeatures(graph, pipeline.featureSteps(), concurrency);
+        return extractFeatures(graph, pipeline.featureSteps(), concurrency, progressTracker);
     }
 
     public LinkFeatureExtractor linkFeatureExtractor(Graph graph) {
@@ -89,9 +93,13 @@ public class PipelineExecutor {
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes
     ) {
+        progressTracker.beginSubTask();
         for (NodePropertyStep step : pipeline.nodePropertySteps()) {
+            progressTracker.beginSubTask();
             step.execute(caller, graphName, nodeLabels, relationshipTypes);
+            progressTracker.endSubTask();
         }
+        progressTracker.endSubTask();
     }
 
     public void splitRelationships(
@@ -100,6 +108,8 @@ public class PipelineExecutor {
         List<String> nodeLabels,
         Optional<Long> randomSeed
     ) {
+        progressTracker.beginSubTask();
+
         LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
         splitConfig.validateAgainstGraphStore(graphStore);
 
@@ -118,6 +128,8 @@ public class PipelineExecutor {
         validateTrainSplit(graphStore);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
+
+        progressTracker.endSubTask();
     }
 
     private void validateTestSplit(GraphStore graphStore) {

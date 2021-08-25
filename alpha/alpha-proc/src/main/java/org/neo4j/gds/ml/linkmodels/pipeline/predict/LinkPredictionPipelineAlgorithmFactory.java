@@ -26,10 +26,13 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.kernel.database.NamedDatabaseId;
+
+import java.util.List;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getLinkPredictionPipeline;
 
@@ -44,6 +47,23 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
         super();
         this.caller = caller;
         this.databaseId = databaseId;
+    }
+
+    @Override
+    protected Task progressTask(Graph graph, CONFIG config) {
+        var trainingPipeline = getLinkPredictionPipeline(config.modelName(), config.username())
+            .customInfo()
+            .trainingPipeline();
+
+        return Tasks.task(
+            taskName(),
+            Tasks.iterativeFixed(
+                "execute node property steps",
+                () -> List.of(Tasks.leaf("step")),
+                trainingPipeline.nodePropertySteps().size()
+            ),
+            Tasks.leaf("predict links", graph.nodeCount())
+        );
     }
 
     @Override
@@ -65,8 +85,14 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
             configuration.username()
         );
         var graphStore = GraphStoreCatalog.get(configuration.username(), databaseId, graphName).graphStore();
-        var customInfo = (LinkPredictionModelInfo) model.customInfo();
-        var pipelineExecutor = new PipelineExecutor(customInfo.trainingPipeline(), caller, databaseId, configuration.username(), graphName);
+        var pipelineExecutor = new PipelineExecutor(
+            model.customInfo().trainingPipeline(),
+            caller,
+            databaseId,
+            configuration.username(),
+            graphName,
+            progressTracker
+        );
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
         return new LinkPrediction(

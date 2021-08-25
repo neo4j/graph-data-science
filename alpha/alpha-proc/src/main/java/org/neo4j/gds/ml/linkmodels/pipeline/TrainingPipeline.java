@@ -75,7 +75,7 @@ public class TrainingPipeline implements Mappable {
         );
     }
 
-    List<NodePropertyStep> nodePropertySteps() {
+    public List<NodePropertyStep> nodePropertySteps() {
         return nodePropertySteps;
     }
 
@@ -83,7 +83,7 @@ public class TrainingPipeline implements Mappable {
         this.nodePropertySteps.add(step);
     }
 
-    List<LinkFeatureStep> featureSteps() {
+    public List<LinkFeatureStep> featureSteps() {
         return featureSteps;
     }
 
@@ -107,7 +107,7 @@ public class TrainingPipeline implements Mappable {
         return parameterSpace;
     }
 
-    void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
+    public void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
         this.parameterSpace = parameterList.stream()
             .map(trainParams -> {
                 var validatedConfig = LinkLogisticRegressionTrainConfig.of(

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class BatchLinkFeatureExtractor implements Runnable {
     final LinkFeatureExtractor extractor;
@@ -30,19 +31,22 @@ class BatchLinkFeatureExtractor implements Runnable {
     final long relationshipOffset;
     final Graph graph;
     final HugeObjectArray<double[]> linkFeatures;
+    final ProgressTracker progressTracker;
 
     BatchLinkFeatureExtractor(
         LinkFeatureExtractor extractor,
         DegreePartition partition,
         Graph graph,
         long relationshipOffset,
-        HugeObjectArray<double[]> linkFeatures
+        HugeObjectArray<double[]> linkFeatures,
+        ProgressTracker progressTracker
     ) {
         this.extractor = extractor;
         this.partition = partition;
         this.relationshipOffset = relationshipOffset;
         this.graph = graph;
         this.linkFeatures = linkFeatures;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -56,6 +60,8 @@ class BatchLinkFeatureExtractor implements Runnable {
                 return true;
             }));
         });
+
+        progressTracker.logProgress(partition.totalDegree());
     }
 }
 

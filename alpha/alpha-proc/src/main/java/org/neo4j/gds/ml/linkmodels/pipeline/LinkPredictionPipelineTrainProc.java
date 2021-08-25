@@ -21,14 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.procedure.Description;
@@ -61,51 +55,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
 
     @Override
     protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            public LinkPredictionTrain build(
-                Graph graph,
-                LinkPredictionTrainConfig trainConfig,
-                AllocationTracker tracker,
-                ProgressTracker progressTracker
-            ) {
-                String graphName = trainConfig
-                    .graphName()
-                    .orElseThrow(() -> new UnsupportedOperationException(
-                        "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
-                var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
-
-                var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), username());
-
-                pipeline.validate();
-
-                var pipelineExecutor = new PipelineExecutor(
-                    pipeline,
-                    LinkPredictionPipelineTrainProc.this,
-                    databaseId(),
-                    username(),
-                    graphName
-                );
-
-                return new LinkPredictionTrain(
-                    graphStore,
-                    trainConfig,
-                    pipeline,
-                    pipelineExecutor,
-                    ProgressTracker.NULL_TRACKER
-                );
-            }
-
-            @Override
-            protected String taskName() {
-                return "Link Prediction pipeline train";
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
-            }
-        };
+        return new LinkPredictionTrainFactory(databaseId(), this);
     }
 
     @Override

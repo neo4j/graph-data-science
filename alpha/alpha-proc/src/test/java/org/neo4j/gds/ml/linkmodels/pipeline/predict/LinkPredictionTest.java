@@ -103,9 +103,17 @@ class LinkPredictionTest extends BaseProcTest {
         )));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var pipelineExecutor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
             var linkPrediction = new LinkPrediction(
                 modelData,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                pipelineExecutor,
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graphStore,
@@ -143,9 +151,17 @@ class LinkPredictionTest extends BaseProcTest {
         )));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var executor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
             var linkPrediction = new LinkPrediction(
                 modelData,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                executor,
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graphStore,
@@ -177,9 +193,17 @@ class LinkPredictionTest extends BaseProcTest {
         )));
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var pipelineExecutor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
             var linkPrediction = new LinkPrediction(
                 modelData,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                pipelineExecutor,
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graphStore,
@@ -231,9 +255,17 @@ class LinkPredictionTest extends BaseProcTest {
 
         for (int i = 0; i < 2; i++) {
             ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+                var pipelineExecutor = new PipelineExecutor(
+                    pipeline,
+                    caller,
+                    db.databaseId(),
+                    getUsername(),
+                    GRAPH_NAME,
+                    ProgressTracker.NULL_TRACKER
+                );
                 var linkPrediction = new LinkPrediction(
                     modelData,
-                    new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME),
+                    pipelineExecutor,
                     List.of(NodeLabel.of("N")),
                     List.of(RelationshipType.of("T")),
                     graphStore,

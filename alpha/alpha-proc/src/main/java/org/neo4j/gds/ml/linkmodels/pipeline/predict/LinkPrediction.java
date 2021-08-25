@@ -74,17 +74,21 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
 
     @Override
     public LinkPredictionResult compute() {
-        computeNodeProperties();
+        progressTracker.beginSubTask();
+        pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
         assertRunning();
 
-        return predictLinks();
-    }
+        var result = predictLinks();
 
-    private void computeNodeProperties() {
-        pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
+        pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
+        progressTracker.endSubTask();
+
+        return result;
     }
 
     private LinkPredictionResult predictLinks() {
+        progressTracker.beginSubTask();
+        // retrieve the graph containing the node-properties added by executing the node property steps
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
         var featureExtractor = pipelineExecutor.linkFeatureExtractor(graph);
 
@@ -104,7 +108,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
             terminationFlag
         );
 
-        pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
+        progressTracker.endSubTask();
 
         return result;
     }
@@ -155,6 +159,8 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
                     }
                 );
             }
+
+            progressTracker.logProgress(batch.size());
         }
 
         private LongHashSet largerNeighbors(long sourceId) {
