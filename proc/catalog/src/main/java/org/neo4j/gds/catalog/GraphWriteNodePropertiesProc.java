@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -27,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -36,7 +36,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodePropertiesProc extends CatalogProc {
@@ -90,12 +88,19 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     }
 
     private long writeNodeProperties(GraphStore graphStore, GraphWriteNodePropertiesConfig config) {
-        Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
-
+        var validNodeLabels = config.validNodeLabels(graphStore);
         var propertiesWritten = 0L;
-        var labelsWritten = 1L;
-        var labelCount = validNodeLabels.size();
+        var task = Tasks.iterativeFixed(
+            "WriteNodeProperties",
+            () -> List.of(
+                Tasks.leaf("Label")
+            ),
+            validNodeLabels.size()
+        );
+        var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
+        var progressTracker = new TaskProgressTracker(task, progressLogger, progressEventTracker);
 
+        progressTracker.beginSubTask();
         for (var label : validNodeLabels) {
             var subGraph = graphStore.getGraph(
                 Collections.singletonList(label),
@@ -103,22 +108,11 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                 Optional.empty()
             );
 
-            // We track the progress for each label individually.
-            // This needs to be reflected in the log output.
-            var taskName = formatWithLocale(
-                "WriteNodeProperties - Label %d of %d [Label='%s']",
-                labelsWritten++,
-                labelCount,
-                label.name()
-            );
-
-            var progressLogger = new BatchingProgressLogger(log, Tasks.leaf(taskName, subGraph.nodeCount()), config.writeConcurrency());
-
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(subGraph)
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .withProgressLogger(progressLogger)
+                .withProgressTracker(progressTracker)
                 .build();
 
             var writeNodeProperties =
@@ -134,6 +128,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             exporter.write(writeNodeProperties);
             propertiesWritten += exporter.propertiesWritten();
         }
+        progressTracker.endSubTask();
 
         return propertiesWritten;
     }

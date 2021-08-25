@@ -25,8 +25,8 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
@@ -43,7 +43,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     protected final TerminationFlag terminationFlag;
     protected final ExecutorService executorService;
-    protected final ProgressLogger progressLogger;
+    protected final ProgressTracker progressTracker;
     protected final int concurrency;
     protected final long nodeCount;
     protected final LongUnaryOperator toOriginalId;
@@ -82,7 +82,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                 nodeCount,
                 toOriginalId,
                 terminationFlag,
-                progressLogger,
+                progressTracker,
                 writeConcurrency,
                 executorService
             );
@@ -98,7 +98,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         long nodeCount,
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
-        ProgressLogger log,
+        ProgressTracker progressTracker,
         int concurrency,
         ExecutorService executorService
     ) {
@@ -106,7 +106,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         this.nodeCount = nodeCount;
         this.toOriginalId = toOriginalId;
         this.terminationFlag = terminationFlag;
-        this.progressLogger = log;
+        this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.propertiesWritten = new LongAdder();
@@ -124,6 +124,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
+        progressTracker.beginSubTask(nodeCount);
         var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
@@ -133,6 +134,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         } else {
             writeSequential(resolvedNodeProperties);
         }
+        progressTracker.endSubTask();
     }
 
     @Override
@@ -168,15 +170,13 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             terminationFlag.assertRunning();
             long progress = 0L;
             Write ops = stmt.dataWrite();
-            progressLogger.logStart();
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
-                progressLogger.logProgress();
+                progressTracker.logProgress();
                 if (++progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();
                 }
             }
-            progressLogger.logFinish();
         });
     }
 
@@ -197,7 +197,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                     Write ops = stmt.dataWrite();
                     for (long currentNode = start; currentNode < end; currentNode++) {
                         writer.accept(ops, currentNode);
-                        progressLogger.logProgress();
+                        progressTracker.logProgress();
 
                         if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                             terminationFlag.assertRunning();
@@ -206,7 +206,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                 });
             }
         );
-        progressLogger.logStart();
         ParallelUtil.runWithConcurrency(
             concurrency,
             runnables,
@@ -216,6 +215,5 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             terminationFlag,
             executorService
         );
-        progressLogger.logFinish();
     }
 }

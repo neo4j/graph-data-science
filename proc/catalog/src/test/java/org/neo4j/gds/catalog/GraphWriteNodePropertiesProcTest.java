@@ -37,6 +37,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
@@ -263,6 +264,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
+            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
             proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction
@@ -274,16 +276,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "WriteNodeProperties - Label 1 of 2 [Label='A'] :: Start",
-                "WriteNodeProperties - Label 1 of 2 [Label='A'] 33%",
-                "WriteNodeProperties - Label 1 of 2 [Label='A'] 66%",
-                "WriteNodeProperties - Label 1 of 2 [Label='A'] 100%",
-                "WriteNodeProperties - Label 1 of 2 [Label='A'] :: Finished",
-                "WriteNodeProperties - Label 2 of 2 [Label='B'] :: Start",
-                "WriteNodeProperties - Label 2 of 2 [Label='B'] 33%",
-                "WriteNodeProperties - Label 2 of 2 [Label='B'] 66%",
-                "WriteNodeProperties - Label 2 of 2 [Label='B'] 100%",
-                "WriteNodeProperties - Label 2 of 2 [Label='B'] :: Finished"
+                "WriteNodeProperties :: Label 1 of 2 :: Start",
+                "WriteNodeProperties :: Label 1 of 2 33%",
+                "WriteNodeProperties :: Label 1 of 2 66%",
+                "WriteNodeProperties :: Label 1 of 2 100%",
+                "WriteNodeProperties :: Label 1 of 2 :: Finished",
+                "WriteNodeProperties :: Label 2 of 2 :: Start",
+                "WriteNodeProperties :: Label 2 of 2 33%",
+                "WriteNodeProperties :: Label 2 of 2 66%",
+                "WriteNodeProperties :: Label 2 of 2 100%",
+                "WriteNodeProperties :: Label 2 of 2 :: Finished"
             );
     }
 
