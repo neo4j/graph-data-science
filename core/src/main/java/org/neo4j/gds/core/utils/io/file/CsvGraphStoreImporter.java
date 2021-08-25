@@ -50,6 +50,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.ImmutableImportedProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
@@ -342,7 +343,8 @@ public final class CsvGraphStoreImporter {
                     config,
                     Pools.DEFAULT,
                     log,
-                    tracker
+                    tracker,
+                    EmptyProgressEventTracker.INSTANCE
                 );
             } catch (ParseException | SemanticErrors e) {
                 throw new RuntimeException(e);
