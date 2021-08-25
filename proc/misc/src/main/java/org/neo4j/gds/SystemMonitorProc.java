@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Context;
@@ -42,6 +43,10 @@ public class SystemMonitorProc extends BaseProc {
     @Procedure(name = "gds.alpha.systemMonitor", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SystemMonitorResult> systemMonitor() {
+        if (GdsEdition.instance().isOnCommunityEdition()) {
+            throw new RuntimeException(
+                "This feature is only available with the Graph Data Science library enterprise edition");
+        }
 
         SystemMonitorResult result = runWithExceptionLogging(
             "Failed to collect system status information",

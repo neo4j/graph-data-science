@@ -22,6 +22,8 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
     }
 
     @Test
+    @GdsEditionTest(Edition.EE)
     void shouldGiveSaneSystemStatus() {
         runQuery("CALL gds.test.pl('foo')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
