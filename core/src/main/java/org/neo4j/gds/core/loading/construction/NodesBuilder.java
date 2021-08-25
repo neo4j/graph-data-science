@@ -104,7 +104,7 @@ public final class NodesBuilder {
         this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
-        this.labelInformationBuilder = LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, tracker);
+        this.labelInformationBuilder = LabelInformation.emptyBuilder(tracker);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
         this.nextLabelId = 0;
