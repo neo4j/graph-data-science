@@ -17,33 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.system;
+package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 
-class SystemStatusProcTest extends BaseTest {
+class SystemMonitorProcTest extends BaseProgressTest {
 
     @BeforeEach
     void setUp() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(
             db,
-            SystemStatusProc.class
+            ProgressTestProc.class,
+            SystemMonitorProc.class
         );
     }
 
     @Test
     void shouldGiveSaneSystemStatus() {
+        runQuery("CALL gds.test.pl('foo')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
         assertCypherResult(
-            "CALL gds.alpha.systemStatus()",
+            "CALL gds.alpha.systemMonitor()",
             List.of(Map.of(
                 "jvmFreeMemory",
                 greaterThan(0L),
@@ -53,8 +57,10 @@ class SystemStatusProcTest extends BaseTest {
                 greaterThan(0L),
                 "jvmAvailableProcessors",
                 greaterThan(0L),
-                "description",
-                aMapWithSize(4)
+                "jvmStatusDescription",
+                aMapWithSize(4),
+                "ongoingGdsProcedures",
+                List.of(Map.of("taskName", "foo", "progress", "33.33%"))
             ))
         );
     }

@@ -27,5 +27,7 @@ public interface ProgressEventStore extends Consumer<ProgressEvent> {
 
     ProgressEvent query(String username, JobId jobId);
 
+    List<ProgressEvent> query();
+
     boolean isEmpty();
 }

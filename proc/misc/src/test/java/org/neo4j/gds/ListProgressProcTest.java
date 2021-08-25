@@ -21,15 +21,12 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -37,13 +34,9 @@ import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.test.FakeClockJobScheduler;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
@@ -57,20 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class ListProgressProcTest extends BaseTest {
-
-    private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
-        builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
-        // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-        builder.addExtension(new ProgressEventExtension(scheduler));
-    }
+public class ListProgressProcTest extends BaseProgressTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -78,7 +58,7 @@ public class ListProgressProcTest extends BaseTest {
             db,
             ListProgressProc.class,
             GraphGenerateProc.class,
-            ProgressLoggingTestProc.class,
+            ProgressTestProc.class,
             ProgressLoggingTestFastRP.class
         );
     }
@@ -223,11 +203,5 @@ public class ListProgressProcTest extends BaseTest {
         protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
             return new FastRPFactory<>();
         }
-    }
-
-    public static class Bar {
-        public final String field;
-
-        public Bar(String field) {this.field = field;}
     }
 }

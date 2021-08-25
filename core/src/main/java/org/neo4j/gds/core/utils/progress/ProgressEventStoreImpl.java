@@ -57,7 +57,17 @@ public class ProgressEventStoreImpl implements ProgressEventStore {
         return progressEvents.isEmpty()
             ? ProgressEvent.endOfStreamEvent(username, jobId)
             : progressEvents.get(0);
+    }
 
+    @Override
+    public List<ProgressEvent> query() {
+        return events
+            .values()
+            .stream()
+            .flatMap(map -> map.values().stream())
+            .filter(not(List::isEmpty))
+            .map(items -> items.get(0))
+            .collect(toList());
     }
 
     @Override

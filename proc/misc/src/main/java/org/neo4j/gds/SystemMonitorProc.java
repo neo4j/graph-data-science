@@ -17,47 +17,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.system;
+package org.neo4j.gds;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.neo4j.procedure.Mode.READ;
 
-public class SystemStatusProc extends BaseProc {
+public class SystemMonitorProc extends BaseProc {
+
+    @Context
+    public ProgressEventStore progress;
 
     private static final String DESCRIPTION = "Gives an overview of the system's resources and how they are currently being used.";
 
-    @Procedure(name = "gds.alpha.systemStatus", mode = READ)
+    @Procedure(name = "gds.alpha.systemMonitor", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SystemStatusResult> systemStatus() {
+    public Stream<SystemMonitorResult> systemMonitor() {
 
-        SystemStatusResult result = runWithExceptionLogging(
+        SystemMonitorResult result = runWithExceptionLogging(
             "Failed to collect system status information",
-            SystemStatusResult::new
+            SystemMonitorResult::new
         );
 
         return Stream.of(result);
     }
 
-    public static class SystemStatusResult {
+    public class SystemMonitorResult {
+
         public final long jvmFreeMemory;
         public final long jvmTotalMemory;
         public final long jvmMaxMemory;
         public final long jvmAvailableProcessors;
-        public final Map<String, String> description;
+        public final Map<String, String> jvmStatusDescription;
+        public final List<Map<String, String>> ongoingGdsProcedures;
 
-        public SystemStatusResult() {
-            this.jvmFreeMemory = Runtime.getRuntime().freeMemory();
-            this.jvmTotalMemory = Runtime.getRuntime().totalMemory();
-            this.jvmMaxMemory = Runtime.getRuntime().maxMemory();
-            this.jvmAvailableProcessors = Runtime.getRuntime().availableProcessors();
-            this.description = Map.of(
+        public SystemMonitorResult() {
+            var runtime = Runtime.getRuntime();
+            this.jvmFreeMemory = runtime.freeMemory();
+            this.jvmTotalMemory = runtime.totalMemory();
+            this.jvmMaxMemory = runtime.maxMemory();
+            this.jvmAvailableProcessors = runtime.availableProcessors();
+
+            this.jvmStatusDescription = Map.of(
                 "jvmFreeMemory",
                 MemoryUsage.humanReadable(this.jvmFreeMemory),
                 "jvmTotalMemory",
@@ -67,6 +77,28 @@ public class SystemStatusProc extends BaseProc {
                 "jvmAvailableProcessors",
                 String.valueOf(this.jvmAvailableProcessors)
             );
+
+            this.ongoingGdsProcedures = getAllOngoingProcedures();
+        }
+
+        private List<Map<String, String>> getAllOngoingProcedures() {
+            return progress
+                .query()
+                .stream()
+                .map(event ->
+                {
+                    var progress = event.task().getProgress();
+                    return Map.of(
+                        "taskName",
+                        event.task().description(),
+                        "progress",
+                        StructuredOutputHelper.computeProgress(
+                            progress.progress(),
+                            progress.volume()
+                        )
+                    );
+                })
+                .collect(toList());
         }
     }
 }
