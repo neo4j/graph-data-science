@@ -74,6 +74,7 @@ public class ListProgressProcTest extends BaseProgressTest {
             List.of(
                 Map.of(
                     "taskName","foo",
+                    "stage", "0 of 2",
                     "progress", "33.33%",
                     "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",

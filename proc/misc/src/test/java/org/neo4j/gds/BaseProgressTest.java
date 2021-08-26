@@ -57,10 +57,14 @@ public class BaseProgressTest extends BaseTest {
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName
         ) {
-            var task = Tasks.leaf(taskName, 3);
-            task.start();
-            task.logProgress(1);
-            progress.addTaskProgressEvent(task);
+            var leaf = Tasks.leaf("leaf", 3);
+            var baseTask = Tasks.task(taskName, leaf);
+            baseTask.start();
+            progress.addTaskProgressEvent(baseTask);
+            leaf.start();
+            leaf.logProgress(1);
+            progress.addTaskProgressEvent(leaf);
+
             return Stream.empty();
         }
     }
