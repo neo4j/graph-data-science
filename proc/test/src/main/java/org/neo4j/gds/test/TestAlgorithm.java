@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
@@ -55,13 +56,34 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         );
     }
 
+    public TestAlgorithm(
+        Graph graph,
+        AllocationTracker allocationTracker,
+        long memoryLimit,
+        Log log,
+        ProgressTracker progressTracker,
+        boolean throwInCompute
+    ) {
+        this.graph = graph;
+        this.allocationTracker = allocationTracker;
+        this.memoryLimit = memoryLimit;
+        this.throwInCompute = throwInCompute;
+        this.progressTracker = progressTracker;
+    }
+
+
     @Override
     public TestAlgorithm compute() {
+        progressTracker.beginSubTask();
+
         if (throwInCompute) {
             throw new IllegalStateException("boo");
         }
         relationshipCount = graph.relationshipCount();
         allocationTracker.add(memoryLimit * 2);
+
+        progressTracker.endSubTask();
+
         return this;
     }
 

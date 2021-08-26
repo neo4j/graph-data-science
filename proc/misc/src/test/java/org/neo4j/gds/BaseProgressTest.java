@@ -23,6 +23,8 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
@@ -38,7 +40,7 @@ import java.util.stream.Stream;
 public class BaseProgressTest extends BaseTest {
 
     protected final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
-    protected static final OptionalLong MAX_MEMORY_USAGE = OptionalLong.of(10);
+    protected static final long MAX_MEMORY_USAGE = 10;
 
     @Override
     @ExtensionCallback
@@ -51,7 +53,7 @@ public class BaseProgressTest extends BaseTest {
         builder.addExtension(new ProgressEventExtension(scheduler));
     }
 
-    public static class ProgressTestProc {
+    public static class BaseProgressTestProc {
         @Context
         public ProgressEventTracker progress;
 
@@ -63,7 +65,7 @@ public class BaseProgressTest extends BaseTest {
             var leaf = Tasks.leaf("leaf", 3);
             var baseTask = Tasks.task(taskName, leaf);
             if (withMemoryEstimation) {
-                baseTask.setEstimatedMaxMemoryInBytes(MAX_MEMORY_USAGE);
+                baseTask.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
             }
             baseTask.start();
             progress.addTaskProgressEvent(baseTask);
@@ -79,5 +81,36 @@ public class BaseProgressTest extends BaseTest {
         public final String field;
 
         public Bar(String field) {this.field = field;}
+    }
+
+    public static class NonReleasingProgressTracker extends TaskProgressTracker {
+
+        NonReleasingProgressTracker(TaskProgressTracker progressTracker) {
+            super(progressTracker);
+        }
+
+        @Override
+        public void release() {
+            // skip the release because we want to observe the messages after the algo is done
+        }
+    }
+
+    public static class NonReleasingProgressEventTracker implements ProgressEventTracker {
+
+        private final ProgressEventTracker tracker;
+
+        NonReleasingProgressEventTracker(ProgressEventTracker tracker) {
+            this.tracker = tracker;
+        }
+
+        @Override
+        public void addTaskProgressEvent(Task task) {
+            tracker.addTaskProgressEvent(task);
+        }
+
+        @Override
+        public void release() {
+            // skip the release because we want to observe the messages after the algo is done
+        }
     }
 }

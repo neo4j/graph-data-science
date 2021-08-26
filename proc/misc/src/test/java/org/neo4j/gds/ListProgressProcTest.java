@@ -25,8 +25,6 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
@@ -54,7 +52,7 @@ public class ListProgressProcTest extends BaseProgressTest {
             db,
             ListProgressProc.class,
             GraphGenerateProc.class,
-            ProgressTestProc.class,
+            BaseProgressTestProc.class,
             ProgressLoggingTestFastRP.class
         );
     }
@@ -159,17 +157,7 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
             var tracker = this.progressEventTracker;
-            this.progressEventTracker = new ProgressEventTracker() {
-                @Override
-                public void addTaskProgressEvent(Task task) {
-                    tracker.addTaskProgressEvent(task);
-                }
-
-                @Override
-                public void release() {
-                    // skip the release because we want to observe the messages after the algo is done
-                }
-            };
+            this.progressEventTracker = new NonReleasingProgressEventTracker(tracker);
 
             try {
                 return super.stream(graphNameOrConfig, configuration);

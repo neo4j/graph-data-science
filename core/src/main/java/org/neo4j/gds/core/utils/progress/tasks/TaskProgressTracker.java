@@ -47,6 +47,15 @@ public class TaskProgressTracker implements ProgressTracker {
         this(baseTask, progressLogger, EmptyProgressEventTracker.INSTANCE);
     }
 
+    @TestOnly
+    public TaskProgressTracker(TaskProgressTracker progressTracker) {
+        this.baseTask = progressTracker.baseTask;
+        this.taskProgressLogger = progressTracker.taskProgressLogger;
+        this.eventTracker = progressTracker.eventTracker;
+        this.currentTask = progressTracker.currentTask;
+        this.nestedTasks = progressTracker.nestedTasks;
+    }
+
     public TaskProgressTracker(
         Task baseTask,
         ProgressLogger progressLogger,
