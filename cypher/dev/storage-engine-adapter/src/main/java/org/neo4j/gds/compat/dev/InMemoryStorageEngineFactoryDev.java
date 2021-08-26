@@ -37,7 +37,9 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.lock.LockService;
@@ -49,6 +51,8 @@ import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.token.TokenHolders;
+
+import java.util.UUID;
 
 @ServiceProvider
 public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngineFactory {
@@ -99,6 +103,17 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
             .withCountsStoreFn(InMemoryCountsStoreImpl::new)
             .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
             .build();
+    }
+
+    @Override
+    public void setExternalStoreUUID(
+        FileSystemAbstraction fileSystemAbstraction,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext,
+        UUID uuid
+    ) {
+        MetaDataStore.getDatabaseIdUuid(pageCache, RecordDatabaseLayout.convert(databaseLayout).metadataStore(), databaseLayout.getDatabaseName(), cursorContext);
     }
 
     @Override
