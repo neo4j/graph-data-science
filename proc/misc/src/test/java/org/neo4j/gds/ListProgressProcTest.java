@@ -23,18 +23,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
@@ -74,7 +70,6 @@ public class ListProgressProcTest extends BaseProgressTest {
             List.of(
                 Map.of(
                     "taskName","foo",
-                    "stage", "0 of 2",
                     "progress", "33.33%",
                     "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",
@@ -144,23 +139,6 @@ public class ListProgressProcTest extends BaseProgressTest {
                     Map.of("taskName", "FastRP", "progress", "100%")
                 )
             );
-        }
-    }
-
-    public static class ProgressLoggingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
-
-        @Procedure("gds.test.pl")
-        public Stream<Bar> foo(
-            @Name(value = "taskName") String taskName
-        ) {
-            var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
-            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress);
-            taskProgressTracker.beginSubTask();
-            taskProgressTracker.beginSubTask();
-            taskProgressTracker.logProgress(1);
-            return Stream.empty();
         }
     }
 
