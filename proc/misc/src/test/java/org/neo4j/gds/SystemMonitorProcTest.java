@@ -22,6 +22,8 @@ package org.neo4j.gds;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -137,12 +139,17 @@ class SystemMonitorProcTest extends BaseProgressTest {
         }
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
     @GdsEditionTest(Edition.EE)
-    void shouldSetMemoryEstimationOnBaseTask() {
+    void shouldSetResourceEstimationOnBaseTask(int concurrency) {
         runQuery(
-            "CALL gds.test.algoTestProc($graph, { writeProperty: $writeProperty })",
-            Map.of("graph", GRAPH_NAME, "writeProperty", "dummy")
+            "CALL gds.test.algoTestProc($graph, { writeProperty: $writeProperty, concurrency: $concurrency })",
+            Map.of(
+                "graph", GRAPH_NAME,
+                "writeProperty", "dummy",
+                "concurrency", concurrency
+            )
         );
 
         assertCypherResult(
@@ -151,12 +158,13 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "freeHeap", greaterThan(0L),
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
-                "jvmAvailableProcessors", greaterThan(0L),
+                "jvmAvailableCpuCores", greaterThan(0L),
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", List.of(Map.of(
                     "taskName", "TestAlgorithm",
                     "progress", "n/a",
-                    "maxMemoryEstimation", NODE_COUNT * MEMORY_RANGE_SIZE + " Bytes"
+                    "maxMemoryEstimation", NODE_COUNT * MEMORY_RANGE_SIZE + " Bytes",
+                    "maxNumberOfCpuCores", String.valueOf(concurrency)
                 ))
             ))
         );
@@ -175,18 +183,20 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "freeHeap", greaterThan(0L),
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
-                "jvmAvailableProcessors", greaterThan(0L),
+                "jvmAvailableCpuCores", greaterThan(0L),
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", containsInAnyOrder(
                     Map.of(
                         "taskName", "foo",
                         "progress", "33.33%",
-                        "maxMemoryEstimation", "n/a"
+                        "maxMemoryEstimation", "n/a",
+                        "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
                     ),
                     Map.of(
                         "taskName", "bar",
                         "progress", "33.33%",
-                        "maxMemoryEstimation", MAX_MEMORY_USAGE + " Bytes"
+                        "maxMemoryEstimation", MAX_MEMORY_USAGE + " Bytes",
+                        "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
                     )
                 )
             ))
@@ -202,7 +212,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "freeHeap", greaterThan(0L),
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
-                "jvmAvailableProcessors", greaterThan(0L),
+                "jvmAvailableCpuCores", greaterThan(0L),
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", Matchers.empty()
             ))

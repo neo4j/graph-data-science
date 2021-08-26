@@ -61,7 +61,7 @@ public class SystemMonitorProc extends BaseProc {
         public final long freeHeap;
         public final long totalHeap;
         public final long maxHeap;
-        public final long jvmAvailableProcessors;
+        public final long jvmAvailableCpuCores;
         public final Map<String, String> jvmStatusDescription;
         public final List<Map<String, String>> ongoingGdsProcedures;
 
@@ -70,7 +70,7 @@ public class SystemMonitorProc extends BaseProc {
             this.freeHeap = runtime.freeMemory();
             this.totalHeap = runtime.totalMemory();
             this.maxHeap = runtime.maxMemory();
-            this.jvmAvailableProcessors = runtime.availableProcessors();
+            this.jvmAvailableCpuCores = runtime.availableProcessors();
 
             this.jvmStatusDescription = Map.of(
                 "freeHeap",
@@ -79,8 +79,8 @@ public class SystemMonitorProc extends BaseProc {
                 MemoryUsage.humanReadable(this.totalHeap),
                 "maxHeap",
                 MemoryUsage.humanReadable(this.maxHeap),
-                "jvmAvailableProcessors",
-                String.valueOf(this.jvmAvailableProcessors)
+                "jvmAvailableCpuCores",
+                String.valueOf(this.jvmAvailableCpuCores)
             );
 
             this.ongoingGdsProcedures = getAllOngoingProcedures();
@@ -95,14 +95,13 @@ public class SystemMonitorProc extends BaseProc {
                         ? MemoryUsage.humanReadable(task.estimatedMaxMemoryInBytes().getAsLong())
                         : "n/a";
                     return Map.of(
-                        "taskName",
-                        task.description(),
-                        "progress",
-                        StructuredOutputHelper.computeProgress(
+                        "taskName", task.description(),
+                        "progress", StructuredOutputHelper.computeProgress(
                             progress.progress(),
                             progress.volume()
                         ),
-                        "maxMemoryEstimation", maxMemoryEstimation
+                        "maxMemoryEstimation", maxMemoryEstimation,
+                        "maxNumberOfCpuCores", String.valueOf(task.concurrency())
                     );
                 })
                 .collect(toList());

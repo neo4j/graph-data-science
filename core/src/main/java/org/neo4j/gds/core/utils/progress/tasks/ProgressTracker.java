@@ -29,7 +29,7 @@ public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
-    void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory);
+    void setEstimatedResourceFootprint(OptionalLong maxMemoryInBytes, int concurrency);
 
     void beginSubTask();
 
@@ -58,8 +58,7 @@ public interface ProgressTracker {
     class EmptyProgressTracker implements ProgressTracker {
 
         @Override
-        public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory) {
-
+        public void setEstimatedResourceFootprint(OptionalLong maxMemoryInBytes, int concurrency) {
         }
 
         @Override

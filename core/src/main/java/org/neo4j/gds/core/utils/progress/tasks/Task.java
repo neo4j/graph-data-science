@@ -39,6 +39,7 @@ public class Task {
     private long finishTime;
 
     private OptionalLong estimatedMaxMemoryInBytes = OptionalLong.empty();
+    private int concurrency = 1;
 
     Task(String description, List<Task> subTasks) {
         this.description = description;
@@ -161,7 +162,12 @@ public class Task {
         return this.estimatedMaxMemoryInBytes;
     }
 
-    public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory) {
-        this.estimatedMaxMemoryInBytes = maxMemory;
+    public int concurrency() {
+        return this.concurrency;
+    }
+
+    public void setEstimatedResourceFootprint(OptionalLong maxMemoryInBytes, int concurrency) {
+        this.estimatedMaxMemoryInBytes = maxMemoryInBytes;
+        this.concurrency = concurrency;
     }
 }

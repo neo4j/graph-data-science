@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 public class BaseProgressTest extends BaseTest {
 
     protected static final long MAX_MEMORY_USAGE = 10;
+    protected static final int MAX_CPU_CORES = 5;
 
     @Override
     @ExtensionCallback
@@ -64,7 +65,9 @@ public class BaseProgressTest extends BaseTest {
         ) {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
             if (withMemoryEstimation) {
-                task.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
+                task.setEstimatedResourceFootprint(OptionalLong.of(MAX_MEMORY_USAGE), MAX_CPU_CORES);
+            } else {
+                task.setEstimatedResourceFootprint(OptionalLong.empty(), MAX_CPU_CORES);
             }
             var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
             taskProgressTracker.beginSubTask();
