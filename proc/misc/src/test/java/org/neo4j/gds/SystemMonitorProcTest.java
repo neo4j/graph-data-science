@@ -69,8 +69,20 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 aMapWithSize(4),
                 "ongoingGdsProcedures",
                 containsInAnyOrder(
-                    Map.of("taskName", "foo", "progress", "33.33%","memoryEstimation", "n/a"),
-                    Map.of("taskName", "bar", "progress", "33.33%", "memoryEstimation", MAX_MEMORY_USAGE.getAsLong() + " Bytes")
+                    Map.of("taskName",
+                        "foo",
+                        "progress",
+                        "33.33%",
+                        "maxMemoryEstimation",
+                        "n/a"),
+                    Map.of(
+                        "taskName",
+                        "bar",
+                        "progress",
+                        "33.33%",
+                        "maxMemoryEstimation",
+                        MAX_MEMORY_USAGE.getAsLong() + " Bytes"
+                    )
                 )
             ))
         );

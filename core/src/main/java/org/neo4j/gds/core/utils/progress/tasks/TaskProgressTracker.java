@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Stack;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -61,8 +62,8 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public Task baseTask() {
-        return baseTask;
+    public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory) {
+        this.baseTask.setEstimatedMaxMemoryInBytes(maxMemory);
     }
 
     @Override

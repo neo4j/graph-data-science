@@ -227,7 +227,7 @@ public abstract class AlgoBaseProc<
 
         ALGO algo = newAlgorithm(graph, config, tracker);
 
-        algo.progressTracker.baseTask().setMaxMemoryUsage(maybeMaxMemoryUsage);
+        algo.progressTracker.setEstimatedMaxMemoryInBytes(maybeMaxMemoryUsage);
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",

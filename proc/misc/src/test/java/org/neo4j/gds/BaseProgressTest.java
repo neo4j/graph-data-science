@@ -63,7 +63,7 @@ public class BaseProgressTest extends BaseTest {
             var leaf = Tasks.leaf("leaf", 3);
             var baseTask = Tasks.task(taskName, leaf);
             if (withMemoryEstimation) {
-                baseTask.setMaxMemoryUsage(MAX_MEMORY_USAGE);
+                baseTask.setEstimatedMaxMemoryInBytes(MAX_MEMORY_USAGE);
             }
             baseTask.start();
             progress.addTaskProgressEvent(baseTask);

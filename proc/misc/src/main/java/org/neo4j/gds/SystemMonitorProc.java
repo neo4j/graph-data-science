@@ -94,8 +94,8 @@ public class SystemMonitorProc extends BaseProc {
                 {
                     var baseTask = event.task();
                     var progress = baseTask.getProgress();
-                    var memoryEstimation = baseTask.maxMemoryUsage().isPresent()
-                        ? MemoryUsage.humanReadable(baseTask.maxMemoryUsage().getAsLong())
+                    var maxMemoryEstimation = baseTask.estimatedMaxMemoryInBytes().isPresent()
+                        ? MemoryUsage.humanReadable(baseTask.estimatedMaxMemoryInBytes().getAsLong())
                         : "n/a";
                     return Map.of(
                         "taskName",
@@ -105,7 +105,7 @@ public class SystemMonitorProc extends BaseProc {
                             progress.progress(),
                             progress.volume()
                         ),
-                        "memoryEstimation", memoryEstimation
+                        "maxMemoryEstimation", maxMemoryEstimation
                     );
                 })
                 .collect(toList());

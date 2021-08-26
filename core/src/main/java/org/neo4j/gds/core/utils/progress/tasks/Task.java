@@ -38,7 +38,7 @@ public class Task {
     private long startTime;
     private long finishTime;
 
-    private OptionalLong maxMemoryUsage = OptionalLong.empty();
+    private OptionalLong estimatedMaxMemoryInBytes = OptionalLong.empty();
 
     Task(String description, List<Task> subTasks) {
         this.description = description;
@@ -157,11 +157,11 @@ public class Task {
         return this.finishTime;
     }
 
-    public OptionalLong maxMemoryUsage() {
-        return this.maxMemoryUsage;
+    public OptionalLong estimatedMaxMemoryInBytes() {
+        return this.estimatedMaxMemoryInBytes;
     }
 
-    public void setMaxMemoryUsage(OptionalLong usage) {
-        this.maxMemoryUsage = usage;
+    public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory) {
+        this.estimatedMaxMemoryInBytes = maxMemory;
     }
 }

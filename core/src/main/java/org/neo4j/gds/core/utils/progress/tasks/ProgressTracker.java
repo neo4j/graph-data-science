@@ -23,11 +23,13 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 
+import java.util.OptionalLong;
+
 public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
-    Task baseTask();
+    void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory);
 
     void beginSubTask();
 
@@ -54,9 +56,10 @@ public interface ProgressTracker {
     void release();
 
     class EmptyProgressTracker implements ProgressTracker {
+
         @Override
-        public Task baseTask() {
-            return Tasks.empty();
+        public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemory) {
+
         }
 
         @Override
