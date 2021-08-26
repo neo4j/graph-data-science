@@ -27,8 +27,8 @@ final class ProcedureArgumentsExtractor {
     private ProcedureArgumentsExtractor() {}
 
     public static List<String> findArguments(String codeSnippet) {
-        var start = codeSnippet.indexOf("(") + 1;
-        var end = codeSnippet.indexOf(")");
+        var start = codeSnippet.indexOf('(') + 1;
+        var end = codeSnippet.indexOf(')');
         var x = codeSnippet.substring(start, end);
         return Arrays.stream(x.split(","))
             .map(yieldField -> yieldField.split(":")[0].trim())

@@ -113,7 +113,7 @@ public final class ExceptionUtil {
         runnable.run();
     }
 
-    public static <T, R, E extends Exception> Function<T, R> function(CheckedFunction<T, R, E> function) throws E {
+    public static <T, R, E extends Exception> Function<T, R> function(CheckedFunction<T, R, E> function) {
         return function;
     }
 

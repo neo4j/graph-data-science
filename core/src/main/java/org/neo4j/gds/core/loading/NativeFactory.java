@@ -130,7 +130,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             .entrySet()
             .stream()
             .map(entry -> {
-                Long relCount = entry.getKey().name.equals("*")
+                long relCount = entry.getKey().name.equals("*")
                     ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
                     : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
 

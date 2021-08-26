@@ -60,7 +60,7 @@ public class StoredModel implements Model<Object, ModelConfig, Model.Mappable> {
         this(storeDir, new ModelFileReader(storeDir).readMetaData(), false);
     }
 
-    private StoredModel(Path storeDir, ModelProto.ModelMetaData metaData, boolean loaded) throws IOException {
+    private StoredModel(Path storeDir, ModelProto.ModelMetaData metaData, boolean loaded) {
         this.modelReader = new ModelFileReader(storeDir);
         this.metaData = metaData;
         this.loaded = loaded;
