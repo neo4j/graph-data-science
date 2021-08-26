@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
@@ -35,6 +41,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -161,5 +169,36 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             "Relationship property `nonExisting` not found for relationship type 'NEW_REL1'. " +
             "Available properties: ['newRelProp1', 'newRelProp2']"
         );
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var log = new TestLog();
+
+        try (var transactions = newKernelTransaction(db)) {
+            var proc = new GraphWriteRelationshipProc();
+
+            proc.procedureTransaction = transactions.tx();
+            proc.transaction = transactions.ktx();
+            proc.api = db;
+            proc.callContext = ProcedureCallContext.EMPTY;
+            proc.log = log;
+            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(
+                proc.api,
+                proc.procedureTransaction
+            ));
+
+            proc.run(TEST_GRAPH_NAME, "NEW_REL1", "newRelProp1", Map.of());
+        }
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "WriteRelationships :: Start",
+                "WriteRelationships 50%",
+                "WriteRelationships 100%",
+                "WriteRelationships :: Finished"
+            );
     }
 }
