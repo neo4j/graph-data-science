@@ -6,7 +6,7 @@
 This section details the operations available over node-properties stored in projected graphs within the Neo4j Graph Data Science library.
 --
 
-The graphs in the Neo4j Graph Data Science Libarary support properties for nodes.
+The graphs in the Neo4j Graph Data Science Library support properties for nodes.
 We provide multiple operations to work with the stored node-properties in projected graphs.
 Node properties are either created during the graph creation or when using the `mutate` mode of our graph algorithms.
 
