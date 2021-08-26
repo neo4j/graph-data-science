@@ -172,8 +172,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     }
 
     private void runColoring(long volume) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(volume);
+        progressTracker.beginSubTask(volume);
         long nodeCount = graph.nodeCount();
         long approximateRelationshipCount = ceilDiv(graph.relationshipCount(), nodeCount) * nodesToColor.cardinality();
         long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
@@ -201,8 +200,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     }
 
     private void runValidation(long volume) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(volume);
+        progressTracker.beginSubTask(volume);
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64

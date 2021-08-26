@@ -68,8 +68,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
 
     @Override
     public SpanningTree compute() {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(graph.nodeCount());
+        progressTracker.beginSubTask(graph.nodeCount());
         Prim prim = new Prim(
             idMapping,
             graph,

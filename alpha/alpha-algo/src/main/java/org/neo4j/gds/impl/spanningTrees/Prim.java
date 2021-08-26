@@ -64,8 +64,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     @Override
     public SpanningTree compute() {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(graph.nodeCount());
+        progressTracker.beginSubTask(graph.nodeCount());
         int[] parent = new int[nodeCount];
         IntDoubleMap cost = new IntDoubleScatterMap(nodeCount);
         SharedIntPriorityQueue queue = SharedIntPriorityQueue.min(

@@ -72,8 +72,7 @@ public final class LinkFeatureExtractor {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(graph.relationshipCount());
+        progressTracker.beginSubTask(graph.relationshipCount());
 
         var extractor = of(graph, linkFeatureSteps);
 

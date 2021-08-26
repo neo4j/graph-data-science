@@ -69,6 +69,12 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTask(long taskVolume) {
+        beginSubTask();
+        setVolume(taskVolume);
+    }
+
+    @Override
     public void endSubTask() {
         var currentTask = requireCurrentTask();
         taskProgressLogger.logEndSubTask(currentTask, parentTask());

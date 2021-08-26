@@ -29,6 +29,8 @@ public interface ProgressTracker {
 
     void beginSubTask();
 
+    void beginSubTask(long taskVolume);
+
     void endSubTask();
 
     void logProgress(long value);
@@ -48,6 +50,11 @@ public interface ProgressTracker {
     class EmptyProgressTracker implements ProgressTracker {
         @Override
         public void beginSubTask() {
+        }
+
+        @Override
+        public void beginSubTask(long taskVolume) {
+
         }
 
         @Override

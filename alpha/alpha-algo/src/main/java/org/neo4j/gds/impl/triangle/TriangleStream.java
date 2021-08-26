@@ -104,8 +104,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
 
     @Override
     public Stream<Result> compute() {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(graph.nodeCount());
+        progressTracker.beginSubTask(graph.nodeCount());
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
         final Iterator<Result> it = new Iterator<>() {

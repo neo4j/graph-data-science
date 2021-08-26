@@ -296,8 +296,7 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(llrConfig.maxEpochs());
+        progressTracker.beginSubTask(llrConfig.maxEpochs());
 
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
@@ -330,9 +329,7 @@ public class LinkPredictionTrain
         BatchQueue evaluationQueue,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-
-        progressTracker.setVolume(inputData.size());
+        progressTracker.beginSubTask(inputData.size());
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var signedProbabilities = SignedProbabilities.create(inputData.size());

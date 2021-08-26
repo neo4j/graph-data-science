@@ -232,8 +232,7 @@ final class NodesFilter {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(filteredNodeMapping.nodeCount() * propertyKeys.size());
+        progressTracker.beginSubTask(filteredNodeMapping.nodeCount() * propertyKeys.size());
 
         var builder = NodePropertyStore.builder();
         var filteredNodeCount = filteredNodeMapping.nodeCount();

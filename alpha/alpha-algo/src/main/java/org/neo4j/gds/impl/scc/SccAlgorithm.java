@@ -75,8 +75,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
      * compute scc
      */
     public HugeLongArray compute() {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(graph.nodeCount());
+        progressTracker.beginSubTask(graph.nodeCount());
         setCount = 0;
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;

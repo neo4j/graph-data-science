@@ -249,13 +249,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
-                progressTracker.beginSubTask();
-                progressTracker.setVolume(modelParams.maxEpochs());
+                progressTracker.beginSubTask(modelParams.maxEpochs());
                 var modelData = trainModel(trainSet, modelParams);
                 progressTracker.endSubTask();
 
-                progressTracker.beginSubTask();
-                progressTracker.setVolume(validationSet.size() + trainSet.size());
+                progressTracker.beginSubTask(validationSet.size() + trainSet.size());
                 computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
                 computeMetrics(classCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
                 progressTracker.endSubTask();
@@ -283,13 +281,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         NodeLogisticRegressionTrainConfig bestParameters
     ) {
         int maxEpochs = bestParameters.maxEpochs();
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(maxEpochs);
+        progressTracker.beginSubTask(maxEpochs);
         NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
         progressTracker.endSubTask();
 
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
         var testMetrics = computeMetrics(classCounts, outerSplit.testSet(), bestModelData, metrics);
         var outerTrainMetrics = computeMetrics(classCounts, outerSplit.trainSet(), bestModelData, metrics);
         progressTracker.endSubTask();
@@ -299,8 +295,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     private NodeLogisticRegressionData retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
         int maxEpochs = bestParameters.maxEpochs();
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(maxEpochs);
+        progressTracker.beginSubTask(maxEpochs);
         var retrainedModelData = trainModel(nodeIds, bestParameters);
         progressTracker.endSubTask();
         return retrainedModelData;
