@@ -41,7 +41,7 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
-            var globalTaskRegistry = new GlobalTaskRegistryMap();
+            var globalTaskRegistry = new GlobalTaskStore();
             registry.registerComponent(TaskStore.class, ctx -> globalTaskRegistry, true);
             registry.registerComponent(TaskRegistry.class, globalTaskRegistry, true);
         } else {

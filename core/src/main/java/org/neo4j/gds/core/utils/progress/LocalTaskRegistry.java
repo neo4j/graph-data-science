@@ -24,22 +24,22 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 public class LocalTaskRegistry implements TaskRegistry {
 
     private final String username;
-    private final GlobalTaskRegistry globalTaskRegistry;
+    private final GlobalTaskStore globalTaskStore;
     private final JobId jobId;
 
-    public LocalTaskRegistry(String username, GlobalTaskRegistry globalTaskRegistry) {
+    public LocalTaskRegistry(String username, GlobalTaskStore globalTaskStore) {
         this.username = username;
-        this.globalTaskRegistry = globalTaskRegistry;
+        this.globalTaskStore = globalTaskStore;
         this.jobId = new JobId();
     }
 
     @Override
     public void registerTask(Task task) {
-        globalTaskRegistry.registerTask(username, jobId, task);
+        globalTaskStore.store(username, jobId, task);
     }
 
     @Override
     public void unregisterTask() {
-        globalTaskRegistry.unregisterTask(username, jobId);
+        globalTaskStore.remove(username, jobId);
     }
 }

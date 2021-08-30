@@ -27,23 +27,21 @@ import org.neo4j.kernel.api.procedure.Context;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GlobalTaskRegistryMap implements GlobalTaskRegistry, ThrowingFunction<Context, TaskRegistry, ProcedureException> {
+public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistry, ProcedureException> {
 
     private final Map<String, Map<JobId, Task>> registeredTasks;
 
-    public GlobalTaskRegistryMap() {
+    GlobalTaskStore() {
         this.registeredTasks = new ConcurrentHashMap<>();
     }
 
-    @Override
-    public void registerTask(String username, JobId jobId, Task task) {
+    void store(String username, JobId jobId, Task task) {
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .put(jobId, task);
     }
 
-    @Override
-    public void unregisterTask(String username, JobId jobId) {
+    void remove(String username, JobId jobId) {
         if (this.registeredTasks.containsKey(username)) {
             this.registeredTasks.get(username).remove(jobId);
         }
