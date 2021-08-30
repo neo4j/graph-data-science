@@ -22,11 +22,12 @@ package org.neo4j.gds.core.utils.progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface TaskStore {
     Map<JobId, Task> query(String username);
 
-    Task query(String username, JobId jobId);
+    Optional<Task> query(String username, JobId jobId);
 
     boolean isEmpty();
 }

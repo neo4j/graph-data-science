@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.Map;
+import java.util.Optional;
 
 public enum EmptyTaskStore implements TaskStore {
     INSTANCE;
@@ -33,8 +33,8 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public Task query(String username, JobId jobId) {
-        return Tasks.empty();
+    public Optional<Task> query(String username, JobId jobId) {
+        return Optional.empty();
     }
 
     @Override

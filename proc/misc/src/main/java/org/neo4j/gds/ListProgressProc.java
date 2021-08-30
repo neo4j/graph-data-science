@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class ListProgressProc extends BaseProc {
 
     static final int PROGRESS_BAR_LENGTH = 10;
@@ -66,7 +68,9 @@ public class ListProgressProc extends BaseProc {
 
     private Stream<ProgressResult> jobDetailView(String jobIdAsString) {
         var jobId = JobId.fromString(jobIdAsString);
-        var task = taskStore.query(username(), jobId);
+        var task = taskStore.query(username(), jobId).orElseThrow(
+            () -> new IllegalArgumentException(formatWithLocale("No task with job id `%s` was found.", jobIdAsString))
+        );
         var jobProgressVisitor = new JobProgressVisitor(jobId);
         TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
         return jobProgressVisitor.progressRowsStream();

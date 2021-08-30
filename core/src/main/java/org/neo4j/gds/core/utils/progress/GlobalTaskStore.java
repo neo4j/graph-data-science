@@ -25,6 +25,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistry, ProcedureException> {
@@ -53,11 +54,8 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
-    public Task query(String username, JobId jobId) {
-        if (registeredTasks.containsKey(username)) {
-            return registeredTasks.get(username).get(jobId);
-        }
-        return null;
+    public Optional<Task> query(String username, JobId jobId) {
+        return Optional.ofNullable(registeredTasks.get(username).get(jobId));
     }
 
     @Override
