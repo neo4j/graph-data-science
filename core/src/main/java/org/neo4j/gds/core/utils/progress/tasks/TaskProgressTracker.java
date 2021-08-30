@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import java.util.Optional;
 import java.util.Stack;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
@@ -70,6 +72,12 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTask(String subTaskSubString) {
+        beginSubTask();
+        assertSubTask(subTaskSubString);
+    }
+
+    @Override
     public void beginSubTask(long taskVolume) {
         beginSubTask();
         setVolume(taskVolume);
@@ -83,6 +91,12 @@ public class TaskProgressTracker implements ProgressTracker {
         this.currentTask = nestedTasks.isEmpty()
             ? Optional.empty()
             : Optional.of(nestedTasks.pop());
+    }
+
+    @Override
+    public void endSubTask(String subTaskSubString) {
+        assertSubTask(subTaskSubString);
+        endSubTask();
     }
 
     @Override
@@ -124,5 +138,16 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private Task requireCurrentTask() {
         return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
+    }
+
+    private void assertSubTask(String subTaskSubString) {
+        if (currentTask.isPresent()) {
+            var currentTaskDescription = currentTask.get().description();
+            assert currentTaskDescription.contains(subTaskSubString) : formatWithLocale(
+                "Expected task name to contain `%s`, but was `%s`",
+                subTaskSubString,
+                currentTaskDescription
+            );
+        }
     }
 }

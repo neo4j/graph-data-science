@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class TaskProgressTrackerTest {
 
@@ -103,5 +104,38 @@ public class TaskProgressTrackerTest {
         progressTracker.endSubTask();
         assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.FINISHED);
         assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.CANCELED);
+    }
+
+    @Test
+    void shouldAssertFailureOnExpectedSubTaskSubString() {
+        var task = Tasks.task("Foo", Tasks.leaf("Leaf1"));
+        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        assertThatThrownBy(() -> progressTracker.beginSubTask("Bar"))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected task name to contain `Bar`, but was `Foo`");
+
+        assertThatThrownBy(() -> progressTracker.beginSubTask("Leaf2"))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected task name to contain `Leaf2`, but was `Leaf1`");
+
+        assertThatThrownBy(() -> progressTracker.endSubTask("Leaf2"))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected task name to contain `Leaf2`, but was `Leaf1`");
+
+        progressTracker.endSubTask(); // call once manually as the call before didn't execute due to the assertion error
+        assertThatThrownBy(() -> progressTracker.endSubTask("Bar"))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected task name to contain `Bar`, but was `Foo`");
+    }
+
+    @Test
+    void shouldAssertSuccessOnExpectedSuBTaskSubString() {
+        var task = Tasks.task("Foo", Tasks.leaf("Leaf"));
+        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+
+        assertDoesNotThrow(() -> progressTracker.beginSubTask("Foo"));
+        assertDoesNotThrow(() -> progressTracker.beginSubTask("Leaf"));
+        assertDoesNotThrow(() -> progressTracker.endSubTask("Leaf"));
+        assertDoesNotThrow(() -> progressTracker.endSubTask("Foo"));
     }
 }
