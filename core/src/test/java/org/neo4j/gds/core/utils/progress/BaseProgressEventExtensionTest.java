@@ -80,8 +80,6 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
     }
 
     public static class ProgressProc {
-        @Context
-        public ProgressEventStore progress;
 
         @Context
         public TaskStore taskStore;

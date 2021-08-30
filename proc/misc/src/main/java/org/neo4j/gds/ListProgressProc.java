@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
@@ -47,9 +46,6 @@ import java.util.stream.Stream;
 public class ListProgressProc extends BaseProc {
 
     static final int PROGRESS_BAR_LENGTH = 10;
-
-    @Context
-    public ProgressEventStore progress;
 
     @Context
     public TaskStore taskStore;

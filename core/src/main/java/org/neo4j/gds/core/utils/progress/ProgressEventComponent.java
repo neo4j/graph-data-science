@@ -35,7 +35,6 @@ final class ProgressEventComponent extends LifecycleAdapter {
     private final ProgressEventHandlerImpl.Monitor monitor;
     private final LoggingProgressEventMonitor loggingMonitor;
     private final Queue<ProgressEvent> messageQueue;
-    private final ProgressEventStore progressEventStore;
     private volatile ProgressEventHandlerImpl progressEventHandler;
 
     ProgressEventComponent(
@@ -49,14 +48,12 @@ final class ProgressEventComponent extends LifecycleAdapter {
         this.monitor = globalMonitors.newMonitor(ProgressEventHandlerImpl.Monitor.class);
         this.loggingMonitor = new LoggingProgressEventMonitor(log);
         this.messageQueue = new MpscLinkedQueue<>();
-        this.progressEventStore = new ProgressEventStoreImpl();
     }
 
     @Override
     public void start() {
         globalMonitors.addMonitorListener(loggingMonitor);
         progressEventHandler = new ProgressEventHandlerImpl(monitor, jobScheduler, messageQueue);
-        progressEventHandler.registerProgressEventListener(progressEventStore);
         progressEventHandler.start();
         this.log.info("GDS Progress event tracking is enabled");
     }
@@ -66,9 +63,5 @@ final class ProgressEventComponent extends LifecycleAdapter {
         progressEventHandler.stop();
         progressEventHandler = null;
         globalMonitors.removeMonitorListener(loggingMonitor);
-    }
-
-    ProgressEventStore progressEventStore() {
-        return progressEventStore;
     }
 }
