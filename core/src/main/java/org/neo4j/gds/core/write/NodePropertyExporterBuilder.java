@@ -25,6 +25,8 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 
@@ -41,11 +43,13 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
     protected ExecutorService executorService;
     protected ProgressLogger progressLogger;
     protected int writeConcurrency;
+    protected ProgressTracker progressTracker;
 
     NodePropertyExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
+        this.progressTracker = ProgressTracker.NULL_TRACKER;
     }
 
     public abstract T build();
@@ -63,11 +67,14 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
     }
 
     public NodePropertyExporterBuilder<T> withLog(Log log) {
-        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), nodeCount), writeConcurrency));
+        var task = Tasks.leaf(taskName(), nodeCount);
+        this.progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        return withProgressTracker(progressTracker);
     }
 
-    public NodePropertyExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
-        this.progressLogger = progressLogger;
+    public NodePropertyExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
         return this;
     }
 
