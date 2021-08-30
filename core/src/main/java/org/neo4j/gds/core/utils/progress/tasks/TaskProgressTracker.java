@@ -22,9 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 
 import java.util.Optional;
@@ -38,7 +36,6 @@ public class TaskProgressTracker implements ProgressTracker {
     private final Task baseTask;
     private final TaskRegistry taskRegistry;
     private final TaskProgressLogger taskProgressLogger;
-    private final ProgressEventTracker eventTracker;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
 
@@ -47,7 +44,7 @@ public class TaskProgressTracker implements ProgressTracker {
         Task baseTask,
         ProgressLogger progressLogger
     ) {
-        this(baseTask, progressLogger, EmptyProgressEventTracker.INSTANCE, EmptyTaskRegistry.INSTANCE);
+        this(baseTask, progressLogger, EmptyTaskRegistry.INSTANCE);
     }
 
     @TestOnly
@@ -62,18 +59,15 @@ public class TaskProgressTracker implements ProgressTracker {
     public TaskProgressTracker(
         Task baseTask,
         ProgressLogger progressLogger,
-        ProgressEventTracker eventTracker,
         TaskRegistry taskRegistry
     ) {
         this.baseTask = baseTask;
         this.taskRegistry = taskRegistry;
         this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);
-        this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
 
         taskRegistry.registerTask(baseTask);
-        eventTracker.addTaskProgressEvent(baseTask);
     }
 
     @Override
@@ -138,18 +132,12 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public ProgressEventTracker progressEventTracker() {
-        return eventTracker;
-    }
-
-    @Override
     public TaskRegistry taskRegistry() {
         return taskRegistry;
     }
 
     @Override
     public void release() {
-        eventTracker.release();
         taskRegistry.unregisterTask();
     }
 

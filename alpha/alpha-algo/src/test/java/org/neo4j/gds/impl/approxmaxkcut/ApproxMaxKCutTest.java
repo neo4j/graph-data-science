@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -184,7 +183,6 @@ final class ApproxMaxKCutTest {
             config,
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyProgressEventTracker.INSTANCE,
             EmptyTaskRegistry.INSTANCE
         );
         approxMaxKCut.compute();

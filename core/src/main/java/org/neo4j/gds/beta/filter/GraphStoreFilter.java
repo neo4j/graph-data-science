@@ -88,7 +88,7 @@ public final class GraphStoreFilter {
             task,
             config.concurrency()
         );
-        var progressTracker = new TaskProgressTracker(task, progressLogger, progressEventTracker, taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
 
         progressTracker.beginSubTask();
 

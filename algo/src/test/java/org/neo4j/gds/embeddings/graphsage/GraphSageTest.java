@@ -38,7 +38,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -142,7 +141,6 @@ class GraphSageTest {
             streamConfig,
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyProgressEventTracker.INSTANCE,
             EmptyTaskRegistry.INSTANCE
         );
         GraphSage.GraphSageResult compute = graphSage.compute();
@@ -204,7 +202,6 @@ class GraphSageTest {
             trainConfig,
             AllocationTracker.empty(),
             new TestLog(),
-            EmptyProgressEventTracker.INSTANCE,
             EmptyTaskRegistry.INSTANCE
         );
 
@@ -222,7 +219,6 @@ class GraphSageTest {
             streamConfig,
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyProgressEventTracker.INSTANCE,
             EmptyTaskRegistry.INSTANCE
         );
         graphSage.compute();

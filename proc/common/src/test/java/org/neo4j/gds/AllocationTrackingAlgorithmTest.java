@@ -27,7 +27,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -72,7 +71,6 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                         tracker,
                         MEMORY_LIMIT,
                         new TestLog(),
-                        EmptyProgressEventTracker.INSTANCE,
                         EmptyTaskRegistry.INSTANCE,
                         false
                     );

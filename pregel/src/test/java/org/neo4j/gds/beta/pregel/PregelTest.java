@@ -197,7 +197,7 @@ class PregelTest {
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressLogger =  new TestProgressLogger(task, config.concurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker, taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
 
         var pregelAlgo = Pregel.create(
             graph,

@@ -68,7 +68,7 @@ public class BaseProgressTest extends BaseTest {
             if (withMemoryEstimation) {
                 task.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
             }
-            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress, taskRegistry);
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);
