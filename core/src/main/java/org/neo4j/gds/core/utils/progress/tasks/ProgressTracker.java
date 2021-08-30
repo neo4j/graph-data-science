@@ -31,11 +31,11 @@ public interface ProgressTracker {
 
     void beginSubTask(long taskVolume);
 
-    void beginSubTask(String subTaskSubString);
+    void beginSubTask(String expectedTaskDescription);
 
     void endSubTask();
 
-    void endSubTask(String subTaskSubString);
+    void endSubTask(String expectedTaskDescription);
 
     void logProgress(long value);
 
@@ -66,12 +66,12 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void beginSubTask(String subTaskSubString) {
+        public void beginSubTask(String expectedTaskDescription) {
 
         }
 
         @Override
-        public void endSubTask(String subTaskSubString) {
+        public void endSubTask(String expectedTaskDescription) {
 
         }
 

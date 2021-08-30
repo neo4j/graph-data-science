@@ -72,9 +72,9 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String subTaskSubString) {
+    public void beginSubTask(String expectedTaskDescription) {
         beginSubTask();
-        assertSubTask(subTaskSubString);
+        assertSubTask(expectedTaskDescription);
     }
 
     @Override
@@ -94,8 +94,8 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void endSubTask(String subTaskSubString) {
-        assertSubTask(subTaskSubString);
+    public void endSubTask(String expectedTaskDescription) {
+        assertSubTask(expectedTaskDescription);
         endSubTask();
     }
 
