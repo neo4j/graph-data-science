@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.RawValues;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
@@ -49,6 +50,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final CypherRelationshipLoader.Context loaderContext;
     private final int bufferSize;
     private final int propertyCount;
+    private final ProgressTracker progressTracker;
     private final boolean noProperties;
     private final boolean singleProperty;
     private final boolean multipleProperties;
@@ -72,12 +74,14 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         ObjectDoubleHashMap<String> propertyDefaultValueByName,
         int bufferSize,
         boolean isAnyRelTypeQuery,
-        boolean throwOnUnMappedNodeIds
+        boolean throwOnUnMappedNodeIds,
+        ProgressTracker progressTracker
     ) {
         this.nodeMapping = nodeMapping;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
+        this.progressTracker = progressTracker;
         this.noProperties = propertyCount == 0;
         this.singleProperty = propertyCount == 1;
         this.multipleProperties = propertyCount > 1;
@@ -177,6 +181,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             flush(importer);
             reset(relationshipType, importer);
         }
+
+        progressTracker.logProgress();
 
         return true;
     }

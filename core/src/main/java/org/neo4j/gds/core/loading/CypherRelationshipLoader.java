@@ -32,6 +32,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -62,6 +63,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final NodeMapping nodeMapping;
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
+    private final ProgressTracker progressTracker;
     private final Map<RelationshipProjection, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
@@ -83,11 +85,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         NodeMapping nodeMapping,
         GraphCreateFromCypherConfig config,
         GraphLoaderContext loadingContext,
-        GraphDimensions dimensions
+        GraphDimensions dimensions,
+        ProgressTracker progressTracker
     ) {
         super(relationshipQuery, nodeMapping.nodeCount(), config, loadingContext);
         this.nodeMapping = nodeMapping;
         this.dimensionsAfterNodeLoading = dimensions;
+        this.progressTracker = progressTracker;
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
     }
@@ -135,6 +139,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+        progressTracker.beginSubTask("Relationships");
         Result queryResult = runLoadingQuery(tx);
 
         List<String> allColumns = queryResult.columns();
@@ -173,11 +178,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             propertyDefaultValueByName,
             bufferSize,
             isAnyRelTypeQuery,
-            cypherConfig.validateRelationships()
+            cypherConfig.validateRelationships(),
+            progressTracker
         );
 
         queryResult.accept(visitor);
         visitor.flushAll();
+        progressTracker.endSubTask("Relationships");
         return new BatchLoadResult(visitor.rows(), -1L);
     }
 

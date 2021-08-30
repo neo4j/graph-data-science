@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
@@ -50,15 +51,18 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final NodesBuilder nodesBuilder;
     private final Collection<String> propertyColumns;
     private final boolean hasLabelInformation;
+    private final ProgressTracker progressTracker;
 
     public NodeRowVisitor(
         NodesBuilder nodesBuilder,
         Collection<String> propertyColumns,
-        boolean hasLabelInformation
+        boolean hasLabelInformation,
+        ProgressTracker progressTracker
     ) {
         this.nodesBuilder = nodesBuilder;
         this.propertyColumns = propertyColumns;
         this.hasLabelInformation = hasLabelInformation;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -72,6 +76,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         var labels = getLabels(row, neoId);
         var properties = getProperties(row);
         nodesBuilder.addNode(neoId, properties, labels);
+        progressTracker.logProgress();
         return true;
     }
 

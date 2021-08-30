@@ -141,12 +141,15 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
                 loadingContext
             ).load(tx);
 
+            progressTracker.beginSubTask("Loading");
+
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
                 loadingContext,
-                dimensions
+                dimensions,
+                progressTracker
             ).load(tx);
 
             RelationshipImportResult relationships = loadRelationships(
@@ -163,6 +166,8 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
                 relationships.dimensions()
             );
 
+            progressTracker.endSubTask("Loading");
+
             logLoadingSummary(graphStore, Optional.empty());
 
             return ImportResult.of(relationships.dimensions(), graphStore);
@@ -171,7 +176,11 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
 
     @Override
     protected ProgressTracker initProgressTracker() {
-        var task = Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + dimensions.maxRelCount());
+        var task = Tasks.task(
+            "Loading",
+            Tasks.leaf("Nodes"),
+            Tasks.leaf("Relationships", dimensions.maxRelCount())
+        );
         var progressLogger = new BatchingProgressLogger(
             loadingContext.log(),
             task,
@@ -210,7 +219,8 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             idsAndProperties.idMap(),
             cypherConfig,
             loadingContext,
-            nodeLoadDimensions
+            nodeLoadDimensions,
+            progressTracker
         );
 
         CypherRelationshipLoader.LoadResult result = relationshipLoader.load(transaction);

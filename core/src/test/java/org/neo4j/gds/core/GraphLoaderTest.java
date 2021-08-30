@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -104,7 +105,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @Test
-    void shouldLogProgress() {
+    void shouldLogProgressWithNativeLoading() {
         var log = new TestLog();
         new StoreLoaderBuilder()
             .api(db)
@@ -120,6 +121,36 @@ class GraphLoaderTest extends BaseTest {
             .anyMatch(message -> message.matches("LOADING \\d\\d%"))
             .anyMatch(message -> message.startsWith("LOADING Node Store Scan (NodeCursorBasedScanner): Imported 3 records and 1 properties"))
             .anyMatch(message -> message.startsWith("LOADING Relationship Store Scan (RelationshipScanCursorBasedScanner): Imported 4 records and 0 properties"));
+    }
+
+    @Test
+    void shouldLogProgressWithCypherLoading() {
+        var log = new TestLog();
+        new CypherLoaderBuilder()
+            .api(db)
+            .graphName("graph")
+            .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
+            .relationshipQuery("MATCH (n)-[:REL1|REL2]->(m) RETURN id(n) AS source, id(m) AS target")
+            .log(log)
+            .build()
+            .graph();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Loading :: Start",
+                "Loading :: Nodes :: Start",
+                "Loading :: Nodes 33%",
+                "Loading :: Nodes 66%",
+                "Loading :: Nodes 100%",
+                "Loading :: Nodes :: Start",
+                "Loading :: Nodes :: Finished",
+                "Loading :: Relationships :: Start",
+                "Loading :: Relationships 25%",
+                "Loading :: Relationships 50%",
+                "Loading :: Relationships 75%",
+                "Loading :: Relationships :: Finished",
+                "Loading :: Finished"
+            );
     }
 
     @AllGraphStoreFactoryTypesTest

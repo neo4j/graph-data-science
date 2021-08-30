@@ -30,6 +30,7 @@ import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Map;
@@ -43,6 +44,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
+    private final ProgressTracker progressTracker;
 
     private long highestNodeId;
     private NodesBuilder nodesBuilder;
@@ -52,16 +54,20 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         long nodeCount,
         GraphCreateFromCypherConfig config,
         GraphLoaderContext loadingContext,
-        GraphDimensions outerDimensions
+        GraphDimensions outerDimensions,
+        ProgressTracker progressTracker
     ) {
         super(nodeQuery, nodeCount, config, loadingContext);
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
+        this.progressTracker = progressTracker;
         this.highestNodeId = 0L;
     }
 
     @Override
     BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+        progressTracker.beginSubTask("Nodes");
+        progressTracker.setVolume(nodeCount);
         var queryResult = runLoadingQuery(tx);
 
         var propertyColumns = getPropertyColumns(queryResult);
@@ -75,13 +81,14 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             .tracker(loadingContext.tracker())
             .build();
 
-        NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation);
+        NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation, progressTracker);
 
         queryResult.accept(visitor);
         long rows = visitor.rows();
         if (rows == 0) {
             throw new IllegalArgumentException("Node-Query returned no nodes");
         }
+        progressTracker.endSubTask("Nodes");
         return new BatchLoadResult(rows, visitor.maxId());
     }
 
