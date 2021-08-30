@@ -458,7 +458,7 @@ public final class BackupAndRestore {
 
     private static void restoreGraph(Path path, Log log) {
         var config = ImmutableCsvGraphStoreImporterConfig.builder().build();
-        var graphStoreImporter = CsvGraphStoreImporter.create(config, path, log);
+        var graphStoreImporter = CsvGraphStoreImporter.create(config.concurrency(), path, log);
 
         graphStoreImporter.run(AllocationTracker.empty());
 
