@@ -157,12 +157,26 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
             var tracker = this.progressEventTracker;
+            var taskRegistry = this.taskRegistry;
             this.progressEventTracker = new NonReleasingProgressEventTracker(tracker);
+
+            this.taskRegistry = new TaskRegistry() {
+                @Override
+                public void registerTask(Task task) {
+                    taskRegistry.registerTask(task);
+                }
+
+                @Override
+                public void unregisterTask() {
+                    // skip removing the task because we want to observe the messages after the algo is done
+                }
+            };
 
             try {
                 return super.stream(graphNameOrConfig, configuration);
             } finally {
                 this.progressEventTracker = tracker;
+                this.taskRegistry = taskRegistry;
             }
         }
 

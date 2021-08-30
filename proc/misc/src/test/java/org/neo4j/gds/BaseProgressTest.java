@@ -20,10 +20,12 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
@@ -62,17 +64,14 @@ public class BaseProgressTest extends BaseTest {
             @Name(value = "taskName") String taskName,
             @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation
         ) {
-            var leaf = Tasks.leaf("leaf", 3);
-            var baseTask = Tasks.task(taskName, leaf);
+            var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
             if (withMemoryEstimation) {
-                baseTask.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
+                task.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
             }
-            baseTask.start();
-            progress.addTaskProgressEvent(baseTask);
-            leaf.start();
-            leaf.logProgress(1);
-            progress.addTaskProgressEvent(leaf);
-
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress, taskRegistry);
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.logProgress(1);
             return Stream.empty();
         }
     }

@@ -162,7 +162,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
             taskProgressTracker.beginSubTask(); // leafIterative 2
             taskProgressTracker.logProgress(1); // log 1/2
 
-            progress.addTaskProgressEvent(task);
             return Stream.empty();
         }
     }

@@ -72,6 +72,7 @@ public class TaskProgressTracker implements ProgressTracker {
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
 
+        taskRegistry.registerTask(baseTask);
         eventTracker.addTaskProgressEvent(baseTask);
     }
 
@@ -149,6 +150,7 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         eventTracker.release();
+        taskRegistry.unregisterTask();
     }
 
     @TestOnly

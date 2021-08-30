@@ -190,8 +190,10 @@ class AuraMaintenanceFunctionTest extends BaseTest {
 
         @Procedure("gds.test.addEvent")
         public void addEvent() {
-            progress.addTaskProgressEvent(Tasks.leaf("gds.test"));
-            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> progress.release(), 420, TimeUnit.MILLISECONDS);
+            var task = Tasks.leaf("gds.test");
+            progress.addTaskProgressEvent(task);
+            taskRegistry.registerTask(task);
+            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> { progress.release(); taskRegistry.unregisterTask(); }, 420, TimeUnit.MILLISECONDS);
         }
     }
 }

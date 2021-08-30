@@ -71,9 +71,14 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
         @Context
         public ProgressEventTracker progress;
 
+        @Context
+        public TaskRegistry taskRegistry;
+
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
-            progress.addTaskProgressEvent(Tasks.leaf("foo"));
+            var task = Tasks.leaf("foo");
+            progress.addTaskProgressEvent(task);
+            taskRegistry.registerTask(task);
             return Stream.empty();
         }
     }
