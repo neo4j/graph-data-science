@@ -27,10 +27,10 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
@@ -47,7 +47,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
     private final TerminationFlag terminationFlag;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final ExecutorService executorService;
 
     public static RelationshipExporterBuilder<NativeRelationshipExporter> builder(
@@ -89,7 +89,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
                 toOriginalId,
                 propertyTranslator,
                 terminationFlag,
-                progressLogger
+                progressTracker
             );
         }
     }
@@ -100,14 +100,14 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         super(transactionContext);
         this.graph = graph;
         this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;
         this.terminationFlag = terminationFlag;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.executorService = Pools.DEFAULT_SINGLE_THREAD_POOL;
     }
 
@@ -142,7 +142,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     }
 
     private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
         PartitionUtils.degreePartitionWithBatchSize(graph, NativeNodePropertyExporter.MIN_BATCH_SIZE, partition -> createBatchRunnable(
@@ -152,7 +152,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             afterWriteConsumer
         ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
     }
 
     private Runnable createBatchRunnable(
@@ -172,7 +172,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
                 propertyTranslator,
                 relationshipToken,
                 propertyToken,
-                progressLogger
+                progressTracker
             );
             if (afterWrite != null) {
                 writeConsumer = writeConsumer.andThen(afterWrite);
@@ -201,7 +201,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         private final RelationshipPropertyTranslator propertyTranslator;
         private final int relTypeToken;
         private final int propertyToken;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final RelationshipWriteBehavior relationshipWriteBehavior;
 
         WriteConsumer(
@@ -210,14 +210,14 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             RelationshipPropertyTranslator propertyTranslator,
             int relTypeToken,
             int propertyToken,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.toOriginalId = toOriginalId;
             this.ops = ops;
             this.propertyTranslator = propertyTranslator;
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             if (propertyToken == NO_SUCH_PROPERTY_KEY) {
                 relationshipWriteBehavior = this::writeWithoutProperty;
             } else {
@@ -238,13 +238,13 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
 
         private void writeWithoutProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
             writeRelationship(sourceNodeId, targetNodeId);
-            progressLogger.logProgress();
+            progressTracker.logProgress();
         }
 
         private void writeWithProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
             long relId = writeRelationship(sourceNodeId, targetNodeId);
             exportProperty(property, relId);
-            progressLogger.logProgress();
+            progressTracker.logProgress();
         }
 
         private long writeRelationship(long sourceNodeId, long targetNodeId) throws EntityNotFoundException {

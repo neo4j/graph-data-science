@@ -25,6 +25,8 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Values;
@@ -34,7 +36,7 @@ import java.util.function.LongUnaryOperator;
 
 public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
 
-    static final int DEFAULT_WRITE_CONCURRENCY = 1;
+    private static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
     protected final TransactionContext transactionContext;
 
@@ -42,6 +44,7 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected TerminationFlag terminationFlag;
     protected Graph graph;
     protected ProgressLogger progressLogger;
+    protected ProgressTracker progressTracker;
 
     RelationshipPropertyTranslator propertyTranslator;
 
@@ -50,6 +53,7 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         this.propertyTranslator = Values::doubleValue;
 
         this.progressLogger = ProgressLogger.NULL_LOGGER;
+        this.progressTracker = ProgressTracker.NULL_TRACKER;
     }
 
     public abstract T build();
@@ -76,15 +80,18 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     }
 
     public RelationshipExporterBuilder<T> withLog(Log log) {
-        return withProgressLogger(new BatchingProgressLogger(
+        var task = Tasks.leaf(taskName(), graph.relationshipCount());
+        this.progressLogger = new BatchingProgressLogger(
             log,
-            Tasks.leaf(taskName(), graph.relationshipCount()),
+            task,
             DEFAULT_WRITE_CONCURRENCY
-        ));
+        );
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        return withProgressTracker(progressTracker);
     }
 
-    private RelationshipExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
-        this.progressLogger = progressLogger;
+    private RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
         return this;
     }
 
