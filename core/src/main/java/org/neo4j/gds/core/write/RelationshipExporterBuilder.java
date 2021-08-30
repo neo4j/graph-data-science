@@ -37,11 +37,10 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
     protected final TransactionContext transactionContext;
+
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
-
     protected Graph graph;
-
     protected ProgressLogger progressLogger;
 
     RelationshipPropertyTranslator propertyTranslator;
