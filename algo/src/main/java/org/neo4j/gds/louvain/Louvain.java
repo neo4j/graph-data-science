@@ -183,7 +183,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 new TaskProgressTracker(
                     modularityOptimizationFactory.progressTask(louvainGraph, modularityOptimizationConfig),
                     progressTracker.progressLogger(),
-                    progressTracker.progressEventTracker()
+                    progressTracker.progressEventTracker(),
+                    progressTracker.taskRegistry()
                 )
             ).withTerminationFlag(terminationFlag);
 

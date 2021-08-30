@@ -21,7 +21,9 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 
 import java.util.OptionalLong;
 
@@ -52,6 +54,8 @@ public interface ProgressTracker {
     ProgressLogger progressLogger();
 
     ProgressEventTracker progressEventTracker();
+
+    TaskRegistry taskRegistry();
 
     void release();
 
@@ -101,6 +105,11 @@ public interface ProgressTracker {
         @Override
         public ProgressEventTracker progressEventTracker() {
             return EmptyProgressEventTracker.INSTANCE;
+        }
+
+        @Override
+        public TaskRegistry taskRegistry() {
+            return EmptyTaskRegistry.INSTANCE;
         }
 
         @Override

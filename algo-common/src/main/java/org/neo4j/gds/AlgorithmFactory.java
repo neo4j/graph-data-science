@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -52,7 +53,8 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         CONFIG configuration,
         AllocationTracker tracker,
         Log log,
-        ProgressEventTracker eventTracker
+        ProgressEventTracker eventTracker,
+        TaskRegistry taskRegistry
     ) {
         var progressTask = progressTask(graph, configuration);
         var progressLogger = loggerFactory.newLogger(
@@ -63,7 +65,8 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         var progressTracker = new TaskProgressTracker(
             progressTask,
             progressLogger,
-            eventTracker
+            eventTracker,
+            taskRegistry
         );
         return build(graph, configuration, tracker, progressTracker);
     }

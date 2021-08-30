@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -122,7 +123,8 @@ class WccTest {
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyProgressEventTracker.INSTANCE
+            EmptyProgressEventTracker.INSTANCE,
+            EmptyTaskRegistry.INSTANCE
         );
         wcc.compute();
 

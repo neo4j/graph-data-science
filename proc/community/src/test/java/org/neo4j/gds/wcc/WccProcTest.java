@@ -28,20 +28,21 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -52,8 +53,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Wcc, CONFIG, DisjointSetStruct>,
@@ -207,7 +208,14 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         applyOnProcedure(proc -> {
             WccBaseConfig config = proc.newConfig(Optional.of(GRAPH_NAME), userInput);
             WccProc
-                .algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog, EmptyProgressEventTracker.INSTANCE);
+                .algorithmFactory()
+                .build(graph,
+                    config,
+                    AllocationTracker.empty(),
+                    testLog,
+                    EmptyProgressEventTracker.INSTANCE,
+                    EmptyTaskRegistry.INSTANCE
+                );
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
         String actual = testLog.getMessages("warn").get(0);

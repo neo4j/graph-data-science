@@ -34,6 +34,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -140,7 +141,8 @@ class LinkPredictionPredictTest {
             config,
             AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER.getLog(),
-            EmptyProgressEventTracker.INSTANCE
+            EmptyProgressEventTracker.INSTANCE,
+            EmptyTaskRegistry.INSTANCE
         );
         algo.compute();
 

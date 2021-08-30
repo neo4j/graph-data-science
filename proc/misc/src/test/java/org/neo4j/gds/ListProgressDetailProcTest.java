@@ -152,7 +152,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                 Tasks.leaf("leaf", 3)
             );
 
-            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress);
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress, taskRegistry);
 
             taskProgressTracker.beginSubTask(); // root
             taskProgressTracker.beginSubTask(); // iterative

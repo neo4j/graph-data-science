@@ -44,6 +44,7 @@ import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
@@ -393,7 +394,8 @@ class GraphStoreFilterTest {
                 Pools.DEFAULT,
                 log,
                 AllocationTracker.empty(),
-                EmptyProgressEventTracker.INSTANCE
+                EmptyProgressEventTracker.INSTANCE,
+                EmptyTaskRegistry.INSTANCE
             );
 
             var messages = log.getMessages(TestLog.INFO);
@@ -519,7 +521,8 @@ class GraphStoreFilterTest {
             Pools.DEFAULT,
             NullLog.getInstance(),
             AllocationTracker.empty(),
-            EmptyProgressEventTracker.INSTANCE
+            EmptyProgressEventTracker.INSTANCE,
+            EmptyTaskRegistry.INSTANCE
         );
     }
 

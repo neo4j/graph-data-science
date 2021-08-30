@@ -96,6 +96,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
                     0L,
                     log,
                     progressTracker.progressEventTracker(),
+                    progressTracker.taskRegistry(),
                     configuration.throwInCompute()
                 );
             }

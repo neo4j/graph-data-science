@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -207,7 +208,8 @@ class NodeClassificationTrainTest {
             config,
             AllocationTracker.empty(),
             log,
-            EmptyProgressEventTracker.INSTANCE
+            EmptyProgressEventTracker.INSTANCE,
+            EmptyTaskRegistry.INSTANCE
         );
 
         algorithm.compute();
@@ -319,7 +321,8 @@ class NodeClassificationTrainTest {
             config,
             AllocationTracker.empty(),
             NULL_LOGGER.getLog(),
-            EmptyProgressEventTracker.INSTANCE
+            EmptyProgressEventTracker.INSTANCE,
+            EmptyTaskRegistry.INSTANCE
         );
 
         var firstResult = algoSupplier.get().compute();

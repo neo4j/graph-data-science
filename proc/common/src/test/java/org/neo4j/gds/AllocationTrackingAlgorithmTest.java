@@ -21,14 +21,15 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.test.TestAlgorithm;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -72,6 +73,7 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                         MEMORY_LIMIT,
                         new TestLog(),
                         EmptyProgressEventTracker.INSTANCE,
+                        EmptyTaskRegistry.INSTANCE,
                         false
                     );
                     tx.commit();

@@ -30,6 +30,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.TestTaskRegistry;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -191,11 +192,12 @@ class PregelTest {
             .build();
 
         var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressLogger =  new TestProgressLogger(task, config.concurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker, taskRegistry);
 
         var pregelAlgo = Pregel.create(
             graph,
