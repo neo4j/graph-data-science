@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
@@ -42,6 +41,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ListProgressProc extends BaseProc {
@@ -65,13 +65,13 @@ public class ListProgressProc extends BaseProc {
     }
 
     private Stream<ProgressResult> jobsSummaryView() {
-        return progress.query(username()).stream().map(ProgressResult::fromProgressEvent);
+        return taskStore.query(username()).entrySet().stream().map(ProgressResult::fromTaskStoreEntry);
     }
 
-    private Stream<ProgressResult> jobDetailView(String jobId) {
-        var progressEvent = progress.query(username(), JobId.fromString(jobId));
-        var task = progressEvent.task();
-        var jobProgressVisitor = new JobProgressVisitor(progressEvent.jobId());
+    private Stream<ProgressResult> jobDetailView(String jobIdAsString) {
+        var jobId = JobId.fromString(jobIdAsString);
+        var task = taskStore.query(username(), jobId);
+        var jobProgressVisitor = new JobProgressVisitor(jobId);
         TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
         return jobProgressVisitor.progressRowsStream();
     }
@@ -85,9 +85,10 @@ public class ListProgressProc extends BaseProc {
         public LocalTimeValue timeStarted;
         public DurationValue elapsedTime;
 
-        static ProgressResult fromProgressEvent(ProgressEvent progressEvent) {
-            var task = progressEvent.task();
-            return new ProgressResult(task, progressEvent.jobId(), task.description());
+        static ProgressResult fromTaskStoreEntry(Map.Entry<JobId, Task> taskStoreEntry) {
+            var jobId = taskStoreEntry.getKey();
+            var task = taskStoreEntry.getValue();
+            return new ProgressResult(task, jobId, task.description());
         }
 
         static ProgressResult fromTaskWithDepth(Task task, JobId jobId, int depth) {
