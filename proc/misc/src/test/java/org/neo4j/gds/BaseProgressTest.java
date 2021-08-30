@@ -21,10 +21,9 @@ package org.neo4j.gds;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
@@ -47,8 +46,8 @@ public class BaseProgressTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-        builder.addExtension(new ProgressEventExtension());
+        builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
+        builder.addExtension(new TaskRegistryExtension());
     }
 
     public static class BaseProgressTestProc {

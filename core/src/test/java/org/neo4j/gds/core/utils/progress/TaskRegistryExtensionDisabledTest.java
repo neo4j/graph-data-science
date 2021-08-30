@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-final class ProgressEventExtensionDisabledTest extends BaseProgressEventExtensionTest {
+final class TaskRegistryExtensionDisabledTest extends BaseTaskRegistryExtensionTest {
 
     @Override
     boolean featureEnabled() {

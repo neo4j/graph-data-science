@@ -30,14 +30,14 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 @ServiceProvider
-public final class ProgressEventExtension extends ExtensionFactory<ProgressEventExtension.Dependencies> {
+public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryExtension.Dependencies> {
 
-    public ProgressEventExtension() {
-        super(ExtensionType.DATABASE, "gds.progress.logger");
+    public TaskRegistryExtension() {
+        super(ExtensionType.DATABASE, "gds.task.registry");
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, ProgressEventExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext context, TaskRegistryExtension.Dependencies dependencies) {
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {

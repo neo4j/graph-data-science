@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-abstract class BaseProgressEventExtensionTest extends BaseTest {
+abstract class BaseTaskRegistryExtensionTest extends BaseTest {
     abstract boolean featureEnabled();
 
     @Override
@@ -46,8 +46,8 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-        builder.addExtension(new ProgressEventExtension());
+        builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
+        builder.addExtension(new TaskRegistryExtension());
     }
 
     abstract void assertResult(List<String> result);
