@@ -59,6 +59,9 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
+            var globalTaskRegistry = new GlobalTaskRegistryMap();
+            registry.registerComponent(TaskStore.class, ctx -> globalTaskRegistry, true);
+            registry.registerComponent(TaskRegistry.class, globalTaskRegistry, true);
             var scheduler = Optional.ofNullable(this.scheduler).orElseGet(dependencies::jobScheduler);
             var progressEventConsumerComponent = new ProgressEventComponent(
                 dependencies.logService().getInternalLog(ProgressEventComponent.class),
@@ -73,6 +76,7 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
             );
             return progressEventConsumerComponent;
         } else {
+            registry.registerComponent(TaskRegistry.class, ctx -> EmptyTaskRegistry.INSTANCE, true);
             registry.registerComponent(ProgressEventTracker.class, ctx -> EmptyProgressEventTracker.INSTANCE, true);
             registry.registerComponent(ProgressEventStore.class, ctx -> EmptyProgressEventStore.INSTANCE, true);
             return new LifecycleAdapter();
