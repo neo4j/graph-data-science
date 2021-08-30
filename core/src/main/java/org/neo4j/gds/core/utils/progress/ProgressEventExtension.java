@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -30,28 +28,12 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.monitoring.Monitors;
-import org.neo4j.scheduler.JobScheduler;
-
-import java.util.Optional;
 
 @ServiceProvider
 public final class ProgressEventExtension extends ExtensionFactory<ProgressEventExtension.Dependencies> {
-    private final @Nullable JobScheduler scheduler;
 
-    @SuppressWarnings("unused - entry point for service loader")
     public ProgressEventExtension() {
-        this(Optional.empty());
-    }
-
-    @TestOnly
-    public ProgressEventExtension(JobScheduler scheduler) {
-        this(Optional.of(scheduler));
-    }
-
-    private ProgressEventExtension(Optional<JobScheduler> maybeScheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
-        this.scheduler = maybeScheduler.orElse(null);
     }
 
     @Override
@@ -62,28 +44,17 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
             var globalTaskRegistry = new GlobalTaskRegistryMap();
             registry.registerComponent(TaskStore.class, ctx -> globalTaskRegistry, true);
             registry.registerComponent(TaskRegistry.class, globalTaskRegistry, true);
-            var scheduler = Optional.ofNullable(this.scheduler).orElseGet(dependencies::jobScheduler);
-            var progressEventConsumerComponent = new ProgressEventComponent(
-                dependencies.logService().getInternalLog(ProgressEventComponent.class),
-                scheduler,
-                dependencies.globalMonitors()
-            );
-            return progressEventConsumerComponent;
         } else {
             registry.registerComponent(TaskRegistry.class, ctx -> EmptyTaskRegistry.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
-            return new LifecycleAdapter();
         }
+        return new LifecycleAdapter();
     }
 
     interface Dependencies {
         Config config();
 
         LogService logService();
-
-        JobScheduler jobScheduler();
-
-        Monitors globalMonitors();
 
         GlobalProcedures globalProceduresRegistry();
     }

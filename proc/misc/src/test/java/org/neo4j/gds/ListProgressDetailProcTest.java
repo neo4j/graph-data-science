@@ -33,7 +33,6 @@ import org.neo4j.values.storable.DurationValue;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -53,7 +52,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
         );
 
         runQuery("CALL gds.test.track");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",

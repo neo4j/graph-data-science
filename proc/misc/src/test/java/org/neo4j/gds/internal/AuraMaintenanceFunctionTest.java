@@ -121,7 +121,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
             // make sure that we 1) have our extension under test and 2) have it only once
             builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-            builder.addExtension(new ProgressEventExtension(scheduler));
+            builder.addExtension(new ProgressEventExtension());
         }
 
         @BeforeEach
@@ -142,9 +142,6 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             //   - wait 420 fake milliseconds
             //   - remove its events
             runQuery("CALL gds.test.addEvent()");
-
-            // wait 100 milliseconds for the initial queue wait time to pick up the event
-            scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             // now we should see the event, so not safe to restart
             assertSafeToRestart(false);

@@ -28,19 +28,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 abstract class BaseProgressEventExtensionTest extends BaseTest {
-    private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
-
     abstract boolean featureEnabled();
 
     @Override
@@ -51,7 +47,7 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
         builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-        builder.addExtension(new ProgressEventExtension(scheduler));
+        builder.addExtension(new ProgressEventExtension());
     }
 
     abstract void assertResult(List<String> result);
@@ -60,7 +56,6 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
     void test() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ProgressProc.class);
         runQuery("CALL gds.test.algo");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertResult(runQuery(
             "CALL gds.test.log() YIELD field RETURN field",
             r -> r.<String>columnAs("field").stream().collect(toList())

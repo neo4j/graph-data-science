@@ -38,7 +38,6 @@ import org.neo4j.values.storable.DurationValue;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,7 +61,6 @@ public class ListProgressProcTest extends BaseProgressTest {
     @Test
     void canListProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertCypherResult(
             "CALL gds.beta.listProgress() " +
             "YIELD taskName, progress, progressBar, status, timeStarted, elapsedTime " +
@@ -83,7 +81,6 @@ public class ListProgressProcTest extends BaseProgressTest {
     @Test
     void shouldReturnValidJobId() {
         runQuery("CALL gds.test.pl('foo')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
             Map.of(),
@@ -95,7 +92,6 @@ public class ListProgressProcTest extends BaseProgressTest {
     void listOnlyFirstProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
         runQuery("CALL gds.test.pl('bar')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertCypherResult(
             "CALL gds.beta.listProgress() YIELD taskName RETURN taskName ORDER BY taskName",
             List.of(
@@ -109,7 +105,6 @@ public class ListProgressProcTest extends BaseProgressTest {
     void progressIsListedFilteredByUser() {
         runQuery("Alice", "CALL gds.test.pl('foo')");
         runQuery("Bob", "CALL gds.test.pl('bar')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         var aliceResult = runQuery(
             "Alice",
@@ -131,7 +126,6 @@ public class ListProgressProcTest extends BaseProgressTest {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
             runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
             runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
-            scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             assertCypherResult(
                 "CALL gds.beta.listProgress() YIELD taskName, progress RETURN taskName, progress",
