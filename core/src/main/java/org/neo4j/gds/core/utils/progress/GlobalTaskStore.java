@@ -24,9 +24,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistry, ProcedureException> {
 
@@ -56,6 +58,13 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     @Override
     public Optional<Task> query(String username, JobId jobId) {
         return Optional.ofNullable(registeredTasks.get(username).get(jobId));
+    }
+
+    @Override
+    public Stream<Task> taskStream() {
+        return registeredTasks.values().stream()
+            .map(Map::values)
+            .flatMap(Collection::stream);
     }
 
     @Override

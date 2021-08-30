@@ -180,7 +180,6 @@ class SystemMonitorProcTest extends BaseProgressTest {
         runQuery("Alice", "CALL gds.test.pl('foo')");
         // Use a non-default mock memory estimation.
         runQuery("Bob", "CALL gds.test.pl('bar', true)");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",

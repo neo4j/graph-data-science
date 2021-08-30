@@ -23,11 +23,14 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface TaskStore {
     Map<JobId, Task> query(String username);
 
     Optional<Task> query(String username, JobId jobId);
+
+    Stream<Task> taskStream();
 
     boolean isEmpty();
 }

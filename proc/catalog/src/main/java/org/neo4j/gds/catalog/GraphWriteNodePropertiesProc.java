@@ -98,7 +98,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             validNodeLabels.size()
         );
         var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, progressEventTracker);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
 
         progressTracker.beginSubTask();
         for (var label : validNodeLabels) {
