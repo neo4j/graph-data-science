@@ -60,7 +60,7 @@ public class ProgressEventStoreImpl implements ProgressEventStore {
     }
 
     @Override
-    public List<ProgressEvent> query() {
+    public List<ProgressEvent> allBaseEvents() {
         return events
             .values()
             .stream()

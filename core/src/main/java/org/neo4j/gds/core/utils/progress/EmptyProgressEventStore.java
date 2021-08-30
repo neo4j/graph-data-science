@@ -34,7 +34,7 @@ enum EmptyProgressEventStore implements ProgressEventStore {
         return ProgressEvent.endOfStreamEvent(username, jobId);
     }
 
-    public List<ProgressEvent> query() {
+    public List<ProgressEvent> allBaseEvents() {
         return List.of();
     }
 

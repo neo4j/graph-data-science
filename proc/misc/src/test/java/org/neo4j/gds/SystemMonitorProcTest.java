@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SystemMonitorProcTest extends BaseProgressTest {
 
@@ -55,11 +56,11 @@ class SystemMonitorProcTest extends BaseProgressTest {
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",
             List.of(Map.of(
-                "jvmFreeMemory",
+                "freeHeap",
                 greaterThan(0L),
-                "jvmTotalMemory",
+                "totalHeap",
                 greaterThan(0L),
-                "jvmMaxMemory",
+                "maxHeap",
                 greaterThan(0L),
                 "jvmAvailableProcessors",
                 greaterThan(0L),
@@ -80,11 +81,11 @@ class SystemMonitorProcTest extends BaseProgressTest {
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",
             List.of(Map.of(
-                "jvmFreeMemory",
+                "freeHeap",
                 greaterThan(0L),
-                "jvmTotalMemory",
+                "totalHeap",
                 greaterThan(0L),
-                "jvmMaxMemory",
+                "maxHeap",
                 greaterThan(0L),
                 "jvmAvailableProcessors",
                 greaterThan(0L),
@@ -94,5 +95,11 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 Matchers.empty()
             ))
         );
+    }
+
+    @Test
+    @GdsEditionTest(Edition.CE)
+    void shouldFailOnCommunityEdition() {
+        assertThrows(RuntimeException.class,() -> runQuery("CALL gds.alpha.systemMonitor()" ));
     }
 }

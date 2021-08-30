@@ -58,27 +58,27 @@ public class SystemMonitorProc extends BaseProc {
 
     public class SystemMonitorResult {
 
-        public final long jvmFreeMemory;
-        public final long jvmTotalMemory;
-        public final long jvmMaxMemory;
+        public final long freeHeap;
+        public final long totalHeap;
+        public final long maxHeap;
         public final long jvmAvailableProcessors;
         public final Map<String, String> jvmStatusDescription;
         public final List<Map<String, String>> ongoingGdsProcedures;
 
         public SystemMonitorResult() {
             var runtime = Runtime.getRuntime();
-            this.jvmFreeMemory = runtime.freeMemory();
-            this.jvmTotalMemory = runtime.totalMemory();
-            this.jvmMaxMemory = runtime.maxMemory();
+            this.freeHeap = runtime.freeMemory();
+            this.totalHeap = runtime.totalMemory();
+            this.maxHeap = runtime.maxMemory();
             this.jvmAvailableProcessors = runtime.availableProcessors();
 
             this.jvmStatusDescription = Map.of(
-                "jvmFreeMemory",
-                MemoryUsage.humanReadable(this.jvmFreeMemory),
-                "jvmTotalMemory",
-                MemoryUsage.humanReadable(this.jvmTotalMemory),
-                "jvmMaxMemory",
-                MemoryUsage.humanReadable(this.jvmMaxMemory),
+                "freeHeap",
+                MemoryUsage.humanReadable(this.freeHeap),
+                "totalHeap",
+                MemoryUsage.humanReadable(this.totalHeap),
+                "maxHeap",
+                MemoryUsage.humanReadable(this.maxHeap),
                 "jvmAvailableProcessors",
                 String.valueOf(this.jvmAvailableProcessors)
             );
@@ -88,7 +88,7 @@ public class SystemMonitorProc extends BaseProc {
 
         private List<Map<String, String>> getAllOngoingProcedures() {
             return progress
-                .query()
+                .allBaseEvents()
                 .stream()
                 .map(event ->
                 {
