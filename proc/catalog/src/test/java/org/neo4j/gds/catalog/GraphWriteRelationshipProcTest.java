@@ -31,7 +31,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -183,7 +183,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
-            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.taskRegistry = EmptyTaskRegistry.INSTANCE;
             proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction

@@ -36,7 +36,7 @@ import java.util.function.LongUnaryOperator;
 
 public abstract class RelationshipExporterBuilder<T extends RelationshipExporter> {
 
-    private static final int DEFAULT_WRITE_CONCURRENCY = 1;
+    public static final int DEFAULT_WRITE_CONCURRENCY = 1;
 
     protected final TransactionContext transactionContext;
 
@@ -90,7 +90,7 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         return withProgressTracker(progressTracker);
     }
 
-    private RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+    public RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
         return this;
     }

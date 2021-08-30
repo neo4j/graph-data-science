@@ -25,8 +25,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphWriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.procedure.Context;
@@ -95,12 +98,15 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         RelationshipType relationshipType
     ) {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
+        var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
+        var progressLogger = new BatchingProgressLogger(log, task, RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
 
         var builder = relationshipExporterBuilder
             .withIdMapping(graph)
             .withGraph(graph)
             .withTerminationFlag(TerminationFlag.wrap(transaction))
-            .withLog(log);
+            .withProgressTracker(progressTracker);
 
 
         if (relationshipProperty.isPresent()) {
