@@ -76,6 +76,7 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
             return progressEventConsumerComponent;
         } else {
             registry.registerComponent(TaskRegistry.class, ctx -> EmptyTaskRegistry.INSTANCE, true);
+            registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
             registry.registerComponent(ProgressEventStore.class, ctx -> EmptyProgressEventStore.INSTANCE, true);
             return new LifecycleAdapter();
         }

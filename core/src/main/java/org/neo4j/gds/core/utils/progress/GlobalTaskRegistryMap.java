@@ -70,6 +70,9 @@ public class GlobalTaskRegistryMap implements GlobalTaskRegistry, ThrowingFuncti
 
     @Override
     public boolean isEmpty() {
-        return registeredTasks.isEmpty();
+        return registeredTasks
+            .values()
+            .stream()
+            .allMatch(Map::isEmpty);
     }
 }
