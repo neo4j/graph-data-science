@@ -212,7 +212,6 @@ public class GraphCreateProc extends CatalogProc {
             Pools.DEFAULT,
             log,
             allocationTracker(),
-            progressEventTracker,
             taskRegistry
         );
 

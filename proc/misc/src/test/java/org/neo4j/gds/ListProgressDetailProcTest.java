@@ -24,11 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
 
@@ -137,8 +135,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
     }
 
     public static class ProgressTrackingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.track")
         public Stream<ListProgressProcTest.Bar> foo() {

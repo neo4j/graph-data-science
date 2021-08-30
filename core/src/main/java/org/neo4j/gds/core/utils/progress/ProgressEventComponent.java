@@ -20,10 +20,6 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.jctools.queues.MpscLinkedQueue;
-import org.neo4j.function.ThrowingFunction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.Log;
 import org.neo4j.monitoring.Monitors;
@@ -31,7 +27,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Queue;
 
-final class ProgressEventComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
+final class ProgressEventComponent extends LifecycleAdapter {
 
     private final Log log;
     private final JobScheduler jobScheduler;
@@ -74,15 +70,5 @@ final class ProgressEventComponent extends LifecycleAdapter implements ThrowingF
 
     ProgressEventStore progressEventStore() {
         return progressEventStore;
-    }
-
-    @Override
-    public ProgressEventTracker apply(Context context) throws ProcedureException {
-        var progressEventConsumer = this.progressEventHandler;
-        if (progressEventConsumer == null) {
-            throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
-        }
-        var username = context.securityContext().subject().username();
-        return new ProgressEventQueue(messageQueue, username);
     }
 }

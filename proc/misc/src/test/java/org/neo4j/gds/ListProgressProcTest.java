@@ -25,7 +25,6 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
@@ -159,9 +158,7 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            var tracker = this.progressEventTracker;
             var taskRegistry = this.taskRegistry;
-            this.progressEventTracker = new NonReleasingProgressEventTracker(tracker);
 
             this.taskRegistry = new TaskRegistry() {
                 @Override
@@ -178,7 +175,6 @@ public class ListProgressProcTest extends BaseProgressTest {
             try {
                 return super.stream(graphNameOrConfig, configuration);
             } finally {
-                this.progressEventTracker = tracker;
                 this.taskRegistry = taskRegistry;
             }
         }

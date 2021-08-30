@@ -56,8 +56,6 @@ public class BaseProgressTest extends BaseTest {
     }
 
     public static class BaseProgressTestProc {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(

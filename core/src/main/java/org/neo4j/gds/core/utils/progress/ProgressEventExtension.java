@@ -68,7 +68,6 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
                 scheduler,
                 dependencies.globalMonitors()
             );
-            registry.registerComponent(ProgressEventTracker.class, progressEventConsumerComponent, true);
             registry.registerComponent(
                 ProgressEventStore.class,
                 ctx -> progressEventConsumerComponent.progressEventStore(),
@@ -77,7 +76,6 @@ public final class ProgressEventExtension extends ExtensionFactory<ProgressEvent
             return progressEventConsumerComponent;
         } else {
             registry.registerComponent(TaskRegistry.class, ctx -> EmptyTaskRegistry.INSTANCE, true);
-            registry.registerComponent(ProgressEventTracker.class, ctx -> EmptyProgressEventTracker.INSTANCE, true);
             registry.registerComponent(ProgressEventStore.class, ctx -> EmptyProgressEventStore.INSTANCE, true);
             return new LifecycleAdapter();
         }

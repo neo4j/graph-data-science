@@ -35,13 +35,11 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;
@@ -185,15 +183,12 @@ class AuraMaintenanceFunctionTest extends BaseTest {
     }
 
     public static class ProgressLoggingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.addEvent")
         public void addEvent() {
             var task = Tasks.leaf("gds.test");
-            progress.addTaskProgressEvent(task);
             taskRegistry.registerTask(task);
-            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> { progress.release(); taskRegistry.unregisterTask(); }, 420, TimeUnit.MILLISECONDS);
+            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> taskRegistry.unregisterTask(), 420, TimeUnit.MILLISECONDS);
         }
     }
 }

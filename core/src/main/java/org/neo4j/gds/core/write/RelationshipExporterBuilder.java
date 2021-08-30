@@ -25,8 +25,6 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Values;
@@ -45,7 +43,6 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected Graph graph;
 
     protected ProgressLogger progressLogger;
-    protected ProgressEventTracker eventTracker;
 
     RelationshipPropertyTranslator propertyTranslator;
 
@@ -54,7 +51,6 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         this.propertyTranslator = Values::doubleValue;
 
         this.progressLogger = ProgressLogger.NULL_LOGGER;
-        this.eventTracker = EmptyProgressEventTracker.INSTANCE;
     }
 
     public abstract T build();

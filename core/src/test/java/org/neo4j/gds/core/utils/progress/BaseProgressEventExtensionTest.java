@@ -69,15 +69,11 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
 
     public static class AlgoProc {
         @Context
-        public ProgressEventTracker progress;
-
-        @Context
         public TaskRegistry taskRegistry;
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
             var task = Tasks.leaf("foo");
-            progress.addTaskProgressEvent(task);
             taskRegistry.registerTask(task);
             return Stream.empty();
         }
