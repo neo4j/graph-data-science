@@ -54,6 +54,8 @@ public class TaskProgressTracker implements ProgressTracker {
         this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
+
+        eventTracker.addTaskProgressEvent(baseTask);
     }
 
     @Override
@@ -63,7 +65,6 @@ public class TaskProgressTracker implements ProgressTracker {
             return task.nextSubtask();
         }).orElse(baseTask);
         nextTask.start();
-        eventTracker.addTaskProgressEvent(nextTask);
         taskProgressLogger.logBeginSubTask(nextTask, parentTask());
         currentTask = Optional.of(nextTask);
     }
@@ -82,21 +83,18 @@ public class TaskProgressTracker implements ProgressTracker {
         this.currentTask = nestedTasks.isEmpty()
             ? Optional.empty()
             : Optional.of(nestedTasks.pop());
-        eventTracker.addTaskProgressEvent(currentTask);
     }
 
     @Override
     public void logProgress(long value) {
         requireCurrentTask().logProgress(value);
         taskProgressLogger.logProgress(value);
-        eventTracker.addTaskProgressEvent(this.currentTask);
     }
 
     @Override
     public void setVolume(long volume) {
         requireCurrentTask().setVolume(volume);
         taskProgressLogger.reset(volume);
-        eventTracker.addTaskProgressEvent(this.currentTask);
     }
 
     @Override
