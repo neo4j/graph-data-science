@@ -57,68 +57,68 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         validateGraphName(graphName);
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        Optional<String> maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
 
-        GraphWriteRelationshipConfig config = GraphWriteRelationshipConfig.of(
+        // input
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
+
+        var config = GraphWriteRelationshipConfig.of(
             username(),
             graphName,
             relationshipType,
             maybeRelationshipProperty,
             cypherConfig
         );
+
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
+        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
+
         // writing
-        Result.Builder builder = new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+        var builder = new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
+        try (var ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long relationshipsWritten = runWithExceptionLogging(
                 "Writing relationships failed",
-                () -> writeRelationshipType(graphStore, config)
+                () -> writeRelationshipType(graphStore, config.relationshipProperty(), RelationshipType.of(config.relationshipType()))
             );
             builder.withRelationshipsWritten(relationshipsWritten);
         }
+
         // result
         return Stream.of(builder.build());
     }
 
-    private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
-        var graph = graphStore.getGraph(
-            RelationshipType.of(config.relationshipType()),
-            config.relationshipProperty()
-        );
+    private long writeRelationshipType(
+        GraphStore graphStore,
+        Optional<String> relationshipProperty,
+        RelationshipType relationshipType
+    ) {
+        var graph = graphStore.getGraph(relationshipType, relationshipProperty);
 
         var builder = relationshipExporterBuilder
             .withIdMapping(graph)
             .withGraph(graph)
-            .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .withTerminationFlag(TerminationFlag.wrap(transaction))
+            .withLog(log);
 
 
-        if (config.relationshipProperty().isPresent()) {
-            ValueType propertyType = graphStore.relationshipPropertyType(config.relationshipProperty().get());
+        if (relationshipProperty.isPresent()) {
+            var propertyKey = relationshipProperty.get();
+            var propertyType = graphStore.relationshipPropertyType(propertyKey);
             if (propertyType == ValueType.LONG) {
-                builder.withRelationPropertyTranslator(relationshipProperty -> Values.longValue((long) relationshipProperty));
+                builder.withRelationPropertyTranslator(property -> Values.longValue((long) property));
             } else if (propertyType == ValueType.DOUBLE) {
                 builder.withRelationPropertyTranslator(Values::doubleValue);
             } else {
                 throw new UnsupportedOperationException("Writing non-numeric data is not supported.");
             }
-        }
-
-        var exporter = builder
-            .withLog(log)
-            .build();
-
-        if (config.relationshipProperty().isPresent()) {
-            exporter.write(config.relationshipType(), config.relationshipProperty().get());
+            builder.build().write(relationshipType.name, propertyKey);
         } else {
-            exporter.write(config.relationshipType());
+            builder.build().write(relationshipType.name);
         }
 
-        return graphStore.relationshipCount(RelationshipType.of(config.relationshipType()));
+        return graphStore.relationshipCount(relationshipType);
     }
 
     @SuppressWarnings("unused")
