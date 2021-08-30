@@ -103,22 +103,19 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
 
-        String relationshipTypeName = isAnyRelTypeQuery
-            ? ALL_RELATIONSHIPS.name
-            : row.getString(TYPE_COLUMN);
-
-        RelationshipType relationshipType = RelationshipType.of(relationshipTypeName);
+        var relationshipType = isAnyRelTypeQuery
+            ? ALL_RELATIONSHIPS
+            : RelationshipType.of(row.getString(TYPE_COLUMN));
 
         if (!localImporters.containsKey(relationshipType)) {
             // Lazily init relationship importer builder
-            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder =
-                loaderContext.getOrCreateImporterBuilder(relationshipType);
+            var importerBuilder = loaderContext.getOrCreateImporterBuilder(relationshipType);
 
             RelationshipImporter.PropertyReader propertyReader;
 
             if (multipleProperties) {
                 // Create thread-local buffer for relationship properties
-                RelationshipPropertiesBatchBuffer propertiesBuffer = new RelationshipPropertiesBatchBuffer(
+                var propertiesBuffer = new RelationshipPropertiesBatchBuffer(
                     bufferSize,
                     propertyCount
                 );
@@ -129,7 +126,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
             }
             // Create thread-local relationship importer
-            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(nodeMapping, bufferSize, propertyReader);
+            var importer = importerBuilder.withBuffer(nodeMapping, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);
@@ -147,7 +144,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             return true;
         }
 
-        SingleTypeRelationshipImporter importer = localImporters.get(relationshipType);
+        var importer = localImporters.get(relationshipType);
 
         if (noProperties) {
             importer.buffer().add(
