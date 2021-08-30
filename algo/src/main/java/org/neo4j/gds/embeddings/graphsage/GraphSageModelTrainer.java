@@ -158,7 +158,7 @@ public class GraphSageModelTrainer {
             )
         );
 
-        ParallelUtil.run(tasks, executor);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
     }
 
     private void trainOnBatch(
@@ -230,7 +230,7 @@ public class GraphSageModelTrainer {
             }
         );
 
-        ParallelUtil.run(tasks, executor);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         double lossValue = doubleAdder.doubleValue();
         progressLogger.getLog().debug("Loss after epoch %s: %s", epoch, lossValue);
