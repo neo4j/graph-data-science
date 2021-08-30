@@ -67,4 +67,9 @@ public class GlobalTaskRegistryMap implements GlobalTaskRegistry, ThrowingFuncti
         var username = context.securityContext().subject().username();
         return new LocalTaskRegistry(username, this);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return registeredTasks.isEmpty();
+    }
 }

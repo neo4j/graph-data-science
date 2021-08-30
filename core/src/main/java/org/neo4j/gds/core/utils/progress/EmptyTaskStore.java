@@ -36,4 +36,11 @@ public enum EmptyTaskStore implements TaskStore {
     public Task query(String username, JobId jobId) {
         return Tasks.empty();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+
 }

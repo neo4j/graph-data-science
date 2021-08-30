@@ -27,4 +27,6 @@ public interface TaskStore {
     Map<JobId, Task> query(String username);
 
     Task query(String username, JobId jobId);
+
+    boolean isEmpty();
 }

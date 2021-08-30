@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressEvent;
 import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
@@ -49,6 +50,9 @@ public class ListProgressProc extends BaseProc {
 
     @Context
     public ProgressEventStore progress;
+
+    @Context
+    public TaskStore taskStore;
 
     @Procedure("gds.beta.listProgress")
     @Description("List progress events for currently running tasks.")

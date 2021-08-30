@@ -22,7 +22,7 @@ package org.neo4j.gds.internal;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
@@ -36,8 +36,8 @@ import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTBoolean;
 
 public class AuraMaintenanceFunction implements CallableUserFunction {
 
-    private static boolean compute(ProgressEventStore progress) {
-        return GraphStoreCatalog.isEmpty() && ModelCatalog.isEmpty() && progress.isEmpty();
+    private static boolean compute(TaskStore taskStore) {
+        return GraphStoreCatalog.isEmpty() && ModelCatalog.isEmpty() && taskStore.isEmpty();
     }
 
     private static final QualifiedName PROCEDURE_NAME = new QualifiedName(
@@ -68,8 +68,8 @@ public class AuraMaintenanceFunction implements CallableUserFunction {
 
     @Override
     public AnyValue apply(org.neo4j.kernel.api.procedure.Context ctx, AnyValue[] input) throws ProcedureException {
-        var progressEventStore = InternalProceduresUtil.lookup(ctx, ProgressEventStore.class);
-        return Values.booleanValue(compute(progressEventStore));
+        var taskStore = InternalProceduresUtil.lookup(ctx, TaskStore.class);
+        return Values.booleanValue(compute(taskStore));
     }
 
     @Override

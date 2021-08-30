@@ -83,6 +83,9 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
         @Context
         public ProgressEventStore progress;
 
+        @Context
+        public TaskStore taskStore;
+
         @Procedure("gds.test.log")
         public Stream<Bar> foo() {
             return progress.query("").stream().map(ProgressEvent::task).map(Task::description).map(Bar::new);
