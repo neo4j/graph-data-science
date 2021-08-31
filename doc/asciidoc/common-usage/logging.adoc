@@ -27,8 +27,15 @@ For more information on configuring Neo4j logs, please refer to the https://neo4
 Progress events may also be tracked by the GDS library itself.
 This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
 To enable this feature, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
-When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks.
+When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks (also referred to as jobs).
+A task in the GDS library is defined as a running procedure, such as an algorithm or a graph load procedure.
 
+The list progress procedure has two modes, depending on whether a `jobId` parameter was set:
+First, if `jobId` is not set, the procedure will produce a single row for each task currently running.
+This can be seen as the summary of those tasks, displaying the overall progress of a particular task for example.
+Second, if the `jobId` parameter is set it will show a detailed view for the given running job.
+The detailed view will produce a row for each step or task that job will perform during execution.
+It will also show how tasks are structured as a tree and print progress for each individual task.
 
 [[logging-progress-logging-syntax]]
 === Syntax
@@ -36,17 +43,35 @@ When the feature is enabled, a procedure is loaded that can be called to show pr
 .Getting the progress of tasks:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.listProgress()
+CALL gds.beta.listProgress(jobId: String)
 YIELD
-  id,
+  jobId,
   taskName,
-  message
+  progress,
+  progressBar,
+  status,
+  timeStarted,
+  elapsedTime
 ----
 
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type          | Default   | Optional  | Description
+| jobId             | String        | ""        | yes       | The jobId of a running task. This will trigger a detailed overview for that particular task.
+|===
+
 .Results
-* `id`: generated identifier of the running task.
-* `taskName`: the name of the running task, i.e. `Node2Vec`.
-* `message`: the progress log message, same as what is logged to the `debug.log` file.
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type      | Description
+| jobId         | String    | A generated identifier of the running task.
+| taskName      | String    | The name of the running task, i.e. `Node2Vec`.
+| progress      | String    | The progress of the job shown as a percentage value.
+| progressBar   | String    | The progress of the job shown as an ASCII progress bar.
+| status        | String    | The current status of the job, i.e. `RUNNING` or `CANCELED`.
+| timeStarted   | LocalTime | The local wall clock time when the task has been started.
+| elapsedTime   | Duration  | The duration from `timeStarted` to now.
 
 
 [[logging-progress-logging-examples]]
@@ -58,14 +83,14 @@ Assuming we just started `gds.beta.node2vec.stream` procedure.
 ----
 CALL gds.beta.listProgress()
 YIELD
-  id,
+  jobId,
   taskName,
-  message
+  progress
 ----
 
 .Results
 [opts="header"]
 |===
-| id                                     | taskName   | message
-| "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "[gds-1] Node2Vec 42%"
+| jobId                                  | taskName   | progress
+| "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "42%"
 |===
