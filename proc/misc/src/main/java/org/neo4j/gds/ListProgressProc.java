@@ -22,8 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
-import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
-import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
@@ -147,21 +145,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         @Override
-        public void visitLeafTask(LeafTask leafTask) {
-            addProgressRow(leafTask);
-        }
-
-        @Override
-        public void visitIntermediateTask(Task task) {
-            addProgressRow(task);
-        }
-
-        @Override
-        public void visitIterativeTask(IterativeTask iterativeTask) {
-            addProgressRow(iterativeTask);
-        }
-
-        private void addProgressRow(Task task) {
+        public void visit(Task task) {
             progressRows.add(ProgressResult.fromTaskWithDepth(task, jobId, depth()));
         }
     }

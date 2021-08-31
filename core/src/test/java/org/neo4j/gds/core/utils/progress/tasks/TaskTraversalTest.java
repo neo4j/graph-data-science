@@ -44,21 +44,7 @@ class TaskTraversalTest {
         List<Integer> depthInformation = new ArrayList<>();
 
         @Override
-        public void visitLeafTask(LeafTask leafTask) {
-            storeDepthInformation();
-        }
-
-        @Override
-        public void visitIntermediateTask(Task task) {
-            storeDepthInformation();
-        }
-
-        @Override
-        public void visitIterativeTask(IterativeTask iterativeTask) {
-            storeDepthInformation();
-        }
-
-        private void storeDepthInformation() {
+        public void visit(Task task) {
             depthInformation.add(depth());
         }
     }
