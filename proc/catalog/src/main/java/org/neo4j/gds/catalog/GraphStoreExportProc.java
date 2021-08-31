@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.core.utils.io.file.csv.estimation.GraphStoreToCsvEstimationConfig;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.StringJoining;
