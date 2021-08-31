@@ -14,10 +14,12 @@ This chapter is divided into the following sections:
 * <<anonymous-graph>>
 * <<node-properties>>
 * <<utility-functions>>
+* <<create-cypher-db>>
 * <<administration>>
 
 include::graph-catalog/graph-catalog.adoc[leveloffset=+1]
 include::anonymous-graph.adoc[leveloffset=+1]
 include::node-properties.adoc[leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]
+include::create-cypher-db.adoc[leveloffset=+1]
 include::administration.adoc[leveloffset=+1]
