@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 public interface TaskVisitor {
-    void visitLeafTask(LeafTask leafTask);
-    void visitIntermediateTask(Task task);
-    void visitIterativeTask(IterativeTask iterativeTask);
+    default void visitLeafTask(LeafTask leafTask) {}
+    default void visitIntermediateTask(Task task) {}
+    default void visitIterativeTask(IterativeTask iterativeTask) {}
 }

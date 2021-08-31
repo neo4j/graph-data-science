@@ -184,15 +184,5 @@ public class TaskProgressLogger implements ProgressLogger {
         public void visitLeafTask(LeafTask leafTask) {
             progressLogger.logFinishPercentage();
         }
-
-        @Override
-        public void visitIntermediateTask(Task task) {
-
-        }
-
-        @Override
-        public void visitIterativeTask(IterativeTask iterativeTask) {
-
-        }
     }
 }
