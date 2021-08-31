@@ -359,7 +359,7 @@ public final class SparseLongArray {
             }
 
             // Count the remaining ids in the tail.
-            var lastBlockBegin = size - (size & BLOCK_MASK);
+            var lastBlockBegin = Math.max(0, cappedSize);
             for (int page = lastBlockBegin; page < size; page++) {
                 count += Long.bitCount(array[page]);
             }

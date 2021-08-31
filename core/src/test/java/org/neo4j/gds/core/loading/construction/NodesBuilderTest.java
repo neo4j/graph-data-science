@@ -290,4 +290,52 @@ class NodesBuilderTest {
             });
         });
     }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    void shouldCountNodesSpecialOriginalId(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            var maxOriginalId = 4032L;
+            var builder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(maxOriginalId)
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            builder.addNode(0L);
+
+            assertThat(builder.build().nodeMapping().nodeCount()).isEqualTo(1L);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    void shouldCountAllNodesSpecialOriginalId(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            var maxOriginalId = 4032;
+            var builder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(maxOriginalId)
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            IntStream.range(1, maxOriginalId + 1).forEach(builder::addNode);
+
+            assertThat(builder.build().nodeMapping().nodeCount()).isEqualTo(maxOriginalId);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    void shouldCountNodesSpecialOriginalId2(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            var maxOriginalId = 4031L;
+            var builder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(maxOriginalId)
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            builder.addNode(0L);
+
+            assertThat(builder.build().nodeMapping().nodeCount()).isEqualTo(1L);
+        });
+    }
 }
