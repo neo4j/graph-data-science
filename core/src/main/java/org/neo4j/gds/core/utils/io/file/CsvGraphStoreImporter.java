@@ -71,7 +71,7 @@ public final class CsvGraphStoreImporter {
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
-    private final CsvGraphStoreImporterConfig config;
+    private final int concurrency;
 
     private final GraphStoreBuilder graphStoreBuilder;
     private String userName;
@@ -79,14 +79,14 @@ public final class CsvGraphStoreImporter {
     private final Log log;
 
     public static CsvGraphStoreImporter create(
-        CsvGraphStoreImporterConfig config,
+        int concurrency,
         Path importPath,
         Log log
     ) {
         return new CsvGraphStoreImporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
-            config,
+            concurrency,
             importPath,
             log
         );
@@ -95,15 +95,15 @@ public final class CsvGraphStoreImporter {
     private CsvGraphStoreImporter(
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
-        CsvGraphStoreImporterConfig config,
+        int concurrency,
         Path importPath,
         Log log
     ) {
         this.nodeVisitorBuilder = nodeVisitorBuilder;
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
-        this.config = config;
+        this.concurrency = concurrency;
         this.importPath = importPath;
-        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.concurrency());
+        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(concurrency);
         this.log = log;
     }
 
@@ -135,7 +135,6 @@ public final class CsvGraphStoreImporter {
         graphStoreBuilder.useBitIdMap(graphInfo.bitIdMap());
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
 
-        int concurrency = config.concurrency();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
@@ -188,8 +187,6 @@ public final class CsvGraphStoreImporter {
     }
 
     private long importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
-        int concurrency = config.concurrency();
-
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
         this.relationshipVisitorBuilder

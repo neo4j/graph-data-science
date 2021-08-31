@@ -33,6 +33,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.values.storable.Values;
 
@@ -232,7 +233,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void undirectedWithAggregation(TestMethodRunner runTest) {
         runTest.run(() -> {
             Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.SUM);
@@ -241,7 +242,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void undirectedWithoutAggregation(TestMethodRunner runTest) {
         runTest.run(() -> {
             Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);

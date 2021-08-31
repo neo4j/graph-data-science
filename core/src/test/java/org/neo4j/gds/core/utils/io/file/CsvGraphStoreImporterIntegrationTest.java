@@ -23,22 +23,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLog;
-import org.neo4j.gds.core.loading.construction.TestMethodRunner;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.loading.BitIdMap;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.values.storable.Values;
 
@@ -82,7 +82,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvGraphStoreImporter.create(importConfig(concurrency), graphLocation, new TestLog());
+        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog());
         importer.run(AllocationTracker.empty());
 
         var importedGraphStore = importer.userGraphStore().graphStore();
@@ -96,7 +96,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvGraphStoreImporter.create(importConfig(4), graphLocation, new TestLog());
+        var importer = CsvGraphStoreImporter.create(4, graphLocation, new TestLog());
         importer.run(AllocationTracker.empty());
 
         var importedGraphStore = importer.userGraphStore().graphStore();
@@ -132,7 +132,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
             GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-            var importer = CsvGraphStoreImporter.create(importConfig(concurrency), graphLocation, new TestLog());
+            var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog());
             importer.run(AllocationTracker.empty());
 
             var importedGraphStore = importer.userGraphStore().graphStore();
@@ -147,12 +147,6 @@ class CsvGraphStoreImporterIntegrationTest {
             .exportName("my-export")
             .writeConcurrency(concurrency)
             .includeMetaData(true)
-            .build();
-    }
-
-    private CsvGraphStoreImporterConfig importConfig(int concurrency) {
-        return ImmutableCsvGraphStoreImporterConfig.builder()
-            .concurrency(concurrency)
             .build();
     }
 

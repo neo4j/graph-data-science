@@ -39,7 +39,7 @@ class CsvGraphStoreImporterTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = CsvGraphStoreImporter.create(config(concurrency), importPath(), new TestLog());
+        var exporter = CsvGraphStoreImporter.create(concurrency, importPath(), new TestLog());
         exporter.run(AllocationTracker.empty());
 
         var userGraphStore = exporter.userGraphStore();
@@ -63,10 +63,6 @@ class CsvGraphStoreImporterTest {
         );
         var actualGraph = graphStore.getUnion();
         assertGraphEquals(expectedGraph, actualGraph);
-    }
-
-    private CsvGraphStoreImporterConfig config(int concurrency) {
-        return ImmutableCsvGraphStoreImporterConfig.builder().concurrency(concurrency).build();
     }
 
     private Path importPath() throws URISyntaxException {

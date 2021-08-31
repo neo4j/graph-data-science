@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -57,7 +58,7 @@ class NodesBuilderTest {
     IdFunction idFunction;
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void parallelIdMapBuilder(TestMethodRunner runTest) {
         runTest.run(() -> {
             long nodeCount = 100;
@@ -81,7 +82,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void parallelIdMapBuilderWithDuplicateNodes(TestMethodRunner runTest) {
         runTest.run(() -> {
             long attempts = 100;
@@ -105,7 +106,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void parallelIdMapBuilderWithLabels(TestMethodRunner runTest) {
         runTest.run(() -> {
             long attempts = 100;
@@ -150,7 +151,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void shouldBuildNodesWithProperties(TestMethodRunner runTest) {
         runTest.run(() -> {
             NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(graph.schema().nodeSchema())
@@ -193,7 +194,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void shouldBuildNodesWithPropertiesInParallel(TestMethodRunner runTest) {
         runTest.run(() -> {
             int nodeCount = 10000;
@@ -246,7 +247,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void shouldBuildNodesWithPropertiesWithoutNodeSchema(TestMethodRunner runTest) {
         runTest.run(() -> {
             var nodesBuilder = GraphFactory.initNodesBuilder()

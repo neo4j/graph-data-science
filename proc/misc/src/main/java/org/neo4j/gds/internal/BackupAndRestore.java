@@ -23,6 +23,7 @@ import org.apache.commons.io.file.PathUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.io.file.CsvGraphStoreImporter;
 import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
-import org.neo4j.gds.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.model.StoredModel;
@@ -457,8 +457,7 @@ public final class BackupAndRestore {
     }
 
     private static void restoreGraph(Path path, Log log) {
-        var config = ImmutableCsvGraphStoreImporterConfig.builder().build();
-        var graphStoreImporter = CsvGraphStoreImporter.create(config, path, log);
+        var graphStoreImporter = CsvGraphStoreImporter.create(ConcurrencyConfig.DEFAULT_CONCURRENCY, path, log);
 
         graphStoreImporter.run(AllocationTracker.empty());
 

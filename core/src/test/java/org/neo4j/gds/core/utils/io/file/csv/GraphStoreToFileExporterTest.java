@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.loading.construction.TestMethodRunner;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -427,7 +427,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.construction.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void exportBitIdMapUsage(TestMethodRunner runTest) {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
