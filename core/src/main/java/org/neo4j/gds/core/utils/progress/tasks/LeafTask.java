@@ -34,6 +34,12 @@ public class LeafTask extends Task {
     }
 
     @Override
+    public void finish() {
+        super.finish();
+        setVolume(currentProgress.longValue());
+    }
+
+    @Override
     public void setVolume(long volume) {
         this.volume = volume;
     }

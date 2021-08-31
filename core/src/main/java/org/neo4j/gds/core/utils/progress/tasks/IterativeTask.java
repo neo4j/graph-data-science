@@ -66,7 +66,7 @@ public class IterativeTask extends Task {
     }
 
     @Override
-    public Task nextSubtask() {
+    protected Task nextSubTaskAfterValidation() {
         var maybeRunningTask = subTasks().stream().filter(t -> t.status() == Status.RUNNING).findFirst();
         if (maybeRunningTask.isPresent()) {
             throw new IllegalStateException(formatWithLocale(

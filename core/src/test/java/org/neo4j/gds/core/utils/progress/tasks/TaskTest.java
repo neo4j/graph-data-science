@@ -216,6 +216,31 @@ class TaskTest {
     }
 
     @Test
+    void shouldSetVolumeWhenFinishingTask() {
+        var task = Tasks.iterativeOpen("root", () -> List.of(Tasks.leaf("leaf")));
+        task.start();
+        var leaf1 = task.nextSubtask();
+        leaf1.start();
+        leaf1.logProgress(22L);
+        leaf1.finish();
+
+        assertThat(leaf1.getProgress().volume()).isEqualTo(22L);
+        assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
+
+        var leaf2 = task.nextSubtask();
+        leaf2.start();
+        leaf2.logProgress(20L);
+        leaf2.finish();
+
+        assertThat(leaf2.getProgress().volume()).isEqualTo(20L);
+        assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
+
+        task.finish();
+        assertThat(task.getProgress().volume()).isEqualTo(42L);
+    }
+
+
+    @Test
     void shouldNotProgressWhenNotStarted() {
         var task = Tasks.task("root", Tasks.leaf("leaf"));
         assertThatThrownBy(task::nextSubtask)
