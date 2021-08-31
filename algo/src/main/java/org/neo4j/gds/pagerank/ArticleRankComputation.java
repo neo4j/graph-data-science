@@ -87,15 +87,15 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
                 sum += message;
             }
             // dampingFactor * neighbor_deltas
-            delta = dampingFactor * averageDegree *  sum;
+            delta = dampingFactor * sum;
             // dividing by averageDegree to avoid huge article ranks
-            context.setNodeValue(PAGE_RANK, rank + delta);
+            context.setNodeValue(PAGE_RANK, rank + (delta / averageDegree));
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
             var degree = degreeFunction.applyAsDouble(context.nodeId());
             if (degree > 0) {
-                context.sendToNeighbors(delta / (degree + averageDegree));
+                context.sendToNeighbors(delta * averageDegree / (degree + averageDegree));
             }
         } else {
             context.voteToHalt();

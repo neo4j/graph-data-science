@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -56,6 +59,7 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class PageRankTest {
 
     private static final double SCORE_PRECISION = 1E-5;
@@ -340,12 +344,12 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.19991 })" +
-            ", (b:Node { expectedRank: 0.41704 })" +
-            ", (c:Node { expectedRank: 0.31791 })" +
-            ", (d:Node { expectedRank: 0.18921 })" +
-            ", (e:Node { expectedRank: 0.19991 })" +
-            ", (f:Node { expectedRank: 0.18921 })" +
+            "  (a:Node { expectedRank: 0.20545 })" +
+            ", (b:Node { expectedRank: 0.44671 })" +
+            ", (c:Node { expectedRank: 0.33657 })" +
+            ", (d:Node { expectedRank: 0.19357 })" +
+            ", (e:Node { expectedRank: 0.20545 })" +
+            ", (f:Node { expectedRank: 0.19357 })" +
             ", (g:Node { expectedRank: 0.15 })" +
             ", (h:Node { expectedRank: 0.15 })" +
             ", (i:Node { expectedRank: 0.15 })" +
@@ -363,11 +367,11 @@ class PageRankTest {
         @GdlGraph(graphNamePrefix = "paper")
         public static final String DB_PAPERS =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.75619 })" +
-            ", (b:Node { expectedRank: 0.56405 })" +
-            ", (c:Node { expectedRank: 0.30635 })" +
-            ", (d:Node { expectedRank: 0.22862 })" +
-            ", (e:Node { expectedRank: 0.27750 })" +
+            "  (a:Node { expectedRank: 0.45309 })" +
+            ", (b:Node { expectedRank: 0.35702 })" +
+            ", (c:Node { expectedRank: 0.22817 })" +
+            ", (d:Node { expectedRank: 0.18931 })" +
+            ", (e:Node { expectedRank: 0.21375 })" +
             ", (f:Node { expectedRank: 0.15000 })" +
             ", (g:Node { expectedRank: 0.15000 })" +
             ", (b)-[:TYPE]->(a)" +
@@ -392,7 +396,7 @@ class PageRankTest {
         private Graph paperGraph;
 
         @Test
-        void articleRank() {
+        void articleRank(SoftAssertions softly) {
             var config = ImmutablePageRankStreamConfig
                 .builder()
                 .maxIterations(40)
@@ -407,12 +411,13 @@ class PageRankTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                softly.assertThat(actual.doubleValue(nodeId))
+                    .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
         @Test
-        void articleRankOnPaperGraph() {
+        void articleRankOnPaperGraph(SoftAssertions softly) {
             var config = ImmutablePageRankStreamConfig
                 .builder()
                 .maxIterations(20)
@@ -428,7 +433,8 @@ class PageRankTest {
             var expected = paperGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < paperGraph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                softly.assertThat(actual.doubleValue(nodeId))
+                    .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }

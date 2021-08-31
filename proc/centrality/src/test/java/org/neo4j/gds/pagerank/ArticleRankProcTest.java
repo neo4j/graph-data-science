@@ -76,12 +76,12 @@ class ArticleRankProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.1925),
-            Arguments.of(ScalarScaler.Variant.L1NORM, 0.43795, 0.56204),
-            Arguments.of(ScalarScaler.Variant.L2NORM, 0.61464, 0.7888),
+            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.2350),
+            Arguments.of(ScalarScaler.Variant.L1NORM, 0.38961, 0.61038),
+            Arguments.of(ScalarScaler.Variant.L2NORM, 0.53803, 0.84292),
             Arguments.of(ScalarScaler.Variant.MEAN, -0.5, 0.5),
             Arguments.of(ScalarScaler.Variant.MINMAX, 0.0, 1.0),
-            Arguments.of(ScalarScaler.Variant.MAX, 0.77922, 1.0)
+            Arguments.of(ScalarScaler.Variant.MAX, 0.63829, 1.0)
         );
     }
 
@@ -145,7 +145,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of("nodeId", 0L, "score", closeTo(0.15, PageRankProcTest.RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(0.1925, PageRankProcTest.RESULT_ERROR))
+            Map.of("nodeId", 1L, "score", closeTo(0.235, PageRankProcTest.RESULT_ERROR))
         ));
     }
 
@@ -162,7 +162,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
             Map.of("nodeId", 0L, "score", closeTo(0.15, PageRankProcTest.RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(0.1925, PageRankProcTest.RESULT_ERROR))
+            Map.of("nodeId", 1L, "score", closeTo(0.235, PageRankProcTest.RESULT_ERROR))
         ));
     }
 
