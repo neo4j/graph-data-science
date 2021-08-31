@@ -27,10 +27,11 @@ For more information on configuring Neo4j logs, please refer to the https://neo4
 Progress events may also be tracked by the GDS library itself.
 This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
 To enable this feature, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
-When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks.
+When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks (also referred to as jobs).
+A task in the GDS library is defined as a running procedure, such as an algorithm or a graph load procedure.
 
-The list progress procedures has two modes, depending on whether a `jobId` parameter was set:
-First, if `jobId` is not set, the procedure will produce a single row for each progress currently running.
+The list progress procedure has two modes, depending on whether a `jobId` parameter was set:
+First, if `jobId` is not set, the procedure will produce a single row for each task currently running.
 This can be seen as the summary of those tasks, displaying the overall progress of a particular task for example.
 Second, if the `jobId` parameter is set it will show a detailed view for the given running job.
 The detailed view will produce a row for each step or task that job will perform during execution.
@@ -57,7 +58,7 @@ YIELD
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| jobId             | String        | "         | yes       | The jobId of a running task. This will trigger a detailed overview for that particular task.
+| jobId             | String        | ""        | yes       | The jobId of a running task. This will trigger a detailed overview for that particular task.
 |===
 
 .Results
@@ -82,7 +83,7 @@ Assuming we just started `gds.beta.node2vec.stream` procedure.
 ----
 CALL gds.beta.listProgress()
 YIELD
-  id,
+  jobId,
   taskName,
   progress
 ----
@@ -90,6 +91,6 @@ YIELD
 .Results
 [opts="header"]
 |===
-| id                                     | taskName   | progress
+| jobId                                  | taskName   | progress
 | "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "42%"
 |===
