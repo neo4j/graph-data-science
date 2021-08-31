@@ -70,7 +70,6 @@ public interface ProgressLogger {
     }
 
     default ProgressLogger logFinish(String message) {
-        logFinishPercentage();
         logMessage((message + TASK_SEPARATOR + "Finished").trim());
         return this;
     }

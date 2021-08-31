@@ -30,10 +30,12 @@ public class TaskProgressLogger implements ProgressLogger {
 
     private final ProgressLogger progressLogger;
     private final Task baseTask;
+    private final LoggingLeafTaskVisitor loggingLeafTaskVisitor;
 
     public TaskProgressLogger(ProgressLogger progressLogger, Task baseTask) {
         this.progressLogger = progressLogger;
         this.baseTask = baseTask;
+        this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(progressLogger);
     }
 
     void logBeginSubTask(Task task, Task parentTask) {
@@ -48,6 +50,7 @@ public class TaskProgressLogger implements ProgressLogger {
 
     void logEndSubTask(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
+        log100OnLeafTaskFinish(task);
         if (parentTask == null) {
             progressLogger.logFinish(taskName);
         } else {
@@ -163,5 +166,33 @@ public class TaskProgressLogger implements ProgressLogger {
         return nextTask == baseTask
             ? ""
             : nextTask.description();
+    }
+
+    private void log100OnLeafTaskFinish(Task task) {
+        task.visit(loggingLeafTaskVisitor);
+    }
+
+    private static final class LoggingLeafTaskVisitor implements TaskVisitor {
+
+        private final ProgressLogger progressLogger;
+
+        private LoggingLeafTaskVisitor(ProgressLogger progressLogger) {
+            this.progressLogger = progressLogger;
+        }
+
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            progressLogger.logFinishPercentage();
+        }
+
+        @Override
+        public void visitIntermediateTask(Task task) {
+
+        }
+
+        @Override
+        public void visitIterativeTask(IterativeTask iterativeTask) {
+
+        }
     }
 }

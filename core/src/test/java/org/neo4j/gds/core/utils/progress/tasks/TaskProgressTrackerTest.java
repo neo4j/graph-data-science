@@ -164,4 +164,28 @@ public class TaskProgressTrackerTest {
             );
         }
     }
+
+    @Test
+    void shouldLog100OnlyOnLeafTasks() {
+        try (var ignored = RenamesCurrentThread.renameThread("test")) {
+            var task = Tasks.task("root", Tasks.leaf("leaf", 4));
+            var logger = new TestProgressLogger(task, 1);
+            var progressTracker = new TaskProgressTracker(task, logger);
+
+            progressTracker.beginSubTask("root");
+            progressTracker.beginSubTask("leaf");
+            progressTracker.logProgress(1);
+            progressTracker.endSubTask("leaf");
+            progressTracker.endSubTask("root");
+
+            assertThat(logger.getMessages(TestLog.INFO)).contains(
+                "[test] root :: Start",
+                "[test] root :: leaf :: Start",
+                "[test] root :: leaf 25%",
+                "[test] root :: leaf 100%",
+                "[test] root :: leaf :: Finished",
+                "[test] root :: Finished"
+            );
+        }
+    }
 }
