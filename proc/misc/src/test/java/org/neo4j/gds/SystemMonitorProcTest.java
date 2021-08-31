@@ -162,7 +162,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", List.of(Map.of(
                     "procedure", "TestAlgorithm",
-                    "progress", "n/a",
+                    "progress", "100%",
                     "maxMemoryEstimation", NODE_COUNT * MEMORY_RANGE_SIZE + " Bytes",
                     "maxNumberOfCpuCores", String.valueOf(concurrency)
                 ))

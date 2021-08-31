@@ -153,19 +153,23 @@ class BatchingProgressLoggerTest {
 
     @Test
     void log100Percent() {
-        var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
-        testProgressLogger.reset(1337);
-        testProgressLogger.logFinishPercentage();
-        assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[main] Test 100%");
+        try (var ignore = RenamesCurrentThread.renameThread("test")) {
+            var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
+            testProgressLogger.reset(1337);
+            testProgressLogger.logFinishPercentage();
+            assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
+        }
     }
 
     @Test
     void shouldLog100OnlyOnce() {
-        var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
-        testProgressLogger.reset(1);
-        testProgressLogger.logProgress(1);
-        testProgressLogger.logFinishPercentage();
-        assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[main] Test 100%");
+        try (var ignore = RenamesCurrentThread.renameThread("test")) {
+            var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
+            testProgressLogger.reset(1);
+            testProgressLogger.logProgress(1);
+            testProgressLogger.logFinishPercentage();
+            assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
+        }
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {

@@ -60,6 +60,7 @@ class IterativeTaskTest {
     void shouldCreateSubTasksOnDemandForOpen() {
         var leafTask = Tasks.leaf("leaf");
         var openTask = Tasks.iterativeOpen("root", () -> List.of(leafTask));
+        openTask.start();
         assertThat(openTask.nextSubtask()).isEqualTo(leafTask);
     }
 
@@ -69,6 +70,7 @@ class IterativeTaskTest {
 
         var root = Tasks.iterativeFixed("root", taskSupplier, 3);
 
+        root.start();
         root.nextSubtask().start();
 
         assertThatThrownBy(root::nextSubtask).hasMessageContaining("Cannot move to next subtask, because subtask `A` is still running");
@@ -79,6 +81,7 @@ class IterativeTaskTest {
         Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("A"), Tasks.leaf("B"));
 
         var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+        root.start();
 
         assertThat(root.currentIteration()).isEqualTo(0);
         var subTask1 = root.nextSubtask();
@@ -101,6 +104,7 @@ class IterativeTaskTest {
         );
 
         var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+        root.start();
 
         assertThat(root.currentIteration()).isEqualTo(0);
         var subTask = root.nextSubtask();

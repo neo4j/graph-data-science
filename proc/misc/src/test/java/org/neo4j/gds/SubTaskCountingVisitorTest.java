@@ -61,7 +61,9 @@ public class SubTaskCountingVisitorTest {
         assertThat(subTaskCountingVisitor.numSubTasks()).isEqualTo(6);
         assertThat(subTaskCountingVisitor.numFinishedSubTasks()).isEqualTo(0);
 
+        baseTask.start();
         var iterativeTask = baseTask.nextSubtask();
+        iterativeTask.start();
         var leaf1Iteration1 = iterativeTask.nextSubtask();
         leaf1Iteration1.start();
         leaf1Iteration1.finish();
