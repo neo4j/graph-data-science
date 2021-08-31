@@ -9,7 +9,7 @@ ext {
         'dev'           : properties.getOrDefault('neo4jVersionDev', '4.4.0-dev'),
     ]
 
-    neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.2').toString().split('\\.')[0..1].join('.')
+    neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
 
     neo_at_least_43 = [
         '4.0': neos.'4.3',
@@ -66,7 +66,7 @@ ext {
         'lucene'               : '8.8.0',
         'memoryfilesystem'     : '2.2.0',
         'mockito'              : '3.11.2',
-        'neo4j'                : properties.getOrDefault('neo4jVersion', neos.'4.2'),
+        'neo4j'                : properties.getOrDefault('neo4jVersion', neos.'4.3'),
         'neo4j_at_least_43'    : neo_at_least_43[neo4j_minor],
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.6.1',
