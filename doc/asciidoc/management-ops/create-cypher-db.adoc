@@ -14,6 +14,7 @@ Executing Cypher queries on an in-memory graph can be achieved by leveraging the
 This procedure will create a new impermanent database which you can switch to.
 That database will then use data from the in-memory graph as compared to the store files for usual Neo4j databases.
 
+
 [[create-cypher-db-limitations]]
 == Limitations
 
@@ -27,6 +28,7 @@ Some known limitations are listed below:
 * Referencing relationships
 ** Referencing variables bound to a relationship is not supported, this includes returning relationships
 ** It is however possible to use relationship as traversal, i.e. `MATCH (n)-[:KNOWS]->(m)` will work as expected
+
 
 [[create-cypher-db-syntax]]
 == Syntax
@@ -63,11 +65,12 @@ YIELD
 |===
 --
 
+
 [[create-cypher-db-example]]
 == Example
 
 To demonstrate how to execute cypher statements on in-memory graphs we are going to create a simple social network graph.
-We will use that graph to create a new database with on which we will execute our statements.
+We will use this graph to create a new database which we will execute our statements on.
 
 [source, cypher, role=noplay setup-query]
 ----
@@ -101,7 +104,7 @@ YIELD
 [opts="header", cols="1,3m,1,3m,1m"]
 |===
 | graph            | nodeCont | relationshipCount
-| "social_persons" | 3        | 3
+| "social_network" | 3        | 3
 |===
 --
 
@@ -127,6 +130,15 @@ In order to verify that the new database was created successfully we can use the
 ----
 SHOW DATABASES
 ----
+
+.Results
+[opts="header"]
+|===
+| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home  |
+| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true  |
+| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false |
+| "gdsDb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false |
+|===
 --
 
 We can now switch to the newly created database.
