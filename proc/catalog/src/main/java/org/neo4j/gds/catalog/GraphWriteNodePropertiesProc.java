@@ -125,7 +125,10 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                     )
                     .collect(Collectors.toList());
 
+            progressTracker.beginSubTask(subGraph.nodeCount());
             exporter.write(writeNodeProperties);
+            progressTracker.endSubTask();
+
             propertiesWritten += exporter.propertiesWritten();
         }
         progressTracker.endSubTask();

@@ -124,7 +124,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
-        progressTracker.beginSubTask(nodeCount);
         var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
@@ -134,7 +133,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         } else {
             writeSequential(resolvedNodeProperties);
         }
-        progressTracker.endSubTask();
     }
 
     @Override

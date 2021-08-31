@@ -22,13 +22,9 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -66,13 +62,6 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
         return this;
     }
 
-    public NodePropertyExporterBuilder<T> withLog(Log log) {
-        var task = Tasks.leaf(taskName(), nodeCount);
-        this.progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
-        return withProgressTracker(progressTracker);
-    }
-
     public NodePropertyExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
         return this;
@@ -84,7 +73,4 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
         return this;
     }
 
-    protected String taskName() {
-        return "WriteNodeProperties";
-    }
 }

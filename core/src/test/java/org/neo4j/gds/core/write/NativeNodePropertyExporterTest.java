@@ -27,6 +27,9 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.huge.DirectIdMapping;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -158,16 +161,22 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
         // with a node exporter
         var log = new TestLog();
+        var writeConcurrency = 4;
+        var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+        var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
         var exporterBuilder = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
-            .withLog(log);
+            .withProgressTracker(progressTracker);
         if (parallel) {
-            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
+            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, writeConcurrency);
         }
         var exporter = exporterBuilder.build();
 
         // when writing properties
+        progressTracker.beginSubTask();
         exporter.write("newProp1", new LongTestProperties(nodeId -> 1L));
+        progressTracker.endSubTask();
 
         // then assert messages
         assertThat(log.getMessages(TestLog.INFO))
