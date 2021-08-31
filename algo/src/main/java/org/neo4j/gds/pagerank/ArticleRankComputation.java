@@ -31,7 +31,7 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 
-public final class PageRankComputation implements PregelComputation<PageRankConfig> {
+public final class ArticleRankComputation implements PregelComputation<PageRankConfig> {
 
     static final String PAGE_RANK = "pagerank";
 
@@ -42,14 +42,17 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
     private final double dampingFactor;
     private final double tolerance;
     private final double alpha;
+    private final double averageDegree;
 
-    PageRankComputation(
+    ArticleRankComputation(
         PageRankConfig config,
         LongSet sourceNodes,
-        LongToDoubleFunction degreeFunction
+        LongToDoubleFunction degreeFunction,
+        double averageDegree
     ) {
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
+        this.averageDegree = averageDegree;
         this.alpha = 1 - this.dampingFactor;
         this.sourceNodes = sourceNodes;
         this.hasSourceNodes = !sourceNodes.isEmpty();
@@ -83,14 +86,16 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
             for (var message : messages) {
                 sum += message;
             }
-            delta = dampingFactor * sum;
+            // dampingFactor * neighbor_deltas
+            delta = dampingFactor * averageDegree *  sum;
+            // dividing by averageDegree to avoid huge article ranks
             context.setNodeValue(PAGE_RANK, rank + delta);
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
             var degree = degreeFunction.applyAsDouble(context.nodeId());
             if (degree > 0) {
-                context.sendToNeighbors(delta / degree);
+                context.sendToNeighbors(delta / (degree + averageDegree));
             }
         } else {
             context.voteToHalt();

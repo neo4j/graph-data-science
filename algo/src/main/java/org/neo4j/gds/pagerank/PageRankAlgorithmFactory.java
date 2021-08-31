@@ -87,7 +87,6 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
         ProgressTracker progressTracker
     ) {
         PregelComputation<PageRankConfig> computation;
-        double deltaCoefficient = 1;
 
         var degreeFunction = degreeFunction(
             graph,
@@ -102,10 +101,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
 
         if (mode == ARTICLE_RANK) {
             double avgDegree = averageDegree(graph, configuration.concurrency());
-            var tempFn = degreeFunction;
-            degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;
-            deltaCoefficient = avgDegree;
-            computation = new PageRankComputation(configuration, mappedSourceNodes, degreeFunction, deltaCoefficient);
+            computation = new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
         } else if (mode == EIGENVECTOR) {
             // Degrees are generally not respected in eigenvector centrality.
             //
@@ -118,7 +114,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
 
             computation = new EigenvectorComputation(graph.nodeCount(), configuration, mappedSourceNodes, degreeFunction);
         } else {
-            computation = new PageRankComputation(configuration, mappedSourceNodes, degreeFunction, deltaCoefficient);
+            computation = new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
         }
 
         return new PageRankAlgorithm(
