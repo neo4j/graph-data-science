@@ -220,25 +220,26 @@ public abstract class BaseProc {
         Function<C, MemoryTreeWithDimensions> runEstimation,
         FreeMemoryInspector inspector
     ) {
-        if (config.sudo()) {
-            log.debug("Sudo mode: Won't check for available memory.");
-            return OptionalLong.empty();
-        }
+        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
 
         try {
-            var memoryTreeWithDimensions = runEstimation.apply(config);
-
-            if (memoryTreeWithDimensions != null) {
-                var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-                var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
-                validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
-
-                return OptionalLong.of(memoryTreeWithDimensions.memoryTree.memoryUsage().max);
-            }
+            memoryTreeWithDimensions = runEstimation.apply(config);
         } catch (MemoryEstimationNotImplementedException ignored) {
         }
 
-        return OptionalLong.empty();
+        if (memoryTreeWithDimensions == null) {
+            return OptionalLong.empty();
+        }
+
+        if (config.sudo()) {
+            log.debug("Sudo mode: Won't check for available memory.");
+        } else {
+            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+            var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
+            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
+        }
+
+        return OptionalLong.of(memoryTreeWithDimensions.memoryTree.memoryUsage().max);
     }
 
     protected MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {

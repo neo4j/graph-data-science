@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -49,7 +48,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -203,7 +201,7 @@ public abstract class AlgoBaseProc<
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
 
-        var maybeMaxMemoryInBytes = validateMemoryUsageIfImplemented(config);
+        var maybeMaxMemoryInBytes = tryValidateMemoryUsage(config, this::memoryEstimation);
 
         GraphStore graphStore;
         Graph graph;
@@ -375,17 +373,6 @@ public abstract class AlgoBaseProc<
                         .relationshipCount()
                 )
             );
-    }
-
-    private OptionalLong validateMemoryUsageIfImplemented(CONFIG config) {
-        var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);
-
-        if (sudoImplicitCreate) {
-            log.debug("Sudo mode: Won't check for available memory.");
-            return OptionalLong.empty();
-        }
-
-        return tryValidateMemoryUsage(config, this::memoryEstimation);
     }
 
     @ValueClass
