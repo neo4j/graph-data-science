@@ -142,7 +142,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     }
 
     private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
-        progressTracker.beginSubTask();
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
         PartitionUtils.degreePartitionWithBatchSize(graph, NativeNodePropertyExporter.MIN_BATCH_SIZE, partition -> createBatchRunnable(
@@ -152,7 +151,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             afterWriteConsumer
         ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
-        progressTracker.endSubTask();
     }
 
     private Runnable createBatchRunnable(

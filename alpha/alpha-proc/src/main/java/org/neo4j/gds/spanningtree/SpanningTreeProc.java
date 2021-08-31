@@ -24,9 +24,12 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.impl.spanningTrees.Prim;
@@ -110,13 +113,23 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
             var spanningGraph = new SpanningGraph(graph, spanningTree);
+            var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
+            var progressLogger = new BatchingProgressLogger(
+                log,
+                task,
+                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
+            );
+            var progressTracker = new TaskProgressTracker(task, progressLogger);
+
+            progressTracker.beginSubTask();
             relationshipExporterBuilder
                 .withGraph(spanningGraph)
                 .withIdMapping(spanningGraph)
                 .withTerminationFlag(prim.getTerminationFlag())
-                .withLog(log)
+                .withProgressTracker(progressTracker)
                 .build()
                 .write(config.writeProperty(), config.weightWriteProperty());
+            progressTracker.endSubTask();
 
         }
         builder.withComputeMillis(computationResult.computeMillis());

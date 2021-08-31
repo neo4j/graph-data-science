@@ -109,6 +109,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             .withProgressTracker(progressTracker);
 
 
+        progressTracker.beginSubTask();
         if (relationshipProperty.isPresent()) {
             var propertyKey = relationshipProperty.get();
             var propertyType = graphStore.relationshipPropertyType(propertyKey);
@@ -123,6 +124,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         } else {
             builder.build().write(relationshipType.name);
         }
+        progressTracker.endSubTask();
 
         return graphStore.relationshipCount(relationshipType);
     }

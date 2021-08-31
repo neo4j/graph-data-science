@@ -26,7 +26,11 @@ import org.neo4j.gds.WriteRelationshipsProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -85,14 +89,21 @@ public abstract class SimilarityWriteProc<
                     procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-
+                            var task = Tasks.leaf("WriteRelationships", similarityGraph.relationshipCount());
+                            var progressLogger = new BatchingProgressLogger(
+                                log,
+                                task,
+                                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
+                            );
+                            var progressTracker = new TaskProgressTracker(task, progressLogger);
                             var exporter = relationshipExporterBuilder
                                 .withIdMapping(rootNodeMapping)
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
-                                .withLog(log)
+                                .withProgressTracker(progressTracker)
                                 .build();
 
+                            progressTracker.beginSubTask();
                             if (SimilarityProc.shouldComputeHistogram(callContext)) {
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(
@@ -107,6 +118,7 @@ public abstract class SimilarityWriteProc<
                             } else {
                                 exporter.write(writeRelationshipType, writeProperty);
                             }
+                            progressTracker.endSubTask();
                         }
                     }
                 );

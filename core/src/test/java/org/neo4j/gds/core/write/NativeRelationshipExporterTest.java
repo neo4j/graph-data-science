@@ -34,7 +34,10 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -187,14 +190,23 @@ class NativeRelationshipExporterTest extends BaseTest {
 
         // with a rel exporter
         var log = new TestLog();
-        var exporterBuilder = NativeRelationshipExporter
-            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
-            .withLog(log);
+        var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            task,
+            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
+        );
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
 
-        var exporter = exporterBuilder.build();
+        var exporter = NativeRelationshipExporter
+            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .withProgressTracker(progressTracker)
+            .build();
 
         // when writing properties
+        progressTracker.beginSubTask();
         exporter.write("T");
+        progressTracker.endSubTask();
 
         // then assert messages
         assertThat(log.getMessages(TestLog.INFO))

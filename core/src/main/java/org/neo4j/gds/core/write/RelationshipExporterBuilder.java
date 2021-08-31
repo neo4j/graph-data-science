@@ -22,13 +22,9 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Values;
 
 import java.util.Objects;
@@ -79,23 +75,9 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         return this;
     }
 
-    public RelationshipExporterBuilder<T> withLog(Log log) {
-        var task = Tasks.leaf(taskName(), graph.relationshipCount());
-        this.progressLogger = new BatchingProgressLogger(
-            log,
-            task,
-            DEFAULT_WRITE_CONCURRENCY
-        );
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
-        return withProgressTracker(progressTracker);
-    }
-
     public RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
         return this;
     }
 
-    protected String taskName() {
-        return "WriteRelationships";
-    }
 }
