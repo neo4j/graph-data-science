@@ -63,6 +63,11 @@ public class Task {
     }
 
     public Task nextSubtask() {
+        validateTaskIsRunning();
+        return nextSubTaskAfterValidation();
+    }
+
+    protected Task nextSubTaskAfterValidation() {
         if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
             throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
         }
@@ -72,6 +77,12 @@ public class Task {
             .filter(t -> t.status() == Status.PENDING)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No more pending subtasks"));
+    }
+
+    private void validateTaskIsRunning() {
+        if (this.status != Status.RUNNING) {
+            throw new IllegalStateException(formatWithLocale("Cannot retrieve next subtask, task `%s` is not running.", description()));
+        }
     }
 
     public void start() {

@@ -85,6 +85,7 @@ class TaskTest {
             "Root",
             a, b, c
         );
+        root.start();
 
         assertThat(root.nextSubtask()).isEqualTo(a);
 
@@ -109,6 +110,7 @@ class TaskTest {
             "Root",
             a, b, c
         );
+        root.start();
 
         assertThat(root.nextSubtask()).isEqualTo(a);
 
@@ -126,6 +128,7 @@ class TaskTest {
             "Root",
             a
         );
+        root.start();
 
         assertThat(root.nextSubtask()).isEqualTo(a);
 
@@ -207,8 +210,17 @@ class TaskTest {
     void shouldSetVolumeLate() {
         var task = Tasks.task("root", Tasks.leaf("leaf"));
         assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
+        task.start();
         task.nextSubtask().setVolume(100);
         assertThat(task.getProgress().volume()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldNotProgressWhenNotStarted() {
+        var task = Tasks.task("root", Tasks.leaf("leaf"));
+        assertThatThrownBy(task::nextSubtask)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("`root` is not running");
     }
 
     @Test
