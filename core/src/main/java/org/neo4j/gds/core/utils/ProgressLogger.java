@@ -51,6 +51,8 @@ public interface ProgressLogger {
 
     void logMessage(Supplier<String> msg);
 
+    void logFinishPercentage();
+
     default void logMessage(String msg) {
         logMessage(() -> msg);
     }
@@ -68,6 +70,7 @@ public interface ProgressLogger {
     }
 
     default ProgressLogger logFinish(String message) {
+        logFinishPercentage();
         logMessage((message + TASK_SEPARATOR + "Finished").trim());
         return this;
     }
@@ -113,7 +116,6 @@ public interface ProgressLogger {
         logProgress(percentDone, NO_MESSAGE);
     }
 
-
     enum NullProgressLogger implements ProgressLogger {
         INSTANCE;
 
@@ -139,6 +141,11 @@ public interface ProgressLogger {
 
         @Override
         public void logMessage(Supplier<String> msg) {
+
+        }
+
+        @Override
+        public void logFinishPercentage() {
 
         }
 

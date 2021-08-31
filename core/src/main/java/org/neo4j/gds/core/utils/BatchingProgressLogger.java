@@ -109,6 +109,13 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
+    public void logFinishPercentage() {
+        if (globalPercentage < 100) {
+            logProgress(100);
+        }
+    }
+
+    @Override
     public void release() {
     }
 

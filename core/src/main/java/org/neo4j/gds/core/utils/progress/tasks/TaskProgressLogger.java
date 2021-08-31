@@ -80,6 +80,11 @@ public class TaskProgressLogger implements ProgressLogger {
     }
 
     @Override
+    public void logFinishPercentage() {
+        progressLogger.logFinishPercentage();
+    }
+
+    @Override
     public void logMessage(Supplier<String> msg) {
         progressLogger.logMessage(msg);
     }

@@ -80,6 +80,11 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     }
 
     @Override
+    public void logFinishPercentage() {
+        batchingLogger.logFinishPercentage();
+    }
+
+    @Override
     public long reset(long newTaskVolume) {
         progresses.add(new AtomicLong(0));
         return batchingLogger.reset(newTaskVolume);
