@@ -29,6 +29,15 @@ public final class GdsEdition {
         return INSTANCE;
     }
 
+    void requireEnterpriseEdition(String detail) {
+        if (currentState != State.ENTERPRISE) {
+            throw new RuntimeException(
+                "The requested operation (" + detail +
+                ") is only available with the Neo4j Graph Data Science library Enterprise Edition. " +
+                "Please refer to the documentation.");
+        }
+    }
+
     private enum State {
         ENTERPRISE,
         COMMUNITY,

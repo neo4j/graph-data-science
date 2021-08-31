@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.junit.annotation.Edition;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,5 +54,20 @@ class GdsEditionTest {
         assertTrue(GdsEdition.instance().isInvalidLicense());
         assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
         assertFalse(GdsEdition.instance().isOnCommunityEdition());
+    }
+
+    @Test
+    @org.neo4j.gds.junit.annotation.GdsEditionTest(Edition.CE)
+    void shouldValidateEnterpriseEdition() {
+        assertThatThrownBy(() -> GdsEdition.instance().requireEnterpriseEdition("detail"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition")
+            .hasMessageContaining("detail");
+    }
+
+    @Test
+    @org.neo4j.gds.junit.annotation.GdsEditionTest(Edition.EE)
+    void shouldNotThrowWhenOnEnterpriseEdition() {
+        assertThatNoException().isThrownBy(() -> GdsEdition.instance().requireEnterpriseEdition("detail"));
     }
 }
