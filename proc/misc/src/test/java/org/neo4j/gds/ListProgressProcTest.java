@@ -25,8 +25,6 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
@@ -152,25 +150,8 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            var taskRegistry = this.taskRegistry;
-
-            this.taskRegistry = new TaskRegistry() {
-                @Override
-                public void registerTask(Task task) {
-                    taskRegistry.registerTask(task);
-                }
-
-                @Override
-                public void unregisterTask() {
-                    // skip removing the task because we want to observe the messages after the algo is done
-                }
-            };
-
-            try {
-                return super.stream(graphNameOrConfig, configuration);
-            } finally {
-                this.taskRegistry = taskRegistry;
-            }
+            this.taskRegistry = new NonReleasingTaskRegistry(taskRegistry);
+            return super.stream(graphNameOrConfig, configuration);
         }
 
         @Override

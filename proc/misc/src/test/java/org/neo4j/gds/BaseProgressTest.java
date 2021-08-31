@@ -22,11 +22,13 @@ package org.neo4j.gds;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -52,6 +54,9 @@ public class BaseProgressTest extends BaseTest {
 
     public static class BaseProgressTestProc {
 
+        @Context
+        public TaskRegistry taskRegistry;
+
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName,
@@ -75,34 +80,22 @@ public class BaseProgressTest extends BaseTest {
         public Bar(String field) {this.field = field;}
     }
 
-    public static class NonReleasingProgressTracker extends TaskProgressTracker {
+    public static class NonReleasingTaskRegistry implements TaskRegistry {
 
-        NonReleasingProgressTracker(TaskProgressTracker progressTracker) {
-            super(progressTracker);
+        private final TaskRegistry taskRegistry;
+
+        NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
+            this.taskRegistry = taskRegistry;
         }
 
         @Override
-        public void release() {
-            // skip the release because we want to observe the messages after the algo is done
-        }
-    }
-
-    public static class NonReleasingProgressEventTracker implements ProgressEventTracker {
-
-        private final ProgressEventTracker tracker;
-
-        NonReleasingProgressEventTracker(ProgressEventTracker tracker) {
-            this.tracker = tracker;
+        public void registerTask(Task task) {
+            taskRegistry.registerTask(task);
         }
 
         @Override
-        public void addTaskProgressEvent(Task task) {
-            tracker.addTaskProgressEvent(task);
-        }
-
-        @Override
-        public void release() {
-            // skip the release because we want to observe the messages after the algo is done
+        public void unregisterTask() {
+            // skip un registering the task because we want to observe the messages after the algo is done
         }
     }
 }
