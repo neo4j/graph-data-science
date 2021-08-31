@@ -20,7 +20,10 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.RenamesCurrentThread;
 
 import java.util.List;
 
@@ -137,5 +140,28 @@ public class TaskProgressTrackerTest {
         assertDoesNotThrow(() -> progressTracker.beginSubTask("Leaf"));
         assertDoesNotThrow(() -> progressTracker.endSubTask("Leaf"));
         assertDoesNotThrow(() -> progressTracker.endSubTask("Foo"));
+    }
+
+    @Test
+    void shouldLog100WhenTaskFinishedEarly() {
+        try (var ignored = RenamesCurrentThread.renameThread("test")) {
+            var task = Tasks.leaf("leaf", 4);
+            var logger = new TestProgressLogger(task, 1);
+            var progressTracker = new TaskProgressTracker(task, logger);
+            progressTracker.beginSubTask();
+            progressTracker.logProgress(1);
+
+            assertThat(logger.getMessages(TestLog.INFO)).contains(
+                "[test] leaf :: Start",
+                "[test] leaf 25%"
+            );
+
+            progressTracker.endSubTask();
+
+            assertThat(logger.getMessages(TestLog.INFO)).contains(
+                "[test] leaf 100%",
+                "[test] leaf :: Finished"
+            );
+        }
     }
 }
