@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
@@ -94,14 +95,17 @@ public class SystemMonitorProc extends BaseProc {
                     var maxMemoryEstimation = task.estimatedMaxMemoryInBytes().isPresent()
                         ? MemoryUsage.humanReadable(task.estimatedMaxMemoryInBytes().getAsLong())
                         : "n/a";
+                    var maxNumberOfCpuCores = task.maxConcurrency() != Task.UNKNOWN_CONCURRENCY
+                        ? String.valueOf(task.maxConcurrency())
+                        : "n/a";
                     return Map.of(
-                        "taskName", task.description(),
+                        "procedure", task.description(),
                         "progress", StructuredOutputHelper.computeProgress(
                             progress.progress(),
                             progress.volume()
                         ),
                         "maxMemoryEstimation", maxMemoryEstimation,
-                        "maxNumberOfCpuCores", String.valueOf(task.concurrency())
+                        "maxNumberOfCpuCores", maxNumberOfCpuCores
                     );
                 })
                 .collect(toList());

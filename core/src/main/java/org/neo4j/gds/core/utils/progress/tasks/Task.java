@@ -29,6 +29,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class Task {
 
     public static final int UNKNOWN_VOLUME = -1;
+    public static final int UNKNOWN_CONCURRENCY = -1;
     public static final long NOT_STARTED = -1L;
     public static final long NOT_FINISHED = -1L;
 
@@ -39,7 +40,7 @@ public class Task {
     private long finishTime;
 
     private OptionalLong estimatedMaxMemoryInBytes = OptionalLong.empty();
-    private int concurrency = 1;
+    private int maxConcurrency = UNKNOWN_CONCURRENCY;
 
     Task(String description, List<Task> subTasks) {
         this.description = description;
@@ -162,12 +163,20 @@ public class Task {
         return this.estimatedMaxMemoryInBytes;
     }
 
-    public int concurrency() {
-        return this.concurrency;
+    public int maxConcurrency() {
+        return this.maxConcurrency;
     }
 
-    public void setEstimatedResourceFootprint(OptionalLong maxMemoryInBytes, int concurrency) {
+    public void setMaxConcurrency(int maxConcurrency) {
+        this.maxConcurrency = maxConcurrency;
+        subTasks.forEach(task -> {
+            if (task.maxConcurrency() == UNKNOWN_CONCURRENCY) {
+                task.setMaxConcurrency(maxConcurrency);
+            }
+        });
+    }
+
+    public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemoryInBytes) {
         this.estimatedMaxMemoryInBytes = maxMemoryInBytes;
-        this.concurrency = concurrency;
     }
 }

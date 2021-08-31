@@ -137,6 +137,24 @@ class TaskTest {
     }
 
     @Test
+    void shouldSetConcurrencyWhenApplicable() {
+        int concurrency = 42;
+
+        var a = Tasks.leaf("A");
+        var b = Tasks.task("B", a);
+        var c = Tasks.leaf("C");
+        var d = Tasks.task("C", b, c);
+
+        c.setMaxConcurrency(concurrency + 1);
+        d.setMaxConcurrency(concurrency);
+
+        assertThat(a.maxConcurrency()).isEqualTo(concurrency);
+        assertThat(b.maxConcurrency()).isEqualTo(concurrency);
+        assertThat(c.maxConcurrency()).isEqualTo(concurrency + 1);
+        assertThat(d.maxConcurrency()).isEqualTo(concurrency);
+    }
+
+    @Test
     void shouldGetCumulativeProgress() {
         var a = Tasks.leaf("A", 100);
         var b = Tasks.leaf("B", 100);

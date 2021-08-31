@@ -61,13 +61,15 @@ public class BaseProgressTest extends BaseTest {
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(
             @Name(value = "taskName") String taskName,
-            @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation
+            @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation,
+            @Name(value = "withConcurrency", defaultValue = "false") boolean withConcurrency
         ) {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
             if (withMemoryEstimation) {
-                task.setEstimatedResourceFootprint(OptionalLong.of(MAX_MEMORY_USAGE), MAX_CPU_CORES);
-            } else {
-                task.setEstimatedResourceFootprint(OptionalLong.empty(), MAX_CPU_CORES);
+                task.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
+            }
+            if (withConcurrency) {
+                task.setMaxConcurrency(MAX_CPU_CORES);
             }
             var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
             taskProgressTracker.beginSubTask();

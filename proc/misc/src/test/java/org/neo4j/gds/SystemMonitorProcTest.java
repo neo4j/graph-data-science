@@ -161,7 +161,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "jvmAvailableCpuCores", greaterThan(0L),
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", List.of(Map.of(
-                    "taskName", "TestAlgorithm",
+                    "procedure", "TestAlgorithm",
                     "progress", "n/a",
                     "maxMemoryEstimation", NODE_COUNT * MEMORY_RANGE_SIZE + " Bytes",
                     "maxNumberOfCpuCores", String.valueOf(concurrency)
@@ -175,7 +175,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
     void shouldShowOngoingProcsOfSeveralUsers() {
         runQuery("Alice", "CALL gds.test.pl('foo')");
         // Use a non-default mock memory estimation.
-        runQuery("Bob", "CALL gds.test.pl('bar', true)");
+        runQuery("Bob", "CALL gds.test.pl('bar', true, true)");
 
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",
@@ -187,13 +187,13 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "jvmStatusDescription", aMapWithSize(4),
                 "ongoingGdsProcedures", containsInAnyOrder(
                     Map.of(
-                        "taskName", "foo",
+                        "procedure", "foo",
                         "progress", "33.33%",
                         "maxMemoryEstimation", "n/a",
-                        "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
+                        "maxNumberOfCpuCores", "n/a"
                     ),
                     Map.of(
-                        "taskName", "bar",
+                        "procedure", "bar",
                         "progress", "33.33%",
                         "maxMemoryEstimation", MAX_MEMORY_USAGE + " Bytes",
                         "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
