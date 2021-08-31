@@ -66,7 +66,7 @@ class CsvGraphStoreImporterTest {
     }
 
     private Path importPath() throws URISyntaxException {
-        var uri = Objects.requireNonNull(getClass().getClassLoader().getResource("CsvToGraphStoreExporterTest")).toURI();
+        var uri = Objects.requireNonNull(getClass().getClassLoader().getResource("CsvToGraphStoreImporterTest")).toURI();
         return Paths.get(uri);
     }
 
