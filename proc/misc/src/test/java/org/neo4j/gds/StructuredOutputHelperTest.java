@@ -32,7 +32,8 @@ class StructuredOutputHelperTest {
         "4, 10, 10, [####~~~~~~]",
         "0, 10, 10, [~~~~~~~~~~]",
         "10, 10, 10, [##########]",
-        "22, 100, 5, [#~~~~]"
+        "22, 100, 5, [#~~~~]",
+        "0, 0, 5, [#####]"
     })
     void shouldComputeProgressBar(long progress, long volume, int progressBarLength, String expected) {
         assertThat(StructuredOutputHelper.progressBar(progress, volume, progressBarLength)).isEqualTo(expected);
@@ -40,7 +41,7 @@ class StructuredOutputHelperTest {
 
     @Test
     void shouldComputeUnknownProgressBar() {
-        assertThat(StructuredOutputHelper.progressBar(1, 0, 10)).isEqualTo("[~~~~n/a~~~]");
+        assertThat(StructuredOutputHelper.progressBar(1, -1, 10)).isEqualTo("[~~~~n/a~~~]");
     }
 
     @ParameterizedTest
@@ -49,6 +50,7 @@ class StructuredOutputHelperTest {
         "0, 100, 0%",
         "100, 100, 100%",
         "1, 3, 33.33%",
+        "0, 0, 100%"
     })
     void shouldComputeProgress(long progress, long volume, String expectedPercentage) {
         assertThat(StructuredOutputHelper.computeProgress(progress, volume)).isEqualTo(expectedPercentage);

@@ -40,10 +40,13 @@ public final class StructuredOutputHelper {
      * Produce a progress bar string in the format of: [######~~~~]
      */
     static String progressBar(long progress, long volume, int progressBarLength) {
-        if (volume <= 0) {
+        if (volume == Task.UNKNOWN_VOLUME) {
             return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
-        var percentage = progress / (volume / 100D);
+
+        var percentage = volume == 0
+            ? 100D
+            : progress / (volume / 100D);
         var scaledPercentage = (int) ((percentage / 100D) * progressBarLength);
 
         var filledProgressBar = "#".repeat(scaledPercentage);
@@ -59,7 +62,9 @@ public final class StructuredOutputHelper {
             return UNKNOWN;
         }
 
-        var progressPercentage = (double) progress / (double) volume;
+        var progressPercentage = volume == 0
+            ? 1.0D
+            : (double) progress / (double) volume;
         var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         return decimalFormat.format(progressPercentage);
     }
