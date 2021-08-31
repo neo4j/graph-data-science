@@ -344,12 +344,12 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.20545 })" +
-            ", (b:Node { expectedRank: 0.44671 })" +
-            ", (c:Node { expectedRank: 0.33657 })" +
-            ", (d:Node { expectedRank: 0.19357 })" +
-            ", (e:Node { expectedRank: 0.20545 })" +
-            ", (f:Node { expectedRank: 0.19357 })" +
+            "  (a:Node { expectedRank: 0.20720 })" +
+            ", (b:Node { expectedRank: 0.47091 })" +
+            ", (c:Node { expectedRank: 0.36067 })" +
+            ", (d:Node { expectedRank: 0.19515 })" +
+            ", (e:Node { expectedRank: 0.20720 })" +
+            ", (f:Node { expectedRank: 0.19515 })" +
             ", (g:Node { expectedRank: 0.15 })" +
             ", (h:Node { expectedRank: 0.15 })" +
             ", (i:Node { expectedRank: 0.15 })" +
@@ -367,10 +367,10 @@ class PageRankTest {
         @GdlGraph(graphNamePrefix = "paper")
         public static final String DB_PAPERS =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.45309 })" +
-            ", (b:Node { expectedRank: 0.35702 })" +
-            ", (c:Node { expectedRank: 0.22817 })" +
-            ", (d:Node { expectedRank: 0.18931 })" +
+            "  (a:Node { expectedRank: 0.34627 })" +
+            ", (b:Node { expectedRank: 0.31950 })" +
+            ", (c:Node { expectedRank: 0.21092 })" +
+            ", (d:Node { expectedRank: 0.18028 })" +
             ", (e:Node { expectedRank: 0.21375 })" +
             ", (f:Node { expectedRank: 0.15000 })" +
             ", (g:Node { expectedRank: 0.15000 })" +

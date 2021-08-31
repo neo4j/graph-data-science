@@ -89,13 +89,13 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
             // dampingFactor * neighbor_deltas
             delta = dampingFactor * sum;
             // dividing by averageDegree to avoid huge article ranks
-            context.setNodeValue(PAGE_RANK, rank + (delta / averageDegree));
+            context.setNodeValue(PAGE_RANK, rank + delta);
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
             var degree = degreeFunction.applyAsDouble(context.nodeId());
             if (degree > 0) {
-                context.sendToNeighbors(delta * averageDegree / (degree + averageDegree));
+                context.sendToNeighbors(delta / (degree + averageDegree));
             }
         } else {
             context.voteToHalt();
