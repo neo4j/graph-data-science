@@ -19,15 +19,11 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import java.util.List;
-import java.util.function.Consumer;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-public interface ProgressEventStore extends Consumer<ProgressEvent> {
-    List<ProgressEvent> query(String username);
+public interface TaskRegistry {
 
-    ProgressEvent query(String username, JobId jobId);
+    void registerTask(Task task);
 
-    List<ProgressEvent> allBaseEvents();
-
-    boolean isEmpty();
+    void unregisterTask();
 }

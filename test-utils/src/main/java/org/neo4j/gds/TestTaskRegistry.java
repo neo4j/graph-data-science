@@ -17,34 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds;
 
-import java.util.List;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-enum EmptyProgressEventStore implements ProgressEventStore {
-    INSTANCE;
+public class TestTaskRegistry implements TaskRegistry {
+
+    private int unregisterTaskCalls = 0;
 
     @Override
-    public List<ProgressEvent> query(String username) {
-        return List.of();
+    public void registerTask(Task task) {
+
     }
 
     @Override
-    public ProgressEvent query(String username, JobId jobId) {
-        return ProgressEvent.endOfStreamEvent(username, jobId);
+    public void unregisterTask() {
+        unregisterTaskCalls++;
     }
 
-    public List<ProgressEvent> allBaseEvents() {
-        return List.of();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public void accept(ProgressEvent progressEvent) {
-
+    public int unregisterTaskCalls() {
+        return this.unregisterTaskCalls;
     }
 }

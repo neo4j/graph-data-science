@@ -38,7 +38,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
@@ -136,7 +136,13 @@ class GraphSageTest {
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(orphanGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
+        var graphSage = algorithmFactory.build(
+            orphanGraph,
+            streamConfig,
+            AllocationTracker.empty(),
+            NullLog.getInstance(),
+            EmptyTaskRegistry.INSTANCE
+        );
         GraphSage.GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
             Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> {
@@ -196,7 +202,7 @@ class GraphSageTest {
             trainConfig,
             AllocationTracker.empty(),
             new TestLog(),
-            EmptyProgressEventTracker.INSTANCE
+            EmptyTaskRegistry.INSTANCE
         );
 
         ModelCatalog.set(graphSageTrain.compute());
@@ -208,7 +214,13 @@ class GraphSageTest {
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
+        var graphSage = algorithmFactory.build(
+            graph,
+            streamConfig,
+            AllocationTracker.empty(),
+            NullLog.getInstance(),
+            EmptyTaskRegistry.INSTANCE
+        );
         graphSage.compute();
 
         var testLogger = (TestProgressLogger) graphSage.getProgressTracker().progressLogger();

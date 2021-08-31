@@ -21,36 +21,36 @@ package org.neo4j.gds.core.utils.io.file;
 
 import org.immutables.builder.Builder;
 import org.neo4j.common.Validator;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableNodePropertyStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
+import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.ImmutableImportedProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
@@ -341,7 +341,7 @@ public final class CsvGraphStoreImporter {
                     Pools.DEFAULT,
                     log,
                     tracker,
-                    EmptyProgressEventTracker.INSTANCE
+                    EmptyTaskRegistry.INSTANCE
                 );
             } catch (ParseException | SemanticErrors e) {
                 throw new RuntimeException(e);

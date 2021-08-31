@@ -22,8 +22,8 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -34,8 +34,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
+    private final TaskRegistry taskRegistry;
     private final TaskProgressLogger taskProgressLogger;
-    private final ProgressEventTracker eventTracker;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
 
@@ -44,30 +44,21 @@ public class TaskProgressTracker implements ProgressTracker {
         Task baseTask,
         ProgressLogger progressLogger
     ) {
-        this(baseTask, progressLogger, EmptyProgressEventTracker.INSTANCE);
-    }
-
-    @TestOnly
-    public TaskProgressTracker(TaskProgressTracker progressTracker) {
-        this.baseTask = progressTracker.baseTask;
-        this.taskProgressLogger = progressTracker.taskProgressLogger;
-        this.eventTracker = progressTracker.eventTracker;
-        this.currentTask = progressTracker.currentTask;
-        this.nestedTasks = progressTracker.nestedTasks;
+        this(baseTask, progressLogger, EmptyTaskRegistry.INSTANCE);
     }
 
     public TaskProgressTracker(
         Task baseTask,
         ProgressLogger progressLogger,
-        ProgressEventTracker eventTracker
+        TaskRegistry taskRegistry
     ) {
         this.baseTask = baseTask;
+        this.taskRegistry = taskRegistry;
         this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);
-        this.eventTracker = eventTracker;
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
 
-        eventTracker.addTaskProgressEvent(baseTask);
+        taskRegistry.registerTask(baseTask);
     }
 
     @Override
@@ -132,13 +123,13 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public ProgressEventTracker progressEventTracker() {
-        return eventTracker;
+    public TaskRegistry taskRegistry() {
+        return taskRegistry;
     }
 
     @Override
     public void release() {
-        eventTracker.release();
+        taskRegistry.unregisterTask();
     }
 
     @TestOnly

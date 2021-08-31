@@ -41,10 +41,10 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
-import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -166,7 +166,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
-            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.taskRegistry = EmptyTaskRegistry.INSTANCE;
 
             if (proc instanceof NodePropertiesWriter) {
                 ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(

@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
-import org.neo4j.gds.core.utils.progress.ProgressEventStore;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class SystemMonitorProc extends BaseProc {
 
     @Context
-    public ProgressEventStore progress;
+    public TaskStore taskStore;
 
     private static final String DESCRIPTION = "Get an overview of the system's workload and available resources";
 
@@ -87,19 +87,16 @@ public class SystemMonitorProc extends BaseProc {
         }
 
         private List<Map<String, String>> getAllOngoingProcedures() {
-            return progress
-                .allBaseEvents()
-                .stream()
-                .map(event ->
-                {
-                    var baseTask = event.task();
-                    var progress = baseTask.getProgress();
-                    var maxMemoryEstimation = baseTask.estimatedMaxMemoryInBytes().isPresent()
-                        ? MemoryUsage.humanReadable(baseTask.estimatedMaxMemoryInBytes().getAsLong())
+            return taskStore
+                .taskStream()
+                .map(task -> {
+                    var progress = task.getProgress();
+                    var maxMemoryEstimation = task.estimatedMaxMemoryInBytes().isPresent()
+                        ? MemoryUsage.humanReadable(task.estimatedMaxMemoryInBytes().getAsLong())
                         : "n/a";
                     return Map.of(
                         "taskName",
-                        event.task().description(),
+                        task.description(),
                         "progress",
                         StructuredOutputHelper.computeProgress(
                             progress.progress(),

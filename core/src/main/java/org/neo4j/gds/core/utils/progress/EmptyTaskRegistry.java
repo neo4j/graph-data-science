@@ -17,29 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public final class TestProgressEventTracker implements ProgressEventTracker {
-    private int releaseCalls = 0;
-    private final List<Task> progressEvents = new ArrayList<>();
+public enum EmptyTaskRegistry implements TaskRegistry {
+    INSTANCE;
 
     @Override
-    public void addTaskProgressEvent(Task task) {
-        progressEvents.add(task);
+    public void registerTask(Task task) {
+
     }
 
     @Override
-    public void release() {
-        releaseCalls++;
-    }
+    public void unregisterTask() {
 
-    public int releaseCalls() {
-        return releaseCalls;
     }
 }

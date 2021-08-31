@@ -19,26 +19,19 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProgressEventQueueTest {
+final class TaskRegistryExtensionDisabledTest extends BaseTaskRegistryExtensionTest {
 
-    @Test
-    void should() {
-        var queue = new ConcurrentLinkedQueue<ProgressEvent>();
-        var username = AuthSubject.ANONYMOUS.username();
-        var tracker = new ProgressEventQueue(queue, username);
-        tracker.release();
-        assertThat(queue.size()).isOne();
-        var event = queue.remove();
-        assertThat(event.isEndOfStream()).isTrue();
-        assertThat(event.username()).isEqualTo(username);
-        assertThat(event.task()).isEqualTo(Tasks.empty());
+    @Override
+    boolean featureEnabled() {
+        return false;
+    }
+
+    @Override
+    void assertResult(List<String> result) {
+        assertThat(result).isEmpty();
     }
 }

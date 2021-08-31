@@ -20,34 +20,34 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import java.util.Queue;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-final class ProgressEventQueue extends LifecycleAdapter implements ProgressEventTracker {
+public enum EmptyTaskStore implements TaskStore {
+    INSTANCE;
 
-    private final Queue<ProgressEvent> queue;
-    private final String username;
-
-    // for now a synthetic id, we can change to a more traceable one as and when
-    private final JobId jobId = new JobId();
-
-    ProgressEventQueue(
-        Queue<ProgressEvent> queue,
-        String username
-    ) {
-        this.queue = queue;
-        this.username = username;
+    @Override
+    public Map<JobId, Task> query(String username) {
+        return Map.of();
     }
 
     @Override
-    public void addTaskProgressEvent(Task task) {
-        var progressEvent = ImmutableProgressEvent.of(username, jobId, task);
-        this.queue.offer(progressEvent);
+    public Optional<Task> query(String username, JobId jobId) {
+        return Optional.empty();
     }
 
     @Override
-    public void release() {
-        queue.offer(ProgressEvent.endOfStreamEvent(username, jobId));
+    public Stream<Task> taskStream() {
+        return Stream.empty();
     }
+
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+
 }

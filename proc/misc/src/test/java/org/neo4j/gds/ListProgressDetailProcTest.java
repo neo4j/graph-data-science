@@ -24,18 +24,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -55,7 +52,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
         );
 
         runQuery("CALL gds.test.track");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
@@ -137,8 +133,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
     }
 
     public static class ProgressTrackingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.track")
         public Stream<ListProgressProcTest.Bar> foo() {
@@ -152,7 +146,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                 Tasks.leaf("leaf", 3)
             );
 
-            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, progress);
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
 
             taskProgressTracker.beginSubTask(); // root
             taskProgressTracker.beginSubTask(); // iterative
@@ -162,7 +156,6 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
             taskProgressTracker.beginSubTask(); // leafIterative 2
             taskProgressTracker.logProgress(1); // log 1/2
 
-            progress.addTaskProgressEvent(task);
             return Stream.empty();
         }
     }

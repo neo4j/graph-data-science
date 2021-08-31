@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import java.util.List;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-final class ProgressEventExtensionDisabledTest extends BaseProgressEventExtensionTest {
+public interface TaskStore {
+    Map<JobId, Task> query(String username);
 
-    @Override
-    boolean featureEnabled() {
-        return false;
-    }
+    Optional<Task> query(String username, JobId jobId);
 
-    @Override
-    void assertResult(List<String> result) {
-        assertThat(result).isEmpty();
-    }
+    Stream<Task> taskStream();
+
+    boolean isEmpty();
 }

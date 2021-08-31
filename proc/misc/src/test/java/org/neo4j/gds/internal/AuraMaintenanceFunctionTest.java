@@ -34,14 +34,12 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.progress.ProgressEventExtension;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;
@@ -122,8 +120,8 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             builder.addExtension(new AuraMaintenanceExtension());
             builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
             // make sure that we 1) have our extension under test and 2) have it only once
-            builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-            builder.addExtension(new ProgressEventExtension(scheduler));
+            builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
+            builder.addExtension(new TaskRegistryExtension());
         }
 
         @BeforeEach
@@ -144,9 +142,6 @@ class AuraMaintenanceFunctionTest extends BaseTest {
             //   - wait 420 fake milliseconds
             //   - remove its events
             runQuery("CALL gds.test.addEvent()");
-
-            // wait 100 milliseconds for the initial queue wait time to pick up the event
-            scheduler.forward(100, TimeUnit.MILLISECONDS);
 
             // now we should see the event, so not safe to restart
             assertSafeToRestart(false);
@@ -185,13 +180,12 @@ class AuraMaintenanceFunctionTest extends BaseTest {
     }
 
     public static class ProgressLoggingTestProc extends BaseProc {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.addEvent")
         public void addEvent() {
-            progress.addTaskProgressEvent(Tasks.leaf("gds.test"));
-            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> progress.release(), 420, TimeUnit.MILLISECONDS);
+            var task = Tasks.leaf("gds.test");
+            taskRegistry.registerTask(task);
+            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> taskRegistry.unregisterTask(), 420, TimeUnit.MILLISECONDS);
         }
     }
 }

@@ -27,9 +27,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.TestTaskRegistry;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -190,12 +190,12 @@ class PregelTest {
             .isAsynchronous(false)
             .build();
 
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressLogger =  new TestProgressLogger(task, config.concurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, eventTracker);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
 
         var pregelAlgo = Pregel.create(
             graph,
@@ -209,7 +209,7 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {

@@ -31,23 +31,18 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.ProgressEventStore;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestConfig;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -60,9 +55,6 @@ class SystemMonitorProcTest extends BaseProgressTest {
     static String GRAPH_NAME = "myGraph";
     static long NODE_COUNT = 3;
     static long MEMORY_RANGE_SIZE = 10;
-
-    @Context
-    public ProgressEventStore progress;
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -91,16 +83,14 @@ class SystemMonitorProcTest extends BaseProgressTest {
     }
 
     public static class MemEstimationTestProc extends AlgoBaseProc<TestAlgorithm, TestAlgorithm, TestConfig> {
-        @Context
-        public ProgressEventTracker progress;
 
         @Procedure("gds.test.algoTestProc")
         public Stream<Bar> foo(
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
+            this.taskRegistry = new NonReleasingTaskRegistry(taskRegistry);
             compute(graphNameOrConfig, configuration);
-
             return Stream.empty();
         }
 
@@ -132,7 +122,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                         allocationTracker(),
                         0L,
                         log,
-                        new NonReleasingProgressTracker((TaskProgressTracker) progressTracker),
+                        progressTracker,
                         false
                     );
                 }
@@ -154,8 +144,6 @@ class SystemMonitorProcTest extends BaseProgressTest {
             "CALL gds.test.algoTestProc($graph, { writeProperty: $writeProperty })",
             Map.of("graph", GRAPH_NAME, "writeProperty", "dummy")
         );
-
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",
@@ -180,7 +168,6 @@ class SystemMonitorProcTest extends BaseProgressTest {
         runQuery("Alice", "CALL gds.test.pl('foo')");
         // Use a non-default mock memory estimation.
         runQuery("Bob", "CALL gds.test.pl('bar', true)");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         assertCypherResult(
             "CALL gds.alpha.systemMonitor()",

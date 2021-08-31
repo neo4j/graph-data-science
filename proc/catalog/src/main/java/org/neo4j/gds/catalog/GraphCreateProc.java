@@ -20,8 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
@@ -31,6 +29,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -38,6 +37,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -212,7 +212,7 @@ public class GraphCreateProc extends CatalogProc {
             Pools.DEFAULT,
             log,
             allocationTracker(),
-            progressEventTracker
+            taskRegistry
         );
 
         GraphStoreCatalog.set(config, graphStore);

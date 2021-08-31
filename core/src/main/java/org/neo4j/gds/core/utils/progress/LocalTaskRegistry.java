@@ -19,8 +19,27 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import java.util.function.Consumer;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-public interface ProgressEventHandler {
-    void registerProgressEventListener(Consumer<ProgressEvent> eventConsumer);
+public class LocalTaskRegistry implements TaskRegistry {
+
+    private final String username;
+    private final GlobalTaskStore globalTaskStore;
+    private final JobId jobId;
+
+    public LocalTaskRegistry(String username, GlobalTaskStore globalTaskStore) {
+        this.username = username;
+        this.globalTaskStore = globalTaskStore;
+        this.jobId = new JobId();
+    }
+
+    @Override
+    public void registerTask(Task task) {
+        globalTaskStore.store(username, jobId, task);
+    }
+
+    @Override
+    public void unregisterTask() {
+        globalTaskStore.remove(username, jobId);
+    }
 }

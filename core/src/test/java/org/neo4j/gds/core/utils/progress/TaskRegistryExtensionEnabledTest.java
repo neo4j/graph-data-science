@@ -19,21 +19,19 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import java.util.List;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public interface ProgressEventTracker {
-    void addTaskProgressEvent(Task task);
+final class TaskRegistryExtensionEnabledTest extends BaseTaskRegistryExtensionTest {
 
-    default void addTaskProgressEvent(Optional<Task> task) {
-        if (task.isPresent()) {
-            addTaskProgressEvent(task.get());
-        } else {
-            addTaskProgressEvent(Tasks.empty());
-        }
+    @Override
+    boolean featureEnabled() {
+        return true;
     }
 
-    void release();
+    @Override
+    void assertResult(List<String> result) {
+        assertThat(result).containsExactly("foo");
+    }
 }

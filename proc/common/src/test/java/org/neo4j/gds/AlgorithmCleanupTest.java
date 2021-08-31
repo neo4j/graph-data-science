@@ -49,29 +49,29 @@ class AlgorithmCleanupTest extends BaseProcTest {
 
     @Test
     void cleanupEventTrackerUnderRegularExecution() {
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
 
         var proc = new TestProc();
-        proc.progressEventTracker = eventTracker;
+        proc.taskRegistry = taskRegistry;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
     }
 
     @Test
     void cleanupEventTrackerWhenTheAlgorithmFails() {
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
 
         var proc = new TestProc();
-        proc.progressEventTracker = eventTracker;
+        proc.taskRegistry = taskRegistry;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
     }
 }

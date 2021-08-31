@@ -317,7 +317,7 @@ public abstract class AlgoBaseProc<
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         return algorithmFactory()
-            .build(graph, config, tracker, log, progressEventTracker)
+            .build(graph, config, tracker, log, taskRegistry)
             .withTerminationFlag(terminationFlag);
     }
 

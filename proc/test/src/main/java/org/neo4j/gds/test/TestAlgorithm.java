@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.ProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -42,7 +42,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         AllocationTracker allocationTracker,
         long memoryLimit,
         Log log,
-        ProgressEventTracker eventTracker,
+        TaskRegistry taskRegistry,
         boolean throwInCompute
     ) {
         this.graph = graph;
@@ -52,7 +52,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         this.progressTracker = new TaskProgressTracker(
             Tasks.leaf("TestAlgorithm"),
             new BatchingProgressLogger(log, Tasks.leaf("test", 42), 1),
-            eventTracker
+            taskRegistry
         );
     }
 

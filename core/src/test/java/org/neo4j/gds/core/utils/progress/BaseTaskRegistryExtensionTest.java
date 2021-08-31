@@ -28,19 +28,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-abstract class BaseProgressEventExtensionTest extends BaseTest {
-    private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
-
+abstract class BaseTaskRegistryExtensionTest extends BaseTest {
     abstract boolean featureEnabled();
 
     @Override
@@ -50,8 +46,8 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
         builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
-        builder.removeExtensions(ex -> ex instanceof ProgressEventExtension);
-        builder.addExtension(new ProgressEventExtension(scheduler));
+        builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
+        builder.addExtension(new TaskRegistryExtension());
     }
 
     abstract void assertResult(List<String> result);
@@ -60,7 +56,6 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
     void test() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ProgressProc.class);
         runQuery("CALL gds.test.algo");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
         assertResult(runQuery(
             "CALL gds.test.log() YIELD field RETURN field",
             r -> r.<String>columnAs("field").stream().collect(toList())
@@ -69,22 +64,24 @@ abstract class BaseProgressEventExtensionTest extends BaseTest {
 
     public static class AlgoProc {
         @Context
-        public ProgressEventTracker progress;
+        public TaskRegistry taskRegistry;
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
-            progress.addTaskProgressEvent(Tasks.leaf("foo"));
+            var task = Tasks.leaf("foo");
+            taskRegistry.registerTask(task);
             return Stream.empty();
         }
     }
 
     public static class ProgressProc {
+
         @Context
-        public ProgressEventStore progress;
+        public TaskStore taskStore;
 
         @Procedure("gds.test.log")
         public Stream<Bar> foo() {
-            return progress.query("").stream().map(ProgressEvent::task).map(Task::description).map(Bar::new);
+            return taskStore.query("").values().stream().map(Task::description).map(Bar::new);
         }
     }
 

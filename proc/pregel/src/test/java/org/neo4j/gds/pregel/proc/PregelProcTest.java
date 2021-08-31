@@ -27,7 +27,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestProgressEventTracker;
+import org.neo4j.gds.TestTaskRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -209,10 +209,10 @@ public class PregelProcTest extends BaseProcTest {
 
     @Test
     void cleanupEventTrackerWhenTheAlgorithmFailsInStreamMode() {
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
-            proc.progressEventTracker = eventTracker;
+            proc.taskRegistry = taskRegistry;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -226,16 +226,16 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(eventTracker.releaseCalls()).isEqualTo(0);
+            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
         }
     }
 
     @Test
     void cleanupEventTrackerWhenTheAlgorithmFailsInWriteMode() {
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
-            proc.progressEventTracker = eventTracker;
+            proc.taskRegistry = taskRegistry;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -249,7 +249,7 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(eventTracker.releaseCalls()).isEqualTo(0);
+            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
         }
     }
 
@@ -258,10 +258,10 @@ public class PregelProcTest extends BaseProcTest {
         var graphName = "testGraph";
         runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
 
-        var eventTracker = new TestProgressEventTracker();
+        var taskRegistry = new TestTaskRegistry();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
-            proc.progressEventTracker = eventTracker;
+            proc.taskRegistry = taskRegistry;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -273,7 +273,7 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(eventTracker.releaseCalls()).isEqualTo(0);
+            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
         }
     }
 

@@ -29,7 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
@@ -84,7 +84,7 @@ public abstract class AlphaSimilarityProcTest<
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
-            proc.progressEventTracker = EmptyProgressEventTracker.INSTANCE;
+            proc.taskRegistry = EmptyTaskRegistry.INSTANCE;
 
             func.accept(proc);
         }
