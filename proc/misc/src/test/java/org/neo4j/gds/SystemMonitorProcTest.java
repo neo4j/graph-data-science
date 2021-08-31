@@ -54,9 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SystemMonitorProcTest extends BaseProgressTest {
 
-    static String GRAPH_NAME = "myGraph";
-    static long NODE_COUNT = 3;
-    static long MEMORY_RANGE_SIZE = 10;
+    private static final String GRAPH_NAME = "myGraph";
+    private static final long NODE_COUNT = 3;
+    private static final long MEMORY_RANGE_SIZE = 10;
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -163,7 +163,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "ongoingGdsProcedures", List.of(Map.of(
                     "procedure", "TestAlgorithm",
                     "progress", "100%",
-                    "maxMemoryEstimation", NODE_COUNT * MEMORY_RANGE_SIZE + " Bytes",
+                    "estimatedMemoryRange", MemoryRange.of(NODE_COUNT * MEMORY_RANGE_SIZE).toString(),
                     "maxNumberOfCpuCores", String.valueOf(concurrency)
                 ))
             ))
@@ -189,13 +189,13 @@ class SystemMonitorProcTest extends BaseProgressTest {
                     Map.of(
                         "procedure", "foo",
                         "progress", "33.33%",
-                        "maxMemoryEstimation", "n/a",
+                        "estimatedMemoryRange", "n/a",
                         "maxNumberOfCpuCores", "n/a"
                     ),
                     Map.of(
                         "procedure", "bar",
                         "progress", "33.33%",
-                        "maxMemoryEstimation", MAX_MEMORY_USAGE + " Bytes",
+                        "estimatedMemoryRange", MEMORY_ESTIMATION_RANGE.toString(),
                         "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
                     )
                 )

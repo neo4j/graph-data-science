@@ -201,7 +201,7 @@ public abstract class AlgoBaseProc<
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
 
-        var maybeMaxMemoryInBytes = tryValidateMemoryUsage(config, this::memoryEstimation);
+        var memoryEstimationInBytes = tryValidateMemoryUsage(config, this::memoryEstimation);
 
         GraphStore graphStore;
         Graph graph;
@@ -225,7 +225,7 @@ public abstract class AlgoBaseProc<
 
         ALGO algo = newAlgorithm(graph, config, tracker);
 
-        algo.progressTracker.setEstimatedResourceFootprint(maybeMaxMemoryInBytes, config.concurrency());
+        algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",

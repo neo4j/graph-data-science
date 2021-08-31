@@ -92,8 +92,8 @@ public class SystemMonitorProc extends BaseProc {
                 .taskStream()
                 .map(task -> {
                     var progress = task.getProgress();
-                    var maxMemoryEstimation = task.estimatedMaxMemoryInBytes().isPresent()
-                        ? MemoryUsage.humanReadable(task.estimatedMaxMemoryInBytes().getAsLong())
+                    var estimatedMemoryRange = !task.estimatedMemoryRangeInBytes().isEmpty()
+                        ? task.estimatedMemoryRangeInBytes().toString()
                         : "n/a";
                     var maxNumberOfCpuCores = task.maxConcurrency() != Task.UNKNOWN_CONCURRENCY
                         ? String.valueOf(task.maxConcurrency())
@@ -104,7 +104,7 @@ public class SystemMonitorProc extends BaseProc {
                             progress.progress(),
                             progress.volume()
                         ),
-                        "maxMemoryEstimation", maxMemoryEstimation,
+                        "estimatedMemoryRange", estimatedMemoryRange,
                         "maxNumberOfCpuCores", maxNumberOfCpuCores
                     );
                 })

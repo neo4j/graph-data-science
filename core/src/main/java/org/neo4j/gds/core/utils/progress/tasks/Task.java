@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.List;
-import java.util.OptionalLong;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -39,7 +39,7 @@ public class Task {
     private long startTime;
     private long finishTime;
 
-    private OptionalLong estimatedMaxMemoryInBytes = OptionalLong.empty();
+    private MemoryRange estimatedMemoryRangeInBytes = MemoryRange.empty();
     private int maxConcurrency = UNKNOWN_CONCURRENCY;
 
     Task(String description, List<Task> subTasks) {
@@ -170,8 +170,8 @@ public class Task {
         return this.finishTime;
     }
 
-    public OptionalLong estimatedMaxMemoryInBytes() {
-        return this.estimatedMaxMemoryInBytes;
+    public MemoryRange estimatedMemoryRangeInBytes() {
+        return this.estimatedMemoryRangeInBytes;
     }
 
     public int maxConcurrency() {
@@ -187,7 +187,7 @@ public class Task {
         });
     }
 
-    public void setEstimatedMaxMemoryInBytes(OptionalLong maxMemoryInBytes) {
-        this.estimatedMaxMemoryInBytes = maxMemoryInBytes;
+    public void setEstimatedMemoryRangeInBytes(MemoryRange memoryRangeInBytes) {
+        this.estimatedMemoryRangeInBytes = memoryRangeInBytes;
     }
 }

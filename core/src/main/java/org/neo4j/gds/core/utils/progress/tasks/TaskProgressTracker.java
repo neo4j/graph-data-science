@@ -24,9 +24,9 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Stack;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -62,9 +62,9 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void setEstimatedResourceFootprint(OptionalLong maxMemoryInBytes, int concurrency) {
-        this.baseTask.setEstimatedMaxMemoryInBytes(maxMemoryInBytes);
-        this.baseTask.setMaxConcurrency(concurrency);
+    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, int maxConcurrency) {
+        this.baseTask.setEstimatedMemoryRangeInBytes(memoryRangeInBytes);
+        this.baseTask.setMaxConcurrency(maxConcurrency);
     }
 
     @Override

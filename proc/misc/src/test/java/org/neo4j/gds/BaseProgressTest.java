@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
@@ -34,12 +35,11 @@ import org.neo4j.procedure.Procedure;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
-import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 public class BaseProgressTest extends BaseTest {
 
-    protected static final long MAX_MEMORY_USAGE = 10;
+    protected static final MemoryRange MEMORY_ESTIMATION_RANGE = MemoryRange.of(10, 20);
     protected static final int MAX_CPU_CORES = 5;
 
     @Override
@@ -66,7 +66,7 @@ public class BaseProgressTest extends BaseTest {
         ) {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
             if (withMemoryEstimation) {
-                task.setEstimatedMaxMemoryInBytes(OptionalLong.of(MAX_MEMORY_USAGE));
+                task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
             }
             if (withConcurrency) {
                 task.setMaxConcurrency(MAX_CPU_CORES);

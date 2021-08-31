@@ -43,6 +43,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -59,7 +60,6 @@ import org.neo4j.procedure.Context;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -211,11 +211,11 @@ public abstract class BaseProc {
         }
     }
 
-    protected <C extends BaseConfig> OptionalLong tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
+    protected <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
         return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }
 
-    public <C extends BaseConfig> OptionalLong tryValidateMemoryUsage(
+    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
         FreeMemoryInspector inspector
@@ -228,7 +228,7 @@ public abstract class BaseProc {
         }
 
         if (memoryTreeWithDimensions == null) {
-            return OptionalLong.empty();
+            return MemoryRange.empty();
         }
 
         if (config.sudo()) {
@@ -239,7 +239,7 @@ public abstract class BaseProc {
             validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
         }
 
-        return OptionalLong.of(memoryTreeWithDimensions.memoryTree.memoryUsage().max);
+        return memoryTreeWithDimensions.memoryTree.memoryUsage();
     }
 
     protected MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {
