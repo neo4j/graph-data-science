@@ -35,6 +35,7 @@ This chapter is divided into the following sections:
 * <<creating-graphs>>
 * <<running-algos>>
 * <<logging>>
+* <<monitoring-system>>
 
 
 include::memory-estimation.adoc[leveloffset=+1]

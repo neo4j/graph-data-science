@@ -21,5 +21,5 @@
 | <<alpha-algorithms-one-hot-encoding>> | `_gds.alpha.ml.oneHotEncoding_`
 | Status of the system                                                      | `gds.debug.sysInfo`
 | <<create-cypher-db, Create an impermanent database backed by a named in-memory graph>> | `gds.alpha.create.cypherdb`
-| Get an overview of the system's workload and available resources | `gds.alpha.systemMonitor`
+| <<monitoring-system, Get an overview of the system's workload and available resources>> | `gds.alpha.systemMonitor`
 |===

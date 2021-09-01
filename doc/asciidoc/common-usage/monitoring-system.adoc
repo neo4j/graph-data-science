@@ -1,0 +1,49 @@
+[[monitoring-system]]
+= Monitoring system
+
+[abstract]
+--
+This section describes features for monitoring a system's capacity and analytics workload using the Neo4j Graph Data Science library.
+--
+
+GDS supports multiple users concurrently working on the same system.
+To know whether it is a reasonable time for a user to run a GDS procedure it is useful to know the current capacity of the system hosting Neo4j and GDS, as well as the current GDS workload on the system.
+Graphs and models are not shared between non-admin users by default, however GDS users on the same system will share its capacity.
+
+
+[.alpha]
+== System monitor procedure
+
+To be able to get an overview of the system's current capacity and its analytics workload one can use the procedure `gds.alpha.systemMonitor`.
+It will give you information on the capacity of the DBMS's JVM instance in terms of memory and CPU cores, and an overview of the resources consumed by the GDS procedures currently being run on the system.
+
+
+=== Syntax
+
+[.system-monitor-syntax]
+--
+.Monitor the system capacity and analytics workload:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.systemMonitor()
+YIELD
+  freeHeap,
+  totalHeap,
+  maxHeap,
+  jvmAvailableCpuCores,
+  jvmHeapStatus,
+  ongoingGdsProcedures
+----
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type        | Description
+| freeHeap             | Integer     | The amount of currently free memory in bytes in the Java Virtual Machine hosting the Neo4j instance.
+| totalHeap            | Integer     | The total amount of memory in bytes in the Java virtual machine hosting the Neo4j instance. This value may vary over time, depending on the host environment.
+| maxHeap              | Integer     | The maximum amount of memory in bytes that the Java virtual machine hosting the Neo4j instance will attempt to use.
+| jvmAvailableCpuCores | Integer     | The number of logical CPU cores currently available to the Java virtual machine. This value may change vary over the lifetime of the DBMS.
+| jvmHeapStatus        | Map         | The above-mentioned heap metrics in human-readable form.
+| ongoingGdsProcedures | List of Map | A list of maps containing resource usage and progress information for all GDS procedures (of all users) currently running on the Neo4j instance.
+|===
+--
