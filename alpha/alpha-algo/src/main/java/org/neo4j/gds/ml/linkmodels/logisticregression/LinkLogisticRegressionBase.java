@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
@@ -29,7 +30,6 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.api.Graph;
 
 import java.util.List;
 
@@ -51,13 +51,8 @@ public class LinkLogisticRegressionBase {
         return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
     }
 
-    protected Constant<Matrix> features(Graph graph, Batch batch) {
+    protected Constant<Matrix> features(Graph graph, Batch batch, int rows) {
         var graphCopy = graph.concurrentCopy();
-        // TODO: replace by MutableLong and throw an error saying reduce batchSize if larger than maxint
-        var relationshipCount = new MutableInt();
-        // assume batching has been done so that relationship count does not overflow int
-        batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
-        int rows = relationshipCount.intValue();
         int cols = modelData.linkFeatureDimension();
         double[] features = new double[rows * cols];
         var relationshipOffset = new MutableInt();

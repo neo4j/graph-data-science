@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 
@@ -68,7 +68,7 @@ class LinkLogisticRegressionBaseTest {
         );
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        var features = base.features(graph, allNodesBatch);
+        var features = base.features(graph, allNodesBatch, (int) graph.relationshipCount());
         var expectedFeatures = new Matrix(new double[]{
             0.49, 0.49, 1.0,
             4.00, 2.56, 1.0,
