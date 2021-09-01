@@ -47,13 +47,6 @@ public interface PregelProcedureConfig extends
         return "";
     }
 
-    @Value.Default
-    @Configuration.Key(WRITE_CONCURRENCY_KEY)
-    @Override
-    default int writeConcurrency() {
-        return concurrency();
-    }
-
     static PregelProcedureConfig of(
         String username,
         Optional<String> graphName,
