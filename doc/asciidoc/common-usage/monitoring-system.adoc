@@ -44,6 +44,37 @@ YIELD
 | maxHeap              | Integer     | The maximum amount of memory in bytes that the Java virtual machine hosting the Neo4j instance will attempt to use.
 | jvmAvailableCpuCores | Integer     | The number of logical CPU cores currently available to the Java virtual machine. This value may change vary over the lifetime of the DBMS.
 | jvmHeapStatus        | Map         | The above-mentioned heap metrics in human-readable form.
-| ongoingGdsProcedures | List of Map | A list of maps containing resource usage and progress information for all GDS procedures (of all users) currently running on the Neo4j instance.
+| ongoingGdsProcedures | List of Map | A list of maps containing resource usage and progress information for all GDS procedures (of all users) currently running on the Neo4j instance. Each map contains the name of the procedure, how far it has progressed, its estimated memory usage as well as how many CPU cores it will try to use at most.
 |===
 --
+
+
+=== Example
+
+Assuming we just started `gds.beta.node2vec.stream` procedure with some arbitrary parameters.
+
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.systemMonitor()
+YIELD
+  freeHeap,
+  totalHeap,
+  maxHeap,
+  jvmAvailableCpuCores,
+  ongoingGdsProcedures
+----
+
+.Results
+[opts="header",cols='1,1,1,2,4']
+|===
+| freeHeap | totalHeap | maxHeap | jvmAvailableCpuCores | ongoingGdsProcedures
+| 1234567  | 2345678   | 3456789 | 100                  | [{ procedure: "Node2Vec", progress: "33.33%", estimatedMemoryRange: "[123 kB ... 234 kB]", maxNumberOfCpuCores: "16" }]
+|===
+
+We can see that there currently is around `1.23 MB` free heap memory in the JVM instance running our Neo4j DBMS.
+This may increase independently of any procedures finishing their execution as `totalHeap` is currently smaller than `maxHeap`.
+
+Further we can note that there is only one GDS procedure currently running, namely the `Node2Vec` procedure we just started. It has finished around `33.33%` of its execution already.
+We also see that it may use up to an estimated `234 kB` of memory.
+Note that it may not currently be using that much memory and so it may require more memory later in its execution, thus possible lowering our current `freeHeap`.
+Apparently it wants to use up to `16` CPU cores, leaving us with a total of `84` currently unused available cores in the system.
