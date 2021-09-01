@@ -30,6 +30,7 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
@@ -37,6 +38,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -343,7 +346,24 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var proc = new GraphSageTrainProc() {
             @Override
             protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-                return fail("Created the train algo factory with an invalid model, should have thrown that model already exists.");
+                return new AlgorithmFactory<>() {
+
+                    @Override
+                    protected String taskName() {
+                        return null;
+                    }
+
+                    @Override
+                    protected GraphSageTrain build(
+                        Graph graph,
+                        GraphSageTrainConfig configuration,
+                        AllocationTracker tracker,
+                        ProgressTracker progressTracker
+                    ) {
+                        return fail(
+                            "Created the train algo factory with an invalid model, should have thrown that model already exists.");
+                    }
+                };
             }
         };
         proc.api = db;
