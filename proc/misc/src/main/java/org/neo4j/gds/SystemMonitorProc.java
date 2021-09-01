@@ -63,7 +63,7 @@ public class SystemMonitorProc extends BaseProc {
         public final long totalHeap;
         public final long maxHeap;
         public final long jvmAvailableCpuCores;
-        public final Map<String, String> jvmStatusDescription;
+        public final Map<String, String> jvmHeapStatus;
         public final List<Map<String, String>> ongoingGdsProcedures;
 
         public SystemMonitorResult() {
@@ -73,7 +73,7 @@ public class SystemMonitorProc extends BaseProc {
             this.maxHeap = runtime.maxMemory();
             this.jvmAvailableCpuCores = runtime.availableProcessors();
 
-            this.jvmStatusDescription = Map.of(
+            this.jvmHeapStatus = Map.of(
                 "freeHeap",
                 MemoryUsage.humanReadable(this.freeHeap),
                 "totalHeap",

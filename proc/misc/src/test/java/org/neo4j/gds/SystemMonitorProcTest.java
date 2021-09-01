@@ -158,7 +158,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
                 "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmStatusDescription", aMapWithSize(4),
+                "jvmHeapStatus", aMapWithSize(4),
                 "ongoingGdsProcedures", List.of(Map.of(
                     "procedure", "TestAlgorithm",
                     "progress", "100%",
@@ -183,7 +183,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
                 "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmStatusDescription", aMapWithSize(4),
+                "jvmHeapStatus", aMapWithSize(4),
                 "ongoingGdsProcedures", containsInAnyOrder(
                     Map.of(
                         "procedure", "foo",
@@ -212,7 +212,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
                 "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmStatusDescription", aMapWithSize(4),
+                "jvmHeapStatus", aMapWithSize(4),
                 "ongoingGdsProcedures", Matchers.empty()
             ))
         );
