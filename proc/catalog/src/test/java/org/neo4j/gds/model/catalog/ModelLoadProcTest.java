@@ -124,6 +124,7 @@ class ModelLoadProcTest extends ModelProcBaseTest {
         var query = "CALL gds.alpha.model.load('testModel1')";
         assertThatThrownBy(() -> runQuery(query))
             .getRootCause()
-            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
+            .hasMessageContaining("Loading a model")
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition.");
     }
 }

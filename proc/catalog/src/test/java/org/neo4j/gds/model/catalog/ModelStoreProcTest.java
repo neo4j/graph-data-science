@@ -183,7 +183,8 @@ class ModelStoreProcTest extends ModelProcBaseTest {
 
         assertThatThrownBy(() -> runQuery(query))
             .getRootCause()
-            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
+            .hasMessageContaining("Storing a model")
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition.");
     }
 
 }

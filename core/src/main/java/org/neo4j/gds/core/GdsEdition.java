@@ -29,7 +29,7 @@ public final class GdsEdition {
         return INSTANCE;
     }
 
-    void requireEnterpriseEdition(String detail) {
+    public void requireEnterpriseEdition(String detail) {
         if (currentState != State.ENTERPRISE) {
             throw new RuntimeException(
                 "The requested operation (" + detail +

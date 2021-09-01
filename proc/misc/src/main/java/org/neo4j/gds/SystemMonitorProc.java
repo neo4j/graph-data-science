@@ -44,10 +44,7 @@ public class SystemMonitorProc extends BaseProc {
     @Procedure(name = "gds.alpha.systemMonitor", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SystemMonitorResult> systemMonitor() {
-        if (GdsEdition.instance().isOnCommunityEdition()) {
-            throw new RuntimeException(
-                "This feature is only available with the Graph Data Science library enterprise edition");
-        }
+        GdsEdition.instance().requireEnterpriseEdition("System monitoring");
 
         SystemMonitorResult result = runWithExceptionLogging(
             "Failed to collect system status information",

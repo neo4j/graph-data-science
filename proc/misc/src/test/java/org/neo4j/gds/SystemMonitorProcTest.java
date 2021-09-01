@@ -47,10 +47,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SystemMonitorProcTest extends BaseProgressTest {
 
@@ -221,6 +221,9 @@ class SystemMonitorProcTest extends BaseProgressTest {
     @Test
     @GdsEditionTest(Edition.CE)
     void shouldFailOnCommunityEdition() {
-        assertThrows(RuntimeException.class, () -> runQuery("CALL gds.alpha.systemMonitor()"));
+        assertThatThrownBy(() -> runQuery("CALL gds.alpha.systemMonitor()"))
+            .hasRootCauseInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition")
+            .hasMessageContaining("System monitoring");
     }
 }

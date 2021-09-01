@@ -33,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
@@ -205,17 +204,15 @@ class FeatureToggleProcTest extends BaseProcTest {
     @Test
     void toggleUseBitIdMapFailsOnCommunity() {
         assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap(false)"))
-            .hasMessageContaining(
-                formatWithLocale("Enterprise Edition of the Neo4j Graph Data Science Library")
-            );
+            .hasMessageContaining("BitIdMap feature")
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition");
     }
 
     @Test
     void resetUseBitIdMapFailsOnCommunity() {
         assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap.reset()"))
-            .hasMessageContaining(
-                formatWithLocale("Enterprise Edition of the Neo4j Graph Data Science Library")
-            );
+            .hasMessageContaining("BitIdMap feature")
+            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition");
     }
 
     @Test
