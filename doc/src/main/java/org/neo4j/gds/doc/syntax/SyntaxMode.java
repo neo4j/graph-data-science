@@ -51,9 +51,16 @@ enum SyntaxMode {
     PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax");
 
     private final String mode;
+    public final boolean hasParameters;
 
     SyntaxMode(String mode) {
         this.mode = mode;
+        this.hasParameters = true;
+    }
+
+    SyntaxMode(String mode, boolean hasParameters) {
+        this.mode = mode;
+        this.hasParameters = hasParameters;
     }
 
     public String mode() {

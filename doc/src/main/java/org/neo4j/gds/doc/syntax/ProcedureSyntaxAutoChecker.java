@@ -82,11 +82,13 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var documentedArguments = ProcedureArgumentsExtractor.findArguments(codeSnippet);
             var expectedArguments = ProcedureLookup.findArgumentNames(procedureName);
 
-            syntaxAssertions.assertThat(documentedArguments)
-                .as("Asserting procedure arguments for `%s`", mode.syntaxMode().mode())
-                .containsExactlyInAnyOrderElementsOf(expectedArguments);
+            if (mode.syntaxMode().hasParameters) {
+                syntaxAssertions.assertThat(documentedArguments)
+                    .as("Asserting procedure arguments for `%s`", mode.syntaxMode().mode())
+                    .containsExactlyInAnyOrderElementsOf(expectedArguments);
 
-            assertTableValues(currentSyntaxSection, mode.syntaxMode(), PARAMETERS_TABLE_TITLE, expectedArguments);
+                assertTableValues(currentSyntaxSection, mode.syntaxMode(), PARAMETERS_TABLE_TITLE, expectedArguments);
+            }
 
             // YIELD fields
             var resultClass = ProcedureLookup.findResultType(procedureName);
