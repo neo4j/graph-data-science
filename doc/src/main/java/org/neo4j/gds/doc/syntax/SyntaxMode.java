@@ -48,7 +48,8 @@ enum SyntaxMode {
     PIPELINE_ADD_NODE_PROPERTY("pipeline-add-node-property-syntax"),
     PIPELINE_ADD_FEATURE("pipeline-add-feature-syntax"),
     PIPELINE_CONFIGURE_SPLIT("pipeline-configure-split-syntax"),
-    PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax");
+    PIPELINE_CONFIGURE_PARAMS("pipeline-configure-params-syntax"),
+    SYSTEM_MONITOR("system-monitor-syntax", false);
 
     private final String mode;
     public final boolean hasParameters;
