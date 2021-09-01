@@ -86,15 +86,16 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
             for (var message : messages) {
                 sum += message;
             }
-            // dampingFactor * neighbor_deltas
             delta = dampingFactor * sum;
-            // dividing by averageDegree to avoid huge article ranks
             context.setNodeValue(PAGE_RANK, rank + delta);
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
             var degree = degreeFunction.applyAsDouble(context.nodeId());
             if (degree > 0) {
+                // different from the original ArticleRank paper as we use deltas instead of the whole rank
+                // to avoid exploding scores, we use `1 / (degree + avgDegree)`
+                // instead of the proposed `avgDegree / (degree + avgDegree)`
                 context.sendToNeighbors(delta / (degree + averageDegree));
             }
         } else {
