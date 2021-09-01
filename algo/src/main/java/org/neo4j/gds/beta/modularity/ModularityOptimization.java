@@ -165,9 +165,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
-        var progressLogger = progressTracker.progressLogger();
         K1Coloring coloring = new K1ColoringFactory<>()
-            .build(graph, k1Config, tracker, progressLogger.getLog(), progressTracker.taskRegistry())
+            .build(graph, k1Config, tracker, progressTracker)
             .withTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();

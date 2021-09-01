@@ -42,6 +42,8 @@ import java.util.List;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
 
+    private static final String MODULARITY_OPTIMIZATION_TASK_NAME = "ModularityOptimization";
+
     public static final MemoryEstimation MEMORY_ESTIMATION =
         MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)
@@ -75,7 +77,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     @Override
     protected String taskName() {
-        return "ModularityOptimization";
+        return MODULARITY_OPTIMIZATION_TASK_NAME;
     }
 
     @Override
@@ -113,7 +115,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     public static <T extends BaseConfig & IterationsConfig> Task modularityOptimizationProgressTask(Graph graph, T config) {
         return Tasks.task(
-            "compute",
+            MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
                 "initialization",
                 K1ColoringFactory.k1ColoringProgressTask(graph, config)

@@ -40,7 +40,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -89,7 +88,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
-            progressTracker.beginSubTask();
 
             assertRunning();
 
@@ -106,20 +104,17 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
 
-            progressTracker.endSubTask();
-
-
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
                 || hasConverged()
             ) {
                 resizeResultArrays();
-                progressTracker.endSubTask();
                 break;
             }
             oldNodeCount = workingGraph.nodeCount();
         }
 
+        progressTracker.endSubTask();
         return this;
     }
 
@@ -173,18 +168,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .batchSize(DEFAULT_BATCH_SIZE)
             .build();
 
-        var modularityOptimizationFactory = new ModularityOptimizationFactory<>();
-        ModularityOptimization modularityOptimization = modularityOptimizationFactory
+        ModularityOptimization modularityOptimization = new ModularityOptimizationFactory<>()
             .build(
                 louvainGraph,
                 modularityOptimizationConfig,
                 seed,
                 tracker,
-                new TaskProgressTracker(
-                    modularityOptimizationFactory.progressTask(louvainGraph, modularityOptimizationConfig),
-                    progressTracker.progressLogger(),
-                    progressTracker.taskRegistry()
-                )
+                progressTracker
             ).withTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();
