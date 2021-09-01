@@ -21,13 +21,8 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
 
@@ -41,26 +36,6 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         Graph graph,
         AllocationTracker allocationTracker,
         long memoryLimit,
-        Log log,
-        TaskRegistry taskRegistry,
-        boolean throwInCompute
-    ) {
-        this.graph = graph;
-        this.allocationTracker = allocationTracker;
-        this.memoryLimit = memoryLimit;
-        this.throwInCompute = throwInCompute;
-        this.progressTracker = new TaskProgressTracker(
-            Tasks.leaf("TestAlgorithm"),
-            new BatchingProgressLogger(log, Tasks.leaf("test", 42), 1),
-            taskRegistry
-        );
-    }
-
-    public TestAlgorithm(
-        Graph graph,
-        AllocationTracker allocationTracker,
-        long memoryLimit,
-        Log log,
         ProgressTracker progressTracker,
         boolean throwInCompute
     ) {

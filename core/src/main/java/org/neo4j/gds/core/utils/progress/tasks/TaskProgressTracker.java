@@ -124,11 +124,6 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public TaskRegistry taskRegistry() {
-        return taskRegistry;
-    }
-
-    @Override
     public void release() {
         taskRegistry.unregisterTask();
     }
