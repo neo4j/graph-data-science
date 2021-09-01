@@ -36,6 +36,6 @@ public final class ProgressFeatureSettings implements SettingsDeclaration {
     public static final Setting<Boolean> progress_tracking_enabled = newBuilder(
         "gds.progress_tracking_enabled",
         BOOL,
-        false
+        true
     ).build();
 }
