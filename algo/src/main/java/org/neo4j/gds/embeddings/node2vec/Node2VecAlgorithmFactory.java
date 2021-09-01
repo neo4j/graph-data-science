@@ -59,7 +59,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
             ? Tasks.task("RandomWalk", DegreeCentralityFactory.degreeCentralityProgressTask(graph))
             : Tasks.leaf("RandomWalk");
         return Tasks.task(
-            "compute",
+            taskName(),
             randomWalkTask,
             Tasks.iterativeFixed(
                 "train",

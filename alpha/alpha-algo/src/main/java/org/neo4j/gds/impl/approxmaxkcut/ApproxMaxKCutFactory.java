@@ -57,7 +57,7 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.iterativeFixed(
-            "compute",
+            taskName(),
             () -> List.of(
                 Tasks.leaf("place nodes randomly", graph.nodeCount()),
                 searchTask(graph.nodeCount(), config.vnsMaxNeighborhoodOrder())

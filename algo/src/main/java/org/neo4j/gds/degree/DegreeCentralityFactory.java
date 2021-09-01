@@ -33,9 +33,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> extends AlgorithmFactory<DegreeCentrality, CONFIG> {
 
+    private static final String DEGREE_CENTRALITY_TASK_NAME = "DegreeCentrality";
+
     @Override
     protected String taskName() {
-        return "DegreeCentrality";
+        return DEGREE_CENTRALITY_TASK_NAME;
     }
 
     @Override
@@ -63,7 +65,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
 
     @NotNull
     public static Task degreeCentralityProgressTask(Graph graph) {
-        return Tasks.leaf("compute", graph.nodeCount());
+        return Tasks.leaf(DEGREE_CENTRALITY_TASK_NAME, graph.nodeCount());
     }
 }
 

@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class LabelPropagationTest {
@@ -258,11 +260,10 @@ class LabelPropagationTest {
         progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-        // TODO: iteration logging not yet implemented
-//        LongStream.range(1, lp.ranIterations() + 1).forEach(iteration -> {
-//            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
-//            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
-//        });
+        LongStream.range(1, lp.ranIterations() + 1).forEach(iteration -> {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
+        });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 }

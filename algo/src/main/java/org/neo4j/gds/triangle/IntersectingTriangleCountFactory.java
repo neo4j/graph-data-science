@@ -33,9 +33,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
+    private static final String INTERSECTING_TRIANGLE_COUNT_TASK_NAME = IntersectingTriangleCount.class.getSimpleName();
+
     @Override
     protected String taskName() {
-        return IntersectingTriangleCount.class.getSimpleName();
+        return INTERSECTING_TRIANGLE_COUNT_TASK_NAME;
     }
 
     @Override
@@ -66,6 +68,6 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
 
     @NotNull
     public static Task triangleCountProgressTask(Graph graph) {
-        return Tasks.leaf("compute", graph.nodeCount());
+        return Tasks.leaf(INTERSECTING_TRIANGLE_COUNT_TASK_NAME, graph.nodeCount());
     }
 }

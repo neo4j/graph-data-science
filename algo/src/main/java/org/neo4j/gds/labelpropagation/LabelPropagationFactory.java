@@ -84,11 +84,11 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "compute",
-            Tasks.leaf("initialization", graph.relationshipCount()),
+            taskName(),
+            Tasks.leaf("Initialization", graph.relationshipCount()),
             Tasks.iterativeDynamic(
-                "assign labels",
-                () -> List.of(Tasks.leaf("iteration", graph.relationshipCount())),
+                "Assign labels",
+                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
                 config.maxIterations()
             )
         );
