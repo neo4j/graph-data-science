@@ -69,7 +69,13 @@ public class LinkLogisticRegressionTrain {
             config.penalty(),
             graph
         );
-        var training = new Training(config, progressTracker, graph.nodeCount(), terminationFlag);
+
+        long trainSize = 0;
+        for (long i = 0; i < trainSet.size(); i++) {
+            trainSize += graph.degree(trainSet.get(i));
+        }
+
+        var training = new Training(config, progressTracker, trainSize, terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
         return objective.modelData;

@@ -65,7 +65,7 @@ class LinkLogisticRegressionTrainTest {
         var config = new LinkLogisticRegressionTrainConfigImpl(
             featureProperties,
             CypherMapWrapper.create(Map.of(
-                "maxEpochs", 100000,
+                "maxEpochs", 100_000,
                 "tolerance", 1e-4,
                 "concurrency", 1
             ))
@@ -99,7 +99,7 @@ class LinkLogisticRegressionTrainTest {
             featureProperties,
             CypherMapWrapper.create(Map.of(
                 "penalty", 1.0,
-                "maxEpochs", 1000000,
+                "maxEpochs", 1_000_000,
                 "tolerance", 1e-10,
                 "concurrency", 4
             ))
