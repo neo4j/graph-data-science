@@ -35,14 +35,14 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalHugeIdMappingBuilder of(long length, AllocationTracker tracker) {
-        HugeLongArray array = HugeLongArray.newArray(length, tracker);
-        return new InternalHugeIdMappingBuilder(array, length);
+    public static InternalHugeIdMappingBuilder of(long capacity, AllocationTracker tracker) {
+        HugeLongArray array = HugeLongArray.newArray(capacity, tracker);
+        return new InternalHugeIdMappingBuilder(array, capacity);
     }
 
-    private InternalHugeIdMappingBuilder(HugeLongArray array, final long length) {
+    private InternalHugeIdMappingBuilder(HugeLongArray array, final long capacity) {
         this.array = array;
-        this.capacity = length;
+        this.capacity = capacity;
         this.allocationIndex = new AtomicLong();
         this.adders = CloseableThreadLocal.withInitial(this::newBulkAdder);
     }

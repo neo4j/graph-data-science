@@ -121,10 +121,10 @@ public final class GraphFactory {
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
-            long length = maxOriginalIdKnown
+            long capacity = maxOriginalIdKnown
                 ? maxOriginalId + 1
                 : nodeCount.orElseThrow(() -> new IllegalArgumentException("Either `maxOriginalId` or `nodeCount` must be set"));
-            var idMappingBuilder = InternalHugeIdMappingBuilder.of(length, tracker);
+            var idMappingBuilder = InternalHugeIdMappingBuilder.of(capacity, tracker);
             nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         }
