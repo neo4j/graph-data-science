@@ -85,6 +85,16 @@ class SequentialSparseLongArrayTest {
         assertEquals(expectedIdCount, builder.build().idCount());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1024, 4096, 5000, 9999})
+    void testIdCountWithCapacityWithout6LowerBitsSet(int expectedIdCount) {
+        var builder = SparseLongArray.sequentialBuilder(12_225);
+        for (int i = 0; i < expectedIdCount; i++) {
+            builder.set(i);
+        }
+        assertEquals(expectedIdCount, builder.build().idCount());
+    }
+
     @Test
     void testContains() {
         var capacity = 8420;
