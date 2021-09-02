@@ -176,7 +176,7 @@ class ModularityOptimizationTest {
     void testLogging() {
         var testLogger = new TestProgressLogger(Tasks.leaf("ModularityOptimization", graph.relationshipCount()), 3);
 
-        compute(graph, 3, null, 3, 2, testLogger);
+        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, testLogger);
 
         assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains(":: Start"));
         assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));

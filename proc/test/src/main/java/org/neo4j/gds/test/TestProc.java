@@ -83,7 +83,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
 
             @Override
             protected String taskName() {
-                return "TestALgorithm";
+                return "TestAlgorithm";
             }
 
             @Override
@@ -94,8 +94,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
                     graph,
                     allocationTracker(),
                     0L,
-                    log,
-                    progressTracker.taskRegistry(),
+                    progressTracker,
                     configuration.throwInCompute()
                 );
             }

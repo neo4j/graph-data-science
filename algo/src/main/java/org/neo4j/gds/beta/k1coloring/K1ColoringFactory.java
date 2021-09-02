@@ -37,13 +37,15 @@ import java.util.List;
 
 public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFactory<K1Coloring, T> {
 
+    private static final String K1_COLORING_TASK_NAME = "K1Coloring";
+
     @Override
     protected String taskName() {
-        return "k1Coloring";
+        return K1_COLORING_TASK_NAME;
     }
 
     @Override
-    protected K1Coloring build(
+    public K1Coloring build(
         Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
         return new K1Coloring(
@@ -76,7 +78,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
 
     public static <T extends BaseConfig & IterationsConfig> Task k1ColoringProgressTask(Graph graph, T config) {
         return Tasks.iterativeDynamic(
-            "compute",
+            K1_COLORING_TASK_NAME,
             () -> List.of(
                 Tasks.leaf("color nodes", graph.nodeCount()),
                 Tasks.leaf("validate nodes", graph.nodeCount())

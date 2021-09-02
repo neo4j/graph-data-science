@@ -123,7 +123,6 @@ class SystemMonitorProcTest extends BaseProgressTest {
                         graph,
                         allocationTracker(),
                         0L,
-                        log,
                         progressTracker,
                         false
                     );
