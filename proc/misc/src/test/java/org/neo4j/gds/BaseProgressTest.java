@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 public class BaseProgressTest extends BaseTest {
 
     protected static final MemoryRange MEMORY_ESTIMATION_RANGE = MemoryRange.of(10, 20);
-    protected static final int MAX_CPU_CORES = 5;
+    protected static final int REQUESTED_CPU_CORES = 5;
 
     @Override
     @ExtensionCallback
@@ -69,7 +69,7 @@ public class BaseProgressTest extends BaseTest {
                 task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
             }
             if (withConcurrency) {
-                task.setMaxConcurrency(MAX_CPU_CORES);
+                task.setMaxConcurrency(REQUESTED_CPU_CORES);
             }
             var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
             taskProgressTracker.beginSubTask();

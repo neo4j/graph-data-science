@@ -163,7 +163,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
                     "procedure", "TestAlgorithm",
                     "progress", "100%",
                     "estimatedMemoryRange", MemoryRange.of(NODE_COUNT * MEMORY_RANGE_SIZE).toString(),
-                    "maxNumberOfCpuCores", String.valueOf(concurrency)
+                    "requestedNumberOfCpuCores", String.valueOf(concurrency)
                 ))
             ))
         );
@@ -189,13 +189,13 @@ class SystemMonitorProcTest extends BaseProgressTest {
                         "procedure", "foo",
                         "progress", "33.33%",
                         "estimatedMemoryRange", "n/a",
-                        "maxNumberOfCpuCores", "n/a"
+                        "requestedNumberOfCpuCores", "n/a"
                     ),
                     Map.of(
                         "procedure", "bar",
                         "progress", "33.33%",
                         "estimatedMemoryRange", MEMORY_ESTIMATION_RANGE.toString(),
-                        "maxNumberOfCpuCores", String.valueOf(MAX_CPU_CORES)
+                        "requestedNumberOfCpuCores", String.valueOf(REQUESTED_CPU_CORES)
                     )
                 )
             ))

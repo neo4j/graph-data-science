@@ -69,7 +69,7 @@ YIELD
 [opts="header",cols='1,1,1,2,4']
 |===
 | freeHeap | totalHeap | maxHeap | jvmAvailableCpuCores | ongoingGdsProcedures
-| 1234567  | 2345678   | 3456789 | 100                  | [{ procedure: "Node2Vec", progress: "33.33%", estimatedMemoryRange: "[123 kB ... 234 kB]", maxNumberOfCpuCores: "16" }]
+| 1234567  | 2345678   | 3456789 | 100                  | [{ procedure: "Node2Vec", progress: "33.33%", estimatedMemoryRange: "[123 kB ... 234 kB]", requestedNumberOfCpuCores: "16" }]
 |===
 
 We can see that there currently is around `1.23 MB` free heap memory in the JVM instance running our Neo4j DBMS.
