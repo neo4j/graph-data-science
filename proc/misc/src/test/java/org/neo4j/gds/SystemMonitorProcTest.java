@@ -48,8 +48,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 
 class SystemMonitorProcTest extends BaseProgressTest {
@@ -139,7 +139,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 4})
+    @ValueSource(ints = {1, 4, 99999999})
     @GdsEditionTest(Edition.EE)
     void shouldSetResourceEstimationOnBaseTask(int concurrency) {
         runQuery(
@@ -151,21 +151,35 @@ class SystemMonitorProcTest extends BaseProgressTest {
             )
         );
 
-        assertCypherResult(
+        runQueryWithRowConsumer(
             "CALL gds.alpha.systemMonitor()",
-            List.of(Map.of(
-                "freeHeap", greaterThan(0L),
-                "totalHeap", greaterThan(0L),
-                "maxHeap", greaterThan(0L),
-                "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmHeapStatus", aMapWithSize(4),
-                "ongoingGdsProcedures", List.of(Map.of(
-                    "procedure", "TestAlgorithm",
-                    "progress", "100%",
-                    "estimatedMemoryRange", MemoryRange.of(NODE_COUNT * MEMORY_RANGE_SIZE).toString(),
-                    "requestedNumberOfCpuCores", String.valueOf(concurrency)
-                ))
-            ))
+            row -> {
+                assertThat(row.getNumber("freeHeap").longValue()).isGreaterThan(0L);
+                assertThat(row.getNumber("totalHeap").longValue()).isGreaterThan(0L);
+                assertThat(row.getNumber("maxHeap").longValue()).isGreaterThan(0L);
+
+                long jvmAvailableCpuCores = row.getNumber("jvmAvailableCpuCores").longValue();
+                assertThat(jvmAvailableCpuCores).isGreaterThan(0L);
+                long availableCpuCoresNotRequested = row.getNumber("availableCpuCoresNotRequested").longValue();
+                assertThat(availableCpuCoresNotRequested).isEqualTo(jvmAvailableCpuCores - concurrency);
+
+                assertThat(row.get("jvmHeapStatus")).satisfies(map -> {
+                    assertThat(map).isInstanceOf(Map.class);
+                    assertThat((Map) map).containsOnlyKeys("freeHeap", "totalHeap", "maxHeap");
+                });
+
+                assertThat(row.get("ongoingGdsProcedures"))
+                    .isInstanceOf(List.class)
+                    .asList()
+                    .containsExactlyInAnyOrder(
+                        Map.of(
+                            "procedure", "TestAlgorithm",
+                            "progress", "100%",
+                            "estimatedMemoryRange", MemoryRange.of(NODE_COUNT * MEMORY_RANGE_SIZE).toString(),
+                            "requestedNumberOfCpuCores", String.valueOf(concurrency)
+                        )
+                    );
+            }
         );
     }
 
@@ -176,29 +190,41 @@ class SystemMonitorProcTest extends BaseProgressTest {
         // Use a non-default mock memory estimation.
         runQuery("Bob", "CALL gds.test.pl('bar', true, true)");
 
-        assertCypherResult(
+        runQueryWithRowConsumer(
             "CALL gds.alpha.systemMonitor()",
-            List.of(Map.of(
-                "freeHeap", greaterThan(0L),
-                "totalHeap", greaterThan(0L),
-                "maxHeap", greaterThan(0L),
-                "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmHeapStatus", aMapWithSize(4),
-                "ongoingGdsProcedures", containsInAnyOrder(
-                    Map.of(
-                        "procedure", "foo",
-                        "progress", "33.33%",
-                        "estimatedMemoryRange", "n/a",
-                        "requestedNumberOfCpuCores", "n/a"
-                    ),
-                    Map.of(
-                        "procedure", "bar",
-                        "progress", "33.33%",
-                        "estimatedMemoryRange", MEMORY_ESTIMATION_RANGE.toString(),
-                        "requestedNumberOfCpuCores", String.valueOf(REQUESTED_CPU_CORES)
-                    )
-                )
-            ))
+            row -> {
+                assertThat(row.getNumber("freeHeap").longValue()).isGreaterThan(0L);
+                assertThat(row.getNumber("totalHeap").longValue()).isGreaterThan(0L);
+                assertThat(row.getNumber("maxHeap").longValue()).isGreaterThan(0L);
+
+                long jvmAvailableCpuCores = row.getNumber("jvmAvailableCpuCores").longValue();
+                assertThat(jvmAvailableCpuCores).isGreaterThan(0L);
+                long availableCpuCoresNotRequested = row.getNumber("availableCpuCoresNotRequested").longValue();
+                assertThat(availableCpuCoresNotRequested).isEqualTo(jvmAvailableCpuCores - REQUESTED_CPU_CORES);
+
+                assertThat(row.get("jvmHeapStatus")).satisfies(map -> {
+                    assertThat(map).isInstanceOf(Map.class);
+                    assertThat((Map) map).containsOnlyKeys("freeHeap", "totalHeap", "maxHeap");
+                });
+
+                assertThat(row.get("ongoingGdsProcedures"))
+                    .isInstanceOf(List.class)
+                    .asList()
+                    .containsExactlyInAnyOrder(
+                        Map.of(
+                            "procedure", "foo",
+                            "progress", "33.33%",
+                            "estimatedMemoryRange", "n/a",
+                            "requestedNumberOfCpuCores", "n/a"
+                        ),
+                        Map.of(
+                            "procedure", "bar",
+                            "progress", "33.33%",
+                            "estimatedMemoryRange", MEMORY_ESTIMATION_RANGE.toString(),
+                            "requestedNumberOfCpuCores", String.valueOf(REQUESTED_CPU_CORES)
+                        )
+                    );
+            }
         );
     }
 
@@ -212,7 +238,8 @@ class SystemMonitorProcTest extends BaseProgressTest {
                 "totalHeap", greaterThan(0L),
                 "maxHeap", greaterThan(0L),
                 "jvmAvailableCpuCores", greaterThan(0L),
-                "jvmHeapStatus", aMapWithSize(4),
+                "availableCpuCoresNotRequested", greaterThan(0L),
+                "jvmHeapStatus", aMapWithSize(3),
                 "ongoingGdsProcedures", Matchers.empty()
             ))
         );

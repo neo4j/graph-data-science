@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -60,6 +61,7 @@ public class SystemMonitorProc extends BaseProc {
         public final long totalHeap;
         public final long maxHeap;
         public final long jvmAvailableCpuCores;
+        public final long availableCpuCoresNotRequested;
         public final Map<String, String> jvmHeapStatus;
         public final List<Map<String, String>> ongoingGdsProcedures;
 
@@ -76,15 +78,16 @@ public class SystemMonitorProc extends BaseProc {
                 "totalHeap",
                 MemoryUsage.humanReadable(this.totalHeap),
                 "maxHeap",
-                MemoryUsage.humanReadable(this.maxHeap),
-                "jvmAvailableCpuCores",
-                String.valueOf(this.jvmAvailableCpuCores)
+                MemoryUsage.humanReadable(this.maxHeap)
             );
 
-            this.ongoingGdsProcedures = getAllOngoingProcedures();
+            var requestedCpuCores = new MutableInt(0);
+            this.ongoingGdsProcedures = getAllOngoingProcedures(requestedCpuCores);
+            this.availableCpuCoresNotRequested = this.jvmAvailableCpuCores - requestedCpuCores.getValue();
         }
 
-        private List<Map<String, String>> getAllOngoingProcedures() {
+        private List<Map<String, String>> getAllOngoingProcedures(MutableInt requestedCpuCores) {
+
             return taskStore
                 .taskStream()
                 .map(task -> {
@@ -92,9 +95,14 @@ public class SystemMonitorProc extends BaseProc {
                     var estimatedMemoryRange = !task.estimatedMemoryRangeInBytes().isEmpty()
                         ? task.estimatedMemoryRangeInBytes().toString()
                         : "n/a";
-                    var requestedNumberOfCpuCores = task.maxConcurrency() != Task.UNKNOWN_CONCURRENCY
-                        ? String.valueOf(task.maxConcurrency())
-                        : "n/a";
+                    String requestedNumberOfCpuCores;
+                    if (task.maxConcurrency() != Task.UNKNOWN_CONCURRENCY) {
+                        requestedNumberOfCpuCores = String.valueOf(task.maxConcurrency());
+                        requestedCpuCores.add(task.maxConcurrency());
+                    } else {
+                        requestedNumberOfCpuCores = "n/a";
+                    }
+
                     return Map.of(
                         "procedure", task.description(),
                         "progress", StructuredOutputHelper.computeProgress(
