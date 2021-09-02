@@ -7,6 +7,7 @@ This section describes features for monitoring a system's capacity and analytics
 --
 
 GDS supports multiple users concurrently working on the same system.
+Typically, GDS procedures are resource heavy in the sense that they may use a lot of memory and/or many CPU cores to do their computation.
 To know whether it is a reasonable time for a user to run a GDS procedure it is useful to know the current capacity of the system hosting Neo4j and GDS, as well as the current GDS workload on the system.
 Graphs and models are not shared between non-admin users by default, however GDS users on the same system will share its capacity.
 
