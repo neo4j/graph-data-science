@@ -350,8 +350,7 @@ public final class SparseLongArray {
             long[] blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
 
             long count = 0;
-            int block;
-            for (block = 0; block < cappedSize; block += BLOCK_SIZE) {
+            for (int block = 0; block < cappedSize; block += BLOCK_SIZE) {
                 for (int page = block; page < block + BLOCK_SIZE; page++) {
                     count += Long.bitCount(array[page]);
                 }
