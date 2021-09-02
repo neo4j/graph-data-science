@@ -20,6 +20,17 @@ The below image illustrates an overview of standard operation of the GDS library
 
 image::projected-graph-model.png[width="850px"]
 
+[NOTE]
+====
+The GDS library runs its procedures greedily in terms of system resources. That means that each procedure will try to use:
+
+* as much memory as it needs (see <<memory-estimation, Memory estimation>>)
+* as many CPU cores as it needs (not exceeding the limits of the `concurrency` it's configured to run with)
+
+Concurrently running procedures share the resources of the system hosting the DBMS and as such may affect each other's performance.
+To get an overview of the status of the system you can use the <<monitoring-system, System monitor procedure>>.
+====
+
 The more detail on each individual operation, see the corresponding section:
 
 1. <<graph-catalog-ops>>
