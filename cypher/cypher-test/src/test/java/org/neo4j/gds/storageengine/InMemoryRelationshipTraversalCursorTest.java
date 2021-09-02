@@ -72,6 +72,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldTraverseRelationships() {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 

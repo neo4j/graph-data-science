@@ -69,6 +69,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldScanSingle() {
         nodeCursor.single(0);
         assertThat(nodeCursor.next()).isTrue();
@@ -82,6 +83,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldScanRange() {
         nodeCursor.scanRange(1, 2);
         nodeCursor.next();
@@ -98,6 +100,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldScanAll() {
         nodeCursor.scan();
         graphStore.nodes().forEachNode(nodeId -> {
@@ -115,6 +118,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void testLabels() {
         graphStore.nodes().forEachNode(nodeId -> {
             nodeCursor.single(nodeId);
@@ -150,6 +154,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
         var propertyCursor = StorageEngineProxy.inMemoryNodePropertyCursor(graphStore, tokenHolders);
