@@ -81,7 +81,7 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
     }
 
     @Override
-    EuclideanAlgorithm newAlgo(EuclideanConfig config, AllocationTracker tracker) {
+    EuclideanAlgorithm newAlgo(EuclideanConfig config, AllocationTracker allocationTracker) {
         return new EuclideanAlgorithm(config, api);
     }
 

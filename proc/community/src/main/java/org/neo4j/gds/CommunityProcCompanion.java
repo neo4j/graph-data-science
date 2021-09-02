@@ -43,7 +43,7 @@ public final class CommunityProcCompanion {
         AlgoBaseProc.ComputationResult<ALGO, RESULT, CONFIG> computationResult,
         String resultProperty,
         LongNodeProperties nodeProperties,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var config = computationResult.config();
         var graphStore = computationResult.graphStore();
@@ -61,7 +61,7 @@ public final class CommunityProcCompanion {
             result = new ConsecutiveLongNodeProperties(
                 nodeProperties,
                 computationResult.graph().nodeCount(),
-                tracker
+                allocationTracker
             );
         } else {
             result = nodeProperties;
@@ -71,13 +71,13 @@ public final class CommunityProcCompanion {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)
                 .minCommunitySize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), tracker))
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), allocationTracker))
                 .orElse(result);
         } else if (config instanceof ComponentSizeConfig) {
             var finalResult = result;
             result = ((ComponentSizeConfig) config)
                 .minComponentSize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), tracker))
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), allocationTracker))
                 .orElse(result);
         }
 
@@ -88,14 +88,14 @@ public final class CommunityProcCompanion {
         LongNodeProperties nodeProperties,
         long size,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeProperties.size(),
             nodeProperties::longValue,
             Pools.DEFAULT,
             concurrency,
-            tracker
+            allocationTracker
         );
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);
     }

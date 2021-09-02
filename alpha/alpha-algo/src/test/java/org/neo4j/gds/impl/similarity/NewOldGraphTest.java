@@ -40,17 +40,25 @@ class NewOldGraphTest {
 
     private static final NodeMapping ID_MAP = idMap(5);
     private static final int CONCURRENCY = 1;
-    private static final AllocationTracker TRACKER = AllocationTracker.empty();
+    private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
     @Test
     void allRelationshipsNewByDefault() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(
+            importer.buildGraphStore(
+                GdlSupportExtension.DATABASE_ID,
+                ID_MAP,
+                CONCURRENCY,
+                ALLOCATION_TRACKER
+            ).getUnion(),
+            visitedRelationships
+        );
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -59,7 +67,7 @@ class NewOldGraphTest {
 
     @Test
     void newShouldFilterVisitedRelationships() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);
@@ -67,7 +75,15 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(
+            importer.buildGraphStore(
+                GdlSupportExtension.DATABASE_ID,
+                ID_MAP,
+                CONCURRENCY,
+                ALLOCATION_TRACKER
+            ).getUnion(),
+            visitedRelationships
+        );
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
         assertThat(ArrayUtils.toObject(newNeighbors), arrayContainingInAnyOrder(2L, 3L));
@@ -75,7 +91,7 @@ class NewOldGraphTest {
 
     @Test
     void oldShouldReturnVisitedRelationships() {
-        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
+        RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, ALLOCATION_TRACKER);
         importer.addRelationshipFromOriginalId(0, 1);
         importer.addRelationshipFromOriginalId(0, 2);
         importer.addRelationshipFromOriginalId(0, 3);
@@ -83,7 +99,15 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(
+            importer.buildGraphStore(
+                GdlSupportExtension.DATABASE_ID,
+                ID_MAP,
+                CONCURRENCY,
+                ALLOCATION_TRACKER
+            ).getUnion(),
+            visitedRelationships
+        );
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);
         assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));
@@ -92,7 +116,7 @@ class NewOldGraphTest {
     private static NodeMapping idMap(int numberOfNodes) {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(numberOfNodes)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (int i = 0; i < numberOfNodes; i++) {

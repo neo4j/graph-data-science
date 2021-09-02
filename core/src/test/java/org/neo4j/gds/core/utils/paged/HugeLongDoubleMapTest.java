@@ -120,33 +120,33 @@ final class HugeLongDoubleMapTest {
         long secondSize = sizeOfLongArray(16) + sizeOfDoubleArray(16);
         long thirdSize = sizeOfLongArray(32) + sizeOfDoubleArray(32);
 
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeLongDoubleMap map = new HugeLongDoubleMap(tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeLongDoubleMap map = new HugeLongDoubleMap(allocationTracker);
 
         for (long i = 0L; i < 6L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(firstSize, tracker.trackedBytes());
+            assertEquals(firstSize, allocationTracker.trackedBytes());
         }
         for (long i = 6L; i < 12L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(secondSize, tracker.trackedBytes());
+            assertEquals(secondSize, allocationTracker.trackedBytes());
         }
         for (long i = 12L; i < 24L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(thirdSize, tracker.trackedBytes());
+            assertEquals(thirdSize, allocationTracker.trackedBytes());
         }
     }
 
     @Test
     void releaseMemory() {
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeLongDoubleMap map = new HugeLongDoubleMap(tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeLongDoubleMap map = new HugeLongDoubleMap(allocationTracker);
 
         for (long i = 0L; i < 20L; i++) {
             map.addTo(i, i + 42L);
         }
         map.release();
-        assertEquals(0L, tracker.trackedBytes());
+        assertEquals(0L, allocationTracker.trackedBytes());
     }
 
     @Test

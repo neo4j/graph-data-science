@@ -106,7 +106,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
             graph,
             concurrency,
             context.executor(),
-            context.tracker()
+            context.allocationTracker()
         ).build(result.streamSimilarityResult());
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }

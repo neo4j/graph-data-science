@@ -134,8 +134,8 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
 
         static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

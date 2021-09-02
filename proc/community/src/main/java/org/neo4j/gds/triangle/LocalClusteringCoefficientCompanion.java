@@ -80,8 +80,8 @@ final class LocalClusteringCoefficientCompanion {
 
         double averageClusteringCoefficient = 0;
 
-        ResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
-            super(callContext, concurrency, tracker);
+        ResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
+            super(callContext, concurrency, allocationTracker);
         }
 
         ResultBuilder<PROC_RESULT> withAverageClusteringCoefficient(double averageClusteringCoefficient) {

@@ -52,7 +52,7 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, Dijkst
             .nodes(computationResult.graph())
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .orientation(Orientation.NATURAL)
-            .tracker(allocationTracker())
+            .allocationTracker(allocationTracker())
             .build();
 
         Relationships relationships;

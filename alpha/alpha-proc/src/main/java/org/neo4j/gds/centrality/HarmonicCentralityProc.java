@@ -151,12 +151,12 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
             protected HarmonicCentrality build(
                 Graph graph,
                 HarmonicCentralityConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return new HarmonicCentrality(
                     graph,
-                    tracker,
+                    allocationTracker,
                     configuration.concurrency(),
                     Pools.DEFAULT
                 );

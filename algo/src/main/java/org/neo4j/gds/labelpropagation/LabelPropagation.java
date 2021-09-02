@@ -46,7 +46,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
     public static final double DEFAULT_WEIGHT = 1.0;
 
     private final long nodeCount;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final NodeProperties nodeProperties;
     private final NodeProperties nodeWeights;
     private final LabelPropagationBaseConfig config;
@@ -64,13 +64,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         LabelPropagationBaseConfig config,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.config = config;
         this.executor = executor;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
         NodeProperties seedProperty;
@@ -127,7 +127,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         progressTracker.beginSubTask();
 
         if (labels == null || labels.size() != nodeCount) {
-            labels = HugeLongArray.newArray(nodeCount, tracker);
+            labels = HugeLongArray.newArray(nodeCount, allocationTracker);
         }
 
         ranIterations = 0L;

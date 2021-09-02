@@ -57,7 +57,7 @@ public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<Graph
     protected GraphSageTrain build(
         Graph graph,
         GraphSageTrainConfig configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var executorService = Pools.DEFAULT;
@@ -66,8 +66,8 @@ public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<Graph
         }
 
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, tracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, tracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, allocationTracker)
+        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, allocationTracker);
     }
 
     @Override

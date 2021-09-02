@@ -46,7 +46,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
     public LinkPredictionTrain build(
         Graph graph,
         LinkPredictionTrainConfig trainConfig,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         String graphName = trainConfig

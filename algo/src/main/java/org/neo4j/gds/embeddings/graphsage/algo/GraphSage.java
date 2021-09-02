@@ -45,20 +45,20 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     private final GraphSageBaseConfig config;
     private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
         ExecutorService executor,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.config = config;
         this.model = config.model();
         this.executor = executor;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.progressTracker = progressTracker;
     }
 
@@ -73,7 +73,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             model.data().featureFunction(),
             executor,
             progressTracker,
-            tracker
+            allocationTracker
         );
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
@@ -81,9 +81,9 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         var features = trainConfig.isMultiLabel() ?
             initializeMultiLabelFeatures(
                 graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig), tracker
+                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig), allocationTracker
             )
-            : initializeSingleLabelFeatures(graph, trainConfig, tracker);
+            : initializeSingleLabelFeatures(graph, trainConfig, allocationTracker);
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,

@@ -137,12 +137,12 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
             protected MSClosenessCentrality build(
                 Graph graph,
                 ClosenessCentralityConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return new MSClosenessCentrality(
                     graph,
-                    tracker,
+                    allocationTracker,
                     configuration.concurrency(),
                     Pools.DEFAULT,
                     configuration.improved()

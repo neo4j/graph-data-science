@@ -33,7 +33,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
 
     private final Graph graph;
     private final Node2VecBaseConfig config;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         return MemoryEstimations.builder(Node2Vec.class)
@@ -47,11 +47,11 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             .build();
     }
 
-    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker, AllocationTracker tracker) {
+    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker, AllocationTracker allocationTracker) {
         this.graph = graph;
         this.config = config;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             config.returnFactor(),
             config.inOutFactor(),
             config.randomSeed(),
-            tracker,
+            allocationTracker,
             progressTracker
         );
 
@@ -75,9 +75,9 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             config.positiveSamplingFactor(),
             config.negativeSamplingExponent(),
             config.concurrency(),
-            tracker
+            allocationTracker
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode(), tracker);
+        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode(), allocationTracker);
 
         randomWalk.compute().forEach(walk -> {
             probabilitiesBuilder.registerWalk(walk);
@@ -90,7 +90,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             walks,
             probabilitiesBuilder.build(),
             progressTracker,
-            tracker
+            allocationTracker
         );
 
         node2VecModel.train();

@@ -47,8 +47,8 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Al
 
     @Override
     protected AStar build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        return AStar.sourceTarget(graph, configuration, progressTracker, tracker);
+        return AStar.sourceTarget(graph, configuration, progressTracker, allocationTracker);
     }
 }

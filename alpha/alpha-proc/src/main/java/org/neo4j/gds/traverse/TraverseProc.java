@@ -91,7 +91,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
             @Override
             protected Traverse build(
-                Graph graph, TraverseConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph, TraverseConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
                 Traverse.ExitPredicate exitFunction;
                 Traverse.Aggregator aggregatorFunction;

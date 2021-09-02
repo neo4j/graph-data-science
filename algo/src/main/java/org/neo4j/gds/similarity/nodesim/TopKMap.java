@@ -57,11 +57,11 @@ public class TopKMap {
         BitSet nodeFilter,
         int topK,
         Comparator<SimilarityResult> comparator,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.nodeFilter = nodeFilter;
         int boundedTopK = (int) Math.min(topK, items);
-        topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
+        topKLists = HugeObjectArray.newArray(TopKList.class, items, allocationTracker);
         topKLists.setAll(node1 -> nodeFilter.get(node1)
             ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
                 ? BoundedLongPriorityQueue.min(boundedTopK)
@@ -150,4 +150,3 @@ public class TopKMap {
         }
     }
 }
-

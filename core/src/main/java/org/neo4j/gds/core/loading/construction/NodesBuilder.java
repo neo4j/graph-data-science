@@ -70,7 +70,7 @@ public final class NodesBuilder {
     private final long maxOriginalId;
     private final long nodeCount;
     private final int concurrency;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private int nextLabelId;
     private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
@@ -98,15 +98,15 @@ public final class NodesBuilder {
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.maxOriginalId = maxOriginalId;
         this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
-        this.labelInformationBuilder = LabelInformation.emptyBuilder(tracker);
+        this.labelInformationBuilder = LabelInformation.emptyBuilder(allocationTracker);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
@@ -121,7 +121,7 @@ public final class NodesBuilder {
             hasProperties
         );
 
-        var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
+        var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, allocationTracker);
 
         Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
             ? this::getOrCreateLabelTokenId
@@ -169,7 +169,7 @@ public final class NodesBuilder {
             highestNeoId,
             concurrency,
             checkDuplicateIds,
-            tracker
+            allocationTracker
         );
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
@@ -220,7 +220,10 @@ public final class NodesBuilder {
         }
         var propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
         if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
-            propertyBuildersByPropertyKey.put(propertyKey, NodePropertiesFromStoreBuilder.of(nodeCount, tracker, NO_PROPERTY_VALUE));
+            propertyBuildersByPropertyKey.put(
+                propertyKey,
+                NodePropertiesFromStoreBuilder.of(nodeCount, allocationTracker, NO_PROPERTY_VALUE)
+            );
         }
         return propertyBuildersByPropertyKey.get(propertyKey);
     }

@@ -48,27 +48,27 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
     private final int concurrency;
     private final ExecutorService executorService;
     private final long nodeCount;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private final boolean wassermanFaust;
 
     public MSClosenessCentrality(
             Graph graph,
-            AllocationTracker tracker,
+            AllocationTracker allocationTracker,
             int concurrency,
             ExecutorService executorService, boolean wassermanFaust) {
         this.graph = graph;
         nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.wassermanFaust = wassermanFaust;
-        farness = PagedAtomicIntegerArray.newArray(nodeCount, this.tracker);
-        component = PagedAtomicIntegerArray.newArray(nodeCount, this.tracker);
+        farness = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
+        component = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
     }
 
     public HugeDoubleArray getCentrality() {
-        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, tracker);
+        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, allocationTracker);
         for (int i = 0; i < nodeCount; i++) {
             cc.set(i, centrality(farness.get(i),
                     component.get(i),
@@ -131,7 +131,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
         };
 
         MultiSourceBFS
-            .aggregatedNeighborProcessing(graph, graph, consumer, tracker)
+            .aggregatedNeighborProcessing(graph, graph, consumer, allocationTracker)
             .run(concurrency, executorService);
 
         progressTracker.endSubTask();

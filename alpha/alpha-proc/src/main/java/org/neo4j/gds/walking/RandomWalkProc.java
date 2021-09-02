@@ -96,7 +96,10 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
 
             @Override
             protected RandomWalk build(
-                Graph graph, RandomWalkConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph,
+                RandomWalkConfig configuration,
+                AllocationTracker allocationTracker,
+                ProgressTracker progressTracker
             ) {
                 Number returnParam = configuration.returnKey();
                 Number inOut = configuration.inOut();

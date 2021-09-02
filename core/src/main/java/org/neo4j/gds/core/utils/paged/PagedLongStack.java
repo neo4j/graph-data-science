@@ -26,8 +26,8 @@ public class PagedLongStack extends PagedDataStructure<long[]> {
     private static final PageAllocator.Factory<long[]> ALLOCATOR_FACTORY =
             PageAllocator.ofArray(long[].class);
 
-    public PagedLongStack(long initialSize, AllocationTracker tracker) {
-        this(Math.max(1L, initialSize), ALLOCATOR_FACTORY.newAllocator(tracker));
+    public PagedLongStack(long initialSize, AllocationTracker allocationTracker) {
+        this(Math.max(1L, initialSize), ALLOCATOR_FACTORY.newAllocator(allocationTracker));
     }
 
     private PagedLongStack(long initialSize, PageAllocator<long[]> allocator) {

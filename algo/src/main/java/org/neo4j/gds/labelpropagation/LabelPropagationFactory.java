@@ -47,14 +47,14 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
 
     @Override
     protected LabelPropagation build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new LabelPropagation(
             graph,
             configuration,
             Pools.DEFAULT,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

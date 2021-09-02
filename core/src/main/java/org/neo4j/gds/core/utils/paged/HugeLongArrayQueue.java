@@ -28,8 +28,8 @@ public final class HugeLongArrayQueue {
     private long head;
     private long tail;
 
-    public static HugeLongArrayQueue newQueue(long capacity, AllocationTracker tracker) {
-        return new HugeLongArrayQueue(HugeLongArray.newArray(capacity + 1, tracker));
+    public static HugeLongArrayQueue newQueue(long capacity, AllocationTracker allocationTracker) {
+        return new HugeLongArrayQueue(HugeLongArray.newArray(capacity + 1, allocationTracker));
     }
 
     private HugeLongArrayQueue(HugeLongArray array) {

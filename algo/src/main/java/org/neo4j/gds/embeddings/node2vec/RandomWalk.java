@@ -56,7 +56,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final double inOutParam;
     private final AtomicLong nodeIndex;
     private final long randomSeed;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private RandomWalk(
         Graph graph,
@@ -67,7 +67,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         double returnParam,
         double inOutParam,
         long randomSeed,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
@@ -78,7 +78,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.returnParam = returnParam;
         this.inOutParam = inOutParam;
         this.randomSeed = randomSeed;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.progressTracker = progressTracker;
         nodeIndex = new AtomicLong(0);
     }
@@ -92,7 +92,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         double returnParam,
         double inOutParam,
         Optional<Long> randomSeed,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var seed = randomSeed.orElseGet(() -> new Random().nextLong());
@@ -107,7 +107,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             );
         }
 
-        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, tracker, progressTracker);
+        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, allocationTracker, progressTracker);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             Pools.DEFAULT,
             config,
             progressTracker,
-            tracker
+            allocationTracker
         ).compute();
     }
 

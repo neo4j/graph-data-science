@@ -94,7 +94,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
             protected TriangleStream build(
                 Graph graph,
                 TriangleCountBaseConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())

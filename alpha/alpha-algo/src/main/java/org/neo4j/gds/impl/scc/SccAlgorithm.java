@@ -60,15 +60,15 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
     private int minSetSize;
     private int maxSetSize;
 
-    public SccAlgorithm(Graph graph, AllocationTracker tracker) {
+    public SccAlgorithm(Graph graph, AllocationTracker allocationTracker) {
         this.graph = graph;
         nodeCount = graph.nodeCount();
-        index = HugeLongArray.newArray(nodeCount, tracker);
-        stack = new PagedLongStack(nodeCount, tracker);
-        boundaries = new PagedLongStack(nodeCount, tracker);
-        connectedComponents = HugeLongArray.newArray(nodeCount, tracker);
+        index = HugeLongArray.newArray(nodeCount, allocationTracker);
+        stack = new PagedLongStack(nodeCount, allocationTracker);
+        boundaries = new PagedLongStack(nodeCount, allocationTracker);
+        connectedComponents = HugeLongArray.newArray(nodeCount, allocationTracker);
         visited = new BitSet(nodeCount);
-        todo = new PagedLongStack(nodeCount, tracker);
+        todo = new PagedLongStack(nodeCount, allocationTracker);
     }
 
     /**

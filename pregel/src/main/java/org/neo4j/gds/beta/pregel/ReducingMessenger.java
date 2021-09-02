@@ -41,15 +41,15 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     private HugeAtomicDoubleArray sendArray;
     private HugeAtomicDoubleArray receiveArray;
 
-    ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker tracker) {
+    ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker allocationTracker) {
         assert !Double.isNaN(reducer.identity()): "identity element must not be NaN";
 
         this.graph = graph;
         this.config = config;
         this.reducer = reducer;
 
-        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
-        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
     }
 
     static MemoryEstimation memoryEstimation() {

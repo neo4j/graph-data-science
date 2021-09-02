@@ -196,7 +196,7 @@ public abstract class AlgoBaseProc<
         boolean releaseTopology
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
-        var tracker = allocationTracker();
+        var allocationTracker = allocationTracker();
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
@@ -223,7 +223,7 @@ public abstract class AlgoBaseProc<
                 .build();
         }
 
-        ALGO algo = newAlgorithm(graph, config, tracker);
+        ALGO algo = newAlgorithm(graph, config, allocationTracker);
 
         algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
@@ -241,7 +241,7 @@ public abstract class AlgoBaseProc<
             }
         );
 
-        log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
+        log.info(algoName() + ": overall memory usage %s", allocationTracker.getUsageString());
 
         return builder
             .graph(graph)
@@ -311,11 +311,11 @@ public abstract class AlgoBaseProc<
     private ALGO newAlgorithm(
         final Graph graph,
         final CONFIG config,
-        final AllocationTracker tracker
+        final AllocationTracker allocationTracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         return algorithmFactory()
-            .build(graph, config, tracker, log, taskRegistry)
+            .build(graph, config, allocationTracker, log, taskRegistry)
             .withTerminationFlag(terminationFlag);
     }
 

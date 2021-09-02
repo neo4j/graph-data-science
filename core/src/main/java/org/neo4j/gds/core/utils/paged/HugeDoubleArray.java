@@ -53,9 +53,9 @@ import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
  * <p><em>Basic Usage</em></p>
  * <pre>
  * {@code}
- * AllocationTracker tracker = ...;
+ * AllocationTracker allocationTracker = ...;
  * long arraySize = 42L;
- * HugeDoubleArray array = HugeDoubleArray.newArray(arraySize, tracker);
+ * HugeDoubleArray array = HugeDoubleArray.newArray(arraySize, allocationTracker);
  * array.set(13L, 37D);
  * double value = array.get(13L);
  * // value = 37D
@@ -135,8 +135,8 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
-    public final HugeDoubleArray copyOf(final long newLength, final AllocationTracker tracker) {
-        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength, tracker);
+    public final HugeDoubleArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
+        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength, allocationTracker);
         this.copyTo(copy, newLength);
         return copy;
     }
@@ -200,11 +200,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeDoubleArray newArray(long size, AllocationTracker tracker) {
+    public static HugeDoubleArray newArray(long size, AllocationTracker allocationTracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeDoubleArray.of(size, tracker);
+            return SingleHugeDoubleArray.of(size, allocationTracker);
         }
-        return PagedHugeDoubleArray.of(size, tracker);
+        return PagedHugeDoubleArray.of(size, allocationTracker);
     }
 
     public static long memoryEstimation(long size) {
@@ -230,22 +230,22 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     }
 
     /* test-only */
-    static HugeDoubleArray newPagedArray(long size, AllocationTracker tracker) {
-        return PagedHugeDoubleArray.of(size, tracker);
+    static HugeDoubleArray newPagedArray(long size, AllocationTracker allocationTracker) {
+        return PagedHugeDoubleArray.of(size, allocationTracker);
     }
 
     /* test-only */
-    static HugeDoubleArray newSingleArray(int size, AllocationTracker tracker) {
-        return SingleHugeDoubleArray.of(size, tracker);
+    static HugeDoubleArray newSingleArray(int size, AllocationTracker allocationTracker) {
+        return SingleHugeDoubleArray.of(size, allocationTracker);
     }
 
     private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeDoubleArray of(long size, AllocationTracker tracker) {
+        private static HugeDoubleArray of(long size, AllocationTracker allocationTracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             double[] page = new double[intSize];
-            tracker.add(sizeOfDoubleArray(intSize));
+            allocationTracker.add(sizeOfDoubleArray(intSize));
 
             return new SingleHugeDoubleArray(intSize, page);
         }
@@ -360,7 +360,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
 
     private static final class PagedHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeDoubleArray of(long size, AllocationTracker tracker) {
+        private static HugeDoubleArray of(long size, AllocationTracker allocationTracker) {
             int numPages = numberOfPages(size);
             double[][] pages = new double[numPages][];
 
@@ -373,7 +373,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
             final int lastPageSize = exclusiveIndexOfPage(size);
             pages[numPages - 1] = new double[lastPageSize];
             memoryUsed += sizeOfDoubleArray(lastPageSize);
-            tracker.add(memoryUsed);
+            allocationTracker.add(memoryUsed);
 
             return new PagedHugeDoubleArray(size, pages, memoryUsed);
         }

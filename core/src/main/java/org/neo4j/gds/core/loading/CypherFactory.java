@@ -162,7 +162,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             CSRGraphStore graphStore = createGraphStore(
                 nodes.idsAndProperties(),
                 relationships,
-                loadingContext.tracker(),
+                loadingContext.allocationTracker(),
                 relationships.dimensions()
             );
 

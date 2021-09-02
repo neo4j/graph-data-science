@@ -48,7 +48,12 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
-    public CollapsePath(Graph[] graphs, CollapsePathConfig config, ExecutorService executorService, AllocationTracker allocationTracker) {
+    public CollapsePath(
+        Graph[] graphs,
+        CollapsePathConfig config,
+        ExecutorService executorService,
+        AllocationTracker allocationTracker
+    ) {
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
         this.config = config;
@@ -64,7 +69,7 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
             .aggregation(Aggregation.NONE)
             .concurrency(config.concurrency())
             .executorService(executorService)
-            .tracker(allocationTracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         var traversalConsumer = config.allowSelfLoops()
@@ -120,14 +125,20 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
 
     private static class TraversalToEdgeMSBFSStrategy extends ANPStrategy {
 
-        static MultiSourceBFS initializeMultiSourceBFS(Graph[] graphs, BfsConsumer perNodeAction, boolean allowSelfLoops, AllocationTracker tracker, long[] startNodes) {
+        static MultiSourceBFS initializeMultiSourceBFS(
+            Graph[] graphs,
+            BfsConsumer perNodeAction,
+            boolean allowSelfLoops,
+            AllocationTracker allocationTracker,
+            long[] startNodes
+        ) {
             return new MultiSourceBFS(
                 graphs[0],
                 graphs[0],
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
                 false,
                 allowSelfLoops,
-                tracker,
+                allocationTracker,
                 startNodes
             );
         }

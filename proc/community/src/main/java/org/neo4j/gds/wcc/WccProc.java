@@ -48,13 +48,13 @@ final class WccProc {
     static <CONFIG extends WccBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return CommunityProcCompanion.nodeProperties(
             computationResult,
             resultProperty,
             computationResult.result().asNodeProperties(),
-            tracker
+            allocationTracker
         );
     }
 }

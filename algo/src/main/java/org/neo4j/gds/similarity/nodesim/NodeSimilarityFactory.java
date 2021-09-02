@@ -45,9 +45,9 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     protected NodeSimilarity build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, tracker);
+        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, allocationTracker);
     }
 
     @Override

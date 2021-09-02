@@ -66,7 +66,7 @@ class NodesBuilderTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .concurrency(concurrency)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(
@@ -90,7 +90,7 @@ class NodesBuilderTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(attempts)
                 .concurrency(concurrency)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(
@@ -118,7 +118,7 @@ class NodesBuilderTest {
                 .maxOriginalId(attempts)
                 .hasLabelInformation(true)
                 .concurrency(concurrency)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
@@ -158,7 +158,7 @@ class NodesBuilderTest {
                 .maxOriginalId(2)
                 .nodeCount(graph.nodeCount())
                 .concurrency(1)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(
@@ -209,7 +209,7 @@ class NodesBuilderTest {
                 .nodeCount(nodeCount)
                 .maxOriginalId(nodeCount)
                 .concurrency(concurrency)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             var tasks = ParallelUtil.tasks(
@@ -256,7 +256,7 @@ class NodesBuilderTest {
                 .concurrency(1)
                 .hasLabelInformation(true)
                 .hasProperties(true)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(
@@ -298,7 +298,7 @@ class NodesBuilderTest {
             var maxOriginalId = 4032L;
             var builder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(maxOriginalId)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             builder.addNode(0L);
@@ -314,7 +314,7 @@ class NodesBuilderTest {
             var maxOriginalId = 4032;
             var builder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(maxOriginalId)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             IntStream.range(1, maxOriginalId + 1).forEach(builder::addNode);
@@ -330,7 +330,7 @@ class NodesBuilderTest {
             var maxOriginalId = 4031L;
             var builder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(maxOriginalId)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             builder.addNode(0L);

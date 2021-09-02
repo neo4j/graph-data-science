@@ -80,7 +80,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         ShortestPathBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         long sourceNode = graph.toMappedNodeId(config.sourceNode());
         long targetNode = graph.toMappedNodeId(config.targetNode());
@@ -92,7 +92,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             config.trackRelationships(),
             heuristicFunction,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 
@@ -104,7 +104,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         AllShortestPathsBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
@@ -112,7 +112,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             config.trackRelationships(),
             heuristicFunction,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 
@@ -139,7 +139,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.sourceNode = sourceNode;
@@ -149,8 +149,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.queue = heuristicFunction
             .map(fn -> minPriorityQueue(graph.nodeCount(), fn))
             .orElseGet(() -> HugeLongPriorityQueue.min(graph.nodeCount()));
-        this.predecessors = new HugeLongLongMap(tracker);
-        this.relationships = trackRelationships ? new HugeLongLongMap(tracker) : null;
+        this.predecessors = new HugeLongLongMap(allocationTracker);
+        this.relationships = trackRelationships ? new HugeLongLongMap(allocationTracker) : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
         this.progressTracker = progressTracker;

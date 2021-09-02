@@ -36,7 +36,7 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
     /**
      * Creates a copy of the given array. The behavior is identical to {@link java.util.Arrays#copyOf(int[], int)}.
      */
-    public abstract Self copyOf(long newLength, AllocationTracker tracker);
+    public abstract Self copyOf(long newLength, AllocationTracker allocationTracker);
 
     /**
      * Returns the length of this array.

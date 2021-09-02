@@ -114,8 +114,8 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
 
         static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

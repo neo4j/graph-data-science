@@ -132,9 +132,9 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         LocalClusteringCoefficientWriteResultBuilder(
             ProcedureCallContext callContext,
             int concurrency,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
-            super(callContext, concurrency, tracker);
+            super(callContext, concurrency, allocationTracker);
         }
 
         @Override

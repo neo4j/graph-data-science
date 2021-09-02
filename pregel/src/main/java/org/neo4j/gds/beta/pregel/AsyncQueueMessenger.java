@@ -26,8 +26,8 @@ class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterat
 
     private final PrimitiveAsyncDoubleQueues queues;
 
-    AsyncQueueMessenger(long nodeCount, AllocationTracker tracker) {
-        this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount, tracker);
+    AsyncQueueMessenger(long nodeCount, AllocationTracker allocationTracker) {
+        this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount, allocationTracker);
     }
 
     static MemoryEstimation memoryEstimation() {

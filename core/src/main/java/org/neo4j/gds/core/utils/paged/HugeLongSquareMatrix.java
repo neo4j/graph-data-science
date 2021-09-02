@@ -23,7 +23,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public class HugeLongSquareMatrix extends HugeLongMatrix {
 
-    public HugeLongSquareMatrix(long order, AllocationTracker tracker) {
-        super(order, order, tracker);
+    public HugeLongSquareMatrix(long order, AllocationTracker allocationTracker) {
+        super(order, order, allocationTracker);
     }
 }

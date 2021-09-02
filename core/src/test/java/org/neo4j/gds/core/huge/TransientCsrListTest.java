@@ -189,13 +189,13 @@ class TransientCsrListTest {
     void shouldWorkWithVeryDenseNodes(TestMethodRunner runner, long firstDegree, long secondDegree) {
         runner.run(() -> {
             int nodeCount = 1_000_000;
-            var tracker = AllocationTracker.empty();
+            var allocationTracker = AllocationTracker.empty();
 
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .nodeCount(nodeCount)
                 .maxOriginalId(nodeCount)
                 .hasLabelInformation(false)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
 
             for (int i = 0; i < nodeCount; i++) {
@@ -207,7 +207,7 @@ class TransientCsrListTest {
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodes.nodeMapping())
                 .orientation(Orientation.UNDIRECTED)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
 
             for (int i = 1; i <= firstDegree; i++) {
@@ -224,7 +224,7 @@ class TransientCsrListTest {
 
             var rels = relsBuilder.build();
 
-            var graph = GraphFactory.create(nodes.nodeMapping(), rels, tracker);
+            var graph = GraphFactory.create(nodes.nodeMapping(), rels, allocationTracker);
 
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
 
@@ -264,7 +264,7 @@ class TransientCsrListTest {
         long sourceNodeId = targets[0];
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(targets[targets.length - 1])
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {
@@ -276,7 +276,7 @@ class TransientCsrListTest {
             .nodes(idMap)
             .concurrency(1)
             .executorService(Pools.DEFAULT)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {

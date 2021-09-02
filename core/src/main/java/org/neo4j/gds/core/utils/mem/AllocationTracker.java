@@ -31,8 +31,8 @@ public interface AllocationTracker extends Supplier<String> {
         return EmptyAllocationTracker.INSTANCE;
     }
 
-    static boolean isTracking(@Nullable AllocationTracker tracker) {
-        return tracker != null && tracker != empty();
+    static boolean isTracking(@Nullable AllocationTracker allocationTracker) {
+        return allocationTracker != null && allocationTracker != empty();
     }
 
     static AllocationTracker create() {

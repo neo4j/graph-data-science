@@ -42,9 +42,9 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
 
     @Override
     protected DegreeCentrality build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, tracker);
+        return new DegreeCentrality(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
     }
 
     @Override
@@ -68,4 +68,3 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         return Tasks.leaf(DEGREE_CENTRALITY_TASK_NAME, graph.nodeCount());
     }
 }
-

@@ -157,7 +157,7 @@ final class RelationshipsFilter {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(outputNodes)
             .concurrency(concurrency)
-            .tracker(allocationTracker)
+            .allocationTracker(allocationTracker)
             .addAllPropertyConfigs(propertyConfigs)
             .build();
 

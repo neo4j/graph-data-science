@@ -84,7 +84,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
             .executorService(Pools.DEFAULT)
-            .tracker(allocationTracker())
+            .allocationTracker(allocationTracker())
             .build();
 
         ParallelUtil.parallelStreamConsume(

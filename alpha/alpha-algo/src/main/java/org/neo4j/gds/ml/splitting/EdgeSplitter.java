@@ -98,7 +98,7 @@ public abstract class EdgeSplitter {
             )
             .concurrency(1)
             .executorService(Pools.DEFAULT)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
     }
 

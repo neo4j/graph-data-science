@@ -89,7 +89,7 @@ public abstract class BaseProc {
     public ProcedureCallContext callContext;
 
     @Context
-    public AllocationTracker tracker;
+    public AllocationTracker allocationTracker;
 
     @Context
     public TaskRegistry taskRegistry;
@@ -98,13 +98,13 @@ public abstract class BaseProc {
         if (GdsEdition.instance().isInvalidLicense()) {
             throw new RuntimeException(GdsEdition.instance().errorMessage().get());
         }
-        if (tracker == null) {
-            tracker = AllocationTracker.empty();
+        if (allocationTracker == null) {
+            allocationTracker = AllocationTracker.empty();
         }
     }
 
     protected AllocationTracker allocationTracker() {
-        return tracker;
+        return allocationTracker;
     }
 
     protected String username() {
@@ -148,7 +148,7 @@ public abstract class BaseProc {
         return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
-    protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
+    protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker allocationTracker) {
         if (api == null) {
             return newFictitiousLoader(createConfig);
         }
@@ -158,7 +158,7 @@ public abstract class BaseProc {
                 .transactionContext(TransactionContext.of(api, procedureTransaction))
                 .api(api)
                 .log(log)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))
                 .build())
             .username(username())

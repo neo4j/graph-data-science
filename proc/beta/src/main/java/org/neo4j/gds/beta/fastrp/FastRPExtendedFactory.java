@@ -40,7 +40,7 @@ public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> exte
 
     @Override
     protected FastRP build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
@@ -49,7 +49,7 @@ public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> exte
             configuration,
             featureExtractors,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

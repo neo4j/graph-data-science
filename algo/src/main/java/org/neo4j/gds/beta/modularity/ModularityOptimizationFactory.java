@@ -82,17 +82,17 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     @Override
     protected ModularityOptimization build(
-        Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
-        return build(graph, configuration, seedProperty, tracker, progressTracker);
+        return build(graph, configuration, seedProperty, allocationTracker, progressTracker);
     }
 
     public ModularityOptimization build(
         Graph graph,
         T configuration,
         NodeProperties seedProperty,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new ModularityOptimization(
@@ -104,7 +104,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             configuration.batchSize(),
             Pools.DEFAULT,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

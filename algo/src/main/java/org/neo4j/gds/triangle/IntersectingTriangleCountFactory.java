@@ -42,13 +42,13 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
 
     @Override
     protected IntersectingTriangleCount build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return IntersectingTriangleCount.create(
             graph,
             configuration,
             Pools.DEFAULT,
-            tracker,
+            allocationTracker,
             progressTracker
         );
     }

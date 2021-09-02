@@ -29,8 +29,8 @@ public final class HugeMergeSort {
 
     private static final int SEQUENTIAL_THRESHOLD = 100;
 
-    public static void sort(HugeLongArray array, int concurrency, AllocationTracker tracker) {
-        var temp = HugeLongArray.newArray(array.size(), tracker);
+    public static void sort(HugeLongArray array, int concurrency, AllocationTracker allocationTracker) {
+        var temp = HugeLongArray.newArray(array.size(), allocationTracker);
         var forkJoinPool = ParallelUtil.getFJPoolWithConcurrency(concurrency);
         forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
     }

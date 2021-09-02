@@ -43,7 +43,7 @@ public class GraphSageEmbeddingsGenerator {
     private final FeatureFunction featureFunction;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
@@ -53,7 +53,7 @@ public class GraphSageEmbeddingsGenerator {
         FeatureFunction featureFunction,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.layers = layers;
         this.batchSize = batchSize;
@@ -62,7 +62,7 @@ public class GraphSageEmbeddingsGenerator {
         this.featureFunction = featureFunction;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     public HugeObjectArray<double[]> makeEmbeddings(
@@ -72,7 +72,7 @@ public class GraphSageEmbeddingsGenerator {
         HugeObjectArray<double[]> result = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
-            tracker
+            allocationTracker
         );
 
         progressTracker.beginSubTask();

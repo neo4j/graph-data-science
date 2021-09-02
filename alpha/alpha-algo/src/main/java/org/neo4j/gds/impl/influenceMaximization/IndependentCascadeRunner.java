@@ -32,7 +32,7 @@ class IndependentCascadeRunner implements Runnable {
     private final AtomicLong globalNodeProgress;
     private final double propagationProbability;
     private final int monteCarloSimulations;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private long[] seedSetNodes;
 
     IndependentCascadeRunner(
@@ -41,14 +41,14 @@ class IndependentCascadeRunner implements Runnable {
         AtomicLong globalNodeProgress,
         double propagationProbability,
         int monteCarloSimulations,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.spreads = spreads;
         this.globalNodeProgress = globalNodeProgress;
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     void setSeedSetNodes(long[] seedSetNodes) {
@@ -62,7 +62,7 @@ class IndependentCascadeRunner implements Runnable {
             propagationProbability,
             monteCarloSimulations,
             spreads,
-            tracker
+            allocationTracker
         );
 
         var candidateNode = 0L;

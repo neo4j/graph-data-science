@@ -59,9 +59,9 @@ final class K1ColoringProc {
         K1ColoringResultBuilder(
             ProcedureCallContext callContext,
             int concurrency,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
-            super(callContext, concurrency, tracker);
+            super(callContext, concurrency, allocationTracker);
         }
 
         K1ColoringResultBuilder<PROC_RESULT> withColorCount(long colorCount) {
@@ -80,4 +80,3 @@ final class K1ColoringProc {
         }
     }
 }
-

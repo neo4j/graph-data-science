@@ -36,10 +36,10 @@ public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<No
     public NodeClassificationTrain build(
         Graph graph,
         NodeClassificationTrainConfig configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        return NodeClassificationTrain.create(graph, configuration, tracker, progressTracker);
+        return NodeClassificationTrain.create(graph, configuration, allocationTracker, progressTracker);
     }
 
     @Override

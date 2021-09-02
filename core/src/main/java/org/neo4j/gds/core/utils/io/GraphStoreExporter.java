@@ -53,9 +53,9 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     protected abstract void export(GraphStoreInput graphStoreInput);
 
-    public ImportedProperties run(AllocationTracker tracker) {
+    public ImportedProperties run(AllocationTracker allocationTracker) {
         var metaDataStore = MetaDataStore.of(graphStore);
-        var nodeStore = NodeStore.of(graphStore, neoNodeProperties, tracker);
+        var nodeStore = NodeStore.of(graphStore, neoNodeProperties, allocationTracker);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphStoreInput = new GraphStoreInput(
             metaDataStore,

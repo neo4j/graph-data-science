@@ -38,8 +38,8 @@ public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubl
                 new AtomicDoubleArray[0]);
     }
 
-    public static PagedAtomicDoubleArray newArray(long size, AllocationTracker tracker) {
-        return new PagedAtomicDoubleArray(size, ALLOCATOR_FACTORY.newAllocator(tracker));
+    public static PagedAtomicDoubleArray newArray(long size, AllocationTracker allocationTracker) {
+        return new PagedAtomicDoubleArray(size, ALLOCATOR_FACTORY.newAllocator(allocationTracker));
     }
 
     private PagedAtomicDoubleArray(

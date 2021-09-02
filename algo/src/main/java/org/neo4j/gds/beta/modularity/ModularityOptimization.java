@@ -68,7 +68,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final Graph graph;
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -93,7 +93,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         int minBatchSize,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
@@ -103,7 +103,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.executor = executor;
         this.concurrency = concurrency;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.minBatchSize = minBatchSize;
 
         if (maxIterations < 1) {
@@ -166,7 +166,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .build();
 
         K1Coloring coloring = new K1ColoringFactory<>()
-            .build(graph, k1Config, tracker, progressTracker)
+            .build(graph, k1Config, allocationTracker, progressTracker)
             .withTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();
@@ -174,7 +174,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void initSeeding() {
-        this.currentCommunities = HugeLongArray.newArray(nodeCount, tracker);
+        this.currentCommunities = HugeLongArray.newArray(nodeCount, allocationTracker);
 
         if (seedProperty == null) {
             return;
@@ -182,7 +182,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         long maxSeedCommunity = seedProperty.getMaxLongPropertyValue().orElse(0L);
 
-        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
+        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, allocationTracker);
         long nextAvailableInternalCommunityId = -1;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
@@ -199,7 +199,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
         }
 
-        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), tracker);
+        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), allocationTracker);
 
         for (LongLongCursor entry : communityMapping) {
             reverseSeedCommunityMapping.set(entry.value, entry.key);
@@ -207,11 +207,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void init() {
-        this.nextCommunities = HugeLongArray.newArray(nodeCount, tracker);
-        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount, tracker);
-        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, tracker);
-        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
-        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+        this.nextCommunities = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
+        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
 
         var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
             new InitTask(
@@ -319,7 +319,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {

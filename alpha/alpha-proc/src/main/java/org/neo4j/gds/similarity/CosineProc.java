@@ -81,7 +81,7 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
     }
 
     @Override
-    CosineAlgorithm newAlgo(CosineConfig config, AllocationTracker tracker) {
+    CosineAlgorithm newAlgo(CosineConfig config, AllocationTracker allocationTracker) {
         return new CosineAlgorithm(config, api);
     }
 

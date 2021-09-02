@@ -111,7 +111,7 @@ public final class RandomGraphGenerator {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
             .hasLabelInformation(maybeNodeLabelProducer.isPresent())
-            .tracker(allocationTracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         if (maybeNodeLabelProducer.isPresent()) {
@@ -124,13 +124,12 @@ public final class RandomGraphGenerator {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
-            .tracker(allocationTracker)
             .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
                 ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
                 : List.of()
             )
             .aggregation(aggregation)
-            .tracker(allocationTracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         generateRelationships(relationshipsBuilder);

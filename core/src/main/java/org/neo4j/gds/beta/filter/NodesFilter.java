@@ -94,7 +94,7 @@ final class NodesFilter {
             .concurrency(concurrency)
             .maxOriginalId(inputNodes.highestNeoId())
             .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
-            .tracker(allocationTracker);
+            .allocationTracker(allocationTracker);
 
         if (IdMapImplementations.useBitIdMap()) {
             // If we need to construct a BitIdMap, we need to make

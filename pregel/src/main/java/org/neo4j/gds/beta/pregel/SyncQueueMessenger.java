@@ -26,8 +26,8 @@ public class SyncQueueMessenger implements Messenger<PrimitiveSyncDoubleQueues.I
 
     private final PrimitiveSyncDoubleQueues queues;
 
-    SyncQueueMessenger(long nodeCount, AllocationTracker tracker) {
-        this.queues = PrimitiveSyncDoubleQueues.of(nodeCount, tracker);
+    SyncQueueMessenger(long nodeCount, AllocationTracker allocationTracker) {
+        this.queues = PrimitiveSyncDoubleQueues.of(nodeCount, allocationTracker);
     }
 
     static MemoryEstimation memoryEstimation() {

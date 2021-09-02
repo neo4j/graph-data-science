@@ -50,7 +50,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
     protected CSRGraphStore createGraphStore(
         IdsAndProperties idsAndProperties,
         RelationshipImportResult relationshipImportResult,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipTypeTokens().size();
@@ -95,7 +95,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             relationships,
             relationshipPropertyStores,
             graphCreateConfig.readConcurrency(),
-            tracker
+            allocationTracker
         );
     }
 
@@ -135,8 +135,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
         return propertyStoreBuilder.build();
     }
 
-    protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> tracker) {
-        tracker.ifPresent(progressTracker.progressLogger()::logMessage);
+    protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> allocationTracker) {
+        allocationTracker.ifPresent(progressTracker.progressLogger()::logMessage);
 
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);

@@ -56,7 +56,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final int concurrency;
     private final boolean produceProbabilities;
     private final List<String> featureProperties;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     NodeClassificationPredict(
         NodeLogisticRegressionPredictor predictor,
@@ -65,7 +65,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         int concurrency,
         boolean produceProbabilities,
         List<String> featureProperties,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         this.predictor = predictor;
@@ -74,7 +74,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
         this.featureProperties = featureProperties;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.progressTracker = progressTracker;
     }
 
@@ -82,7 +82,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     public NodeLogisticRegressionResult compute() {
         progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
-        var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
+        var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         var consumer = new NodeClassificationPredictConsumer(
             graph,
             IDENTITY,
@@ -115,7 +115,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             var predictions = HugeObjectArray.newArray(
                 double[].class,
                 graph.nodeCount(),
-                tracker
+                allocationTracker
             );
             predictions.setAll(i -> new double[numberOfClasses]);
             return predictions;

@@ -87,7 +87,7 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
             .addParameter(pregelSpec.configTypeName(), configurationVar)
-            .addParameter(AllocationTracker.class, "tracker")
+            .addParameter(AllocationTracker.class, "allocationTracker")
             .addParameter(ProgressTracker.class, "progressTracker")
             .addStatement(
                 CodeBlock.builder().addNamed(
@@ -96,7 +96,7 @@ class AlgorithmGenerator extends PregelGenerator {
                     "$config:N, " +
                     "new $computation:T(), " +
                     "$pools:T.DEFAULT, " +
-                    "tracker, " +
+                    "allocationTracker, " +
                     "progressTracker" +
                     ")",
                     Map.of(

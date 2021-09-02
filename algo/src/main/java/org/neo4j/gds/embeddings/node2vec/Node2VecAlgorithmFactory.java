@@ -42,10 +42,10 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
 
     @Override
     protected Node2Vec build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         validateConfig(configuration, graph);
-        return new Node2Vec(graph, configuration, progressTracker, tracker);
+        return new Node2Vec(graph, configuration, progressTracker, allocationTracker);
     }
 
     @Override

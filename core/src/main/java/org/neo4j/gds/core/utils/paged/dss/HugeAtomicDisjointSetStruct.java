@@ -82,8 +82,8 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     private final HugeAtomicLongArray communities;
     private final AtomicLong maxCommunityId;
 
-    public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker, int concurrency) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), tracker);
+    public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker allocationTracker, int concurrency) {
+        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), allocationTracker);
         this.communities = null;
         this.maxCommunityId = null;
     }
@@ -91,17 +91,17 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     public HugeAtomicDisjointSetStruct(
         long capacity,
         NodeProperties communityMapping,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         int concurrency
     ) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), allocationTracker);
         this.communities = HugeAtomicLongArray.newArray(
             capacity,
             LongPageCreator.of(concurrency, nodeId -> {
                 var seedCommunity = communityMapping.longValue(nodeId);
                 return seedCommunity < 0 ? -1 : seedCommunity;
             }),
-            tracker
+            allocationTracker
         );
         maxCommunityId = new AtomicLong(communityMapping.getMaxLongPropertyValue().orElse(NO_SUCH_SEED_VALUE));
     }

@@ -134,7 +134,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             return null;
         }
 
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount, this.context.tracker());
+        var neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount, this.context.allocationTracker());
 
         ParallelUtil.readParallel(
             this.config.concurrency(),
@@ -162,15 +162,15 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             return NeighborList.NOT_INSERTED;
         }
 
-        var tracker = this.context.tracker();
+        var allocationTracker = this.context.allocationTracker();
         var concurrency = this.config.concurrency();
         var executor = this.context.executor();
 
         var sampledK = this.config.sampledK(n);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
-        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
+        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
+        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
 
         ParallelUtil.readParallel(concurrency, n, executor, new SplitOldAndNewNeighbors(
             this.random,
@@ -181,8 +181,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         ));
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
-        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
+        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
+        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
 
         reverseOldAndNewNeighbors(n, allOldNeighbors, allNewNeighbors, reverseOldNeighbors, reverseNewNeighbors);
 

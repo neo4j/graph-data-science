@@ -23,28 +23,28 @@ import org.neo4j.gds.compat.AllocationTrackerAdapter;
 
 public final class KernelAllocationTracker implements AllocationTracker {
 
-    private final AllocationTrackerAdapter tracker;
+    private final AllocationTrackerAdapter allocationTrackerAdapter;
 
-    private KernelAllocationTracker(AllocationTrackerAdapter tracker) {
-        this.tracker = tracker;
+    private KernelAllocationTracker(AllocationTrackerAdapter allocationTrackerAdapter) {
+        this.allocationTrackerAdapter = allocationTrackerAdapter;
     }
 
     @Override
     public void add(long bytes) {
-        tracker.add(bytes);
+        allocationTrackerAdapter.add(bytes);
     }
 
     @Override
     public void remove(long bytes) {
-        tracker.remove(bytes);
+        allocationTrackerAdapter.remove(bytes);
     }
 
     @Override
     public long trackedBytes() {
-        return tracker.trackedBytes();
+        return allocationTrackerAdapter.trackedBytes();
     }
 
-    public static AllocationTracker create(AllocationTrackerAdapter tracker) {
-        return new KernelAllocationTracker(tracker);
+    public static AllocationTracker create(AllocationTrackerAdapter allocationTrackerAdapter) {
+        return new KernelAllocationTracker(allocationTrackerAdapter);
     }
 }

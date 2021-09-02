@@ -34,16 +34,16 @@ public class ConsecutiveLongNodeProperties implements LongNodeProperties {
     public ConsecutiveLongNodeProperties(
         LongNodeProperties longNodeProperties,
         long nodeCount,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var nextConsecutiveId = -1L;
 
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
             nodeCount,
             MAPPING_SIZE_QUOTIENT
-        ), tracker);
+        ), allocationTracker);
 
-        this.communities = HugeLongArray.newArray(nodeCount, tracker);
+        this.communities = HugeLongArray.newArray(nodeCount, allocationTracker);
 
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
             var setId = longNodeProperties.longValue(nodeId);

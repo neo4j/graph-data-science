@@ -216,9 +216,9 @@ public final class GraphSageHelper {
     public static HugeObjectArray<double[]> initializeSingleLabelFeatures(
         Graph graph,
         GraphSageTrainConfig config,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
-        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
         var extractors = featureExtractors(graph, config);
 
         return FeatureExtraction.extract(graph, extractors, features);
@@ -258,9 +258,9 @@ public final class GraphSageHelper {
     public static HugeObjectArray<double[]> initializeMultiLabelFeatures(
         Graph graph,
         MultiLabelFeatureExtractors multiLabelFeatureExtractors,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
-        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
         var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
         graph.forEachNode(nodeId -> {
             var nodeLabel = labelOf(graph, nodeId);

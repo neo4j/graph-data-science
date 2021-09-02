@@ -46,7 +46,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
 
     @Override
     public K1Coloring build(
-        Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new K1Coloring(
             graph,
@@ -55,7 +55,7 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
             configuration.concurrency(),
             Pools.DEFAULT,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

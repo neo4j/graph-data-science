@@ -47,7 +47,7 @@ public class Node2VecModel {
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
@@ -70,14 +70,14 @@ public class Node2VecModel {
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.config = config;
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
 
         centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
         contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
@@ -133,7 +133,7 @@ public class Node2VecModel {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
             nodeCount,
-            tracker
+            allocationTracker
         );
 
         var random = new Random();

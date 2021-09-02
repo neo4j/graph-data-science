@@ -52,16 +52,16 @@ public final class HugeSparseLongArray {
         this.defaultValue = defaultValue;
     }
 
-    public static Builder builder(long size, AllocationTracker tracker) {
-        return builder(size, NOT_FOUND, tracker);
+    public static Builder builder(long size, AllocationTracker allocationTracker) {
+        return builder(size, NOT_FOUND, allocationTracker);
     }
 
-    public static Builder builder(long size, long defaultValue, AllocationTracker tracker) {
+    public static Builder builder(long size, long defaultValue, AllocationTracker allocationTracker) {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
         long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
         AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(numPages);
-        tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
-        return new Builder(capacity, pages, defaultValue, tracker);
+        allocationTracker.add(MemoryUsage.sizeOfObjectArray(numPages));
+        return new Builder(capacity, pages, defaultValue, allocationTracker);
     }
 
     /**
@@ -126,13 +126,18 @@ public final class HugeSparseLongArray {
         private final long defaultValue;
 
         private final AtomicReferenceArray<long[]> pages;
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
         private final ReentrantLock newPageLock;
 
-        private Builder(long capacity, AtomicReferenceArray<long[]> pages, long defaultValue, AllocationTracker tracker) {
+        private Builder(
+            long capacity,
+            AtomicReferenceArray<long[]> pages,
+            long defaultValue,
+            AllocationTracker allocationTracker
+        ) {
             this.capacity = capacity;
             this.pages = pages;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
             this.defaultValue = defaultValue;
             this.newPageLock = new ReentrantLock(true);
         }
@@ -185,7 +190,7 @@ public final class HugeSparseLongArray {
                 if (page != null) {
                     return page;
                 }
-                tracker.add(PAGE_SIZE_IN_BYTES);
+                allocationTracker.add(PAGE_SIZE_IN_BYTES);
                 page = new long[PAGE_SIZE];
                 if (defaultValue != 0L) {
                     Arrays.fill(page, defaultValue);
@@ -199,7 +204,7 @@ public final class HugeSparseLongArray {
     }
 
     public static final class GrowingBuilder {
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
         private final ReentrantLock newPageLock;
         private final long defaultValue;
 
@@ -207,18 +212,22 @@ public final class HugeSparseLongArray {
 
         private AtomicReferenceArray<long[]> pages;
 
-        public static GrowingBuilder create(AllocationTracker tracker) {
-            return create(NOT_FOUND, tracker);
+        public static GrowingBuilder create(AllocationTracker allocationTracker) {
+            return create(NOT_FOUND, allocationTracker);
         }
 
-        public static GrowingBuilder create(long defaultValue, AllocationTracker tracker) {
+        public static GrowingBuilder create(long defaultValue, AllocationTracker allocationTracker) {
             AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(0);
-            return new GrowingBuilder(pages, defaultValue, tracker);
+            return new GrowingBuilder(pages, defaultValue, allocationTracker);
         }
 
-        private GrowingBuilder(AtomicReferenceArray<long[]> pages, long defaultValue, AllocationTracker tracker) {
+        private GrowingBuilder(
+            AtomicReferenceArray<long[]> pages,
+            long defaultValue,
+            AllocationTracker allocationTracker
+        ) {
             this.pages = pages;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
             this.defaultValue = defaultValue;
             this.newPageLock = new ReentrantLock(true);
         }
@@ -298,7 +307,7 @@ public final class HugeSparseLongArray {
                 if (page != null) {
                     return page;
                 }
-                tracker.add(PAGE_SIZE_IN_BYTES);
+                allocationTracker.add(PAGE_SIZE_IN_BYTES);
                 page = new long[PAGE_SIZE];
                 if (defaultValue != 0L) {
                     Arrays.fill(page, defaultValue);

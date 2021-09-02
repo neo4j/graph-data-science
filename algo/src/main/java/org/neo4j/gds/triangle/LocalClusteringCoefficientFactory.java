@@ -38,12 +38,12 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     protected LocalClusteringCoefficient build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new LocalClusteringCoefficient(
             graph,
             configuration,
-            tracker,
+            allocationTracker,
             progressTracker
         );
     }

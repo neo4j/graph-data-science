@@ -42,8 +42,8 @@ public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicInte
     }
 
 
-    public static PagedAtomicIntegerArray newArray(long size, AllocationTracker tracker) {
-        return new PagedAtomicIntegerArray(size, ALLOCATOR_FACTORY.newAllocator(tracker));
+    public static PagedAtomicIntegerArray newArray(long size, AllocationTracker allocationTracker) {
+        return new PagedAtomicIntegerArray(size, ALLOCATOR_FACTORY.newAllocator(allocationTracker));
     }
 
     private PagedAtomicIntegerArray(

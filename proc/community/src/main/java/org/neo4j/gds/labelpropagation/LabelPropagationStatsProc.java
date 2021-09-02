@@ -108,8 +108,8 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

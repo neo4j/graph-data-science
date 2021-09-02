@@ -85,7 +85,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
             protected MSBFSASPAlgorithm build(
                 Graph graph,
                 AllShortestPathsConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 if (configuration.hasRelationshipWeightProperty()) {
@@ -98,7 +98,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                 } else {
                     return new MSBFSAllShortestPaths(
                         graph,
-                        tracker,
+                        allocationTracker,
                         configuration.concurrency(),
                         Pools.DEFAULT
                     )

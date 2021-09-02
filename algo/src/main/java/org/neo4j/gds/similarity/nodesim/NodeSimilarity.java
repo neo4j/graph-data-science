@@ -49,7 +49,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private final BitSet nodeFilter;
 
@@ -64,14 +64,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         NodeSimilarityBaseConfig config,
         ExecutorService executorService,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.config = config;
         this.executorService = executorService;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
     }
@@ -148,7 +148,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 graph,
                 config.concurrency(),
                 executorService,
-                tracker
+                allocationTracker
             ).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);
@@ -157,9 +157,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     private void prepare() {
         progressTracker.beginSubTask();
 
-        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
+        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), allocationTracker);
         if (weighted) {
-            weights = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+            weights = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
         }
 
         DegreeComputer degreeComputer = new DegreeComputer();
@@ -251,7 +251,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator,
+            allocationTracker
+        );
         loggableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -274,7 +276,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator,
+            allocationTracker
+        );
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableNodeStream(),
             config.concurrency(),

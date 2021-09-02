@@ -46,7 +46,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public MultiLabelGraphSageTrain(
 
@@ -54,13 +54,13 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         GraphSageTrainConfig config,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
         var trainResult = trainer.train(
             graph,
-            initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors, tracker)
+            initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors, allocationTracker)
         );
 
         return Model.of(

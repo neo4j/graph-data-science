@@ -117,11 +117,11 @@ class SystemMonitorProcTest extends BaseProgressTest {
 
                 @Override
                 protected TestAlgorithm build(
-                    Graph graph, TestConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                    Graph graph, TestConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
                 ) {
                     return new TestAlgorithm(
                         graph,
-                        allocationTracker(),
+                        allocationTracker,
                         0L,
                         progressTracker,
                         false

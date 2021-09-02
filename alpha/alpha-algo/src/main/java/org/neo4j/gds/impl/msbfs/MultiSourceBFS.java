@@ -107,18 +107,18 @@ public final class MultiSourceBFS implements Runnable {
      * To finalize initialization, one must call:
      * {@link MultiSourceBFS#initAggregatedNeighborProcessing}.
      */
-    public static MultiSourceBFS aggregatedNeighborProcessing(Graph graph, AllocationTracker tracker) {
-        return new MultiSourceBFS(graph, graph, null, false, false, tracker);
+    public static MultiSourceBFS aggregatedNeighborProcessing(Graph graph, AllocationTracker allocationTracker) {
+        return new MultiSourceBFS(graph, graph, null, false, false, allocationTracker);
     }
 
     public static MultiSourceBFS aggregatedNeighborProcessing(
         IdMapping nodeIds,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         long... startNodes
     ) {
-        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, false, tracker, startNodes);
+        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, false, allocationTracker, startNodes);
     }
 
     /**
@@ -131,15 +131,15 @@ public final class MultiSourceBFS implements Runnable {
      * To finalize initialization, one must call:
      * {@link MultiSourceBFS#initPredecessorProcessing}.
      */
-    public static MultiSourceBFS predecessorProcessing(Graph graph, AllocationTracker tracker) {
-        return new MultiSourceBFS(graph, graph, null, true, false, tracker);
+    public static MultiSourceBFS predecessorProcessing(Graph graph, AllocationTracker allocationTracker) {
+        return new MultiSourceBFS(graph, graph, null, true, false, allocationTracker);
     }
 
     public static MultiSourceBFS predecessorProcessing(
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         long... startNodes
     ) {
         return new MultiSourceBFS(
@@ -148,7 +148,7 @@ public final class MultiSourceBFS implements Runnable {
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             true,
             false,
-            tracker,
+            allocationTracker,
             startNodes
         );
     }
@@ -193,7 +193,7 @@ public final class MultiSourceBFS implements Runnable {
         ExecutionStrategy strategy,
         boolean initSeenNext,
         boolean allowStartNodeTraversal,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         long... startNodes
     ) {
         this.nodeIds = nodeIds;
@@ -205,10 +205,10 @@ public final class MultiSourceBFS implements Runnable {
             Arrays.sort(this.startNodes);
         }
         this.nodeCount = nodeIds.nodeCount();
-        this.visits = new LocalHugeLongArray(nodeCount, tracker);
-        this.visitsNext = new LocalHugeLongArray(nodeCount, tracker);
-        this.seens = new LocalHugeLongArray(nodeCount, tracker);
-        this.seensNext = initSeenNext ? new LocalHugeLongArray(nodeCount, tracker) : null;
+        this.visits = new LocalHugeLongArray(nodeCount, allocationTracker);
+        this.visitsNext = new LocalHugeLongArray(nodeCount, allocationTracker);
+        this.seens = new LocalHugeLongArray(nodeCount, allocationTracker);
+        this.seensNext = initSeenNext ? new LocalHugeLongArray(nodeCount, allocationTracker) : null;
     }
 
     private MultiSourceBFS(
@@ -525,16 +525,16 @@ public final class MultiSourceBFS implements Runnable {
 
     private static final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
         private final long size;
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
 
-        private LocalHugeLongArray(final long size, final AllocationTracker tracker) {
+        private LocalHugeLongArray(final long size, final AllocationTracker allocationTracker) {
             this.size = size;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
         }
 
         @Override
         protected HugeLongArray initialValue() {
-            return HugeLongArray.newArray(size, tracker);
+            return HugeLongArray.newArray(size, allocationTracker);
         }
 
         @Override

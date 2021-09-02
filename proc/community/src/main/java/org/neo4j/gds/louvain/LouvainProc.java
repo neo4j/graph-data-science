@@ -38,7 +38,7 @@ final class LouvainProc {
     static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
@@ -47,7 +47,7 @@ final class LouvainProc {
                 computationResult,
                 resultProperty,
                 computationResult.result().finalDendrogram().asNodeProperties(),
-                tracker
+                allocationTracker
             );
         } else {
             var size = computationResult.graph().nodeCount();
@@ -90,9 +90,9 @@ final class LouvainProc {
         LouvainResultBuilder(
             ProcedureCallContext context,
             int concurrency,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
-            super(context, concurrency, tracker);
+            super(context, concurrency, allocationTracker);
         }
 
         LouvainResultBuilder<PROC_RESULT> withLevels(long levels) {

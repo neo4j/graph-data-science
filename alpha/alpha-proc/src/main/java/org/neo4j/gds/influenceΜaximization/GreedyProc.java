@@ -108,7 +108,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
             protected Greedy build(
                 Graph graph,
                 InfluenceMaximizationConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return new Greedy(
@@ -118,7 +118,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
                     configuration.monteCarloSimulations(),
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    tracker
+                    allocationTracker
                 );
             }
         };

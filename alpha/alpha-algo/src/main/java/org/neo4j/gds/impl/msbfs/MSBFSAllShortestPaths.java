@@ -40,17 +40,17 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
     private Graph graph;
     private BlockingQueue<AllShortestPathsStream.Result> resultQueue;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public MSBFSAllShortestPaths(
             Graph graph,
-            AllocationTracker tracker,
+            AllocationTracker allocationTracker,
             int concurrency,
             ExecutorService executorService) {
         this.graph = graph;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.resultQueue = new LinkedBlockingQueue<>(); // TODO limit size?
@@ -120,7 +120,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                         }
                         progressTracker.logProgress();
                     },
-                    tracker
+                allocationTracker
             ).run(concurrency, executorService);
 
             resultQueue.add(AllShortestPathsStream.DONE);

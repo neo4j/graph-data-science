@@ -36,20 +36,20 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public SingleLabelGraphSageTrain(
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeSingleLabelFeatures(graph, config, tracker)
+            initializeSingleLabelFeatures(graph, config, allocationTracker)
         );
 
         return Model.of(

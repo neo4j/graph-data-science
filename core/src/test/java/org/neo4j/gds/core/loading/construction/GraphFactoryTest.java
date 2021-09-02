@@ -87,7 +87,7 @@ class GraphFactoryTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .hasLabelInformation(true)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(0, NodeLabel.of("A"));
@@ -100,7 +100,7 @@ class GraphFactoryTest {
                 .nodes(idMap)
                 .orientation(orientation)
                 .aggregation(Aggregation.SUM)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             for (int i = 0; i < nodeCount; i++) {
@@ -128,7 +128,7 @@ class GraphFactoryTest {
             var nodesBuilder = GraphFactory.initNodesBuilder(expectedGraph.schema().nodeSchema())
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(0, Map.of("p", Values.longValue(42)), NodeLabel.of("A"));
@@ -169,7 +169,7 @@ class GraphFactoryTest {
             var nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(0, Map.of("p", Values.longValue(42)), NodeLabel.of("A"));
@@ -196,7 +196,7 @@ class GraphFactoryTest {
             .nodes(idMap)
             .orientation(orientation)
             .aggregation(Aggregation.SUM)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (int i = 0; i < nodeCount; i++) {
@@ -254,7 +254,7 @@ class GraphFactoryTest {
         long nodeCount = 4;
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (int i = 0; i < nodeCount; i++) {
@@ -266,7 +266,7 @@ class GraphFactoryTest {
             .nodes(idMap)
             .orientation(orientation)
             .addPropertyConfig(aggregation, DefaultValue.forDouble())
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         for (int i = 0; i < nodeCount; i++) {

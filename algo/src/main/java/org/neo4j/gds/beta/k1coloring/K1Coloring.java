@@ -66,7 +66,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     private final Graph graph;
     private final long nodeCount;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final int minBatchSize;
     private final int concurrency;
 
@@ -86,14 +86,14 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         int concurrency,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.minBatchSize = minBatchSize;
         this.concurrency = concurrency;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
 
         this.nodeCount = graph.nodeCount();
         this.maxIterations = maxIterations;
@@ -144,7 +144,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
 
-        colors = HugeLongArray.newArray(nodeCount, tracker);
+        colors = HugeLongArray.newArray(nodeCount, allocationTracker);
         colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
         ranIterations = 0L;

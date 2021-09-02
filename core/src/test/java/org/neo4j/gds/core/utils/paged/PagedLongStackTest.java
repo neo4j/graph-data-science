@@ -143,9 +143,9 @@ final class PagedLongStackTest {
     @Test
     void shouldReleaseMemory() {
         int valuesToAdd = between(10_000, 20_000).integer();
-        AllocationTracker tracker = AllocationTracker.create();
-        PagedLongStack stack = new PagedLongStack(valuesToAdd, tracker);
-        long tracked = tracker.trackedBytes();
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        PagedLongStack stack = new PagedLongStack(valuesToAdd, allocationTracker);
+        long tracked = allocationTracker.trackedBytes();
         List<Executable> assertions = new ArrayList<>();
         assertions.add(() -> assertEquals(stack.release(), tracked));
         assertions.add(() -> assertTrue(stack.isEmpty(), "released stack is empty"));

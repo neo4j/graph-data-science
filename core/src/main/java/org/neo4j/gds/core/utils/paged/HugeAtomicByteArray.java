@@ -50,9 +50,9 @@ import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
  * <p><em>Basic Usage</em></p>
  * <pre>
  * {@code}
- * AllocationTracker tracker = ...;
+ * AllocationTracker allocationTracker = ...;
  * long arraySize = 42L;
- * HugeAtomicByteArray array = HugeAtomicByteArray.newArray(arraySize, tracker);
+ * HugeAtomicByteArray array = HugeAtomicByteArray.newArray(arraySize, allocationTracker);
  * array.set(13L, (byte)37);
  * byte value = array.get(13L);
  * // value = (byte)37;
@@ -189,11 +189,11 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
      * Creates a new array of the given size, tracking the memory requirements into the given {@link org.neo4j.gds.core.utils.mem.AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeAtomicByteArray newArray(long size, AllocationTracker tracker) {
+    public static HugeAtomicByteArray newArray(long size, AllocationTracker allocationTracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeAtomicByteArray.of(size, tracker);
+            return SingleHugeAtomicByteArray.of(size, allocationTracker);
         }
-        return PagedHugeAtomicByteArray.of(size, BytePageCreator.of(1), tracker);
+        return PagedHugeAtomicByteArray.of(size, BytePageCreator.of(1), allocationTracker);
     }
 
     public static long memoryEstimation(long size) {
@@ -211,23 +211,27 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
     }
 
     @TestOnly
-    static HugeAtomicByteArray newPagedArray(long size, final BytePageCreator pageFiller, AllocationTracker tracker) {
-        return HugeAtomicByteArray.PagedHugeAtomicByteArray.of(size, pageFiller, tracker);
+    static HugeAtomicByteArray newPagedArray(
+        long size,
+        final BytePageCreator pageFiller,
+        AllocationTracker allocationTracker
+    ) {
+        return HugeAtomicByteArray.PagedHugeAtomicByteArray.of(size, pageFiller, allocationTracker);
     }
 
     @TestOnly
-    static HugeAtomicByteArray newSingleArray(int size, AllocationTracker tracker) {
-        return HugeAtomicByteArray.SingleHugeAtomicByteArray.of(size, tracker);
+    static HugeAtomicByteArray newSingleArray(int size, AllocationTracker allocationTracker) {
+        return HugeAtomicByteArray.SingleHugeAtomicByteArray.of(size, allocationTracker);
     }
 
     static final class SingleHugeAtomicByteArray extends HugeAtomicByteArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(byte[].class);
 
-        private static HugeAtomicByteArray of(long size, AllocationTracker tracker) {
+        private static HugeAtomicByteArray of(long size, AllocationTracker allocationTracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
-            tracker.add(MemoryUsage.sizeOfByteArray(intSize));
+            allocationTracker.add(MemoryUsage.sizeOfByteArray(intSize));
             byte[] page = new byte[intSize];
 
             return new SingleHugeAtomicByteArray(intSize, page);
@@ -313,7 +317,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(byte[].class);
 
-        private static HugeAtomicByteArray of(long size, BytePageCreator pageCreator, AllocationTracker tracker) {
+        private static HugeAtomicByteArray of(long size, BytePageCreator pageCreator, AllocationTracker allocationTracker) {
             int numPages = numberOfPages(size);
             final int lastPageSize = exclusiveIndexOfPage(size);
 
@@ -321,7 +325,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
             pageCreator.fill(pages, lastPageSize);
 
             long memoryUsed = memoryUsageOfData(size);
-            tracker.add(memoryUsed);
+            allocationTracker.add(memoryUsed);
 
             return new PagedHugeAtomicByteArray(size, pages, memoryUsed);
         }

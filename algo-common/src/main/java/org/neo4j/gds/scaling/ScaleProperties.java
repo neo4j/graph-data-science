@@ -48,24 +48,24 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
 
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final ExecutorService executor;
 
     public ScaleProperties(
         Graph graph,
         ScalePropertiesBaseConfig config,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ExecutorService executor
     ) {
         this.graph = graph;
         this.config = config;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.executor = executor;
     }
 
     @Override
     public Result compute() {
-        var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), allocationTracker);
 
         // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers

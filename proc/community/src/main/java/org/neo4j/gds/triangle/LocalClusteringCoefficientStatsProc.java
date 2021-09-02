@@ -118,8 +118,8 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
 
     static class LocalClusteringCoefficientStatsBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<StatsResult> {
 
-        LocalClusteringCoefficientStatsBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
-            super(callContext, concurrency, tracker);
+        LocalClusteringCoefficientStatsBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
+            super(callContext, concurrency, allocationTracker);
         }
 
         @Override

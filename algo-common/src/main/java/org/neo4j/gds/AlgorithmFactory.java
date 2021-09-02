@@ -50,7 +50,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
     public final ALGO build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         Log log,
         TaskRegistry taskRegistry
     ) {
@@ -65,7 +65,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
             progressLogger,
             taskRegistry
         );
-        return build(graph, configuration, tracker, progressTracker);
+        return build(graph, configuration, allocationTracker, progressTracker);
     }
 
     /**
@@ -98,7 +98,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
     protected abstract ALGO build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     );
 }

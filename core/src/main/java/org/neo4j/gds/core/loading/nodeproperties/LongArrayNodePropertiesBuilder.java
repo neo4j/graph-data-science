@@ -31,12 +31,12 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     private final HugeObjectArray<long[]> objectArray;
     private final DefaultValue defaultValue;
 
-    public LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+    public LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
         // validate defaultValue is a long array
         defaultValue.longArrayValue();
 
         this.defaultValue = defaultValue;
-        this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, tracker);
+        this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker);
     }
 
     public void set(long nodeId, long[] value) {

@@ -64,7 +64,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final Random random;
     private final ExecutorService executor;
     private final ApproxMaxKCutConfig config;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final WeightTransformer weightTransformer;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDoubleArray[] costs;
@@ -78,20 +78,20 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         ExecutorService executor,
         ApproxMaxKCutConfig config,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.random = new Random(config.randomSeed().orElseGet(() -> new Random().nextLong()));
         this.executor = executor;
         this.config = config;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
 
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
         this.candidateSolutions = new HugeByteArray[]{
-            HugeByteArray.newArray(graph.nodeCount(), tracker),
-            HugeByteArray.newArray(graph.nodeCount(), tracker)
+            HugeByteArray.newArray(graph.nodeCount(), allocationTracker),
+            HugeByteArray.newArray(graph.nodeCount(), allocationTracker)
         };
 
         // TODO: Should we create a dedicated AtomicDouble class using `AtomicReference` or `VarHandle` to avoid the
@@ -104,10 +104,10 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         // Used by `localSearch()` to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
-        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
+        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), allocationTracker);
 
         // Used by `localSearch()` to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), tracker);
+        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), allocationTracker);
 
         this.degreePartition = PartitionUtils.degreePartition(
             graph,
@@ -167,7 +167,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         progressTracker.beginSubTask();
 
         if (config.vnsMaxNeighborhoodOrder() > 0) {
-            neighboringSolution = HugeByteArray.newArray(graph.nodeCount(), tracker);
+            neighboringSolution = HugeByteArray.newArray(graph.nodeCount(), allocationTracker);
         }
 
         for (int i = 1; (i <= config.iterations()) && running(); i++) {

@@ -64,14 +64,14 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return new DijkstraFactory<>() {
             @Override
             protected Dijkstra build(
-                Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
                 return Dijkstra.sourceTarget(
                     graph,
                     configuration,
                     Optional.empty(),
                     progressTracker,
-                    tracker
+                    allocationTracker
                 );
             }
         };
@@ -81,14 +81,14 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return new DijkstraFactory<>() {
             @Override
             protected Dijkstra build(
-                Graph graph, T configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
                 return Dijkstra.singleSource(
                     graph,
                     configuration,
                     Optional.empty(),
                     progressTracker,
-                    tracker
+                    allocationTracker
                 );
             }
         };

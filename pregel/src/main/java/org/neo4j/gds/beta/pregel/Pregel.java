@@ -58,7 +58,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         CONFIG config,
         PregelComputation<CONFIG> computation,
         ExecutorService executor,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         // This prevents users from disabling concurrency
@@ -71,9 +71,9 @@ public final class Pregel<CONFIG extends PregelConfig> {
             graph,
             config,
             computation,
-            NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), tracker),
+            NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), allocationTracker),
             executor,
-            tracker,
+            allocationTracker,
             progressTracker
         );
     }
@@ -123,7 +123,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final PregelComputation<CONFIG> computation,
         final NodeValue initialNodeValue,
         final ExecutorService executor,
-        final AllocationTracker tracker,
+        final AllocationTracker allocationTracker,
         final ProgressTracker progressTracker
     ) {
         this.graph = graph;
@@ -136,10 +136,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
         var reducer = computation.reducer();
 
         this.messenger = reducer.isPresent()
-            ? new ReducingMessenger(graph, config, reducer.get(), tracker)
+            ? new ReducingMessenger(graph, config, reducer.get(), allocationTracker)
             : config.isAsynchronous()
-                ? new AsyncQueueMessenger(graph.nodeCount(), tracker)
-                : new SyncQueueMessenger(graph.nodeCount(), tracker);
+                ? new AsyncQueueMessenger(graph.nodeCount(), allocationTracker)
+                : new SyncQueueMessenger(graph.nodeCount(), allocationTracker);
 
         this.computer = PregelComputer.<CONFIG>builder()
             .graph(graph)
@@ -147,7 +147,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .config(config)
             .nodeValues(nodeValues)
             .messenger(messenger)
-            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), tracker))
+            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), allocationTracker))
             .executorService(config.useForkJoin()
                 ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
                 : executor)

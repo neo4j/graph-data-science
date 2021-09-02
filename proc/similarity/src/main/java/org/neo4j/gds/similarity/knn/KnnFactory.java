@@ -48,7 +48,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
 
     @Override
     protected Knn build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new Knn(
             graph,
@@ -57,7 +57,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(Pools.DEFAULT)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build()
         );
     }

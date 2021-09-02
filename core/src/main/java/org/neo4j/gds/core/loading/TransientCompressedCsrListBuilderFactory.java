@@ -25,23 +25,23 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 public final class TransientCompressedCsrListBuilderFactory implements CsrListBuilderFactory<byte[], TransientCompressedList, long[], TransientUncompressedList> {
 
-    public static TransientCompressedCsrListBuilderFactory of(AllocationTracker tracker) {
-        return new TransientCompressedCsrListBuilderFactory(tracker);
+    public static TransientCompressedCsrListBuilderFactory of(AllocationTracker allocationTracker) {
+        return new TransientCompressedCsrListBuilderFactory(allocationTracker);
     }
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
-    private TransientCompressedCsrListBuilderFactory(AllocationTracker tracker) {
-        this.tracker = tracker;
+    private TransientCompressedCsrListBuilderFactory(AllocationTracker allocationTracker) {
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
     public TransientCompressedListBuilder newAdjacencyListBuilder() {
-        return new TransientCompressedListBuilder(tracker);
+        return new TransientCompressedListBuilder(allocationTracker);
     }
 
     @Override
     public TransientUncompressedListBuilder newAdjacencyPropertiesBuilder() {
-        return new TransientUncompressedListBuilder(tracker);
+        return new TransientUncompressedListBuilder(allocationTracker);
     }
 }

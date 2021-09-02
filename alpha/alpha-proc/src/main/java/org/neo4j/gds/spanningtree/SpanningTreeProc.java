@@ -159,7 +159,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
             protected Prim build(
                 Graph graph,
                 SpanningTreeConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);

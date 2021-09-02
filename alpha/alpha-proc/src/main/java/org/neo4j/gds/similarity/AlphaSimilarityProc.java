@@ -134,7 +134,7 @@ abstract class AlphaSimilarityProc
             histogram
         ));
     }
-    abstract ALGO newAlgo(CONFIG config, AllocationTracker tracker);
+    abstract ALGO newAlgo(CONFIG config, AllocationTracker allocationTracker);
 
     abstract String taskName();
 
@@ -148,10 +148,10 @@ abstract class AlphaSimilarityProc
 
             @Override
             protected ALGO build(
-                Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
                 removeGraph();
-                return newAlgo(configuration, tracker);
+                return newAlgo(configuration, allocationTracker);
             }
         };
     }

@@ -88,7 +88,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final Set<Graph> createdGraphs;
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private ZonedDateTime modificationTime;
 
@@ -99,11 +99,11 @@ public class CSRGraphStore implements GraphStore {
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         // A graph store must contain at least one topology, even if it is empty.
         var topologies = relationships.isEmpty()
-            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes, tracker).topology())
+            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes, allocationTracker).topology())
             : relationships;
 
         return new CSRGraphStore(
@@ -113,7 +113,7 @@ public class CSRGraphStore implements GraphStore {
             topologies,
             relationshipPropertyStores,
             concurrency,
-            tracker
+            allocationTracker
         );
     }
 
@@ -124,7 +124,7 @@ public class CSRGraphStore implements GraphStore {
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.databaseId = databaseId;
         this.nodes = nodes;
@@ -137,7 +137,7 @@ public class CSRGraphStore implements GraphStore {
         this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -609,7 +609,7 @@ public class CSRGraphStore implements GraphStore {
             filteredNodeProperties,
             topology,
             properties,
-            tracker
+            allocationTracker
         );
 
         return filteredNodes.isPresent()
@@ -719,6 +719,3 @@ public class CSRGraphStore implements GraphStore {
     }
 
 }
-
-
-

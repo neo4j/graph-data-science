@@ -40,9 +40,9 @@ public class CompressedRandomWalks {
     private int maxWalkLength;
     private long size = 0L;
 
-    public CompressedRandomWalks(long maxWalkCount, AllocationTracker tracker) {
-        this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount, tracker);
-        this.walkLengths = HugeIntArray.newArray(maxWalkCount, tracker);
+    public CompressedRandomWalks(long maxWalkCount, AllocationTracker allocationTracker) {
+        this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount, allocationTracker);
+        this.walkLengths = HugeIntArray.newArray(maxWalkCount, allocationTracker);
     }
 
     public void add(long... walk) {

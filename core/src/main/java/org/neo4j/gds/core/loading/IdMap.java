@@ -62,7 +62,7 @@ public class IdMap implements NodeMapping {
 
     private final long nodeCount;
     private final long highestNeoId;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private final LabelInformation labelInformation;
 
@@ -82,14 +82,14 @@ public class IdMap implements NodeMapping {
         LabelInformation labelInformation,
         long nodeCount,
         long highestNeoId,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -184,7 +184,7 @@ public class IdMap implements NodeMapping {
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
+        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, allocationTracker);
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             newGraphIds.set(cursor, nodeId);
@@ -196,7 +196,7 @@ public class IdMap implements NodeMapping {
             nodeToGraphIds.getCapacity(),
             concurrency,
             IdMapBuilder.add(newGraphIds),
-            tracker
+            allocationTracker
         );
 
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
@@ -208,7 +208,7 @@ public class IdMap implements NodeMapping {
             newLabelInformation,
             newNodeCount,
             highestNeoId,
-            tracker
+            allocationTracker
         );
     }
 
@@ -223,9 +223,9 @@ public class IdMap implements NodeMapping {
             LabelInformation filteredLabelInformation,
             long nodeCount,
             long highestNeoId,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, tracker);
+            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
             this.rootNodeCount = rootNodeCount;
         }
 

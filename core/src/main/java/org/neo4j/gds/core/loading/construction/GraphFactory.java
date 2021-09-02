@@ -99,7 +99,7 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         boolean useBitIdMap = IdMapImplementations.useBitIdMap();
         boolean disjointPartitions = hasDisjointPartitions.orElse(false);
@@ -113,18 +113,18 @@ public final class GraphFactory {
 
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
         if (useBitIdMap && disjointPartitions && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
             nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else if (useBitIdMap && !labelInformation && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
             long capacity = maxOriginalIdKnown
                 ? maxOriginalId + 1
                 : nodeCount.orElseThrow(() -> new IllegalArgumentException("Either `maxOriginalId` or `nodeCount` must be set"));
-            var idMappingBuilder = InternalHugeIdMappingBuilder.of(capacity, tracker);
+            var idMappingBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
             nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         }
@@ -137,7 +137,7 @@ public final class GraphFactory {
             threadCount,
             schema,
             labelInformation,
-            tracker
+            allocationTracker
         )).orElseGet(() -> {
             boolean nodeProperties = hasProperties.orElse(false);
             long nodes = nodeCount.orElse(-1L);
@@ -157,7 +157,7 @@ public final class GraphFactory {
                 internalIdMappingBuilder,
                 labelInformation,
                 nodeProperties,
-                tracker
+                allocationTracker
             );
         });
     }
@@ -170,7 +170,7 @@ public final class GraphFactory {
         int concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var nodeLabels = nodeSchema.availableLabels();
 
@@ -191,7 +191,7 @@ public final class GraphFactory {
             nodeSchema.properties().get(nodeLabel).forEach((propertyKey, propertySchema) ->
                 builderByLabelTokenAndPropertyToken.get(labelToken).put(
                     propertyKey,
-                    NodePropertiesFromStoreBuilder.of(nodeCount, tracker, propertySchema.defaultValue())
+                    NodePropertiesFromStoreBuilder.of(nodeCount, allocationTracker, propertySchema.defaultValue())
                 ));
         });
 
@@ -206,7 +206,7 @@ public final class GraphFactory {
             internalIdMappingBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
-            tracker
+            allocationTracker
         );
     }
 
@@ -249,7 +249,7 @@ public final class GraphFactory {
         Optional<Boolean> preAggregate,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -294,19 +294,19 @@ public final class GraphFactory {
             aggregations,
             propertyKeyIds,
             defaultValues,
-            tracker
+            allocationTracker
         );
 
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
             adjacencyListWithPropertiesBuilder,
             numberOfPages,
             pageSize,
-            tracker,
+            allocationTracker,
             relationshipCounter,
             preAggregate.orElse(false)
         );
 
-        var relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
+        var relationshipImporter = new RelationshipImporter(allocationTracker, adjacencyBuilder);
 
         var importerBuilder = new SingleTypeRelationshipImporter.Builder(
             relationshipType,
@@ -333,11 +333,11 @@ public final class GraphFactory {
         );
     }
 
-    public static Relationships emptyRelationships(IdMapping nodeMapping, AllocationTracker tracker) {
-        return initRelationshipsBuilder().nodes(nodeMapping).tracker(tracker).build().build();
+    public static Relationships emptyRelationships(IdMapping nodeMapping, AllocationTracker allocationTracker) {
+        return initRelationshipsBuilder().nodes(nodeMapping).allocationTracker(allocationTracker).build().build();
     }
 
-    public static HugeGraph create(NodeMapping idMap, Relationships relationships, AllocationTracker tracker) {
+    public static HugeGraph create(NodeMapping idMap, Relationships relationships, AllocationTracker allocationTracker) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         return create(
@@ -346,7 +346,7 @@ public final class GraphFactory {
             Collections.emptyMap(),
             RelationshipType.of("REL"),
             relationships,
-            tracker
+            allocationTracker
         );
     }
 
@@ -356,7 +356,7 @@ public final class GraphFactory {
         Map<String, NodeProperties> nodeProperties,
         RelationshipType relationshipType,
         Relationships relationships,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
@@ -374,7 +374,7 @@ public final class GraphFactory {
             nodeProperties,
             relationships.topology(),
             relationships.properties(),
-            tracker
+            allocationTracker
         );
     }
 }

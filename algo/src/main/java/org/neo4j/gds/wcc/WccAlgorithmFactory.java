@@ -44,7 +44,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Alg
 
     @Override
     protected Wcc build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             progressTracker.progressLogger()
@@ -57,7 +57,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Alg
             ParallelUtil.DEFAULT_BATCH_SIZE,
             configuration,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

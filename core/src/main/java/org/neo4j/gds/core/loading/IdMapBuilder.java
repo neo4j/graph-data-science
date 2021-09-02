@@ -35,24 +35,24 @@ public final class IdMapBuilder {
     public static BitIdMap build(
         InternalBitIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return new BitIdMap(
             idMapBuilder.build(),
             labelInformationBuilder.build(),
-            tracker
+            allocationTracker
         );
     }
 
     public static BitIdMap build(
         InternalSequentialBitIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return new BitIdMap(
             idMapBuilder.build(),
             labelInformationBuilder.build(),
-            tracker
+            allocationTracker
         );
     }
 
@@ -61,7 +61,7 @@ public final class IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         HugeLongArray graphIds = idMapBuilder.build();
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
@@ -69,7 +69,7 @@ public final class IdMapBuilder {
             highestNodeId,
             concurrency,
             add(graphIds),
-            tracker
+            allocationTracker
         );
 
         return new IdMap(
@@ -78,7 +78,7 @@ public final class IdMapBuilder {
             labelInformationBuilder.build(),
             idMapBuilder.size(),
             highestNodeId,
-            tracker
+            allocationTracker
         );
     }
 
@@ -87,7 +87,7 @@ public final class IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) throws DuplicateNodeIdException {
         HugeLongArray graphIds = idMapBuilder.build();
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
@@ -95,10 +95,17 @@ public final class IdMapBuilder {
             highestNodeId,
             concurrency,
             addChecked(graphIds),
-            tracker
+            allocationTracker
         );
 
-        return new IdMap(graphIds, nodeToGraphIds, labelInformationBuilder.build(), idMapBuilder.size(), idMapBuilder.capacity(), tracker);
+        return new IdMap(
+            graphIds,
+            nodeToGraphIds,
+            labelInformationBuilder.build(),
+            idMapBuilder.size(),
+            idMapBuilder.capacity(),
+            allocationTracker
+        );
     }
 
     @NotNull
@@ -107,13 +114,13 @@ public final class IdMapBuilder {
         long highestNodeId,
         int concurrency,
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.builder(
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
             highestNodeId + 1,
-            tracker
+            allocationTracker
         );
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();

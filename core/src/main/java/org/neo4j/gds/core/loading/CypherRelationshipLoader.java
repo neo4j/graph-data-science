@@ -274,7 +274,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 aggregationsWithDefault,
                 propertyKeyIds,
                 propertyDefaultValues,
-                loadingContext.tracker()
+                loadingContext.allocationTracker()
             );
 
             allBuilders.put(relationshipType, builder);
@@ -285,7 +285,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 relationshipType,
                 projection,
                 builder,
-                loadingContext.tracker()
+                loadingContext.allocationTracker()
             );
 
             relationshipCounters.put(projection, importerBuilder.relationshipCounter());
@@ -299,19 +299,19 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             RelationshipType relationshipType,
             RelationshipProjection relationshipProjection,
             AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             LongAdder relationshipCounter = new LongAdder();
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
                 adjacencyListWithPropertiesBuilder,
                 numberOfPages,
                 pageSize,
-                tracker,
+                allocationTracker,
                 relationshipCounter,
                 GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()
             );
 
-            RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);
+            RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.allocationTracker(), adjacencyBuilder);
             return new SingleTypeRelationshipImporter.Builder(
                 relationshipType,
                 relationshipProjection,

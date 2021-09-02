@@ -48,7 +48,7 @@ public final class RawCompressor implements AdjacencyCompressor {
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             @SuppressWarnings("unchecked")
             CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new CsrListBuilder[propertyMappings.numberOfMappings()];
@@ -57,10 +57,10 @@ public final class RawCompressor implements AdjacencyCompressor {
             return new Blueprint(
                 csrListBuilderFactory.newAdjacencyListBuilder(),
                 propertyBuilders,
-                HugeIntArray.newArray(nodeCount, tracker),
-                HugeLongArray.newArray(nodeCount, tracker),
+                HugeIntArray.newArray(nodeCount, allocationTracker),
+                HugeLongArray.newArray(nodeCount, allocationTracker),
                 Stream
-                    .generate(() -> HugeLongArray.newArray(nodeCount, tracker))
+                    .generate(() -> HugeLongArray.newArray(nodeCount, allocationTracker))
                     .limit(propertyBuilders.length)
                     .toArray(HugeLongArray[]::new),
                 noAggregation,

@@ -91,7 +91,7 @@ public class HugeGraph implements CSRGraph {
     public static final double NO_PROPERTY_VALUE = Double.NaN;
 
     protected final NodeMapping idMapping;
-    protected final AllocationTracker tracker;
+    protected final AllocationTracker allocationTracker;
     protected final GraphSchema schema;
 
     protected final Map<String, NodeProperties> nodeProperties;
@@ -120,7 +120,7 @@ public class HugeGraph implements CSRGraph {
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
         Optional<Relationships.Properties> maybeProperties,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return new HugeGraph(
             nodes,
@@ -133,7 +133,7 @@ public class HugeGraph implements CSRGraph {
             maybeProperties.map(Relationships.Properties::propertiesList).orElse(null),
             topology.orientation(),
             topology.isMultiGraph(),
-            tracker
+            allocationTracker
         );
     }
 
@@ -148,12 +148,12 @@ public class HugeGraph implements CSRGraph {
         @Nullable AdjacencyProperties properties,
         Orientation orientation,
         boolean isMultiGraph,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.idMapping = idMapping;
         this.schema = schema;
         this.isMultiGraph = isMultiGraph;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
         this.adjacency = adjacency;
@@ -363,7 +363,7 @@ public class HugeGraph implements CSRGraph {
             properties,
             orientation,
             isMultiGraph,
-            tracker
+            allocationTracker
         );
     }
 
@@ -445,7 +445,7 @@ public class HugeGraph implements CSRGraph {
     public void releaseProperties() {
         if (canRelease) {
             for (NodeProperties nodeMapping : nodeProperties.values()) {
-                tracker.remove(nodeMapping.release());
+                allocationTracker.remove(nodeMapping.release());
             }
         }
     }

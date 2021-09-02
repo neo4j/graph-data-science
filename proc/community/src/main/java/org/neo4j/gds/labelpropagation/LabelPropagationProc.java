@@ -37,13 +37,13 @@ final class LabelPropagationProc {
     static <CONFIG extends LabelPropagationBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return CommunityProcCompanion.nodeProperties(
             computationResult,
             resultProperty,
             computationResult.result().labels().asNodeProperties(),
-            tracker
+            allocationTracker
         );
     }
 
@@ -65,8 +65,8 @@ final class LabelPropagationProc {
 
         boolean didConverge;
 
-        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
-            super(callContext, concurrency, tracker);
+        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker allocationTracker) {
+            super(callContext, concurrency, allocationTracker);
         }
 
         LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {

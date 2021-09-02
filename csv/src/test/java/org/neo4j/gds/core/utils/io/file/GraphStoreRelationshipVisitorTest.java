@@ -75,7 +75,7 @@ class GraphStoreRelationshipVisitorTest {
             .initRelationshipsBuilder()
             .concurrency(1)
             .nodes(graph)
-            .tracker(AllocationTracker.empty());
+            .allocationTracker(AllocationTracker.empty());
         var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType);
 
         var relationshipTypeR = RelationshipType.of("R");
@@ -133,7 +133,7 @@ class GraphStoreRelationshipVisitorTest {
             .nodes(expectedGraph)
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .useBitIdMap(false)
             .log(NullLog.getInstance())
             .build()

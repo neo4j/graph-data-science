@@ -41,7 +41,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final ArrayList<IndependentCascadeRunner> tasks;
 
     private final LongDoubleScatterMap seedSetNodes;
@@ -60,7 +60,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
         int monteCarloSimulations,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
@@ -71,7 +71,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
 
         this.seedSetNodes = new LongDoubleScatterMap(this.seedSetCount);
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
@@ -133,7 +133,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
                 globalNodeProgress,
                 propagationProbability,
                 monteCarloSimulations,
-                tracker
+                allocationTracker
             ));
         }
         return tasks;

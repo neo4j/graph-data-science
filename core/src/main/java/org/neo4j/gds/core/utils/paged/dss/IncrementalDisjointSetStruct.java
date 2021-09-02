@@ -62,12 +62,12 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
     public IncrementalDisjointSetStruct(
             long size,
             NodeProperties communityMapping,
-            AllocationTracker tracker) {
-        this.parent = HugeLongArray.newArray(size, tracker);
-        this.internalToProvidedIds = new HugeLongLongMap(size, tracker);
+            AllocationTracker allocationTracker) {
+        this.parent = HugeLongArray.newArray(size, allocationTracker);
+        this.internalToProvidedIds = new HugeLongLongMap(size, allocationTracker);
         this.communityMapping = communityMapping;
         this.size = size;
-        init(tracker);
+        init(allocationTracker);
     }
 
     @Override
@@ -78,10 +78,10 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
     /**
      * reset the container
      */
-    private void init(AllocationTracker tracker) {
+    private void init(AllocationTracker allocationTracker) {
         this.maxCommunity = communityMapping.getMaxLongPropertyValue().orElse(NO_SUCH_SEED_PROPERTY);
 
-        final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
+        final HugeLongLongMap internalMapping = new HugeLongLongMap(size, allocationTracker);
 
         this.parent.setAll(nodeId -> {
             long parentValue = -1;

@@ -92,9 +92,9 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
-        this(graph, config, featureExtractors, progressTracker, tracker, config.randomSeed());
+        this(graph, config, featureExtractors, progressTracker, allocationTracker, config.randomSeed());
     }
 
     public FastRP(
@@ -102,7 +102,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         Optional<Long> randomSeed
     ) {
         this.graph = graph;
@@ -114,11 +114,11 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.progressTracker = progressTracker;
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
-        this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
-        this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
-        this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
+        this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
+        this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
+        this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
         // Each of the above arrays will contain a float array of size `embeddingDimension` for each node.
-        tracker.add(3 * graph.nodeCount() * MemoryUsage.sizeOfFloatArray(config.embeddingDimension()));
+        allocationTracker.add(3 * graph.nodeCount() * MemoryUsage.sizeOfFloatArray(config.embeddingDimension()));
 
         this.embeddingDimension = config.embeddingDimension();
         this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();

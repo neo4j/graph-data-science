@@ -45,11 +45,11 @@ public final class AdjacencyBuilder {
         @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
         int numPages,
         int pageSize,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         LongAdder relationshipCounter,
         boolean preAggregate
     ) {
-        tracker.add(sizeOfObjectArray(numPages) << 2);
+        allocationTracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
         final CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
         LongArrayBuffer[] buffers = new LongArrayBuffer[numPages];
@@ -69,7 +69,7 @@ public final class AdjacencyBuilder {
             preAggregate
         );
         for (int idx = 0; idx < numPages; idx++) {
-            compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
+            compressingPagedAdjacency.addAdjacencyImporter(allocationTracker, idx);
         }
         return compressingPagedAdjacency;
     }
@@ -123,7 +123,7 @@ public final class AdjacencyBuilder {
      * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
      * @param offsets        offsets into targets; every offset position indicates a source node group
      * @param length         length of offsets array (how many source tuples to import)
-     * @param tracker
+     * @param allocationTracker
      */
     void addAll(
         long[] batch,
@@ -131,7 +131,7 @@ public final class AdjacencyBuilder {
         @Nullable long[][] propertyValues,
         int[] offsets,
         int length,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         int pageShift = this.pageShift;
         long pageMask = this.pageMask;
@@ -166,7 +166,7 @@ public final class AdjacencyBuilder {
                 CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
                 if (compressedTargets == null) {
                     compressedTargets = new CompressedLongArray(
-                        tracker,
+                        allocationTracker,
                         propertyValues == null ? 0 : propertyValues.length
                     );
                     this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
@@ -241,10 +241,10 @@ public final class AdjacencyBuilder {
         return this.globalBuilder.supportsProperties();
     }
 
-    private void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
-        tracker.add(sizeOfObjectPage);
-        tracker.add(sizeOfObjectPage);
-        tracker.add(sizeOfLongPage);
+    private void addAdjacencyImporter(AllocationTracker allocationTracker, int pageIndex) {
+        allocationTracker.add(sizeOfObjectPage);
+        allocationTracker.add(sizeOfObjectPage);
+        allocationTracker.add(sizeOfLongPage);
         compressedAdjacencyLists[pageIndex] = new CompressedLongArray[pageSize];
         buffers[pageIndex] = new LongArrayBuffer();
         localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder();

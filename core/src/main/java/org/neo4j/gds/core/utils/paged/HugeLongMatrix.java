@@ -28,10 +28,10 @@ public class HugeLongMatrix {
     private final long rows;
     private final long cols;
 
-    public HugeLongMatrix(long rows, long cols, AllocationTracker tracker) {
+    public HugeLongMatrix(long rows, long cols, AllocationTracker allocationTracker) {
         this.rows = rows;
         this.cols = cols;
-        this.array = HugeLongArray.newArray(Math.multiplyExact(rows, cols), tracker);
+        this.array = HugeLongArray.newArray(Math.multiplyExact(rows, cols), allocationTracker);
     }
 
     public void set(long x, long y, long v) {

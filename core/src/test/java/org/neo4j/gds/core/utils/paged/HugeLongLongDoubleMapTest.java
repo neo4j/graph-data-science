@@ -118,24 +118,24 @@ final class HugeLongLongDoubleMapTest {
         long minimumSize = sizeOfDoubleArray(4)
                 // double the buffer size for keys, as we have two keys
                 + 2L * sizeOfLongArray(4);
-        AllocationTracker tracker = AllocationTracker.create();
-        new HugeLongLongDoubleMap(0L, tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        new HugeLongLongDoubleMap(0L, allocationTracker);
         // minimum buffer size is 4
-        assertEquals(minimumSize, tracker.trackedBytes());
+        assertEquals(minimumSize, allocationTracker.trackedBytes());
 
-        tracker = AllocationTracker.create();
+        allocationTracker = AllocationTracker.create();
         // 3 * load_factor -> buffer size of 4
-        new HugeLongLongDoubleMap(3L, tracker);
+        new HugeLongLongDoubleMap(3L, allocationTracker);
         // minimum buffer size is 4
-        assertEquals(minimumSize, tracker.trackedBytes());
+        assertEquals(minimumSize, allocationTracker.trackedBytes());
 
-        tracker = AllocationTracker.create();
-        new HugeLongLongDoubleMap(100L, tracker);
+        allocationTracker = AllocationTracker.create();
+        new HugeLongLongDoubleMap(100L, allocationTracker);
         // 100 with load_factor => 128; round up to next power of two -> 256
         long expectedSize = sizeOfDoubleArray(256)
                 // double the buffer size for keys, as we have two keys
                 + 2L * sizeOfLongArray(256);
-        assertEquals(expectedSize, tracker.trackedBytes());
+        assertEquals(expectedSize, allocationTracker.trackedBytes());
     }
 
     @Test
@@ -168,33 +168,33 @@ final class HugeLongLongDoubleMapTest {
         long secondSize = 2L * sizeOfLongArray(16) + sizeOfDoubleArray(16);
         long thirdSize = 2L * sizeOfLongArray(32) + sizeOfDoubleArray(32);
 
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(allocationTracker);
 
         for (long i = 0L; i < 6L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(firstSize, tracker.trackedBytes());
+            assertEquals(firstSize, allocationTracker.trackedBytes());
         }
         for (long i = 6L; i < 12L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(secondSize, tracker.trackedBytes());
+            assertEquals(secondSize, allocationTracker.trackedBytes());
         }
         for (long i = 12L; i < 24L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(thirdSize, tracker.trackedBytes());
+            assertEquals(thirdSize, allocationTracker.trackedBytes());
         }
     }
 
     @Test
     void releaseMemory() {
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(allocationTracker);
 
         for (long i = 0L; i < 20L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
         }
         map.release();
-        assertEquals(0L, tracker.trackedBytes());
+        assertEquals(0L, allocationTracker.trackedBytes());
     }
 
     @Test

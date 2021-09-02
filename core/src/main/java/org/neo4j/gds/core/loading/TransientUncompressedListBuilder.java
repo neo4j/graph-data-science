@@ -31,11 +31,11 @@ import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
 public final class TransientUncompressedListBuilder implements CsrListBuilder<long[], TransientUncompressedList> {
 
     private final BumpAllocator<long[]> builder;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
-    TransientUncompressedListBuilder(AllocationTracker tracker) {
-        this.builder = new BumpAllocator<>(tracker, Factory.INSTANCE);
-        this.tracker = tracker;
+    TransientUncompressedListBuilder(AllocationTracker allocationTracker) {
+        this.builder = new BumpAllocator<>(allocationTracker, Factory.INSTANCE);
+        this.allocationTracker = allocationTracker;
     }
 
     @Override

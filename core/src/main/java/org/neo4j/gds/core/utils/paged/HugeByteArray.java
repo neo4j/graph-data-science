@@ -52,9 +52,9 @@ import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
  * <p><em>Basic Usage</em></p>
  * <pre>
  * {@code}
- * AllocationTracker tracker = ...;
+ * AllocationTracker allocationTracker = ...;
  * long arraySize = 42L;
- * HugeByteArray array = HugeByteArray.newArray(arraySize, tracker);
+ * HugeByteArray array = HugeByteArray.newArray(arraySize, allocationTracker);
  * array.set(13L, 37);
  * byte value = array.get(13L);
  * // value = 37
@@ -191,8 +191,8 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * {@inheritDoc}
      */
     @Override
-    public final HugeByteArray copyOf(final long newLength, final AllocationTracker tracker) {
-        HugeByteArray copy = HugeByteArray.newArray(newLength, tracker);
+    public final HugeByteArray copyOf(final long newLength, final AllocationTracker allocationTracker) {
+        HugeByteArray copy = HugeByteArray.newArray(newLength, allocationTracker);
         this.copyTo(copy, newLength);
         return copy;
     }
@@ -216,11 +216,11 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * Creates a new array of the given size, tracking the memory requirements into the given {@link org.neo4j.gds.core.utils.mem.AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeByteArray newArray(long size, AllocationTracker tracker) {
+    public static HugeByteArray newArray(long size, AllocationTracker allocationTracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeByteArray.of(size, tracker);
+            return SingleHugeByteArray.of(size, allocationTracker);
         }
-        return PagedHugeByteArray.of(size, tracker);
+        return PagedHugeByteArray.of(size, allocationTracker);
     }
 
     public static HugeByteArray of(final byte... values) {
@@ -246,22 +246,22 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
     }
 
     /* test-only */
-    static HugeByteArray newPagedArray(long size, AllocationTracker tracker) {
-        return PagedHugeByteArray.of(size, tracker);
+    static HugeByteArray newPagedArray(long size, AllocationTracker allocationTracker) {
+        return PagedHugeByteArray.of(size, allocationTracker);
     }
 
     /* test-only */
-    static HugeByteArray newSingleArray(int size, AllocationTracker tracker) {
-        return SingleHugeByteArray.of(size, tracker);
+    static HugeByteArray newSingleArray(int size, AllocationTracker allocationTracker) {
+        return SingleHugeByteArray.of(size, allocationTracker);
     }
 
     private static final class SingleHugeByteArray extends HugeByteArray {
 
-        private static HugeByteArray of(long size, AllocationTracker tracker) {
+        private static HugeByteArray of(long size, AllocationTracker allocationTracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             byte[] page = new byte[intSize];
-            tracker.add(sizeOfByteArray(intSize));
+            allocationTracker.add(sizeOfByteArray(intSize));
 
             return new SingleHugeByteArray(intSize, page);
         }
@@ -395,7 +395,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
 
     private static final class PagedHugeByteArray extends HugeByteArray {
 
-        private static HugeByteArray of(long size, AllocationTracker tracker) {
+        private static HugeByteArray of(long size, AllocationTracker allocationTracker) {
             int numPages = numberOfPages(size);
             byte[][] pages = new byte[numPages][];
 
@@ -408,7 +408,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
             final int lastPageSize = exclusiveIndexOfPage(size);
             pages[numPages - 1] = new byte[lastPageSize];
             memoryUsed += sizeOfByteArray(lastPageSize);
-            tracker.add(memoryUsed);
+            allocationTracker.add(memoryUsed);
 
             return new PagedHugeByteArray(size, pages, memoryUsed);
         }

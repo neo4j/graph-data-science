@@ -52,7 +52,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public BetweennessCentrality(
         Graph graph,
@@ -60,17 +60,17 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         ExecutorService executorService,
         int concurrency,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
         this.progressTracker = progressTracker;
-        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.divisor = graph.isUndirected() ? 2.0 : 1.0;
     }
 
@@ -78,7 +78,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     public HugeAtomicDoubleArray compute() {
         progressTracker.beginSubTask();
         nodeQueue.set(0);
-        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(tracker)), executorService);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(allocationTracker)), executorService);
         progressTracker.endSubTask();
         return centrality;
     }
@@ -108,18 +108,18 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         private final HugeLongArray sigma;
         private final HugeIntArray distance;
 
-        private BCTask(AllocationTracker tracker) {
+        private BCTask(AllocationTracker allocationTracker) {
             this.localRelationshipIterator = graph.concurrentCopy();
 
-            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, tracker);
+            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
             this.predecessorsCursor = predecessors.newCursor();
-            this.backwardNodes = HugeLongArrayStack.newStack(nodeCount, tracker);
+            this.backwardNodes = HugeLongArrayStack.newStack(nodeCount, allocationTracker);
             // TODO: make queue growable
-            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
+            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, allocationTracker);
 
-            this.sigma = HugeLongArray.newArray(nodeCount, tracker);
-            this.delta = HugeDoubleArray.newArray(nodeCount, tracker);
-            this.distance = HugeIntArray.newArray(nodeCount, tracker);
+            this.sigma = HugeLongArray.newArray(nodeCount, allocationTracker);
+            this.delta = HugeDoubleArray.newArray(nodeCount, allocationTracker);
+            this.distance = HugeIntArray.newArray(nodeCount, allocationTracker);
         }
 
         @Override

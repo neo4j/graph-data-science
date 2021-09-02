@@ -142,11 +142,15 @@ public final class LabelInformation {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }
 
-    public static Builder emptyBuilder(AllocationTracker tracker) {
-        return new Builder(tracker);
+    public static Builder emptyBuilder(AllocationTracker allocationTracker) {
+        return new Builder(allocationTracker);
     }
 
-    public static Builder builder(long nodeCount, IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping, AllocationTracker tracker) {
+    public static Builder builder(
+        long nodeCount,
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        AllocationTracker allocationTracker
+    ) {
         var nodeLabelBitSetMap = StreamSupport.stream(
             labelTokenNodeLabelMapping.values().spliterator(),
             false
@@ -155,7 +159,7 @@ public final class LabelInformation {
             .distinct()
             .collect(Collectors.toMap(
                 nodeLabel -> nodeLabel,
-                nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker))
+                nodeLabel -> HugeAtomicBitSet.create(nodeCount, allocationTracker))
             );
 
         // set the whole range for '*' projections
@@ -163,28 +167,28 @@ public final class LabelInformation {
             nodeLabelBitSetMap.get(starLabel).set(0, nodeCount);
         }
 
-        return new Builder(nodeLabelBitSetMap, tracker);
+        return new Builder(nodeLabelBitSetMap, allocationTracker);
     }
 
     public static class Builder {
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
 
         final Map<NodeLabel, HugeAtomicBitSet> labelInformation;
 
-        Builder(AllocationTracker tracker) {
-            this(new ConcurrentHashMap<>(), tracker);
+        Builder(AllocationTracker allocationTracker) {
+            this(new ConcurrentHashMap<>(), allocationTracker);
         }
 
-        Builder(Map<NodeLabel, HugeAtomicBitSet> labelInformation, AllocationTracker tracker) {
+        Builder(Map<NodeLabel, HugeAtomicBitSet> labelInformation, AllocationTracker allocationTracker) {
             this.labelInformation = labelInformation;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
         }
 
         public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId, long nodeCount) {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicBitSet.create(nodeCount, tracker)
+                    (ignored) -> HugeAtomicBitSet.create(nodeCount, allocationTracker)
                 )
                 .set(nodeId);
         }

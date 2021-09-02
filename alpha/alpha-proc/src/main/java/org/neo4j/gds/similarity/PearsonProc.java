@@ -83,7 +83,7 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
     }
 
     @Override
-    PearsonAlgorithm newAlgo(PearsonConfig config, AllocationTracker tracker) {
+    PearsonAlgorithm newAlgo(PearsonConfig config, AllocationTracker allocationTracker) {
         return new PearsonAlgorithm(config, api);
     }
 

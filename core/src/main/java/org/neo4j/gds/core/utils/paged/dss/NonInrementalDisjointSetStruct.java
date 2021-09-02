@@ -47,8 +47,8 @@ public final class NonInrementalDisjointSetStruct extends SequentialDisjointSetS
      *
      * @param size number of elements (maximum node id)
      */
-    public NonInrementalDisjointSetStruct(long size, AllocationTracker tracker) {
-        parent = HugeLongArray.newArray(size, tracker);
+    public NonInrementalDisjointSetStruct(long size, AllocationTracker allocationTracker) {
+        parent = HugeLongArray.newArray(size, allocationTracker);
         this.size = size;
         parent.fill(-1L);
     }

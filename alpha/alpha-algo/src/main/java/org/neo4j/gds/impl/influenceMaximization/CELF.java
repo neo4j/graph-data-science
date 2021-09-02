@@ -44,7 +44,7 @@ public class CELF extends Algorithm<CELF, CELF> {
     private final ArrayList<Runnable> tasks;
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final ExecutorService executorService;
 
     private double gain;
@@ -61,7 +61,7 @@ public class CELF extends Algorithm<CELF, CELF> {
         int monteCarloSimulations,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
@@ -72,7 +72,7 @@ public class CELF extends Algorithm<CELF, CELF> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.tasks = new ArrayList<>();
 
         seedSetNodes = new LongDoubleScatterMap(seedSetCount);
@@ -102,7 +102,7 @@ public class CELF extends Algorithm<CELF, CELF> {
             var runner = new IndependentCascadeRunner(graph, spreads, globalNodeProgress,
                 propagationProbability,
                 monteCarloSimulations,
-                tracker
+                allocationTracker
             );
             runner.setSeedSetNodes(new long[0]);
             tasks.add(runner);
@@ -125,7 +125,7 @@ public class CELF extends Algorithm<CELF, CELF> {
             propagationProbability,
             monteCarloSimulations,
             spreads,
-            tracker
+            allocationTracker
         );
 
         for (long i = 0; i < seedSetCount - 1; i++) {

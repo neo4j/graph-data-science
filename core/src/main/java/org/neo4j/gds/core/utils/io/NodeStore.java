@@ -105,7 +105,7 @@ public class NodeStore {
     static NodeStore of(
         GraphStore graphStore,
         Map<String, LongFunction<Object>> additionalProperties,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         HugeIntArray labelCounts = null;
 
@@ -114,7 +114,7 @@ public class NodeStore {
 
         boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
         if (hasNodeLabels) {
-            labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), tracker);
+            labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), allocationTracker);
             labelCounts.setAll(i -> {
                 int labelCount = 0;
                 for (var nodeLabel : nodeLabels.availableNodeLabels()) {

@@ -53,14 +53,14 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
 
     @Override
     protected Louvain build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new Louvain(
             graph,
             configuration,
             Pools.DEFAULT,
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

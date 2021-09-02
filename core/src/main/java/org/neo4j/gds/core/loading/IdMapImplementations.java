@@ -29,11 +29,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
-        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
-            idMapBuilder,
-            labelInformationBuilder,
-            tracker
-        );
+        return
+            (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker) ->
+                IdMapBuilder.build(idMapBuilder, labelInformationBuilder, allocationTracker);
     }
 
     public static NodeMappingBuilder.Capturing bitIdMapBuilder(InternalBitIdMappingBuilder idMapBuilder) {
@@ -41,11 +39,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalSequentialBitIdMappingBuilder> sequentialBitIdMapBuilder() {
-        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
-            idMapBuilder,
-            labelInformationBuilder,
-            tracker
-        );
+        return
+            (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker) ->
+                IdMapBuilder.build(idMapBuilder, labelInformationBuilder, allocationTracker);
     }
 
     public static NodeMappingBuilder.Capturing sequentialBitIdMapBuilder(InternalSequentialBitIdMappingBuilder idMapBuilder) {
@@ -53,9 +49,23 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, tracker) -> checkDuplicateIds
-            ? IdMapBuilder.buildChecked(idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, tracker)
-            : IdMapBuilder.build(idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, tracker);
+        return
+            (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker)
+                -> checkDuplicateIds
+                ? IdMapBuilder.buildChecked(
+                    idMapBuilder,
+                    labelInformationBuilder,
+                    graphDimensions,
+                    concurrency,
+                    allocationTracker
+                )
+                : IdMapBuilder.build(
+                    idMapBuilder,
+                    labelInformationBuilder,
+                    graphDimensions,
+                    concurrency,
+                    allocationTracker
+                );
     }
 
     public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {

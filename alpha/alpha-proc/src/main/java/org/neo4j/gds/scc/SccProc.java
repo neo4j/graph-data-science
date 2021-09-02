@@ -67,13 +67,13 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
         SccAlgorithm algorithm = computationResult.algorithm();
         HugeLongArray components = computationResult.result();
         SccConfig config = computationResult.config();
-        AllocationTracker tracker = allocationTracker();
+        AllocationTracker allocationTracker = allocationTracker();
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
             callContext,
             config.concurrency(),
-            tracker
+            allocationTracker
         )
             .buildCommunityCount(true)
             .buildHistogram(true)
@@ -88,7 +88,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
             return Stream.of(writeBuilder.build());
         }
 
-        log.info("Scc: overall memory usage: %s", tracker.getUsageString());
+        log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = nodePropertyExporterBuilder
@@ -131,7 +131,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     ) {
         ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphNameOrConfig, configuration);
 
-        AllocationTracker tracker = allocationTracker();
+        AllocationTracker allocationTracker = allocationTracker();
         Graph graph = computationResult.graph();
         HugeLongArray components = computationResult.result();
 
@@ -140,7 +140,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
             return Stream.empty();
         }
 
-        log.info("Scc: overall memory usage: %s", tracker.getUsageString());
+        log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
         graph.release();
 
         return LongStream.range(0, graph.nodeCount())
@@ -168,9 +168,9 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
 
             @Override
             protected SccAlgorithm build(
-                Graph graph, SccConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+                Graph graph, SccConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
-                return new SccAlgorithm(graph, tracker).withTerminationFlag(TerminationFlag.wrap(transaction));
+                return new SccAlgorithm(graph, allocationTracker).withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
     }
@@ -244,8 +244,8 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
 
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
 
-        SccResultBuilder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-            super(context, concurrency, tracker);
+        SccResultBuilder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+            super(context, concurrency, allocationTracker);
         }
 
         @Override

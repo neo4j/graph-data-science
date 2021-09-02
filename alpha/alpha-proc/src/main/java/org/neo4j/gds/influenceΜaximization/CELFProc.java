@@ -108,7 +108,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
             protected CELF build(
                 Graph graph,
                 InfluenceMaximizationConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 return new CELF(
@@ -118,7 +118,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
                     configuration.monteCarloSimulations(),
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    tracker
+                    allocationTracker
                 );
             }
         };

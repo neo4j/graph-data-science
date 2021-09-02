@@ -357,7 +357,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                     protected GraphSageTrain build(
                         Graph graph,
                         GraphSageTrainConfig configuration,
-                        AllocationTracker tracker,
+                        AllocationTracker allocationTracker,
                         ProgressTracker progressTracker
                     ) {
                         return fail(

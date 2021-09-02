@@ -45,9 +45,9 @@ public final class CommunityStatistics {
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
-        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(EMPTY_COMMUNITY, tracker);
+        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(EMPTY_COMMUNITY, allocationTracker);
 
         if (concurrency == 1) {
             // For one thread, we can just iterate through the node space
@@ -88,14 +88,14 @@ public final class CommunityStatistics {
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var communitySizes = communitySizes(
             nodeCount,
             communityFunction,
             executorService,
             concurrency,
-            tracker
+            allocationTracker
         );
         return communityCount(communitySizes, executorService, concurrency);
     }
@@ -129,14 +129,14 @@ public final class CommunityStatistics {
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var communitySizes = communitySizes(
             nodeCount,
             communityFunction,
             executorService,
             concurrency,
-            tracker
+            allocationTracker
         );
         return communityCountAndHistogram(communitySizes, executorService, concurrency);
     }

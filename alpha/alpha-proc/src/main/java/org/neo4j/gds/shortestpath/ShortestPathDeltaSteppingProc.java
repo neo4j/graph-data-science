@@ -154,7 +154,7 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
             protected ShortestPathDeltaStepping build(
                 Graph graph,
                 ShortestPathDeltaSteppingConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNode(), graph);

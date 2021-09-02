@@ -47,7 +47,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     protected NodeClassificationPredict build(
         Graph graph,
         NodeClassificationPredictConfig configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var model = ModelCatalog.get(
@@ -65,7 +65,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             configuration.concurrency(),
             configuration.includePredictedProbabilities(),
             featureProperties,
-            tracker,
+            allocationTracker,
             progressTracker
         );
     }

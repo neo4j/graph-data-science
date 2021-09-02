@@ -49,10 +49,10 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
         PregelComputation<PageRankConfig> pregelComputation,
         PageRankAlgorithmFactory.Mode mode,
         ExecutorService executorService,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, tracker, progressTracker);
+        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, allocationTracker, progressTracker);
         this.mode = mode;
         this.executorService = executorService;
         this.config = config;

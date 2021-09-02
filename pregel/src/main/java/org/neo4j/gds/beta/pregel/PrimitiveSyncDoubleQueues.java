@@ -34,18 +34,18 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
     private HugeObjectArray<double[]> prevQueues;
     private HugeAtomicLongArray prevTails;
 
-    public static PrimitiveSyncDoubleQueues of(long nodeCount, AllocationTracker tracker) {
-        return of(nodeCount, MIN_CAPACITY, tracker);
+    public static PrimitiveSyncDoubleQueues of(long nodeCount, AllocationTracker allocationTracker) {
+        return of(nodeCount, MIN_CAPACITY, allocationTracker);
     }
 
-    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker tracker) {
-        var currentTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
-        var prevTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
+    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker allocationTracker) {
+        var currentTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
+        var prevTails = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
 
-        var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
-        var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+        var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
+        var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
 
-        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, tracker);
+        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, allocationTracker);
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         currentQueues.setAll(value -> new double[capacity]);

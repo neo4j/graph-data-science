@@ -36,7 +36,7 @@ import java.util.function.LongToDoubleFunction;
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient, LocalClusteringCoefficient.Result> {
 
     private final int concurrency;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final NodeProperties triangleCountProperty;
     private final LocalClusteringCoefficientBaseConfig configuration;
 
@@ -49,11 +49,11 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     LocalClusteringCoefficient(
         Graph graph,
         LocalClusteringCoefficientBaseConfig configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.progressTracker = progressTracker;
 
         this.configuration = configuration;
@@ -83,7 +83,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
     private void calculateCoefficients(LongToDoubleFunction propertyValueFunction) {
         long nodeCount = graph.nodeCount();
-        localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
+        localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, allocationTracker);
 
         ThreadLocal<Graph> concurrentGraphCopy = ThreadLocal.withInitial(() -> graph.concurrentCopy());
         DoubleAdder localClusteringCoefficientSum = new DoubleAdder();
@@ -107,7 +107,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
             graph,
             LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
-            tracker,
+            allocationTracker,
             progressTracker
         );
 

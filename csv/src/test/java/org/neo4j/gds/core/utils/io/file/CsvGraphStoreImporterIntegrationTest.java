@@ -117,7 +117,7 @@ class CsvGraphStoreImporterIntegrationTest {
                 .maxOriginalId(1337L)
                 .nodeCount(3L)
                 .hasDisjointPartitions(true)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .concurrency(concurrency)
                 .build();
 

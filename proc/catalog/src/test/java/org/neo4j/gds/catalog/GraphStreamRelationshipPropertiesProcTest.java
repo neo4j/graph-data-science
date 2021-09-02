@@ -183,7 +183,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -264,7 +264,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

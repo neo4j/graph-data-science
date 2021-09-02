@@ -56,7 +56,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private final LouvainBaseConfig config;
     private final NodeProperties seedingValues;
     private final ExecutorService executorService;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     // results
     private HugeLongArray[] dendrograms;
     private double[] modularities;
@@ -67,13 +67,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         LouvainBaseConfig config,
         ExecutorService executorService,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.config = config;
         this.rootGraph = graph;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.dendrograms = new HugeLongArray[config.maxLevels()];
         this.modularities = new double[config.maxLevels()];
         this.progressTracker = progressTracker;
@@ -98,7 +98,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             modularityOptimization.release();
 
             modularities[ranLevels] = modularityOptimization.getModularity();
-            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
+            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), allocationTracker);
             long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
@@ -173,7 +173,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 louvainGraph,
                 modularityOptimizationConfig,
                 seed,
-                tracker,
+                allocationTracker,
                 progressTracker
             ).withTerminationFlag(terminationFlag);
 
@@ -190,7 +190,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
             .concurrency(config.concurrency())
-            .tracker(tracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         assertRunning();
@@ -210,7 +210,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .preAggregate(true)
             .executorService(executorService)
-            .tracker(tracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         var relationshipCreators = PartitionUtils.rangePartition(
@@ -228,7 +228,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         ParallelUtil.run(relationshipCreators, executorService);
 
-        return GraphFactory.create(idMap, relationshipsBuilder.build(), tracker);
+        return GraphFactory.create(idMap, relationshipsBuilder.build(), allocationTracker);
     }
 
     private boolean hasConverged() {

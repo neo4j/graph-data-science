@@ -125,8 +125,8 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
 
         static class Builder extends LouvainProc.LouvainResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

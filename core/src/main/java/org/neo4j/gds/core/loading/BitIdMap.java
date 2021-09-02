@@ -53,7 +53,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         )
         .build();
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private final LabelInformation labelInformation;
 
@@ -69,11 +69,11 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     public BitIdMap(
         SparseLongArray sparseLongArray,
         LabelInformation labelInformation,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.sparseLongArray = sparseLongArray;
         this.labelInformation = labelInformation;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -173,7 +173,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             rootNodeCount(),
             sparseLongArray,
             newLabelInformation,
-            tracker
+            allocationTracker
         );
     }
 
@@ -185,9 +185,9 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             long rootNodeCount,
             SparseLongArray sparseLongArray,
             LabelInformation filteredLabelInformation,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
-            super(sparseLongArray, filteredLabelInformation, tracker);
+            super(sparseLongArray, filteredLabelInformation, allocationTracker);
             this.rootNodeCount = rootNodeCount;
         }
 

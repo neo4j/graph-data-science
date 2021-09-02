@@ -39,7 +39,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         .perNode("values", HugeDoubleArray::memoryEstimation)
         .build();
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private HugeLongArray keys;
     private HugeDoubleArray values;
@@ -60,15 +60,15 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongDoubleMap(AllocationTracker tracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, tracker);
+    public HugeLongDoubleMap(AllocationTracker allocationTracker) {
+        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongDoubleMap(long expectedElements, AllocationTracker tracker) {
-        this.tracker = tracker;
+    public HugeLongDoubleMap(long expectedElements, AllocationTracker allocationTracker) {
+        this.allocationTracker = allocationTracker;
         initialBuffers(expectedElements);
     }
 
@@ -179,7 +179,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         long released = 0L;
         released += keys.release();
         released += values.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
 
         keys = null;
         values = null;
@@ -188,7 +188,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), tracker);
+        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
     }
 
     @Override
@@ -286,7 +286,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         // Try to allocate new buffers first. If we OOM, we leave in a consistent state.
         final HugeLongArray prevKeys = this.keys;
         final HugeDoubleArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), tracker);
+        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
         assert this.keys.size() > prevKeys.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at
@@ -300,7 +300,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         long released = 0L;
         released += prevKeys.release();
         released += prevValues.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
     }
 
 

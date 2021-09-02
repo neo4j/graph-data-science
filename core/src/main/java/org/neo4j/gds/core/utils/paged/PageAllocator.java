@@ -68,8 +68,8 @@ public abstract class PageAllocator<T> {
         long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
 
         T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
-        PageFactory<T> newPage = (tracker) -> {
-            tracker.add(bytesPerPage);
+        PageFactory<T> newPage = (allocationTracker) -> {
+            allocationTracker.add(bytesPerPage);
             return (T) Array.newInstance(componentType, pageSize);
         };
 
@@ -85,8 +85,8 @@ public abstract class PageAllocator<T> {
         long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
 
         T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
-        PageFactory<T> newPage = (tracker) -> {
-            tracker.add(bytesPerPage);
+        PageFactory<T> newPage = (allocationTracker) -> {
+            allocationTracker.add(bytesPerPage);
             return (T) Array.newInstance(componentType, pageSize);
         };
 
@@ -116,14 +116,14 @@ public abstract class PageAllocator<T> {
             return numPages * bytesPerPage;
         }
 
-        PageAllocator<T> newAllocator(AllocationTracker tracker) {
-            if (AllocationTracker.isTracking(tracker)) {
+        PageAllocator<T> newAllocator(AllocationTracker allocationTracker) {
+            if (AllocationTracker.isTracking(allocationTracker)) {
                 return new TrackingAllocator<>(
                         newPage,
                         emptyPages,
                         pageSize,
                         bytesPerPage,
-                        tracker);
+                        allocationTracker);
             }
             return new DirectAllocator<>(newPage, emptyPages, pageSize, bytesPerPage);
         }
@@ -131,7 +131,7 @@ public abstract class PageAllocator<T> {
 
     @FunctionalInterface
     public interface PageFactory<T> {
-        T newPage(AllocationTracker tracker);
+        T newPage(AllocationTracker allocationTracker);
 
         default T newPage() {
             return newPage(AllocationTracker.empty());
@@ -139,8 +139,8 @@ public abstract class PageAllocator<T> {
     }
 
     private static <T> PageFactory<T> pageFactory(Supplier<T> newPage, long bytesPerPage) {
-        return tracker -> {
-            tracker.add(bytesPerPage);
+        return allocationTracker -> {
+            allocationTracker.add(bytesPerPage);
             return newPage.get();
         };
     }
@@ -151,25 +151,26 @@ public abstract class PageAllocator<T> {
         private final T[] emptyPages;
         private final int pageSize;
         private final long bytesPerPage;
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
 
         private TrackingAllocator(
                 PageFactory<T> newPage,
                 T[] emptyPages,
                 int pageSize,
                 long bytesPerPage,
-                AllocationTracker tracker) {
+                AllocationTracker allocationTracker
+        ) {
             this.emptyPages = emptyPages;
             assert BitUtil.isPowerOfTwo(pageSize);
             this.newPage = newPage;
             this.pageSize = pageSize;
             this.bytesPerPage = bytesPerPage;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
         }
 
         @Override
         public T newPage() {
-            return newPage.newPage(tracker);
+            return newPage.newPage(allocationTracker);
         }
 
         @Override
@@ -228,4 +229,3 @@ public abstract class PageAllocator<T> {
         }
     }
 }
-

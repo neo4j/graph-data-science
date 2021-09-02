@@ -150,7 +150,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
             protected KSpanningTree build(
                 Graph graph,
                 KSpanningTreeConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);

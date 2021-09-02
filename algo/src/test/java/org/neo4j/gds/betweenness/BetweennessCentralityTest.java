@@ -42,7 +42,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 
 class BetweennessCentralityTest {
 
-    private static final AllocationTracker TRACKER = AllocationTracker.empty();
+    private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
     private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(
         "",
@@ -142,7 +142,7 @@ class BetweennessCentralityTest {
             Pools.DEFAULT,
             concurrency,
             ProgressTracker.NULL_TRACKER,
-            TRACKER
+            ALLOCATION_TRACKER
         ).compute();
 
         assertEquals(expectedResult.size(), actualResult.size());
@@ -161,7 +161,7 @@ class BetweennessCentralityTest {
             Pools.DEFAULT,
             concurrency,
             ProgressTracker.NULL_TRACKER,
-            TRACKER
+            ALLOCATION_TRACKER
         ).compute();
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));

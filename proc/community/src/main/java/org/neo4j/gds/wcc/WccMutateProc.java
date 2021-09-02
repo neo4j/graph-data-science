@@ -129,9 +129,9 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
             Builder(
                 ProcedureCallContext context,
                 int concurrency,
-                AllocationTracker tracker
+                AllocationTracker allocationTracker
             ) {
-                super(context, concurrency, tracker);
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

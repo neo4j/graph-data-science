@@ -57,14 +57,14 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
         GdsFeatureToggles.USE_KERNEL_TRACKER.enableAndRun(
             () -> {
                 TestAlgorithm algorithm;
-                AllocationTracker tracker;
+                AllocationTracker allocationTracker;
                 try (Transaction tx = db.beginTx()) {
                     var ktx = ((InternalTransaction) tx).kernelTransaction();
                     var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(ktx);
-                    tracker = AllocationTracker.create(memoryTrackerProxy);
+                    allocationTracker = AllocationTracker.create(memoryTrackerProxy);
                     algorithm = new TestAlgorithm(
                         graph,
-                        tracker,
+                        allocationTracker,
                         MEMORY_LIMIT,
                         ProgressTracker.NULL_TRACKER,
                         false

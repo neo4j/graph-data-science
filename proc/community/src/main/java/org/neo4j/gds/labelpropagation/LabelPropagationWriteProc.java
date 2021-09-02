@@ -122,8 +122,8 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

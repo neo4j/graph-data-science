@@ -44,7 +44,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final ExecutorService threadPool;
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
-    protected final AllocationTracker tracker;
+    protected final AllocationTracker allocationTracker;
     protected final ProgressTracker progressTracker;
     protected final int concurrency;
 
@@ -61,7 +61,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
-        this.tracker = loadingContext.tracker();
+        this.allocationTracker = loadingContext.allocationTracker();
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
     }

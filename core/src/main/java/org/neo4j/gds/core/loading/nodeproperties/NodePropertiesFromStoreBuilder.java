@@ -58,18 +58,22 @@ public final class NodePropertiesFromStoreBuilder {
 
     private final DefaultValue defaultValue;
     private final long nodeSize;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
     private final LongAdder size;
 
-    public static NodePropertiesFromStoreBuilder of(long nodeSize, AllocationTracker tracker, DefaultValue defaultValue) {
-        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, tracker);
+    public static NodePropertiesFromStoreBuilder of(
+        long nodeSize,
+        AllocationTracker allocationTracker,
+        DefaultValue defaultValue
+    ) {
+        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker);
     }
 
-    private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker tracker) {
+    private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker allocationTracker) {
         this.defaultValue = defaultValue;
         this.nodeSize = nodeSize;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.innerBuilder = new AtomicReference<>();
         this.size = new LongAdder();
     }
@@ -100,15 +104,15 @@ public final class NodePropertiesFromStoreBuilder {
         if (innerBuilder.get() == null) {
             InnerNodePropertiesBuilder newBuilder;
             if (value instanceof IntegralValue) {
-                newBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof FloatingPointValue) {
-                newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof LongArray) {
-                newBuilder = new LongArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new LongArrayNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof DoubleArray) {
-                newBuilder = new DoubleArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new DoubleArrayNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof FloatArray) {
-                newBuilder = new FloatArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new FloatArrayNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else {
                 throw new UnsupportedOperationException(formatWithLocale(
                     "Loading of values of type %s is currently not supported",

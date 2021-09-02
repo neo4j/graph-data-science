@@ -27,8 +27,8 @@ public final class HugeLongArrayStack {
     private final long capacity;
     private long size;
 
-    public static HugeLongArrayStack newStack(long capacity, AllocationTracker tracker) {
-        return new HugeLongArrayStack(HugeLongArray.newArray(capacity, tracker));
+    public static HugeLongArrayStack newStack(long capacity, AllocationTracker allocationTracker) {
+        return new HugeLongArrayStack(HugeLongArray.newArray(capacity, allocationTracker));
     }
 
     private HugeLongArrayStack(HugeLongArray array) {

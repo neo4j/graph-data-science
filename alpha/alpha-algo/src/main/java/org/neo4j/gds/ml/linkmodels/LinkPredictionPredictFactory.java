@@ -55,7 +55,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
     protected LinkPredictionPredict build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var model = ModelCatalog.get(

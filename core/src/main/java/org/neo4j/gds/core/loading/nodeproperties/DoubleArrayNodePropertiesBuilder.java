@@ -31,11 +31,11 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     private final HugeObjectArray<double[]> objectArray;
     private final DefaultValue defaultValue;
 
-    public DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+    public DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
         // validate defaultValue is a double array
         defaultValue.doubleArrayValue();
 
-        this.objectArray = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+        this.objectArray = HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
         this.defaultValue = defaultValue;
     }
 

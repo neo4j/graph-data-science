@@ -69,7 +69,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     private final AtomicInteger actualIterations;
     private final Random random;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public ApproxNearestNeighborsAlgorithm(
         ApproximateNearestNeighborsConfig config,
@@ -77,14 +77,14 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         GraphDatabaseAPI api,
         Log log,
         ExecutorService executor,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         super(config, api);
         this.config = config;
         this.algorithm = algorithm;
         this.log = log;
         this.executor = executor;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
 
         this.nodeQueue = new AtomicLong();
         this.actualIterations = new AtomicInteger();
@@ -145,12 +145,14 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
             tempVisitedRelationships = ANNUtils.initializeRoaringBitmaps(inputSize);
 
-            RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, tracker);
+            RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
             importer.consume(topKConsumers);
-            Graph graph = importer.buildGraphStore(api.databaseId(), nodes.idMap(), config.concurrency(), tracker).getUnion();
+            Graph graph = importer
+                .buildGraphStore(api.databaseId(), nodes.idMap(), config.concurrency(), allocationTracker)
+                .getUnion();
 
-            RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
-            RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
+            RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
+            RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, allocationTracker);
 
             Collection<Runnable> setupTasks = setupTasks(
                 sampleSize,
@@ -167,13 +169,13 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 api.databaseId(),
                 nodes.idMap(),
                 config.concurrency(),
-                tracker
+                allocationTracker
             );
             GraphStore newGraphStore = newImporter.buildGraphStore(
                 api.databaseId(),
                 nodes.idMap(),
                 config.concurrency(),
-                tracker
+                allocationTracker
             );
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
@@ -279,7 +281,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxNeoId)
             .concurrency(config.concurrency())
-            .tracker(tracker)
+            .allocationTracker(allocationTracker)
             .build();
 
         for (INPUT input : inputs) {
@@ -565,7 +567,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             NamedDatabaseId databaseId,
             NodeMapping nodeMapping,
             int concurrency,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             Relationships outRelationships = outImporter().build();
             Relationships inRelationships = inImporter().build();
@@ -581,23 +583,23 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 topology,
                 Collections.emptyMap(),
                 concurrency,
-                tracker
+                allocationTracker
             );
         }
 
-        static RelationshipImporter of(NodeMapping nodeMapping, ExecutorService executorService, AllocationTracker tracker) {
+        static RelationshipImporter of(NodeMapping nodeMapping, ExecutorService executorService, AllocationTracker allocationTracker) {
             RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodeMapping)
                 .orientation(Orientation.NATURAL)
                 .executorService(executorService)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
 
             RelationshipsBuilder inImporter = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodeMapping)
                 .orientation(Orientation.REVERSE)
                 .executorService(executorService)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
 
             return ImmutableRelationshipImporter.of(outImporter, inImporter);

@@ -78,16 +78,16 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
             .map(relType -> graphStore.getGraph(RelationshipType.of(relType)))
             .toArray(Graph[]::new);
 
-        var tracker = allocationTracker();
+        var allocationTracker = allocationTracker();
 
-        CollapsePath algo = new CollapsePath(graphs, config, Pools.DEFAULT, tracker);
+        CollapsePath algo = new CollapsePath(graphs, config, Pools.DEFAULT, allocationTracker);
         builder.algorithm(algo);
 
         try (ProgressTimer timer = ProgressTimer.start(builder::computeMillis)) {
             builder.result(algo.compute());
         }
 
-        log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
+        log.info(algoName() + ": overall memory usage %s", allocationTracker.getUsageString());
 
         algo.release();
 

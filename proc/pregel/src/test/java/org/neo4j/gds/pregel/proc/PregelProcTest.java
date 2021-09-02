@@ -322,13 +322,13 @@ public class PregelProcTest extends BaseProcTest {
                 protected CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker tracker,
+                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
                     return new CompositeTestAlgorithm(
                         graph,
                         configuration,
-                        tracker,
+                        allocationTracker,
                         progressTracker,
                         configuration.throwInCompute()
                     );
@@ -391,10 +391,16 @@ public class PregelProcTest extends BaseProcTest {
                 protected CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker tracker,
+                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker, progressTracker, configuration.throwInCompute());
+                    return new CompositeTestAlgorithm(
+                        graph,
+                        configuration,
+                        allocationTracker,
+                        progressTracker,
+                        configuration.throwInCompute()
+                    );
                 }
 
                 @Override
@@ -453,10 +459,16 @@ public class PregelProcTest extends BaseProcTest {
                 protected CompositeTestAlgorithm build(
                     Graph graph,
                     TestPregelConfig configuration,
-                    AllocationTracker tracker,
+                    AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker, progressTracker, configuration.throwInCompute());
+                    return new CompositeTestAlgorithm(
+                        graph,
+                        configuration,
+                        allocationTracker,
+                        progressTracker,
+                        configuration.throwInCompute()
+                    );
                 }
 
                 @Override
@@ -485,7 +497,7 @@ public class PregelProcTest extends BaseProcTest {
         CompositeTestAlgorithm(
             Graph graph,
             PregelProcedureConfig configuration,
-            AllocationTracker tracker,
+            AllocationTracker allocationTracker,
             ProgressTracker progressTracker,
             boolean throwInCompute
         ) {
@@ -512,7 +524,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, Pools.DEFAULT, tracker, progressTracker);
+            }, Pools.DEFAULT, allocationTracker, progressTracker);
         }
 
         @Override

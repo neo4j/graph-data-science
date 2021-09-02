@@ -37,19 +37,19 @@ public final class CompressedLongArray {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private byte[] storage;
     private long[][] weights;
     private int pos;
     private long lastValue;
     private int length;
 
-    public CompressedLongArray(AllocationTracker tracker) {
-        this(tracker, 0);
+    public CompressedLongArray(AllocationTracker allocationTracker) {
+        this(allocationTracker, 0);
     }
 
-    public CompressedLongArray(AllocationTracker tracker, int numberOfProperties) {
-        this.tracker = tracker;
+    public CompressedLongArray(AllocationTracker allocationTracker, int numberOfProperties) {
+        this.allocationTracker = allocationTracker;
         storage = EMPTY_BYTES;
         weights = new long[numberOfProperties][0];
     }
@@ -130,8 +130,8 @@ public final class CompressedLongArray {
             ));
         } else if (storage.length <= targetLength) {
             int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
-            tracker.remove(sizeOfByteArray(storage.length));
-            tracker.add(sizeOfByteArray(newLength));
+            allocationTracker.remove(sizeOfByteArray(storage.length));
+            allocationTracker.add(sizeOfByteArray(newLength));
             this.storage = Arrays.copyOf(storage, newLength);
         }
     }
@@ -146,8 +146,8 @@ public final class CompressedLongArray {
             ));
         } else if (weights[weightIndex].length <= pos + required) {
             int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
-            tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
-            tracker.add(sizeOfDoubleArray(newLength));
+            allocationTracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
+            allocationTracker.add(sizeOfDoubleArray(newLength));
             weights[weightIndex] = Arrays.copyOf(weights[weightIndex], newLength);
         }
     }
@@ -175,8 +175,8 @@ public final class CompressedLongArray {
 
     public void release() {
         if (storage.length > 0) {
-            tracker.remove(sizeOfByteArray(storage.length));
-            tracker.remove(sizeOfDoubleArray(weights.length));
+            allocationTracker.remove(sizeOfByteArray(storage.length));
+            allocationTracker.remove(sizeOfDoubleArray(weights.length));
         }
         storage = null;
         weights = null;

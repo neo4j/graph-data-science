@@ -81,7 +81,7 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
     }
 
     @Override
-    OverlapAlgorithm newAlgo(OverlapConfig config, AllocationTracker tracker) {
+    OverlapAlgorithm newAlgo(OverlapConfig config, AllocationTracker allocationTracker) {
         return new OverlapAlgorithm(config, api);
     }
 

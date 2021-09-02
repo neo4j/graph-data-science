@@ -45,7 +45,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
     @Override
     protected BetweennessCentrality build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         var samplingSize = configuration.samplingSize();
         var samplingSeed = configuration.samplingSeed();
@@ -60,7 +60,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             Pools.DEFAULT,
             configuration.concurrency(),
             progressTracker,
-            tracker
+            allocationTracker
         );
     }
 

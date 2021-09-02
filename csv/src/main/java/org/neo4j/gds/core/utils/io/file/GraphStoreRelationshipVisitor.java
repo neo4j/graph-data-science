@@ -82,7 +82,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         Map<String, RelationshipsBuilder> relationshipBuildersByType;
         int concurrency;
         IdMapping nodes;
-        AllocationTracker tracker;
+        AllocationTracker allocationTracker;
 
         Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
             this.relationshipBuildersByType = relationshipBuildersByType;
@@ -100,7 +100,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         }
 
         Builder withAllocationTracker(AllocationTracker allocationTracker) {
-            this.tracker = allocationTracker;
+            this.allocationTracker = allocationTracker;
             return this;
         }
 
@@ -115,7 +115,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                 .initRelationshipsBuilder()
                 .concurrency(concurrency)
                 .nodes(nodes)
-                .tracker(tracker);
+                .allocationTracker(allocationTracker);
             return new GraphStoreRelationshipVisitor(
                 relationshipSchema,
                 relationshipBuilderSupplier,

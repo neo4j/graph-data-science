@@ -83,7 +83,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
     protected PageRankAlgorithm build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         PregelComputation<PageRankConfig> computation;
@@ -92,7 +92,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
         var degreeFunction = degreeFunction(
             graph,
             configuration,
-            tracker
+            allocationTracker
         );
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
@@ -121,7 +121,15 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
             computation = new PageRankComputation(configuration, mappedSourceNodes, degreeFunction, deltaCoefficient);
         }
 
-        return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressTracker);
+        return new PageRankAlgorithm(
+            graph,
+            configuration,
+            computation,
+            mode,
+            Pools.DEFAULT,
+            allocationTracker,
+            progressTracker
+        );
     }
 
     @Override
@@ -133,7 +141,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
     private LongToDoubleFunction degreeFunction(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(configuration.concurrency())
@@ -145,7 +153,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
             Pools.DEFAULT,
             config,
             ProgressTracker.NULL_TRACKER,
-            tracker
+            allocationTracker
         );
 
         var degrees = degreeCentrality.compute();

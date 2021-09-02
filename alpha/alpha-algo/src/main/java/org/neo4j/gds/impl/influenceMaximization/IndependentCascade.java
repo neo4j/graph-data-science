@@ -46,7 +46,7 @@ final class IndependentCascade {
         double propagationProbability,
         long monteCarloSimulations,
         HugeLongPriorityQueue spreads,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph.concurrentCopy();
         this.propagationProbability = propagationProbability;
@@ -54,7 +54,7 @@ final class IndependentCascade {
         this.spreads = spreads;
 
         this.active = new LongScatterSet();
-        this.newActive = HugeLongArrayStack.newStack(graph.nodeCount(), tracker);
+        this.newActive = HugeLongArrayStack.newStack(graph.nodeCount(), allocationTracker);
 
         this.rand = new Random();
     }

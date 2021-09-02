@@ -43,7 +43,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         AdjacencyFactory adjacencyFactory,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var aggregations = aggregations(projection);
         var propertyKeyIds = propertyKeyIds(projection, relationshipPropertyTokens);
@@ -56,7 +56,7 @@ public final class AdjacencyListWithPropertiesBuilder {
             aggregations,
             propertyKeyIds,
             defaultValues,
-            tracker
+            allocationTracker
         );
     }
 
@@ -67,13 +67,13 @@ public final class AdjacencyListWithPropertiesBuilder {
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var adjacencyCompressor = adjacencyFactory.create(
             nodeCount,
             projection.properties(),
             aggregations,
-            tracker
+            allocationTracker
         );
 
         return new AdjacencyListWithPropertiesBuilder(

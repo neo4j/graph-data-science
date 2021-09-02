@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class HugeLongLongDoubleMap {
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private HugeLongArray keys1;
     private HugeLongArray keys2;
@@ -51,15 +51,15 @@ public final class HugeLongLongDoubleMap {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongDoubleMap(AllocationTracker tracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, tracker);
+    public HugeLongLongDoubleMap(AllocationTracker allocationTracker) {
+        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongDoubleMap(long expectedElements, AllocationTracker tracker) {
-        this.tracker = tracker;
+    public HugeLongLongDoubleMap(long expectedElements, AllocationTracker allocationTracker) {
+        this.allocationTracker = allocationTracker;
         initialBuffers(expectedElements);
     }
 
@@ -192,7 +192,7 @@ public final class HugeLongLongDoubleMap {
         released += keys1.release();
         released += keys2.release();
         released += values.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
 
         keysCursor.close();
 
@@ -204,7 +204,7 @@ public final class HugeLongLongDoubleMap {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), tracker);
+        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
     }
 
     /**
@@ -347,7 +347,7 @@ public final class HugeLongLongDoubleMap {
         final HugeLongArray prevKeys1 = this.keys1;
         final HugeLongArray prevKeys2 = this.keys2;
         final HugeDoubleArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), tracker);
+        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
         assert this.keys1.size() > prevKeys1.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at
@@ -363,7 +363,7 @@ public final class HugeLongLongDoubleMap {
         released += prevKeys1.release();
         released += prevKeys2.release();
         released += prevValues.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
     }
 
 

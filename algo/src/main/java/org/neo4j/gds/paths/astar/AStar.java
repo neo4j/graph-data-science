@@ -47,7 +47,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         Graph graph,
         ShortestPathAStarBaseConfig config,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var latitudeProperty = config.latitudeProperty();
         var longitudeProperty = config.longitudeProperty();
@@ -69,10 +69,10 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
         var targetNode = graph.toMappedNodeId(config.targetNode());
 
-        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, tracker);
+        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, allocationTracker);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, tracker);
+        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, allocationTracker);
         return new AStar(dijkstra);
     }
 
@@ -117,13 +117,13 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
             NodeProperties latitudeProperties,
             NodeProperties longitudeProperties,
             long targetNode,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             this.latitudeProperties = latitudeProperties;
             this.longitudeProperties = longitudeProperties;
             this.targetLatitude = latitudeProperties.doubleValue(targetNode);
             this.targetLongitude = longitudeProperties.doubleValue(targetNode);
-            this.distanceCache = new HugeLongDoubleMap(tracker);
+            this.distanceCache = new HugeLongDoubleMap(allocationTracker);
         }
 
         @Override

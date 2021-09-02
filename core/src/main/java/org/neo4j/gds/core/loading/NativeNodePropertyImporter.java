@@ -145,7 +145,7 @@ public final class NativeNodePropertyImporter {
         private long nodeCount;
         private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
-        private AllocationTracker tracker = AllocationTracker.empty();
+        private AllocationTracker allocationTracker = AllocationTracker.empty();
 
 
         private Builder() {
@@ -166,13 +166,13 @@ public final class NativeNodePropertyImporter {
             return this;
         }
 
-        public Builder tracker(AllocationTracker tracker) {
-            this.tracker = tracker;
+        public Builder allocationTracker(AllocationTracker allocationTracker) {
+            this.allocationTracker = allocationTracker;
             return this;
         }
 
         public NativeNodePropertyImporter build() {
-            var nodePropertyBuilders = BuildersByLabel.create(propertyMappings, nodeCount, tracker);
+            var nodePropertyBuilders = BuildersByLabel.create(propertyMappings, nodeCount, allocationTracker);
             var buildersByLabelIdAndPropertyId = BuildersByLabelIdAndPropertyId.create(
                 nodePropertyBuilders,
                 // TODO: We align on `id` over `token` in this class but need to carry that change on to the rest of
@@ -189,14 +189,14 @@ public final class NativeNodePropertyImporter {
         static BuildersByLabel create(
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
             long nodeCount,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             var instance = new BuildersByLabel();
             for (var label : propertyMappingsByLabel.keySet()) {
                 for (var propertyMapping : propertyMappingsByLabel.get(label)) {
                     var builder = NodePropertiesFromStoreBuilder.of(
                         nodeCount,
-                        tracker,
+                        allocationTracker,
                         propertyMapping.defaultValue()
                     );
                     instance.put(label, propertyMapping, builder);

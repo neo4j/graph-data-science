@@ -49,7 +49,7 @@ public final class GraphStoreFilter {
         GraphCreateFromGraphConfig config,
         ExecutorService executorService,
         Log log,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         TaskRegistry taskRegistry
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
@@ -96,7 +96,7 @@ public final class GraphStoreFilter {
             config.concurrency(),
             executorService,
             progressTracker,
-            tracker
+            allocationTracker
         );
 
         var filteredRelationships = RelationshipsFilter.filterRelationships(
@@ -107,7 +107,7 @@ public final class GraphStoreFilter {
             config.concurrency(),
             executorService,
             progressTracker,
-            tracker
+            allocationTracker
         );
 
         progressTracker.endSubTask();
@@ -119,7 +119,7 @@ public final class GraphStoreFilter {
             filteredRelationships.topology(),
             filteredRelationships.propertyStores(),
             config.concurrency(),
-            tracker
+            allocationTracker
         );
     }
 

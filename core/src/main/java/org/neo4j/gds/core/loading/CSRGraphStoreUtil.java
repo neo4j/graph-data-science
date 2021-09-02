@@ -51,7 +51,7 @@ public final class CSRGraphStoreUtil {
         String relationshipTypeString,
         Optional<String> relationshipProperty,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         Relationships relationships = graph.relationships();
 
@@ -73,7 +73,7 @@ public final class CSRGraphStoreUtil {
             topology,
             relationshipProperties,
             concurrency,
-            tracker
+            allocationTracker
         );
     }
 

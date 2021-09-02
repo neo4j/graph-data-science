@@ -55,12 +55,12 @@ public abstract class NodeValue {
             .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
     }
 
-    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency, AllocationTracker tracker) {
+    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency, AllocationTracker allocationTracker) {
         var properties = schema.elements()
             .stream()
             .collect(Collectors.toMap(
                 Element::propertyKey,
-                element -> initArray(element, nodeCount, concurrency, tracker)
+                element -> initArray(element, nodeCount, concurrency, allocationTracker)
             ));
 
         if (properties.size() == 1) {
@@ -184,10 +184,10 @@ public abstract class NodeValue {
         }
     }
 
-    private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker tracker) {
+    private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker allocationTracker) {
         switch (element.propertyType()) {
             case DOUBLE:
-                var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
+                var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, allocationTracker);
                 ParallelUtil.parallelStreamConsume(
                     LongStream.range(0, nodeCount),
                     concurrency,
@@ -198,7 +198,7 @@ public abstract class NodeValue {
                 );
                 return doubleNodeValues;
             case LONG:
-                var longNodeValues = HugeLongArray.newArray(nodeCount, tracker);
+                var longNodeValues = HugeLongArray.newArray(nodeCount, allocationTracker);
                 ParallelUtil.parallelStreamConsume(
                     LongStream.range(0, nodeCount),
                     concurrency,
@@ -209,9 +209,9 @@ public abstract class NodeValue {
                 );
                 return longNodeValues;
             case LONG_ARRAY:
-                return HugeObjectArray.newArray(long[].class, nodeCount, tracker);
+                return HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker);
             case DOUBLE_ARRAY:
-                return HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+                return HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker);
             default:
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                     "Unsupported value type: %s",

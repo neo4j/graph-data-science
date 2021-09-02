@@ -153,14 +153,14 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         validate(dimensions, storeConfig);
 
         int concurrency = graphCreateConfig.readConcurrency();
-        AllocationTracker tracker = loadingContext.tracker();
+        AllocationTracker allocationTracker = loadingContext.allocationTracker();
         progressTracker.beginSubTask();
         IdsAndProperties nodes = loadNodes(concurrency);
-        RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
+        RelationshipImportResult relationships = loadRelationships(allocationTracker, nodes, concurrency);
         progressTracker.endSubTask();
-        CSRGraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
+        CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
 
-        logLoadingSummary(graphStore, Optional.of(tracker));
+        logLoadingSummary(graphStore, Optional.of(allocationTracker));
 
         return ImportResult.of(dimensions, graphStore);
     }
@@ -200,16 +200,16 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> bitIdMappingBuilderFactory() {
-        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestNeoId() + 1, loadingContext.tracker());
+        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestNeoId() + 1, loadingContext.allocationTracker());
     }
 
     @NotNull
     private InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> hugeIdMappingBuilderFactory() {
-        return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.tracker());
+        return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.allocationTracker());
     }
 
     private RelationshipImportResult loadRelationships(
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         IdsAndProperties idsAndProperties,
         int concurrency
     ) {
@@ -225,7 +225,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     AdjacencyFactory.configured(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),
-                    tracker
+                    allocationTracker
                 )
             ));
 

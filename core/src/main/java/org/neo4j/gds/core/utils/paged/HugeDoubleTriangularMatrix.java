@@ -26,10 +26,10 @@ public class HugeDoubleTriangularMatrix {
     private final HugeDoubleArray array;
     private final long order;
 
-    public HugeDoubleTriangularMatrix(long order, AllocationTracker tracker) {
+    public HugeDoubleTriangularMatrix(long order, AllocationTracker allocationTracker) {
         long size = Math.multiplyExact(order, order + 1) / 2;
         this.order = order;
-        this.array = HugeDoubleArray.newArray(size, tracker);
+        this.array = HugeDoubleArray.newArray(size, allocationTracker);
     }
 
     public void set(long x, long y, double v) {

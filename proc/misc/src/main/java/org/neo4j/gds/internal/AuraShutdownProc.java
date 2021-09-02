@@ -129,10 +129,10 @@ public class AuraShutdownProc implements CallableProcedure {
 
         var timeoutInSeconds = ((NumberValue) input[0]).longValue();
         var log = InternalProceduresUtil.lookup(ctx, Log.class);
-        var tracker = InternalProceduresUtil.lookup(ctx, AllocationTracker.class);
+        var allocationTracker = InternalProceduresUtil.lookup(ctx, AllocationTracker.class);
 
         var future = EXECUTOR_SERVICE.submit(
-            () -> shutdown(restorePath, log, timeoutInSeconds, tracker)
+            () -> shutdown(restorePath, log, timeoutInSeconds, allocationTracker)
         );
 
         if (blockOnSubmit) {

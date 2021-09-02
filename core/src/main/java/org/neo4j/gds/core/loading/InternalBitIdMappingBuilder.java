@@ -34,7 +34,7 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalBitIdMappingBuilder of(long length, AllocationTracker tracker) {
+    public static InternalBitIdMappingBuilder of(long length, AllocationTracker allocationTracker) {
         var builder = SparseLongArray.builder(length);
         return new InternalBitIdMappingBuilder(builder, length);
     }

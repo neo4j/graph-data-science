@@ -112,8 +112,8 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         labelInformationBuilder =
             graphCreateConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder(tracker)
-                : LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, tracker);
+                ? LabelInformation.emptyBuilder(allocationTracker)
+                : LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, allocationTracker);
 
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
@@ -141,7 +141,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             dimensions.highestNeoId(),
             concurrency,
             false,
-            tracker
+            allocationTracker
         );
 
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
@@ -188,7 +188,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                     progressTracker,
                     terminationFlag,
                     threadPool,
-                    tracker
+                    allocationTracker
                 ))
             ).collect(Collectors.toList());
 
@@ -245,7 +245,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 .nodeCount(nodeCount)
                 .dimensions(dimensions)
                 .propertyMappings(propertyMappingsByLabel)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
         } else {
             return null;

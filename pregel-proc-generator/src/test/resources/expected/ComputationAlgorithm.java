@@ -34,8 +34,8 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
-                         AllocationTracker tracker, ProgressTracker progressTracker) {
-        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, tracker, progressTracker);
+                         AllocationTracker allocationTracker, ProgressTracker progressTracker) {
+        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, allocationTracker, progressTracker);
     }
 
     @Override

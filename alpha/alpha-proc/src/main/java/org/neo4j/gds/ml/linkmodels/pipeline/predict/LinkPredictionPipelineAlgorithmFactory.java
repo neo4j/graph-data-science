@@ -73,7 +73,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
 
     @Override
     protected LinkPrediction build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         String graphName = configuration
             .graphName()

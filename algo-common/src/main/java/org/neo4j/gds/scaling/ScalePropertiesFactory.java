@@ -42,13 +42,13 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
     protected ScaleProperties build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         return new ScaleProperties(
             graph,
             configuration,
-            tracker,
+            allocationTracker,
             Pools.DEFAULT
         );
     }

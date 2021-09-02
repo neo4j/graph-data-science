@@ -101,7 +101,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
     @Override
     ApproxNearestNeighborsAlgorithm<SimilarityInput> newAlgo(
         ApproximateNearestNeighborsConfig config,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         SimilarityAlgorithm<?, SimilarityInput> similarity =
             (SimilarityAlgorithm<?, SimilarityInput>) similarityAlgorithm(config);
@@ -111,7 +111,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
             api,
             log,
             Pools.DEFAULT,
-            tracker
+            allocationTracker
         );
     }
 

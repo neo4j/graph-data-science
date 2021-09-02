@@ -84,7 +84,7 @@ class RelationshipsBuilderTest {
             .nodes(idMap)
             .orientation(Orientation.NATURAL)
             .concurrency(concurrency)
-            .tracker(AllocationTracker.empty());
+            .allocationTracker(AllocationTracker.empty());
 
         if (importProperty) {
             builder.addPropertyConfig(GraphFactory.PropertyConfig.withDefaults());
@@ -138,7 +138,7 @@ class RelationshipsBuilderTest {
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         ParallelUtil.parallelStreamConsume(
@@ -186,7 +186,7 @@ class RelationshipsBuilderTest {
         runTest.run(() -> {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
-                .tracker(AllocationTracker.empty())
+                .allocationTracker(AllocationTracker.empty())
                 .build();
 
             for (long i = 0; i < nodeCount; i++) {
@@ -215,7 +215,7 @@ class RelationshipsBuilderTest {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
-            .tracker(AllocationTracker.empty())
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         var a1Original = idFunction.of("a1");

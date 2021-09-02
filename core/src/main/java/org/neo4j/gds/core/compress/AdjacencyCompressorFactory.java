@@ -34,6 +34,6 @@ public interface AdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> {
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     );
 }

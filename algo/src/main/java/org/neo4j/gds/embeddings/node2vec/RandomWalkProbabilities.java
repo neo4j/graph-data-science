@@ -52,7 +52,7 @@ interface RandomWalkProbabilities {
 
         private final long nodeCount;
         private final int concurrency;
-        private final AllocationTracker tracker;
+        private final AllocationTracker allocationTracker;
         private final double positiveSamplingFactor;
         private final double negativeSamplingExponent;
         private final HugeLongArray nodeFrequencies;
@@ -63,15 +63,15 @@ interface RandomWalkProbabilities {
             double positiveSamplingFactor,
             double negativeSamplingExponent,
             int concurrency,
-            AllocationTracker tracker
+            AllocationTracker allocationTracker
         ) {
             this.nodeCount = nodeCount;
             this.concurrency = concurrency;
-            this.tracker = tracker;
+            this.allocationTracker = allocationTracker;
             this.positiveSamplingFactor = positiveSamplingFactor;
             this.negativeSamplingExponent = negativeSamplingExponent;
 
-            this.nodeFrequencies = HugeLongArray.newArray(nodeCount, tracker);
+            this.nodeFrequencies = HugeLongArray.newArray(nodeCount, allocationTracker);
             this.sampleCount = new MutableLong(0);
         }
 
@@ -98,7 +98,7 @@ interface RandomWalkProbabilities {
         }
 
         private HugeDoubleArray computePositiveSamplingProbabilities() {
-            var centerProbabilities = HugeDoubleArray.newArray(nodeCount, tracker);
+            var centerProbabilities = HugeDoubleArray.newArray(nodeCount, allocationTracker);
             var sum = sampleCount.getValue();
 
             ParallelUtil.parallelStreamConsume(
@@ -117,7 +117,7 @@ interface RandomWalkProbabilities {
         }
 
         private HugeLongArray computeNegativeSamplingDistribution() {
-            var contextDistribution = HugeLongArray.newArray(nodeCount, tracker);
+            var contextDistribution = HugeLongArray.newArray(nodeCount, allocationTracker);
             long sum = 0;
             for (var i = 0L; i < nodeCount; i++) {
                 sum += Math.pow(nodeFrequencies.get(i), negativeSamplingExponent);

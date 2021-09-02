@@ -111,23 +111,23 @@ public final class CsvGraphStoreImporter {
         return ImmutableUserGraphStore.of(userName, graphStoreBuilder.build());
     }
 
-    public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
+    public GraphStoreExporter.ImportedProperties run(AllocationTracker allocationTracker) {
         var fileInput = new FileInput(importPath);
-        graphStoreBuilder.tracker(tracker);
+        graphStoreBuilder.allocationTracker(allocationTracker);
         graphStoreBuilder.log(log);
         this.userName = fileInput.userName();
-        return importGraph(fileInput, tracker);
+        return importGraph(fileInput, allocationTracker);
     }
 
-    private GraphStoreExporter.ImportedProperties importGraph(FileInput fileInput, AllocationTracker tracker) {
-        var nodes = importNodes(fileInput, tracker);
+    private GraphStoreExporter.ImportedProperties importGraph(FileInput fileInput, AllocationTracker allocationTracker) {
+        var nodes = importNodes(fileInput, allocationTracker);
         var importedRelationships = importRelationships(fileInput, nodes, AllocationTracker.empty());
         return ImmutableImportedProperties.of(nodes.nodeCount(), importedRelationships);
     }
 
     private NodeMapping importNodes(
         FileInput fileInput,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         NodeSchema nodeSchema = fileInput.nodeSchema();
 
@@ -139,7 +139,7 @@ public final class CsvGraphStoreImporter {
             .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
             .nodeCount(graphInfo.nodeCount())
-            .tracker(tracker)
+            .allocationTracker(allocationTracker)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
@@ -186,14 +186,14 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private long importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
+    private long importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker allocationTracker) {
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
         this.relationshipVisitorBuilder
             .withRelationshipSchema(relationshipSchema)
             .withNodes(nodes)
             .withConcurrency(concurrency)
-            .withAllocationTracker(tracker)
+            .withAllocationTracker(allocationTracker)
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType);
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
@@ -309,7 +309,7 @@ public final class CsvGraphStoreImporter {
         int concurrency,
         boolean useBitIdMap,
         Log log,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         var graphStore = CSRGraphStore.of(
             databaseId,
@@ -318,7 +318,7 @@ public final class CsvGraphStoreImporter {
             relationships,
             relationshipPropertyStores,
             concurrency,
-            tracker
+            allocationTracker
         );
         if (useBitIdMap) {
             // When the originally persisted graph was using a BitIdMap
@@ -340,7 +340,7 @@ public final class CsvGraphStoreImporter {
                     config,
                     Pools.DEFAULT,
                     log,
-                    tracker,
+                    allocationTracker,
                     EmptyTaskRegistry.INSTANCE
                 );
             } catch (ParseException | SemanticErrors e) {

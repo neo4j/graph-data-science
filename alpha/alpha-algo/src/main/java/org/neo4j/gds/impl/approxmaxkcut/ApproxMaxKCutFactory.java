@@ -49,9 +49,9 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
 
     @Override
     protected ApproxMaxKCut build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        return new ApproxMaxKCut(graph, Pools.DEFAULT, configuration, progressTracker, tracker);
+        return new ApproxMaxKCut(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
     }
 
     @Override

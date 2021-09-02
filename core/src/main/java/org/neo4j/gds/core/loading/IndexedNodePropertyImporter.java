@@ -73,7 +73,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         @Nullable ExecutorService executorService,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this(
             concurrency,
@@ -89,7 +89,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             index.schema().getPropertyId(),
             NodePropertiesFromStoreBuilder.of(
                 idMap.nodeCount(),
-                tracker,
+                allocationTracker,
                 mapping.defaultValue()
             )
         );

@@ -53,14 +53,14 @@ public final class BumpAllocator<PAGE> {
 
     private final Factory<PAGE> pageFactory;
     private final ReentrantLock growLock;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
-    BumpAllocator(AllocationTracker tracker, Factory<PAGE> pageFactory) {
+    BumpAllocator(AllocationTracker allocationTracker, Factory<PAGE> pageFactory) {
         this.pageFactory = pageFactory;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.growLock = new ReentrantLock(true);
         this.pages = pageFactory.newEmptyPages();
-        tracker.add(sizeOfObjectArray(0));
+        allocationTracker.add(sizeOfObjectArray(0));
     }
 
     static {
@@ -97,10 +97,10 @@ public final class BumpAllocator<PAGE> {
         // overwritten by another thread during `grow()`.
         growLock.lock();
         try {
-            tracker.add(pageFactory.memorySizeOfPage(page));
+            allocationTracker.add(pageFactory.memorySizeOfPage(page));
             var pages = this.pages;
             if (pages[pageIndex] != null) {
-                tracker.remove(pageFactory.memorySizeOfPage(PAGE_SIZE));
+                allocationTracker.remove(pageFactory.memorySizeOfPage(PAGE_SIZE));
             }
             pages[pageIndex] = page;
         } finally {
@@ -136,14 +136,14 @@ public final class BumpAllocator<PAGE> {
      */
     private void setPages(int newNumPages, int skipPage) {
         PAGE[] currentPages = this.pages;
-        tracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
+        allocationTracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
 
         PAGE[] newPages = Arrays.copyOf(currentPages, newNumPages);
 
         for (int i = currentPages.length; i < newNumPages; i++) {
             // Create new page for default sized pages
             if (i != skipPage) {
-                tracker.add(pageFactory.memorySizeOfPage(PAGE_SIZE));
+                allocationTracker.add(pageFactory.memorySizeOfPage(PAGE_SIZE));
                 newPages[i] = pageFactory.newPage(PAGE_SIZE);
             }
         }

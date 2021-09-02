@@ -78,7 +78,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             protected SplitRelationships build(
                 Graph graph,
                 SplitRelationshipsMutateConfig configuration,
-                AllocationTracker tracker,
+                AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 var masterGraph = graph;

@@ -188,8 +188,8 @@ public abstract class HugeAtomicDoubleArray {
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeAtomicDoubleArray newArray(long size, AllocationTracker tracker) {
-        return newArray(size, DoublePageCreator.passThrough(1), tracker);
+    public static HugeAtomicDoubleArray newArray(long size, AllocationTracker allocationTracker) {
+        return newArray(size, DoublePageCreator.passThrough(1), allocationTracker);
     }
 
     /**
@@ -197,11 +197,15 @@ public abstract class HugeAtomicDoubleArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      * The values are pre-calculated according to the semantics of {@link java.util.Arrays#setAll(double[], java.util.function.IntToDoubleFunction)}
      */
-    public static HugeAtomicDoubleArray newArray(long size, DoublePageCreator pageFiller, AllocationTracker tracker) {
+    public static HugeAtomicDoubleArray newArray(
+        long size,
+        DoublePageCreator pageFiller,
+        AllocationTracker allocationTracker
+    ) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+            return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, allocationTracker);
         }
-        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, allocationTracker);
     }
 
     public static long memoryEstimation(long size) {
@@ -238,10 +242,14 @@ public abstract class HugeAtomicDoubleArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
 
-        private static HugeAtomicDoubleArray of(long size, DoublePageCreator pageCreator, AllocationTracker tracker) {
+        private static HugeAtomicDoubleArray of(
+            long size,
+            DoublePageCreator pageCreator,
+            AllocationTracker allocationTracker
+        ) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
-            tracker.add(sizeOfLongArray(intSize));
+            allocationTracker.add(sizeOfLongArray(intSize));
             double[] page = new double[intSize];
             pageCreator.fillPage(page, 0);
             return new HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray(intSize, page);
@@ -343,7 +351,11 @@ public abstract class HugeAtomicDoubleArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
 
-        private static HugeAtomicDoubleArray of(long size, DoublePageCreator pageCreator, AllocationTracker tracker) {
+        private static HugeAtomicDoubleArray of(
+            long size,
+            DoublePageCreator pageCreator,
+            AllocationTracker allocationTracker
+        ) {
             int numPages = numberOfPages(size);
             final int lastPageSize = exclusiveIndexOfPage(size);
 
@@ -351,7 +363,7 @@ public abstract class HugeAtomicDoubleArray {
             pageCreator.fill(pages, lastPageSize);
 
             long memoryUsed = memoryUsageOfData(size);
-            tracker.add(memoryUsed);
+            allocationTracker.add(memoryUsed);
             return new PagedHugeAtomicDoubleArray(size, pages, memoryUsed);
         }
 

@@ -54,7 +54,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     public GraphSage build(
         Graph graph,
         CONFIG configuration,
-        AllocationTracker tracker,
+        AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
 
@@ -67,7 +67,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             graph,
             configuration,
             executorService,
-            tracker,
+            allocationTracker,
             progressTracker
         );
     }

@@ -123,12 +123,12 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             adjacencyListWithPropertiesBuilder,
             numberOfPages,
             pageSize,
-            tracker,
+            allocationTracker,
             relationshipCounter,
             USE_PRE_AGGREGATION.isEnabled()
         );
 
-        RelationshipImporter importer = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);
+        RelationshipImporter importer = new RelationshipImporter(loadingContext.allocationTracker(), adjacencyBuilder);
         int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
         return new SingleTypeRelationshipImporter.Builder(
             relationshipType,

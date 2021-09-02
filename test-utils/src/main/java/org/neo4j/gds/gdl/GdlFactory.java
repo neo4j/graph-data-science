@@ -179,7 +179,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             topologies,
             properties,
             1,
-            loadingContext.tracker()
+            loadingContext.allocationTracker()
         );
         return ImportResult.of(dimensions, graphStore);
     }
@@ -189,7 +189,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             .maxOriginalId(dimensions.highestNeoId())
             .hasLabelInformation(true)
             .concurrency(1)
-            .tracker(loadingContext.tracker())
+            .allocationTracker(loadingContext.allocationTracker())
             .build();
 
         gdlHandler.getVertices().forEach(vertex -> nodesBuilder.addNode(
@@ -226,7 +226,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesFromStoreBuilder.of(
                         dimensions.nodeCount(),
-                        loadingContext.tracker(),
+                        loadingContext.allocationTracker(),
                         DefaultValue.DEFAULT
                     )).set(idMap.toMappedNodeId(vertex.getId()), Values.of(propertyValue));
             }));
@@ -389,7 +389,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         .aggregation(graphCreateConfig.aggregation())
                         .addAllPropertyConfigs(propertyConfigs)
                         .executorService(loadingContext.executor())
-                        .tracker(loadingContext.tracker())
+                        .allocationTracker(loadingContext.allocationTracker())
                         .build();
                 }
             ));

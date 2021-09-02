@@ -108,7 +108,7 @@ public final class ProcedureReflection {
             proc.callContext = caller.callContext;
             proc.log = caller.log;
             proc.procedureTransaction = caller.procedureTransaction;
-            proc.tracker = caller.tracker;
+            proc.allocationTracker = caller.allocationTracker;
             proc.transaction = caller.transaction;
             proc.taskRegistry = caller.taskRegistry;
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
@@ -149,4 +149,3 @@ public final class ProcedureReflection {
         );
     }
 }
-

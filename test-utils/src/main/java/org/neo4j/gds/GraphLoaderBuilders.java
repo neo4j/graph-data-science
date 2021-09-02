@@ -58,7 +58,7 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> tracker,
+        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -99,7 +99,7 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             executorService,
-            tracker,
+            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -113,7 +113,7 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> tracker,
+        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -123,7 +123,7 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             executorService,
-            tracker,
+            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -141,7 +141,7 @@ public final class GraphLoaderBuilders {
         // GraphLoader parameters
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
-        Optional<AllocationTracker> tracker,
+        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -167,7 +167,7 @@ public final class GraphLoaderBuilders {
             api,
             transactionContext,
             Optional.empty(),
-            tracker,
+            allocationTracker,
             terminationFlag,
             log,
             userName,
@@ -180,7 +180,7 @@ public final class GraphLoaderBuilders {
         GraphDatabaseAPI api,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> tracker,
+        Optional<AllocationTracker> allocationTracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
@@ -191,7 +191,7 @@ public final class GraphLoaderBuilders {
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
                 .api(api)
                 .executor(executorService.orElse(Pools.DEFAULT))
-                .tracker(tracker.orElse(AllocationTracker.empty()))
+                .allocationTracker(allocationTracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .log(log.orElse(NullLog.getInstance()))
                 .build())

@@ -467,14 +467,14 @@ class GraphStoreFilterTest {
             var nodeCount = 10_000;
             var maxOriginalId = 100_000;
             var concurrency = 4;
-            var tracker = AllocationTracker.empty();
+            var allocationTracker = AllocationTracker.empty();
 
             // Create an id map where the original id space
             // does not overlap with the internal id space.
             var builder = GraphFactory.initNodesBuilder()
                 .nodeCount(nodeCount)
                 .maxOriginalId(maxOriginalId)
-                .tracker(tracker)
+                .allocationTracker(allocationTracker)
                 .build();
 
             LongStream.range(maxOriginalId - nodeCount, maxOriginalId).forEach(builder::addNode);
@@ -489,7 +489,7 @@ class GraphStoreFilterTest {
                 ),
                 Map.of(),
                 concurrency,
-                tracker
+                allocationTracker
             );
 
             var filteredGraphStore = filter(graphStore, "*", "*", concurrency);

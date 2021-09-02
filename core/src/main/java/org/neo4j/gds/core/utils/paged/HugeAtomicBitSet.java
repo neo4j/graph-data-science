@@ -38,10 +38,10 @@ public final class HugeAtomicBitSet {
         return HugeAtomicLongArray.memoryEstimation(wordsSize) + MemoryUsage.sizeOfInstance(HugeAtomicBitSet.class);
     }
 
-    public static HugeAtomicBitSet create(long size, AllocationTracker tracker) {
+    public static HugeAtomicBitSet create(long size, AllocationTracker allocationTracker) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
-        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, tracker), size, remainder);
+        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, allocationTracker), size, remainder);
     }
 
     private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {

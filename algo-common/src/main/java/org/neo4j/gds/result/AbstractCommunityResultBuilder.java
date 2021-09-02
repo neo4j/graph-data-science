@@ -40,7 +40,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     protected boolean buildHistogram;
     protected boolean buildCommunityCount;
 
@@ -66,16 +66,16 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
-        this(callContext, Pools.DEFAULT, concurrency, tracker);
+        this(callContext, Pools.DEFAULT, concurrency, allocationTracker);
     }
 
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
         ExecutorService executorService,
         int concurrency,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.buildHistogram = callContext
             .outputFields()
@@ -85,7 +85,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
             .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     protected abstract WRITE_RESULT buildResult();
@@ -106,7 +106,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
                     communityFunction,
                     executorService,
                     concurrency,
-                    tracker
+                    allocationTracker
                 ));
             } else if (buildCommunityCount || buildHistogram) {
                 var communityCountAndHistogram = communityCountAndHistogram(
@@ -114,7 +114,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
                     communityFunction,
                     executorService,
                     concurrency,
-                    tracker
+                    allocationTracker
                 );
                 maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
                 maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());

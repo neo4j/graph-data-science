@@ -41,21 +41,21 @@ public interface AdjacencyFactory {
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     );
 
     default AdjacencyCompressorBlueprint create(
         long nodeCount,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         return create(
             nodeCount,
             propertyMappings,
             aggregations,
             Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),
-            tracker
+            allocationTracker
         );
     }
 
@@ -66,26 +66,26 @@ public interface AdjacencyFactory {
     }
 
     static AdjacencyFactory transientCompressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) ->
+        return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
             DeltaVarLongCompressor.Factory.INSTANCE.create(
                 nodeCount,
-                TransientCompressedCsrListBuilderFactory.of(tracker),
+                TransientCompressedCsrListBuilderFactory.of(allocationTracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
-                tracker
+                allocationTracker
             );
     }
 
     static AdjacencyFactory transientUncompressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) ->
+        return (nodeCount, propertyMappings, aggregations, noAggregation, allocationTracker) ->
             RawCompressor.Factory.INSTANCE.create(
                 nodeCount,
-                TransientUncompressedCsrListBuilderFactory.of(tracker),
+                TransientUncompressedCsrListBuilderFactory.of(allocationTracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
-                tracker
+                allocationTracker
             );
     }
 

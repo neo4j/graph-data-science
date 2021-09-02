@@ -81,7 +81,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private final WccBaseConfig config;
     private final NodeProperties initialComponents;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
     private final long nodeCount;
     private final long batchSize;
     private final int threadSize;
@@ -101,7 +101,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         int minBatchSize,
         WccBaseConfig config,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.config = config;
@@ -109,7 +109,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ? graph.nodeProperties(config.seedProperty())
             : null;
         this.executor = executor;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
         this.nodeCount = graph.nodeCount();
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
@@ -139,8 +139,8 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         long nodeCount = graph.nodeCount();
 
         DisjointSetStruct dss = config.isIncremental()
-            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, tracker, config.concurrency())
-            : new HugeAtomicDisjointSetStruct(nodeCount, tracker, config.concurrency());
+            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, allocationTracker, config.concurrency())
+            : new HugeAtomicDisjointSetStruct(nodeCount, allocationTracker, config.concurrency());
 
         if (graph.isUndirected() && !config.hasThreshold()) {
             computeUndirected(dss);

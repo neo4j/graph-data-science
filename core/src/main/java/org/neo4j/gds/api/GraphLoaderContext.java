@@ -46,7 +46,7 @@ public interface GraphLoaderContext {
     }
 
     @Value.Default
-    default AllocationTracker tracker() {
+    default AllocationTracker allocationTracker() {
         return AllocationTracker.empty();
     }
 

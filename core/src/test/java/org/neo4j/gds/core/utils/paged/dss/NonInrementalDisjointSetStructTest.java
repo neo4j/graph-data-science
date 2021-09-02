@@ -29,10 +29,8 @@ class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
-        AllocationTracker tracker = AllocationTracker.empty();
-        return new NonInrementalDisjointSetStruct(
-                capacity,
-                tracker);
+        AllocationTracker allocationTracker = AllocationTracker.empty();
+        return new NonInrementalDisjointSetStruct(capacity, allocationTracker);
     }
 
     @Test

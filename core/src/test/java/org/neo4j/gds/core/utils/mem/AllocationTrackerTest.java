@@ -42,58 +42,58 @@ class AllocationTrackerTest {
     @ParameterizedTest
     @MethodSource("allocationTrackers")
     void testAddForInMemoryTracking() {
-        var tracker = AllocationTracker.create();
-        tracker.add(42);
-        assertEquals(42, tracker.trackedBytes());
+        var allocationTracker = AllocationTracker.create();
+        allocationTracker.add(42);
+        assertEquals(42, allocationTracker.trackedBytes());
     }
 
     @ParameterizedTest
     @MethodSource("allocationTrackers")
     void testRemoveForInMemoryTracking() {
-        var tracker = AllocationTracker.create();
-        tracker.add(1337);
-        tracker.remove(42);
-        assertEquals(1337 - 42, tracker.trackedBytes());
+        var allocationTracker = AllocationTracker.create();
+        allocationTracker.add(1337);
+        allocationTracker.remove(42);
+        assertEquals(1337 - 42, allocationTracker.trackedBytes());
     }
 
     @Test
     void testStringOutputForInMemoryTracking() {
-        var tracker = AllocationTracker.create();
-        tracker.add(1337);
-        assertEquals("1337 Bytes", tracker.getUsageString());
-        tracker.add(1337 * 42);
-        assertEquals("56 KiB", tracker.getUsageString());
+        var allocationTracker = AllocationTracker.create();
+        allocationTracker.add(1337);
+        assertEquals("1337 Bytes", allocationTracker.getUsageString());
+        allocationTracker.add(1337 * 42);
+        assertEquals("56 KiB", allocationTracker.getUsageString());
     }
 
     @ParameterizedTest
     @MethodSource("emptyTrackers")
-    void testAddForEmptyTracking(AllocationTracker tracker) {
-        tracker.add(1337);
-        assertEquals(0, tracker.trackedBytes());
-        tracker.remove(42);
-        assertEquals(0, tracker.trackedBytes());
+    void testAddForEmptyTracking(AllocationTracker allocationTracker) {
+        allocationTracker.add(1337);
+        assertEquals(0, allocationTracker.trackedBytes());
+        allocationTracker.remove(42);
+        assertEquals(0, allocationTracker.trackedBytes());
     }
 
     @Test
     void testCheckForAllocationTracking() {
-        var tracker = AllocationTracker.create();
-        assertTrue(AllocationTracker.isTracking(tracker));
+        var allocationTracker = AllocationTracker.create();
+        assertTrue(AllocationTracker.isTracking(allocationTracker));
         assertFalse(AllocationTracker.isTracking(AllocationTracker.empty()));
         assertFalse(AllocationTracker.isTracking(null));
     }
 
     @Test
     void shouldUseInMemoryTrackerWhenFeatureIsToggledOff() {
-        var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
-        var allocationTracker = AllocationTracker.create(trackerProxy);
+        var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
+        var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
         assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
     }
 
     @Test
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
-            var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
-            var allocationTracker = AllocationTracker.create(trackerProxy);
+            var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
+            var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
             assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
         });
     }
@@ -102,8 +102,8 @@ class AllocationTrackerTest {
     void shouldTerminateTransactionWhenOverallocating() {
         USE_KERNEL_TRACKER.enableAndRun(
             () -> {
-                var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
-                var allocationTracker = AllocationTracker.create(trackerProxy);
+                var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
+                var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
                 allocationTracker.add(42);
                 assertEquals(42L, allocationTracker.trackedBytes());
                 var exception = assertThrows(

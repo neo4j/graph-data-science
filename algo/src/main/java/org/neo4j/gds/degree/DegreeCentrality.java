@@ -45,7 +45,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     private Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     public interface DegreeFunction {
         double get(long nodeId);
@@ -56,13 +56,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         ExecutorService executor,
         DegreeCentralityConfig config,
         ProgressTracker progressTracker,
-        AllocationTracker tracker
+        AllocationTracker allocationTracker
     ) {
         this.graph = graph;
         this.executor = executor;
         this.config = config;
         this.progressTracker = progressTracker;
-        this.tracker = tracker;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -157,7 +157,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     private DegreeFunction computeDegree(TaskFunction taskFunction) {
-        var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        var degrees = HugeDoubleArray.newArray(graph.nodeCount(), allocationTracker);
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
@@ -169,7 +169,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+        var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),

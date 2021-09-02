@@ -47,7 +47,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
 
     @Override
     protected LinkPredictionTrain build(
-        Graph graph, LinkPredictionTrainConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, LinkPredictionTrainConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         return new LinkPredictionTrain(graph, configuration, progressTracker);
     }

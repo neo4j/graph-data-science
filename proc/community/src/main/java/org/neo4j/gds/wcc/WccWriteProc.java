@@ -126,8 +126,8 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
 
         static class Builder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
-                super(context, concurrency, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker allocationTracker) {
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

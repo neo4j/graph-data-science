@@ -60,8 +60,8 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Algo
 
     @Override
     protected Yens build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
+        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, progressTracker, tracker);
+        return Yens.sourceTarget(graph, configuration, progressTracker, allocationTracker);
     }
 }

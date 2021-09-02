@@ -163,8 +163,8 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, allocationTracker);
 
         final AtomicReferenceArray<long[]> pages = getPages(array);
         for (int i = 0; i < pages.length(); i++) {
@@ -172,15 +172,15 @@ final class HugeSparseLongArrayTest {
             assertNull(page);
         }
 
-        long tracked = tracker.trackedBytes();
+        long tracked = allocationTracker.trackedBytes();
         // allow some bytes for the container type and
         assertEquals(sizeOfObjectArray(2), tracked);
     }
 
     @Test
     void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
-        AllocationTracker tracker = AllocationTracker.create();
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, tracker);
+        AllocationTracker allocationTracker = AllocationTracker.create();
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, allocationTracker);
 
         int index = integer(PS, 2 * PS - 1);
         int value = integer(42, 1337);
@@ -195,7 +195,7 @@ final class HugeSparseLongArrayTest {
             }
         }
 
-        long tracked = tracker.trackedBytes();
+        long tracked = allocationTracker.trackedBytes();
         assertEquals(sizeOfObjectArray(2) + sizeOfLongArray(PS), tracked);
     }
 
@@ -242,7 +242,7 @@ final class HugeSparseLongArrayTest {
         //long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
         //  private final long capacity;
         //  private final long[][] pages;
-        //  private final AllocationTracker tracker;
+        //  private final AllocationTracker allocationTracker;
         long classSizeComponents =
                 8L /* capacity */ +
                 4L /* ref for long[][] array */ +

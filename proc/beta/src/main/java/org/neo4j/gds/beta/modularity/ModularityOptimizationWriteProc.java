@@ -134,9 +134,9 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
             Builder(
                 ProcedureCallContext context,
                 int concurrency,
-                AllocationTracker tracker
+                AllocationTracker allocationTracker
             ) {
-                super(context, concurrency, tracker);
+                super(context, concurrency, allocationTracker);
             }
 
             @Override

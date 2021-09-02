@@ -43,7 +43,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
             .perNode("values", HugeLongArray::memoryEstimation)
             .build();
 
-    private final AllocationTracker tracker;
+    private final AllocationTracker allocationTracker;
 
     private HugeLongArray keys;
     private HugeLongArray values;
@@ -64,15 +64,15 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(AllocationTracker tracker) {
-        this(DEFAULT_EXPECTED_ELEMENTS, tracker);
+    public HugeLongLongMap(AllocationTracker allocationTracker) {
+        this(DEFAULT_EXPECTED_ELEMENTS, allocationTracker);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(long expectedElements, AllocationTracker tracker) {
-        this.tracker = tracker;
+    public HugeLongLongMap(long expectedElements, AllocationTracker allocationTracker) {
+        this.allocationTracker = allocationTracker;
         initialBuffers(expectedElements);
     }
 
@@ -215,7 +215,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         long released = 0L;
         released += keys.release();
         released += values.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
 
         keys = null;
         values = null;
@@ -224,7 +224,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), tracker);
+        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
     }
 
     @Override
@@ -262,15 +262,15 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
      * Allocate new internal buffers. This method attempts to allocate
      * and assign internal buffers atomically (either allocations succeed or not).
      */
-    private void allocateBuffers(long arraySize, AllocationTracker tracker) {
+    private void allocateBuffers(long arraySize, AllocationTracker allocationTracker) {
         assert BitUtil.isPowerOfTwo(arraySize);
 
         // Ensure no change is done if we hit an OOM.
         HugeLongArray prevKeys = this.keys;
         HugeLongArray prevValues = this.values;
         try {
-            this.keys = HugeLongArray.newArray(arraySize, tracker);
-            this.values = HugeLongArray.newArray(arraySize, tracker);
+            this.keys = HugeLongArray.newArray(arraySize, allocationTracker);
+            this.values = HugeLongArray.newArray(arraySize, allocationTracker);
             keysCursor = keys.newCursor();
             entries = new EntryIterator();
         } catch (OutOfMemoryError e) {
@@ -324,7 +324,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         // Try to allocate new buffers first. If we OOM, we leave in a consistent state.
         final HugeLongArray prevKeys = this.keys;
         final HugeLongArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), tracker);
+        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
         assert this.keys.size() > prevKeys.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at
@@ -338,7 +338,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         long released = 0L;
         released += prevKeys.release();
         released += prevValues.release();
-        tracker.remove(released);
+        allocationTracker.remove(released);
     }
 
 
