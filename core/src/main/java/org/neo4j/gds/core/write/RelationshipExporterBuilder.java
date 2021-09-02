@@ -22,7 +22,6 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.values.storable.Values;
@@ -39,7 +38,6 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
     protected Graph graph;
-    protected ProgressLogger progressLogger;
     protected ProgressTracker progressTracker;
 
     RelationshipPropertyTranslator propertyTranslator;
@@ -47,8 +45,6 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     RelationshipExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.propertyTranslator = Values::doubleValue;
-
-        this.progressLogger = ProgressLogger.NULL_LOGGER;
         this.progressTracker = ProgressTracker.NULL_TRACKER;
     }
 
@@ -75,6 +71,15 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
         return this;
     }
 
+    /**
+     * Set the @{code ProgressTracker} to use for logging progress during export.
+     *
+     * If a {@code TaskProgressTracker} is used, caller must manage beginning and finishing the subtasks.
+     * By default, an {@code EmptyProgressTracker} is used. That one doesn't require caller to manage any tasks.
+     *
+     * @param progressTracker The progress tracker to use for logging progress during export.
+     * @return this
+     */
     public RelationshipExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
         return this;
