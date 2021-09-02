@@ -366,8 +366,9 @@ public final class SparseLongArray {
             // blockOffsets[0] is always 0, hence + 1
             long[] blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
 
+            // count block-wise on all first whole blocks and set offsets
             long count = 0;
-            for (int block = 0; block < cappedSize; block += BLOCK_SIZE) {
+            for (int block = 0; block <= cappedSize; block += BLOCK_SIZE) {
                 for (int page = block; page < block + BLOCK_SIZE; page++) {
                     count += Long.bitCount(array[page]);
                 }
@@ -375,8 +376,9 @@ public final class SparseLongArray {
             }
 
             // Count the remaining ids in the tail.
-            var lastBlockBegin = Math.max(0, cappedSize);
-            for (int page = lastBlockBegin; page < size; page++) {
+            // bitwise AND will retain a value <= BLOCK_MASK
+            var tailSize = size & BLOCK_MASK;
+            for (int page = size - tailSize; page < size; page++) {
                 count += Long.bitCount(array[page]);
             }
 
