@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -54,7 +51,6 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
 
     @Test
     void shouldThrowWhenOverAllocating() {
-        Assumptions.assumeFalse(is40(), "There is no KernelTracker in 4.0");
 
         Graph graph = fromGdl("()-->()");
 
@@ -80,9 +76,5 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                 assertThat(exception).hasMessageStartingWith("The allocation of an extra");
             }
         );
-    }
-
-    private boolean is40() {
-        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
     }
 }

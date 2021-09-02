@@ -58,7 +58,6 @@ class InMemoryStorageEngineTest extends CypherTest {
     protected void onSetup() {}
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)

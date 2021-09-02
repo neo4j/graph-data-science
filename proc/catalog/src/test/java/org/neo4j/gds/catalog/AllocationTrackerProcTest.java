@@ -24,10 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -59,7 +57,6 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldFailOnMemoryLimitExceeded() {
         String cypher = GdsCypher.call()
             .loadEverything()
@@ -80,7 +77,6 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldReally() {
         String cypher = "CALL test.doIt()";
         USE_KERNEL_TRACKER.enableAndRun(

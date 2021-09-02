@@ -22,11 +22,7 @@ package org.neo4j.gds.core.utils.mem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -94,7 +90,6 @@ class AllocationTrackerTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
             var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
@@ -104,7 +99,6 @@ class AllocationTrackerTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldIgnoreFeatureToggleOn40() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
             var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
@@ -114,7 +108,6 @@ class AllocationTrackerTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldTerminateTransactionWhenOverallocating() {
         USE_KERNEL_TRACKER.enableAndRun(
             () -> {
@@ -134,11 +127,9 @@ class AllocationTrackerTest {
     }
 
     static Stream<AllocationTracker> emptyTrackers() {
-        return Stream.concat(
-            Stream.of(AllocationTracker.empty()),
-            GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0
-                ? Stream.empty()
-                : Stream.of(AllocationTracker.create(Neo4jProxy.emptyMemoryTrackerProxy()))
+        return Stream.of(
+            AllocationTracker.empty(),
+            AllocationTracker.create(Neo4jProxy.emptyMemoryTrackerProxy())
         );
     }
 

@@ -22,7 +22,6 @@ package org.neo4j.gds.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,10 +32,6 @@ class Neo4jVersionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "4.0, V_4_0",
-        "4.0-foo, V_4_0",
-        "4.0.2, V_4_0",
-        "4.0.2-foo, V_4_0",
         "4.1, V_4_1",
         "4.1-foo, V_4_1",
         "4.1.1, V_4_1",
@@ -57,7 +52,6 @@ class Neo4jVersionTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
     void shouldNotRespectVersionOverride() {
         System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
         assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());

@@ -39,7 +39,6 @@ public class NodeLabelIndexTest extends BaseTest {
     public static final String DB_CYPHER = "CREATE (a:Foo),(b:Bar)";
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "Label index is mandatory in 4.0.")
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_1, message = "Label index is mandatory in 4.1.")
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_2, message = "Label index is mandatory in 4.2.")
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_3_drop40, message = "Label index is mandatory in Neo4j 4.3.0-drop04.0.")

@@ -32,7 +32,6 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
     @Override
     public boolean canLoad(Neo4jVersion version) {
         var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_0,
             Neo4jVersion.V_4_1,
             Neo4jVersion.V_4_2,
             Neo4jVersion.V_4_3_drop31,

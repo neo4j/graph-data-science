@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public enum Neo4jVersion {
-    V_4_0,
     V_4_1,
     V_4_2,
     V_4_3,
@@ -39,8 +38,6 @@ public enum Neo4jVersion {
     @Override
     public String toString() {
         switch (this) {
-            case V_4_0:
-                return "4.0";
             case V_4_1:
                 return "4.1";
             case V_4_2:
@@ -108,8 +105,6 @@ public enum Neo4jVersion {
             .limit(2)
             .collect(Collectors.joining("."));
         switch (majorVersion) {
-            case "4.0":
-                return Neo4jVersion.V_4_0;
             case "4.1":
                 return Neo4jVersion.V_4_1;
             case "4.2":
