@@ -22,7 +22,6 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -37,14 +36,12 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
     protected TerminationFlag terminationFlag;
 
     protected ExecutorService executorService;
-    protected ProgressLogger progressLogger;
     protected int writeConcurrency;
     protected ProgressTracker progressTracker;
 
     NodePropertyExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
-        this.progressLogger = ProgressLogger.NULL_LOGGER;
         this.progressTracker = ProgressTracker.NULL_TRACKER;
     }
 
