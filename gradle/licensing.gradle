@@ -109,7 +109,6 @@ def publicModules = [
     ':core',
     ':neo4j-adapter',
     ':neo4j-kernel-adapter',
-    ':neo4j-kernel-adapter-4.0',
     ':neo4j-kernel-adapter-4.1',
     ':neo4j-kernel-adapter-4.2',
     ':neo4j-kernel-adapter-4.3',

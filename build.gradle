@@ -23,7 +23,6 @@ ext {
 
     compatibilityModules = [
             'kernel-adapter': [
-                    project(':neo4j-kernel-adapter-4.0'),
                     project(':neo4j-kernel-adapter-4.1'),
                     project(':neo4j-kernel-adapter-4.2'),
                     project(':neo4j-kernel-adapter-4.3'),

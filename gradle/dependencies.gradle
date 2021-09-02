@@ -1,6 +1,5 @@
 ext {
     neos = [
-        '4.0'           : properties.getOrDefault('neo4jVersion40', '4.0.12'),
         '4.1'           : properties.getOrDefault('neo4jVersion41', '4.1.10'),
         '4.2'           : properties.getOrDefault('neo4jVersion42', '4.2.10'),
         '4.3'           : properties.getOrDefault('neo4jVersion43', '4.3.3'),
@@ -14,7 +13,6 @@ ext {
     neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
 
     neo_at_least_43 = [
-        '4.0': neos.'4.3',
         '4.1': neos.'4.3',
         '4.2': neos.'4.3',
         '4.3': neos.'4.3',
