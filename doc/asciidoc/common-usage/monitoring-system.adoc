@@ -51,6 +51,13 @@ YIELD
 |===
 --
 
+[NOTE]
+====
+`freeHeap` is influenced by ongoing GDS procedures, graphs stored the <<graph-catalog-ops, Graph catalog>> and the underlying Neo4j DBMS.
+Stored graphs can take up a significant amount of heap memory.
+To inspect the graphs in the graph catalog you can use the <<catalog-graph-list, Graph list>> procedure.
+====
+
 
 === Example
 
