@@ -141,10 +141,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++ranIterations;
             didConverge = stepRunners.stream().allMatch(StepRunner::didConverge);
+            progressTracker.endSubTask();
             if (didConverge) {
                 break;
             }
-            progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
 
