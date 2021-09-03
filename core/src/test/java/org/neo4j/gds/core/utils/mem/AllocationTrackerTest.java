@@ -99,15 +99,6 @@ class AllocationTrackerTest {
     }
 
     @Test
-    void shouldIgnoreFeatureToggleOn40() {
-        USE_KERNEL_TRACKER.enableAndRun(() -> {
-            var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
-            var allocationTracker = AllocationTracker.create(trackerProxy);
-            assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
-        });
-    }
-
-    @Test
     void shouldTerminateTransactionWhenOverallocating() {
         USE_KERNEL_TRACKER.enableAndRun(
             () -> {
