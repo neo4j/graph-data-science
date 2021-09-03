@@ -291,7 +291,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void shouldCountNodesSpecialOriginalId(TestMethodRunner runTest) {
         runTest.run(() -> {
             var maxOriginalId = 4032L;
@@ -307,7 +307,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void shouldCountAllNodesSpecialOriginalId(TestMethodRunner runTest) {
         runTest.run(() -> {
             var maxOriginalId = 4032;
@@ -323,7 +323,7 @@ class NodesBuilderTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void shouldCountNodesSpecialOriginalId2(TestMethodRunner runTest) {
         runTest.run(() -> {
             var maxOriginalId = 4031L;
