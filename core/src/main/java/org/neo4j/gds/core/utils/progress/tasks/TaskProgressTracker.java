@@ -22,9 +22,9 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Optional;
 import java.util.Stack;
@@ -126,6 +126,7 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         taskRegistry.unregisterTask();
+        validateTaskFinishedOrCanceled();
     }
 
     @TestOnly
@@ -140,6 +141,15 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private Task requireCurrentTask() {
         return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
+    }
+
+    private void validateTaskFinishedOrCanceled() {
+        if (baseTask.status() == Status.RUNNING) {
+            throw new IllegalStateException(formatWithLocale(
+                "Attempted to release algorithm, but task %s is still running",
+                baseTask.description()
+            ));
+        }
     }
 
     private void assertSubTask(String subTaskSubString) {
