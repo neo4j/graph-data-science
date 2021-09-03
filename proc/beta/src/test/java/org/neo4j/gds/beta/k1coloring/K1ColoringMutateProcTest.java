@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
@@ -36,8 +36,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringMutateConfig>
-    implements MutateNodePropertyTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
+public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig>
+    implements MutateNodePropertyTest<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig> {
 
     @BeforeEach
     void addGraphWriteNodePropertiesProc() throws Exception {
@@ -70,7 +70,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig>> getProcedureClazz() {
         return K1ColoringMutateProc.class;
     }
 

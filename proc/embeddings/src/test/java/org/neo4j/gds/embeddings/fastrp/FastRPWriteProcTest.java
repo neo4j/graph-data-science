@@ -25,9 +25,9 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
-class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
+class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteProc.WriteResult, FastRPWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -55,7 +55,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteProc.WriteResult, FastRPWriteConfig>> getProcedureClazz() {
         return FastRPWriteProc.class;
     }
 

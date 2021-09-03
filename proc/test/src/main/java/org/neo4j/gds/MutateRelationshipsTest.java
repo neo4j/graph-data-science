@@ -20,16 +20,16 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface MutateRelationshipsTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
-    extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface MutateRelationshipsTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends MutateConfig & AlgoBaseConfig>
+    extends MutateProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
 
     String mutateRelationshipType();
 

@@ -21,14 +21,15 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.WriteRelationshipWithPropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Knn.Result> {
+class KnnWriteProcTest extends KnnProcTest<SimilarityWriteResult, KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, Knn.Result, SimilarityWriteResult, KnnWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, SimilarityWriteResult, KnnWriteConfig>> getProcedureClazz() {
         return KnnWriteProc.class;
     }
 

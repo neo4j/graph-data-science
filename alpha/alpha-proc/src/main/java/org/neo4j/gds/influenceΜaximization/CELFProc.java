@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConfig> {
+public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationResult, InfluenceMaximizationConfig> {
     private static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
     @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)

@@ -22,14 +22,14 @@ package org.neo4j.gds.wcc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
@@ -43,9 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
-    MutateNodePropertyTest<Wcc, WccMutateConfig, DisjointSetStruct>,
-    ConsecutiveIdsConfigTest<Wcc, WccMutateConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccMutateProc.MutateResult, WccMutateConfig> implements
+    MutateNodePropertyTest<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig>,
+    ConsecutiveIdsConfigTest<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
 
     @Override
     public String mutateProperty() {
@@ -58,7 +58,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 

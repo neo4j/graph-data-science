@@ -96,7 +96,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * the database returned by {@link AlgoBaseProcTest#graphDb} and
  * clears the data after each test.
  */
-public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
+public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig>
     extends GraphCreateConfigSupport
 {
 
@@ -107,9 +107,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
+    Class<? extends AlgoBaseProc<ALGORITHM, RESULT, PROC_RESULT, CONFIG>> getProcedureClazz();
 
-    default AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc() {
+    default AlgoBaseProc<ALGORITHM, RESULT, PROC_RESULT, CONFIG> proc() {
         try {
             return getProcedureClazz()
                 .getConstructor()
@@ -152,9 +152,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
     }
 
-    default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> func) {
+    default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, PROC_RESULT, CONFIG>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb())) {
-            AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc;
+            AlgoBaseProc<ALGORITHM, RESULT, PROC_RESULT, CONFIG> proc;
             try {
                 proc = getProcedureClazz().getDeclaredConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -169,7 +169,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.taskRegistry = EmptyTaskRegistry.INSTANCE;
 
             if (proc instanceof NodePropertiesWriter) {
-                ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                ((NodePropertiesWriter<?, ?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction
@@ -185,7 +185,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             }
 
             if (proc instanceof StreamOfRelationshipsWriter) {
-                ((StreamOfRelationshipsWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporter.Builder(
+                ((StreamOfRelationshipsWriter<?, ?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporter.Builder(
                     TransactionContext.of(
                         proc.api,
                         proc.procedureTransaction
@@ -528,7 +528,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     private Object relationshipProjectionForType(String type) {
-        return this instanceof OnlyUndirectedTest<?, ?, ?>
+        return this instanceof OnlyUndirectedTest<?, ?, ?, ?>
             ? Map.of(type, Map.of(TYPE_KEY, type, ORIENTATION_KEY, Orientation.UNDIRECTED.name()))
             : List.of(type);
     }
@@ -636,12 +636,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
-    default boolean methodExists(AlgoBaseProc<?, RESULT, CONFIG> proc, String methodSuffix) {
+    default boolean methodExists(AlgoBaseProc<?, RESULT, PROC_RESULT, CONFIG> proc, String methodSuffix) {
         return getProcedureMethods(proc)
             .anyMatch(method -> getProcedureMethodName(method).endsWith(methodSuffix));
     }
 
-    default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, CONFIG> proc) {
+    default Stream<Method> getProcedureMethods(AlgoBaseProc<?, RESULT, PROC_RESULT, CONFIG> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method -> method.getDeclaredAnnotation(Procedure.class) != null);
     }
@@ -656,7 +656,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return name;
     }
 
-    default Stream<Method> getWriteAndStreamProcedures(AlgoBaseProc<?, RESULT, CONFIG> proc) {
+    default Stream<Method> getWriteAndStreamProcedures(AlgoBaseProc<?, RESULT, PROC_RESULT, CONFIG> proc) {
         return getProcedureMethods(proc)
             .filter(method -> {
                 String procedureMethodName = getProcedureMethodName(method);
@@ -664,7 +664,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             });
     }
 
-    default Stream<Method> getWriteStreamStatsProcedures(AlgoBaseProc<?, RESULT, CONFIG> proc) {
+    default Stream<Method> getWriteStreamStatsProcedures(AlgoBaseProc<?, RESULT, PROC_RESULT, CONFIG> proc) {
         return getProcedureMethods(proc)
             .filter(method -> {
                 var procedureMethodName = getProcedureMethodName(method);

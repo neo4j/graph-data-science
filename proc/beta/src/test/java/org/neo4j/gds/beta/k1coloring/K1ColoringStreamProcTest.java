@@ -22,8 +22,8 @@ package org.neo4j.gds.beta.k1coloring;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamConfig> {
+class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamProc.StreamResult, K1ColoringStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamProc.StreamResult, K1ColoringStreamConfig>> getProcedureClazz() {
         return K1ColoringStreamProc.class;
     }
 

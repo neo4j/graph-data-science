@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
-public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
 
     @Test
     default void validateUndirected() {

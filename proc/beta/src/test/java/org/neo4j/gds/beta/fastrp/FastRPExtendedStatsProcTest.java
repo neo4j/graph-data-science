@@ -21,18 +21,18 @@ package org.neo4j.gds.beta.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
 
 import java.util.List;
 import java.util.Optional;
 
-class FastRPExtendedStatsProcTest extends FastRPExtendedProcTest<FastRPExtendedStatsConfig> {
+class FastRPExtendedStatsProcTest extends FastRPExtendedProcTest<FastRPExtendedStatsProc.StatsResult, FastRPExtendedStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStatsProc.StatsResult, FastRPExtendedStatsConfig>> getProcedureClazz() {
         return FastRPExtendedStatsProc.class;
     }
 

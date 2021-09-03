@@ -55,11 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Wcc, CONFIG, DisjointSetStruct>,
-    SeedConfigTest<Wcc, CONFIG, DisjointSetStruct>,
-    MemoryEstimateTest<Wcc, CONFIG, DisjointSetStruct>,
-    HeapControlTest<Wcc, CONFIG, DisjointSetStruct> {
+abstract class WccProcTest<PROC_RESULT,CONFIG extends WccBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<Wcc, DisjointSetStruct, PROC_RESULT, CONFIG>,
+    SeedConfigTest<Wcc, DisjointSetStruct, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<Wcc, DisjointSetStruct, PROC_RESULT, CONFIG>,
+    HeapControlTest<Wcc, DisjointSetStruct, PROC_RESULT, CONFIG> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

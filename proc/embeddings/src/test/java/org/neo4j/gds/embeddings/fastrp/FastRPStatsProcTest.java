@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
+class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
     @Override
     GdsCypher.ExecutionModes mode() {
@@ -40,7 +40,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPStatsProc.StatsResult, FastRPStatsConfig>> getProcedureClazz() {
         return FastRPStatsProc.class;
     }
 

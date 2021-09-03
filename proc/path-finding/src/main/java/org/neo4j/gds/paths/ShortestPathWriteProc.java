@@ -38,7 +38,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
 public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
-    extends StreamOfRelationshipsWriter<ALGO, DijkstraResult, CONFIG> {
+    extends StreamOfRelationshipsWriter<ALGO, DijkstraResult, StandardWriteRelationshipsResult, CONFIG> {
 
     protected Stream<StandardWriteRelationshipsResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Write relationships failed", () -> {

@@ -22,20 +22,20 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ConfigurableSeedConfigTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.AbstractRelationshipProjections;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -45,17 +45,17 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
-    implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    OnlyUndirectedTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
+abstract class LocalClusteringCoefficientBaseProcTest<PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
+    implements AlgoBaseProcTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, PROC_RESULT, CONFIG>,
+    OnlyUndirectedTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, PROC_RESULT, CONFIG>,
+    ConfigurableSeedConfigTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, PROC_RESULT, CONFIG>,
+    HeapControlTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, PROC_RESULT, CONFIG> {
 
     protected static final String TEST_GRAPH_NAME = "g";
 

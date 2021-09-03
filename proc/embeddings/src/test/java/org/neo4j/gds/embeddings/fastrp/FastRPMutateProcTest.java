@@ -24,13 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +38,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
-    implements MutateNodePropertyTest<FastRP, FastRPMutateConfig, FastRP.FastRPResult> {
+class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateProc.MutateResult, FastRPMutateConfig>
+    implements MutateNodePropertyTest<FastRP, FastRP.FastRPResult, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Override
     GdsCypher.ExecutionModes mode() {
@@ -74,7 +74,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPMutateProc.MutateResult, FastRPMutateConfig>> getProcedureClazz() {
         return FastRPMutateProc.class;
     }
 

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.config.MutateConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,7 +33,7 @@ public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
 
     @Override
     public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {

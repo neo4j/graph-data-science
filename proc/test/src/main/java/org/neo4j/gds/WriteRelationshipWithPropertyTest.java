@@ -22,9 +22,9 @@ package org.neo4j.gds;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,12 +33,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
-    extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends WriteConfig & AlgoBaseConfig>
+    extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
 
     String writeRelationshipType();
 

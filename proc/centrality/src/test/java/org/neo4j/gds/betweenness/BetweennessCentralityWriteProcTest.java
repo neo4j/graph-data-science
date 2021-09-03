@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig> {
+class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -48,7 +48,7 @@ class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<B
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig>> getProcedureClazz() {
         return BetweennessCentralityWriteProc.class;
     }
 

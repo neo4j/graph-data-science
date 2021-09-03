@@ -84,7 +84,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
         runQuery(createQuery);
     }
 
-    public static class MemEstimationTestProc extends AlgoBaseProc<TestAlgorithm, TestAlgorithm, TestConfig> {
+    public static class MemEstimationTestProc extends AlgoBaseProc<TestAlgorithm, TestAlgorithm, Bar, TestConfig> {
 
         @Procedure("gds.test.algoTestProc")
         public Stream<Bar> foo(

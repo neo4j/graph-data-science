@@ -98,7 +98,8 @@ import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
 import org.neo4j.gds.scc.SccProc;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
-import org.neo4j.gds.similarity.ApproxNearestNeighborsProc;
+import org.neo4j.gds.similarity.ApproxNearestNeighborsStreamProc;
+import org.neo4j.gds.similarity.ApproxNearestNeighborsWriteProc;
 import org.neo4j.gds.similarity.CosineProc;
 import org.neo4j.gds.similarity.EuclideanProc;
 import org.neo4j.gds.similarity.OverlapProc;
@@ -493,7 +494,8 @@ class ListProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             ApproxMaxKCutMutateProc.class,
             ApproxMaxKCutStreamProc.class,
-            ApproxNearestNeighborsProc.class,
+            ApproxNearestNeighborsWriteProc.class,
+            ApproxNearestNeighborsStreamProc.class,
             ClosenessCentralityProc.class,
             HarmonicCentralityProc.class,
             IsFiniteFunc.class,

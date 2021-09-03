@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
-public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig> {
+public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, Prim.Result, SpanningTreeConfig> {
 
     private static final String MIN_DESCRIPTION =
         "Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +

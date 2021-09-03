@@ -32,7 +32,7 @@ public abstract class WriteRelationshipsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
 
 
     @Context

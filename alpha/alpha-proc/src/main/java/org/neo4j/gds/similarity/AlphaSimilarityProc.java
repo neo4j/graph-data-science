@@ -57,7 +57,7 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 abstract class AlphaSimilarityProc
     <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig>
-    extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG> {
+    extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, SimilarityResult, CONFIG> {
 
     public static final String SIMILARITY_FAKE_GRAPH_NAME = "  SIM-NULL-GRAPH";
 

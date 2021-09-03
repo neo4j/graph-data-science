@@ -50,12 +50,12 @@ import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig.K_KEY;
 
-abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Yens, CONFIG, DijkstraResult>,
-    MemoryEstimateTest<Yens, CONFIG, DijkstraResult>,
-    HeapControlTest<Yens, CONFIG, DijkstraResult>,
-    SourceNodeConfigTest<Yens, CONFIG, DijkstraResult>,
-    TargetNodeConfigTest<Yens, CONFIG, DijkstraResult> {
+abstract class ShortestPathYensProcTest<PROC_RESULT, CONFIG extends ShortestPathYensBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<Yens, DijkstraResult, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<Yens, DijkstraResult, PROC_RESULT, CONFIG>,
+    HeapControlTest<Yens, DijkstraResult, PROC_RESULT, CONFIG>,
+    SourceNodeConfigTest<Yens, DijkstraResult, PROC_RESULT, CONFIG>,
+    TargetNodeConfigTest<Yens, DijkstraResult, PROC_RESULT, CONFIG> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

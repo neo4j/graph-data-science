@@ -20,13 +20,13 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -35,10 +35,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
+class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
@@ -64,7 +64,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
     }
 
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig>> getProcedureClazz() {
         return Node2VecWriteProc.class;
     }
 

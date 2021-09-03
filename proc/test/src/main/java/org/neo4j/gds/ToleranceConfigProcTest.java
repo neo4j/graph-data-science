@@ -32,7 +32,7 @@ import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 public final class ToleranceConfigProcTest {
 
     public static List<DynamicTest> test(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -44,7 +44,7 @@ public final class ToleranceConfigProcTest {
     private ToleranceConfigProcTest() {}
 
     private static DynamicTest invalidTolerance(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidTolerance", () -> {
@@ -55,7 +55,7 @@ public final class ToleranceConfigProcTest {
     }
 
     private static DynamicTest validTolerance(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("validTolerance", () -> {

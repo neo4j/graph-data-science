@@ -35,8 +35,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMutateConfig> implements
-    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCutMutateConfig, ApproxMaxKCut.CutResult> {
+class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMutateProc.MutateResult, ApproxMaxKCutMutateConfig> implements
+    MutateNodePropertyTest<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateProc.MutateResult, ApproxMaxKCutMutateConfig> {
 
     @Override
     public String mutateProperty() {
@@ -49,7 +49,7 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutMutateProc.MutateResult, ApproxMaxKCutMutateConfig>> getProcedureClazz() {
         return ApproxMaxKCutMutateProc.class;
     }
 

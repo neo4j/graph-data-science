@@ -32,7 +32,7 @@ import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 public final class WritePropertyConfigProcTest {
 
     public static List<DynamicTest> test(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -47,7 +47,7 @@ public final class WritePropertyConfigProcTest {
     private WritePropertyConfigProcTest() {}
 
     private static DynamicTest unspecifiedWriteProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedWriteProperty", () -> {
@@ -58,7 +58,7 @@ public final class WritePropertyConfigProcTest {
     }
 
     private static DynamicTest nullWriteProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("nullWriteProperty", () -> {
@@ -71,7 +71,7 @@ public final class WritePropertyConfigProcTest {
     }
 
     private static DynamicTest whitespaceWriteProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceWriteProperty", () -> {
@@ -82,7 +82,7 @@ public final class WritePropertyConfigProcTest {
     }
 
     private static DynamicTest validWriteProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("validWriteProperty", () -> {
@@ -93,7 +93,7 @@ public final class WritePropertyConfigProcTest {
     }
 
     private static DynamicTest validWriteConcurrency(
-        AlgoBaseProc<?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("validWriteConcurrency", () -> {

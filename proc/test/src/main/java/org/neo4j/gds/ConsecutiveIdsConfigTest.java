@@ -20,11 +20,11 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.QueryRunner.runQuery;
 
-public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,CONFIG extends ConsecutiveIdsConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends ConsecutiveIdsConfig & AlgoBaseConfig> extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
 
     @Test
     default void shouldProduceResultWithConsecutiveIds() {
