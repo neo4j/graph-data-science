@@ -58,30 +58,13 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
         return ApproxMaxKCutMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    // We need to override this to make sure that we set the config to be corresponding with what
-    // `expectedMutatedGraph()` wants unless the config params have already been set for some other reason.
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
-        }
-        if (!mapWrapper.containsKey("k")) {
-            mapWrapper = mapWrapper.withNumber("k", 2);
-        }
-        if (!mapWrapper.containsKey("iterations")) {
-            mapWrapper = mapWrapper.withNumber("iterations", 8);
-        }
-        if (!mapWrapper.containsKey("vnsMaxNeighborhoodOrder")) {
-            mapWrapper = mapWrapper.withNumber("vnsMaxNeighborhoodOrder", 0);
-        }
-        if (!mapWrapper.containsKey("randomSeed")) {
-            mapWrapper = mapWrapper.withNumber("randomSeed", 1337L);
-        }
-        if (!mapWrapper.containsKey("concurrency")) {
-            mapWrapper = mapWrapper.withNumber("concurrency", 1);
+            mapWrapper = mapWrapper.withString("mutateProperty", this.mutateProperty());
         }
 
-        return mapWrapper;
+        return minimalConfigWithDefaults(mapWrapper);
     }
 
     // We override this in order to be able to specify an algo config yielding a deterministic result.

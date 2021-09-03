@@ -112,6 +112,33 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
         assertEquals(result1.cutCost(), result2.cutCost());
     }
 
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        return minimalConfigWithDefaults(mapWrapper);
+    }
+
+    // We need to override this to make sure that we set the config to generate a deterministic result when comparing
+    // output from actual computation.
+    protected CypherMapWrapper minimalConfigWithDefaults(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("k")) {
+            mapWrapper = mapWrapper.withNumber("k", 2);
+        }
+        if (!mapWrapper.containsKey("iterations")) {
+            mapWrapper = mapWrapper.withNumber("iterations", 8);
+        }
+        if (!mapWrapper.containsKey("vnsMaxNeighborhoodOrder")) {
+            mapWrapper = mapWrapper.withNumber("vnsMaxNeighborhoodOrder", 0);
+        }
+        if (!mapWrapper.containsKey("concurrency")) {
+            mapWrapper = mapWrapper.withNumber("concurrency", 1);
+        }
+        if (!mapWrapper.containsKey("randomSeed") && mapWrapper.getInt("concurrency", 1) == 1) {
+            mapWrapper = mapWrapper.withNumber("randomSeed", 1337L);
+        }
+
+        return mapWrapper;
+    }
+
     @Test
     void testK() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("k", 18)));
