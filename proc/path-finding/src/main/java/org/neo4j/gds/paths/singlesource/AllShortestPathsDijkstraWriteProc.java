@@ -48,7 +48,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphNameOrConfig, configuration, false, true));
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)

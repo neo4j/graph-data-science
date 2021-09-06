@@ -38,8 +38,8 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
     public abstract void release();
 
     public final void releaseAll(boolean releaseAlgorithm) {
-        progressTracker.release();
         if (releaseAlgorithm) {
+            progressTracker.release();
             release();
         }
     }

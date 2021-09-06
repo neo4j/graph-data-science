@@ -47,7 +47,7 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphNameOrConfig, configuration, false, true));
     }
 
     @Procedure(name = "gds.shortestPath.yens.mutate.estimate", mode = READ)

@@ -287,13 +287,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                 AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
                     loadedGraphName,
-                    configMap
+                    configMap,
+                    releaseAlgorithm(),
+                    true
                 );
 
                 Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
                 AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
                     implicitConfigMap,
-                    Collections.emptyMap()
+                    Collections.emptyMap(),
+                    releaseAlgorithm(),
+                    true
                 );
 
                 assertResultEquals(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
@@ -317,12 +321,16 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromCypher = proc.compute(
                 cypherConfig,
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                releaseAlgorithm(),
+                true
             );
 
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromStore = proc.compute(
                 storeConfig,
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                releaseAlgorithm(),
+                true
             );
 
             assertResultEquals(resultOnImplicitGraphFromCypher.result(), resultOnImplicitGraphFromStore.result());
@@ -356,6 +364,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return ALL_RELATIONSHIPS_QUERY;
     }
 
+    default boolean releaseAlgorithm() {
+        return true;
+    }
+
     @AllGraphStoreFactoryTypesTest
     default void testRunMultipleTimesOnLoadedGraph(TestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
@@ -369,8 +381,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap);
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap, releaseAlgorithm(), true);
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap, releaseAlgorithm(), true);
 
             assertResultEquals(resultRun1.result(), resultRun2.result());
         });
@@ -532,7 +544,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             IllegalArgumentException.class,
             () -> applyOnProcedure((proc) -> proc.compute(
                 config,
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                releaseAlgorithm(),
+                true
             ))
         );
 
@@ -552,7 +566,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             IllegalArgumentException.class,
             () -> applyOnProcedure((proc) -> proc.compute(
                 config,
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                releaseAlgorithm(),
+                true
             ))
         );
         assertThat(ex)
@@ -590,7 +606,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 IllegalArgumentException.class,
                 () -> proc.compute(
                     config,
-                    Collections.emptyMap()
+                    Collections.emptyMap(),
+                    releaseAlgorithm(),
+                    true
                 )
             );
             String message = ex.getMessage();

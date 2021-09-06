@@ -34,11 +34,11 @@ import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -142,6 +142,11 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
     @Override
     public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
         assertEquals(result1.pathSet(), result2.pathSet());
+    }
+
+    @Override
+    public boolean releaseAlgorithm() {
+        return false;
     }
 
     @Test
