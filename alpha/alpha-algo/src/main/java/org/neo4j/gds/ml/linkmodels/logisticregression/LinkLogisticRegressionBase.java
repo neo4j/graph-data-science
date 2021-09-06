@@ -51,13 +51,8 @@ public class LinkLogisticRegressionBase {
         return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
     }
 
-    protected Constant<Matrix> features(Graph graph, Batch batch) {
+    protected Constant<Matrix> features(Graph graph, Batch batch, int rows) {
         var graphCopy = graph.concurrentCopy();
-        // TODO: replace by MutableLong and throw an error saying reduce batchSize if larger than maxint
-        var relationshipCount = new MutableInt();
-        // assume batching has been done so that relationship count does not overflow int
-        batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
-        int rows = relationshipCount.intValue();
         int cols = modelData.linkFeatureDimension();
         double[] features = new double[rows * cols];
         var relationshipOffset = new MutableInt();

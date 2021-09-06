@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,14 +32,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.math.L2Norm;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 
 @GdlExtension
 class LinkLogisticRegressionTrainTest {
@@ -58,69 +57,34 @@ class LinkLogisticRegressionTrainTest {
     @Inject
     private Graph graph;
 
-    @Test
-    void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldComputeWithDefaultAdamOptimizerAndStreakStopper(int concurrency) {
         var featureProperties = List.of("a", "b");
         var config = new LinkLogisticRegressionTrainConfigImpl(
             featureProperties,
             CypherMapWrapper.create(Map.of(
-                "maxEpochs", 100000,
+                "maxEpochs", 10_000,
                 "tolerance", 1e-4,
-                "concurrency", 1
+                "concurrency", concurrency
             ))
         );
 
         var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, extractors, config, ProgressLogger.NULL_LOGGER);
-
-        var result = linearRegression.compute();
-
-        assertThat(result).isNotNull();
-
-        var trainedWeights = result.weights();
+        var linearRegression = new LinkLogisticRegressionTrain(
+            graph,
+            trainSet,
+            extractors,
+            config,
+            ProgressLogger.NULL_LOGGER
+        );
 
         var expected = new Matrix(new double[]{-1.0681821169962793, 1.0115009499444914, -0.1381213947059403}, 1, 3);
-        assertThat(trainedWeights.data()).satisfies(matrix -> matrix.equals(expected, 1e-8));
-    }
-
-    @Test
-    void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
-        var featureProperties = List.of("a", "b");
-        var config = new LinkLogisticRegressionTrainConfigImpl(
-            featureProperties,
-            CypherMapWrapper.create(Map.of(
-                "penalty", 1.0,
-                "maxEpochs", 1000000,
-                "tolerance", 1e-10,
-                "concurrency", 4
-            ))
-        );
-
-        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
-
-        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
-        trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, extractors, config, ProgressLogger.NULL_LOGGER);
 
         var result = linearRegression.compute();
-
-        assertThat(result).isNotNull();
-
-        var trainedWeights = result.weights();
-        assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(1);
-        assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
-
-        var trainedData = trainedWeights.data().data();
-        var expectedData = new double[]{-0.16207697085323056, 0.10360002113065836, 0.04906215177508012};
-
-        var deviation = new double[3];
-        for (int i = 0; i < 3; i++) {
-            deviation[i] = (trainedData[i] - expectedData[i]);
-        }
-        // could be flaky but passed 1327 times in a row
-        assertThat(L2Norm.l2Norm(deviation) / L2Norm.l2Norm(expectedData)).isLessThan(0.05);
+        assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
     }
 
     @Test

@@ -102,11 +102,14 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
 
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
-        var features = features(graph, batch);
+        // assume batching has been done so that relationship count does not overflow int
+        int rows = 0;
+        for (var nodeId : batch.nodeIds()) {
+            rows += graph.degree(nodeId);
+        }
+
+        var features = features(graph, batch, rows);
         Variable<Matrix> predictions = predictions(features);
-        var relationshipCount = new MutableInt();
-        batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
-        var rows = relationshipCount.getValue();
         var targets = makeTargetsArray(batch, rows);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), rows * penalty / trainSize);
         var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);

@@ -69,7 +69,7 @@ class LinkLogisticRegressionBaseTest {
         );
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        var features = base.features(graph, allNodesBatch);
+        var features = base.features(graph, allNodesBatch, (int) graph.relationshipCount());
         var expectedFeatures = new Matrix(new double[]{
             0.49, 0.49, 1.0,
             4.00, 2.56, 1.0,
