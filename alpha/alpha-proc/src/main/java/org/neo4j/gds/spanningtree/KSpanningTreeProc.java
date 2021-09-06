@@ -26,10 +26,13 @@ import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
 import org.neo4j.gds.impl.spanningTrees.Prim;
@@ -96,10 +99,12 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
+            var progressTracker = new TaskProgressTracker(task, progressLogger);
             final NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .withLog(log)
+                .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();
 
@@ -115,10 +120,12 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
                 }
             };
 
+            progressTracker.beginSubTask();
             exporter.write(
                 config.writeProperty(),
                 properties
             );
+            progressTracker.endSubTask();
 
             builder.withNodePropertiesWritten(exporter.propertiesWritten());
         }

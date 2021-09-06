@@ -24,8 +24,11 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -78,14 +81,19 @@ public abstract class WriteProc<
 
             Graph graph = computationResult.graph();
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
+            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var progressLogger = new BatchingProgressLogger(log, task, writePropertyConfig.writeConcurrency());
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(terminationFlag)
-                .withLog(log)
+                .withProgressTracker(progressTracker)
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
+            progressTracker.beginSubTask();
             exporter.write(nodePropertyList(computationResult));
+            progressTracker.endSubTask();
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());

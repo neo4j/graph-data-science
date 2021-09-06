@@ -26,9 +26,12 @@ import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
@@ -117,16 +120,21 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
                 }
             };
 
+            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
+            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            progressTracker.beginSubTask();
             nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
-                .withLog(log)
+                .withProgressTracker(progressTracker)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()
                 .write(
                     config.writeProperty(),
                     properties
                 );
+            progressTracker.endSubTask();
         }
 
         return Stream.of(builder.build());
