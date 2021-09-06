@@ -1,5 +1,7 @@
 apply plugin: 'java-library'
 
+description = 'Neo4j Graph Data Science :: CSV'
+
 dependencies {
     annotationProcessor project(':annotations')
 
