@@ -22,11 +22,17 @@ The `gds.model.store_location` parameter must be configured for this feature.
 [[catalog-model-store]]
 == Storing models from the catalog on disk
 
-*Trained models that can be stored*
+*Models that can be stored*
 
 * <<algorithms-embeddings-graph-sage,GraphSAGE model>>
 * <<algorithms-ml-nodeclassification,Node Classification model>>
 * <<algorithms-ml-linkprediction,Link Prediction model>>
+
+
+*Models that cannot be stored*
+
+* <<algorithms-ml-linkprediction-pipelines, Link prediction training pipeline>>
+* <<algorithms-ml-linkprediction-pipelines-train, Link prediction pipeline>>
 
 
 === Syntax
@@ -36,7 +42,10 @@ The `gds.model.store_location` parameter must be configured for this feature.
 .Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.store(modelName: String)
+CALL gds.alpha.model.store(
+    modelName: String,
+    failIfUnsupportedType: Boolean
+)
 YIELD
     modelName: String,
     storeMillis: Integer
@@ -45,8 +54,9 @@ YIELD
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name          | Type   | Default | Optional | Description
-| modelName     | String | n/a     | no      | The name of a model.
+| Name                      | Type    | Default | Optional | Description
+| modelName                 | String  | n/a     | no       | The name of a model.
+| failIfUnsupportedType     | Boolean | true    | yes      | By default, the library will raise an error when trying to store a non-supported model. When set to `false`, the procedure returns an empty result.
 |===
 
 .Results

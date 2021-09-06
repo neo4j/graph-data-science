@@ -35,7 +35,7 @@ public final class ModelSupport {
         LinkPredictionTrain.MODEL_TYPE
     );
 
-    private static void validateAlgoType(String algoType) {
+    public static void validateAlgoType(String algoType) {
         if (!SUPPORTED_TYPES.contains(algoType)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Unknown model type '%s', supported model types are: %s.",

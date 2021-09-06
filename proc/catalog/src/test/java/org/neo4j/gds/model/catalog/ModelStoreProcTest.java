@@ -36,6 +36,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.model.StoredModel;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -49,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
 
 @GdsEditionTest(Edition.EE)
 class ModelStoreProcTest extends ModelProcBaseTest {
@@ -152,7 +154,29 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     }
 
     @Test
-    void shouldLogAndReturnEmptyResultOnUnsupportedModel() {
+    void shouldFailOnUnsupportedModel() {
+        var modelName = "testModel1";
+        var model1 = Model.of(
+            getUsername(),
+            modelName,
+            "unsupportedModel",
+            GRAPH_SCHEMA,
+            "bogusModel",
+            TestTrainConfig.of(),
+            Map::of
+        );
+
+        ModelCatalog.set(model1);
+
+        var query = "CALL gds.alpha.model.store('testModel1')";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessageContaining("Unknown model type 'unsupportedModel'")
+            .hasMessageContaining("supported model types are: " + StringJoining.join(SUPPORTED_TYPES));
+    }
+
+    @Test
+    void shouldFailSilentlyOnUnsupportedModel() {
         var modelName = "testModel1";
         var model1 = Model.of(
             getUsername(),
@@ -166,7 +190,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
 
         ModelCatalog.set(model1);
 
-        assertCypherResult("CALL gds.alpha.model.store('testModel1')", List.of());
+        assertCypherResult("CALL gds.alpha.model.store('testModel1', false)", List.of());
 
         assertThat(testLog.getMessages(TestLog.DEBUG))
             .contains("Storing models of type `Link prediction pipeline` is not supported yet.");

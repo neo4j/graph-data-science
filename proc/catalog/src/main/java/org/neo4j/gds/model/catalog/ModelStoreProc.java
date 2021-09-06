@@ -51,14 +51,21 @@ public class ModelStoreProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.model.store", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelStoreResult> store(@Name(value = "modelName") String modelName) throws IOException {
+    public Stream<ModelStoreResult> store(
+        @Name(value = "modelName") String modelName,
+        @Name(value = "failIfUnsupportedType", defaultValue = "true") boolean failIfUnsupportedType
+    ) throws IOException {
         GdsEdition.instance().requireEnterpriseEdition("Storing a model");
 
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (!ModelSupport.SUPPORTED_TYPES.contains(model.algoType())) {
-            log.debug("Storing models of type `%s` is not supported yet.", model.algoType());
-            return Stream.of();
+            if (failIfUnsupportedType) {
+                ModelSupport.validateAlgoType(model.algoType());
+            } else {
+                log.debug("Storing models of type `%s` is not supported yet.", model.algoType());
+                return Stream.of();
+            }
         }
 
         if (model.stored()) {
