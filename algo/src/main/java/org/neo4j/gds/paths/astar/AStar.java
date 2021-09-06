@@ -41,6 +41,8 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
 
     private AStar(Dijkstra dijkstra) {
         this.dijkstra = dijkstra;
+        this.progressTracker = dijkstra.getProgressTracker();
+        this.terminationFlag = dijkstra.getTerminationFlag();
     }
 
     public static AStar sourceTarget(

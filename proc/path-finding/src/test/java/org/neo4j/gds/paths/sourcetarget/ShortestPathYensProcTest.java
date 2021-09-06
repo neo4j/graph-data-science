@@ -27,6 +27,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.RelationshipWeightConfigProcTest;
@@ -34,13 +36,11 @@ import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -138,6 +138,11 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     @Override
     public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
         Assertions.assertEquals(result1.pathSet(), result2.pathSet());
+    }
+
+    @Override
+    public boolean releaseAlgorithm() {
+        return false;
     }
 
     @Test

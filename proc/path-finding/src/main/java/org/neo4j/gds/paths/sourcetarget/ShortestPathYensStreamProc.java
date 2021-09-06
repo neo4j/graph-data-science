@@ -47,7 +47,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphNameOrConfig, configuration, false, true));
     }
 
     @Procedure(name = "gds.shortestPath.yens.stream.estimate", mode = READ)

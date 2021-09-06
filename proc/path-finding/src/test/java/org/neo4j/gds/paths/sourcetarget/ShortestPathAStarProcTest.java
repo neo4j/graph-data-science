@@ -25,40 +25,40 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.SourceNodeConfigTest;
-import org.neo4j.gds.TargetNodeConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.gds.paths.astar.AStar;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
+import org.neo4j.gds.SourceNodeConfigTest;
+import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.astar.AStar;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 
 abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
@@ -224,6 +224,11 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
             baseMap = baseMap.withString(NODE_QUERY_KEY, NODE_QUERY);
         }
         return createMinimalConfig(baseMap);
+    }
+
+    @Override
+    public boolean releaseAlgorithm() {
+        return false;
     }
 
     @Test
