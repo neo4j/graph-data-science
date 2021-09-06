@@ -22,6 +22,7 @@ package org.neo4j.gds.model.catalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.core.model.Model;
@@ -35,7 +36,8 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.model.StoredModel;
-import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -47,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
 
 @GdsEditionTest(Edition.EE)
 class ModelStoreProcTest extends ModelProcBaseTest {
@@ -55,10 +56,24 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     @TempDir
     Path tempDir;
 
+    TestLog testLog;
+
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
+        testLog = new TestLog();
+        builder.setUserLogProvider(new LogProvider() {
+            @Override
+            public Log getLog(Class<?> loggingClass) {
+                return testLog;
+            }
+
+            @Override
+            public Log getLog(String name) {
+                return testLog;
+            }
+        });
         builder.setConfig(ModelStoreSettings.model_store_location, tempDir);
     }
 
@@ -137,12 +152,12 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     }
 
     @Test
-    void shouldFailOnUnsupportedModel() {
+    void shouldLogAndReturnEmptyResultOnUnsupportedModel() {
         var modelName = "testModel1";
         var model1 = Model.of(
             getUsername(),
             modelName,
-            "unsupportedModel",
+            "Link prediction pipeline",
             GRAPH_SCHEMA,
             "bogusModel",
             TestTrainConfig.of(),
@@ -151,11 +166,10 @@ class ModelStoreProcTest extends ModelProcBaseTest {
 
         ModelCatalog.set(model1);
 
-        var query = "CALL gds.alpha.model.store('testModel1')";
-        assertThatThrownBy(() -> runQuery(query))
-            .getRootCause()
-            .hasMessageContaining("Unknown model type 'unsupportedModel'")
-            .hasMessageContaining("supported model types are: " + StringJoining.join(SUPPORTED_TYPES));
+        assertCypherResult("CALL gds.alpha.model.store('testModel1')", List.of());
+
+        assertThat(testLog.getMessages(TestLog.DEBUG))
+            .contains("Storing models of type `Link prediction pipeline` is not supported yet.");
     }
 
     @Test

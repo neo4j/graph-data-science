@@ -27,6 +27,7 @@ import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.model.ModelSupport;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -54,6 +55,11 @@ public class ModelStoreProc extends BaseProc {
         GdsEdition.instance().requireEnterpriseEdition("Storing a model");
 
         var model = ModelCatalog.getUntyped(username(), modelName);
+
+        if (!ModelSupport.SUPPORTED_TYPES.contains(model.algoType())) {
+            log.debug("Storing models of type `%s` is not supported yet.", model.algoType());
+            return Stream.of();
+        }
 
         if (model.stored()) {
             return Stream.of(new ModelStoreResult(modelName, 0));
