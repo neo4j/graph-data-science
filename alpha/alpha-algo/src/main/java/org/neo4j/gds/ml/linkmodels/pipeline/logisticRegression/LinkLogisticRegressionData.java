@@ -50,7 +50,7 @@ public interface LinkLogisticRegressionData {
         return LinkLogisticRegressionData.from(
             numberOfLinkFeatures,
             useBias
-                ? Optional.of(Weights.ofScalar())
+                ? Optional.of(Weights.ofScalar(0))
                 : Optional.empty()
         );
     }

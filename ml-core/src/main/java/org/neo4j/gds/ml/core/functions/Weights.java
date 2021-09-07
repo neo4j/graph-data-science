@@ -61,8 +61,8 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
         return new Weights<>(new Matrix(rows, cols));
     }
 
-    public static Weights<Scalar> ofScalar() {
-        return new Weights<>(new Scalar(0));
+    public static Weights<Scalar> ofScalar(double value) {
+        return new Weights<>(new Scalar(value));
     }
 
     public static long sizeInBytes(int rows, int cols) {

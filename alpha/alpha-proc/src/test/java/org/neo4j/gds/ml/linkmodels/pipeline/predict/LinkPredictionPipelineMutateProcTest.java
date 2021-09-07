@@ -97,11 +97,14 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-            weights,
-            1,
-            weights.length
-        )), Weights.ofScalar());
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(new Matrix(
+                weights,
+                1,
+                weights.length
+            )),
+            Weights.ofScalar(0)
+        );
 
         ModelCatalog.set(Model.of(
             getUsername(),

@@ -51,6 +51,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class LogisticLoss extends AbstractVariable<Scalar> {
     // 1 x d
     private final Variable<Matrix> weights;
+    private Variable<Scalar> bias = null;
     // n x 1
     private final Variable<Matrix> predictions;
     // n x d
@@ -71,6 +72,26 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         validateVectorDimensions(targets.dimensions(), features.dimension(ROWS_INDEX));
 
         this.weights = weights;
+        this.predictions = predictions;
+        this.features = features;
+        this.targets = targets;
+    }
+
+    public LogisticLoss(
+        Variable<Matrix> weights,
+        Variable<Scalar> bias,
+        Variable<Matrix> predictions,
+        Variable<Matrix> features,
+        Variable<Vector> targets
+    ) {
+        super(List.of(weights, bias, features, targets), scalar());
+
+        validateVectorDimensions(weights.dimensions(), features.dimension(COLUMNS_INDEX));
+        validateVectorDimensions(predictions.dimensions(), features.dimension(ROWS_INDEX));
+        validateVectorDimensions(targets.dimensions(), features.dimension(ROWS_INDEX));
+
+        this.weights = weights;
+        this.bias = bias;
         this.predictions = predictions;
         this.features = features;
         this.targets = targets;
@@ -124,6 +145,19 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
                 }
             }
             return gradient;
+        } else if (parent == bias) {
+            ctx.forward(predictions);
+            var predVector = ctx.data(predictions);
+            var targetVector = ctx.data(targets);
+            var gradient = new Scalar(0);
+            int numberOfExamples = targetVector.length();
+
+            for (int idx = 0; idx < numberOfExamples; idx++) {
+                double errorPerNode = (predVector.dataAt(idx) - targetVector.dataAt(idx));
+                gradient.addDataAt(0, errorPerNode);
+            }
+
+            return gradient.scalarMultiplyMutate(1.0D / numberOfExamples);
         } else {
             // assume other variables do not require gradient
             return ctx.data(parent).createWithSameDimensions();
