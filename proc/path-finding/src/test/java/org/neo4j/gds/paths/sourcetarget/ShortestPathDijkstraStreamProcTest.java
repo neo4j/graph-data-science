@@ -20,15 +20,15 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestLog;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
@@ -46,12 +46,12 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
+class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<StreamResult, ShortestPathDijkstraStreamConfig> {
 
     TestLog testLog;
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, StreamResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
         return ShortestPathDijkstraStreamProc.class;
     }
 

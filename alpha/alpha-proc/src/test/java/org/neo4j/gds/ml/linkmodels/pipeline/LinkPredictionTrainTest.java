@@ -133,7 +133,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
                 graphStore,
                 trainConfig,
@@ -193,7 +193,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
                 graphStore,
                 config,

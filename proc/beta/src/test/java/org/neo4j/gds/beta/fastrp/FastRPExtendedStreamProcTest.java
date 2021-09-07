@@ -21,19 +21,19 @@ package org.neo4j.gds.beta.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
 
 import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtendedStreamConfig> {
+class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtendedStreamProc.StreamResult, FastRPExtendedStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStreamProc.StreamResult, FastRPExtendedStreamConfig>> getProcedureClazz() {
         return FastRPExtendedStreamProc.class;
     }
 

@@ -31,7 +31,7 @@ public abstract class StreamProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
 
     protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
 

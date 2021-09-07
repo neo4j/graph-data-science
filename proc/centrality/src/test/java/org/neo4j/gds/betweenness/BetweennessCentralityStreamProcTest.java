@@ -22,15 +22,16 @@ package org.neo4j.gds.betweenness;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Optional;
 
-class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
+class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<CentralityStreamResult, BetweennessCentralityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, CentralityStreamResult, BetweennessCentralityStreamConfig>> getProcedureClazz() {
         return BetweennessCentralityStreamProc.class;
     }
 

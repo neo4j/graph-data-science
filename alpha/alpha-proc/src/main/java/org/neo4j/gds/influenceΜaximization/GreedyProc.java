@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizationConfig> {
+public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizationResult, InfluenceMaximizationConfig> {
     private static final String DESCRIPTION = "The Greedy algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
     @Procedure(name = "gds.alpha.influenceMaximization.greedy.stream", mode = READ)

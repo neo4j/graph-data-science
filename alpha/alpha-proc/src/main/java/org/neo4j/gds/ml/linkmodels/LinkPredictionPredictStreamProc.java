@@ -38,7 +38,7 @@ import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndire
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamConfig> {
+public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamProc.Result, LinkPredictionPredictStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(DESCRIPTION)

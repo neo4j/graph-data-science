@@ -37,10 +37,10 @@ import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
 
-class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraStreamConfig> {
+class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraProcTest<StreamResult, AllShortestPathsDijkstraStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, StreamResult, AllShortestPathsDijkstraStreamConfig>> getProcedureClazz() {
         return AllShortestPathsDijkstraStreamProc.class;
     }
 

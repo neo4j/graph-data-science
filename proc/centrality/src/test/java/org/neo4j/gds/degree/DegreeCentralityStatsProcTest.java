@@ -32,10 +32,10 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentralityStatsConfig> {
+class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentralityStatsProc.StatsResult, DegreeCentralityStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsProc.StatsResult, DegreeCentralityStatsConfig>> getProcedureClazz() {
         return DegreeCentralityStatsProc.class;
     }
 

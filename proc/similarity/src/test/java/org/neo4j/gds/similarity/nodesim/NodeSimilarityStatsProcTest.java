@@ -23,8 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.SimilarityStatsResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +39,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimilarityStatsConfig> {
+public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<SimilarityStatsResult, NodeSimilarityStatsConfig> {
 
     @Test
     void testStatsYields() {
@@ -117,7 +118,7 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, SimilarityStatsResult, NodeSimilarityStatsConfig>> getProcedureClazz() {
         return NodeSimilarityStatsProc.class;
     }
 

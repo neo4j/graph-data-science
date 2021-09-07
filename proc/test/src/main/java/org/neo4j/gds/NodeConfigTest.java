@@ -21,17 +21,17 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.config.NodeConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.QueryRunner.runQuery;
 
-public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends NodeConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends NodeConfig & AlgoBaseConfig> extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
 
     default void testNodeValidation(String configKey, String... expectedMessageSubstrings) {
         runQuery(graphDb(), "CREATE (:A)");

@@ -21,9 +21,9 @@ package org.neo4j.gds.labelpropagation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,10 +38,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
-class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropagationStatsConfig> {
+class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig>> getProcedureClazz() {
         return LabelPropagationStatsProc.class;
     }
 

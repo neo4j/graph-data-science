@@ -25,27 +25,27 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigProcTest;
-import org.neo4j.gds.SeedConfigTest;
-import org.neo4j.gds.ToleranceConfigProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.RelationshipWeightConfigProcTest;
+import org.neo4j.gds.SeedConfigTest;
+import org.neo4j.gds.ToleranceConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -58,11 +58,11 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
-    SeedConfigTest<Louvain, CONFIG, Louvain>,
-    MemoryEstimateTest<Louvain, CONFIG, Louvain>,
-    HeapControlTest<Louvain, CONFIG, Louvain> {
+abstract class LouvainProcTest<PROC_RESULT, CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<Louvain, Louvain, PROC_RESULT, CONFIG>,
+    SeedConfigTest<Louvain, Louvain, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<Louvain, Louvain, PROC_RESULT, CONFIG>,
+    HeapControlTest<Louvain, Louvain, PROC_RESULT, CONFIG> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

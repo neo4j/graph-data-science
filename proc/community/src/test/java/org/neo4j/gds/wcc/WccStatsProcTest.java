@@ -21,9 +21,9 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
@@ -39,10 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
-class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
+class WccStatsProcTest extends WccProcTest<WccStatsProc.StatsResult, WccStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStatsProc.StatsResult, WccStatsConfig>> getProcedureClazz() {
         return WccStatsProc.class;
     }
 

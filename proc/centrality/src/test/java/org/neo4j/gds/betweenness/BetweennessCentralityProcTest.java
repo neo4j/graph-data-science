@@ -24,14 +24,14 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.OrientationCombinationTest;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -39,12 +39,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
+abstract class BetweennessCentralityProcTest<PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig>
     extends BaseProcTest
     implements
-    AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray>,
-    MemoryEstimateTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray>,
-    OrientationCombinationTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
+    AlgoBaseProcTest<BetweennessCentrality, HugeAtomicDoubleArray, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<BetweennessCentrality, HugeAtomicDoubleArray, PROC_RESULT, CONFIG>,
+    OrientationCombinationTest<BetweennessCentrality, HugeAtomicDoubleArray, PROC_RESULT, CONFIG> {
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
     protected static final String BC_GRAPH_NAME = "bcGraph";

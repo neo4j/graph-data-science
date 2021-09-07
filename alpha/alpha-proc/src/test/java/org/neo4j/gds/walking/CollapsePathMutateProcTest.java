@@ -22,18 +22,17 @@ package org.neo4j.gds.walking;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipsTest;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -45,8 +44,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CollapsePathMutateProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<CollapsePath, CollapsePathConfig, Relationships>,
-    MutateRelationshipsTest<CollapsePath, CollapsePathConfig, Relationships> {
+    MutateRelationshipsTest<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
@@ -89,7 +87,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<CollapsePath, Relationships, CollapsePathConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig>> getProcedureClazz() {
         return CollapsePathMutateProc.class;
     }
 

@@ -25,22 +25,22 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.NodeWeightConfigProcTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -56,14 +56,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
-    SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
-    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
-    HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
+abstract class LabelPropagationProcTest<PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<LabelPropagation, LabelPropagation, PROC_RESULT, CONFIG>,
+    SeedConfigTest<LabelPropagation, LabelPropagation, PROC_RESULT, CONFIG>,
+    MemoryEstimateTest<LabelPropagation, LabelPropagation, PROC_RESULT, CONFIG>,
+    HeapControlTest<LabelPropagation, LabelPropagation, PROC_RESULT, CONFIG> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

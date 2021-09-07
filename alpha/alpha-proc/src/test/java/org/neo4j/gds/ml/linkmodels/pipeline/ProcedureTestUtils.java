@@ -32,10 +32,12 @@ import java.util.function.Consumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 
 public final class ProcedureTestUtils {
-    public static void applyOnProcedure(GraphDatabaseAPI db, Consumer<? super AlgoBaseProc<?, ?, ?>> func) {
+    private ProcedureTestUtils() {}
+
+    public static void applyOnProcedure(GraphDatabaseAPI db, Consumer<? super AlgoBaseProc<?, ?, ?, ?>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
             // TODO: replace with for example LinkPrediction.train procedure (although maybe not worth it)
-            AlgoBaseProc<?, ?, ?> proc = new LouvainMutateProc(); // any proc really, just highjacking state
+            AlgoBaseProc<?, ?, ?, ?> proc = new LouvainMutateProc(); // any proc really, just highjacking state
 
             proc.procedureTransaction = transactions.tx();
             proc.transaction = transactions.ktx();

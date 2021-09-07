@@ -31,10 +31,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStreamConfig> {
+class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStreamProc.StreamResult, ApproxMaxKCutStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamProc.StreamResult, ApproxMaxKCutStreamConfig>> getProcedureClazz() {
         return ApproxMaxKCutStreamProc.class;
     }
 

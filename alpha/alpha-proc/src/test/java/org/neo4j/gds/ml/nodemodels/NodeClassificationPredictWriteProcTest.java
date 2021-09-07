@@ -65,7 +65,8 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KE
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
-class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
+class NodeClassificationPredictWriteProcTest extends BaseProcTest
+    implements AlgoBaseProcTest<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
 
     private static final String DB_CYPHER =
         "CREATE " +
@@ -163,7 +164,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
         return NodeClassificationPredictWriteProc.class;
     }
 

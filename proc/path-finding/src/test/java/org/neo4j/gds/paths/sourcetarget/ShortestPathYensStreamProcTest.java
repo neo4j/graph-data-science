@@ -20,6 +20,8 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
@@ -27,8 +29,6 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
@@ -37,10 +37,10 @@ import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
 
-class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPathYensStreamConfig> {
+class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<StreamResult, ShortestPathYensStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, StreamResult, ShortestPathYensStreamConfig>> getProcedureClazz() {
         return ShortestPathYensStreamProc.class;
     }
 

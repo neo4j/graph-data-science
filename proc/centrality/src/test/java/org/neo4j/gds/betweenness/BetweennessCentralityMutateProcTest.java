@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Map;
@@ -36,8 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BetweennessCentralityMutateProcTest
-    extends BetweennessCentralityProcTest<BetweennessCentralityMutateConfig>
-    implements MutateNodePropertyTest<BetweennessCentrality, BetweennessCentralityMutateConfig, HugeAtomicDoubleArray> {
+    extends BetweennessCentralityProcTest<BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig>
+    implements MutateNodePropertyTest<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
 
     @Override
     public String mutateProperty() {
@@ -64,7 +64,7 @@ public class BetweennessCentralityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig>> getProcedureClazz() {
         return BetweennessCentralityMutateProc.class;
     }
 

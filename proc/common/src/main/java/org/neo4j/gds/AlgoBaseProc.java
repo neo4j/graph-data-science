@@ -61,6 +61,7 @@ import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
+    PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";

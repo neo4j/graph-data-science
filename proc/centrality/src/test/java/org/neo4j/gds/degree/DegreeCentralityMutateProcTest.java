@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -34,11 +34,11 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCentralityMutateConfig>
-    implements MutateNodePropertyTest<DegreeCentrality, DegreeCentralityMutateConfig, DegreeCentrality.DegreeFunction> {
+class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCentralityMutateProc.MutateResult, DegreeCentralityMutateConfig>
+    implements MutateNodePropertyTest<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateProc.MutateResult, DegreeCentralityMutateConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateProc.MutateResult, DegreeCentralityMutateConfig>> getProcedureClazz() {
         return DegreeCentralityMutateProc.class;
     }
 

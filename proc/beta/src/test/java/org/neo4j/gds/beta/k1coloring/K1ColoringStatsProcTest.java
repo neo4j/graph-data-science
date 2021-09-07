@@ -31,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConfig> {
+class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsProc.StatsResult, K1ColoringStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStatsProc.StatsResult, K1ColoringStatsConfig>> getProcedureClazz() {
         return K1ColoringStatsProc.class;
     }
 

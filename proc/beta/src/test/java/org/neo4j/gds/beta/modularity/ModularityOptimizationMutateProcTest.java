@@ -22,9 +22,8 @@ package org.neo4j.gds.beta.modularity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -36,6 +35,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -49,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
+class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest
+    implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
 
     private static final String TEST_GRAPH_NAME = "myGraph";
 
@@ -179,7 +180,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig>> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
 

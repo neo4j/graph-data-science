@@ -22,15 +22,16 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,12 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 
-class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPathYensMutateConfig>
-    implements MutateRelationshipWithPropertyTest<Yens, ShortestPathYensMutateConfig, DijkstraResult> {
+class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<MutateResult, ShortestPathYensMutateConfig>
+    implements MutateRelationshipWithPropertyTest<Yens, DijkstraResult, MutateResult, ShortestPathYensMutateConfig> {
 
     private static final String EXISTING_GRAPH =
         "CREATE" +
@@ -92,7 +93,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, MutateResult, ShortestPathYensMutateConfig>> getProcedureClazz() {
         return ShortestPathYensMutateProc.class;
     }
 

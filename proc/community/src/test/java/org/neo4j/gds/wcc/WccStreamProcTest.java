@@ -22,14 +22,14 @@ package org.neo4j.gds.wcc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.CommunityHelper;
+import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
@@ -40,13 +40,13 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WccStreamProcTest extends WccProcTest<WccStreamConfig> implements
-    ConsecutiveIdsConfigTest<Wcc, WccStreamConfig, DisjointSetStruct> {
+class WccStreamProcTest extends WccProcTest<WccStreamProc.StreamResult, WccStreamConfig> implements
+    ConsecutiveIdsConfigTest<Wcc, DisjointSetStruct, WccStreamProc.StreamResult, WccStreamConfig> {
 
     private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccStreamProc.StreamResult, WccStreamConfig>> getProcedureClazz() {
         return WccStreamProc.class;
     }
 

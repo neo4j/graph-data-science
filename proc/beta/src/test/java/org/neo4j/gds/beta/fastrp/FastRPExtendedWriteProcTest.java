@@ -23,18 +23,18 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedWriteConfig> {
+class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedWriteProc.WriteResult, FastRPExtendedWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -44,7 +44,7 @@ class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedW
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedWriteProc.WriteResult, FastRPExtendedWriteConfig>> getProcedureClazz() {
         return FastRPExtendedWriteProc.class;
     }
 

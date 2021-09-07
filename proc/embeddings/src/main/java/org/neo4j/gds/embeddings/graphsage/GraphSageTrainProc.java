@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageModelTrainer.GraphSageTrainMetrics, TrainProc.TrainResult, GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)

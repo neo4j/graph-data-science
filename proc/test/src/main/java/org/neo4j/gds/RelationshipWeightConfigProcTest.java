@@ -36,7 +36,7 @@ public final class RelationshipWeightConfigProcTest {
     private RelationshipWeightConfigProcTest() {}
 
     public static <C extends AlgoBaseConfig & RelationshipWeightConfig> List<DynamicTest> allTheTests(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -50,7 +50,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertRelationshipWeightPropertyCanBeConfigured(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("relationshipWeightProperty", () -> {
@@ -61,7 +61,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertDefaultRelationshipWeightPropertyIsNull(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultRelationshipWeightProperty", () -> {
@@ -71,7 +71,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertBlankRelationshipWeightPropertyIsNull(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("blankRelationshipWeightProperty", () -> {
@@ -82,7 +82,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertEmptyRelationshipWeightPropertyIsNull(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("emptyRelationshipWeightProperty", () -> {
@@ -95,7 +95,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertRelationshipWeightPropertyIsValid(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         var graphStore = GdlFactory.of("()-[:A {rrw: 4}]->()-[:A {rw: 3}]->(), ()-[:A {rw: 2}]->(), ()-[:A {rw: 1}]->()").build().graphStore();
@@ -112,7 +112,7 @@ public final class RelationshipWeightConfigProcTest {
     }
 
     private static <C extends AlgoBaseConfig & RelationshipWeightConfig> DynamicTest assertRelationshipWeightPropertyIsInvalid(
-        AlgoBaseProc<?, ?, C> proc,
+        AlgoBaseProc<?, ?, ?, C> proc,
         CypherMapWrapper config
     ) {
         var graphStore = GdlFactory.of("()-[:A {foo: 1}]->()").build().graphStore();

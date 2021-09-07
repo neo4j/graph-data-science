@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
+public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, Prim.Result, KSpanningTreeConfig> {
 
     private static final String MAX_DESCRIPTION =
         "The maximum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +

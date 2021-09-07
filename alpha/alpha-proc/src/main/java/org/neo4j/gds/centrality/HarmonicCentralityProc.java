@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig> {
+public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityProc.StreamResult, HarmonicCentralityConfig> {
 
     private static final String DESCRIPTION =
         "Harmonic centrality is a way of detecting nodes that are " +

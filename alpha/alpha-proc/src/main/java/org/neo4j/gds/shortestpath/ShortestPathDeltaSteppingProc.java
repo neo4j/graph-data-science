@@ -60,7 +60,7 @@ import static org.neo4j.procedure.Mode.WRITE;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
+public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaStepping.DeltaSteppingResult, ShortestPathDeltaSteppingConfig> {
 
     private static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
 
