@@ -89,7 +89,7 @@ class LinkLogisticRegressionObjectiveTest {
             ProgressTracker.NULL_TRACKER
         );
         this.objective = new LinkLogisticRegressionObjective(
-            LinkLogisticRegressionData.from(features.size()),
+            LinkLogisticRegressionData.from(features.size(), true),
             1.0,
             linkFeatures,
             targets

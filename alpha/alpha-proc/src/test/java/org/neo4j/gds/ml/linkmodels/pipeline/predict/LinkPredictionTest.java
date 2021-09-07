@@ -96,11 +96,15 @@ class LinkPredictionTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-            WEIGHTS,
-            1,
-            WEIGHTS.length
-        )));
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(
+                new Matrix(
+                    WEIGHTS,
+                    1,
+                    WEIGHTS.length
+                )),
+            Weights.ofScalar(0)
+        );
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
@@ -144,11 +148,15 @@ class LinkPredictionTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-            WEIGHTS,
-            1,
-            WEIGHTS.length
-        )));
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(
+                new Matrix(
+                    WEIGHTS,
+                    1,
+                    WEIGHTS.length
+                )),
+            Weights.ofScalar(0)
+        );
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
@@ -186,11 +194,14 @@ class LinkPredictionTest extends BaseProcTest {
 
         double[] weights = {-2.0, -1.0, 3.0, 1.0};
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-            weights,
-            1,
-            weights.length
-        )));
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(new Matrix(
+                weights,
+                1,
+                weights.length
+            )),
+            Weights.ofScalar(0)
+        );
 
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
@@ -238,11 +249,14 @@ class LinkPredictionTest extends BaseProcTest {
 
         double[] weights = {-2.0, -1.0, 3.0, 1.0};
 
-        var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(
-            weights,
-            1,
-            weights.length
-        )));
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(new Matrix(
+                weights,
+                1,
+                weights.length
+            )),
+            Weights.ofScalar(0)
+        );
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.9818363089715674),

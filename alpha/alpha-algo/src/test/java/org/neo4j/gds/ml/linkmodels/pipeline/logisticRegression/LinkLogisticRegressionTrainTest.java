@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
@@ -95,8 +96,11 @@ class LinkLogisticRegressionTrainTest {
 
         var result = linearRegression.compute();
 
-        var expected = new Matrix(new double[]{1.4312096002404944, -1.0723221599949817}, 1, 2);
+        var expected = new Matrix(new double[]{1.4846110075228092, -1.03519781024844}, 1, 2);
         assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
+
+        var expectedBias = -0.17217994185059912;
+        assertThat(result.bias().get().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
     }
 
     @Test
@@ -112,8 +116,11 @@ class LinkLogisticRegressionTrainTest {
 
         var result = linearRegression.compute();
 
-        var expected = new Matrix(new double[]{0.09696345464435131, -0.09306922756442035}, 1, 2);
+        var expected = new Matrix(new double[]{0.09659737489561905, -0.09546107129698361}, 1, 2);
         assertThat(result.weights().data()).matches(matrix -> matrix.equals(expected, 1e-8));
+
+        var expectedBias = 0.027877045803993247;
+        assertThat(result.bias().get().data().value()).isCloseTo(expectedBias, Offset.offset(1e-8));
     }
 
     @Test

@@ -20,7 +20,8 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -30,28 +31,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticLossTest implements FiniteDifferenceTest {
 
-    @Test
-    void shouldApplyCorrectly() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldApplyCorrectly(boolean withBias) {
         var targets = Constant.vector(new double[]{1.0, 0.0});
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
-        var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
+        var features = Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
         var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
-        var loss = new LogisticLoss(weights, predictions, features, targets);
+
+        var loss = withBias
+            ? new LogisticLoss(weights,  Weights.ofScalar(2.5), predictions, features, targets)
+            : new LogisticLoss(weights, predictions, features, targets);
+
         ComputationContext ctx = new ComputationContext();
-        double lossValue = ctx.forward(loss).value();
-        double expectedValue = -1.0/2.0 * (1.0*log(0.7137567) + 0 + 0 + log(1-0.74732574));
-        assertThat(ctx.data(predictions).data()).containsExactly(new double[]{0.7137567, 0.74732574}, Offset.offset(1e-6));
-        assertThat(lossValue).isCloseTo(expectedValue, Offset.offset(1e-8));
+
+        // the bias should not influence the `apply` computation of the logistic loss
+        double expectedValue = -1.0 / 2.0 * (1.0 * log(0.7137567) + 0 + 0 + log(1 - 0.74732574));
+        assertThat(ctx.forward(loss).value()).isCloseTo(expectedValue, Offset.offset(1e-8));
+
+        // verify that the predictions are updated in the context
+        assertThat(ctx.data(predictions).data()).containsExactly(
+            new double[]{0.7137567, 0.74732574},
+            Offset.offset(1e-6)
+        );
     }
 
-    @Test
-    void logisticLossApproximatesGradient() {
-        var targets =  Constant.vector(new double[]{1.0, 0.0});
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void logisticLossApproximatesGradient(boolean withBias) {
+        var targets = Constant.vector(new double[]{1.0, 0.0});
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
-        var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
+        var features = Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
         var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
 
-        var loss = new LogisticLoss(weights, predictions, features, targets);
+        var loss = withBias
+            ? new LogisticLoss(weights, Weights.ofScalar(2.5), predictions, features, targets)
+            : new LogisticLoss(weights, predictions, features, targets);
+
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
 

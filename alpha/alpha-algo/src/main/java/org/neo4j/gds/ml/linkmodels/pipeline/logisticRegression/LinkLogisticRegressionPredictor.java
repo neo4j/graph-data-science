@@ -20,21 +20,27 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.ml.core.functions.Sigmoid;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 
 public class LinkLogisticRegressionPredictor {
     private final Matrix weights;
+    private final Scalar bias;
 
     public LinkLogisticRegressionPredictor(
         LinkLogisticRegressionData modelData
     ) {
         this.weights = modelData.weights().data();
+        // since tensors are mutable, extracting the double value here can lead to a stale value
+        this.bias = modelData.bias().map(Weights::data).orElse(new Scalar(0d));
     }
 
     public double predictedProbability(double[] features) {
         var affinity = 0D;
+        double biasValue = bias.value();
         for (int i = 0; i < features.length; i++) {
-            affinity += weights.dataAt(i) * features[i];
+            affinity += weights.dataAt(i) * features[i] + biasValue;
         }
         return Sigmoid.sigmoid(affinity);
     }
