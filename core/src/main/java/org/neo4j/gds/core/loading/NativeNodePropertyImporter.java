@@ -192,8 +192,9 @@ public final class NativeNodePropertyImporter {
             AllocationTracker allocationTracker
         ) {
             var instance = new BuildersByLabel();
-            for (var label : propertyMappingsByLabel.keySet()) {
-                for (var propertyMapping : propertyMappingsByLabel.get(label)) {
+            for (var entry : propertyMappingsByLabel.entrySet()) {
+                var label = entry.getKey();
+                for (var propertyMapping : entry.getValue()) {
                     var builder = NodePropertiesFromStoreBuilder.of(
                         nodeCount,
                         allocationTracker,
