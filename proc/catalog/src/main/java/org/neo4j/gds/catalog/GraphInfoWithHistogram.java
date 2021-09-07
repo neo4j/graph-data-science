@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -33,7 +34,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
 
     public GraphInfoWithHistogram(
         GraphInfo graphInfo,
-        Map<String, Object> degreeDistribution
+        @Nullable Map<String, Object> degreeDistribution
     ) {
         super(
             graphInfo.graphName,
@@ -55,7 +56,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
         this.degreeDistribution = degreeDistribution;
     }
 
-    static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
+    static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore, boolean computeHistogram) {
         var graphInfo = GraphInfo.withMemoryUsage(graphCreateConfig, graphStore);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
@@ -65,15 +66,19 @@ public class GraphInfoWithHistogram extends GraphInfo {
         );
 
         var degreeDistribution = maybeDegreeDistribution.orElseGet(() -> {
-            var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion());
-            // Cache the computed degree distribution in the Catalog
-            GraphStoreCatalog.setDegreeDistribution(
-                graphCreateConfig.username(),
-                graphStore.databaseId(),
-                graphCreateConfig.graphName(),
-                newHistogram
-            );
-            return newHistogram;
+            if (computeHistogram) {
+                var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion());
+                // Cache the computed degree distribution in the Catalog
+                GraphStoreCatalog.setDegreeDistribution(
+                    graphCreateConfig.username(),
+                    graphStore.databaseId(),
+                    graphCreateConfig.graphName(),
+                    newHistogram
+                );
+                return newHistogram;
+            } else {
+                return null;
+            }
         });
 
         return new GraphInfoWithHistogram(graphInfo, degreeDistribution);

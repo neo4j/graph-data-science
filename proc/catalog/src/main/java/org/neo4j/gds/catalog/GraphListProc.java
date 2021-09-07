@@ -53,7 +53,11 @@ public class GraphListProc extends CatalogProc {
         return graphEntries.map(e -> {
             GraphCreateConfig graphCreateConfig = e.getKey();
             GraphStore graphStore = e.getValue();
-            return GraphInfoWithHistogram.of(graphCreateConfig, graphStore);
+            boolean computeDegreeDistribution = callContext
+                .outputFields()
+                .anyMatch(s -> s.equalsIgnoreCase("degreeDistribution"));
+
+            return GraphInfoWithHistogram.of(graphCreateConfig, graphStore, computeDegreeDistribution);
         });
     }
 }
