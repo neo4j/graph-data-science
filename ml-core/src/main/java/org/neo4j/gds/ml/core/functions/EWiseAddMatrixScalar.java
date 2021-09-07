@@ -28,51 +28,34 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+/**
+ * Corresponds to: result[i, j] = matrix[i, j] + scalar
+ */
+public class EWiseAddMatrixScalar extends AbstractVariable<Matrix> {
 
-public class MatrixScalarSum extends AbstractVariable<Matrix> {
+    private final Variable<Matrix> matrixVariable;
+    private final Variable<Scalar> scalarVariable;
 
-    private final Variable<Matrix> matrix;
-    private final Variable<Scalar> scalar;
-    private final int rows;
-    private final int cols;
-
-    public MatrixScalarSum(Variable<Matrix> matrix, Variable<Scalar> scalar) {
-        super(List.of(matrix, scalar), matrix.dimensions());
-        this.matrix = matrix;
-        this.rows = matrix.dimension(ROWS_INDEX);
-        this.cols = matrix.dimension(COLUMNS_INDEX);
-        this.scalar = scalar;
+    public EWiseAddMatrixScalar(Variable<Matrix> matrixVariable, Variable<Scalar> scalarVariable) {
+        super(List.of(matrixVariable, scalarVariable), matrixVariable.dimensions());
+        this.matrixVariable = matrixVariable;
+        this.scalarVariable = scalarVariable;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
+        var matrix = ctx.data(matrixVariable);
+        double scalarValue = ctx.data(scalarVariable).value();
 
-        double[] matrixData = ctx.data(matrix).data();
-        double scalarValue = ctx.data(scalar).value();
-
-        double[] result = new double[matrixData.length];
-
-        for (int pos = 0; pos < matrixData.length; pos++) {
-            result[pos] = matrixData[pos] + scalarValue;
-        }
-
-        return new Matrix(result, rows, cols);
+        return matrix.map(v -> v + scalarValue);
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        if (parent == matrix) {
+        if (parent == matrixVariable) {
             return ctx.gradient(this);
         } else {
-            var gradient = ctx.gradient(this);
-            var result = 0d;
-            for (int pos = 0; pos < gradient.totalSize(); pos++) {
-                result += gradient.dataAt(pos);
-            }
-
-            return new Scalar(result);
+            return new Scalar(ctx.gradient(this).aggregateSum());
         }
     }
 }
