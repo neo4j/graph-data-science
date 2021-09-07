@@ -93,7 +93,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
                 .divide(bigNanos)
                 .longValueExact();
 
-            progressTracker.progressLogger().logMessage(
+            progressTracker.progressLogger().getLog().debug(
                 formatWithLocale(
                     "%s Store Scan (%s): Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
                     label,

@@ -43,8 +43,6 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         }
     }
 
-    public static final String TASK_LOADING = "LOADING";
-
     protected final CONFIG graphCreateConfig;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;

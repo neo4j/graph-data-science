@@ -116,11 +116,37 @@ class GraphLoaderTest extends BaseTest {
             .log(log)
             .build()
             .graph();
+        assertThat(log.getMessages(TestLog.DEBUG))
+            .anyMatch(message -> message.startsWith("Node Store Scan (NodeCursorBasedScanner): Imported 3 records and 1 properties"))
+            .anyMatch(message -> message.startsWith("Relationship Store Scan (RelationshipScanCursorBasedScanner): Imported 4 records and 0 properties"));
+    }
+
+    @Test
+    public void shouldTrackProgressWithNativeLoading() throws Exception {
+        TestLog log = new TestLog();
+
+        new StoreLoaderBuilder()
+            .api(db)
+            .graphName("graph")
+            .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
+            .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))
+            .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
+            .log(log)
+            .build()
+            .graph();
+
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .anyMatch(message -> message.matches("LOADING \\d\\d%"))
-            .anyMatch(message -> message.startsWith("LOADING Node Store Scan (NodeCursorBasedScanner): Imported 3 records and 1 properties"))
-            .anyMatch(message -> message.startsWith("LOADING Relationship Store Scan (RelationshipScanCursorBasedScanner): Imported 4 records and 0 properties"));
+            .contains(
+                "Loading :: Start",
+                "Loading :: Nodes :: Start",
+                "Loading :: Nodes 100%",
+                "Loading :: Nodes :: Finished",
+                "Loading :: Relationships :: Start",
+                "Loading :: Relationships 100%",
+                "Loading :: Relationships :: Finished",
+                "Loading :: Finished"
+            );
     }
 
     @Test

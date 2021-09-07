@@ -25,7 +25,6 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.compat.WriterLogBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
@@ -70,7 +69,7 @@ class ProgressLoggingTest extends BaseTest {
 
         assertThat(output)
             .isNotEmpty()
-            .contains(GraphStoreFactory.TASK_LOADING);
+            .contains("Loading");
     }
 
     private static Log testLogger(StringWriter writer) {

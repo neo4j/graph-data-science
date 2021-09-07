@@ -139,7 +139,11 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
-        var task = Tasks.leaf(TASK_LOADING, dimensions.nodeCount() + relationshipCount);
+        var task = Tasks.task(
+            "Loading",
+            Tasks.leaf("Nodes", dimensions.nodeCount()),
+            Tasks.leaf("Relationships", relationshipCount)
+        );
         var progressLogger = new BatchingProgressLogger(
             loadingContext.log(),
             task,
@@ -154,15 +158,18 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker allocationTracker = loadingContext.allocationTracker();
-        progressTracker.beginSubTask();
-        IdsAndProperties nodes = loadNodes(concurrency);
-        RelationshipImportResult relationships = loadRelationships(allocationTracker, nodes, concurrency);
-        progressTracker.endSubTask();
-        CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
+        try {
+            progressTracker.beginSubTask();
+            IdsAndProperties nodes = loadNodes(concurrency);
+            RelationshipImportResult relationships = loadRelationships(allocationTracker, nodes, concurrency);
+            CSRGraphStore graphStore = createGraphStore(nodes, relationships, allocationTracker, dimensions);
 
-        logLoadingSummary(graphStore, Optional.of(allocationTracker));
+            logLoadingSummary(graphStore, Optional.of(allocationTracker));
 
-        return ImportResult.of(dimensions, graphStore);
+            return ImportResult.of(dimensions, graphStore);
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     private IdsAndProperties loadNodes(int concurrency) {
@@ -195,7 +202,12 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                 IdMapImplementations.hugeIdMapBuilder()
             );
 
-        return scanningNodesImporter.call();
+        try {
+            progressTracker.beginSubTask();
+            return scanningNodesImporter.call();
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     @NotNull
@@ -229,7 +241,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                 )
             ));
 
-        ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
+        ScanningRelationshipsImporter scanningRelationshipsImporter = new ScanningRelationshipsImporter(
             graphCreateConfig,
             loadingContext,
             dimensions,
@@ -237,8 +249,16 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             idsAndProperties.idMap(),
             allBuilders,
             concurrency
-        ).call();
+        );
 
-        return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
+        try {
+            progressTracker.beginSubTask();
+
+            ObjectLongMap<RelationshipType> relationshipCounts = scanningRelationshipsImporter.call();
+
+            return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 }

@@ -160,7 +160,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
                 }
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);
-                progressTracker.progressLogger().logProgress(importedRels);
+                progressTracker.logProgress(importedRels);
                 allImportedRels += importedRels;
                 allImportedWeights += importedWeights;
             }
