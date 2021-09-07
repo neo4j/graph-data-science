@@ -58,7 +58,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 
     @Test
@@ -72,6 +72,6 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 }

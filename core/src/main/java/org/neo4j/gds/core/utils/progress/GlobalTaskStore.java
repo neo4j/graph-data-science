@@ -34,11 +34,11 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
 
     private final Map<String, Map<JobId, Task>> registeredTasks;
 
-    GlobalTaskStore() {
+    public GlobalTaskStore() {
         this.registeredTasks = new ConcurrentHashMap<>();
     }
 
-    void store(String username, JobId jobId, Task task) {
+    public void store(String username, JobId jobId, Task task) {
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .put(jobId, task);

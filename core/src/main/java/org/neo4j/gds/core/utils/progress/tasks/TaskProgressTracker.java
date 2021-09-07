@@ -95,9 +95,12 @@ public class TaskProgressTracker implements ProgressTracker {
         var currentTask = requireCurrentTask();
         taskProgressLogger.logEndSubTask(currentTask, parentTask());
         currentTask.finish();
-        this.currentTask = nestedTasks.isEmpty()
-            ? Optional.empty()
-            : Optional.of(nestedTasks.pop());
+        if (nestedTasks.isEmpty()) {
+            this.currentTask = Optional.empty();
+            release();
+        } else {
+            this.currentTask = Optional.of(nestedTasks.pop());
+        }
     }
 
     @Override
