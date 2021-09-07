@@ -102,7 +102,7 @@ class LinkPredictionTest extends BaseProcTest {
             WEIGHTS.length
         )));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -150,7 +150,7 @@ class LinkPredictionTest extends BaseProcTest {
             WEIGHTS.length
         )));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -192,7 +192,7 @@ class LinkPredictionTest extends BaseProcTest {
             weights.length
         )));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -254,7 +254,7 @@ class LinkPredictionTest extends BaseProcTest {
         );
 
         for (int i = 0; i < 2; i++) {
-            ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+            ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
                 var pipelineExecutor = new PipelineExecutor(
                     pipeline,
                     caller,

@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStreamProc.Result, LocalClusteringCoefficientStreamConfig> {
+class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStreamConfig> {
 
     @Test
     void testStreaming() {
@@ -74,7 +74,7 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamProc.Result, LocalClusteringCoefficientStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig>> getProcedureClazz() {
         return LocalClusteringCoefficientStreamProc.class;
     }
 

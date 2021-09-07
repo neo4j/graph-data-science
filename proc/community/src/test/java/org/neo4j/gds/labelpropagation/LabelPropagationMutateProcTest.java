@@ -23,15 +23,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -48,9 +48,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> implements
-    MutateNodePropertyTest<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig>,
-    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
+public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements
+    MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
 
     @Override
     public String mutateProperty() {
@@ -80,7 +80,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
     }
 

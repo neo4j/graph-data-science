@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteProc.WriteResult, DegreeCentralityWriteConfig> {
+class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -47,7 +47,7 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteProc.WriteResult, DegreeCentralityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig>> getProcedureClazz() {
         return DegreeCentralityWriteProc.class;
     }
 

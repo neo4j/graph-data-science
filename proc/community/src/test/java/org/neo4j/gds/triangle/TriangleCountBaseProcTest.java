@@ -22,18 +22,18 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.AbstractRelationshipProjections;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -43,16 +43,16 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class TriangleCountBaseProcTest<PROC_RESULT, CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
-    implements AlgoBaseProcTest<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, PROC_RESULT, CONFIG>,
-    OnlyUndirectedTest<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, PROC_RESULT, CONFIG> {
+abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
+    implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
+    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
+    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
+    HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +

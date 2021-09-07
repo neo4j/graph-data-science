@@ -24,13 +24,12 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.List;
 import java.util.Map;
@@ -40,15 +39,15 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 
-class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<StandardWriteRelationshipsResult, ShortestPathYensWriteConfig> {
+class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, StandardWriteRelationshipsResult, ShortestPathYensWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig>> getProcedureClazz() {
         return ShortestPathYensWriteProc.class;
     }
 

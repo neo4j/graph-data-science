@@ -22,16 +22,15 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -39,14 +38,14 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
-class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<MutateResult, ShortestPathAStarMutateConfig>
-    implements MutateRelationshipWithPropertyTest<AStar, DijkstraResult, MutateResult, ShortestPathAStarMutateConfig> {
+class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<ShortestPathAStarMutateConfig>
+    implements MutateRelationshipWithPropertyTest<AStar, ShortestPathAStarMutateConfig, DijkstraResult> {
 
     private static final String EXISTING_GRAPH =        "CREATE" +
         "  (nA:Label {latitude: 1.304444D,    longitude: 103.717373D})" +
@@ -109,7 +108,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<MutateRe
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, MutateResult, ShortestPathAStarMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarMutateConfig>> getProcedureClazz() {
         return ShortestPathAStarMutateProc.class;
     }
 

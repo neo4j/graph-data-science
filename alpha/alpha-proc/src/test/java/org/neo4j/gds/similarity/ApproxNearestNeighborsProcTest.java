@@ -74,7 +74,7 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(ApproxNearestNeighborsWriteProc.class, ApproxNearestNeighborsStreamProc.class);
+        registerProcedures(ApproxNearestNeighborsProc.class);
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -194,6 +194,6 @@ class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNeare
 
     @Override
     Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig>> getProcedureClazz() {
-        return ApproxNearestNeighborsWriteProc.class;
+        return ApproxNearestNeighborsProc.class;
     }
 }

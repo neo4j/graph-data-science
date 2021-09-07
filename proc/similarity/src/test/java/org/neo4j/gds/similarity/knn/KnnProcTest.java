@@ -26,23 +26,23 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeWeightConfigProcTest;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -54,14 +54,14 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
-import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
-abstract class KnnProcTest<PROC_RESULT, CONFIG extends KnnBaseConfig> extends BaseProcTest implements
-    MemoryEstimateTest<Knn, Knn.Result, PROC_RESULT, CONFIG>,
-    HeapControlTest<Knn, Knn.Result, PROC_RESULT, CONFIG> {
+abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
+    MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
+    HeapControlTest<Knn, CONFIG, Knn.Result> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

@@ -23,10 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsProc.StatsResult, PageRankStatsConfig> {
+public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -49,7 +49,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsProc.St
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStatsProc.StatsResult, PageRankStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStatsConfig>> getProcedureClazz() {
         return PageRankStatsProc.class;
     }
 

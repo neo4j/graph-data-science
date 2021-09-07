@@ -20,8 +20,8 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.IterationsConfig;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 public final class IterationsConfigProcTest {
 
     public static List<DynamicTest> test(
-        AlgoBaseProc<?, ?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
@@ -50,7 +50,7 @@ public final class IterationsConfigProcTest {
     private IterationsConfigProcTest() {}
 
     private static DynamicTest invalidMaxIterations(
-        AlgoBaseProc<?, ?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
@@ -66,7 +66,7 @@ public final class IterationsConfigProcTest {
     }
 
     private static DynamicTest validMaxIterations(
-        AlgoBaseProc<?, ?, ?, ?> proc,
+        AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("validMaxIterations", () -> {

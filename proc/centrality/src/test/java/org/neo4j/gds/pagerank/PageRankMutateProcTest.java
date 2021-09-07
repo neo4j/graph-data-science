@@ -22,12 +22,12 @@ package org.neo4j.gds.pagerank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
 
-class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateProc.MutateResult, PageRankMutateConfig> implements MutateNodePropertyTest<PageRankAlgorithm, PageRankResult, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
+class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements MutateNodePropertyTest<PageRankAlgorithm, PageRankMutateConfig, PageRankResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
@@ -117,7 +117,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateProc.MutateR
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankMutateProc.MutateResult, PageRankMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankMutateConfig>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
 

@@ -49,12 +49,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 
-abstract class ShortestPathDijkstraProcTest<PROC_RESULT, CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    SourceNodeConfigTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    TargetNodeConfigTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG> {
+abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
+    MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
+    HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<Dijkstra, CONFIG, DijkstraResult>,
+    TargetNodeConfigTest<Dijkstra, CONFIG, DijkstraResult> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

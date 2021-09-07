@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsStream.Result,  AllShortestPathsConfig> {
+public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> {
 
     private static final String DESCRIPTION = "The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.";
 

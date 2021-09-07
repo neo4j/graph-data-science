@@ -100,10 +100,10 @@ public final class ProcedureReflection {
         return annotation.name().isEmpty() ? annotation.value() : annotation.name();
     }
 
-    private AlgoBaseProc<?, ?, ?, ?> createProcedure(BaseProc caller, Method method) {
-        AlgoBaseProc<?, ?, ?, ?> proc;
+    private AlgoBaseProc<?, ?, ?> createProcedure(BaseProc caller, Method method) {
+        AlgoBaseProc<?, ?, ?> proc;
         try {
-            proc = (AlgoBaseProc<?, ?, ?, ?>) method.getDeclaringClass().getConstructor().newInstance();
+            proc = (AlgoBaseProc<?, ?, ?>) method.getDeclaringClass().getConstructor().newInstance();
             proc.api = caller.api;
             proc.callContext = caller.callContext;
             proc.log = caller.log;
@@ -134,7 +134,7 @@ public final class ProcedureReflection {
     }
 
     public void invokeProc(BaseProc caller, String graphName, Method procMethod, Map<String, Object> config) {
-        AlgoBaseProc<?, ?, ?, ?> procedure = createProcedure(caller, procMethod);
+        AlgoBaseProc<?, ?, ?> procedure = createProcedure(caller, procMethod);
         try {
             procMethod.invoke(procedure, graphName, config);
         } catch (IllegalAccessException | InvocationTargetException e) {

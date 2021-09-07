@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, WalkResult, RandomWalkConfig> {
+public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkConfig> {
 
     private static final String DESCRIPTION =
         "Random Walk is an algorithm that provides random paths in a graph. " +

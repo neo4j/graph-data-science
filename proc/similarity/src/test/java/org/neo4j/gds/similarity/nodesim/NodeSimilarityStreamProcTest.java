@@ -25,14 +25,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.catalog.GraphDropProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.catalog.GraphDropProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -41,13 +40,13 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.Orientation.REVERSE;
 
-class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<SimilarityResult, NodeSimilarityStreamConfig> {
+class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, SimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
         return NodeSimilarityStreamProc.class;
     }
 

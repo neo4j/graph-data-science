@@ -21,9 +21,9 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class KnnStreamProcTest extends KnnProcTest<SimilarityResult, KnnStreamConfig> {
+class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     private static final Collection<SimilarityResult> EXPECTED = new HashSet<>();
     static {
@@ -41,7 +41,7 @@ class KnnStreamProcTest extends KnnProcTest<SimilarityResult, KnnStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, SimilarityResult, KnnStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStreamConfig>> getProcedureClazz() {
         return KnnStreamProc.class;
     }
 

@@ -26,9 +26,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class KnnStatsProcTest extends KnnProcTest<SimilarityStatsResult, KnnStatsConfig> {
+public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     private static Stream<Arguments> negativeGraphs() {
         return Stream.of(
@@ -163,7 +162,7 @@ public final class KnnStatsProcTest extends KnnProcTest<SimilarityStatsResult, K
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, SimilarityStatsResult, KnnStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStatsConfig>> getProcedureClazz() {
         return KnnStatsProc.class;
     }
 

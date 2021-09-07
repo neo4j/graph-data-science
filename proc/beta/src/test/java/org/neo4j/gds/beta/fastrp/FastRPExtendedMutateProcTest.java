@@ -25,18 +25,18 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.functions.NodePropertyFunc;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Optional;
 
-class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtendedMutateProc.MutateResult, FastRPExtendedMutateConfig>
-    implements MutateNodePropertyTest<FastRP, FastRP.FastRPResult, FastRPExtendedMutateProc.MutateResult, FastRPExtendedMutateConfig>  {
+class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtendedMutateConfig>
+    implements MutateNodePropertyTest<FastRP, FastRPExtendedMutateConfig, FastRP.FastRPResult>  {
 
     @Override
     public String mutateProperty() {
@@ -75,7 +75,7 @@ class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtended
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedMutateProc.MutateResult, FastRPExtendedMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedMutateConfig>> getProcedureClazz() {
         return FastRPExtendedMutateProc.class;
     }
 

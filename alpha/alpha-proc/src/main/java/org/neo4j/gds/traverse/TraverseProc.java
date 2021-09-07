@@ -44,7 +44,7 @@ import static org.neo4j.gds.utils.InputNodeValidator.validateEndNode;
 import static org.neo4j.gds.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 
-public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, WalkResult, TraverseConfig> {
+public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
     private static final String DESCRIPTION =
         "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +

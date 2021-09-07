@@ -23,10 +23,10 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteProc.WriteResult, TriangleCountWriteConfig> {
+class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -119,7 +119,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteProc.WriteResult, TriangleCountWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig>> getProcedureClazz() {
         return TriangleCountWriteProc.class;
     }
 

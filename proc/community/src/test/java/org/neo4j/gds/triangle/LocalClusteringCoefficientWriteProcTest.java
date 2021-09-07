@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientWriteProcTest
-    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteProc.WriteResult, LocalClusteringCoefficientWriteConfig> {
+    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -88,7 +88,7 @@ class LocalClusteringCoefficientWriteProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteProc.WriteResult, LocalClusteringCoefficientWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig>> getProcedureClazz() {
         return LocalClusteringCoefficientWriteProc.class;
     }
 

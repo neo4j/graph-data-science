@@ -98,7 +98,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER)
             );
@@ -131,7 +131,7 @@ class PipelineExecutorTest extends BaseProcTest {
             "scaler", "MEAN"
         )));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
                 RELATIONSHIP_TYPE
@@ -153,7 +153,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var normD = Math.sqrt(42 * 42 + 9 * 9);
 
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
                 pipeline,
                 caller,
@@ -196,7 +196,7 @@ class PipelineExecutorTest extends BaseProcTest {
             0.6668064514098416
         );
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
                 pipeline,
                 caller,
@@ -229,7 +229,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -270,7 +270,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.setSplitConfig(splitConfig);
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -309,7 +309,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?, ?>>) caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,

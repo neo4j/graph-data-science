@@ -35,7 +35,7 @@ public abstract class WriteStreamOfRelationshipsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT extends RelationshipStreaming,
     PROC_RESULT,
-    CONFIG extends WriteRelationshipConfig & WritePropertyConfig & AlgoBaseConfig> extends StreamOfRelationshipsWriter<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
+    CONFIG extends WriteRelationshipConfig & WritePropertyConfig & AlgoBaseConfig> extends StreamOfRelationshipsWriter<ALGO, ALGO_RESULT, CONFIG> {
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 

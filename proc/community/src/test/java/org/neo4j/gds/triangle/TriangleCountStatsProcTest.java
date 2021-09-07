@@ -21,9 +21,9 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
+class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStatsConfig> {
 
     @Test
     void testStats() {
@@ -74,7 +74,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig>> getProcedureClazz() {
         return TriangleCountStatsProc.class;
     }
 

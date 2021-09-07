@@ -20,9 +20,9 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
+public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     private String heapGraphName() { return "heapTestGraph"; }
 

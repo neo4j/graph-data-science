@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 
-public interface SourceNodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends SourceNodeConfig & AlgoBaseConfig> extends NodeConfigTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
+public interface SourceNodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends SourceNodeConfig & AlgoBaseConfig, RESULT> extends NodeConfigTest<ALGORITHM, CONFIG, RESULT> {
 
     @Test
     default void testSourceNodeValidation() {

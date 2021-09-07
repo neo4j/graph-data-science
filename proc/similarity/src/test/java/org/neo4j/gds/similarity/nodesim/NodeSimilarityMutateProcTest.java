@@ -24,12 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.similarity.SimilarityMutateResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -41,8 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityMutateProcTest
-    extends NodeSimilarityProcTest<SimilarityMutateResult, NodeSimilarityMutateConfig>
-    implements MutateRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityResult, SimilarityMutateResult, NodeSimilarityMutateConfig> {
+    extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
+    implements MutateRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
     @Override
     public String mutateRelationshipType() {
@@ -60,7 +59,7 @@ class NodeSimilarityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, SimilarityMutateResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
         return NodeSimilarityMutateProc.class;
     }
 

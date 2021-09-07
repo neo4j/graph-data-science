@@ -25,12 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,9 +44,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public abstract class FastRPProcTest<PROC_RESULT, CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<FastRP, FastRP.FastRPResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<FastRP, FastRP.FastRPResult, PROC_RESULT, CONFIG> {
+public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
+    MemoryEstimateTest<FastRP, CONFIG, FastRP.FastRPResult> {
 
     @Neo4jGraph
     private static final String DB_CYPHER =

@@ -22,12 +22,11 @@ package org.neo4j.gds.pagerank;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher.ModeBuildStage;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.HashMap;
@@ -38,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PageRankStreamProcTest extends PageRankProcTest<CentralityStreamResult, PageRankStreamConfig> {
+class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, CentralityStreamResult, PageRankStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStreamConfig>> getProcedureClazz() {
         return PageRankStreamProc.class;
     }
 

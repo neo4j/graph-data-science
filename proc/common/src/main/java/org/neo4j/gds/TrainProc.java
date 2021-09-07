@@ -43,10 +43,9 @@ import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
 
 public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>>,
     TRAIN_RESULT,
-    TRAIN_INFO extends Model.Mappable,
-    PROC_RESULT,
-    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
-    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, PROC_RESULT, TRAIN_CONFIG> {
+    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig,
+    TRAIN_INFO extends Model.Mappable>
+    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> {
 
     protected abstract String modelType();
 

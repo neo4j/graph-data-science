@@ -42,10 +42,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-abstract class ApproxMaxKCutProcTest<PROC_RESULT, CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<ApproxMaxKCut, ApproxMaxKCut.CutResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<ApproxMaxKCut, ApproxMaxKCut.CutResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<ApproxMaxKCut, ApproxMaxKCut.CutResult, PROC_RESULT, CONFIG> {
+abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult>,
+    MemoryEstimateTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult>,
+    HeapControlTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
 
     static final String GRAPH_NAME = "myGraph";
 

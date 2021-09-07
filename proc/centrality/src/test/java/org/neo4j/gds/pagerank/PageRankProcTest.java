@@ -28,24 +28,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SourceNodesConfigTest;
 import org.neo4j.gds.ToleranceConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.ImmutablePropertyMapping;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -63,11 +63,11 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class PageRankProcTest<PROC_RESULT, CONFIG extends PageRankConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<PageRankAlgorithm, PageRankResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<PageRankAlgorithm, PageRankResult, PROC_RESULT, CONFIG>,
-    SourceNodesConfigTest<PageRankAlgorithm, PageRankResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<PageRankAlgorithm, PageRankResult, PROC_RESULT, CONFIG> {
+abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<PageRankAlgorithm, CONFIG, PageRankResult>,
+    MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
+    SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
+    HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

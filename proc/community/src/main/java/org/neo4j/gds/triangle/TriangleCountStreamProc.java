@@ -40,7 +40,8 @@ import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndire
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleCountStreamProc
-    extends StreamProc<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
+    extends StreamProc<IntersectingTriangleCount, TriangleCountResult,
+    TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
 
     @Description(TriangleCountCompanion.DESCRIPTION)
     @Procedure(name = "gds.triangleCount.stream", mode = Mode.READ)

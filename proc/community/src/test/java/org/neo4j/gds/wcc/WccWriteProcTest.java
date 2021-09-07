@@ -25,9 +25,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
@@ -43,14 +43,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class WccWriteProcTest extends WccProcTest<WccWriteProc.WriteResult, WccWriteConfig> implements
-    ConsecutiveIdsConfigTest<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccWriteConfig> {
+class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
+    ConsecutiveIdsConfigTest<Wcc, WccWriteConfig, DisjointSetStruct> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
         return WccWriteProc.class;
     }
 

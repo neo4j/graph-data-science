@@ -20,10 +20,10 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -34,12 +34,12 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends MutateConfig & AlgoBaseConfig>
-    extends MutatePropertyProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
+public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+    extends MutatePropertyProcTest<ALGORITHM, CONFIG, RESULT> {
 
     String mutateProperty();
 

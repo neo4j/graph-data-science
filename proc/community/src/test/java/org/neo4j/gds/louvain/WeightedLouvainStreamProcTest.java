@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -33,7 +34,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.compat.MapUtil.map;
 
-class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamProc.StreamResult, LouvainStreamConfig> {
+class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     private static final Map<String, Object> expectedWeightedResult = map(
         "Alice", 3L,
@@ -268,7 +268,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamProc.St
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainStreamProc.StreamResult, LouvainStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainStreamConfig>> getProcedureClazz() {
         return LouvainStreamProc.class;
     }
 

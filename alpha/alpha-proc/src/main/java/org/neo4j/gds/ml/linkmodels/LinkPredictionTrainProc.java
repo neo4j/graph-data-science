@@ -41,7 +41,7 @@ import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndire
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrainProc extends
-    TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionModelInfo, MLTrainResult, LinkPredictionTrainConfig> {
+    TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model")

@@ -23,12 +23,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,17 +38,17 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeSimilarityWriteProcTest
-    extends NodeSimilarityProcTest<SimilarityWriteResult, NodeSimilarityWriteConfig>
-    implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityResult, SimilarityWriteResult, NodeSimilarityWriteConfig> {
+    extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>
+    implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityWriteConfig, NodeSimilarityResult> {
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, SimilarityWriteResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
         return NodeSimilarityWriteProc.class;
     }
 

@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig> {
+class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStatsConfig> {
 
     @Test
     void testStats() {
@@ -62,7 +62,7 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig>> getProcedureClazz() {
         return LocalClusteringCoefficientStatsProc.class;
     }
 

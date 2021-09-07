@@ -21,10 +21,10 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Map;
@@ -36,8 +36,8 @@ import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientMutateProcTest
-    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig>
-    implements MutateNodePropertyTest<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig> {
+    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateConfig>
+    implements MutateNodePropertyTest<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficient.Result> {
 
     @Override
     public String mutateProperty() {
@@ -123,7 +123,7 @@ class LocalClusteringCoefficientMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig>> getProcedureClazz() {
         return LocalClusteringCoefficientMutateProc.class;
     }
 

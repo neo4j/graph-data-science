@@ -25,10 +25,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
@@ -38,11 +38,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> implements
-    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagation, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> {
+class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> implements
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationStreamConfig, LabelPropagation> {
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;
     }
 

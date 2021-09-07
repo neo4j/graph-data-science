@@ -21,12 +21,12 @@ package org.neo4j.gds;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -43,8 +43,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, RESULT, PROC_RESULT, CONFIG extends MutateConfig & AlgoBaseConfig>
-    extends AlgoBaseProcTest<ALGORITHM, RESULT, PROC_RESULT, CONFIG> {
+public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+    extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     default Optional<String> mutateGraphName() {
         return Optional.empty();

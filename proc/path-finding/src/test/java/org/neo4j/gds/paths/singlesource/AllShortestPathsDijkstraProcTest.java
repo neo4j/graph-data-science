@@ -47,11 +47,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 
-abstract class AllShortestPathsDijkstraProcTest<PROC_RESULT, CONFIG extends AllShortestPathsBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>,
-    SourceNodeConfigTest<Dijkstra, DijkstraResult, PROC_RESULT, CONFIG>
+abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
+    MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
+    HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {
     @TestFactory
     Stream<DynamicTest> configTests() {

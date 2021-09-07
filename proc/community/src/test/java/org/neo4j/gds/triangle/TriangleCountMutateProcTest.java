@@ -21,12 +21,12 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
@@ -39,8 +39,8 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class TriangleCountMutateProcTest
-    extends TriangleCountBaseProcTest<TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig>
-    implements MutateNodePropertyTest<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
+    extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
+    implements MutateNodePropertyTest<IntersectingTriangleCount, TriangleCountMutateConfig, IntersectingTriangleCount.TriangleCountResult> {
 
     @Override
     public String mutateProperty() {
@@ -139,7 +139,7 @@ class TriangleCountMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig>> getProcedureClazz() {
         return TriangleCountMutateProc.class;
     }
 

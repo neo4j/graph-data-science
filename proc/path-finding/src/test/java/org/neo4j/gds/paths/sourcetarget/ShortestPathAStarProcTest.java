@@ -60,12 +60,12 @@ import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 
-abstract class ShortestPathAStarProcTest<PROC_RESULT, CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<AStar, DijkstraResult, PROC_RESULT, CONFIG>,
-    MemoryEstimateTest<AStar, DijkstraResult, PROC_RESULT, CONFIG>,
-    HeapControlTest<AStar, DijkstraResult, PROC_RESULT, CONFIG>,
-    SourceNodeConfigTest<AStar, DijkstraResult, PROC_RESULT, CONFIG>,
-    TargetNodeConfigTest<AStar, DijkstraResult, PROC_RESULT, CONFIG> {
+abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
+    MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
+    HeapControlTest<AStar, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
+    TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
     private static final String NODE_QUERY = "MATCH (n) RETURN id(n) AS id, n.latitude AS latitude, n.longitude AS longitude";
 

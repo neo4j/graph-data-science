@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, SccProc.SccResult, SccConfig> {
+public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, SccConfig> {
 
     private static final String DESCRIPTION =
         "The SCC algorithm finds sets of connected nodes in an directed graph, " +

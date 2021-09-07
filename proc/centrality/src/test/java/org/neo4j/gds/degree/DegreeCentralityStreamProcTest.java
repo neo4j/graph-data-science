@@ -22,7 +22,6 @@ package org.neo4j.gds.degree;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -30,10 +29,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<CentralityStreamResult, DegreeCentralityStreamConfig> {
+class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<DegreeCentralityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, CentralityStreamResult, DegreeCentralityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig>> getProcedureClazz() {
         return DegreeCentralityStreamProc.class;
     }
 

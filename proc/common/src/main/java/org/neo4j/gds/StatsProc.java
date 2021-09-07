@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.stream.Stream;
 
@@ -28,7 +28,7 @@ public abstract class StatsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
+    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 

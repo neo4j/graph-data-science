@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
+class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
 
     @Test
     void testStreaming() {
@@ -46,7 +46,7 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamProc.Result, TriangleCountStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig>> getProcedureClazz() {
         return TriangleCountStreamProc.class;
     }
 

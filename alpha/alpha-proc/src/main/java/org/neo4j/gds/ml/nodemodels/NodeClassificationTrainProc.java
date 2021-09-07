@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationModelInfo, MLTrainResult, NodeClassificationTrainConfig> {
+public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig, NodeClassificationModelInfo> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")
