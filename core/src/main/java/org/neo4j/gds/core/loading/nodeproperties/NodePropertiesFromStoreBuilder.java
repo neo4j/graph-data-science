@@ -21,10 +21,10 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.FloatingPointValue;
@@ -56,19 +56,15 @@ public final class NodePropertiesFromStoreBuilder {
         return MEMORY_ESTIMATION;
     }
 
+    public static NodePropertiesFromStoreBuilder of(long nodeSize, AllocationTracker allocationTracker, DefaultValue defaultValue) {
+        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker);
+    }
+
     private final DefaultValue defaultValue;
     private final long nodeSize;
     private final AllocationTracker allocationTracker;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
     private final LongAdder size;
-
-    public static NodePropertiesFromStoreBuilder of(
-        long nodeSize,
-        AllocationTracker allocationTracker,
-        DefaultValue defaultValue
-    ) {
-        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker);
-    }
 
     private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker allocationTracker) {
         this.defaultValue = defaultValue;

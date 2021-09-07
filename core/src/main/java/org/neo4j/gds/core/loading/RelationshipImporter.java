@@ -67,9 +67,9 @@ public class RelationshipImporter {
 
     private long importUndirected(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, null, adjacencyBuilder, allocationTracker);
+        int importedOut = importRelationships(buffer, batch, null, adjacencyBuilder);
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, null, adjacencyBuilder, allocationTracker);
+        int importedIn = importRelationships(buffer, batch, null, adjacencyBuilder);
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
@@ -85,7 +85,7 @@ public class RelationshipImporter {
             adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
-        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, allocationTracker);
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder);
 
         batch = buffer.sortByTarget();
         long[][] inProperties = reader.readProperty(
@@ -97,14 +97,14 @@ public class RelationshipImporter {
             adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
-        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, allocationTracker);
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder);
 
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
     private long importNatural(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortBySource();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, allocationTracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder), 0);
     }
 
     private long importNaturalWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -119,13 +119,13 @@ public class RelationshipImporter {
             adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
-        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, allocationTracker);
+        int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
 
     private long importReverse(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
         long[] batch = buffer.sortByTarget();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder, allocationTracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, null, adjacencyBuilder), 0);
     }
 
     private long importReverseWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
@@ -140,7 +140,7 @@ public class RelationshipImporter {
             adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
-        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, allocationTracker);
+        int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
 
@@ -169,7 +169,7 @@ public class RelationshipImporter {
         );
     }
 
-    public Collection<Runnable> flushTasks() {
+    Collection<Runnable> flushTasks() {
         return adjacencyBuilder.flushTasks();
     }
 
@@ -218,12 +218,11 @@ public class RelationshipImporter {
         };
     }
 
-    private static int importRelationships(
+    private int importRelationships(
         RelationshipsBatchBuffer buffer,
         long[] batch,
         long[][] properties,
-        AdjacencyBuilder adjacency,
-        AllocationTracker allocationTracker
+        AdjacencyBuilder adjacency
     ) {
         int batchLength = buffer.length();
 

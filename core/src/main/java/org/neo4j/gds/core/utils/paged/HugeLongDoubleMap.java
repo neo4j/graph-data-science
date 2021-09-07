@@ -188,7 +188,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
+        allocateBuffers(minBufferSize(expectedElements));
     }
 
     @Override
@@ -226,15 +226,15 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
      * Allocate new internal buffers. This method attempts to allocate
      * and assign internal buffers atomically (either allocations succeed or not).
      */
-    private void allocateBuffers(long arraySize, AllocationTracker tracker) {
+    private void allocateBuffers(long arraySize) {
         assert BitUtil.isPowerOfTwo(arraySize);
 
         // Ensure no change is done if we hit an OOM.
         HugeLongArray prevKeys = this.keys;
         HugeDoubleArray prevValues = this.values;
         try {
-            this.keys = HugeLongArray.newArray(arraySize, tracker);
-            this.values = HugeDoubleArray.newArray(arraySize, tracker);
+            this.keys = HugeLongArray.newArray(arraySize, allocationTracker);
+            this.values = HugeDoubleArray.newArray(arraySize, allocationTracker);
             keysCursor = keys.newCursor();
             entries = new EntryIterator();
         } catch (OutOfMemoryError e) {
@@ -286,7 +286,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
         // Try to allocate new buffers first. If we OOM, we leave in a consistent state.
         final HugeLongArray prevKeys = this.keys;
         final HugeDoubleArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
+        allocateBuffers(nextBufferSize(mask + 1));
         assert this.keys.size() > prevKeys.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at

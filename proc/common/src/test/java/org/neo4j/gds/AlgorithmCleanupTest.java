@@ -48,7 +48,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupEventTrackerUnderRegularExecution() {
+    void cleanupTaskRegistryUnderRegularExecution() {
         var taskRegistry = new TestTaskRegistry();
 
         var proc = new TestProc();
@@ -62,7 +62,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupEventTrackerWhenTheAlgorithmFails() {
+    void cleanupTaskRegistryWhenTheAlgorithmFails() {
         var taskRegistry = new TestTaskRegistry();
 
         var proc = new TestProc();

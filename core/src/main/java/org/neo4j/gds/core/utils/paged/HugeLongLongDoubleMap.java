@@ -204,7 +204,7 @@ public final class HugeLongLongDoubleMap {
     }
 
     private void initialBuffers(long expectedElements) {
-        allocateBuffers(minBufferSize(expectedElements), allocationTracker);
+        allocateBuffers(minBufferSize(expectedElements));
     }
 
     /**
@@ -260,7 +260,7 @@ public final class HugeLongLongDoubleMap {
      * Allocate new internal buffers. This method attempts to allocate
      * and assign internal buffers atomically (either allocations succeed or not).
      */
-    private void allocateBuffers(long arraySize, AllocationTracker tracker) {
+    private void allocateBuffers(long arraySize) {
         assert BitUtil.isPowerOfTwo(arraySize);
 
         // Compute new hash mixer candidate before expanding.
@@ -271,9 +271,9 @@ public final class HugeLongLongDoubleMap {
         HugeLongArray prevKeys2 = this.keys2;
         HugeDoubleArray prevValues = this.values;
         try {
-            this.keys1 = HugeLongArray.newArray(arraySize, tracker);
-            this.keys2 = HugeLongArray.newArray(arraySize, tracker);
-            this.values = HugeDoubleArray.newArray(arraySize, tracker);
+            this.keys1 = HugeLongArray.newArray(arraySize, allocationTracker);
+            this.keys2 = HugeLongArray.newArray(arraySize, allocationTracker);
+            this.values = HugeDoubleArray.newArray(arraySize, allocationTracker);
             keysCursor = CloseableThreadLocal.withInitial(keys1::newCursor);
         } catch (OutOfMemoryError e) {
             this.keys1 = prevKeys1;
@@ -347,7 +347,7 @@ public final class HugeLongLongDoubleMap {
         final HugeLongArray prevKeys1 = this.keys1;
         final HugeLongArray prevKeys2 = this.keys2;
         final HugeDoubleArray prevValues = this.values;
-        allocateBuffers(nextBufferSize(mask + 1), allocationTracker);
+        allocateBuffers(nextBufferSize(mask + 1));
         assert this.keys1.size() > prevKeys1.size();
 
         // We have succeeded at allocating new data so insert the pending key/value at

@@ -208,7 +208,7 @@ public class PregelProcTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupEventTrackerWhenTheAlgorithmFailsInStreamMode() {
+    void cleanupTaskRegistryWhenTheAlgorithmFailsInStreamMode() {
         var taskRegistry = new TestTaskRegistry();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
@@ -231,7 +231,7 @@ public class PregelProcTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupEventTrackerWhenTheAlgorithmFailsInWriteMode() {
+    void cleanupTaskRegistryWhenTheAlgorithmFailsInWriteMode() {
         var taskRegistry = new TestTaskRegistry();
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
@@ -254,7 +254,7 @@ public class PregelProcTest extends BaseProcTest {
     }
 
     @Test
-    void cleanupEventTrackerWhenTheAlgorithmFailsInMutateMode() {
+    void cleanupTaskRegistryWhenTheAlgorithmFailsInMutateMode() {
         var graphName = "testGraph";
         runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
 

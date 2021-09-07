@@ -123,22 +123,6 @@ public abstract class DisjointSetStructTest {
         }
     }
 
-    @Test
-    final void testMergeDSS() {
-        final DisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
-        final DisjointSetStruct b = create(10, set(0, 5), set(7, 9));
-        if (a instanceof SequentialDisjointSetStruct) {
-            SequentialDisjointSetStruct dssa = (SequentialDisjointSetStruct) a;
-            if (b instanceof SequentialDisjointSetStruct) {
-                SequentialDisjointSetStruct dssb = (SequentialDisjointSetStruct) b;
-                assertEquals(4, getSetCount(dssa));
-                dssa.merge(dssb);
-                assertEquals(2, getSetCount(dssa));
-
-            }
-        }
-    }
-
     private static int[] set(int... elements) {
         return elements;
     }
