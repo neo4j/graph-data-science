@@ -70,18 +70,27 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
+        Constant<Vector> targets = makeTargetsArray(relationshipBatch);
         Constant<Matrix> features = features(relationshipBatch, linkFeatures);
         Variable<Matrix> weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights());
-        var weightedFeaturesMaybeWithBias = modelData.bias().isPresent()
-            ? new EWiseAddMatrixScalar(weightedFeatures, modelData.bias().get())
-            : weightedFeatures;
-        Variable<Matrix> predictions = new Sigmoid<>(weightedFeaturesMaybeWithBias);
 
-        Constant<Vector> targets = makeTargetsArray(relationshipBatch);
-        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), relationshipBatch.size() * penalty / trainSize);
-        var unpenalizedLoss = modelData.bias().isPresent()
-            ? new LogisticLoss(modelData.weights(), modelData.bias().get(), predictions, features, targets)
-            : new LogisticLoss(modelData.weights(), predictions, features, targets);
+        LogisticLoss unpenalizedLoss;
+
+        if (modelData.bias().isPresent()) {
+            Weights<Scalar> bias = modelData.bias().get();
+            var weightedFeaturesWithBias = new EWiseAddMatrixScalar(weightedFeatures, bias);
+            var predictions = new Sigmoid<>(weightedFeaturesWithBias);
+            unpenalizedLoss = new LogisticLoss(modelData.weights(), bias, predictions, features, targets);
+        } else {
+            var predictions = new Sigmoid<>(weightedFeatures);
+            unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);
+        }
+
+        var penaltyVariable = new ConstantScale<>(
+            new L2NormSquared(modelData.weights()),
+            relationshipBatch.size() * penalty / trainSize
+        );
+
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
