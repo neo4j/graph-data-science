@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.storageengine.api.StorageEngine;
@@ -40,7 +41,7 @@ public abstract class CypherTest extends BaseTest {
 
     @BeforeEach
     void setup() throws Exception {
-        this.graphStore = graphStore();
+        this.graphStore = new CypherGraphStore(graphStore());
 
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", db.databaseLayout().getDatabaseName()), graphStore);
 

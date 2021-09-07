@@ -88,7 +88,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
         var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
-        this.graphStore = new CypherGraphStore(getGraphStoreFromCatalog(graphName));
+        this.graphStore = getGraphStoreFromCatalog(graphName);
         this.txStateVisitorFn = txStateVisitorFn;
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
@@ -235,8 +235,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     }
 
-    private static GraphStore getGraphStoreFromCatalog(String graphName) {
-        return GraphStoreCatalog.getAllGraphStores()
+    private static CypherGraphStore getGraphStoreFromCatalog(String graphName) {
+        return (CypherGraphStore) GraphStoreCatalog.getAllGraphStores()
             .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
                 .config()
                 .graphName()

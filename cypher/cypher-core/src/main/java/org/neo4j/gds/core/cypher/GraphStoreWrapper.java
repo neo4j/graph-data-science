@@ -19,31 +19,8 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
 
-public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
-
-    private final CypherNodeMapping cypherNodeMapping;
-
-    public CypherGraphStore(GraphStore graphStore) {
-        super(graphStore);
-        this.cypherNodeMapping = new CypherNodeMapping(super.nodes());
-    }
-
-    @Override
-    public NodeMapping nodes() {
-        return this.cypherNodeMapping;
-    }
-
-    @Override
-    public void addNodeLabel(NodeLabel nodeLabel) {
-        this.cypherNodeMapping.addNodeLabel(nodeLabel);
-    }
-
-    @Override
-    public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
-        this.cypherNodeMapping.addLabelToNode(nodeId, nodeLabel);
-    }
+public interface GraphStoreWrapper extends GraphStore {
+    GraphStore innerGraphStore();
 }
