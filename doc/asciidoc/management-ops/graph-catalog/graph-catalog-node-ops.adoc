@@ -209,6 +209,7 @@ YIELD
 ====
 
 
+[[node-ops-examples]]
 == Examples
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
@@ -270,11 +271,11 @@ ORDER BY score DESC
 .Results
 [opts="header"]
 |===
-| name        | score
-| "Florentin" | 2.0
-| "Adam"      | 1.0
-| "Veselin"   | 0.0
-| "The Hobbit"   | 0.0
+| name         | score
+| "Florentin"  | 2.0
+| "Adam"       | 1.0
+| "Veselin"    | 0.0
+| "The Hobbit" | 0.0
 |===
 --
 
@@ -454,4 +455,75 @@ YIELD propertiesRemoved
 [NOTE]
 --
 If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
+--
+
+
+[[utility-functions-catalog]]
+== Utility functions
+
+Utility functions allow accessing specific nodes of in-memory graphs directly from a Cypher query.
+
+.Catalog Functions
+[opts=header,cols="1m,1"]
+|===
+| Name                  | Description
+| gds.util.nodeProperty | Allows accessing a node property stored in a named graph.
+|===
+
+
+=== Syntax
+
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                                               | Description
+| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING, nodeLabel: STRING?) | Named graph in the catalog, Neo4j node id, node property key and optional node label present in the named-graph.
+|===
+
+If a node label is given, the property value for the corresponding projection and the given node is returned.
+If no label or `'*'` is given, the property value is retrieved and returned from an arbitrary projection that contains the given propertyKey.
+If the property value is missing for the given node, `null` is returned.
+
+
+=== Examples
+
+We use the `socialGraph` with the property `score` introduced <<node-ops-examples, above>>.
+
+[role=query-example]
+--
+.Access a property node property for Florentin:
+[source, cypher, role=noplay]
+----
+MATCH (florentin:Person {name: 'Florentin'})
+RETURN
+  florentin.name AS name,
+  gds.util.nodeProperty('socialGraph', id(florentin), 'score') AS score
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| name        | score
+| "Florentin" | 2.0
+|===
+--
+
+We can also specifically return the `score` property from the `Person` projection in case other projections also have a `score` property as follows.
+
+[role=query-example]
+--
+.Access a property node property from Person for Florentin:
+[source, cypher, role=noplay]
+----
+MATCH (florentin:Person {name: 'Florentin'})
+RETURN
+  florentin.name AS name,
+  gds.util.nodeProperty('socialGraph', id(florentin), 'score', 'Person') AS score
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| name        | score
+| "Florentin" | 2.0
+|===
 --

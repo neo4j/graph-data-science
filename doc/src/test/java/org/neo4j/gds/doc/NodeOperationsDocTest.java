@@ -24,6 +24,8 @@ import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.functions.NodePropertyFunc;
 
 import java.util.List;
 
@@ -37,6 +39,14 @@ final class NodeOperationsDocTest extends DocTestBase {
             GraphStreamNodePropertiesProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphRemoveNodePropertiesProc.class
+        );
+    }
+
+    @Override
+    List<Class<?>> functions() {
+        return List.of(
+            NodePropertyFunc.class,
+            AsNodeFunc.class
         );
     }
 
