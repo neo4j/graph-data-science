@@ -1,5 +1,5 @@
 [[algorithms-linkprediction]]
-= Structural link prediction
+= Topological link prediction
 
 [abstract]
 --
