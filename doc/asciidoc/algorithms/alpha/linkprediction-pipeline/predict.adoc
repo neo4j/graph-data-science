@@ -130,11 +130,11 @@ ORDER BY source ASC, target ASC
 [opts="header"]
 |===
 | source  | target      | probability
-| "Alice"   | "Chris"   | 0.6922053593304601
-| "Alice"   | "Greg"    | 0.6658121026542557
-| "Alice"   | "Karin"   | 0.6660408218843401
-| "Alice"   | "Mark"    | 0.666660964770462
-| "Chris"   | "Mark"    | 0.6872148760622431
+| "Alice"   | "Chris"   | 0.5422350772807373
+| "Alice"   | "Greg"    | 0.51204718863418
+| "Alice"   | "Karin"   | 0.5123040606165334
+| "Alice"   | "Mark"    | 0.5130009448848327
+| "Chris"   | "Mark"    | 0.5364414066546659
 |===
 
 We can see, that our model predicts the most likely link is between Alice and Chris.

@@ -38,10 +38,9 @@ public class LinkLogisticRegressionPredictor {
 
     public double predictedProbability(double[] features) {
         var affinity = 0D;
-        double biasValue = bias.value();
         for (int i = 0; i < features.length; i++) {
-            affinity += weights.dataAt(i) * features[i] + biasValue;
+            affinity += weights.dataAt(i) * features[i];
         }
-        return Sigmoid.sigmoid(affinity);
+        return Sigmoid.sigmoid(affinity + bias.value());
     }
 }
