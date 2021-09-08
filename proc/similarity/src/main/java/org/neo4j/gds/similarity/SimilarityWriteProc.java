@@ -89,7 +89,7 @@ public abstract class SimilarityWriteProc<
                     procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            var task = Tasks.leaf("WriteRelationships", similarityGraph.relationshipCount());
+                            var task = Tasks.leaf(algoName() + " :: WriteRelationships", similarityGraph.relationshipCount());
                             var progressLogger = new BatchingProgressLogger(
                                 log,
                                 task,

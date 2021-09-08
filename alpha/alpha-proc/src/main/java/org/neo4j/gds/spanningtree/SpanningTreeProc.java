@@ -113,7 +113,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
             var spanningGraph = new SpanningGraph(graph, spanningTree);
-            var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
+            var task = Tasks.leaf(algoName() + " :: WriteRelationships", graph.relationshipCount());
             var progressLogger = new BatchingProgressLogger(
                 log,
                 task,
