@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistry, ProcedureException> {
+public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
 
     private final Map<String, Map<JobId, Task>> registeredTasks;
 
@@ -70,9 +70,9 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
-    public TaskRegistry apply(Context context) throws ProcedureException {
+    public TaskRegistryFactory apply(Context context) throws ProcedureException {
         var username = context.securityContext().subject().username();
-        return new LocalTaskRegistry(username, this);
+        return new LocalTaskRegistryFactory(username, this);
     }
 
     @Override

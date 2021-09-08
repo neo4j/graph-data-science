@@ -43,9 +43,9 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         if (enabled) {
             var globalTaskRegistry = new GlobalTaskStore();
             registry.registerComponent(TaskStore.class, ctx -> globalTaskRegistry, true);
-            registry.registerComponent(TaskRegistry.class, globalTaskRegistry, true);
+            registry.registerComponent(TaskRegistryFactory.class, globalTaskRegistry, true);
         } else {
-            registry.registerComponent(TaskRegistry.class, ctx -> EmptyTaskRegistry.INSTANCE, true);
+            registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
         }
         return new LifecycleAdapter();
