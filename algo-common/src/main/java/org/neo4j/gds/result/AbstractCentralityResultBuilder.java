@@ -25,19 +25,25 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.statistics.CentralityStatistics;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 
 public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
+    private static final String HISTOGRAM_ERROR_KEY = "Error";
+
     private final int concurrency;
     protected boolean buildHistogram;
 
     protected long postProcessingMillis = -1L;
     protected Optional<DoubleHistogram> maybeCentralityHistogram = Optional.empty();
+
+    protected Map<String, Object> histogramError;
 
     protected @Nullable Map<String, Object> centralityHistogramOrNull() {
         return maybeCentralityHistogram.map(histogram -> MapUtil.map(
@@ -50,10 +56,11 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
             "p95", histogram.getValueAtPercentile(95),
             "p99", histogram.getValueAtPercentile(99),
             "p999", histogram.getValueAtPercentile(99.9)
-        )).orElse(null);
+        )).orElse(histogramError);
     }
 
     protected LongToDoubleFunction centralityFunction = null;
+    protected ScalarScaler.Variant scaler;
 
     protected AbstractCentralityResultBuilder(
         ProcedureCallContext callContext,
@@ -63,6 +70,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("centralityDistribution"));
         this.concurrency = concurrency;
+        this.histogramError = new HashMap<>();
     }
 
     protected abstract WRITE_RESULT buildResult();
@@ -72,17 +80,36 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
         return this;
     }
 
+    public AbstractCentralityResultBuilder<WRITE_RESULT> withScalerVariant(ScalarScaler.Variant scaler) {
+        this.scaler = scaler;
+        return this;
+    }
+
     @Override
     public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
+        var logScaler = scaler == ScalarScaler.Variant.LOG;
         if (buildHistogram && centralityFunction != null) {
-            maybeCentralityHistogram = Optional.of(CentralityStatistics.histogram(nodeCount, centralityFunction,Pools.DEFAULT, concurrency));
+            if (logScaler) {
+                logScalerHistogramError();
+            } else {
+                maybeCentralityHistogram = Optional.of(CentralityStatistics.histogram(
+                    nodeCount,
+                    centralityFunction,
+                    Pools.DEFAULT,
+                    concurrency
+                ));
+            }
         }
         timer.stop();
         this.postProcessingMillis = timer.getDuration();
 
         return buildResult();
+    }
+
+    private void logScalerHistogramError() {
+        this.histogramError.put(HISTOGRAM_ERROR_KEY, "Unable to create histogram when using scaler of type " + ScalarScaler.Variant.LOG);
     }
 
 }

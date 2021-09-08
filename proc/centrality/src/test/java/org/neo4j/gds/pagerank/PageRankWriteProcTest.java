@@ -23,11 +23,12 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher.ModeBuildStage;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher.ModeBuildStage;
+import org.neo4j.gds.scaling.ScalarScaler;
 
 import java.util.Collection;
 import java.util.List;
@@ -117,6 +118,23 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
             "centralityDistribution", isA(Map.class),
             "configuration", allOf(isA(Map.class), hasEntry("writeProperty", writeProp))
         )));
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
+    void shouldNotComputeCentralityDistributionOnLogScaler(ModeBuildStage queryBuilder, String testCaseName) {
+        var writeProp = "writeProp";
+        var query = queryBuilder
+            .writeMode()
+            .addParameter("scaler", ScalarScaler.Variant.LOG)
+            .addParameter("writeProperty", writeProp)
+            .yields("centralityDistribution");
+
+        assertCypherResult(query, List.of(
+            Map.of(
+                "centralityDistribution", Map.of("Error", "Unable to create histogram when using scaler of type LOG")
+            )
+        ));
     }
 
     @Override
