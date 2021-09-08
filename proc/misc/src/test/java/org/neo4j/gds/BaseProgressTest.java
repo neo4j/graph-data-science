@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Level;
@@ -86,17 +85,10 @@ public class BaseProgressTest extends BaseTest {
         public Bar(String field) {this.field = field;}
     }
 
-    public static class NonReleasingTaskRegistry implements TaskRegistry {
-
-        private final TaskRegistry taskRegistry;
+    public static class NonReleasingTaskRegistry extends TaskRegistry {
 
         NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
-            this.taskRegistry = taskRegistry;
-        }
-
-        @Override
-        public void registerTask(Task task) {
-            taskRegistry.registerTask(task);
+            super(taskRegistry);
         }
 
         @Override

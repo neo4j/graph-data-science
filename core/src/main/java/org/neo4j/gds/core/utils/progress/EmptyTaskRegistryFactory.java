@@ -24,6 +24,6 @@ public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
 
     @Override
     public TaskRegistry newInstance() {
-        return new LocalTaskRegistry("", EmptyTaskStore.INSTANCE);
+        return new TaskRegistry("", EmptyTaskStore.INSTANCE);
     }
 }

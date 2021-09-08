@@ -29,7 +29,7 @@ class TaskRegistryTest {
     @Test
     void shouldStoreIncomingTasks() {
         var globalTaskStore = new GlobalTaskStore();
-        var taskRegistry1 = new LocalTaskRegistry("", globalTaskStore);
+        var taskRegistry1 = new TaskRegistry("", globalTaskStore);
 
         assertThat(globalTaskStore.isEmpty()).isTrue();
 
@@ -39,7 +39,7 @@ class TaskRegistryTest {
         assertThat(globalTaskStore.query("")).containsValue(task1);
         assertThat(globalTaskStore.isEmpty()).isFalse();
 
-        var taskRegistry2 = new LocalTaskRegistry("", globalTaskStore);
+        var taskRegistry2 = new TaskRegistry("", globalTaskStore);
         var task2 = Tasks.leaf("task2");
         taskRegistry2.registerTask(task2);
 
@@ -50,7 +50,7 @@ class TaskRegistryTest {
     @Test
     void shouldRemoveStoredTasks() {
         var globalTaskStore = new GlobalTaskStore();
-        var taskRegistry = new LocalTaskRegistry("", globalTaskStore);
+        var taskRegistry = new TaskRegistry("", globalTaskStore);
 
         var task = Tasks.leaf("task");
         taskRegistry.registerTask(task);

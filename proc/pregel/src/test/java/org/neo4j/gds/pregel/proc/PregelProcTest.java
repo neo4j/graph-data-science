@@ -48,7 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -212,7 +212,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInStreamMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -236,7 +236,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInWriteMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -263,7 +263,7 @@ public class PregelProcTest extends BaseProcTest {
         runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
 
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;

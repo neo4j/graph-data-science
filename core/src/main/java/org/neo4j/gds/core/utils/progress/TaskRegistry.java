@@ -19,11 +19,31 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-public interface TaskRegistry {
+public class TaskRegistry {
 
-    void registerTask(Task task);
+    private final String username;
+    private final TaskStore taskStore;
+    private final JobId jobId;
 
-    void unregisterTask();
+    @TestOnly
+    public TaskRegistry(TaskRegistry taskRegistry) {
+        this(taskRegistry.username, taskRegistry.taskStore);
+    }
+
+    public TaskRegistry(String username, TaskStore taskStore) {
+        this.username = username;
+        this.taskStore = taskStore;
+        this.jobId = new JobId();
+    }
+
+    public void registerTask(Task task) {
+        taskStore.store(username, jobId, task);
+    }
+
+    public void unregisterTask() {
+        taskStore.remove(username, jobId);
+    }
 }

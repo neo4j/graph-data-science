@@ -91,7 +91,8 @@ class SystemMonitorProcTest extends BaseProgressTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistryFactory.newInstance());
+            var taskRegistry = taskRegistryFactory.newInstance();
+            this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistry);
             compute(graphNameOrConfig, configuration);
             return Stream.empty();
         }

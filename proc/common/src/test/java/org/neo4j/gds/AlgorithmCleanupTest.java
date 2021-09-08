@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.logging.NullLog;
@@ -52,7 +52,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryUnderRegularExecution() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
 
         var proc = new TestProc();
         proc.taskRegistryFactory = taskRegistryFactory;
@@ -67,7 +67,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFails() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
 
         var proc = new TestProc();
         proc.taskRegistryFactory = taskRegistryFactory;
