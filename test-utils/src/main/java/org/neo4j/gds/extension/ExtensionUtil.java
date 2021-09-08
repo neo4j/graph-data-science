@@ -25,6 +25,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Locale;
 
+import static java.util.Arrays.stream;
+import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
+
 public final class ExtensionUtil {
 
     private ExtensionUtil() {}
@@ -68,5 +71,18 @@ public final class ExtensionUtil {
             throw new RuntimeException(e);
         }
         return value;
+    }
+
+    static <T> void injectInstance(Object testInstance, T instance, Class<T> clazz) {
+        Class<?> testClass = testInstance.getClass();
+        do {
+            stream(testClass.getDeclaredFields())
+                .filter(field -> field.getType() == clazz)
+                .filter(field -> isAnnotated(field, Inject.class))
+                .findFirst()
+                .ifPresent(field -> ExtensionUtil.setField(testInstance, field, instance));
+            testClass = testClass.getSuperclass();
+        }
+        while (testClass != null);
     }
 }

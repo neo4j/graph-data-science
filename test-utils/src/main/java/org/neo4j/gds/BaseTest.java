@@ -22,12 +22,12 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
+import org.neo4j.gds.core.EnterpriseLicensingExtension;
+import org.neo4j.gds.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
-import org.neo4j.gds.core.EnterpriseLicensingExtension;
-import org.neo4j.gds.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
