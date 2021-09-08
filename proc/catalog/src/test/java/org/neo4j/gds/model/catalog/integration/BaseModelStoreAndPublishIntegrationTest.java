@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.model.catalog;
+package org.neo4j.gds.model.catalog.integration;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +28,10 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.ModelStoreSettings;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.StoredModel;
+import org.neo4j.gds.model.catalog.ModelDeleteProc;
+import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.model.catalog.ModelPublishProc;
+import org.neo4j.gds.model.catalog.ModelStoreProc;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -161,7 +165,15 @@ abstract class BaseModelStoreAndPublishIntegrationTest extends BaseProcTest {
         });
     }
 
-    protected abstract void publishModel(String modelName);
+    private void publishModel(String modelName) {
+        assertCypherResult(
+            "CALL gds.alpha.model.publish($modelName)",
+            map("modelName", modelName),
+            publishModelExpectedResult(modelName)
+        );
+    }
+
+    abstract List<Map<String, Object>> publishModelExpectedResult(String modelName);
 
     private void modelShouldNotBeInCatalog(String modelName) {
         assertThatThrownBy(() -> ModelCatalog.getUntyped(getUsername(), modelName))
@@ -173,7 +185,15 @@ abstract class BaseModelStoreAndPublishIntegrationTest extends BaseProcTest {
         checkStoredModelFile(modelName + "_public");
     }
 
-    protected abstract void dropStoredModel(String modelName);
+    private void dropStoredModel(String modelName) {
+        assertCypherResult(
+            "CALL gds.beta.model.drop($modelName)",
+            Map.of("modelName", modelName),
+            dropStoreModelExpectedResult(modelName)
+        );
+    }
+
+    abstract List<Map<String, Object>> dropStoreModelExpectedResult(String modelName);
 
     private void deletedModel(String modelName) {
         assertCypherResult(

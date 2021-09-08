@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.model.catalog;
+package org.neo4j.gds.model.catalog.integration;
 
-import org.hamcrest.Matchers;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -119,59 +118,36 @@ class GraphSageModelStoreAndPublishIntegrationTest extends BaseModelStoreAndPubl
     }
 
     @Override
-    protected void publishModel(String modelName) {
-        assertCypherResult(
-            "CALL gds.alpha.model.publish($modelName)",
-            map("modelName", modelName),
-            singletonList(
-                map(
-                    "modelInfo",
-                    map("modelName",
-                        modelName + "_public",
-                        "modelType", "graphSage",
-                        "metrics", Map.of(
-                            "didConverge", false,
-                            "ranEpochs", 1,
-                            "epochLosses", List.of(398.6774315625296)
-                        )
-                    ),
-                    "trainConfig", isA(Map.class),
-                    "graphSchema", isA(Map.class),
-                    "creationTime", isA(ZonedDateTime.class),
-                    "shared", true,
-                    "loaded", true,
-                    "stored", true
-                )
-            )
-        );
+    protected List<Map<String, Object>> publishModelExpectedResult(String modelName) {
+        return modelData(modelName + "_public", true);
     }
 
     @Override
-    protected void dropStoredModel(String modelName) {
-        assertCypherResult(
-            "CALL gds.beta.model.drop($modelName)",
-            Map.of("modelName", modelName),
-            singletonList(
-                Map.of(
-                    "modelInfo", map("modelName",
-                        modelName,
-                        "modelType", "graphSage",
-                        "metrics", Map.of(
-                            "didConverge", false,
-                            "ranEpochs", 1,
-                            "epochLosses", List.of(398.6774315625296)
-                        )
-                    ),
-                    "creationTime", Matchers.isA(ZonedDateTime.class),
-                    "trainConfig", Matchers.isA(Map.class),
-                    "loaded", false,
-                    "stored", true,
-                    "graphSchema", Matchers.isA(Map.class),
-                    "shared", true
-                )
+    List<Map<String, Object>> dropStoreModelExpectedResult(String modelName) {
+        return modelData(modelName, false);
+    }
+
+    private List<Map<String, Object>> modelData(String expectedModelName, boolean loaded) {
+        return singletonList(
+            map(
+                "modelInfo",
+                map("modelName",
+                    expectedModelName,
+                    "modelType", "graphSage",
+                    "metrics", Map.of(
+                        "didConverge", false,
+                        "ranEpochs", 1,
+                        "epochLosses", List.of(398.6774315625296)
+                    )
+                ),
+                "trainConfig", isA(Map.class),
+                "graphSchema", isA(Map.class),
+                "creationTime", isA(ZonedDateTime.class),
+                "shared", true,
+                "loaded", loaded,
+                "stored", true
             )
         );
     }
-
 
 }
