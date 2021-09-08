@@ -209,7 +209,7 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(1);
+        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {

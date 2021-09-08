@@ -46,7 +46,6 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         this.progressTracker = progressTracker;
     }
 
-
     @Override
     public TestAlgorithm compute() {
         progressTracker.beginSubTask();

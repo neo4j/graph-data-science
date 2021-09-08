@@ -42,6 +42,10 @@ import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
@@ -267,6 +271,55 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             runnable::run
         );
         assertThat(exception).hasMessageContaining(error);
+    }
+
+    class InvocationCountingTaskStore extends GlobalTaskStore {
+        int registerTaskInvocations;
+
+        @Override
+        public void store(
+            String username, JobId jobId, Task task
+        ) {
+            super.store(username, jobId, task);
+            registerTaskInvocations++;
+        }
+    }
+
+    @Test
+    default void shouldUnregisterTaskAfterComputation() {
+        var taskStore = new InvocationCountingTaskStore();
+
+        String loadedGraphName = "loadedGraph";
+        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
+        applyOnProcedure(proc -> {
+            proc.taskRegistry = new LocalTaskRegistry("", taskStore);
+
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+            GraphStoreCatalog.set(
+                graphCreateConfig,
+                graphStore
+            );
+            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> computationResult1 = proc.compute(
+                loadedGraphName,
+                configMap,
+                releaseAlgorithm(),
+                true
+            );
+
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> computationResult2 = proc.compute(
+                loadedGraphName,
+                configMap,
+                releaseAlgorithm(),
+                true
+            );
+
+            // trigger consumption of stream return values
+            assertResultEquals(computationResult1.result(), computationResult2.result());
+
+            assertThat(taskStore.taskStream()).isEmpty();
+            assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
+        });
     }
 
     @AllGraphStoreFactoryTypesTest
