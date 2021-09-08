@@ -22,9 +22,9 @@ package org.neo4j.gds.core.utils.progress;
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
 
     private final String username;
-    private final GlobalTaskStore taskStore;
+    private final TaskStore taskStore;
 
-    LocalTaskRegistryFactory(String username, GlobalTaskStore taskStore) {
+    LocalTaskRegistryFactory(String username, TaskStore taskStore) {
         this.username = username;
         this.taskStore = taskStore;
     }
