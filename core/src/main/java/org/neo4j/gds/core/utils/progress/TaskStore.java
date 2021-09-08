@@ -26,6 +26,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface TaskStore {
+
+    void store(String username, JobId jobId, Task task);
+
+    void remove(String username, JobId jobId);
+
     Map<JobId, Task> query(String username);
 
     Optional<Task> query(String username, JobId jobId);

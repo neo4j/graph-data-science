@@ -38,13 +38,15 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
         this.registeredTasks = new ConcurrentHashMap<>();
     }
 
+    @Override
     public void store(String username, JobId jobId, Task task) {
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .put(jobId, task);
     }
 
-    void remove(String username, JobId jobId) {
+    @Override
+    public void remove(String username, JobId jobId) {
         if (this.registeredTasks.containsKey(username)) {
             this.registeredTasks.get(username).remove(jobId);
         }

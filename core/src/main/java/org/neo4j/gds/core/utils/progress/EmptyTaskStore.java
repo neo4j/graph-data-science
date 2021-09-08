@@ -29,6 +29,12 @@ public enum EmptyTaskStore implements TaskStore {
     INSTANCE;
 
     @Override
+    public void store(String username, JobId jobId, Task task) {}
+
+    @Override
+    public void remove(String username, JobId jobId) {}
+
+    @Override
     public Map<JobId, Task> query(String username) {
         return Map.of();
     }
@@ -43,11 +49,9 @@ public enum EmptyTaskStore implements TaskStore {
         return Stream.empty();
     }
 
-
     @Override
     public boolean isEmpty() {
         return true;
     }
-
 
 }
