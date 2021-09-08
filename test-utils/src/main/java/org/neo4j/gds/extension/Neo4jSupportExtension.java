@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
-import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
+import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Neo4jSupportExtension implements BeforeEachCallback {
@@ -111,18 +111,5 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             injectInstance(testInstance, idFunction, IdFunction.class);
             injectInstance(testInstance, db, GraphDatabaseAPI.class);
         });
-    }
-
-    private static <T> void injectInstance(Object testInstance, T instance, Class<T> clazz) {
-        Class<?> testClass = testInstance.getClass();
-        do {
-            stream(testClass.getDeclaredFields())
-                .filter(field -> field.getType() == clazz)
-                .filter(field -> isAnnotated(field, Inject.class))
-                .findFirst()
-                .ifPresent(field -> ExtensionUtil.setField(testInstance, field, instance));
-            testClass = testClass.getSuperclass();
-        }
-        while (testClass != null);
     }
 }
