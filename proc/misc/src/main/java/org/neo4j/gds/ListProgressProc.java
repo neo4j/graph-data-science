@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
@@ -123,7 +124,7 @@ public class ListProgressProc extends BaseProc {
             var finishTime = task.finishTime();
             var finishTimeOrNow = finishTime != -1
                 ? finishTime
-                : System.currentTimeMillis();
+                : ClockService.clock().millis();
             var elapsedTime = finishTimeOrNow - task.startTime();
             var duration = Duration.ofMillis(elapsedTime);
             return DurationValue.duration(duration);

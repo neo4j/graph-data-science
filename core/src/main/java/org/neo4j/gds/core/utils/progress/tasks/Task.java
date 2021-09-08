@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.List;
@@ -94,7 +95,7 @@ public class Task {
             ));
         }
         this.status = Status.RUNNING;
-        this.startTime = System.currentTimeMillis();
+        this.startTime = ClockService.clock().millis();
     }
 
     public void finish() {
@@ -106,7 +107,7 @@ public class Task {
             ));
         }
         this.status = Status.FINISHED;
-        this.finishTime = System.currentTimeMillis();
+        this.finishTime = ClockService.clock().millis();
     }
 
     public void cancel() {

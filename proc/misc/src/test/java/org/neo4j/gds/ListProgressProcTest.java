@@ -29,21 +29,28 @@ import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.extension.FakeClockExtension;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.time.FakeClock;
 import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@FakeClockExtension
 public class ListProgressProcTest extends BaseProgressTest {
+
+    @Inject
+    public FakeClock fakeClock;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -74,8 +81,8 @@ public class ListProgressProcTest extends BaseProgressTest {
                     "progress", "33.33%",
                     "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class)
+                    "timeStarted", LocalTime.ofInstant(fakeClock.instant(), ZoneId.systemDefault()),
+                    "elapsedTime", DurationValue.ZERO
                 )
             )
         );

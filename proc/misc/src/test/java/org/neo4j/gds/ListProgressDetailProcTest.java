@@ -27,19 +27,26 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.extension.FakeClockExtension;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.time.FakeClock;
 import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+@FakeClockExtension
 public class ListProgressDetailProcTest extends BaseProgressTest {
+
+    @Inject
+    public FakeClock fakeClock;
 
     String jobId;
 
@@ -62,6 +69,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
 
     @Test
     void shouldReturnProgressDetail() {
+        var expectedLocalTime = LocalTime.ofInstant(fakeClock.instant(), ZoneId.systemDefault());
         assertCypherResult(
             "CALL gds.beta.listProgress('" + jobId + "')" +
             "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
@@ -71,8 +79,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "|-- root",
                     "progressBar", "[####~~~~~~]",
                     "progress", "42.86%",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class),
+                    "timeStarted", expectedLocalTime,
+                    "elapsedTime", DurationValue.ZERO,
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -80,8 +88,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "    |-- iterative",
                     "progressBar", "[#######~~~]",
                     "progress", "75%",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class),
+                    "timeStarted", expectedLocalTime,
+                    "elapsedTime", DurationValue.ZERO,
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -89,8 +97,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "        |-- leafIterative",
                     "progressBar", "[##########]",
                     "progress", "100%",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class),
+                    "timeStarted", expectedLocalTime,
+                    "elapsedTime", DurationValue.ZERO,
                     "status", Status.FINISHED.name(),
                     "jobId", jobId
                 ),
@@ -98,8 +106,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "        |-- leafIterative",
                     "progressBar", "[#####~~~~~]",
                     "progress", "50%",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class),
+                    "timeStarted", expectedLocalTime,
+                    "elapsedTime", DurationValue.ZERO,
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -107,8 +115,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "    |-- leaf",
                     "progressBar", "[~~~~~~~~~~]",
                     "progress", "0%",
-                    "timeStarted", instanceOf(LocalTime.class),
-                    "elapsedTime", instanceOf(DurationValue.class),
+                    "timeStarted", expectedLocalTime,
+                    "elapsedTime", DurationValue.ZERO,
                     "status", Status.PENDING.name(),
                     "jobId", jobId
                 )
