@@ -112,7 +112,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
             @Override
             public DegreeCentralityStatsProc.StatsResult buildResult() {
                 return new DegreeCentralityStatsProc.StatsResult(
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

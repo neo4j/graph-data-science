@@ -139,7 +139,7 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
                 return new WriteResult(
                     ranIterations,
                     didConverge,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

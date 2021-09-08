@@ -127,7 +127,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     config.toMap()
                 );
             }

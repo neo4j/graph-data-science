@@ -128,7 +128,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             @Override
             public StatsResult buildResult() {
                 return new StatsResult(
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     sumCentrality,
                     minCentrality,
                     maxCentrality,

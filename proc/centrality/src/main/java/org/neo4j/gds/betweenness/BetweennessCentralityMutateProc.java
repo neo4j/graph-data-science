@@ -137,7 +137,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     sumCentrality,
                     minCentrality,
                     maxCentrality,

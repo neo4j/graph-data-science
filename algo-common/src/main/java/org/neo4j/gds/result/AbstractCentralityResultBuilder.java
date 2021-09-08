@@ -20,7 +20,7 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -38,29 +38,14 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     private static final String HISTOGRAM_ERROR_KEY = "Error";
 
     private final int concurrency;
-    protected boolean buildHistogram;
+    private final boolean buildHistogram;
+    private final Map<String, Object> histogramError;
+
+    private LongToDoubleFunction centralityFunction;
+    private ScalarScaler.Variant scaler;
 
     protected long postProcessingMillis = -1L;
-    protected Optional<DoubleHistogram> maybeCentralityHistogram = Optional.empty();
-
-    protected Map<String, Object> histogramError;
-
-    protected @Nullable Map<String, Object> centralityHistogramOrNull() {
-        return maybeCentralityHistogram.map(histogram -> MapUtil.map(
-            "min", histogram.getMinValue(),
-            "mean", histogram.getMean(),
-            "max", histogram.getMaxValue(),
-            "p50", histogram.getValueAtPercentile(50),
-            "p75", histogram.getValueAtPercentile(75),
-            "p90", histogram.getValueAtPercentile(90),
-            "p95", histogram.getValueAtPercentile(95),
-            "p99", histogram.getValueAtPercentile(99),
-            "p999", histogram.getValueAtPercentile(99.9)
-        )).orElse(histogramError);
-    }
-
-    protected LongToDoubleFunction centralityFunction = null;
-    protected ScalarScaler.Variant scaler;
+    protected Map<String, Object> centralityHistogram;
 
     protected AbstractCentralityResultBuilder(
         ProcedureCallContext callContext,
@@ -87,14 +72,24 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     @Override
     public WRITE_RESULT build() {
-        final ProgressTimer timer = ProgressTimer.start();
+        var timer = ProgressTimer.start();
+        var maybeCentralityHistogram = computeCentralityHistogram();
+        this.centralityHistogram = centralityHistogramResult(maybeCentralityHistogram);
 
+        timer.stop();
+        this.postProcessingMillis = timer.getDuration();
+
+        return buildResult();
+    }
+
+    @NotNull
+    private Optional<DoubleHistogram> computeCentralityHistogram() {
         var logScaler = scaler == ScalarScaler.Variant.LOG;
         if (buildHistogram && centralityFunction != null) {
             if (logScaler) {
                 logScalerHistogramError();
             } else {
-                maybeCentralityHistogram = Optional.of(CentralityStatistics.histogram(
+                return Optional.of(CentralityStatistics.histogram(
                     nodeCount,
                     centralityFunction,
                     Pools.DEFAULT,
@@ -102,10 +97,21 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
                 ));
             }
         }
-        timer.stop();
-        this.postProcessingMillis = timer.getDuration();
+        return Optional.empty();
+    }
 
-        return buildResult();
+    private Map<String, Object> centralityHistogramResult(Optional<DoubleHistogram> maybeHistogram) {
+        return maybeHistogram.map(histogram -> MapUtil.map(
+            "min", histogram.getMinValue(),
+            "mean", histogram.getMean(),
+            "max", histogram.getMaxValue(),
+            "p50", histogram.getValueAtPercentile(50),
+            "p75", histogram.getValueAtPercentile(75),
+            "p90", histogram.getValueAtPercentile(90),
+            "p95", histogram.getValueAtPercentile(95),
+            "p99", histogram.getValueAtPercentile(99),
+            "p999", histogram.getValueAtPercentile(99.9)
+        )).orElse(histogramError);
     }
 
     private void logScalerHistogramError() {
