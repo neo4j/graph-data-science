@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+@FunctionalInterface
 public interface TaskRegistryFactory {
     TaskRegistry newInstance();
 }

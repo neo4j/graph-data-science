@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.TestTaskRegistry;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
@@ -44,6 +44,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -190,12 +191,12 @@ class PregelTest {
             .isAsynchronous(false)
             .build();
 
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressLogger =  new TestProgressLogger(task, config.concurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, () -> new LocalTaskRegistry("", taskStore));
 
         var pregelAlgo = Pregel.create(
             graph,
@@ -209,7 +210,7 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
+        assertThat(taskStore.storeTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {

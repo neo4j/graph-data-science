@@ -31,7 +31,7 @@ import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
@@ -50,7 +50,7 @@ public final class GraphStoreFilter {
         ExecutorService executorService,
         Log log,
         AllocationTracker allocationTracker,
-        TaskRegistry taskRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
@@ -86,7 +86,7 @@ public final class GraphStoreFilter {
             task,
             config.concurrency()
         );
-        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
 
         progressTracker.beginSubTask();
 

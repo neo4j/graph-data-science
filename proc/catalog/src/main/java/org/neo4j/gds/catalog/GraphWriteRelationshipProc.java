@@ -100,7 +100,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
         var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
         var progressLogger = new BatchingProgressLogger(log, task, RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY);
-        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
 
         var builder = relationshipExporterBuilder
             .withIdMapping(graph)

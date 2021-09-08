@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.logging.NullLog;
 
@@ -49,29 +51,31 @@ class AlgorithmCleanupTest extends BaseProcTest {
 
     @Test
     void cleanupTaskRegistryUnderRegularExecution() {
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
 
         var proc = new TestProc();
-        proc.taskRegistry = taskRegistry;
+        proc.taskRegistryFactory = taskRegistryFactory;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
+        assertThat(taskStore.storeTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFails() {
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
 
         var proc = new TestProc();
-        proc.taskRegistry = taskRegistry;
+        proc.taskRegistryFactory = taskRegistryFactory;
         proc.api = db;
         proc.log = NullLog.getInstance();
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-        assertThat(taskRegistry.unregisterTaskCalls()).isGreaterThanOrEqualTo(1);
+        assertThat(taskStore.storeTaskCalls()).isGreaterThanOrEqualTo(1);
     }
 }

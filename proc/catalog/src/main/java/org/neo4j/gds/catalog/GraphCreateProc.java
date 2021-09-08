@@ -212,7 +212,7 @@ public class GraphCreateProc extends CatalogProc {
             Pools.DEFAULT,
             log,
             allocationTracker(),
-            taskRegistry
+            taskRegistryFactory
         );
 
         GraphStoreCatalog.set(config, graphStore);

@@ -83,7 +83,7 @@ public abstract class WriteProc<
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
             var task = Tasks.leaf(algoName() + " :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, writePropertyConfig.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistry);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(terminationFlag)

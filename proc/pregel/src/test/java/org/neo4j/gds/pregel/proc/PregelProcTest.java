@@ -27,7 +27,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestTaskRegistry;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -48,6 +48,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -209,10 +211,11 @@ public class PregelProcTest extends BaseProcTest {
 
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInStreamMode() {
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
-            proc.taskRegistry = taskRegistry;
+            proc.taskRegistryFactory = taskRegistryFactory;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -226,16 +229,17 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
         }
     }
 
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInWriteMode() {
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
-            proc.taskRegistry = taskRegistry;
+            proc.taskRegistryFactory = taskRegistryFactory;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -249,7 +253,7 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
         }
     }
 
@@ -258,10 +262,11 @@ public class PregelProcTest extends BaseProcTest {
         var graphName = "testGraph";
         runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
 
-        var taskRegistry = new TestTaskRegistry();
+        var taskStore = new TestTaskStore();
+        var taskRegistryFactory = (TaskRegistryFactory) () -> new LocalTaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
-            proc.taskRegistry = taskRegistry;
+            proc.taskRegistryFactory = taskRegistryFactory;
             proc.api = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
@@ -273,7 +278,7 @@ public class PregelProcTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
             // TODO: set to 1 once tracking is implemented
-            assertThat(taskRegistry.unregisterTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
         }
     }
 

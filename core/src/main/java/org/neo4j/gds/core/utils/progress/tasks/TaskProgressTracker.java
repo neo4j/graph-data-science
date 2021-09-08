@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 
 import java.util.Optional;
 import java.util.Stack;
@@ -50,10 +51,10 @@ public class TaskProgressTracker implements ProgressTracker {
     public TaskProgressTracker(
         Task baseTask,
         ProgressLogger progressLogger,
-        TaskRegistry taskRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) {
         this.baseTask = baseTask;
-        this.taskRegistry = taskRegistry;
+        this.taskRegistry = taskRegistryFactory.newInstance();
         this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();

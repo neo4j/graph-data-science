@@ -19,24 +19,51 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-public class TestTaskRegistry implements TaskRegistry {
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-    private int unregisterTaskCalls = 0;
+public class TestTaskStore implements TaskStore {
+
+    private int storeTaskCalls = 0;
 
     @Override
-    public void registerTask(Task task) {
+    public void store(
+        String username, JobId jobId, Task task
+    ) {
+        storeTaskCalls++;
+    }
+
+    @Override
+    public void remove(String username, JobId jobId) {
 
     }
 
     @Override
-    public void unregisterTask() {
-        unregisterTaskCalls++;
+    public Map<JobId, Task> query(String username) {
+        return null;
     }
 
-    public int unregisterTaskCalls() {
-        return this.unregisterTaskCalls;
+    @Override
+    public Optional<Task> query(String username, JobId jobId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Stream<Task> taskStream() {
+        return null;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    public int storeTaskCalls() {
+        return this.storeTaskCalls;
     }
 }

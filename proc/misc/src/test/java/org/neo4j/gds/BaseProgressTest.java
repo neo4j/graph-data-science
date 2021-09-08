@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -56,7 +57,7 @@ public class BaseProgressTest extends BaseTest {
     public static class BaseProgressTestProc {
 
         @Context
-        public TaskRegistry taskRegistry;
+        public TaskRegistryFactory taskRegistryFactory;
 
         @Procedure("gds.test.pl")
         public Stream<Bar> foo(
@@ -71,7 +72,7 @@ public class BaseProgressTest extends BaseTest {
             if (withConcurrency) {
                 task.setMaxConcurrency(REQUESTED_CPU_CORES);
             }
-            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistry);
+            var taskProgressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER, taskRegistryFactory);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

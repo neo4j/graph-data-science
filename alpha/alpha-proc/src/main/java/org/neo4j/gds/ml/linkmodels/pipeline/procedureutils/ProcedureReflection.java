@@ -110,7 +110,7 @@ public final class ProcedureReflection {
             proc.procedureTransaction = caller.procedureTransaction;
             proc.allocationTracker = caller.allocationTracker;
             proc.transaction = caller.transaction;
-            proc.taskRegistry = caller.taskRegistry;
+            proc.taskRegistryFactory = caller.taskRegistryFactory;
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

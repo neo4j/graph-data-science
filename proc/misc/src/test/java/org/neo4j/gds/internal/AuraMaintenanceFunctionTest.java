@@ -184,8 +184,9 @@ class AuraMaintenanceFunctionTest extends BaseTest {
         @Procedure("gds.test.addEvent")
         public void addEvent() {
             var task = Tasks.leaf("gds.test");
+            var taskRegistry = taskRegistryFactory.newInstance();
             taskRegistry.registerTask(task);
-            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, () -> taskRegistry.unregisterTask(), 420, TimeUnit.MILLISECONDS);
+            FAKE_SCHEDULER.get().schedule(Group.DATA_COLLECTOR, taskRegistry::unregisterTask, 420, TimeUnit.MILLISECONDS);
         }
     }
 }

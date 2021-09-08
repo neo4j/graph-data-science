@@ -150,7 +150,7 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            this.taskRegistry = new NonReleasingTaskRegistry(taskRegistry);
+            this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistryFactory.newInstance());
             return super.stream(graphNameOrConfig, configuration);
         }
 

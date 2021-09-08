@@ -47,8 +47,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 
@@ -91,7 +91,7 @@ class SystemMonitorProcTest extends BaseProgressTest {
             @Name(value = "graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            this.taskRegistry = new NonReleasingTaskRegistry(taskRegistry);
+            this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistryFactory.newInstance());
             compute(graphNameOrConfig, configuration);
             return Stream.empty();
         }
