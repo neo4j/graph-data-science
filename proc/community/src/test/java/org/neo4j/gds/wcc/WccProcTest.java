@@ -41,7 +41,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -212,7 +212,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
                     config,
                     AllocationTracker.empty(),
                     testLog,
-                    EmptyTaskRegistry.INSTANCE
+                    EmptyTaskRegistryFactory.INSTANCE
                 );
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";

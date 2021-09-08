@@ -37,7 +37,7 @@ import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
@@ -395,7 +395,7 @@ class GraphSageAlgorithmFactoryTest {
                 multiLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
-                EmptyTaskRegistry.INSTANCE
+                EmptyTaskRegistryFactory.INSTANCE
             );
         assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
 
@@ -414,7 +414,7 @@ class GraphSageAlgorithmFactoryTest {
                 singleLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
-                EmptyTaskRegistry.INSTANCE
+                EmptyTaskRegistryFactory.INSTANCE
             );
         assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }

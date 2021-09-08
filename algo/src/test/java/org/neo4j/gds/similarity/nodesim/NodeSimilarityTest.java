@@ -38,7 +38,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -805,7 +805,7 @@ final class NodeSimilarityTest {
             config,
             AllocationTracker.empty(),
             progressLog,
-            EmptyTaskRegistry.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         nodeSimilarity.compute();

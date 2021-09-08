@@ -41,7 +41,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
@@ -170,7 +170,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
-            proc.taskRegistry = EmptyTaskRegistry.INSTANCE;
+            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
 
             if (proc instanceof NodePropertiesWriter) {
                 ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
@@ -292,7 +292,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
         applyOnProcedure(proc -> {
-            proc.taskRegistry = new LocalTaskRegistry("", taskStore);
+            proc.taskRegistryFactory = () -> new LocalTaskRegistry("", taskStore);
 
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(

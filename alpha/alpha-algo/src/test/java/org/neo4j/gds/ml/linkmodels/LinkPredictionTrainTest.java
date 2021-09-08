@@ -33,7 +33,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistry;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -289,7 +289,7 @@ class LinkPredictionTrainTest {
             config,
             AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER.progressLogger().getLog(),
-            EmptyTaskRegistry.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 

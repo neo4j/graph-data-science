@@ -45,7 +45,7 @@ import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.graphdb.Transaction;
@@ -92,7 +92,7 @@ public abstract class BaseProc {
     public AllocationTracker allocationTracker;
 
     @Context
-    public TaskRegistry taskRegistry;
+    public TaskRegistryFactory taskRegistryFactory;
 
     protected BaseProc() {
         if (GdsEdition.instance().isInvalidLicense()) {
