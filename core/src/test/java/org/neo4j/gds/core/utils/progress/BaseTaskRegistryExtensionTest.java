@@ -64,11 +64,12 @@ abstract class BaseTaskRegistryExtensionTest extends BaseTest {
 
     public static class AlgoProc {
         @Context
-        public TaskRegistry taskRegistry;
+        public TaskRegistryFactory taskRegistryFactory;
 
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
             var task = Tasks.leaf("foo");
+            var taskRegistry = taskRegistryFactory.newInstance();
             taskRegistry.registerTask(task);
             return Stream.empty();
         }

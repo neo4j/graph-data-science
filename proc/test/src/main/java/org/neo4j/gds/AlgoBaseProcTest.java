@@ -44,7 +44,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.LocalTaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
@@ -292,7 +292,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
         applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = () -> new LocalTaskRegistry("", taskStore);
+            proc.taskRegistryFactory = () -> new TaskRegistry("", taskStore);
 
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(

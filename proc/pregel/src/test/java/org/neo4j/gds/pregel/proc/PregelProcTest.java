@@ -228,8 +228,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
-            // TODO: set to 1 once tracking is implemented
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
         }
     }
 
@@ -252,8 +251,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
-            // TODO: set to 1 once tracking is implemented
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
         }
     }
 
@@ -277,8 +275,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
-            // TODO: set to 1 once tracking is implemented
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(0);
+            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
         }
     }
 
