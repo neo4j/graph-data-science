@@ -33,8 +33,8 @@ import java.util.OptionalLong;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
-import static org.neo4j.gds.core.utils.statistics.CommunityStatistics.communityCount;
-import static org.neo4j.gds.core.utils.statistics.CommunityStatistics.communityCountAndHistogram;
+import static org.neo4j.gds.result.CommunityStatistics.communityCount;
+import static org.neo4j.gds.result.CommunityStatistics.communityCountAndHistogram;
 
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 

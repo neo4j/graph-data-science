@@ -31,7 +31,7 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
-import org.neo4j.gds.core.utils.statistics.CommunityStatistics;
+import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
