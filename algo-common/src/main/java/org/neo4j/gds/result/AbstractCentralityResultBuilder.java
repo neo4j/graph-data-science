@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.statistics.CentralityStatistics;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
