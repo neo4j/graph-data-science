@@ -25,6 +25,9 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.logging.Log;
 
@@ -40,16 +43,26 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected TerminationFlag terminationFlag;
     protected ProgressLogger progressLogger;
 
-    private final int writeConcurrency;
+    protected ProgressTracker progressTracker;
 
     RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
         this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
     }
 
-    public abstract T build();
+    public final T build() {
+        prepareProgressTracker();
+
+        return actuallyBuild();
+    }
+
+    private void prepareProgressTracker() {
+        Task task = Tasks.leaf(taskName());
+        progressTracker = new TaskProgressTracker(task, progressLogger);
+    }
+
+    protected abstract T actuallyBuild();
 
     public RelationshipStreamExporterBuilder<T> withIdMapping(IdMapping idMapping) {
         Objects.requireNonNull(idMapping);
@@ -63,7 +76,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     }
 
     public RelationshipStreamExporterBuilder<T> withLog(Log log) {
-        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), writeConcurrency));
+        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), ConcurrencyConfig.DEFAULT_CONCURRENCY));
     }
 
     public RelationshipStreamExporterBuilder<T> withRelationships(Stream<Relationship> relationships) {
@@ -76,7 +89,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
-    String taskName() {
+    private String taskName() {
         return "WriteRelationshipStream";
     }
 

@@ -22,8 +22,8 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StatementApi;
 
 import java.util.Arrays;
@@ -34,8 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
 
     private static final int QUEUE_CAPACITY = 2;
@@ -44,7 +42,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     private final Stream<Relationship> relationships;
     private final int batchSize;
     private final TerminationFlag terminationFlag;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     public static RelationshipStreamExporterBuilder<NativeRelationshipStreamExporter> builder(
         TransactionContext transactionContext,
@@ -65,14 +63,14 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         }
 
         @Override
-        public NativeRelationshipStreamExporter build() {
+        protected NativeRelationshipStreamExporter actuallyBuild() {
             return new NativeRelationshipStreamExporter(
                 transactionContext,
                 toOriginalId,
                 relationships,
                 batchSize,
                 terminationFlag,
-                progressLogger
+                progressTracker
             );
         }
     }
@@ -83,14 +81,14 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         Stream<Relationship> relationships,
         int batchSize,
         TerminationFlag terminationFlag,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         super(tx);
         this.toOriginalId = toOriginalId;
         this.relationships = relationships.sequential();
         this.batchSize = batchSize;
         this.terminationFlag = terminationFlag;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -98,58 +96,61 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         var relationshipToken = getOrCreateRelationshipToken(relationshipType);
         var propertyTokens = Arrays.stream(propertyKeys).mapToInt(this::getOrCreatePropertyToken).toArray();
 
-        progressLogger.logStart();
-
-        var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
-        var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
-        for (int i = 0; i < QUEUE_CAPACITY; i++) {
-            bufferPool.add(new Buffer(batchSize));
-        }
-
-        var writer = new Writer(
-            tx,
-            toOriginalId,
-            writeQueue,
-            bufferPool,
-            relationshipToken,
-            propertyTokens,
-            terminationFlag,
-            progressLogger
-        );
-        var consumer = Pools.DEFAULT.submit(writer);
-
-        var bufferRef = new AtomicReference<>(bufferPool.poll());
-
-        relationships.forEach(relationship -> {
-            var buffer = bufferRef.get();
-            buffer.add(relationship);
-            if (buffer.isFull()) {
-                try {
-                    writeQueue.put(buffer);
-                    bufferRef.set(bufferPool.take());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
         try {
-            writeQueue.put(bufferRef.get());
-            // Add an empty buffer to signal end of writing
-            writeQueue.put(new Buffer(0));
-            consumer.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        progressLogger.logFinish();
+            progressTracker.beginSubTask();
 
-        return writer.written;
+            var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+            var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+            for (int i = 0; i < QUEUE_CAPACITY; i++) {
+                bufferPool.add(new Buffer(batchSize));
+            }
+
+            var writer = new Writer(
+                tx,
+                progressTracker,
+                toOriginalId,
+                writeQueue,
+                bufferPool,
+                relationshipToken,
+                propertyTokens,
+                terminationFlag
+            );
+            var consumer = Pools.DEFAULT.submit(writer);
+
+            var bufferRef = new AtomicReference<>(bufferPool.poll());
+
+            relationships.forEach(relationship -> {
+                var buffer = bufferRef.get();
+                buffer.add(relationship);
+                if (buffer.isFull()) {
+                    try {
+                        writeQueue.put(buffer);
+                        bufferRef.set(bufferPool.take());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+            try {
+                writeQueue.put(bufferRef.get());
+                // Add an empty buffer to signal end of writing
+                writeQueue.put(new Buffer(0));
+                consumer.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+
+            return writer.written;
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     static class Writer extends StatementApi implements Runnable {
 
         private final TerminationFlag terminationFlag;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
 
         private final LongUnaryOperator toOriginalId;
         private final BlockingQueue<Buffer> writeQueue;
@@ -161,22 +162,22 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
 
         Writer(
             TransactionContext tx,
+            ProgressTracker progressTracker,
             LongUnaryOperator toOriginalId,
             BlockingQueue<Buffer> writeQueue,
             BlockingQueue<Buffer> bufferPool,
             int relationshipToken,
             int[] propertyTokens,
-            TerminationFlag terminationFlag,
-            ProgressLogger progressLogger
+            TerminationFlag terminationFlag
         ) {
             super(tx);
+            this.progressTracker = progressTracker;
             this.toOriginalId = toOriginalId;
             this.writeQueue = writeQueue;
             this.bufferPool = bufferPool;
             this.relationshipToken = relationshipToken;
             this.propertyTokens = propertyTokens;
             this.terminationFlag = terminationFlag;
-            this.progressLogger = progressLogger;
         }
 
         @Override
@@ -190,7 +191,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                     }
                     written += write(buffer, relationshipToken, propertyTokens);
 
-                    progressLogger.logMessage(formatWithLocale("has written %d relationships", written));
+                    progressTracker.logProgress(written);
 
                     buffer.reset();
                     bufferPool.put(buffer);

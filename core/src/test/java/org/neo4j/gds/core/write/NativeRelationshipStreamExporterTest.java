@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.core.utils.TerminationFlag.RUNNING_TRUE;
 
 class NativeRelationshipStreamExporterTest extends BaseTest {
@@ -242,16 +243,13 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(relationshipCount, relationshipsWritten);
 
-        var messages = log.getMessages("info");
-        assertEquals(7, messages.size());
-
-        assertThat(messages.get(0)).contains("WriteRelationshipStream :: Start");
-        assertThat(messages.get(1)).contains("WriteRelationshipStream has written 25 relationships");
-        assertThat(messages.get(2)).contains("WriteRelationshipStream has written 50 relationships");
-        assertThat(messages.get(3)).contains("WriteRelationshipStream has written 75 relationships");
-        assertThat(messages.get(4)).contains("WriteRelationshipStream has written 100 relationships");
-        assertThat(messages.get(5)).contains("WriteRelationshipStream has written 105 relationships");
-        assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "WriteRelationshipStream :: Start",
+                "WriteRelationshipStream 100%",
+                "WriteRelationshipStream :: Finished"
+            );
     }
 
     Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
