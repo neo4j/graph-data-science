@@ -123,7 +123,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     config.toMap()
                 );
             }

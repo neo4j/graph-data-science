@@ -132,7 +132,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     sumCentrality,
                     minCentrality,
                     maxCentrality,

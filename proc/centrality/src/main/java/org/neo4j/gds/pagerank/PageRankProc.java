@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
@@ -47,7 +47,8 @@ final class PageRankProc {
         procResultBuilder
             .withDidConverge(!computeResult.isGraphEmpty() && result.didConverge())
             .withRanIterations(!computeResult.isGraphEmpty() ? result.iterations() : 0)
-            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().scores()::get : null);
+            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().scores()::get : null)
+            .withScalerVariant(computeResult.config().scaler());
 
         return procResultBuilder;
     }
