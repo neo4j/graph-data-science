@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.centrality;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.config.WritePropertyConfig;
@@ -26,7 +26,7 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
-public class CentralityScore {
+class CentralityScore {
 
     public final long nodeId;
     public final Double score;

@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.results.CentralityScore;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
