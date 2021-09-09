@@ -11,6 +11,7 @@ dependencies {
 
     compileOnly project(':proc-common')
     implementation project(':proc-catalog')
+    implementation project(':proc-centrality')
     implementation project(':proc-community')
     implementation project(':pregel')
     implementation project(':proc-pregel')
