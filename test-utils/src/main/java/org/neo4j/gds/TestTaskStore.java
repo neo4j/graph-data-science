@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -44,8 +45,8 @@ public class TestTaskStore implements TaskStore {
     }
 
     @Override
-    public Map<JobId, Task> query(String username) {
-        return null;
+    public @NotNull Map<JobId, Task> query(String username) {
+        return Map.of();
     }
 
     @Override

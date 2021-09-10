@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -53,8 +54,8 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
-    public Map<JobId, Task> query(String username) {
-        return registeredTasks.get(username);
+    public @NotNull Map<JobId, Task> query(String username) {
+        return registeredTasks.getOrDefault(username, Map.of());
     }
 
     @Override

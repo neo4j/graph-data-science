@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ public interface TaskStore {
 
     void remove(String username, JobId jobId);
 
+    @NotNull
     Map<JobId, Task> query(String username);
 
     Optional<Task> query(String username, JobId jobId);

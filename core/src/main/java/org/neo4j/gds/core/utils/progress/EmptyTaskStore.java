@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ public enum EmptyTaskStore implements TaskStore {
     public void remove(String username, JobId jobId) {}
 
     @Override
-    public Map<JobId, Task> query(String username) {
+    public @NotNull Map<JobId, Task> query(String username) {
         return Map.of();
     }
 

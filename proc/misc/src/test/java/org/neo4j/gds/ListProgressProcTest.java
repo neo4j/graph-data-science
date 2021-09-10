@@ -57,6 +57,11 @@ public class ListProgressProcTest extends BaseProgressTest {
     }
 
     @Test
+    void shouldNotFailWhenTheTaskStoreIsEmpty() {
+        assertDoesNotThrow(() -> runQuery("CALL gds.beta.listProgress()"));
+    }
+
+    @Test
     void canListProgressEvent() {
         runQuery("CALL gds.test.pl('foo')");
         assertCypherResult(

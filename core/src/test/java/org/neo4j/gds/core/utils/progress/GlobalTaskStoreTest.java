@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class GlobalTaskStoreTest {
@@ -35,4 +36,10 @@ class GlobalTaskStoreTest {
         assertDoesNotThrow(() -> taskStore.remove("", jobId));
     }
 
+    @Test
+    void shouldReturnEmptyResultWhenStoreIsEmpty() {
+        assertThat(new GlobalTaskStore().query(""))
+            .isNotNull()
+            .isEmpty();
+    }
 }
