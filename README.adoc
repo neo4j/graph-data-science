@@ -144,11 +144,11 @@ To run all tests you can simply run `./gradlew check`
 Packaging the library::
 To package the library you can run `./gradlew packaging:shadowJar`.
 This will create the bundled JAR at `packaging/build/libs/neo4j-graph-data-science-VERSION.jar`.
+To use the bundled JAR in Neo4j, place the JAR file in the `plugins` directory of your Neo4j database and restart the database.
+For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
-Preview of the Documentation::
-To generate a preview you can run `./gradlew doc:preview`.
-This will build the documentation and make it available under `http://localhost:8001/`.
-When you are done run `./gradlew doc:stopPreview` to stop the web server.
+Preview of the documentation::
+A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/1.7-preview/.
 
 == Contributing
 
