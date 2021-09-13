@@ -625,3 +625,39 @@ ORDER BY numberOfPages DESC, person
 --
 
 We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
+
+
+=== Validate relationships flag
+
+As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to create a relationship that connects to or from a node not present in the <<node-projection-syntax, node projection>>.
+Note that even if the flag is set to `false` such a relationship will still not be created but the loading process will continue with the next relationship instead.
+
+We can simulate such a case with the graph present in the Neo4j database:
+
+--
+.Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
+[source, cypher]
+----
+CALL gds.graph.create(
+  'danglingRelationships',
+  'Person',
+  ['READ', 'KNOWS'],
+  {
+    validateRelationships: true
+  }
+)
+YIELD
+  graphName AS graph,
+  relationshipProjection AS readProjection,
+  nodeCount AS nodes,
+  relationshipCount AS rels
+----
+
+.Results
+----
+org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph.create`: Caused by: java.lang.IllegalArgumentException: Failed to load a relationship because its target-node with id 3 is not part of the node query or projection. To ignore the relationship, set the configuration parameter `validateRelationships` to false.
+----
+--
+
+We can see that the above query resulted in an exception being thrown.
+The exception message will provide information about the specific node id that was missing, which will help debugging underlying problems.
