@@ -315,6 +315,14 @@
         </d:tocentry>
     </d:tocentry>
 
+    <d:tocentry linkend="end-to-end-examples">
+        <?dbhtml filename="end-to-end-examples/end-to-end-examples/index.html"?>
+
+        <d:tocentry linkend="fastrp-knn-example">
+            <?dbhtml filename="end-to-end-examples/fastrp-knn-example/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
     <d:tocentry linkend="production-deployment">
         <?dbhtml filename="production-deployment/index.html"?>
         <d:tocentry linkend="transaction-handling">
