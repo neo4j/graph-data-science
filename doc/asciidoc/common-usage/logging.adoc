@@ -24,10 +24,9 @@ For more information on configuring Neo4j logs, please refer to the https://neo4
 [.beta]
 == Progress-logging procedure
 
-Progress events may also be tracked by the GDS library itself.
+Progress is also tracked by the GDS library itself.
 This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
-To enable this feature, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
-When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks (also referred to as jobs).
+To access progress information for currently running tasks (also referred to as jobs), we can make use of the list progress procedure: `gds.beta.listProgress`.
 A task in the GDS library is defined as a running procedure, such as an algorithm or a graph load procedure.
 
 The list progress procedure has two modes, depending on whether a `jobId` parameter was set:
