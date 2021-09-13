@@ -566,6 +566,12 @@ YIELD
 We can delete all relationships of a given type from a named graph in the catalog.
 This is useful to free up main memory or to remove accidentally created relationship types.
 
+[NOTE]
+====
+Deleting relationships of a given type is only possible if it is not the last relationship type present in the graph.
+If we still want to delete these relationships we need to <<catalog-graph-drop, drop the graph>> instead.
+====
+
 [role=query-example]
 --
 .Delete all relationships of type `SIMILAR` from a named graph:
