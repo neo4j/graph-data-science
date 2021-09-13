@@ -169,3 +169,24 @@ Thus, it is still useful to first run the estimation mode before running an algo
 
 The free memory taken into consideration is based on the Java runtime system information.
 The amount of free memory can be increased by either <<catalog-graph-drop, dropping>> unused graphs from the catalog, or by <<heap-size, increasing the maximum heap size>> prior to starting the Neo4j instance.
+
+[[bypass-heap-control]]
+=== Bypassing heap control
+
+Occasionally you will want the ability to bypass heap control if it is too restrictive. You might have insights into how your particular procedure call will behave, memory-wise; or you might just want to take a chance e.g. because the memory estimate you received is very close to system limits.
+
+For that use case we have _sudo mode_ which allows you to manually skip heap control and run your procedure regardless. Sudo mode is off by default to protect users - we fail fast if we can see your potentially long-running procedure would not be able to complete successfully.
+
+To enable sudo mode, add the sudo parameter when calling a procedure. Here is an example of calling the popular Louvain community detection algorithm in sudo mode:
+
+[role=query-example]
+--
+.Run Louvain in sudo mode:
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.write('myGraph', { writeProperty: 'community', sudo: true })
+YIELD communityCount, modularity, modularities
+----
+--
+
+Accidentally enabling sudo mode when calling a procedure, causing it to run out of memory, will not significantly damage your installation, but it will waste your time.
