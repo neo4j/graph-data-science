@@ -2,11 +2,12 @@
 = FastRP and kNN example
 
 In this example we consider a graph of products and customers, and we want to find new products to recommend for each customer.
-We want to use the kNN algorithm to identify similar customers and base our product recommendations on that.
-In order to be able to leverage topological information about the graph in kNN, we will first create node embeddings using FastRP.
+We want to use the <<algorithms-knn, K-Nearest Neighbors algorithm (kNN)>> to identify similar customers and base our product recommendations on that.
+In order to be able to leverage topological information about the graph in kNN, we will first create node embeddings using <<algorithms-embeddings-fastrp, FastRP>>.
 These embeddings will then be the input to the kNN algorithm.
 
 For each pair of similar customers we can then recommend products that have been purchased by one of the customers but not the other, using a simple cypher query.
+
 
 == Graph creation
 
@@ -78,12 +79,14 @@ CALL gds.graph.create(
 )
 ----
 
+
 == FastRP embedding
 
 Now we run the FastRP algorithm to generate node embeddings that capture topological information from the graph.
 We choose to work with `embeddingDimension` set to 4 which is sufficient since our example graph is very small.
 The `iterationWeights` are chosen empirically to yield sensible results.
-Since we want to use the embeddings as input when we run kNN later we use FastRP's `mutate` mode.
+Please see the <<algorithms-embeddings-fastrp-syntax, syntax section>> of the FastRP documentation for more information on these parameters.
+Since we want to use the embeddings as input when we run kNN later we use FastRP's <<running-algos-mutate, `mutate` mode>>.
 
 [role=query-example, group=fastrp-knn]
 --
@@ -115,7 +118,8 @@ YIELD nodePropertiesWritten
 
 Now we can run kNN to identify similar nodes by using the node embeddings that we generated with FastRP as `nodeWeightProperty`.
 Since we are working with a small graph, we can set `sampleRate` to 1 and `deltaThreshold` to 0 without having to worry about long computation times.
-Note that we use the algorithm's `write` mode to write the properties back to our database, so that we can analyze them later using Cypher.
+Please see the <<algorithms-knn-syntax, syntax section>> of the kNN documentation for more information on these parameters.
+Note that we use the algorithm's <<running-algos-write, `write` mode>> to write the properties and relationships back to our database, so that we can analyze them later using Cypher.
 
 [role=query-example, group=fastrp-knn]
 --
