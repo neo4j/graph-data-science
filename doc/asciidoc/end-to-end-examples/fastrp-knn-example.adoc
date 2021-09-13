@@ -211,3 +211,10 @@ RETURN p2.name as recommendation
 --
 
 Indeed, "Kale" is the one product that the `Person` named "Annie" buys that is also not purchased by the `Person` named "Matt".
+
+
+== Conclusion
+
+Using two GDS algorithms and some basic Cypher we were easily able to derive some sensible product recommendations for a customer in our small example.
+
+To make sure to get similarities to other customers for every customer in our graph with kNN, we could play around with increasing the `topK` parameter.
