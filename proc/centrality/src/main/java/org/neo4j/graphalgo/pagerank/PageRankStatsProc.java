@@ -124,7 +124,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
                 return new StatsResult(
                     ranIterations,
                     didConverge,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

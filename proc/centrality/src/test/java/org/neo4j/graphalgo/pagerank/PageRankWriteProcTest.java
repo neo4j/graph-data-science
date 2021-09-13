@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
@@ -107,6 +108,23 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
             "centralityDistribution", isA(Map.class),
             "configuration", allOf(isA(Map.class), hasEntry("writeProperty", writeProp))
         )));
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    void shouldNotComputeCentralityDistributionOnLogScaler(ModeBuildStage queryBuilder, String testCaseName) {
+        var writeProp = "writeProp";
+        var query = queryBuilder
+            .writeMode()
+            .addParameter("scaler", ScalarScaler.Variant.LOG)
+            .addParameter("writeProperty", writeProp)
+            .yields("centralityDistribution");
+
+        assertCypherResult(query, List.of(
+            Map.of(
+                "centralityDistribution", Map.of("Error", "Unable to create histogram when using scaler of type LOG")
+            )
+        ));
     }
 
     @Override

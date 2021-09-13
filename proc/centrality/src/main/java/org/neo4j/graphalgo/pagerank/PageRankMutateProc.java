@@ -139,7 +139,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
                 return new MutateResult(
                     ranIterations,
                     didConverge,
-                    centralityHistogramOrNull(),
+                    centralityHistogram,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

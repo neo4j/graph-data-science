@@ -73,7 +73,7 @@ public class CentralityScore {
                     computeMillis,
                     writeMillis,
                     config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
-                    centralityHistogramOrNull()
+                    centralityHistogram
                 );
             }
         }

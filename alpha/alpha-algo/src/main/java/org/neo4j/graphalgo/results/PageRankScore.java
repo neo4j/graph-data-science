@@ -92,7 +92,7 @@ public class PageRankScore {
                     writeMillis,
                     dampingFactor,
                     config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
-                    centralityHistogramOrNull()
+                    centralityHistogram
                 );
             }
         }
