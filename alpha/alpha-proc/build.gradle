@@ -10,19 +10,7 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     compileOnly project(':proc-common')
-    implementation project(':proc-catalog')
-    implementation project(':proc-centrality')
-    implementation project(':proc-community')
-    implementation project(':proc-embeddings')
-    implementation project(':proc-path-finding')
-    implementation project(':proc-similarity')
-    implementation project(':pregel')
-    implementation project(':proc-pregel')
 
-    api project(':alpha-algo')
-    api project(':storage-engine-adapter')
-
-    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     neodeps.each {
@@ -31,15 +19,24 @@ dependencies {
         }
     }
 
-    testImplementation project(':test-utils')
-    testImplementation project(':proc-test')
-    testImplementation project(':proc-embeddings')
-    testImplementation project(':proc-common')
-    testImplementation project(':proc-catalog')
-    // TODO: can remove when we've ported the triangle count doc test
-    testImplementation project(':proc-community')
-    testImplementation project(':proc-beta')
+    implementation project(':pregel')
+    implementation project(':proc-catalog')
+    implementation project(':proc-centrality')
+    implementation project(':proc-community')
+    implementation project(':proc-path-finding')
+    implementation project(':proc-pregel')
+
+    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+
+    api project(':alpha-algo')
+    api project(':storage-engine-adapter')
+
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
+    testImplementation project(':test-utils')
+    testImplementation project(':proc-test')
+    testImplementation project(':proc-beta')
+    testImplementation project(':proc-embeddings')
 }
