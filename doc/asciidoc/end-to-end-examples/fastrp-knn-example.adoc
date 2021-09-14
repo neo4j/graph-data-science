@@ -182,6 +182,7 @@ ORDER BY similarity DESCENDING, person1, person2
 Our kNN results indicate among other things that the `Person` nodes named "Annie" and "Matt" are very similar.
 Looking at the `BUYS` relationships for these two nodes we can see that such a conclusion makes sense.
 They both buy three products, two of which are the same (`Product` nodes named "Cucumber" and "Tomatoes") for both people and with similar amounts.
+We therefore have high confidence in our approach.
 
 
 == Making recommendations
