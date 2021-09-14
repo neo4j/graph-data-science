@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.datasets.CommunityDbCreator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.ResultTransformer;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
@@ -57,12 +58,12 @@ abstract class DumpDatasetTest {
         return graphStore(graphName).getUnion();
     }
 
-    protected void runQuery(String query) {
-        api.executeTransactionally(query, Map.of(), r-> {return true;});
+    protected String runQuery(String query) {
+        return api.executeTransactionally(query, Map.of(), Result::resultAsString);
     }
 
-    protected void runQuery(String query, ResultTransformer<Object> transformer) {
-        api.executeTransactionally(query, Map.of(), transformer);
+    protected Object runQuery(String query, ResultTransformer<Object> transformer) {
+        return api.executeTransactionally(query, Map.of(), transformer);
     }
 
     protected void runQuery(String query, Map<String, Object> parameters, ResultTransformer<Object> transformer) {
