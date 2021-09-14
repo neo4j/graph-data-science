@@ -6,7 +6,7 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                                     | Operation
-| <<logging-progress-logging, List all operations in GDS>>        | `_gds.list_`
+| <<neo4j-server-verify, List all operations in GDS>>        | `_gds.list_`
 | <<logging-progress-logging, List logged progress>>              | `gds.beta.listProgress`
 | <<utility-functions, The version of the installed GDS>>         | `_gds.version_`
 .2+<.^| <<utility-functions-node-path>>
