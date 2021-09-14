@@ -32,7 +32,7 @@ public final class ClockService {
     }
 
     public static Clock clock() {
-        return CLOCK ;
+        return CLOCK;
     }
 
     private ClockService() {}
