@@ -154,11 +154,13 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     private void validateTaskFinishedOrCanceled() {
+        var message = formatWithLocale(
+            "Attempted to release algorithm, but task %s is still running",
+            baseTask.description()
+        );
         if (baseTask.status() == Status.RUNNING) {
-            throw new IllegalStateException(formatWithLocale(
-                "Attempted to release algorithm, but task %s is still running",
-                baseTask.description()
-            ));
+            assert false: message;
+            progressLogger().getLog().warn(message);
         }
     }
 
