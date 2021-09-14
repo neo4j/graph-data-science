@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.utils.ProgressLogger;
-
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 public interface ProgressTracker {
@@ -44,6 +43,8 @@ public interface ProgressTracker {
     default void logProgress() {
         logProgress(1);
     }
+
+    void logProgress(long value, String messageTemplate);
 
     void setVolume(long volume);
 
@@ -82,6 +83,11 @@ public interface ProgressTracker {
 
         @Override
         public void logProgress(long value) {
+        }
+
+        @Override
+        public void logProgress(long value, String messageTemplate) {
+
         }
 
         @Override
