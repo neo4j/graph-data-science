@@ -410,7 +410,7 @@ Additionally, we can specify a threshold for the weight value.
 Then, only weights greater than the threshold value will be considered by the algorithm.
 We do this by specifying the threshold value with the `threshold` configuration parameter.
 
-If a relationship does not have the specified weight property, the algorithm falls back to using a default value.
+If a relationship does not have the specified weight property, the algorithm falls back to using a default value of zero.
 
 [role=query-example]
 --
