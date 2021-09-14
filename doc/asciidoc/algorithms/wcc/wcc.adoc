@@ -411,7 +411,6 @@ Then, only weights greater than the threshold value will be considered by the al
 We do this by specifying the threshold value with the `threshold` configuration parameter.
 
 If a relationship does not have the specified weight property, the algorithm falls back to using a default value.
-The default fallback value is zero, but can be configured to using the `defaultValue` configuration parameter.
 
 [role=query-example]
 --
