@@ -117,6 +117,12 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void logProgress(long value, String messageTemplate) {
+        requireCurrentTask().logProgress(value);
+        taskProgressLogger.logMessage(formatWithLocale(messageTemplate, value));
+    }
+
+    @Override
     public void setVolume(long volume) {
         requireCurrentTask().setVolume(volume);
         taskProgressLogger.reset(volume);
