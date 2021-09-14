@@ -106,6 +106,8 @@
 *** xref:alpha-algorithms/one-hot-encoding/index.adoc[]
 *** xref:alpha-algorithms/split-relationships/index.adoc[]
 ** xref:algorithms/pregel-api/index.adoc[]
+* xref:end-to-end-examples/end-to-end-examples/index.adoc[]
+** xref:end-to-end-examples/fastrp-knn-example/index.adoc[]
 * xref:production-deployment/index.adoc[]
 ** xref:production-deployment/transaction-handling/index.adoc[]
 ** xref:production-deployment/fabric/index.adoc[]
