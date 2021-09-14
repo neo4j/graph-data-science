@@ -191,7 +191,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                     }
                     written += write(buffer, relationshipToken, propertyTokens);
 
-                    progressTracker.logProgress(written);
+                    progressTracker.logProgress(written, "has written %d relationships");
 
                     buffer.reset();
                     bufferPool.put(buffer);

@@ -22,14 +22,14 @@ package org.neo4j.gds.core.write;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.values.storable.Value;
@@ -247,6 +247,11 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .extracting(removingThreadId())
             .contains(
                 "WriteRelationshipStream :: Start",
+                "WriteRelationshipStream has written 25 relationships",
+                "WriteRelationshipStream has written 50 relationships",
+                "WriteRelationshipStream has written 75 relationships",
+                "WriteRelationshipStream has written 100 relationships",
+                "WriteRelationshipStream has written 105 relationships",
                 "WriteRelationshipStream 100%",
                 "WriteRelationshipStream :: Finished"
             );
