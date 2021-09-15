@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +29,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
@@ -42,14 +41,21 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -78,10 +84,6 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.gds.compat.MapUtil.genericMap;
-import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.gds.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
@@ -90,6 +92,9 @@ import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.getCypherAggregation;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.gds.compat.MapUtil.genericMap;
+import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -97,6 +102,7 @@ import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphCreateProcTest extends BaseProcTest {
 
@@ -172,6 +178,30 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(graphName);
+    }
+
+    @Test
+    void testNativeProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+
+            proc.create("myGraph", "*", "*", Map.of());
+
+            Assertions.assertThat(taskStore.taskStream().map(Task::description)).contains("Loading");
+        });
+    }
+
+    @Test
+    void testCypherProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+
+            proc.createCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());
+
+            Assertions.assertThat(taskStore.taskStream().map(Task::description)).contains("Loading");
+        });
     }
 
     @Test
