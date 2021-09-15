@@ -27,11 +27,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
@@ -143,10 +143,8 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
             proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
-                TransactionContext.of(
-                    proc.api,
-                    proc.procedureTransaction
-                ));
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
 
             proc.write(
                 Map.of(
@@ -159,22 +157,6 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
             assertThat(taskStore.taskStream().map(Task::description)).contains("MSClosenessCentrality", "WriteNodeProperties");
         });
-    }
-
-    public static class NonReleasingTaskRegistry extends TaskRegistry {
-
-        NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
-            super(taskRegistry);
-        }
-
-        @Override
-        public void unregisterTask() {
-            // skip un registering the task because we want to observe the messages after the algo is done
-        }
-
-        public TaskStore taskStore() {
-            return taskStore;
-        }
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {
