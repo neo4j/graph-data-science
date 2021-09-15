@@ -25,6 +25,7 @@ import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.graphbuilder.GridBuilder;
 
@@ -91,9 +92,9 @@ class ParallelDeltaSteppingTest extends AlgoTestBase {
     }
 
     private double[] compute(int threads) {
-        return new ShortestPathDeltaStepping(graph, rootNodeId, 2.5)
-                .withExecutorService(Executors.newFixedThreadPool(threads))
-                .compute()
-                .getShortestPaths();
+        return new ShortestPathDeltaStepping(graph, rootNodeId, 2.5, ProgressTracker.NULL_TRACKER)
+            .withExecutorService(Executors.newFixedThreadPool(threads))
+            .compute()
+            .getShortestPaths();
     }
 }
