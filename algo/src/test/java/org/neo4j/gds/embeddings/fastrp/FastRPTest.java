@@ -148,7 +148,7 @@ class FastRPTest extends AlgoTestBase {
     }
 
     @Test
-    void shouldBeIndpendentOfPartitioning() {
+    void shouldBeDetermintisticInParallel() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Node1")
@@ -163,6 +163,7 @@ class FastRPTest extends AlgoTestBase {
             .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
             .featureProperties(List.of("f1", "f2"))
             .addIterationWeight(1.0D)
+            .minBatchSize(1)
             .randomSeed(42L);
 
         FastRP concurrentFastRP = new FastRP(

@@ -52,7 +52,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
-    private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
 
@@ -73,6 +72,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final int embeddingDimension;
     private final int baseEmbeddingDimension;
     private final List<Number> iterationWeights;
+    private final int minBatchSize;
 
     public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
@@ -112,6 +112,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
         this.progressTracker = progressTracker;
+        this.minBatchSize = config.minBatchSize();
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), allocationTracker);
@@ -167,15 +168,15 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     void initRandomVectors() {
         progressTracker.beginSubTask();
 
-        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
-        List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
+        List<Runnable> tasks = PartitionUtils.rangePartition(
+            concurrency,
             graph.nodeCount(),
-            batchSize,
             partition -> new InitRandomVectorTask(
                 partition,
                 sqrtEmbeddingDimension
-            )
+            ),
+            Optional.of(minBatchSize)
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
@@ -184,8 +185,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     void propagateEmbeddings() {
         progressTracker.beginSubTask();
-        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
-        var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, batchSize, Function.identity());
+        var partitions = PartitionUtils.degreePartition(graph, concurrency, Function.identity(), Optional.of(minBatchSize));
 
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressTracker.beginSubTask();
