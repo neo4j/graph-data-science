@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -41,7 +40,6 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -51,7 +49,6 @@ import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -81,7 +78,6 @@ import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -157,21 +153,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb())) {
-            AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc;
-            try {
-                proc = getProcedureClazz().getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
-            }
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = graphDb();
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-
+        ProcedureRunner.applyOnProcedure(graphDb(), getProcedureClazz(), proc -> {
             if (proc instanceof NodePropertiesWriter) {
                 ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
                     TransactionContext.of(
@@ -197,7 +179,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             }
 
             func.accept(proc);
-        }
+        });
     }
 
     @Test
