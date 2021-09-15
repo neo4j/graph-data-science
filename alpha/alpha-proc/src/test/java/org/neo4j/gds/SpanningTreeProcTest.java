@@ -23,18 +23,25 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.SettingImpl;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProc;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -199,5 +206,32 @@ public class SpanningTreeProcTest extends BaseProcTest {
             .yields();
 
         assertError(query, "startNode with id 42 was not loaded");
+    }
+
+    @Test
+    void shouldTrackProgress() {
+        ProcedureRunner.applyOnProcedure(db, SpanningTreeProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
+
+            proc.spanningTree( // min or max doesn't matter
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "weightWriteProperty", "myProp",
+                    "startNodeId", 0L
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).contains(
+                "SpanningTree",
+                "SpanningTree :: WriteRelationships"
+            );
+        });
     }
 }
