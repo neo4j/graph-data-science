@@ -106,7 +106,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             var writeConcurrency = computationResult.config().writeConcurrency();
-            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("ClosenessCentrality :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
             var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             var exporter = nodePropertyExporterBuilder
@@ -137,7 +137,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
         return new AlgorithmFactory<>() {
             @Override
             protected String taskName() {
-                return "MSClosenessCentrality";
+                return "ClosenessCentrality";
             }
 
             @Override

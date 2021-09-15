@@ -102,7 +102,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
 
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             var writeConcurrency = computationResult.config().writeConcurrency();
-            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("HarmonicCentrality :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
             var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             NodePropertyExporter exporter =  nodePropertyExporterBuilder

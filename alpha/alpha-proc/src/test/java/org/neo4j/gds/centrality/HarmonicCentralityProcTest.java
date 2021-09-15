@@ -128,7 +128,10 @@ class HarmonicCentralityProcTest extends BaseProcTest {
                 Map.of()
             );
 
-            assertThat(taskStore.taskStream().map(Task::description)).contains("HarmonicCentrality", "WriteNodeProperties");
+            assertThat(taskStore.taskStream().map(Task::description)).contains(
+                "HarmonicCentrality",
+                "HarmonicCentrality :: WriteNodeProperties"
+            );
         });
     }
 
