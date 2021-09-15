@@ -112,7 +112,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
     @Override
     public Stream<long[]> compute() {
-        progressTracker.beginSubTask();
         int timeout = 100;
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(queueSize);
         long[] TOMB = new long[0];
@@ -134,9 +133,11 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                     returnParam,
                     inOutParam,
                     walks,
-                    randomSeed
+                    randomSeed,
+                    progressTracker
                 )).collect(Collectors.toList());
 
+        progressTracker.beginSubTask("create walks");
         new Thread(() -> {
             ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
             try {
@@ -144,8 +145,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             } catch (InterruptedException e) {
             }
         }).start();
-
-        progressTracker.endSubTask();
         return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
     }
 
@@ -188,6 +187,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final double normalizedSameDistanceProbability;
         private final double normalizedInOutProbability;
         private final long randomSeed;
+        private final ProgressTracker progressTracker;
         private final CumulativeWeightSupplier cumulativeWeightSupplier;
 
         static RandomWalkTask of(
@@ -199,7 +199,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             double returnParam,
             double inOutParam,
             BlockingQueue<long[]> walks,
-            long randomSeed
+            long randomSeed,
+            ProgressTracker progressTracker
         ) {
             var maxProbability = Math.max(Math.max(1 / returnParam, 1.0), 1 / inOutParam);
             var normalizedReturnProbability = (1 / returnParam) / maxProbability;
@@ -216,7 +217,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 normalizedSameDistanceProbability,
                 normalizedInOutProbability,
                 graph,
-                randomSeed
+                randomSeed,
+                progressTracker
             );
         }
 
@@ -230,7 +232,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             double normalizedSameDistanceProbability,
             double normalizedInOutProbability,
             Graph graph,
-            long randomSeed
+            long randomSeed,
+            ProgressTracker progressTracker
         ) {
             this.nextNodeSupplier = nextNodeSupplier;
             this.cumulativeWeightSupplier = cumulativeWeightSupplier;
@@ -242,6 +245,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
             this.normalizedInOutProbability = normalizedInOutProbability;
             this.randomSeed = randomSeed;
+            this.progressTracker = progressTracker;
+
 
             this.currentWeight = new MutableDouble(0);
             this.randomNeighbour = new MutableLong(-1);
@@ -259,6 +264,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 if (nodeId >= graph.nodeCount()) break;
 
                 if (graph.degree(nodeId) == 0) {
+                    progressTracker.logProgress();
                     continue;
                 }
 
@@ -271,6 +277,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                         flushBuffer();
                     }
                 }
+
+                progressTracker.logProgress();
             }
 
             flushBuffer();
