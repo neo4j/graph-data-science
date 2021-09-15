@@ -161,7 +161,11 @@ class SccProcTest extends BaseProcTest {
                 Map.of()
             );
 
-            assertThat(taskStore.taskStream().map(Task::description)).contains("Scc", "Scc :: WriteNodeProperties");
+            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+                "Loading",
+                "Scc",
+                "Scc :: WriteNodeProperties"
+            );
         });
     }
 

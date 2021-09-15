@@ -343,7 +343,7 @@ public abstract class AlgoBaseProc<
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             validateConfigsBeforeLoad(createConfig, config);
 
-            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
+            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty(), taskRegistryFactory);
             GraphStore graphStore = loader.graphStore();
 
             graphCandidate = GraphStoreWithConfig.of(graphStore, createConfig);
