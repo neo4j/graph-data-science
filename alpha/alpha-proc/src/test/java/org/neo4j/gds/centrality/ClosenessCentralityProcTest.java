@@ -155,7 +155,10 @@ class ClosenessCentralityProcTest extends BaseProcTest {
                 Map.of()
             );
 
-            assertThat(taskStore.taskStream().map(Task::description)).contains("MSClosenessCentrality", "WriteNodeProperties");
+            assertThat(taskStore.taskStream().map(Task::description)).contains(
+                "ClosenessCentrality",
+                "ClosenessCentrality :: WriteNodeProperties"
+            );
         });
     }
 
