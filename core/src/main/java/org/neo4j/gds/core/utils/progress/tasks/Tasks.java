@@ -35,6 +35,11 @@ public final class Tasks {
         return EMPTY_TASK;
     }
 
+    public static Task task(String description, List<Task> children) {
+        assert !children.isEmpty();
+        return new Task(description, children);
+    }
+
     public static Task task(String description, Task firstChild, Task... children) {
         var childrenList = new ArrayList<Task>();
         childrenList.add(firstChild);

@@ -76,16 +76,15 @@ public class PositiveSampleProducer {
             return false;
         }
         long[] walk = walks.next();
+        progressTracker.logProgress();
         int filteredWalkLength = filter(walk);
 
         while (walks.hasNext() && filteredWalkLength < 2) {
             walk = walks.next();
             filteredWalkLength = filter(walk);
-            progressTracker.logProgress();
         }
 
         if (filteredWalkLength >= 2) {
-            progressTracker.logProgress();
             this.currentWalk = walk;
             centerWordIndex = -1;
             return nextCenterWord();
