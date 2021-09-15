@@ -21,10 +21,18 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.impl.walking.VirtualNode;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
 
+import java.util.Map;
 import java.util.function.DoubleConsumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -197,6 +205,34 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
         verify(consumer, times(11)).accept(anyDouble());
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
+    }
+
+    @Test
+    void testProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
+
+            proc.deltaStepping(
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "writeProperty", "myProp",
+                    "startNode", new VirtualNode(0, db),
+                    "delta", 0.1
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).contains(
+                "ShortestPathDeltaStepping",
+                "ShortestPathDeltaStepping :: WriteNodeProperties"
+            );
+        });
     }
 
     @Test
