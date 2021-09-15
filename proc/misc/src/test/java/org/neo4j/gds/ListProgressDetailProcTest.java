@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.Status;
@@ -33,14 +34,17 @@ import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
 import org.neo4j.values.storable.DurationValue;
 
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 
 @FakeClockExtension
 public class ListProgressDetailProcTest extends BaseProgressTest {
@@ -69,7 +73,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
 
     @Test
     void shouldReturnProgressDetail() {
-        var expectedLocalTime = LocalTime.ofInstant(fakeClock.instant(), ZoneId.systemDefault());
+        var expectedLocalTime = LocalTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         assertCypherResult(
             "CALL gds.beta.listProgress('" + jobId + "')" +
             "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
@@ -80,7 +84,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "progressBar", "[####~~~~~~]",
                     "progress", "42.86%",
                     "timeStarted", expectedLocalTime,
-                    "elapsedTime", DurationValue.ZERO,
+                    "elapsedTime", "42 seconds",
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -89,7 +93,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "progressBar", "[#######~~~]",
                     "progress", "75%",
                     "timeStarted", expectedLocalTime,
-                    "elapsedTime", DurationValue.ZERO,
+                    "elapsedTime", "42 seconds",
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -98,7 +102,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "progressBar", "[##########]",
                     "progress", "100%",
                     "timeStarted", expectedLocalTime,
-                    "elapsedTime", DurationValue.ZERO,
+                    "elapsedTime", "42 seconds",
                     "status", Status.FINISHED.name(),
                     "jobId", jobId
                 ),
@@ -106,8 +110,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "        |-- leafIterative",
                     "progressBar", "[#####~~~~~]",
                     "progress", "50%",
-                    "timeStarted", expectedLocalTime,
-                    "elapsedTime", DurationValue.ZERO,
+                    "timeStarted", expectedLocalTime.plusSeconds(42),
+                    "elapsedTime", "0 seconds",
                     "status", Status.RUNNING.name(),
                     "jobId", jobId
                 ),
@@ -115,8 +119,8 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
                     "taskName", "    |-- leaf",
                     "progressBar", "[~~~~~~~~~~]",
                     "progress", "0%",
-                    "timeStarted", expectedLocalTime,
-                    "elapsedTime", DurationValue.ZERO,
+                    "timeStarted", nullValue(),
+                    "elapsedTime", "Not yet started",
                     "status", Status.PENDING.name(),
                     "jobId", jobId
                 )
@@ -160,6 +164,7 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
             taskProgressTracker.beginSubTask(); // iterative
             taskProgressTracker.beginSubTask(); // leafIterative 1
             taskProgressTracker.logProgress(2); // log 2/2
+            ((FakeClock) ClockService.clock()).forward(42, TimeUnit.SECONDS);
             taskProgressTracker.endSubTask();
             taskProgressTracker.beginSubTask(); // leafIterative 2
             taskProgressTracker.logProgress(1); // log 1/2

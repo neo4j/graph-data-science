@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
@@ -30,10 +31,8 @@ import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.DurationValue;
 import org.neo4j.values.storable.LocalTimeValue;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -82,7 +81,7 @@ public class ListProgressProc extends BaseProc {
         public String progressBar;
         public String status;
         public LocalTimeValue timeStarted;
-        public DurationValue elapsedTime;
+        public String elapsedTime;
 
         static ProgressResult fromTaskStoreEntry(Map.Entry<JobId, Task> taskStoreEntry) {
             var jobId = taskStoreEntry.getKey();
@@ -104,12 +103,12 @@ public class ListProgressProc extends BaseProc {
             this.progressBar = StructuredOutputHelper.progressBar(progressContainer.progress(), progressContainer.volume(), PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
-            this.elapsedTime = computeElapsedTime(task);
+            this.elapsedTime = prettyElapsedTime(task);
         }
 
         private LocalTimeValue localTimeValue(Task task) {
             if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
-                return LocalTimeValue.MIN_VALUE;
+                return null;
             }
             return LocalTimeValue.localTime(LocalTime.ofInstant(
                 Instant.ofEpochMilli(task.startTime()),
@@ -117,17 +116,16 @@ public class ListProgressProc extends BaseProc {
             ));
         }
 
-        private DurationValue computeElapsedTime(Task task) {
+        private String prettyElapsedTime(Task task) {
             if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
-                return DurationValue.ZERO;
+                return "Not yet started";
             }
             var finishTime = task.finishTime();
             var finishTimeOrNow = finishTime != -1
                 ? finishTime
                 : ClockService.clock().millis();
             var elapsedTime = finishTimeOrNow - task.startTime();
-            var duration = Duration.ofMillis(elapsedTime);
-            return DurationValue.duration(duration);
+            return DurationFormatUtils.formatDurationWords(elapsedTime, true, true);
         }
     }
 
