@@ -169,7 +169,8 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
                 return new ShortestPathDeltaStepping(
                     graph,
                     configuration.startNode(),
-                    configuration.delta()
+                    configuration.delta(),
+                    progressTracker
                 );
             }
         };
