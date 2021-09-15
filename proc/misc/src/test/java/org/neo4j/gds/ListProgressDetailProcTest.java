@@ -32,7 +32,6 @@ import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
-import org.neo4j.values.storable.DurationValue;
 
 import java.time.Instant;
 import java.time.LocalTime;
@@ -137,10 +136,10 @@ public class ListProgressDetailProcTest extends BaseProgressTest {
 
         runQueryWithRowConsumer(query, row -> {
             LocalTime timeStarted = (LocalTime) row.get("timeStarted");
-            DurationValue elapsedTime = (DurationValue) row.get("elapsedTime");
+            var elapsedTime = row.getString("elapsedTime");
 
-            assertThat(timeStarted.toNanoOfDay()).isEqualTo(0L);
-            assertThat(elapsedTime.compareTo(DurationValue.duration(0, 0, 0, 0))).isEqualTo(0);
+            assertThat(timeStarted).isNull();
+            assertThat(elapsedTime).isEqualTo("Not yet started");
         });
     }
 
