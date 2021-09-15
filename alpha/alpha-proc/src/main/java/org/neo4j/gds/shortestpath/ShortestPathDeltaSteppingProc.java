@@ -120,9 +120,9 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
                 }
             };
 
-            var task = Tasks.leaf(algoName() + " :: WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("ShortestPathDeltaStepping :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             progressTracker.beginSubTask();
             nodePropertyExporterBuilder
                 .withIdMapping(graph)
