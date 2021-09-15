@@ -629,10 +629,10 @@ We can see, that the two READ relationships between Florentin and the Hobbit sum
 
 === Validate relationships flag
 
-As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to create a relationship that connects to or from a node not present in the <<node-projection-syntax, node projection>>.
-Note that even if the flag is set to `false` such a relationship will still not be created but the loading process will continue with the next relationship instead.
+As mentioned in the <<graph-create-native-syntax, syntax section>>, the `validateRelationships` flag controls whether an error will be raised when attempting to create a relationship where either the source or target node is not present in the <<node-projection-syntax, node projection>>.
+Note that even if the flag is set to `false` such a relationship will still not be created but the loading process will not be aborted.
 
-We can simulate such a case with the graph present in the Neo4j database:
+We can simulate such a case with the <<graph-create-examples, graph present in the Neo4j database>>:
 
 --
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
