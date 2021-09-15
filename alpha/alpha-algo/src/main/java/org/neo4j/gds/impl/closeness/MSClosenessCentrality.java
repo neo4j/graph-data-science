@@ -20,15 +20,15 @@
 package org.neo4j.gds.impl.closeness;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.impl.msbfs.BfsConsumer;
-import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.impl.msbfs.BfsConsumer;
+import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
@@ -54,15 +54,19 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
     private final boolean wassermanFaust;
 
     public MSClosenessCentrality(
-            Graph graph,
-            AllocationTracker allocationTracker,
-            int concurrency,
-            ExecutorService executorService, boolean wassermanFaust) {
+        Graph graph,
+        int concurrency,
+        boolean wassermanFaust,
+        AllocationTracker allocationTracker,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
         this.graph = graph;
         nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.allocationTracker = allocationTracker;
+        this.progressTracker = progressTracker;
         this.wassermanFaust = wassermanFaust;
         farness = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
         component = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);

@@ -107,7 +107,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
             var writeConcurrency = computationResult.config().writeConcurrency();
             var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
@@ -148,10 +148,11 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
             ) {
                 return new MSClosenessCentrality(
                     graph,
-                    allocationTracker,
                     configuration.concurrency(),
+                    configuration.improved(),
+                    allocationTracker,
                     Pools.DEFAULT,
-                    configuration.improved()
+                    progressTracker
                 );
             }
         };
