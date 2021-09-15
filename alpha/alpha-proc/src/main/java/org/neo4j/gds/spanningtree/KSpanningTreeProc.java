@@ -99,9 +99,9 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("KSpanningTree :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             final NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)
