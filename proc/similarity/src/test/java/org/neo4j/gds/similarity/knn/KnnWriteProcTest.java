@@ -19,16 +19,21 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.WriteRelationshipWithPropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutablePropertyMapping;
+import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Map;
 import java.util.Optional;
@@ -163,6 +168,35 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("relationshipsWritten").longValue());
+        });
+    }
+
+    @Test
+    void testProgressTracking() {
+        var graphName = "undirectedGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("knn")
+            .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        applyOnProcedure(proc -> {
+            var pathProc = ((KnnWriteProc) proc);
+
+            var taskStore = new GlobalTaskStore();
+
+            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+
+            pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
+
+            Assertions.assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+                "KnnWriteProc :: WriteRelationships",
+                "KNN compute"
+            );
         });
     }
 
