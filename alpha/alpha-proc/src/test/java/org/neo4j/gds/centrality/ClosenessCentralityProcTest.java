@@ -27,6 +27,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -34,6 +41,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -126,6 +134,47 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         });
 
         verifyMock();
+    }
+
+    @Test
+    void testProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                TransactionContext.of(
+                    proc.api,
+                    proc.procedureTransaction
+                ));
+
+            proc.write(
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "writeProperty", "myProp"
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).contains("MSClosenessCentrality", "WriteNodeProperties");
+        });
+    }
+
+    public static class NonReleasingTaskRegistry extends TaskRegistry {
+
+        NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
+            super(taskRegistry);
+        }
+
+        @Override
+        public void unregisterTask() {
+            // skip un registering the task because we want to observe the messages after the algo is done
+        }
+
+        public TaskStore taskStore() {
+            return taskStore;
+        }
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {
