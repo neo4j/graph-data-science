@@ -20,9 +20,13 @@
 package org.neo4j.gds.impl.scc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -31,8 +35,11 @@ import org.neo4j.gds.extension.Inject;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class SccTest {
@@ -72,7 +79,7 @@ class SccTest {
 
     @Test
     void testDirect() {
-        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.empty());
+        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
         HugeLongArray components = scc.compute();
 
         assertCC(components);
@@ -83,7 +90,7 @@ class SccTest {
 
     @Test
     void testHugeIterativeScc() {
-        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.empty());
+        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
@@ -122,6 +129,32 @@ class SccTest {
             }
             assertNotEquals(needle, data.get(i));
         }
+    }
+
+    @Test
+    void testLogging() {
+        var task = Tasks.leaf("My task");
+        var progressLogger = new TestProgressLogger(task, 1);
+        var progressTracker = new TaskProgressTracker(task, progressLogger);
+
+        var algo = new SccAlgorithm(
+            graph,
+            AllocationTracker.empty(),
+            progressTracker
+        );
+
+        algo.compute();
+
+        assertThat(progressLogger.getMessages(INFO))
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .containsExactly(
+                "My task :: Start",
+                "My task 11%",
+                "My task 22%",
+                "My task 100%",
+                "My task :: Finished"
+            );
     }
 
 }

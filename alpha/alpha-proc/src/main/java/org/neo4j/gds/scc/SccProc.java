@@ -182,7 +182,8 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
             ) {
                 return new SccAlgorithm(
                     graph,
-                    allocationTracker
+                    allocationTracker,
+                    progressTracker
                 ).withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
