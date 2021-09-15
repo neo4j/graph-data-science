@@ -34,7 +34,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
-import org.neo4j.values.storable.DurationValue;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -82,7 +81,7 @@ public class ListProgressProcTest extends BaseProgressTest {
                     "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",
                     "timeStarted", LocalTime.ofInstant(fakeClock.instant(), ZoneId.systemDefault()),
-                    "elapsedTime", DurationValue.ZERO
+                    "elapsedTime", "0 seconds"
                 )
             )
         );
