@@ -36,7 +36,7 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-list, gds.graph.list>>                                        | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                                    | Checks if a named graph is stored in the catalog.
 | <<graph-catalog-node-ops, gds.graph.removeNodeProperties>>                    | Removes node properties from a named graph.
-| <<graph-catalog-relationship-ops, gds.graph.deleteRelationships>>             | Deletes relationships of a given relationship type from a named graph.
+| <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>              | Deletes relationships of a given relationship type from a named graph.
 | <<catalog-graph-drop, gds.graph.drop>>                                        | Drops a named graph from the catalog.
 | <<graph-catalog-node-ops, gds.graph.streamNodeProperty>>                      | Streams a single node property stored in a named graph.
 | <<graph-catalog-node-ops, gds.graph.streamNodeProperties>>                    | Streams node properties stored in a named graph.
