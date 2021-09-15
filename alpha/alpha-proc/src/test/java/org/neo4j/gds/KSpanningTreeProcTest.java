@@ -22,10 +22,17 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -133,5 +140,33 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .yields();
 
         assertError(query, "startNode with id 42 was not loaded");
+    }
+
+    @Test
+    void shouldTrackProgress() {
+        ProcedureRunner.applyOnProcedure(db, KSpanningTreeProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
+
+            proc.kmax( // kmin or kmax doesn't matter
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "writeProperty", "myProp",
+                    "k", 1L,
+                    "startNodeId", 0L
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).contains(
+                "KSpanningTree",
+                "KSpanningTree :: WriteNodeProperties"
+            );
+        });
     }
 }
