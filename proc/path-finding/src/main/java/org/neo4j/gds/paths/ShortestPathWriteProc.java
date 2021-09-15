@@ -79,7 +79,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                     .withIdMapping(computationResult.graph())
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withLog(log)
+                    .withLogging(log, taskRegistryFactory)
                     .build();
 
 
