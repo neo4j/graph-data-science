@@ -25,6 +25,8 @@ import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -42,12 +44,14 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
     protected ProgressLogger progressLogger;
+    protected TaskRegistryFactory taskRegistryFactory;
 
     protected ProgressTracker progressTracker;
 
     RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.progressLogger = ProgressLogger.NULL_LOGGER;
+        this.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
         this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
     }
 
@@ -59,7 +63,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     private void prepareProgressTracker() {
         Task task = Tasks.leaf(taskName());
-        progressTracker = new TaskProgressTracker(task, progressLogger);
+        progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
     }
 
     protected abstract T actuallyBuild();
@@ -75,8 +79,10 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
-    public RelationshipStreamExporterBuilder<T> withLog(Log log) {
-        return withProgressLogger(new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), ConcurrencyConfig.DEFAULT_CONCURRENCY));
+    public RelationshipStreamExporterBuilder<T> withLogging(Log log, TaskRegistryFactory taskRegistryFactory) {
+        this.progressLogger = new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), ConcurrencyConfig.DEFAULT_CONCURRENCY);
+        this.taskRegistryFactory = taskRegistryFactory;
+        return this;
     }
 
     public RelationshipStreamExporterBuilder<T> withRelationships(Stream<Relationship> relationships) {
@@ -91,10 +97,5 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     private String taskName() {
         return "WriteRelationshipStream";
-    }
-
-    private RelationshipStreamExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
-        this.progressLogger = progressLogger;
-        return this;
     }
 }
