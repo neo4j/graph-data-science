@@ -41,9 +41,9 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
-            var globalTaskRegistry = new GlobalTaskStore();
-            registry.registerComponent(TaskStore.class, ctx -> globalTaskRegistry, true);
-            registry.registerComponent(TaskRegistryFactory.class, globalTaskRegistry, true);
+            var globalTaskStore = new GlobalTaskStore();
+            registry.registerComponent(TaskStore.class, ctx -> globalTaskStore, true);
+            registry.registerComponent(TaskRegistryFactory.class, globalTaskStore, true);
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
