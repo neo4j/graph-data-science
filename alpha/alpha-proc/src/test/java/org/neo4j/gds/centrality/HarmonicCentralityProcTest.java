@@ -23,10 +23,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -99,6 +107,29 @@ class HarmonicCentralityProcTest extends BaseProcTest {
         });
 
         validateResult(resultMap);
+    }
+
+    @Test
+    void testProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, HarmonicCentralityProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
+
+            proc.write(
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "writeProperty", "myProp"
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).contains("HarmonicCentrality", "WriteNodeProperties");
+        });
     }
 
     private void validateResult(Map<Long, Double> resultMap) {
