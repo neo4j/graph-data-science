@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.Logger;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings("removal")
@@ -43,6 +45,18 @@ public class TestLog extends AbstractLog {
 
     public TestLog() {
         messages = new ConcurrentHashMap<>(3);
+    }
+
+    public void assertContainsMessage(String level, String fragment) {
+        assertThat(containsMessage(level, fragment))
+            .withFailMessage(() ->
+                formatWithLocale(
+                    "Expected log output to contain `%s` for log level `%s`\nLog messages:\n%s",
+                    fragment,
+                    level,
+                    StringJoining.joinInGivenOrder(messages.get(level).stream(), "\n")
+            ))
+            .isTrue();
     }
 
     public boolean containsMessage(String level, String fragment) {
