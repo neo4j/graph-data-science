@@ -23,13 +23,14 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.LongAdder;
@@ -90,7 +91,9 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         HugeObjectArray<NeighborList> neighbors;
         try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
             try (var ignored2 = ProgressTimer.start(this::logInitTime)) {
+                progressTracker.beginSubTask();
                 neighbors = this.initializeRandomNeighbors();
+                progressTracker.endSubTask();
             }
             if (neighbors == null) {
                 return new EmptyResult();
@@ -117,8 +120,9 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 }
             }
 
-            progressTracker.endSubTask();
             return ImmutableResult.of(neighbors, iteration, didConverge);
+        } finally {
+            progressTracker.endSubTask();
         }
     }
 
@@ -146,7 +150,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 neighbors,
                 nodeCount,
                 k,
-                boundedK
+                boundedK,
+                progressTracker
             )
         );
 
@@ -157,8 +162,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         // this is a sanity check
         // we check for this before any iteration and return
         // and just make sure that this invariant holds on every iteration
-        var n = this.nodeCount;
-        if (n < 2 || this.config.topK() == 0) {
+        var nodeCount = this.nodeCount;
+        if (nodeCount < 2 || this.config.topK() == 0) {
             return NeighborList.NOT_INSERTED;
         }
 
@@ -166,25 +171,37 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         var concurrency = this.config.concurrency();
         var executor = this.context.executor();
 
-        var sampledK = this.config.sampledK(n);
+        var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
-        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
+        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
+        var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
 
-        ParallelUtil.readParallel(concurrency, n, executor, new SplitOldAndNewNeighbors(
+        progressTracker.beginSubTask();
+        ParallelUtil.readParallel(concurrency, nodeCount, executor, new SplitOldAndNewNeighbors(
             this.random,
             neighbors,
             allOldNeighbors,
             allNewNeighbors,
-            sampledK
+            sampledK,
+            progressTracker
         ));
+        progressTracker.endSubTask();
 
         // TODO: init in ctor and reuse - benchmark against new allocations
-        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
-        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, allocationTracker);
+        var reverseOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
+        var reverseNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, allocationTracker);
 
-        reverseOldAndNewNeighbors(n, allOldNeighbors, allNewNeighbors, reverseOldNeighbors, reverseNewNeighbors);
+        progressTracker.beginSubTask();
+        reverseOldAndNewNeighbors(
+            nodeCount,
+            allOldNeighbors,
+            allNewNeighbors,
+            reverseOldNeighbors,
+            reverseNewNeighbors,
+            progressTracker
+        );
+        progressTracker.endSubTask();
 
         var neighborsJoiner = new JoinNeighbors(
             this.random,
@@ -194,13 +211,16 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             allNewNeighbors,
             reverseOldNeighbors,
             reverseNewNeighbors,
-            n,
+            nodeCount,
             this.config.topK(),
             sampledK,
-            this.config.randomJoins()
+            this.config.randomJoins(),
+            progressTracker
         );
 
-        ParallelUtil.readParallel(concurrency, n, executor, neighborsJoiner);
+        progressTracker.beginSubTask();
+        ParallelUtil.readParallel(concurrency, nodeCount, executor, neighborsJoiner);
+        progressTracker.endSubTask();
 
         return neighborsJoiner.updateCount.sum();
     }
@@ -210,12 +230,14 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
-        HugeObjectArray<LongArrayList> reverseNewNeighbors
+        HugeObjectArray<LongArrayList> reverseNewNeighbors,
+        ProgressTracker progressTracker
     ) {
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             reverseNeighbors(nodeId, allOldNeighbors, reverseOldNeighbors);
             reverseNeighbors(nodeId, allNewNeighbors, reverseNewNeighbors);
+            progressTracker.logProgress();
         }
     }
 
@@ -250,6 +272,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         private final int k;
         private final int sampledK;
         private final int randomJoins;
+        private final ProgressTracker progressTracker;
         private final LongAdder updateCount;
 
         private JoinNeighbors(
@@ -263,7 +286,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             long n,
             int k,
             int sampledK,
-            int randomJoins
+            int randomJoins,
+            ProgressTracker progressTracker
         ) {
             this.random = random;
             this.computer = computer;
@@ -276,6 +300,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.k = k;
             this.sampledK = sampledK;
             this.randomJoins = randomJoins;
+            this.progressTracker = progressTracker;
             this.updateCount = new LongAdder();
         }
 
@@ -320,6 +345,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
                 // this isn't in the paper
                 randomJoins(rng, computer, n, k, allNeighbors, nodeId, this.randomJoins);
+                progressTracker.logProgress();
             }
 
             this.updateCount.add(updateCount);

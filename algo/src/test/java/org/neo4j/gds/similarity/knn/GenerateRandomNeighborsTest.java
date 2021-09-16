@@ -54,7 +54,8 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             allNeighbors,
             nodeCount,
             k,
-            k
+            k,
+            progressTracker
         );
 
         generateRandomNeighbors.apply(0, nodeCount);
