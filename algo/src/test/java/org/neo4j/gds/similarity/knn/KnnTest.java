@@ -270,6 +270,17 @@ class KnnTest {
         assertThat(result.neighborsOf(1)).containsExactly(0L);
     }
 
+    @Test
+    void shouldLogProgress() {
+        var config = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("knn")
+            .randomSeed(42L)
+            .topK(1)
+            .build();
+
+
+    }
+
     @Nested
     class IterationsLimitTest {
 
