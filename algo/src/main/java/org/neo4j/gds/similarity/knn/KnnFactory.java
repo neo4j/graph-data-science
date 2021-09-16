@@ -108,7 +108,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
             taskName(),
             Tasks.leaf("Initialize random neighbors", graph.nodeCount()),
             Tasks.iterativeDynamic(
-                "",
+                "Iteration",
                 () -> List.of(
                     Tasks.leaf("Split old and new neighbors", graph.nodeCount()),
                     Tasks.leaf("Reverse old and new neighbors", graph.nodeCount()),

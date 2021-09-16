@@ -27,11 +27,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.loading.NullPropertyMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -278,7 +281,49 @@ class KnnTest {
             .topK(1)
             .build();
 
+        var factory = new KnnFactory<>();
 
+        var progressTask = factory.progressTask(graph, config);
+        var testLogger = new TestProgressLogger(
+            progressTask,
+            4
+        );
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+
+        factory
+            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .compute();
+
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 33%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 66%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 100%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 33%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 66%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 33%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 66%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 100%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 33%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 66%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 100%");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 2 of 100 :: Start");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 2 of 100 :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Finished");
+        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Finished");
     }
 
     @Nested
