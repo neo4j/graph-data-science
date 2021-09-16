@@ -34,23 +34,26 @@ class RelationshipIntersectFactoryLocatorTest {
 
     @Test
     void supportsHugeGraph() {
-        var testGraph = TestSupport.fromGdl("()-->()");
-        assertThat(testGraph.graph()).isInstanceOf(HugeGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(testGraph)).isPresent();
+        var graph = TestSupport.fromGdl("()-->()").graph();
+        assertThat(graph).isInstanceOf(HugeGraph.class);
+        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
     }
 
     @Test
     void supportsUnionGraph() {
-        var testGraph = TestSupport.fromGdl("()-[:A]->()-[:B]->()");
-        assertThat(testGraph.graph()).isInstanceOf(UnionGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(testGraph)).isPresent();
+        var graph = TestSupport.fromGdl("()-[:A]->()-[:B]->()").graph();
+        assertThat(graph).isInstanceOf(UnionGraph.class);
+        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
     }
 
     @Test
-    void supportsTestGraph() {
-        var graphStore = GdlFactory.of("(:A)-[:A]->(:A)-[:B]->(:B)").build().graphStore();
-        var testGraph = graphStore.getGraph("A", "A", Optional.empty());
-        assertThat(testGraph).isInstanceOf(NodeFilteredGraph.class);
-        assertThat(RelationshipIntersectFactoryLocator.lookup(testGraph)).isPresent();
+    void supportsNodeFilteredGraph() {
+        var graph = GdlFactory
+            .of("(:A)-[:A]->(:A)-[:B]->(:B)")
+            .build()
+            .graphStore()
+            .getGraph("A", "A", Optional.empty());
+        assertThat(graph).isInstanceOf(NodeFilteredGraph.class);
+        assertThat(RelationshipIntersectFactoryLocator.lookup(graph)).isPresent();
     }
 }

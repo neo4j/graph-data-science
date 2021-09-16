@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -34,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class IntersectingTriangleCountTest {
 
@@ -520,5 +521,9 @@ class IntersectingTriangleCountTest {
 
     private TriangleCountResult compute(Graph graph, TriangleCountBaseConfig config) {
         return IntersectingTriangleCount.create(graph, config, Pools.DEFAULT).compute();
+    }
+
+    private static Graph fromGdl(String gdl, Orientation orientation) {
+        return TestSupport.fromGdl(gdl, orientation).graph();
     }
 }

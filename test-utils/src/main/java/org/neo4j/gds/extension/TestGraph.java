@@ -20,14 +20,9 @@
 package org.neo4j.gds.extension;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIntersect;
 
 public class TestGraph extends CSRGraphAdapter {
 
@@ -72,22 +67,4 @@ public class TestGraph extends CSRGraphAdapter {
         return name;
     }
 
-    @ServiceProvider
-    public static final class TestGraphIntersectFactory implements RelationshipIntersectFactory {
-
-        @Override
-        public boolean canLoad(Graph graph) {
-            return graph instanceof TestGraph;
-        }
-
-        @Override
-        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
-            assert graph instanceof TestGraph;
-            var innerGraph = ((TestGraph) graph).graph();
-            return RelationshipIntersectFactoryLocator
-                .lookup(innerGraph)
-                .orElseThrow(UnsupportedOperationException::new)
-                .load(innerGraph, config);
-        }
-    }
 }

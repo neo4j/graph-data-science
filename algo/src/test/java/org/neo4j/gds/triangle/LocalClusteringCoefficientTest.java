@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +39,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // TODO: Add tests for seeded property
@@ -328,5 +329,7 @@ class LocalClusteringCoefficientTest {
         return ImmutableLocalClusteringCoefficientBaseConfig.builder();
     }
 
+    private static Graph fromGdl(String gdl, Orientation orientation) {
+        return TestSupport.fromGdl(gdl, orientation).graph();
+    }
 }
-

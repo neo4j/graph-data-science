@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.ml.core.subgraph;
 
 import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.gds.ml.core.batch.UniformSampler;
@@ -63,11 +63,11 @@ public class NeighborhoodSampler {
         }
     }
 
-    long randomState() {
+    public long randomState() {
         return this.randomSeed;
     }
 
-    OptionalLong sampleOne(Graph graph, long nodeId) {
+    public OptionalLong sampleOne(Graph graph, long nodeId) {
         return sample(graph, nodeId, 1).findFirst();
     }
 }
