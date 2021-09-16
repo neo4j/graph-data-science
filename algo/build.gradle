@@ -19,12 +19,11 @@ dependencies {
         }
     }
 
-    api(project(':algo-common'))
-
     implementation(
         project(":annotations"),
         project(":ml-core"),
-        project(':pregel')
+        project(':pregel'),
+        project(':algo-common')
     )
 
     // TEST DEPENDENCIES

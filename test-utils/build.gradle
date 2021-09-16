@@ -13,6 +13,9 @@ dependencies {
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
     compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':core')
+    implementation project(':algo-common')
+
     api (
             platform(dep.junit5bom),
             dep.junit5jupiter,
