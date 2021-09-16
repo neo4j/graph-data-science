@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
-import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
 import org.neo4j.procedure.Context;
@@ -107,7 +106,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private LocalTimeValue localTimeValue(Task task) {
-            if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
+            if (!task.hasStarted()) {
                 return null;
             }
             return LocalTimeValue.localTime(LocalTime.ofInstant(
@@ -117,7 +116,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private String prettyElapsedTime(Task task) {
-            if (task.status() == Status.PENDING || task.startTime() == Task.NOT_STARTED) {
+            if (!task.hasStarted()) {
                 return "Not yet started";
             }
             var finishTime = task.finishTime();

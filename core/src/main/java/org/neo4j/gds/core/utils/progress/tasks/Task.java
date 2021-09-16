@@ -68,24 +68,6 @@ public class Task {
         return nextSubTaskAfterValidation();
     }
 
-    protected Task nextSubTaskAfterValidation() {
-        if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
-            throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
-        }
-
-        return subTasks()
-            .stream()
-            .filter(t -> t.status() == Status.PENDING)
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No more pending subtasks"));
-    }
-
-    private void validateTaskIsRunning() {
-        if (this.status != Status.RUNNING) {
-            throw new IllegalStateException(formatWithLocale("Cannot retrieve next subtask, task `%s` is not running.", description()));
-        }
-    }
-
     public void start() {
         if (this.status != Status.PENDING) {
             throw new UnsupportedOperationException(formatWithLocale(
@@ -171,6 +153,10 @@ public class Task {
         return this.finishTime;
     }
 
+    public boolean hasStarted() {
+        return status() == Status.RUNNING;
+    }
+
     public MemoryRange estimatedMemoryRangeInBytes() {
         return this.estimatedMemoryRangeInBytes;
     }
@@ -190,5 +176,23 @@ public class Task {
 
     public void setEstimatedMemoryRangeInBytes(MemoryRange memoryRangeInBytes) {
         this.estimatedMemoryRangeInBytes = memoryRangeInBytes;
+    }
+
+    protected Task nextSubTaskAfterValidation() {
+        if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
+            throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
+        }
+
+        return subTasks()
+            .stream()
+            .filter(t -> t.status() == Status.PENDING)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No more pending subtasks"));
+    }
+
+    private void validateTaskIsRunning() {
+        if (this.status != Status.RUNNING) {
+            throw new IllegalStateException(formatWithLocale("Cannot retrieve next subtask, task `%s` is not running.", description()));
+        }
     }
 }
