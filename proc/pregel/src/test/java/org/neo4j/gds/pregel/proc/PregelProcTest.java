@@ -228,7 +228,9 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
+            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.tasksSeen())
+                .containsExactlyInAnyOrder("Loading", "TestPregelImpl");
         }
     }
 
@@ -251,7 +253,8 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
+            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("Loading", "TestPregelImpl");
         }
     }
 
@@ -275,7 +278,8 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
-            assertThat(taskStore.storeTaskCalls()).isEqualTo(1);
+            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("TestPregelImpl");
         }
     }
 
