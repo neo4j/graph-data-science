@@ -106,12 +106,12 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             long updateCount;
             int iteration = 0;
             boolean didConverge = false;
+
+            progressTracker.beginSubTask();
             for (; iteration < maxIterations; iteration++) {
                 int currentIteration = iteration;
                 try (var ignored3 = ProgressTimer.start(took -> logIterationTime(currentIteration, took))) {
-                    progressTracker.beginSubTask();
                     updateCount = this.iteration(neighbors);
-                    progressTracker.endSubTask();
                 }
                 if (updateCount <= updateThreshold) {
                     iteration++;
@@ -119,10 +119,10 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                     break;
                 }
             }
-
-            return ImmutableResult.of(neighbors, iteration, didConverge);
-        } finally {
             progressTracker.endSubTask();
+
+            progressTracker.endSubTask();
+            return ImmutableResult.of(neighbors, iteration, didConverge);
         }
     }
 
