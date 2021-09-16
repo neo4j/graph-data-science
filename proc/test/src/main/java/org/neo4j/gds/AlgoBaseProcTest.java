@@ -40,6 +40,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -721,6 +722,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
                 .transactionContext(TestSupport.fullAccessTransaction(db))
+                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .api(db)
                 .log(new TestLog())
                 .build())
