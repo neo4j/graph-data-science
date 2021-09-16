@@ -37,6 +37,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LabelInformation {
@@ -162,26 +163,28 @@ public final class LabelInformation {
                 )
             );
 
-        // TODO: figure out if we can do this on the final step
-//        // set the whole range for '*' projections
-//        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-//            nodeLabelBitSetMap.get(starLabel).add(0, nodeCount);
-//        }
+        var starNodeLabelMappings = labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, List.of());
 
-        return new Builder(nodeLabelBitSetMap, allocationTracker);
+        return new Builder(nodeLabelBitSetMap, starNodeLabelMappings, allocationTracker);
     }
 
     public static class Builder {
+        private final List<NodeLabel> starNodeLabelMappings;
         private final AllocationTracker allocationTracker;
 
         final Map<NodeLabel, Roaring64NavigableMap> labelInformation;
 
         Builder(AllocationTracker allocationTracker) {
-            this(new ConcurrentHashMap<>(), allocationTracker);
+            this(new ConcurrentHashMap<>(), List.of(), allocationTracker);
         }
 
-        Builder(Map<NodeLabel, Roaring64NavigableMap> labelInformation, AllocationTracker allocationTracker) {
+        Builder(
+            Map<NodeLabel, Roaring64NavigableMap> labelInformation,
+            List<NodeLabel> starNodeLabelMappings,
+            AllocationTracker allocationTracker
+        ) {
             this.labelInformation = labelInformation;
+            this.starNodeLabelMappings = starNodeLabelMappings;
             this.allocationTracker = allocationTracker;
         }
 
@@ -195,7 +198,7 @@ public final class LabelInformation {
         }
 
         public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
-            return new LabelInformation(labelInformation
+            var labelInformation = this.labelInformation
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -205,7 +208,16 @@ public final class LabelInformation {
                     importBitSet.stream().map(mappedIdFn).forEach(internBitSet::set);
 
                     return internBitSet;
-                })));
+                }));
+
+            // set the whole range for '*' projections
+            for (NodeLabel starLabel : starNodeLabelMappings) {
+                var bitSet = new BitSet(nodeCount);
+                bitSet.set(0, nodeCount);
+                labelInformation.put(starLabel, bitSet);
+            }
+
+            return new LabelInformation(labelInformation);
         }
     }
 }
