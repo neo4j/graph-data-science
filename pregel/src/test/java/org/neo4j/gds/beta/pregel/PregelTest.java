@@ -210,7 +210,9 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(taskStore.storeTaskCalls()).isGreaterThanOrEqualTo(1);
+        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.tasksSeen())
+            .containsExactlyInAnyOrder("TestPregelComputation");
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
