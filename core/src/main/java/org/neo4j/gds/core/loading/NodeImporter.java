@@ -92,24 +92,26 @@ public class NodeImporter {
         var labelIds = buffer.labelIds();
 
         if (buffer.hasLabelInformation()) {
-            setNodeLabelInformation(batchLength, adder.startId(), labelIds);
+            setNodeLabelInformation(batch, batchLength, labelIds);
         }
 
         importedProperties += adder.insert(batch, batchLength, propertyAllocator, reader, properties, labelIds);
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
-    private void setNodeLabelInformation(int batchLength, long startIndex, long[][] labelIds) {
+    private void setNodeLabelInformation(long[] batch, int batchLength, long[][] labelIds) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
+            long originalId = batch[i];
             long[] labelIdsForNode = labelIds[i];
+
             for (long labelId : labelIdsForNode) {
-                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
+                var elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
                     (int) labelId,
                     Collections.emptyList()
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, startIndex + i, idMapBuilder.capacity());
+                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, originalId, idMapBuilder.capacity());
                 }
             }
         }

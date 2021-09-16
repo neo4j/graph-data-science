@@ -37,9 +37,12 @@ public final class IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         AllocationTracker allocationTracker
     ) {
+        var idMap = idMapBuilder.build();
+        var labelInformation = labelInformationBuilder.build(idMap.idCount(), idMap::toMappedNodeId);
+
         return new BitIdMap(
-            idMapBuilder.build(),
-            labelInformationBuilder.build(),
+            idMap,
+            labelInformation,
             allocationTracker
         );
     }
@@ -49,9 +52,12 @@ public final class IdMapBuilder {
         LabelInformation.Builder labelInformationBuilder,
         AllocationTracker allocationTracker
     ) {
+        var idMap = idMapBuilder.build();
+        var labelInformation = labelInformationBuilder.build(idMap.idCount(), idMap::toMappedNodeId);
+
         return new BitIdMap(
-            idMapBuilder.build(),
-            labelInformationBuilder.build(),
+            idMap,
+            labelInformation,
             allocationTracker
         );
     }
@@ -72,11 +78,14 @@ public final class IdMapBuilder {
             allocationTracker
         );
 
+        var nodeCount = idMapBuilder.size();
+        var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
+
         return new IdMap(
             graphIds,
             nodeToGraphIds,
-            labelInformationBuilder.build(),
-            idMapBuilder.size(),
+            labelInformation,
+            nodeCount,
             highestNodeId,
             allocationTracker
         );
@@ -98,11 +107,14 @@ public final class IdMapBuilder {
             allocationTracker
         );
 
+        var nodeCount = idMapBuilder.size();
+        var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
+
         return new IdMap(
             graphIds,
             nodeToGraphIds,
-            labelInformationBuilder.build(),
-            idMapBuilder.size(),
+            labelInformation,
+            nodeCount,
             idMapBuilder.capacity(),
             allocationTracker
         );

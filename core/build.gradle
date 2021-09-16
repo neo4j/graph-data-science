@@ -40,7 +40,8 @@ dependencies {
     )
 
     implementation(
-            [group: 'io.jsonwebtoken', name: 'jjwt-impl', version: ver.'jjwt'],
+        [group: 'io.jsonwebtoken', name: 'jjwt-impl', version: ver.'jjwt'],
+        [group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'],
     )
 
     // Set hardcoded version of jackson-databind until there is a new version of jjwt-jackson

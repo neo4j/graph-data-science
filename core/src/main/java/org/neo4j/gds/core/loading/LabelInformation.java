@@ -25,19 +25,18 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LabelInformation {
@@ -152,20 +151,22 @@ public final class LabelInformation {
         AllocationTracker allocationTracker
     ) {
         var nodeLabelBitSetMap = StreamSupport.stream(
-            labelTokenNodeLabelMapping.values().spliterator(),
-            false
-        )
+                labelTokenNodeLabelMapping.values().spliterator(),
+                false
+            )
             .flatMap(cursor -> cursor.value.stream())
             .distinct()
             .collect(Collectors.toMap(
-                nodeLabel -> nodeLabel,
-                nodeLabel -> HugeAtomicBitSet.create(nodeCount, allocationTracker))
+                    nodeLabel -> nodeLabel,
+                    nodeLabel -> Roaring64NavigableMap.bitmapOf()
+                )
             );
 
-        // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            nodeLabelBitSetMap.get(starLabel).set(0, nodeCount);
-        }
+        // TODO: figure out if we can do this on the final step
+//        // set the whole range for '*' projections
+//        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+//            nodeLabelBitSetMap.get(starLabel).add(0, nodeCount);
+//        }
 
         return new Builder(nodeLabelBitSetMap, allocationTracker);
     }
@@ -173,31 +174,38 @@ public final class LabelInformation {
     public static class Builder {
         private final AllocationTracker allocationTracker;
 
-        final Map<NodeLabel, HugeAtomicBitSet> labelInformation;
+        final Map<NodeLabel, Roaring64NavigableMap> labelInformation;
 
         Builder(AllocationTracker allocationTracker) {
             this(new ConcurrentHashMap<>(), allocationTracker);
         }
 
-        Builder(Map<NodeLabel, HugeAtomicBitSet> labelInformation, AllocationTracker allocationTracker) {
+        Builder(Map<NodeLabel, Roaring64NavigableMap> labelInformation, AllocationTracker allocationTracker) {
             this.labelInformation = labelInformation;
             this.allocationTracker = allocationTracker;
         }
 
-        public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId, long nodeCount) {
+        public synchronized void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId, long nodeCount) {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicBitSet.create(nodeCount, allocationTracker)
+                    (ignored) -> Roaring64NavigableMap.bitmapOf()
                 )
-                .set(nodeId);
+                .addLong(nodeId);
         }
 
-        public LabelInformation build() {
+        public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
             return new LabelInformation(labelInformation
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toBitSet())));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> {
+                    var importBitSet = e.getValue();
+                    var internBitSet = new BitSet(nodeCount);
+
+                    importBitSet.stream().map(mappedIdFn).forEach(internBitSet::set);
+
+                    return internBitSet;
+                })));
         }
     }
 }
