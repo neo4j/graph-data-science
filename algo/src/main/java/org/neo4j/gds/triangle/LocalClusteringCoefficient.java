@@ -67,6 +67,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     @Override
     public Result compute() {
         progressTracker.beginSubTask();
+
         if (null == triangleCountProperty) {
             HugeAtomicLongArray triangleCounts = computeTriangleCounts();
             calculateCoefficients(triangleCounts::get);
@@ -82,6 +83,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     private void calculateCoefficients(LongToDoubleFunction propertyValueFunction) {
+        progressTracker.beginSubTask();
+
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, allocationTracker);
 
@@ -96,10 +99,13 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             );
             localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
             localClusteringCoefficientSum.add(localClusteringCoefficient);
+            progressTracker.logProgress();
         });
 
         // compute average clustering coefficient
         averageClusteringCoefficient = localClusteringCoefficientSum.doubleValue() / nodeCount;
+
+        progressTracker.endSubTask();
     }
 
     private HugeAtomicLongArray computeTriangleCounts() {

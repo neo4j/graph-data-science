@@ -29,6 +29,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.ArrayList;
+
 public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
     @Override
@@ -75,8 +77,12 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return config.seedProperty() == null
-            ? Tasks.task(taskName(), IntersectingTriangleCountFactory.triangleCountProgressTask(graph))
-            : Tasks.leaf(taskName());
+        var tasks = new ArrayList<Task>();
+        if (config.seedProperty() == null) {
+            tasks.add(IntersectingTriangleCountFactory.triangleCountProgressTask(graph));
+        }
+        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
+
+        return Tasks.task(taskName(), tasks);
     }
 }
