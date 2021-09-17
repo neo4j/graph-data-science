@@ -826,7 +826,7 @@ final class NodeSimilarityTest {
         var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
         var progressLogger = new TestProgressLogger(progressTask, concurrency);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
+        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var nodeSimilarity = new NodeSimilarity(
             graph,

@@ -30,6 +30,7 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -271,7 +272,7 @@ final class DijkstraTest {
 
             var progressTask = DijkstraFactory.sourceTarget().progressTask(graph, config);
             var testLogger = new TestProgressLogger(progressTask, 1);
-            var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+            var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
 
             Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker, AllocationTracker.empty())
                 .compute()

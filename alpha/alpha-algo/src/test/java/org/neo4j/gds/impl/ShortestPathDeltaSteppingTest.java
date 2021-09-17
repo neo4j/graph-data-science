@@ -21,6 +21,7 @@ package org.neo4j.gds.impl;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -171,7 +172,7 @@ final class ShortestPathDeltaSteppingTest {
     void testLogging() {
         var task = Tasks.leaf("My task");
         var progressLogger = new TestProgressLogger(task, 1);
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new ShortestPathDeltaStepping(
             graph,

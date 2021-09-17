@@ -24,6 +24,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 
 import java.util.List;
 
@@ -43,7 +44,11 @@ public class TaskProgressTrackerTest {
             iterativeTask
         );
 
-        var progressTracker = new TaskProgressTracker(rootTask, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            rootTask,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(rootTask);
@@ -70,7 +75,11 @@ public class TaskProgressTrackerTest {
     @Test
     void shouldThrowIfEndMoreTasksThanStarted() {
         var task = Tasks.leaf("leaf");
-        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
         assertThatThrownBy(progressTracker::endSubTask)
@@ -81,7 +90,11 @@ public class TaskProgressTrackerTest {
     @Test
     void shouldLogProgress() {
         var task = Tasks.leaf("leaf");
-        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         progressTracker.beginSubTask();
         progressTracker.logProgress(42);
         assertThat(task.getProgress().progress()).isEqualTo(42);
@@ -90,7 +103,11 @@ public class TaskProgressTrackerTest {
     @Test
     void shouldCancelSubTasksOnDynamicIterative() {
         var task = Tasks.iterativeDynamic("iterative", () -> List.of(Tasks.leaf("leaf")), 2);
-        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(task);
 
@@ -112,7 +129,11 @@ public class TaskProgressTrackerTest {
     @Test
     void shouldAssertFailureOnExpectedSubTaskSubString() {
         var task = Tasks.task("Foo", Tasks.leaf("Leaf1"));
-        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         assertThatThrownBy(() -> progressTracker.beginSubTask("Bar"))
             .isInstanceOf(AssertionError.class)
             .hasMessageContaining("Expected task name to contain `Bar`, but was `Foo`");
@@ -134,7 +155,11 @@ public class TaskProgressTrackerTest {
     @Test
     void shouldAssertSuccessOnExpectedSuBTaskSubString() {
         var task = Tasks.task("Foo", Tasks.leaf("Leaf"));
-        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            ProgressLogger.NULL_LOGGER,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         assertDoesNotThrow(() -> progressTracker.beginSubTask("Foo"));
         assertDoesNotThrow(() -> progressTracker.beginSubTask("Leaf"));
@@ -147,7 +172,7 @@ public class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
             var logger = new TestProgressLogger(task, 1);
-            var progressTracker = new TaskProgressTracker(task, logger);
+            var progressTracker = new TaskProgressTracker(task, logger, EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
@@ -170,7 +195,7 @@ public class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
             var logger = new TestProgressLogger(task, 1);
-            var progressTracker = new TaskProgressTracker(task, logger);
+            var progressTracker = new TaskProgressTracker(task, logger, EmptyTaskRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");

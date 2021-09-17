@@ -36,6 +36,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -196,7 +197,7 @@ class NativeRelationshipExporterTest extends BaseTest {
             task,
             RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
         );
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var exporter = NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)

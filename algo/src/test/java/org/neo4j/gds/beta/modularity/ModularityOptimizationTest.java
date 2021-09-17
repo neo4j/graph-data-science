@@ -36,6 +36,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
@@ -225,7 +226,7 @@ class ModularityOptimizationTest {
             .batchSize(minBatchSize)
             .build();
         var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
-        var progressTracker = new TaskProgressTracker(task, testLogger);
+        var progressTracker = new TaskProgressTracker(task, testLogger, EmptyTaskRegistryFactory.INSTANCE);
         return new ModularityOptimization(
             graph,
             maxIterations,
