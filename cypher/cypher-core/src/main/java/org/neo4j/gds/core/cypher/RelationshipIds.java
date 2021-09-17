@@ -94,7 +94,6 @@ public final class RelationshipIds {
         return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
     }
 
-
     @ValueClass
     public interface RelationshipIdContext {
         RelationshipType relationshipType();
