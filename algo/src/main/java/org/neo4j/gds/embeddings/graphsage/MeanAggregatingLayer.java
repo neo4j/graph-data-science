@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 public class MeanAggregatingLayer implements Layer {

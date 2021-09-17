@@ -21,14 +21,13 @@ package org.neo4j.gds.ml.core.subgraph;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
-import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.NeighborhoodFunction;
 
 import java.util.Arrays;
 import java.util.List;

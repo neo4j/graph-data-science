@@ -11,6 +11,7 @@ dependencies {
     compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
 
     implementation             project(':annotations')
+    implementation             project(':algo-common')
     implementation             project(':proc-common')
     implementation             project(':pregel')
     implementation             project(':proc-pregel')

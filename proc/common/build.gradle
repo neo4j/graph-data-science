@@ -16,6 +16,7 @@ dependencies {
 
     implementation(
         project(':neo4j-adapter'),
+        project(':algo-common'),
         project(':pregel')
     )
 

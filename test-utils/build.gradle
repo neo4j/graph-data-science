@@ -13,10 +13,12 @@ dependencies {
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
     compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':core')
+    implementation project(':algo-common')
+
     api (
             platform(dep.junit5bom),
             dep.junit5jupiter,
-            project(':algo'),
             project(':write-services'),
             [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
