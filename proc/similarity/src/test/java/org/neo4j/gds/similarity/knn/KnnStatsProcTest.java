@@ -155,6 +155,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             .algo("gds.beta.knn")
             .statsMode()
             .addParameter("nodeWeightProperty", "weight")
+            .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
             .yields("similarityPairs");
 

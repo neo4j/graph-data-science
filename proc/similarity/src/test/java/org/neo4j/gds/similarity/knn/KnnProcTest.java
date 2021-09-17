@@ -157,11 +157,21 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        // In case we're not testing something explicit with concurrency we want a deterministic result.
+        // For this reason we set concurrency to 1 and fix a randomSeed != -1.
+
+        if (!mapWrapper.containsKey("concurrency")) {
+            mapWrapper = mapWrapper.withNumber("concurrency", 1);
+        }
+
+        if (mapWrapper.getInt("concurrency", 1) == 1) {
+            // example of a bad seed with randomJoins=10: 3382659597966568962L
+            mapWrapper = mapWrapper.withNumber("randomSeed", 1337L);
+        }
+
         return mapWrapper
             .withNumber("sampleRate", 1.0)
             .withNumber("deltaThreshold", 0.0)
-            // example of a bad seed with randomJoins=10: 3382659597966568962L
-            .withNumber("randomSeed", 1337L)
             .withNumber("randomJoins", 42)
             .withNumber("topK", 1)
             .withEntry("nodeWeightProperty", "knn");

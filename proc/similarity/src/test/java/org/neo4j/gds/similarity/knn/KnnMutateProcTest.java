@@ -171,6 +171,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("sudo", true)
             .addParameter("nodeWeightProperty", "knn")
             .addParameter("topK", 1)
+            .addParameter("concurrency", 1)
             .addParameter("randomSeed", 42)
             .addParameter("mutateRelationshipType", "SIMILAR")
             .addParameter("mutateProperty", "score")
