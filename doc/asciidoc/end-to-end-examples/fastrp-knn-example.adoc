@@ -118,6 +118,7 @@ YIELD nodePropertiesWritten
 
 Now we can run kNN to identify similar nodes by using the node embeddings that we generated with FastRP as `nodeWeightProperty`.
 Since we are working with a small graph, we can set `sampleRate` to 1 and `deltaThreshold` to 0 without having to worry about long computation times.
+The `concurrency` parameter is set to 1 (along with the fixed `randomSeed`) in order to get a deterministic result.
 Please see the <<algorithms-knn-syntax, syntax section>> of the kNN documentation for more information on these parameters.
 Note that we use the algorithm's <<running-algos-write, `write` mode>> to write the properties and relationships back to our database, so that we can analyze them later using Cypher.
 
@@ -130,6 +131,7 @@ CALL gds.beta.knn.write('purchases', {
     topK: 2,
     nodeWeightProperty: 'embedding',
     randomSeed: 42,
+    concurrency: 1,
     sampleRate: 1.0,
     deltaThreshold: 0.0,
     writeRelationshipType: "SIMILAR",
