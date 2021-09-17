@@ -203,7 +203,8 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
             while ((offset = frontierIndex.getAndAdd(64)) < frontierLength) {
                 long limit = Math.min(offset + 64, frontierLength);
 
-                for (long nodeId = offset; nodeId < limit; nodeId++) {
+                for (long idx = offset; idx < limit; idx++) {
+                    var nodeId = frontier.get(idx);
                     if (distances.get(nodeId) >= delta * binIndex) {
                         relaxNode(nodeId);
                     }
@@ -213,6 +214,7 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
 
         private void relaxLocalBin() {
             while (binIndex < localBins.length
+                   && localBins[binIndex] != null
                    && !localBins[binIndex].isEmpty()
                    && localBins[binIndex].size() < BIN_SIZE_THRESHOLD) {
                 var binCopy = localBins[binIndex].clone();
