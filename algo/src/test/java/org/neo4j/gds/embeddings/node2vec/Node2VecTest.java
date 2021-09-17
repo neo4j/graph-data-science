@@ -41,7 +41,6 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,14 +121,26 @@ class Node2VecTest extends AlgoTestBase {
             AllocationTracker.empty()
         ).compute();
 
-        List<AtomicLong> progresses = testLogger.getProgresses();
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: Start"));
 
-        // We "reset" the logger once per iteration
-        assertEquals(config.iterations() + expectedProgresses, progresses.size());
-        progresses.forEach(progress -> assertTrue(progress.get() <= graph.nodeCount() * config.walksPerNode()));
+        if (relationshipWeights) {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: DegreeCentrality :: Start"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished"));
+        }
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks 100%"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks :: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: Finished"));
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: train :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 100%"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 :: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: train :: Finished"));
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Node2Vec :: Finished"));
     }
 
     @Test

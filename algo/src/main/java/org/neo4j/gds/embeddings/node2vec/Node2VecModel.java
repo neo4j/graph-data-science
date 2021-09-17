@@ -89,6 +89,7 @@ public class Node2VecModel {
 
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
             progressTracker.beginSubTask();
+            progressTracker.setVolume(walks.size());
 
             var learningRate = (float) Math.max(
                 config.minLearningRate(),

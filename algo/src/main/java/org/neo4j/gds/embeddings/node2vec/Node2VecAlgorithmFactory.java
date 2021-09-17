@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.multiplyExact;
@@ -55,15 +56,22 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        var randomWalkTask = graph.hasRelationshipProperty()
-            ? Tasks.task("RandomWalk", DegreeCentralityFactory.degreeCentralityProgressTask(graph))
-            : Tasks.leaf("RandomWalk");
+
+        var randomWalkTasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            randomWalkTasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+
         return Tasks.task(
             taskName(),
-            randomWalkTask,
+            Tasks.task(
+                "RandomWalk",
+                randomWalkTasks
+            ),
             Tasks.iterativeFixed(
                 "train",
-                () -> List.of(Tasks.leaf("produce positive samples")),
+                () -> List.of(Tasks.leaf("iteration")),
                 config.iterations()
             )
         );
