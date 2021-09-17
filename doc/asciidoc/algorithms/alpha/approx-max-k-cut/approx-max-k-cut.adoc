@@ -27,10 +27,18 @@ The 2-cut we outlined above would then not be a maximum 2-cut (with a cut cost o
 Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum Cut] when `k = 2`.
 ====
 
-Finding the maximum k-cut for a graph has several applications.
-It could for example be used to find communities of entities between which the sum of Bitcoin transfers is maximized.
-
 include::../alpha-note.adoc[]
+
+
+=== Applications
+
+Finding the maximum k-cut for a graph has several known applications, for example it is used to:
+
+* analyze protein interaction
+* design circuit (VLSI) layouts
+* solve wireless communication problems
+* analyze cryptocurrency transaction patterns
+* design computer networks
 
 
 === Approximation
