@@ -96,4 +96,27 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         assertThat(relationshipCursor.next()).isFalse();
     }
+
+    @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
+    void shouldSetCorrectIds() {
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
+        );
+
+        assertThat(relationshipCursor.next()).isTrue();
+        assertThat(relationshipCursor.getId()).isEqualTo(0L);
+
+        assertThat(relationshipCursor.next()).isTrue();
+        assertThat(relationshipCursor.getId()).isEqualTo(1L);
+    }
 }

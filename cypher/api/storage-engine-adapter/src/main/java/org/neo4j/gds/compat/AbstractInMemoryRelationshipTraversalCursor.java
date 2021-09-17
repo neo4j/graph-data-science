@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.RelationshipSelection;
@@ -55,14 +54,7 @@ public abstract class AbstractInMemoryRelationshipTraversalCursor extends InMemo
 
     @Override
     public void init(long nodeReference, long reference, RelationshipSelection selection) {
-        RelationshipType[] filteredRelTypes = graphStore.relationshipTypes().stream().filter(relType -> {
-            int typeId = tokenHolders.relationshipTypeTokens().getIdByName(relType.name());
-            return selection.test(typeId);
-        }).toArray(RelationshipType[]::new);
-        relationshipCursors = graphStore
-            .getGraph(filteredRelTypes)
-            .streamRelationships(nodeReference, Double.NaN)
-            .iterator();
+        relationshipCursors = graphStore.relationshipIds().relationshipCursors(nodeReference, selection);
         originNodeReference = nodeReference;
     }
 }

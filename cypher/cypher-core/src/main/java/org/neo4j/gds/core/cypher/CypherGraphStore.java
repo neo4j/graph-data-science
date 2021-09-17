@@ -52,4 +52,8 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
         this.cypherNodeMapping.addLabelToNode(nodeId, nodeLabel);
     }
+
+    public RelationshipIds relationshipIds() {
+        return this.relationshipIds;
+    }
 }

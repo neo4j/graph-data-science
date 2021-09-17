@@ -119,6 +119,7 @@ public final class StorageEngineProxy {
         CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
+        graphStore.initialize(tokenHolders);
         return IMPL.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 

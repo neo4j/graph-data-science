@@ -63,7 +63,7 @@ public final class RelationshipIds {
         this.tokenHolders = tokenHolders;
     }
 
-    Iterator<RelationshipWithIdCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
+    public Iterator<RelationshipWithIdCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
         Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
             var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());
             return relationshipSelection.test(relTypeToken);
