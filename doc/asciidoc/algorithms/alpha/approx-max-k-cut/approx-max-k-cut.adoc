@@ -160,10 +160,10 @@ include::specific-configuration.adoc[]
 [[algorithms-approx-max-k-cut-examples]]
 == Examples
 
-In this section we will show examples of running the Approximate Maximum k-cut algorithm on a concrete graph.
-The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
-We will do this on a small graph of transactions between people.
-Using Approximate Maximum k-cut we can find clusters of people between which there are a lot of transactions.
+:algorithm-name: {algorithm}
+:graph-description: Bitcoin transactions
+:image-file: approx-max-k-cut-example.png
+include::../../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
