@@ -19,7 +19,7 @@ So for example a 2-cut of a graph with nodes `a,b,c,d` could be the communities 
 
 A Maximum k-cut is a k-cut such that the total weight of relationships between nodes from different communities in the k-cut is maximized.
 That is, a k-cut that maximizes the sum of weights of relationships whose source and target nodes are assigned to different communities in the k-cut.
-Suppose in the simple `a,b,c,d` node set example above we only had one relationship `b->c` and it was of weight `1.0`.
+Suppose in the simple `a,b,c,d` node set example above we only had one relationship `b -> c`, and it was of weight `1.0`.
 The 2-cut we outlined above would then not be a maximum 2-cut (with a cut cost of `0.0`), whereas for example the 2-cut with communities `{a,b}` and `{c,d}` would be one (with a cut cost of `1.0`).
 
 [NOTE]
