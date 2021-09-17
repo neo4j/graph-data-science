@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
@@ -71,6 +72,7 @@ class KnnTest {
     void shouldRun() {
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("knn")
+            .concurrency(1)
             .randomSeed(19L)
             .topK(1)
             .build();
@@ -164,7 +166,7 @@ class KnnTest {
         var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = new Knn(
             graph.nodeCount(),
-            ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").topK(1).randomSeed(42L).build(),
+            ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").topK(1).concurrency(1).randomSeed(42L).build(),
             SimilarityComputer.ofProperty(nodeProperties, "knn"),
             ImmutableKnnContext.builder().build()
         );
@@ -328,5 +330,14 @@ class KnnTest {
             assertEquals(1, result.ranIterations());
         }
 
+    }
+
+    @Test
+    void invalidRandomParameters() {
+        var configBuilder = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("dummy")
+            .concurrency(4)
+            .randomSeed(1337L);
+        assertThrows(IllegalArgumentException.class, configBuilder::build);
     }
 }
