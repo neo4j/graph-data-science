@@ -19,19 +19,26 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.RelationshipCursor;
+import java.util.Iterator;
 
-@ValueClass
-public interface RelationshipWithIdCursor extends RelationshipCursor {
-    long id();
+public class SingleElementIterator<T> implements Iterator<T> {
 
-    static RelationshipWithIdCursor fromRelationshipCursor(RelationshipCursor relationshipCursor, long id) {
-        return ImmutableRelationshipWithIdCursor.of(
-            relationshipCursor.sourceId(),
-            relationshipCursor.targetId(),
-            relationshipCursor.property(),
-            id
-        );
+    private final T element;
+    private boolean firstIteration;
+
+    public SingleElementIterator(T element) {
+        this.element = element;
+        this.firstIteration = true;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return firstIteration;
+    }
+
+    @Override
+    public T next() {
+        firstIteration = false;
+        return element;
     }
 }

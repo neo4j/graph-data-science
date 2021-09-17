@@ -35,7 +35,7 @@ import org.neo4j.token.api.TokenHolder;
 
 public abstract class CypherTest extends BaseTest {
 
-    protected GraphStore graphStore;
+    protected CypherGraphStore graphStore;
     protected TokenHolders tokenHolders;
     protected StorageEngine storageEngine;
 

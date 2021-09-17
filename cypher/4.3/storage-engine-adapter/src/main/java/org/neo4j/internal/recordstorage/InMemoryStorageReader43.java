@@ -24,6 +24,7 @@ import org.neo4j.gds.compat._43.InMemoryNodeCursor;
 import org.neo4j.gds.compat._43.InMemoryPropertyCursor;
 import org.neo4j.gds.compat._43.InMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.storageengine.InMemoryRelationshipScanCursor;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.StorageNodeCursor;
@@ -76,6 +77,6 @@ public class InMemoryStorageReader43 extends AbstractInMemoryStorageReader {
 
     @Override
     public StorageRelationshipScanCursor allocateRelationshipScanCursor(CursorContext cursorContext) {
-        return new RecordRelationshipScanCursor(null, cursorContext);
+        return new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
     }
 }

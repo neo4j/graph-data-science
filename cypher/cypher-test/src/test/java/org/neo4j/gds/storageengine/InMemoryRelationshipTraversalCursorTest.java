@@ -63,7 +63,9 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Override
     protected void onSetup() {
-        this.relationshipCursor = StorageEngineProxy.inMemoryRelationshipTraversalCursor(new CypherGraphStore(graphStore), tokenHolders);
+        var graphStore = new CypherGraphStore(this.graphStore);
+        graphStore.initialize(tokenHolders);
+        this.relationshipCursor = StorageEngineProxy.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 
     @Test

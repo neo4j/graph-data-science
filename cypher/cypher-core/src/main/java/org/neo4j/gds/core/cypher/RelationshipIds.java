@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class RelationshipIds {
 
     private final List<RelationshipIdContext> relationshipIdContexts;
@@ -40,7 +42,7 @@ public final class RelationshipIds {
 
     public static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
         var relationshipIdContexts = new ArrayList<RelationshipIdContext>();
-        graphStore.relationshipTypes().stream().sorted().forEach(relType -> {
+        graphStore.relationshipTypes().forEach(relType -> {
             var relCount = graphStore.relationshipCount(relType);
             var graph = graphStore.getGraph(relType);
             var offsets = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
@@ -61,6 +63,27 @@ public final class RelationshipIds {
     ) {
         this.relationshipIdContexts = relationshipIdContexts;
         this.tokenHolders = tokenHolders;
+    }
+
+    public RelationshipWithIdCursor relationshipForId(long relationshipId) {
+        long id = relationshipId;
+        for (RelationshipIdContext relationshipIdContext : relationshipIdContexts) {
+            if (id - relationshipIdContext.relationshipCount() >= 0) {
+                id -= relationshipIdContext.relationshipCount();
+            } else {
+                var nodeId = relationshipIdContext.offsets().binarySearch(id);
+                var offsetInAdjacency = id - relationshipIdContext.offsets().get(nodeId);
+                return relationshipIdContext
+                    .graph()
+                    .streamRelationships(nodeId, Double.NaN)
+                    .skip(offsetInAdjacency)
+                    .findFirst()
+                    .map(relCursor -> RelationshipWithIdCursor.fromRelationshipCursor(relCursor, relationshipId))
+                    .orElseThrow(IllegalStateException::new);
+            }
+        }
+
+        throw new IllegalArgumentException(formatWithLocale("No relationship with id %d was found.", relationshipId));
     }
 
     public Iterator<RelationshipWithIdCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
