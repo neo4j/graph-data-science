@@ -88,17 +88,23 @@ class RelationshipWithIdCursorIteratorTest extends BaseTest {
     }
 
     @Test
-    void shouldProduceCorrectRelationshipIds() {
+    void shouldProduceCorrectRelationshipCursors() {
         var relationshipIterator = new RelationshipWithIdCursorIterator(contexts, idFunction.of("a"), relType -> true);
 
         assertThat(relationshipIterator.hasNext()).isTrue();
-        assertThat(relationshipIterator.next().id()).isEqualTo(0);
+        var relationshipCursor = relationshipIterator.next();
+        assertThat(relationshipCursor.id()).isEqualTo(0);
+        assertThat(relationshipCursor.relationshipType()).isEqualTo(RelationshipType.of("REL1"));
 
         assertThat(relationshipIterator.hasNext()).isTrue();
-        assertThat(relationshipIterator.next().id()).isEqualTo(1);
+        relationshipCursor = relationshipIterator.next();
+        assertThat(relationshipCursor.id()).isEqualTo(1);
+        assertThat(relationshipCursor.relationshipType()).isEqualTo(RelationshipType.of("REL1"));
 
         assertThat(relationshipIterator.hasNext()).isTrue();
-        assertThat(relationshipIterator.next().id()).isEqualTo(3);
+        relationshipCursor = relationshipIterator.next();
+        assertThat(relationshipCursor.id()).isEqualTo(3);
+        assertThat(relationshipCursor.relationshipType()).isEqualTo(RelationshipType.of("REL3"));
 
         assertThat(relationshipIterator.hasNext()).isFalse();
     }
@@ -108,7 +114,9 @@ class RelationshipWithIdCursorIteratorTest extends BaseTest {
         var relationshipIterator = new RelationshipWithIdCursorIterator(contexts, idFunction.of("a"), relType -> !relType.equals(RelationshipType.of("REL1")));
 
         assertThat(relationshipIterator.hasNext()).isTrue();
-        assertThat(relationshipIterator.next().id()).isEqualTo(3);
+        var relationshipCursor = relationshipIterator.next();
+        assertThat(relationshipCursor.id()).isEqualTo(3);
+        assertThat(relationshipCursor.relationshipType()).isEqualTo(RelationshipType.of("REL3"));
 
         assertThat(relationshipIterator.hasNext()).isFalse();
     }

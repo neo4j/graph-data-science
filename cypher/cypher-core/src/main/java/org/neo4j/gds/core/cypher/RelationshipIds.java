@@ -86,7 +86,7 @@ public final class RelationshipIds {
                     .streamRelationships(nodeId, Double.NaN)
                     .skip(offsetInAdjacency)
                     .findFirst()
-                    .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId))
+                    .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId, relationshipIdContext.relationshipType()))
                     .orElseThrow(
                         () -> new IllegalArgumentException(formatWithLocale(
                             "No relationship with id %d was found for relationship type %s",

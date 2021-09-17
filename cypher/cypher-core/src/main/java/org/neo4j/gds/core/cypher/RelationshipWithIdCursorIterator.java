@@ -70,11 +70,10 @@ public class RelationshipWithIdCursorIterator implements Iterator<CypherRelation
     @Override
     public CypherRelationshipCursor next() {
         var relationshipCursor = currentRelCursor.next();
-        return ImmutableRelationshipWithIdCursor.of(
-            relationshipCursor.sourceId(),
-            relationshipCursor.targetId(),
-            relationshipCursor.property(),
-            relationshipId++
+        return CypherRelationshipCursor.fromRelationshipCursor(
+            relationshipCursor,
+            relationshipId++,
+            currentRelContext.relationshipType()
         );
     }
 

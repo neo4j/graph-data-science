@@ -19,19 +19,26 @@
  */
 package org.neo4j.gds.core.cypher;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.RelationshipCursor;
 
 @ValueClass
 public interface CypherRelationshipCursor extends RelationshipCursor {
     long id();
+    RelationshipType relationshipType();
 
-    static CypherRelationshipCursor fromRelationshipCursor(RelationshipCursor relationshipCursor, long id) {
-        return ImmutableRelationshipWithIdCursor.of(
+    static CypherRelationshipCursor fromRelationshipCursor(
+        RelationshipCursor relationshipCursor,
+        long id,
+        RelationshipType relationshipType
+    ) {
+        return ImmutableCypherRelationshipCursor.of(
             relationshipCursor.sourceId(),
             relationshipCursor.targetId(),
             relationshipCursor.property(),
-            id
+            id,
+            relationshipType
         );
     }
 }

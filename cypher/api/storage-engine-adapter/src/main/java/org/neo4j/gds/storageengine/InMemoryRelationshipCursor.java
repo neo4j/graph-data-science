@@ -48,7 +48,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public int type() {
-        return 0;
+        return getType();
     }
 
     @Override
@@ -76,6 +76,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         if (relationshipCursors.hasNext()) {
             currentRelationshipCursor = relationshipCursors.next();
             setId(currentRelationshipCursor.id());
+            setType(tokenHolders.relationshipTypeTokens().getIdByName(currentRelationshipCursor.relationshipType().name()));
             return true;
         }
         return false;

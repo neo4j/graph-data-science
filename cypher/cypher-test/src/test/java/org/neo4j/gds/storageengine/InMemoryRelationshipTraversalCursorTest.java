@@ -95,7 +95,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     }
 
     @Test
-    void shouldSetCorrectIds() {
+    void shouldSetCorrectIdsAndTypes() {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
@@ -106,8 +106,10 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         assertThat(relationshipCursor.next()).isTrue();
         assertThat(relationshipCursor.getId()).isEqualTo(0L);
+        assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
 
         assertThat(relationshipCursor.next()).isTrue();
         assertThat(relationshipCursor.getId()).isEqualTo(1L);
+        assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
     }
 }
