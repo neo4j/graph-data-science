@@ -22,6 +22,8 @@ package org.neo4j.gds.impl;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -29,6 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.impl.sssp.DeltaStepping;
 
 import java.util.concurrent.Executors;
 
@@ -114,20 +117,38 @@ final class ShortestPathDeltaSteppingTest {
     @Test
     void testParallel() {
         var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER)
-                .withExecutorService(Executors.newFixedThreadPool(3));
+            .withExecutorService(Executors.newFixedThreadPool(3));
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))], 0.1);
+    }
+
+    @Test
+    void testParallelNew() {
+        var concurrency = 4;
+
+        var sssp = new DeltaStepping(
+            graph,
+            graph.toMappedNodeId("s"),
+            3,
+            concurrency,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        var result = sssp.compute();
+
+        assertEquals(8, result.distance(graph.toMappedNodeId("x")), 0.1);
     }
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"),3, ProgressTracker.NULL_TRACKER);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER);
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId("z"))],0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId("z"))], 0.1);
     }
 
     @Test
