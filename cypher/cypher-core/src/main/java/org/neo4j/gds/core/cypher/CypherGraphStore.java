@@ -22,14 +22,20 @@ package org.neo4j.gds.core.cypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.token.TokenHolders;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
     private final CypherNodeMapping cypherNodeMapping;
+    private RelationshipIds relationshipIds;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
         this.cypherNodeMapping = new CypherNodeMapping(super.nodes());
+    }
+
+    public void initialize(TokenHolders tokenHolders) {
+        this.relationshipIds = RelationshipIds.fromGraphStore(innerGraphStore(), tokenHolders);
     }
 
     @Override

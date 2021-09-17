@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -62,7 +63,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Override
     protected void onSetup() {
-        this.relationshipCursor = StorageEngineProxy.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
+        this.relationshipCursor = StorageEngineProxy.inMemoryRelationshipTraversalCursor(new CypherGraphStore(graphStore), tokenHolders);
     }
 
     @Test

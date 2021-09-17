@@ -20,10 +20,10 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.dev.InMemoryNodeCursor;
 import org.neo4j.gds.compat.dev.InMemoryPropertyCursor;
 import org.neo4j.gds.compat.dev.InMemoryRelationshipTraversalCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
@@ -39,7 +39,7 @@ import org.neo4j.token.TokenHolders;
 public class InMemoryStorageReaderDev extends AbstractInMemoryStorageReader {
 
     public InMemoryStorageReaderDev(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
     ) {

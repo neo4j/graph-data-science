@@ -31,6 +31,7 @@ import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader43;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -84,7 +85,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
 
     @Override
     public StorageReader inMemoryStorageReader(
-        GraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
+        CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         return new InMemoryStorageReader43(graphStore, tokenHolders, counts);
     }
@@ -126,7 +127,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
 
     @Override
     public AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
-        GraphStore graphStore, TokenHolders tokenHolders
+        CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         return new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }

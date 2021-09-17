@@ -25,6 +25,7 @@ import org.neo4j.function.TriFunction;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
@@ -55,7 +56,7 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
-        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
+        TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
         super(
             databaseLayout,

@@ -26,6 +26,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -51,7 +52,7 @@ public interface StorageEngineProxyApi {
     );
 
     StorageReader inMemoryStorageReader(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
     );
@@ -71,7 +72,7 @@ public interface StorageEngineProxyApi {
     AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders);
 
     AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders
     );
 

@@ -71,7 +71,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     private final TokenHolders tokenHolders;
     private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
-    private final TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
+    private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
     private final MetadataProvider metadataProvider;
     protected final CypherGraphStore graphStore;
@@ -83,7 +83,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
-        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
+        TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
         this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
@@ -93,6 +93,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
         schemaAndTokensLifecycle();
+        graphStore.initialize(tokenHolders);
 
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;

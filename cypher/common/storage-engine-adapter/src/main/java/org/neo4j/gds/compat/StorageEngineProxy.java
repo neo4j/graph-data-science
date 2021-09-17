@@ -26,6 +26,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -78,7 +79,7 @@ public final class StorageEngineProxy {
     }
 
     public static StorageReader inMemoryStorageReader(
-        GraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
+        CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         return IMPL.inMemoryStorageReader(graphStore, tokenHolders, counts);
     }
@@ -115,7 +116,7 @@ public final class StorageEngineProxy {
     }
 
     public static AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
         return IMPL.inMemoryRelationshipTraversalCursor(graphStore, tokenHolders);

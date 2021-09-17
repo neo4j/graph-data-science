@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
@@ -41,7 +42,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn;
     protected BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     protected Supplier<CommandCreationContext> commandCreationContextSupplier;
-    protected TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
+    protected TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
 
     protected InMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
@@ -68,7 +69,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
         return this;
     }
 
-    public InMemoryStorageEngineBuilder<T> withStorageReaderFn(TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn) {
+    public InMemoryStorageEngineBuilder<T> withStorageReaderFn(TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn) {
         this.storageReaderFn = storageReaderFn;
         return this;
     }

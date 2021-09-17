@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.storageengine.api.RelationshipVisitor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
@@ -30,13 +30,13 @@ import java.util.Iterator;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
-    protected final GraphStore graphStore;
+    protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
 
     protected Iterator<RelationshipCursor> relationshipCursors;
     protected RelationshipCursor currentRelationshipCursor;
 
-    public InMemoryRelationshipCursor(GraphStore graphStore, TokenHolders tokenHolders, long id) {
+    public InMemoryRelationshipCursor(CypherGraphStore graphStore, TokenHolders tokenHolders, long id) {
         super(id);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;

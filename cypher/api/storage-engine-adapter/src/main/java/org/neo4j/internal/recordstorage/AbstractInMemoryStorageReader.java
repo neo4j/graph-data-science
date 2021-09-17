@@ -22,7 +22,7 @@ package org.neo4j.internal.recordstorage;
 import org.neo4j.common.EntityType;
 import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.internal.schema.ConstraintDescriptor;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.SchemaDescriptor;
@@ -43,14 +43,14 @@ import java.util.function.Function;
 
 public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
-    protected final GraphStore graphStore;
+    protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
     protected final CountsAccessor counts;
     private final Map<Class<?>, Object> dependantState;
     private boolean closed;
 
     public AbstractInMemoryStorageReader(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
     ) {

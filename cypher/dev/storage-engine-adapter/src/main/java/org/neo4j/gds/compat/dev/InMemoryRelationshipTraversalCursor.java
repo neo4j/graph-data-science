@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
@@ -28,7 +28,7 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipTraversalCursor extends AbstractInMemoryRelationshipTraversalCursor {
 
-    public InMemoryRelationshipTraversalCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public InMemoryRelationshipTraversalCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
