@@ -3,6 +3,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Storage Engine Core'
 
 dependencies {
+    annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
 
