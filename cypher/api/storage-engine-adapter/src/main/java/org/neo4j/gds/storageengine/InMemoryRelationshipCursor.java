@@ -20,7 +20,7 @@
 package org.neo4j.gds.storageengine;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.cypher.RelationshipWithIdCursor;
+import org.neo4j.gds.core.cypher.CypherRelationshipCursor;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.storageengine.api.RelationshipVisitor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
@@ -33,8 +33,8 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
 
-    protected Iterator<RelationshipWithIdCursor> relationshipCursors;
-    protected RelationshipWithIdCursor currentRelationshipCursor;
+    protected Iterator<CypherRelationshipCursor> relationshipCursors;
+    protected CypherRelationshipCursor currentRelationshipCursor;
 
     public InMemoryRelationshipCursor(CypherGraphStore graphStore, TokenHolders tokenHolders, long id) {
         super(id);

@@ -23,10 +23,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.RelationshipCursor;
 
 @ValueClass
-public interface RelationshipWithIdCursor extends RelationshipCursor {
+public interface CypherRelationshipCursor extends RelationshipCursor {
     long id();
 
-    static RelationshipWithIdCursor fromRelationshipCursor(RelationshipCursor relationshipCursor, long id) {
+    static CypherRelationshipCursor fromRelationshipCursor(RelationshipCursor relationshipCursor, long id) {
         return ImmutableRelationshipWithIdCursor.of(
             relationshipCursor.sourceId(),
             relationshipCursor.targetId(),

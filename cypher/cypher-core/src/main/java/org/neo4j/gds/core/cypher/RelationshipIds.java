@@ -59,7 +59,7 @@ public final class RelationshipIds {
         this.tokenHolders = tokenHolders;
     }
 
-    public RelationshipWithIdCursor relationshipForId(long relationshipId) {
+    public CypherRelationshipCursor relationshipForId(long relationshipId) {
         long graphLocalRelationshipId = relationshipId;
         // Find the correct RelationshipIdContext given a relationship id.
         // Relationship ids are created consecutively for each topology stored
@@ -86,7 +86,7 @@ public final class RelationshipIds {
                     .streamRelationships(nodeId, Double.NaN)
                     .skip(offsetInAdjacency)
                     .findFirst()
-                    .map(relCursor -> RelationshipWithIdCursor.fromRelationshipCursor(relCursor, relationshipId))
+                    .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId))
                     .orElseThrow(
                         () -> new IllegalArgumentException(formatWithLocale(
                             "No relationship with id %d was found for relationship type %s",
@@ -100,7 +100,7 @@ public final class RelationshipIds {
         throw new IllegalArgumentException(formatWithLocale("No relationship with id %d was found.", relationshipId));
     }
 
-    public Iterator<RelationshipWithIdCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
+    public Iterator<CypherRelationshipCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
         Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
             var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());
             return relationshipSelection.test(relTypeToken);
