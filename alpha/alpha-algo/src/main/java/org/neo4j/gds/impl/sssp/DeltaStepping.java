@@ -254,9 +254,11 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
                 var offset = frontierIndex.getAndAdd(size);
 
                 for (LongCursor longCursor : localBins[binIndex]) {
-                    var index = offset + longCursor.index;
+                    long index = offset + longCursor.index;
                     frontier.set(index, longCursor.value);
                 }
+
+                localBins[binIndex].elementsCount = 0;
             }
         }
     }
