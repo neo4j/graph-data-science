@@ -279,6 +279,13 @@ include::knn-specific-algo-config.adoc[]
 
 The results are the same as running write mode on a named graph, see <<algorithms-knn-syntax, write mode syntax above>>.
 
+[NOTE]
+====
+To get a deterministic result when running the algorithm:
+
+* the `concurrency` parameter must be set to one
+* the `randomSeed` must be explicitly set to something other than `-1`.
+====
 
 [[algorithms-knn-examples]]
 == Examples
@@ -380,7 +387,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 --
 
 We use default values for the procedure configuration parameter for most parameters.
-The `randomSeed` is set to produce the same result on every invocation.
+The `randomSeed` and `concurrency` is set to produce the same result on every invocation.
 The `topK` parameter is set to 1 to only return the single nearest neighbor for every node.
 
 
@@ -395,7 +402,7 @@ include::../shared/examples-stats-intro.adoc[]
 .The following will run the algorithm and return the result in form of statistical and measurement values:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.knn.stats('myGraph', {topK: 1, randomSeed: 42, nodeWeightProperty: 'age'})
+CALL gds.beta.knn.stats('myGraph', {topK: 1, concurrency: 1, randomSeed: 42, nodeWeightProperty: 'age'})
 YIELD nodesCompared, similarityPairs
 ----
 
@@ -423,6 +430,7 @@ CALL gds.beta.knn.mutate('myGraph', {
     mutateProperty: 'score',
     topK: 1,
     randomSeed: 42,
+    concurrency: 1,
     nodeWeightProperty: 'age'
 })
 YIELD nodesCompared, relationshipsWritten
@@ -461,6 +469,7 @@ CALL gds.beta.knn.write('myGraph', {
     writeProperty: 'score',
     topK: 1,
     randomSeed: 42,
+    concurrency: 1,
     nodeWeightProperty: 'age'
 })
 YIELD nodesCompared, relationshipsWritten

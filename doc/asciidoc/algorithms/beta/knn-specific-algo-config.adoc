@@ -8,5 +8,5 @@
 | deltaThreshold                                                   | Float   | 0.001   | yes      | Value as a percentage to determine when to stop early. If fewer updates than the configured value happen, the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).
 | <<common-configuration-max-iterations,maxIterations>>            | Integer | 100     | yes      | Hard limit to stop the algorithm after that many iterations.
 | randomJoins                                                      | Integer | 10      | yes      | Between every iteration, how many attempts are being made to connect new node neighbors based on random selection.
-| randomSeed                                                       | Integer | -1      | yes      | The seed value to control the randomness of the algorithm. The value -1 means that a new seed is generated for every execution, all other values  (including negative ones) are used as the seed value.
+| randomSeed                                                       | Integer | -1      | yes      | The seed value to control the randomness of the algorithm. The value -1 means that a new seed is generated for every execution, all other values  (including negative ones) are used as the seed value. Note that `concurrency` must be set to 1 when overriding the default of this parameter.
 |===
