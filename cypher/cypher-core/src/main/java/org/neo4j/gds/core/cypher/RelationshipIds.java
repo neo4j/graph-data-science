@@ -40,18 +40,12 @@ public final class RelationshipIds {
     private final List<RelationshipIdContext> relationshipIdContexts;
     private final TokenHolders tokenHolders;
 
-    public static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
+    static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
         var relationshipIdContexts = new ArrayList<RelationshipIdContext>();
         graphStore.relationshipTypes().forEach(relType -> {
             var relCount = graphStore.relationshipCount(relType);
             var graph = graphStore.getGraph(relType);
-            var offsets = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
-
-            long offset = 0L;
-            for (long i = 0; i < offsets.size(); i++) {
-                offsets.set(i, offset);
-                offset += graph.degree(i);
-            }
+            var offsets = computeAccumulatedOffsets(graph);
             relationshipIdContexts.add(ImmutableRelationshipIdContext.of(relType, relCount, graph, offsets));
         });
         return new RelationshipIds(relationshipIdContexts, tokenHolders);
@@ -66,20 +60,40 @@ public final class RelationshipIds {
     }
 
     public RelationshipWithIdCursor relationshipForId(long relationshipId) {
-        long id = relationshipId;
+        long graphLocalRelationshipId = relationshipId;
+        // Find the correct RelationshipIdContext given a relationship id.
+        // Relationship ids are created consecutively for each topology stored
+        // in the GraphStore. For example if the topology of type `REL1`
+        // has 42 relationships, then the first relationship id of the topology
+        // of type `REL2` has a relationship id of 43, given that `REL2` comes after
+        // `REL1`. This operation tries to reverse that logic.
         for (RelationshipIdContext relationshipIdContext : relationshipIdContexts) {
-            if (id - relationshipIdContext.relationshipCount() >= 0) {
-                id -= relationshipIdContext.relationshipCount();
+            // If the relationship id is greater than the relationship count of the current
+            // context, we can be sure that it does not belong to the topology represented
+            // by the current context.
+            if (graphLocalRelationshipId >= relationshipIdContext.relationshipCount()) {
+                // Subtract the relationship count of the current context to move
+                // the relationship id into the range of the next context.
+                graphLocalRelationshipId -= relationshipIdContext.relationshipCount();
             } else {
-                var nodeId = relationshipIdContext.offsets().binarySearch(id);
-                var offsetInAdjacency = id - relationshipIdContext.offsets().get(nodeId);
+                // We have found the context that contains the relationship id.
+                // Now we need to compute the exact position within the relationships
+                // of that context.
+                var nodeId = relationshipIdContext.offsets().binarySearch(graphLocalRelationshipId);
+                var offsetInAdjacency = graphLocalRelationshipId - relationshipIdContext.offsets().get(nodeId);
                 return relationshipIdContext
                     .graph()
                     .streamRelationships(nodeId, Double.NaN)
                     .skip(offsetInAdjacency)
                     .findFirst()
                     .map(relCursor -> RelationshipWithIdCursor.fromRelationshipCursor(relCursor, relationshipId))
-                    .orElseThrow(IllegalStateException::new);
+                    .orElseThrow(
+                        () -> new IllegalArgumentException(formatWithLocale(
+                            "No relationship with id %d was found for relationship type %s",
+                            relationshipId,
+                            relationshipIdContext.relationshipType()
+                        ))
+                    );
             }
         }
 
@@ -92,6 +106,17 @@ public final class RelationshipIds {
             return relationshipSelection.test(relTypeToken);
         };
         return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
+    }
+
+    private static HugeLongArray computeAccumulatedOffsets(Graph graph) {
+        var offsets = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+
+        long offset = 0L;
+        for (long i = 0; i < offsets.size(); i++) {
+            offsets.set(i, offset);
+            offset += graph.degree(i);
+        }
+        return offsets;
     }
 
     @ValueClass
