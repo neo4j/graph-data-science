@@ -37,6 +37,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -176,7 +177,11 @@ class PageRankTest {
 
             var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph, config);
             var progressLogger = new TestProgressLogger(progressTask, config.concurrency());
-            var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
+            var progressTracker = new TaskProgressTracker(
+                progressTask,
+                progressLogger,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
 
             runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
 

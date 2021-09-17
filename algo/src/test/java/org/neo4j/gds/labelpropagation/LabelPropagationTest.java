@@ -36,6 +36,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -241,7 +242,7 @@ class LabelPropagationTest {
     void shouldLogProgress() {
         var progressTask = new LabelPropagationFactory<>().progressTask(graph, DEFAULT_CONFIG);
         var testLogger = new TestProgressLogger(progressTask, DEFAULT_CONFIG.concurrency());
-        var testTracker = new TaskProgressTracker(progressTask, testLogger);
+        var testTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var lp = new LabelPropagation(
             graph,

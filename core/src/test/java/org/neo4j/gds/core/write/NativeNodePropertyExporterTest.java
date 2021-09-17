@@ -28,6 +28,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
@@ -164,7 +165,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var writeConcurrency = 4;
         var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
         var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
         var exporterBuilder = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withProgressTracker(progressTracker);

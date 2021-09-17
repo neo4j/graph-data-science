@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 
@@ -40,19 +39,7 @@ public class TaskProgressTracker implements ProgressTracker {
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
 
-    @TestOnly
-    public TaskProgressTracker(
-        Task baseTask,
-        ProgressLogger progressLogger
-    ) {
-        this(baseTask, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
-    }
-
-    public TaskProgressTracker(
-        Task baseTask,
-        ProgressLogger progressLogger,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
+    public TaskProgressTracker(Task baseTask, ProgressLogger progressLogger, TaskRegistryFactory taskRegistryFactory) {
         this.baseTask = baseTask;
         this.taskRegistry = taskRegistryFactory.newInstance();
         this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);

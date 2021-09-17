@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -432,7 +433,7 @@ class LouvainTest {
 
         var progressTask = new LouvainFactory<>().progressTask(graph, config);
         var testLogger = new TestProgressLogger(progressTask, config.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var louvain = new Louvain(
             graph,

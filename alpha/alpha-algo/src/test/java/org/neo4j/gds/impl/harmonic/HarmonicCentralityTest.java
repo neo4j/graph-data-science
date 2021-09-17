@@ -25,6 +25,7 @@ import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -84,7 +85,7 @@ public class HarmonicCentralityTest {
     void testLogging() {
         var task = Tasks.leaf("My task");
         var progressLogger = new TestProgressLogger(task, 1);
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new HarmonicCentrality(
             graph,
