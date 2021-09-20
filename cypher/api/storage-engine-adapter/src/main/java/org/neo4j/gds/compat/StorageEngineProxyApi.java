@@ -76,5 +76,7 @@ public interface StorageEngineProxyApi {
         TokenHolders tokenHolders
     );
 
+    AbstractInMemoryRelationshipScanCursor inMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders);
+
     Edition dbmsEdition(GraphDatabaseAPI api);
 }

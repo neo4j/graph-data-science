@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.RelationshipWithIdCursor;
 import org.neo4j.gds.core.cypher.SingleElementIterator;
+import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.RelationshipSelection;
-import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
-public class InMemoryRelationshipScanCursor extends InMemoryRelationshipCursor implements StorageRelationshipScanCursor {
+public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRelationshipCursor implements StorageRelationshipScanCursor {
 
-    public InMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders, NO_ID);
     }
 
@@ -54,15 +54,5 @@ public class InMemoryRelationshipScanCursor extends InMemoryRelationshipCursor i
     @Override
     public void single(long reference) {
         relationshipCursors = new SingleElementIterator<>(graphStore.relationshipIds().relationshipForId(reference));
-    }
-
-    @Override
-    public long propertiesReference() {
-        return 0;
-    }
-
-    @Override
-    public void properties(StoragePropertyCursor propertyCursor) {
-
     }
 }

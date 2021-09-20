@@ -22,6 +22,8 @@ package org.neo4j.gds.storageengine;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -46,7 +48,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
     @Inject
     IdFunction idFunction;
 
-    InMemoryRelationshipScanCursor relationshipScanCursor;
+    AbstractInMemoryRelationshipScanCursor relationshipScanCursor;
 
     @Override
     protected GraphStore graphStore() {
@@ -60,7 +62,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
     @Override
     protected void onSetup() {
-        this.relationshipScanCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+        this.relationshipScanCursor = StorageEngineProxy.inMemoryRelationshipScanCursor(graphStore, tokenHolders);
     }
 
     @Test
