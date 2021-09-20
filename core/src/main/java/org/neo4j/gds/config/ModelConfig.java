@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.annotation.Configuration;
+
 import java.io.Serializable;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
+@Configuration
 public interface ModelConfig extends Serializable, BaseConfig {
 
     long serialVersionUID = 0x42L;
@@ -28,5 +33,14 @@ public interface ModelConfig extends Serializable, BaseConfig {
     String MODEL_NAME_KEY = "modelName";
     String MODEL_TYPE_KEY = "modelType";
 
+    @Configuration.ConvertWith("validateName")
     String modelName();
+
+    static String validateName(String input) {
+        if (input.matches(".*\\s.*")) {
+            throw new IllegalArgumentException(formatWithLocale("`modelName` must not contain space characters, but got `%s`.", input));
+        }
+
+        return input;
+    }
 }
