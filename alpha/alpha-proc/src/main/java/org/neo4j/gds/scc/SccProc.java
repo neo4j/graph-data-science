@@ -27,7 +27,6 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -95,8 +94,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             var task = Tasks.leaf("Scc :: WriteNodeProperties", graph.nodeCount());
-            var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+            var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
             NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())

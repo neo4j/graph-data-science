@@ -24,21 +24,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.DirectIdMapping;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
-import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
@@ -164,8 +163,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var log = new TestLog();
         var writeConcurrency = 4;
         var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
-        var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(task, log, writeConcurrency, EmptyTaskRegistryFactory.INSTANCE);
         var exporterBuilder = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withProgressTracker(progressTracker);

@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -114,12 +113,12 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
 
             var spanningGraph = new SpanningGraph(graph, spanningTree);
             var task = Tasks.leaf("SpanningTree :: WriteRelationships", graph.relationshipCount());
-            var progressLogger = new BatchingProgressLogger(
-                log,
+            var progressTracker = new TaskProgressTracker(
                 task,
-                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
+                log,
+                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                taskRegistryFactory
             );
-            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
 
             progressTracker.beginSubTask();
             relationshipExporterBuilder

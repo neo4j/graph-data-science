@@ -26,7 +26,6 @@ import org.neo4j.gds.WriteRelationshipsProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -89,13 +88,16 @@ public abstract class SimilarityWriteProc<
                     procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            var task = Tasks.leaf(algoName() + " :: WriteRelationships", similarityGraph.relationshipCount());
-                            var progressLogger = new BatchingProgressLogger(
-                                log,
-                                task,
-                                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
+                            var task = Tasks.leaf(
+                                algoName() + " :: WriteRelationships",
+                                similarityGraph.relationshipCount()
                             );
-                            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+                            var progressTracker = new TaskProgressTracker(
+                                task,
+                                log,
+                                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                                taskRegistryFactory
+                            );
                             var exporter = relationshipExporterBuilder
                                 .withIdMapping(rootNodeMapping)
                                 .withGraph(similarityGraph)

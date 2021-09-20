@@ -34,7 +34,6 @@ import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -159,12 +158,12 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             Tasks.task("Nodes", nodeTasks),
             Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
         );
-        var progressLogger = new BatchingProgressLogger(
-            loadingContext.log(),
+        return new TaskProgressTracker(
             task,
-            graphCreateConfig.readConcurrency()
+            loadingContext.log(),
+            graphCreateConfig.readConcurrency(),
+            loadingContext.taskRegistryFactory()
         );
-        return new TaskProgressTracker(task, progressLogger, loadingContext.taskRegistryFactory());
     }
 
     @Override

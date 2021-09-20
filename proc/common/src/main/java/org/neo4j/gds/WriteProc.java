@@ -24,7 +24,6 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -99,8 +98,7 @@ public abstract class WriteProc<
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         var task = Tasks.leaf(algoName() + " :: WriteNodeProperties", graph.nodeCount());
-        var progressLogger = new BatchingProgressLogger(log, task, computationResult.config().writeConcurrency());
-        return new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+        return new TaskProgressTracker(task, log, computationResult.config().writeConcurrency(), taskRegistryFactory);
     }
 
     NodePropertyExporter createNodePropertyExporter(

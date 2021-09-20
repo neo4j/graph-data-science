@@ -29,7 +29,6 @@ import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -81,12 +80,7 @@ public final class GraphStoreFilter {
 
         var inputNodes = graphStore.nodes();
 
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            task,
-            config.concurrency()
-        );
-        var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+        var progressTracker = new TaskProgressTracker(task, log, config.concurrency(), taskRegistryFactory);
 
         progressTracker.beginSubTask();
 
