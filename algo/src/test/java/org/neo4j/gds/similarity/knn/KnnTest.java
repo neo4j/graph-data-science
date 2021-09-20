@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -294,36 +295,40 @@ class KnnTest {
             .build(graph, config, AllocationTracker.empty(), progressTracker)
             .compute();
 
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 33%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 66%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors 100%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Initialize random neighbors :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 33%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 66%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 33%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 66%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 100%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 33%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 66%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 100%");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 2 of 100 :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Join neighbors 2 of 100 :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Iteration :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "Knn :: Finished");
+        assertThat(testLogger.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Knn :: Start",
+                "Knn :: Initialize random neighbors :: Start",
+                "Knn :: Initialize random neighbors 33%",
+                "Knn :: Initialize random neighbors 66%",
+                "Knn :: Initialize random neighbors 100%",
+                "Knn :: Initialize random neighbors :: Finished",
+                "Knn :: Iteration :: Start",
+                "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start",
+                "Knn :: Iteration :: Split old and new neighbors 1 of 100 33%",
+                "Knn :: Iteration :: Split old and new neighbors 1 of 100 66%",
+                "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%",
+                "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished",
+                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start",
+                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 33%",
+                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 66%",
+                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 100%",
+                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished",
+                "Knn :: Iteration :: Join neighbors 1 of 100 :: Start",
+                "Knn :: Iteration :: Join neighbors 1 of 100 33%",
+                "Knn :: Iteration :: Join neighbors 1 of 100 66%",
+                "Knn :: Iteration :: Join neighbors 1 of 100 100%",
+                "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished",
+                "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Start",
+                "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Finished",
+                "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Start",
+                "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Finished",
+                "Knn :: Iteration :: Join neighbors 2 of 100 :: Start",
+                "Knn :: Iteration :: Join neighbors 2 of 100 :: Finished",
+                "Knn :: Iteration :: Finished",
+                "Knn :: Finished"
+            );
     }
 
     @Nested
