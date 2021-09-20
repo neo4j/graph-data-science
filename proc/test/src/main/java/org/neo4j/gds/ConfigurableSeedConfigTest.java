@@ -20,14 +20,14 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Collections;
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,10 +69,11 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
     }
 
     @Test
-    default void testTrimmedToNullSeedProperty() {
+    default void failOnBlankPropertyName() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(seedPropertyKeyOverride(), "  "));
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.seedProperty());
+        assertThatThrownBy(() -> createConfig(createMinimalConfig(mapWrapper)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("not contain whitespace characters");
     }
 
     @Test

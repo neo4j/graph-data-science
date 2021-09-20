@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -35,9 +34,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig, RandomSeedConfig {
 
-    @NotNull
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     @Override
+    @Configuration.ConvertWith("org.neo4j.gds.config.NodeWeightConfig#validatePropertyName")
     String nodeWeightProperty();
 
     @Value.Default

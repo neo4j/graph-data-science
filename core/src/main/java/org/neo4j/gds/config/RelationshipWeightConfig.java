@@ -26,7 +26,7 @@ import org.neo4j.gds.annotation.Configuration;
 public interface RelationshipWeightConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validatePropertyName")
     default @Nullable String relationshipWeightProperty() {
         return null;
     }
@@ -35,5 +35,9 @@ public interface RelationshipWeightConfig {
     @Configuration.Ignore
     default boolean hasRelationshipWeightProperty() {
         return relationshipWeightProperty() != null;
+    }
+
+    static String validatePropertyName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "relationshipWeightProperty");
     }
 }

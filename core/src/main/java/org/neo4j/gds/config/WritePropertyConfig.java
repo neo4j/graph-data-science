@@ -25,8 +25,11 @@ public interface WritePropertyConfig extends WriteConfig {
 
     String WRITE_PROPERTY_KEY = "writeProperty";
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validatePropertyName")
     @Configuration.Key(WRITE_PROPERTY_KEY)
     String writeProperty();
 
+    static String validatePropertyName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "writeProperty");
+    }
 }

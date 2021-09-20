@@ -25,7 +25,11 @@ public interface MutatePropertyConfig extends MutateConfig {
 
     String MUTATE_PROPERTY_KEY = "mutateProperty";
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validateProperty")
     @Configuration.Key(MUTATE_PROPERTY_KEY)
     String mutateProperty();
+
+    static String validateProperty(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "mutateProperty");
+    }
 }

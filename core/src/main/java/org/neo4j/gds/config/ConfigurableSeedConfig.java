@@ -26,7 +26,7 @@ import org.neo4j.gds.annotation.Configuration;
 public interface ConfigurableSeedConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validateProperty")
     default @Nullable String seedProperty() {
         return null;
     }
@@ -34,5 +34,9 @@ public interface ConfigurableSeedConfig {
     @Configuration.Ignore
     default String propertyNameOverride() {
         return "seedProperty";
+    }
+
+    static String validateProperty(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "seedProperty");
     }
 }

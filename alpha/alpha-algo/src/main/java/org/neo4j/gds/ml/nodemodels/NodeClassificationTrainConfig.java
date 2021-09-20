@@ -22,14 +22,15 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.config.StringIdentifierValidations;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     @Configuration.IntegerRange(min = 2)
     int validationFolds();
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validateProperty")
     String targetProperty();
 
     List<Map<String, Object>> params();
@@ -78,6 +79,10 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
         if (params().isEmpty()) {
             throw new IllegalArgumentException("No model candidates (params) specified, we require at least one");
         }
+    }
+
+    static String validateProperty(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "targetProperty");
     }
 
     static NodeClassificationTrainConfig of(

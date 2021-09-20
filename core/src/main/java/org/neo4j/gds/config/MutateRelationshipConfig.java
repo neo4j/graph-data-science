@@ -25,6 +25,10 @@ public interface MutateRelationshipConfig extends MutateConfig {
 
     String MUTATE_RELATIONSHIP_TYPE_KEY = "mutateRelationshipType";
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validateTypeIdentifier")
     String mutateRelationshipType();
+
+    static String validateTypeIdentifier(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "mutateRelationshipType");
+    }
 }

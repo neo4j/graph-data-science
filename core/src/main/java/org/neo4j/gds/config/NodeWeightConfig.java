@@ -26,8 +26,12 @@ import org.neo4j.gds.annotation.Configuration;
 public interface NodeWeightConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validatePropertyName")
     default @Nullable String nodeWeightProperty() {
         return null;
+    }
+
+    static String validatePropertyName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "nodeWeightProperty");
     }
 }

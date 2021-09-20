@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
+import org.neo4j.gds.config.StringIdentifierValidations;
 
 @ValueClass
 @Configuration
@@ -34,7 +35,7 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
     @Override
     @Value.Default
     @Configuration.Key("triangleCountProperty")
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validateProperty")
     default @Nullable String seedProperty() {
         return null;
     }
@@ -43,5 +44,9 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
     @Configuration.Ignore
     default String propertyNameOverride() {
         return "triangleCountProperty";
+    }
+
+    static String validateProperty(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "triangleCountProperty");
     }
 }

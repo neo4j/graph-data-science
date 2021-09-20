@@ -25,6 +25,10 @@ public interface WriteRelationshipConfig extends WriteConfig {
 
     String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validatePropertyName")
     String writeRelationshipType();
+
+    static String validatePropertyName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "writeRelationshipType");
+    }
 }

@@ -22,7 +22,6 @@ package org.neo4j.gds.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -33,6 +32,8 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.StringIdentifierValidations;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -175,15 +176,23 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         }
 
         @Value.Default
-        @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+        @Configuration.ConvertWith("validateHubProperty")
         default String hubProperty() {
             return "hub";
         }
 
         @Value.Default
-        @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+        @Configuration.ConvertWith("validateAuthProperty")
         default String authProperty() {
             return "auth";
+        }
+
+        static String validateHubProperty(String input) {
+            return StringIdentifierValidations.validateNoWhiteCharacter(input, "hubProperty");
+        }
+
+        static String validateAuthProperty(String input) {
+            return StringIdentifierValidations.validateNoWhiteCharacter(input, "authProperty");
         }
 
         static HitsConfig of(
