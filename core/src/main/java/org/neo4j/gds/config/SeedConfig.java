@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 
 public interface SeedConfig {
     @Value.Default
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith("validatePropertyName")
     default @Nullable String seedProperty() {
         return null;
     }
@@ -33,5 +33,9 @@ public interface SeedConfig {
     @Configuration.Ignore
     default boolean isIncremental() {
         return seedProperty() != null;
+    }
+
+    static String validatePropertyName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "seedProperty");
     }
 }
