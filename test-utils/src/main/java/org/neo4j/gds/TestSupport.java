@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
+import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
@@ -62,7 +63,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -295,6 +295,7 @@ public final class TestSupport {
         List<Map<String, Object>> expected
     ) {
         runInTransaction(db, tx -> {
+            var softAssertions = new SoftAssertions();
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(db, query, queryParameters, result -> {
                 result.accept(row -> {
@@ -306,7 +307,7 @@ public final class TestSupport {
                     return true;
                 });
             });
-            assertThat(actual)
+            softAssertions.assertThat(actual)
                 .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
                     actual.size(),
                     expected.size()
@@ -317,18 +318,19 @@ public final class TestSupport {
                 Map<String, Object> expectedRow = expected.get(i);
                 Map<String, Object> actualRow = actual.get(i);
 
-                assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
+                softAssertions.assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
 
                 int rowNumber = i;
                 expectedRow.forEach((key, expectedValue) -> {
                     Object actualValue = actualRow.get(key);
-                    ObjectAssert<Object> assertion = assertThat(actualValue).withFailMessage(
-                        "Different value for column '%s' of row %d (expected %s, but got %s)",
-                        key,
-                        rowNumber,
-                        expectedValue,
-                        actualValue
-                    );
+                    ObjectAssert<Object> assertion = softAssertions.assertThat(actualValue)
+                        .withFailMessage(
+                            "Different value for column '%s' of row %d (expected %s, but got %s)",
+                            key,
+                            rowNumber,
+                            expectedValue,
+                            actualValue
+                        );
 
                     if (expectedValue instanceof Matcher) {
                         assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
@@ -339,6 +341,7 @@ public final class TestSupport {
                     }
                 });
             }
+            softAssertions.assertAll();
         });
     }
 
