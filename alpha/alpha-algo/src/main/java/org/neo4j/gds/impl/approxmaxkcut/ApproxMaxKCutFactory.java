@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.impl.approxmaxkcut;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -89,11 +87,6 @@ public class ApproxMaxKCutFactory<CONFIG extends ApproxMaxKCutConfig> extends Al
             ),
             Tasks.leaf("compute current solution cost", nodeCount)
         );
-    }
-
-    @TestOnly
-    ApproxMaxKCutFactory(ProgressLogger.ProgressLoggerFactory factory) {
-        super(factory);
     }
 
     @Override

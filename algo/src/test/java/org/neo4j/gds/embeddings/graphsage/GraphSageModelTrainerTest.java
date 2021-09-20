@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -44,7 +44,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.helper.TensorTestUtils;
-import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.List;
@@ -190,16 +189,18 @@ class GraphSageModelTrainerTest {
             .randomSeed(42L)
             .build();
 
-        var algo = new GraphSageTrainAlgorithmFactory(TestProgressLogger.FACTORY).build(
+        var log = new TestLog();
+
+        var algo = new GraphSageTrainAlgorithmFactory().build(
             graph,
             config,
             AllocationTracker.empty(),
-            NullLog.getInstance(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 
-        var messagesInOrder = ((TestProgressLogger) algo.getProgressTracker().progressLogger()).getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id

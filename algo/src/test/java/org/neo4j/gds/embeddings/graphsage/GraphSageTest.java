@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -135,8 +134,7 @@ class GraphSageTest {
             .concurrency(4)
             .build();
 
-        var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(
+        var graphSage = new GraphSageAlgorithmFactory<>().build(
             orphanGraph,
             streamConfig,
             AllocationTracker.empty(),
@@ -213,18 +211,17 @@ class GraphSageTest {
             .batchSize(1)
             .build();
 
-        var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(
+        var log = new TestLog();
+        var graphSage = new GraphSageAlgorithmFactory<>().build(
             graph,
             streamConfig,
             AllocationTracker.empty(),
-            NullLog.getInstance(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.compute();
 
-        var testLogger = (TestProgressLogger) graphSage.getProgressTracker().progressLogger();
-        var messagesInOrder = testLogger.getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id

@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -41,7 +41,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,16 +116,17 @@ class WccTest {
     void shouldLogProgress(Orientation orientation) {
         var graph = createTestGraph(orientation);
 
-        var wcc = new WccAlgorithmFactory<>(TestProgressLogger.FACTORY).build(
+        var log = new TestLog();
+        var wcc = new WccAlgorithmFactory<>().build(
             graph,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             AllocationTracker.empty(),
-            NullLog.getInstance(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         wcc.compute();
 
-        var messagesInOrder = ((TestProgressLogger) wcc.getProgressTracker().progressLogger()).getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id

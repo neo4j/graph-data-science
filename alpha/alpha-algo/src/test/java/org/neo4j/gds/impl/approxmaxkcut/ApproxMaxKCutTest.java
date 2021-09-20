@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -39,7 +38,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.logging.NullLog;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -178,54 +176,53 @@ final class ApproxMaxKCutTest {
 
         var config = configBuilder.build();
 
-        var approxMaxKCut = new ApproxMaxKCutFactory<>(TestProgressLogger.FACTORY).build(
+        var log = new TestLog();
+        var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
             graph,
             config,
             AllocationTracker.empty(),
-            NullLog.getInstance(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         approxMaxKCut.compute();
 
-        var progressLogger = (TestProgressLogger) approxMaxKCut.getProgressTracker().progressLogger();
-
-        assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Start")).isTrue();
-        assertThat(progressLogger.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, ":: Start")).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
 
         for (int i = 1; i <= config.iterations(); i++) {
-            assertThat(progressLogger.containsMessage(
+            assertThat(log.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s :: Start", i, config.iterations())
             )).isTrue();
-            assertThat(progressLogger.containsMessage(
+            assertThat(log.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s 100%%", i, config.iterations())
             )).isTrue();
-            assertThat(progressLogger.containsMessage(
+            assertThat(log.containsMessage(
                 TestLog.INFO,
                 formatWithLocale("place nodes randomly %s of %s :: Finished", i, config.iterations())
             )).isTrue();
 
             if (vnsMaxNeighborhoodOrder == 0) {
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: Start", i, config.iterations())
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: Finished", i, config.iterations())
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: improvement loop :: Start", i, config.iterations())
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("local search %s of %s :: improvement loop :: Finished", i, config.iterations())
                 )).isTrue();
 
                 // May occur several times but we don't know.
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Start",
@@ -233,7 +230,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 100%%",
@@ -241,7 +238,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Finished",
@@ -249,7 +246,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Start",
@@ -257,7 +254,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 100%%",
@@ -265,7 +262,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Finished",
@@ -274,7 +271,7 @@ final class ApproxMaxKCutTest {
                     )
                 )).isTrue();
 
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost :: Start",
@@ -282,7 +279,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost 100%%",
@@ -290,7 +287,7 @@ final class ApproxMaxKCutTest {
                         config.iterations()
                     )
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale(
                         "local search %s of %s :: compute current solution cost :: Finished",
@@ -300,11 +297,11 @@ final class ApproxMaxKCutTest {
                 )).isTrue();
             } else {
                 // We merely check that VNS is indeed run. The rest is very similar to the non-VNS case.
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("variable neighborhood search %s of %s :: Start", i, config.iterations())
                 )).isTrue();
-                assertThat(progressLogger.containsMessage(
+                assertThat(log.containsMessage(
                     TestLog.INFO,
                     formatWithLocale("variable neighborhood search %s of %s :: Finished", i, config.iterations())
                 )).isTrue();

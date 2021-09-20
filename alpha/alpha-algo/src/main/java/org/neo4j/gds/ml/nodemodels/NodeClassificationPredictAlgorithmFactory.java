@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -93,10 +91,5 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.leaf(taskName(), graph.nodeCount());
-    }
-
-    @TestOnly
-    NodeClassificationPredictAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
-        super(factory);
     }
 }
