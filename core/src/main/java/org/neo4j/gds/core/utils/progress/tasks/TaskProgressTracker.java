@@ -141,12 +141,16 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     private void validateTaskFinishedOrCanceled() {
-        var message = formatWithLocale(
-            "Attempted to release algorithm, but task %s is still running",
-            baseTask.description()
-        );
         if (baseTask.status() == Status.RUNNING) {
-            assert false: message;
+            var message = formatWithLocale(
+                "Attempted to release algorithm, but task %s is still running",
+                baseTask.description()
+            );
+
+            // As a bug in logging should not hinder the user in running procedures
+            // but only in our tests, we only use an assertion here
+            assert false : message;
+
             progressLogger().getLog().warn(message);
         }
     }
