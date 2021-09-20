@@ -145,7 +145,7 @@ public class LinkPredictionTrain
     }
 
     public LinkLogisticRegressionPredictor predictor(LinkLogisticRegressionData modelData, List<FeatureExtractor> extractors) {
-        return new LinkLogisticRegressionPredictor(modelData, config.featureProperties(), extractors);
+        return new LinkLogisticRegressionPredictor(modelData, extractors);
     }
 
     private Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> mergeMetrics(

@@ -64,7 +64,6 @@ public class LinkLogisticRegressionTrain {
         );
         var objective = new LinkLogisticRegressionObjective(
             llrData,
-            config.featureProperties(),
             extractors,
             config.penalty(),
             graph

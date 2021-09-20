@@ -117,7 +117,7 @@ class LinkPredictionEndToEndTest {
     private LinkPredictionPredict predictAlgorithm(Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model) {
         var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
 
-        var predictor = new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties(), extractors);
+        var predictor = new LinkLogisticRegressionPredictor(model.data(), extractors);
         return new LinkPredictionPredict(
             predictor,
             graph,

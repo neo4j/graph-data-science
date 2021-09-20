@@ -36,14 +36,13 @@ import java.util.List;
 public class LinkLogisticRegressionBase {
 
     protected final LinkLogisticRegressionData modelData;
-
-    protected final List<String> featureProperties;
-
     protected final List<FeatureExtractor> extractors;
 
-    LinkLogisticRegressionBase(LinkLogisticRegressionData modelData, List<String> featureProperties, List<FeatureExtractor> extractors) {
+    LinkLogisticRegressionBase(
+        LinkLogisticRegressionData modelData,
+        List<FeatureExtractor> extractors
+    ) {
         this.modelData = modelData;
-        this.featureProperties = featureProperties;
         this.extractors = extractors;
     }
 

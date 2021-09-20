@@ -85,7 +85,7 @@ class LinkPredictionPredictTest {
             .build();
 
         var result = new LinkPredictionPredict(
-            new LinkLogisticRegressionPredictor(modelData, featureProperties, extractors),
+            new LinkLogisticRegressionPredictor(modelData, extractors),
             graph,
             1,
             1,

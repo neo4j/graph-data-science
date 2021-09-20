@@ -49,12 +49,11 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
 
     public LinkLogisticRegressionObjective(
         LinkLogisticRegressionData llrData,
-        List<String> featureProperties,
         List<FeatureExtractor> extractors,
         double penalty,
         Graph graph
     ) {
-        super(llrData, featureProperties, extractors);
+        super(llrData, extractors);
         this.graph = graph;
         this.penalty = penalty;
     }

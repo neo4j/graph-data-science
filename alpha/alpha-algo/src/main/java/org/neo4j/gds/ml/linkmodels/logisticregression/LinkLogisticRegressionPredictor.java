@@ -32,10 +32,9 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
 
     public LinkLogisticRegressionPredictor(
         LinkLogisticRegressionData modelData,
-        List<String> featureProperties,
         List<FeatureExtractor> extractors
     ) {
-        super(modelData, featureProperties, extractors);
+        super(modelData, extractors);
     }
 
     static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
