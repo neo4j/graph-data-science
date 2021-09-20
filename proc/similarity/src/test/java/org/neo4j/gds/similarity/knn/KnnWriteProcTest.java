@@ -195,7 +195,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
             Assertions.assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
                 "KnnWriteProc :: WriteRelationships",
-                "KNN compute"
+                "Knn"
             );
         });
     }
