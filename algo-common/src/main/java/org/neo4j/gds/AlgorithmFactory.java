@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -36,17 +33,6 @@ import org.neo4j.logging.Log;
 
 public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
-    private final ProgressLogger.ProgressLoggerFactory loggerFactory;
-
-    protected AlgorithmFactory() {
-        this(BatchingProgressLogger.FACTORY);
-    }
-
-    @TestOnly
-    protected AlgorithmFactory(ProgressLogger.ProgressLoggerFactory loggerFactory) {
-        this.loggerFactory = loggerFactory;
-    }
-
     public final ALGO build(
         Graph graph,
         CONFIG configuration,
@@ -55,14 +41,10 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         TaskRegistryFactory taskRegistryFactory
     ) {
         var progressTask = progressTask(graph, configuration);
-        var progressLogger = loggerFactory.newLogger(
-            log,
-            progressTask,
-            configuration.concurrency()
-        );
         var progressTracker = new TaskProgressTracker(
             progressTask,
-            progressLogger,
+            log,
+            configuration.concurrency(),
             taskRegistryFactory
         );
         return build(graph, configuration, allocationTracker, progressTracker);
