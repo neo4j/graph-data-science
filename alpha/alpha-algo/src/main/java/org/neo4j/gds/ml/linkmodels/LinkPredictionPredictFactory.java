@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,11 +37,6 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
 
     public LinkPredictionPredictFactory() {
         super();
-    }
-
-    @TestOnly
-    LinkPredictionPredictFactory(ProgressLogger.ProgressLoggerFactory loggerFactory) {
-        super(loggerFactory);
     }
 
     @Override

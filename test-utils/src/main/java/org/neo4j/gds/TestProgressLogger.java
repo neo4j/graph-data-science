@@ -31,9 +31,6 @@ import java.util.function.Supplier;
 
 public class TestProgressLogger extends TestLog implements ProgressLogger {
 
-    public static final ProgressLoggerFactory FACTORY =
-        (log, task, concurrency) -> new TestProgressLogger(task, concurrency);
-
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
 
@@ -100,5 +97,3 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
         return this;
     }
 }
-
-

@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
@@ -40,7 +39,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
@@ -230,7 +228,8 @@ class NodeClassificationPredictTest {
         );
         ModelCatalog.set(model);
 
-        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(TestProgressLogger.FACTORY).build(
+        var log = new TestLog();
+        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>().build(
             graph,
             ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
@@ -239,14 +238,14 @@ class NodeClassificationPredictTest {
                 .batchSize(1)
                 .build(),
             AllocationTracker.empty(),
-            NullLog.getInstance(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         mcnlrPredict.compute();
 
-        var messagesInOrder = ((TestProgressLogger) mcnlrPredict.getProgressTracker().progressLogger()).getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
-        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+        assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .doesNotHaveDuplicates()

@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -284,18 +283,19 @@ class LinkPredictionTrainTest {
                 expectedWinner
             )).build();
 
-        var algo = new LinkPredictionTrainFactory(TestProgressLogger.FACTORY).build(
+        var log = new TestLog();
+        var algo = new LinkPredictionTrainFactory().build(
             graph,
             config,
             AllocationTracker.empty(),
-            ProgressTracker.NULL_TRACKER.progressLogger().getLog(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 
-        var messagesInOrder = ((TestProgressLogger) algo.getProgressTracker().progressLogger()).getMessages(INFO);
+        var messagesInOrder = log.getMessages(INFO);
 
-        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+        assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsSequence(
