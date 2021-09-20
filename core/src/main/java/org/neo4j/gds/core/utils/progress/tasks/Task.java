@@ -153,8 +153,8 @@ public class Task {
         return this.finishTime;
     }
 
-    public boolean hasStarted() {
-        return status() == Status.RUNNING;
+    public boolean hasNotStarted() {
+        return status() == Status.PENDING || startTime() == Task.NOT_STARTED;
     }
 
     public MemoryRange estimatedMemoryRangeInBytes() {
