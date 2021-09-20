@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -304,32 +303,29 @@ class LocalClusteringCoefficientTest {
             : createConfig().build();
 
         var progressTask = factory.progressTask(graph, config);
-        var testLogger = new TestProgressLogger(
-            progressTask,
-            4
-        );
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
             .build(graph, config, AllocationTracker.empty(), progressTracker)
             .compute();
 
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
         if (!useSeed) {
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start");
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
-            testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished");
         }
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
-        testLogger.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
     }
 
     @Test

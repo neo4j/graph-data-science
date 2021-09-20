@@ -28,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.loading.NullPropertyMap;
@@ -286,17 +285,14 @@ class KnnTest {
         var factory = new KnnFactory<>();
 
         var progressTask = factory.progressTask(graph, config);
-        var testLogger = new TestProgressLogger(
-            progressTask,
-            4
-        );
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
             .build(graph, config, AllocationTracker.empty(), progressTracker)
             .compute();
 
-        assertThat(testLogger.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
                 "Knn :: Start",
