@@ -42,13 +42,12 @@ public class TaskProgressTracker implements ProgressTracker {
     protected Optional<Task> currentTask;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
-        this(baseTask, new BatchingProgressLogger(log, baseTask, concurrency), taskRegistryFactory);
-    }
-
-    public TaskProgressTracker(Task baseTask, ProgressLogger progressLogger, TaskRegistryFactory taskRegistryFactory) {
         this.baseTask = baseTask;
         this.taskRegistry = taskRegistryFactory.newInstance();
-        this.taskProgressLogger = new TaskProgressLogger(progressLogger, baseTask);
+        this.taskProgressLogger = new TaskProgressLogger(
+            new BatchingProgressLogger(log, baseTask, concurrency),
+            baseTask
+        );
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
 
