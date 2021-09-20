@@ -41,7 +41,6 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
     private IdMapping idMapping;
     private Graph graph;
     private RelationshipProperties weights;
-    private final int nodeCount;
     private final DoubleUnaryOperator minMax;
     private final int startNodeId;
     private final long k;
@@ -59,7 +58,6 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.idMapping = idMapping;
         this.graph = graph;
         this.weights = weights;
-        this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 

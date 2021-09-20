@@ -52,10 +52,6 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
         return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
     }
 
-    public LinkLogisticRegressionData modelData() {
-        return modelData;
-    }
-
     public double predictedProbability(long sourceId, long targetId) {
         var weightsArray = modelData.weights().data().data();
         var features = features(sourceId, targetId);

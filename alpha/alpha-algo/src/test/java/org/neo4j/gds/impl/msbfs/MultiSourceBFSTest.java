@@ -458,9 +458,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         }
 
         @Override
-        public void reset() {}
-
-        @Override
         public boolean equals(final Object obj) {
             return obj instanceof FakeListIterator && longs.equals(((FakeListIterator) obj).longs);
         }

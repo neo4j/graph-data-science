@@ -20,17 +20,13 @@
 package org.neo4j.gds.pagerank;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.ToleranceConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.Optional;
+import org.neo4j.gds.scaling.ScalarScaler;
 
 @ValueClass
 @Configuration("PageRankConfigImpl")
@@ -85,14 +81,5 @@ public interface PageRankConfig extends
     @Configuration.Ignore
     default Partitioning partitioning() {
         return Partitioning.AUTO;
-    }
-
-    static PageRankConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new PageRankConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }

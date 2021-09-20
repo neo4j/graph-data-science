@@ -24,6 +24,4 @@ import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 public interface BfsSources extends PrimitiveLongIterator {
 
     int size();
-
-    void reset();
 }

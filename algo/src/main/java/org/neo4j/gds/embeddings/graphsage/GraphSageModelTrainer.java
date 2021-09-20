@@ -219,10 +219,6 @@ public class GraphSageModelTrainer {
             weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
         }
 
-        public boolean converged() {
-            return converged;
-        }
-
         public double loss() {
             return prevLoss;
         }
