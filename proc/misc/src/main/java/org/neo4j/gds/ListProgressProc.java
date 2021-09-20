@@ -106,7 +106,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private LocalTimeValue localTimeValue(Task task) {
-            if (!task.hasStarted()) {
+            if (task.hasNotStarted()) {
                 return null;
             }
             return LocalTimeValue.localTime(LocalTime.ofInstant(
@@ -116,7 +116,7 @@ public class ListProgressProc extends BaseProc {
         }
 
         private String prettyElapsedTime(Task task) {
-            if (!task.hasStarted()) {
+            if (task.hasNotStarted()) {
                 return "Not yet started";
             }
             var finishTime = task.finishTime();
