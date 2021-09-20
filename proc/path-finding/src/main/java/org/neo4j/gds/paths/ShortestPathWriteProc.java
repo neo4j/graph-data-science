@@ -25,6 +25,8 @@ import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
@@ -70,6 +72,13 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                     createValues(graph, pathResult, writeNodeIds, writeCosts)
                 ));
 
+            var progressTracker = new TaskProgressTracker(
+                Tasks.leaf("WriteRelationshipStream"),
+                log,
+                1,
+                taskRegistryFactory
+            );
+
             // this is necessary in order to close the relationship stream which triggers
             // the progress tracker to close its root task
             try (var statement = transaction.acquireStatement()) {
@@ -79,15 +88,16 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                     .withIdMapping(computationResult.graph())
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withLogging(log, taskRegistryFactory)
+                    .withProgressTracker(progressTracker)
                     .build();
 
-
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+                    progressTracker.beginSubTask();
                     resultBuilder.withRelationshipsWritten(exporter.write(
                         writeRelationshipType,
                         createKeys(writeNodeIds, writeCosts)
                     ));
+                    progressTracker.endSubTask();
                 }
             }
 

@@ -25,7 +25,10 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -71,16 +74,41 @@ public abstract class WriteStreamOfRelationshipsProc<
             log.debug("Writing results");
 
             Graph graph = computationResult.graph();
-            TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
-            var exporter = relationshipStreamExporterBuilder
-                .withIdMapping(graph.cloneIdMapping())
-                .withRelationships(computationResult.result().relationshipStream())
-                .withTerminationFlag(terminationFlag)
-                .build();
 
-            long numberOfRelationshipsWritten = exporter.write(config.writeRelationshipType(), config.writeProperty());
+            var progressTracker = createProgressTracker(graph, computationResult);
+            var exporter = createRelationshipStreamExporter(graph, progressTracker, computationResult);
 
-            resultBuilder.withRelationshipsWritten(numberOfRelationshipsWritten);
+            var relationshipsWritten = 0L;
+            try {
+                progressTracker.beginSubTask();
+                relationshipsWritten = exporter.write(config.writeRelationshipType(), config.writeProperty());
+            } finally {
+                progressTracker.endSubTask();
+                progressTracker.release();
+            }
+
+            resultBuilder.withRelationshipsWritten(relationshipsWritten);
         }
+    }
+
+    ProgressTracker createProgressTracker(
+        Graph graph,
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+    ) {
+        var task = Tasks.leaf(algoName() + " :: WriteRelationshipStream", graph.nodeCount());
+        return new TaskProgressTracker(task, log, computationResult.config().writeConcurrency(), taskRegistryFactory);
+    }
+
+    RelationshipStreamExporter createRelationshipStreamExporter(
+        Graph graph,
+        ProgressTracker progressTracker,
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+    ) {
+        return relationshipStreamExporterBuilder
+            .withIdMapping(graph)
+            .withTerminationFlag(computationResult.algorithm().terminationFlag)
+            .withRelationships(computationResult.result().relationshipStream())
+            .withProgressTracker(progressTracker)
+            .build();
     }
 }
