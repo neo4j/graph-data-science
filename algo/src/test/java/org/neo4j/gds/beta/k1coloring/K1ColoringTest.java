@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -215,8 +214,8 @@ class K1ColoringTest {
             .build();
 
         var progressTask = new K1ColoringFactory<>().progressTask(graph, config);
-        var testLogger = new TestProgressLogger(progressTask, concurrency);
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var k1Coloring = new K1Coloring(
             graph,
@@ -230,19 +229,19 @@ class K1ColoringTest {
 
         k1Coloring.compute();
 
-        List<AtomicLong> progresses = testLogger.getProgresses();
+        List<AtomicLong> progresses = progressTracker.getProgresses();
 
         assertEquals(k1Coloring.ranIterations() * concurrency + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration ->
-            assertThat(testLogger.getMessages(TestLog.INFO)).anyMatch(message -> {
+            assertThat(log.getMessages(TestLog.INFO)).anyMatch(message -> {
                 var expected = formatWithLocale("%d of %d", iteration, config.maxIterations());
                 return message.contains(expected);
             })
         );
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+        assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
