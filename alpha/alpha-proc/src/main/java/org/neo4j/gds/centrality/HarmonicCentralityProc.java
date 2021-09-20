@@ -25,7 +25,6 @@ import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -102,8 +101,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             var writeConcurrency = computationResult.config().writeConcurrency();
             var task = Tasks.leaf("HarmonicCentrality :: WriteNodeProperties", graph.nodeCount());
-            var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+            var progressTracker = new TaskProgressTracker(task, log, writeConcurrency, taskRegistryFactory);
             NodePropertyExporter exporter =  nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())

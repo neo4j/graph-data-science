@@ -26,7 +26,6 @@ import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -100,8 +99,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             var task = Tasks.leaf("KSpanningTree :: WriteNodeProperties", graph.nodeCount());
-            var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
+            var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
             final NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(TerminationFlag.wrap(transaction)).withProgressTracker(progressTracker)

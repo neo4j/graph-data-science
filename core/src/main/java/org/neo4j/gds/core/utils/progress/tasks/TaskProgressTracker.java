@@ -21,10 +21,12 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.Stack;
@@ -38,6 +40,10 @@ public class TaskProgressTracker implements ProgressTracker {
     private final TaskProgressLogger taskProgressLogger;
     private final Stack<Task> nestedTasks;
     private Optional<Task> currentTask;
+
+    public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
+        this(baseTask, new BatchingProgressLogger(log, baseTask, concurrency), taskRegistryFactory);
+    }
 
     public TaskProgressTracker(Task baseTask, ProgressLogger progressLogger, TaskRegistryFactory taskRegistryFactory) {
         this.baseTask = baseTask;
