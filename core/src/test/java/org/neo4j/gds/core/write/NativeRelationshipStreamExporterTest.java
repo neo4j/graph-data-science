@@ -30,6 +30,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -228,7 +230,9 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var rand = new Random();
 
+        var task = Tasks.leaf("WriteRelationshipStream", 0);
         var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         var relationshipStream = IntStream
             .range(0, relationshipCount)
@@ -237,10 +241,12 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
-            .withLogging(log, EmptyTaskRegistryFactory.INSTANCE)
+            .withProgressTracker(progressTracker)
             .build();
 
+        progressTracker.beginSubTask();
         var relationshipsWritten = exporter.write("FOOBAR");
+        progressTracker.endSubTask();
 
         assertEquals(relationshipCount, relationshipsWritten);
 

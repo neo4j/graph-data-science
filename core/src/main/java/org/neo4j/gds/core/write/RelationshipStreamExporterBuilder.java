@@ -20,18 +20,9 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Log;
 
 import java.util.Objects;
 import java.util.function.LongUnaryOperator;
@@ -43,30 +34,15 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected int batchSize;
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
-    protected ProgressLogger progressLogger;
-    protected TaskRegistryFactory taskRegistryFactory;
-
     protected ProgressTracker progressTracker;
 
     RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
-        this.progressLogger = ProgressLogger.NULL_LOGGER;
-        this.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
         this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
+        this.progressTracker = ProgressTracker.NULL_TRACKER;
     }
 
-    public final T build() {
-        prepareProgressTracker();
-
-        return actuallyBuild();
-    }
-
-    private void prepareProgressTracker() {
-        Task task = Tasks.leaf(taskName());
-        progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
-    }
-
-    protected abstract T actuallyBuild();
+    public abstract T build();
 
     public RelationshipStreamExporterBuilder<T> withIdMapping(IdMapping idMapping) {
         Objects.requireNonNull(idMapping);
@@ -76,12 +52,6 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     public RelationshipStreamExporterBuilder<T> withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        return this;
-    }
-
-    public RelationshipStreamExporterBuilder<T> withLogging(Log log, TaskRegistryFactory taskRegistryFactory) {
-        this.progressLogger = new BatchingProgressLogger(log, Tasks.leaf(taskName(), 0), ConcurrencyConfig.DEFAULT_CONCURRENCY);
-        this.taskRegistryFactory = taskRegistryFactory;
         return this;
     }
 
@@ -95,7 +65,17 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
-    private String taskName() {
-        return "WriteRelationshipStream";
+    /**
+     * Set the {@link ProgressTracker} to use for logging progress during export.
+     *
+     * If a {@link org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker} is used, caller must manage beginning and finishing the subtasks.
+     * By default, an {@link org.neo4j.gds.core.utils.progress.tasks.ProgressTracker.EmptyProgressTracker} is used. That one doesn't require caller to manage any tasks.
+     *
+     * @param progressTracker The progress tracker to use for logging progress during export.
+     * @return this
+     */
+    public RelationshipStreamExporterBuilder<T> withProgressTracker(ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
+        return this;
     }
 }
