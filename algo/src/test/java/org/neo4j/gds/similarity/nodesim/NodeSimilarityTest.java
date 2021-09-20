@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
@@ -40,7 +40,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -825,8 +824,12 @@ final class NodeSimilarityTest {
         var graph = naturalGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
-        var progressLogger = new TestProgressLogger(progressTask, concurrency);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(
+            progressTask,
+            new TestLog(),
+            concurrency,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         var nodeSimilarity = new NodeSimilarity(
             graph,
@@ -838,7 +841,7 @@ final class NodeSimilarityTest {
 
         long comparisons = nodeSimilarity.compute().streamResult().count();
 
-        List<AtomicLong> progresses = progressLogger.getProgresses();
+        List<AtomicLong> progresses = progressTracker.getProgresses();
 
         // Should log progress for prepare and actual comparisons
         assertEquals(4, progresses.size());

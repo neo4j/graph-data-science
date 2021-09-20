@@ -24,7 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -35,7 +36,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrainConfig;
@@ -169,10 +169,11 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
             );
 
             var progressTask = factory.progressTask(graphStore.getUnion(), predictConfig);
-            var progressLogger = new TestProgressLogger(progressTask, 1);
-            var progressTracker = new TaskProgressTracker(
+            var log = new TestLog();
+            var progressTracker = new TestProgressTracker(
                 progressTask,
-                progressLogger,
+                log,
+                1,
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
@@ -185,7 +186,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
 
             predictAlgo.compute();
 
-            assertThat(progressLogger.getMessages(INFO))
+            assertThat(log.getMessages(INFO))
                 .extracting(removingThreadId())
                 .containsExactly(
                     "Link Prediction Pipeline :: Start",

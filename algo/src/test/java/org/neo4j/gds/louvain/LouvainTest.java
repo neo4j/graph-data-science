@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -432,8 +432,13 @@ class LouvainTest {
         var config = defaultConfigBuilder().build();
 
         var progressTask = new LouvainFactory<>().progressTask(graph, config);
-        var testLogger = new TestProgressLogger(progressTask, config.concurrency());
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(
+            progressTask,
+            log,
+            config.concurrency(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         var louvain = new Louvain(
             graph,
@@ -445,7 +450,7 @@ class LouvainTest {
 
         louvain.compute();
 
-        assertTrue(testLogger.containsMessage(INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
+        assertTrue(log.containsMessage(INFO, ":: Start"));
+        assertTrue(log.containsMessage(INFO, ":: Finished"));
     }
 }

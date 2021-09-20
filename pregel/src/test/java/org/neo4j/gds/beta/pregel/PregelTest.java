@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.annotation.Configuration;
@@ -134,9 +134,8 @@ class PregelTest {
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
-        var progressLogger = new TestProgressLogger(task, config.concurrency());
-
-        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(task, log, config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
             graph,
@@ -147,11 +146,11 @@ class PregelTest {
             progressTracker
         ).run();
 
-        assertThat(progressLogger.getProgresses())
+        assertThat(progressTracker.getProgresses())
             .extracting(AtomicLong::get)
             .allMatch(progress -> progress == 0 || progress == graph.nodeCount());
 
-        assertThat(progressLogger.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .contains(
@@ -196,8 +195,12 @@ class PregelTest {
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
-        var progressLogger =  new TestProgressLogger(task, config.concurrency());
-        var progressTracker = new TaskProgressTracker(task, progressLogger, () -> new TaskRegistry("", taskStore));
+        var progressTracker = new TaskProgressTracker(
+            task,
+            new TestLog(),
+            config.concurrency(),
+            () -> new TaskRegistry("", taskStore)
+        );
 
         var pregelAlgo = Pregel.create(
             graph,

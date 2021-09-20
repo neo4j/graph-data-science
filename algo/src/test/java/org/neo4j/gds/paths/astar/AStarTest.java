@@ -25,13 +25,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -158,30 +157,30 @@ class AStarTest {
             .build();
 
         var progressTask = new AStarFactory<>().progressTask(graph, config);
-        var testLogger = new TestProgressLogger(progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         AStar.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
-        List<AtomicLong> progresses = testLogger.getProgresses();
+        List<AtomicLong> progresses = progressTracker.getProgresses();
         assertEquals(1, progresses.size());
         assertEquals(9, progresses.get(0).get());
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 5%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 17%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 23%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 29%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 35%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 41%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 47%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 52%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Finished"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar :: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 5%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 17%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 23%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 29%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 35%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 41%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 47%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar 52%"));
+        assertTrue(log.containsMessage(TestLog.INFO, "AStar :: Finished"));
 
         // no duplicate entries in progress logger
-        var logMessages = testLogger.getMessages(TestLog.INFO);
+        var logMessages = log.getMessages(TestLog.INFO);
         assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
     }
 

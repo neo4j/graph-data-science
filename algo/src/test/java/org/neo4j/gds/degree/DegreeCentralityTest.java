@@ -26,14 +26,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -198,8 +197,8 @@ final class DegreeCentralityTest {
         var config = configBuilder.build();
 
         var progressTask = new DegreeCentralityFactory<>().progressTask(graph, config);
-        TestProgressLogger progressLogger = new TestProgressLogger(progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
             Pools.DEFAULT,
@@ -209,13 +208,13 @@ final class DegreeCentralityTest {
         );
 
         degreeCentrality.compute();
-        List<AtomicLong> progresses = progressLogger.getProgresses();
+        List<AtomicLong> progresses = progressTracker.getProgresses();
 
         assertEquals(1, progresses.size());
         assertEquals(graph.nodeCount(), progresses.get(0).longValue());
 
-        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Start"));
-        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Finish"));
+        assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, ":: Finish"));
     }
 
     @ParameterizedTest

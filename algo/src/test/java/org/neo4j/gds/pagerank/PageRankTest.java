@@ -32,14 +32,13 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -176,16 +175,17 @@ class PageRankTest {
                 .build();
 
             var progressTask = PageRankAlgorithmFactory.pagerankProgressTask(graph, config);
-            var progressLogger = new TestProgressLogger(progressTask, config.concurrency());
-            var progressTracker = new TaskProgressTracker(
+            var log = new TestLog();
+            var progressTracker = new TestProgressTracker(
                 progressTask,
-                progressLogger,
+                log,
+                config.concurrency(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
             runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
 
-            var progresses = progressLogger.getProgresses().stream()
+            var progresses = progressTracker.getProgresses().stream()
                 .filter(it -> it.get() > 0)
                 .collect(Collectors.toList());
 
@@ -197,7 +197,7 @@ class PageRankTest {
                 assertThat(progress.get()).isIn(List.of(graph.nodeCount(), graph.nodeCount() * 2));
             });
 
-            var messages = progressLogger.getMessages(TestLog.INFO);
+            var messages = log.getMessages(TestLog.INFO);
 
             LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
                 assertThat(messages)

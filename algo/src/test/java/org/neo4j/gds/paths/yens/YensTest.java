@@ -28,13 +28,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -180,29 +179,29 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var testLogger = new TestProgressLogger(progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
-        assertEquals(12, testLogger.getProgresses().size());
+        assertEquals(12, progressTracker.getProgresses().size());
 
         // once
-        assertThat(testLogger.containsMessage(TestLog.INFO, "Yens :: Start")).isTrue();
-        assertThat(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished")).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, "Yens :: Start")).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, "Yens :: Finished")).isTrue();
         // for each k
         MutableInt iteration = new MutableInt(0);
         for (int i = 1; i <= k; i++) {
             iteration.setValue(i);
             var expected = formatWithLocale("k %d of %d", iteration.getValue(), k);
-            assertThat(testLogger.containsMessage(TestLog.INFO, expected)).isTrue();
+            assertThat(log.containsMessage(TestLog.INFO, expected)).isTrue();
         }
         // multiple times within each k
-        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Start Dijkstra for spur node"))).isTrue();
-        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Start"))).isTrue();
-        assertThat(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Finished"))).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Start Dijkstra for spur node"))).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Start"))).isTrue();
+        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Finished"))).isTrue();
     }
 
     @Test
@@ -214,14 +213,14 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var testLogger = new TestProgressLogger(progressTask, 1);
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
-        var messages = testLogger.getMessages(TestLog.INFO);
+        var messages = log.getMessages(TestLog.INFO);
 
         assertThat(messages)
             .extracting(removingThreadId())
@@ -238,6 +237,7 @@ class YensTest {
                 "Yens :: Finished"
             );
     }
+
     private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {
         var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
 
