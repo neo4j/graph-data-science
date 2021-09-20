@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collections;
@@ -92,17 +93,21 @@ public class NodeImporter {
         var labelIds = buffer.labelIds();
 
         if (buffer.hasLabelInformation()) {
-            setNodeLabelInformation(batch, batchLength, labelIds);
+            if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
+                setNodeLabelInformation(batch, batchLength, adder.startId(), labelIds, (nodeIds, startIndex, pos) -> nodeIds[pos]);
+            } else {
+                setNodeLabelInformation(batch, batchLength, adder.startId(), labelIds, (nodeIds, startIndex, pos) -> startIndex + pos);
+            }
         }
 
         importedProperties += adder.insert(batch, batchLength, propertyAllocator, reader, properties, labelIds);
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
-    private void setNodeLabelInformation(long[] batch, int batchLength, long[][] labelIds) {
+    private void setNodeLabelInformation(long[] batch, int batchLength, long startIndex, long[][] labelIds, IdFunction idFunction) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
-            long originalId = batch[i];
+            long nodeId = idFunction.apply(batch, startIndex, i);
             long[] labelIdsForNode = labelIds[i];
 
             for (long labelId : labelIdsForNode) {
@@ -111,7 +116,7 @@ public class NodeImporter {
                     Collections.emptyList()
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, originalId, idMapBuilder.capacity());
+                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, nodeId, idMapBuilder.capacity());
                 }
             }
         }
@@ -138,5 +143,10 @@ public class NodeImporter {
             );
         }
         return batchImportedProperties;
+    }
+
+    @FunctionalInterface
+    interface IdFunction {
+        long apply(long[] batch, long startIndex, int pos);
     }
 }

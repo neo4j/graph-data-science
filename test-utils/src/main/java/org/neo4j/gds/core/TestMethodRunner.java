@@ -73,4 +73,19 @@ public interface TestMethodRunner {
             GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
                 GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
     }
+
+    static Stream<TestMethodRunner> labelImportVariants() {
+        return Stream.of(
+            TestMethodRunner::runWithInternalIdsForLabelImport,
+            TestMethodRunner::runWithOriginalIdsForLabelImport
+        );
+    }
+
+    static <E extends Exception> void runWithInternalIdsForLabelImport(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.disableAndRun(code));
+    }
+
+    static <E extends Exception> void runWithOriginalIdsForLabelImport(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.enableAndRun(code));
+    }
 }
