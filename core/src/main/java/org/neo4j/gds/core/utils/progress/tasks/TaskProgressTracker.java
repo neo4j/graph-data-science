@@ -39,7 +39,7 @@ public class TaskProgressTracker implements ProgressTracker {
     private final TaskRegistry taskRegistry;
     private final TaskProgressLogger taskProgressLogger;
     private final Stack<Task> nestedTasks;
-    private Optional<Task> currentTask;
+    protected Optional<Task> currentTask;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, new BatchingProgressLogger(log, baseTask, concurrency), taskRegistryFactory);
