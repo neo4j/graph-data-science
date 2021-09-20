@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.config.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
@@ -42,7 +43,9 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
-    public Stream<PipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
+    public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
+        var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
+
         var model = Model.of(
             username(),
             pipelineName,

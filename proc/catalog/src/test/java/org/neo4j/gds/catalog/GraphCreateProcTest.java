@@ -56,6 +56,7 @@ import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
+import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -1403,6 +1404,19 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name),
             formatWithLocale("A graph with name '%s' already exists.", name));
     }
+
+    @Test
+    void failOnInvalidGraphName() {
+        String invalidName = " na me ";
+        String expectedMessage = formatWithLocale(
+            "`graphName` must not contain space characters, but got `%s`.",
+            invalidName
+        );
+
+        assertError("CALL gds.graph.create($name, '*', '*')", map("name", invalidName), expectedMessage);
+        assertError("CALL gds.graph.create.cypher($name, '*', '*')", map("name", invalidName), expectedMessage);
+    }
+
 
     @Test
     void failsOnWriteQuery() {

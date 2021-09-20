@@ -21,8 +21,8 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -40,6 +40,7 @@ public interface GraphCreateConfig extends BaseConfig {
     String READ_CONCURRENCY_KEY = "readConcurrency";
 
     @Configuration.Parameter
+    @Configuration.ConvertWith("validateName")
     String graphName();
 
     @Value.Default
@@ -91,6 +92,10 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Configuration.Ignore
     <R> R accept(Cases<R> visitor);
+
+    static String validateName(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
+    }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(

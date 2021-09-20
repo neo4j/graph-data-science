@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -64,10 +63,9 @@ public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')", "Model with name `myPipeline` already exists.");
     }
 
-    @Disabled("White space models are allowed atm.")
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('   ')");
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')", "Model with name must contain at least one non white-space character.");
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('   ')",
+            "`   ` must not contain space characters, but got `pipelineName`.");
     }
 }

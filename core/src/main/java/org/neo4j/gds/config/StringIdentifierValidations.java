@@ -19,22 +19,17 @@
  */
 package org.neo4j.gds.config;
 
-import org.neo4j.gds.annotation.Configuration;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.Serializable;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@Configuration
-public interface ModelConfig extends Serializable, BaseConfig {
+public final class StringIdentifierValidations {
 
-    long serialVersionUID = 0x42L;
+    public static @Nullable String validateNoWhiteCharacter(@Nullable String input, String paramterName) {
+        if (input != null && input.matches(".*\\s.*")) {
+            throw new IllegalArgumentException(formatWithLocale("`%s` must not contain whitespace characters, but got `%s`.", paramterName, input));
+        }
 
-    String MODEL_NAME_KEY = "modelName";
-    String MODEL_TYPE_KEY = "modelType";
-
-    @Configuration.ConvertWith("validateName")
-    String modelName();
-
-    static String validateName(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, MODEL_TYPE_KEY);
+        return input;
     }
 }
