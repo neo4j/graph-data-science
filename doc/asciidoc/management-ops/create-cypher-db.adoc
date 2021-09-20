@@ -72,12 +72,12 @@ YIELD
 To demonstrate how to execute cypher statements on in-memory graphs we are going to create a simple social network graph.
 We will use this graph to create a new database which we will execute our statements on.
 
-[source, cypher, role=noplay setup-query]
+[source, cypher, role=noplay]
 ----
 CREATE
   (alice:Person { name: 'Alice', age: 23 }),
   (bob:Person { name: 'Bob', age: 42 }),
-  (carl:Person { name: 'Carl', age: 31),
+  (carl:Person { name: 'Carl', age: 31 }),
 
   (alice)-[:KNOWS]->(bob),
   (bob)-[:KNOWS]->(alice),
@@ -86,8 +86,6 @@ CREATE
 
 We will now load a graph projection of the created graph via the <<catalog-graph-create, graph create>> procedure:
 
-[role=query-example]
---
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
@@ -101,17 +99,15 @@ YIELD
 ----
 
 .Results
-[opts="header", cols="1,3m,1,3m,1m"]
+[opts="header"]
 |===
 | graph            | nodeCont | relationshipCount
 | "social_network" | 3        | 3
 |===
---
+
 
 With a named graph loaded into the Neo4j Graph Data Science library, we can proceed to create the new database using the loaded graph as underlying data.
 
-[role=query-example]
---
 .Create a new database `gdsDb` using our `social_network` graph:
 [source, cypher, role=noplay]
 ----
@@ -120,12 +116,9 @@ CALL gds.alpha.create.cypherdb(
   'social_network'
 )
 ----
---
 
 In order to verify that the new database was created successfully we can use the Neo4j database administration commands.
 
-[role=query-example]
---
 [source, cypher, role=noplay]
 ----
 SHOW DATABASES
@@ -134,40 +127,33 @@ SHOW DATABASES
 .Results
 [opts="header"]
 |===
-| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home  |
-| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true  |
-| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false |
-| "gdsDb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false |
+| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home
+| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true
+| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
+| "gdsDb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
 |===
---
 
 We can now switch to the newly created database.
 
-[role=query-example]
---
 [source, cypher, role=noplay]
 ----
 :use gdsDb
 ----
---
 
 Finally, we are set up to execute cypher queries on our in-memory graph.
 
-[role=query-example]
---
 [source, cypher, role=noplay]
 ----
 MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 ----
 
 .Results
-[opts="header", cols="1,3m,1,3m,1m"]
+[opts="header"]
 |===
 | age1 | age2
 | 23   | 42
 | 42   | 23
 | 23   | 31
 |===
---
 
 We can see that the returned ages correspond to the structure of the original graph.
