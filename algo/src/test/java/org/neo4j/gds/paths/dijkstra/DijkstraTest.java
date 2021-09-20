@@ -26,13 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -271,27 +270,27 @@ final class DijkstraTest {
                 .build();
 
             var progressTask = DijkstraFactory.sourceTarget().progressTask(graph, config);
-            var testLogger = new TestProgressLogger(progressTask, 1);
-            var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+            var testLog = new TestLog();
+            var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
             Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
-            List<AtomicLong> progresses = testLogger.getProgresses();
+            List<AtomicLong> progresses = progressTracker.getProgresses();
             assertEquals(1, progresses.size());
             assertEquals(graph.relationshipCount(), progresses.get(0).get());
 
-            assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 28%"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 42%"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 71%"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 85%"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 100%"));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, ":: Start"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 28%"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 42%"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 71%"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 85%"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 100%"));
+            assertTrue(testLog.containsMessage(TestLog.INFO, ":: Finished"));
 
             // no duplicate entries in progress logger
-            var logMessages = testLogger.getMessages(TestLog.INFO);
+            var logMessages = testLog.getMessages(TestLog.INFO);
             assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
         }
     }

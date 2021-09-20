@@ -20,13 +20,13 @@
 package org.neo4j.gds.impl.scc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -135,8 +135,8 @@ class SccTest {
     @Test
     void testLogging() {
         var task = Tasks.leaf("My task");
-        var progressLogger = new TestProgressLogger(task, 1);
-        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new SccAlgorithm(
             graph,
@@ -146,7 +146,7 @@ class SccTest {
 
         algo.compute();
 
-        assertThat(progressLogger.getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(

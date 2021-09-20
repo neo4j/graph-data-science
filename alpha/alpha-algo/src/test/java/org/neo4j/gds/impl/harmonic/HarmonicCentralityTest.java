@@ -21,13 +21,13 @@ package org.neo4j.gds.impl.harmonic;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -84,8 +84,8 @@ public class HarmonicCentralityTest {
     @Test
     void testLogging() {
         var task = Tasks.leaf("My task");
-        var progressLogger = new TestProgressLogger(task, 1);
-        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new TestLog();
+        var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new HarmonicCentrality(
             graph,
@@ -97,7 +97,7 @@ public class HarmonicCentralityTest {
 
         algo.compute();
 
-        assertThat(progressLogger.getMessages(INFO))
+        assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(

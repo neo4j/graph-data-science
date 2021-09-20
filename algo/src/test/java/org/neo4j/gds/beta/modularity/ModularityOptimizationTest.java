@@ -26,25 +26,24 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -103,7 +102,7 @@ class ModularityOptimizationTest {
     void testUnweighted() {
         var graph = unweightedGraph();
 
-        ModularityOptimization pmo = compute(graph, 3, null, 1, 10_000, ProgressLogger.NULL_LOGGER);
+        ModularityOptimization pmo = compute(graph, 3, null, 1, 10_000);
 
         assertEquals(0.12244, pmo.getModularity(), 0.001);
         assertCommunities(
@@ -116,7 +115,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testWeighted() {
-        ModularityOptimization pmo = compute(graph, 3, null, 3, 2, ProgressLogger.NULL_LOGGER);
+        ModularityOptimization pmo = compute(graph, 3, null, 3, 2);
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
         assertCommunities(
@@ -135,8 +134,7 @@ class ModularityOptimizationTest {
             graph,
             10, graph.nodeProperties("seed2"),
             1,
-            100,
-            ProgressLogger.NULL_LOGGER
+            100
         );
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
@@ -154,8 +152,7 @@ class ModularityOptimizationTest {
             graph,
             10, graph.nodeProperties("seed1"),
             1,
-            100,
-            ProgressLogger.NULL_LOGGER
+            100
         );
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
@@ -175,16 +172,16 @@ class ModularityOptimizationTest {
 
     @Test
     void testLogging() {
-        var testLogger = new TestProgressLogger(Tasks.leaf("ModularityOptimization", graph.relationshipCount()), 3);
+        var log = new TestLog();
 
-        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, testLogger);
+        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
 
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains(":: Start"));
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
-        assertThat(testLogger.getMessages(INFO)).anyMatch(s -> s.contains(":: Finished"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains(":: Start"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
+        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains(":: Finished"));
     }
 
     @ParameterizedTest
@@ -217,8 +214,19 @@ class ModularityOptimizationTest {
         int maxIterations,
         NodeProperties properties,
         int concurrency,
+        int minBatchSize
+    ) {
+        return compute(graph, maxIterations, properties, concurrency, minBatchSize, new TestLog());
+    }
+
+    @NotNull
+    private ModularityOptimization compute(
+        Graph graph,
+        int maxIterations,
+        NodeProperties properties,
+        int concurrency,
         int minBatchSize,
-        ProgressLogger testLogger
+        Log log
     ) {
         var config = ImmutableModularityOptimizationStreamConfig.builder()
             .maxIterations(maxIterations)
@@ -226,7 +234,7 @@ class ModularityOptimizationTest {
             .batchSize(minBatchSize)
             .build();
         var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
-        var progressTracker = new TaskProgressTracker(task, testLogger, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
         return new ModularityOptimization(
             graph,
             maxIterations,
