@@ -9,10 +9,10 @@
 This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
 --
 
-:directed: true
-:undirected: true
-:monopartite: true
-:weighted: true
+:directed:
+:undirected:
+:monopartite:
+:weighted:
 include::../shared/graph-variants.adoc[]
 
 
