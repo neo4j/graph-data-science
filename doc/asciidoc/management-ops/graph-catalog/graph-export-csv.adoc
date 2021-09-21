@@ -129,7 +129,7 @@ YIELD
 
 == Export format
 
-The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin-import/[import] command.
+The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
 
 
 === Nodes
@@ -143,7 +143,7 @@ The naming schema of the exported files is: `nodes_LABELS_INDEX.csv`, where:
 For each label combination one or more data files are created, as each exporter thread exports into a separate file.
 
 Additionally, each label combination produces a single header file, which contains a single line describing the columns in the data files
-More information about the header files can be found here: https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin-import/#import-tool-header-format[CSV header format].
+More information about the header files can be found here: https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/#import-tool-header-format[CSV header format].
 
 For example a Graph with the node combinations `:A`, `:B` and `:A:B` might create the following files
 
