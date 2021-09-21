@@ -72,6 +72,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
         int numberOfThreads = sizing.numberOfThreads();
 
         try (StoreScanner<Record> scanner = factory.newScanner(StoreScanner.DEFAULT_PREFETCH_SIZE, transaction)) {
+            progressTracker.beginSubTask("Store Scan");
+
             progressTracker
                 .progressLogger()
                 .getLog()
@@ -111,6 +113,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
                     bytesPerSecond / numberOfThreads
                 )
             );
+
+            progressTracker.endSubTask("Store Scan");
         }
 
         return build();

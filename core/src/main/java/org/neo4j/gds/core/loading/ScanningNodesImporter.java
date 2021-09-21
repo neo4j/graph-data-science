@@ -160,75 +160,78 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
         long indexStart = System.nanoTime();
-        progressTracker.progressLogger().logMessage("Property Index Scan :: Start");
 
-        var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
-        // In order to avoid a race between preparing the importers and the flag being toggled,
-        // we set the concurrency to 1 if we don't import in parallel.
-        //
-        // !! NOTE !!
-        //   If you end up changing this logic
-        //   you need to add a check for the feature flag to IndexedNodePropertyImporter
-        var concurrency = parallelIndexScan ? this.concurrency : 1;
+        try {
+            progressTracker.beginSubTask("Property Index Scan");
 
-        var indexScanningImporters = properties.indexedProperties()
-            .entrySet()
-            .stream()
-            .flatMap(labelAndProperties -> labelAndProperties
-                .getValue()
-                .mappings()
+            var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
+            // In order to avoid a race between preparing the importers and the flag being toggled,
+            // we set the concurrency to 1 if we don't import in parallel.
+            //
+            // !! NOTE !!
+            //   If you end up changing this logic
+            //   you need to add a check for the feature flag to IndexedNodePropertyImporter
+            var concurrency = parallelIndexScan ? this.concurrency : 1;
+
+            var indexScanningImporters = properties.indexedProperties()
+                .entrySet()
                 .stream()
-                .map(mappingAndIndex -> new IndexedNodePropertyImporter(
-                    concurrency,
-                    transaction,
-                    labelAndProperties.getKey(),
-                    mappingAndIndex.property(),
-                    mappingAndIndex.index(),
-                    nodeMapping,
-                    progressTracker,
-                    terminationFlag,
-                    threadPool,
-                    allocationTracker
-                ))
-            ).collect(Collectors.toList());
+                .flatMap(labelAndProperties -> labelAndProperties
+                    .getValue()
+                    .mappings()
+                    .stream()
+                    .map(mappingAndIndex -> new IndexedNodePropertyImporter(
+                        concurrency,
+                        transaction,
+                        labelAndProperties.getKey(),
+                        mappingAndIndex.property(),
+                        mappingAndIndex.index(),
+                        nodeMapping,
+                        progressTracker,
+                        terminationFlag,
+                        threadPool,
+                        allocationTracker
+                    ))
+                ).collect(Collectors.toList());
 
-        var expectedProperties = ((long) indexScanningImporters.size()) * nodeMapping.nodeCount();
-        var remainingVolume = progressTracker.progressLogger().reset(expectedProperties);
-
-        if (!parallelIndexScan) {
-            // While we don't scan the index in parallel, try to at least scan all properties in parallel
-            ParallelUtil.run(indexScanningImporters, threadPool);
-        }
-        long recordsImported = 0L;
-        for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
-            if (parallelIndexScan) {
-                // If we run in parallel, we need to run the importers one after another, as they will
-                // parallelize internally
-                propertyImporter.run();
+            if (!parallelIndexScan) {
+                // While we don't scan the index in parallel, try to at least scan all properties in parallel
+                ParallelUtil.run(indexScanningImporters, threadPool);
             }
-            var nodeLabel = propertyImporter.nodeLabel();
-            var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
-            storeProperties.put(propertyImporter.mapping(), propertyImporter.build());
-            recordsImported += propertyImporter.imported();
+            long recordsImported = 0L;
+            for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
+                if (parallelIndexScan) {
+                    // If we run in parallel, we need to run the importers one after another, as they will
+                    // parallelize internally
+                    propertyImporter.run();
+                }
+                var nodeLabel = propertyImporter.nodeLabel();
+                var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
+                storeProperties.put(propertyImporter.mapping(), propertyImporter.build());
+                recordsImported += propertyImporter.imported();
+            }
+
+            long tookNanos = System.nanoTime() - indexStart;
+            BigInteger bigNanos = BigInteger.valueOf(tookNanos);
+            double tookInSeconds = new BigDecimal(bigNanos)
+                .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
+                .doubleValue();
+            double recordsPerSecond = new BigDecimal(A_BILLION)
+                .multiply(BigDecimal.valueOf(recordsImported))
+                .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
+                .doubleValue();
+
+            progressTracker.logProgress(recordsImported);
+
+            progressTracker.progressLogger().getLog().debug(formatWithLocale(
+                "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
+                recordsImported,
+                tookInSeconds,
+                recordsPerSecond
+            ));
+        } finally {
+            progressTracker.endSubTask("Property Index Scan");
         }
-
-        long tookNanos = System.nanoTime() - indexStart;
-        BigInteger bigNanos = BigInteger.valueOf(tookNanos);
-        double tookInSeconds = new BigDecimal(bigNanos)
-            .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
-            .doubleValue();
-        double recordsPerSecond = new BigDecimal(A_BILLION)
-            .multiply(BigDecimal.valueOf(recordsImported))
-            .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
-            .doubleValue();
-
-        progressTracker.progressLogger().logMessage(formatWithLocale(
-            "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
-            recordsImported,
-            tookInSeconds,
-            recordsPerSecond
-        ));
-        progressTracker.progressLogger().reset(remainingVolume);
     }
 
     @Nullable

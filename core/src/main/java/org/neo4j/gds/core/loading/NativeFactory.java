@@ -39,10 +39,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -139,10 +141,23 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
+        var properties = IndexPropertyMappings.prepareProperties(
+            graphCreateConfig,
+            dimensions,
+            loadingContext.transactionContext()
+        );
+
+        List<Task> nodeTasks = properties.indexedProperties().isEmpty()
+            ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
+            : List.of(
+                Tasks.leaf("Store Scan", dimensions.nodeCount()),
+                Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
+            );
+
         var task = Tasks.task(
             "Loading",
-            Tasks.leaf("Nodes", dimensions.nodeCount()),
-            Tasks.leaf("Relationships", relationshipCount)
+            Tasks.task("Nodes", nodeTasks),
+            Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
         );
         var progressLogger = new BatchingProgressLogger(
             loadingContext.log(),

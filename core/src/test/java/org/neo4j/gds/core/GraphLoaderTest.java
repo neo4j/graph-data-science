@@ -34,6 +34,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
@@ -140,10 +142,42 @@ class GraphLoaderTest extends BaseTest {
             .contains(
                 "Loading :: Start",
                 "Loading :: Nodes :: Start",
-                "Loading :: Nodes 100%",
+                "Loading :: Nodes :: Store Scan :: Start",
+                "Loading :: Nodes :: Store Scan 100%",
+                "Loading :: Nodes :: Store Scan :: Finished",
                 "Loading :: Nodes :: Finished",
                 "Loading :: Relationships :: Start",
-                "Loading :: Relationships 100%",
+                "Loading :: Relationships :: Store Scan :: Start",
+                "Loading :: Relationships :: Store Scan 100%",
+                "Loading :: Relationships :: Store Scan :: Finished",
+                "Loading :: Relationships :: Finished",
+                "Loading :: Finished"
+            )
+            .doesNotContain("Loading :: Nodes :: Property Index Scan :: Start");
+    }
+
+    @Test
+    public void shouldTrackProgressWithNativeLoadingUsingIndex() {
+        TestLog log = new TestLog();
+
+        USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> testPropertyLoadingWithIndex(TestSupport.FactoryType.NATIVE, log));
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Loading :: Start",
+                "Loading :: Nodes :: Start",
+                "Loading :: Nodes :: Store Scan :: Start",
+                "Loading :: Nodes :: Store Scan 100%",
+                "Loading :: Nodes :: Store Scan :: Finished",
+                "Loading :: Nodes :: Property Index Scan :: Start",
+                "Loading :: Nodes :: Property Index Scan 100%",
+                "Loading :: Nodes :: Property Index Scan :: Finished",
+                "Loading :: Nodes :: Finished",
+                "Loading :: Relationships :: Start",
+                "Loading :: Relationships :: Store Scan :: Start",
+                "Loading :: Relationships :: Store Scan 100%",
+                "Loading :: Relationships :: Store Scan :: Finished",
                 "Loading :: Relationships :: Finished",
                 "Loading :: Finished"
             );
@@ -275,17 +309,17 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphStoreFactoryTypesTest
     void testPropertyViaIndex(TestSupport.FactoryType factoryType) {
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-            testPropertyLoadingWithIndex(factoryType));
+            testPropertyLoadingWithIndex(factoryType, NullLog.getInstance()));
     }
 
     @AllGraphStoreFactoryTypesTest
     void testParallelPropertyViaIndex(TestSupport.FactoryType factoryType) {
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
             USE_PARALLEL_PROPERTY_VALUE_INDEX.enableAndRun(() ->
-                testPropertyLoadingWithIndex(factoryType)));
+                testPropertyLoadingWithIndex(factoryType, NullLog.getInstance())));
     }
 
-    private void testPropertyLoadingWithIndex(TestSupport.FactoryType factoryType) {
+    private void testPropertyLoadingWithIndex(TestSupport.FactoryType factoryType, Log log) {
         var indexQueries = List.of(
             "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
             "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
@@ -303,6 +337,7 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("Node1", "Node2", "Node3")
             .withNodeProperties(nodePropertyMappings)
             .withDefaultAggregation(Aggregation.SINGLE)
+            .withLog(log)
             .graph(factoryType);
 
         Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
