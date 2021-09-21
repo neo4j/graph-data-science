@@ -36,7 +36,7 @@ public final class StringIdentifierValidations {
         return input;
     }
 
-    public static String replaceBlankWithNull(String input) {
+    public static String emptyToNull(String input) {
         return input == null || input.isEmpty() ? null : input;
     }
 }

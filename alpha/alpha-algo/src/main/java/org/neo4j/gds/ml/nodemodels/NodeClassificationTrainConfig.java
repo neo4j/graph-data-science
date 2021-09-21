@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @ValueClass
@@ -85,7 +85,7 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     }
 
     static @Nullable String validateProperty(String input) {
-        return validateNoWhiteCharacter(replaceBlankWithNull(input), "targetProperty");
+        return validateNoWhiteCharacter(emptyToNull(input), "targetProperty");
     }
 
     static NodeClassificationTrainConfig of(

@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface NodeWeightConfig {
@@ -35,6 +35,6 @@ public interface NodeWeightConfig {
     }
 
     static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(replaceBlankWithNull(input), "nodeWeightProperty");
+        return validateNoWhiteCharacter(emptyToNull(input), "nodeWeightProperty");
     }
 }

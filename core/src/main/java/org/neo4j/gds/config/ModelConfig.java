@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.Configuration;
 
 import java.io.Serializable;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @Configuration
@@ -38,6 +38,6 @@ public interface ModelConfig extends Serializable, BaseConfig {
     String modelName();
 
     static String validateName(String input) {
-        return validateNoWhiteCharacter(replaceBlankWithNull(input), MODEL_TYPE_KEY);
+        return validateNoWhiteCharacter(emptyToNull(input), MODEL_TYPE_KEY);
     }
 }
