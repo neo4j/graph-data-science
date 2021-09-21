@@ -60,7 +60,10 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
 
     @Override
     public Optional<Task> query(String username, JobId jobId) {
-        return Optional.ofNullable(registeredTasks.get(username).get(jobId));
+        if (registeredTasks.containsKey(username)) {
+            return Optional.ofNullable(registeredTasks.get(username).get(jobId));
+        }
+        return Optional.empty();
     }
 
     @Override
