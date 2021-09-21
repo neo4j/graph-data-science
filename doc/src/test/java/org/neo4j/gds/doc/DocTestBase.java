@@ -150,9 +150,9 @@ abstract class DocTestBase extends BaseProcTest {
                     .collect(Collectors.toList());
                 actualResults.add(actualResultValues);
             }
-            assertThat(queryExample.results())
+            assertThat(actualResults)
                 .as(queryExample.query())
-                .containsExactlyElementsOf(actualResults);
+                .containsExactlyElementsOf(queryExample.results());
         });
     }
 
