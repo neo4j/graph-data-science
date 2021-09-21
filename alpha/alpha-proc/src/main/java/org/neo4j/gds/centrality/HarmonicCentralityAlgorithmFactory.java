@@ -45,7 +45,7 @@ class HarmonicCentralityAlgorithmFactory extends AlgorithmFactory<HarmonicCentra
             configuration.concurrency(),
             allocationTracker,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            progressTracker
         );
     }
 }
