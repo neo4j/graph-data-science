@@ -9,6 +9,12 @@
 This section describes the Degree Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
+:directed:
+:undirected:
+:monopartite:
+:weighted:
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-degree-centrality-intro]]
 == Introduction
