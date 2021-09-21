@@ -283,6 +283,7 @@ class KnnTest {
             .nodeWeightProperty("knn")
             .randomSeed(42L)
             .topK(1)
+            .concurrency(1)
             .build();
 
         var factory = new KnnFactory<>();
