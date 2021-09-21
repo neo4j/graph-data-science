@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 
+@TestOnly
 public class NonReleasingTaskRegistry extends TaskRegistry {
 
     public NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
