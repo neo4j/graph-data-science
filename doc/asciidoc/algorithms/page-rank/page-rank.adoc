@@ -13,6 +13,7 @@ This section describes the PageRank algorithm in the Neo4j Graph Data Science li
 :undirected:
 :monopartite:
 :weighted:
+:unweighted:
 include::../shared/graph-variants.adoc[]
 
 

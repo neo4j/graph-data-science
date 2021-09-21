@@ -13,6 +13,7 @@ This section describes the {algorithm} algorithm in the Neo4j Graph Data Science
 :undirected:
 :monopartite:
 :weighted:
+:unweighted:
 include::../shared/graph-variants.adoc[]
 
 
