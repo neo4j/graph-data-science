@@ -162,7 +162,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new Prim(graph, graph, minMax, configuration.startNodeId());
+                return new Prim(graph, graph, minMax, configuration.startNodeId(), progressTracker);
             }
         };
     }

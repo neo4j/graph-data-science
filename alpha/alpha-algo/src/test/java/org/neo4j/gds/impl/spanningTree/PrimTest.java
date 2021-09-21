@@ -21,14 +21,15 @@ package org.neo4j.gds.impl.spanningTree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.impl.spanningTrees.Prim;
-import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -87,52 +88,52 @@ class PrimTest {
 
     @Test
     void testMaximumFromA() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a).compute());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMaximumFromB() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b).compute());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMaximumFromC() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c).compute());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMaximumFromD() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d).compute());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMaximumFromE() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e).compute());
+        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMinimumFromA() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a).compute());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMinimumFromB() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b).compute());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMinimumFromC() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c).compute());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMinimumFromD() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d).compute());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d, ProgressTracker.NULL_TRACKER).compute());
     }
 
     @Test
     void testMinimumFromE() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
+        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e, ProgressTracker.NULL_TRACKER).compute());
     }
 
     private void assertMinimum(SpanningTree mst) {
