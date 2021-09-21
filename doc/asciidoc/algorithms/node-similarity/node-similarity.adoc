@@ -10,6 +10,13 @@ This section describes the Node Similarity algorithm in the Neo4j Graph Data Sci
 The algorithm is based on the Jaccard Similarity score.
 --
 
+:directed:
+:undirected:
+:multipartite:
+:weighted:
+:unweighted:
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-node-similarity-intro]]
 == Introduction
