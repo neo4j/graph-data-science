@@ -63,4 +63,18 @@ class TaskRegistryTest {
         assertThat(globalTaskStore.isEmpty()).isTrue();
     }
 
+    @Test
+    void shouldDetectAlreadyRegisteredTasks() {
+        var globalTaskStore = new GlobalTaskStore();
+        var taskRegistry = new TaskRegistry("", globalTaskStore);
+
+        var task = Tasks.leaf("task");
+
+        assertThat(taskRegistry.containsTask(task)).isFalse();
+
+        taskRegistry.registerTask(task);
+
+        assertThat(taskRegistry.containsTask(task)).isTrue();
+    }
+
 }

@@ -46,4 +46,10 @@ public class TaskRegistry {
     public void unregisterTask() {
         taskStore.remove(username, jobId);
     }
+
+    public boolean containsTask(Task task) {
+        return taskStore.query(username, jobId)
+            .map(t -> t == task)
+            .orElse(false);
+    }
 }
