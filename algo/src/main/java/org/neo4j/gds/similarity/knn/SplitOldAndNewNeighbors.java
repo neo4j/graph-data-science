@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
 
@@ -40,19 +41,22 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
     private final HugeObjectArray<LongArrayList> allNewNeighbors;
     private final int sampledK;
+    private final ProgressTracker progressTracker;
 
     SplitOldAndNewNeighbors(
         SplittableRandom random,
         HugeObjectArray<NeighborList> neighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
-        int sampledK
+        int sampledK,
+        ProgressTracker progressTracker
     ) {
         this.random = random;
         this.neighbors = neighbors;
         this.allOldNeighbors = allOldNeighbors;
         this.allNewNeighbors = allNewNeighbors;
         this.sampledK = sampledK;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -100,6 +104,7 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
             }
 
             if (sampled.isEmpty()) {
+                progressTracker.logProgress();
                 continue;
             }
 
@@ -112,6 +117,7 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
                 assert neighborNode >= 0;
                 newNeighbors.add(neighborNode);
             }
+            progressTracker.logProgress();
         }
     }
 }

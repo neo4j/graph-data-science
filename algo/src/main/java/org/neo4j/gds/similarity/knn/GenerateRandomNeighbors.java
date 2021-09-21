@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
 
@@ -35,6 +36,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
     private final long n;
     private final int k;
     private final int k2;
+    private final ProgressTracker progressTracker;
 
     GenerateRandomNeighbors(
         SplittableRandom random,
@@ -42,7 +44,8 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
         HugeObjectArray<NeighborList> neighbors,
         long n,
         int k,
-        int k2
+        int k2,
+        ProgressTracker progressTracker
     ) {
         this.random = random;
         this.computer = computer;
@@ -50,6 +53,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
         this.n = n;
         this.k = k;
         this.k2 = k2;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -85,6 +89,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
             assert neighbors.size() > 0; // because K > 0 and N > 1
             assert neighbors.size() <= k;
 
+            progressTracker.logProgress();
             this.neighbors.set(nodeId, neighbors);
         }
     }

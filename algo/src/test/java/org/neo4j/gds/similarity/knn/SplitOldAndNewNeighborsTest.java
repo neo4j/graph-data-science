@@ -26,6 +26,7 @@ import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
 import java.util.stream.LongStream;
@@ -83,7 +84,8 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
             allNeighbors,
             allOldNeighbors,
             allNewNeighbors,
-            sampledK
+            sampledK,
+            ProgressTracker.NULL_TRACKER
         );
         splitNeighbors.apply(0, nodeCount);
 

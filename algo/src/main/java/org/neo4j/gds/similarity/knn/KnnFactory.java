@@ -104,10 +104,18 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.iterativeDynamic(
-            "KNN compute",
-            () -> List.of(Tasks.leaf("iteration")),
-            config.maxIterations()
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("Initialize random neighbors", graph.nodeCount()),
+            Tasks.iterativeDynamic(
+                "Iteration",
+                () -> List.of(
+                    Tasks.leaf("Split old and new neighbors", graph.nodeCount()),
+                    Tasks.leaf("Reverse old and new neighbors", graph.nodeCount()),
+                    Tasks.leaf("Join neighbors", graph.nodeCount())
+                ),
+                config.maxIterations()
+            )
         );
     }
 }
