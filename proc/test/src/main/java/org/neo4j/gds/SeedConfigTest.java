@@ -70,7 +70,7 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "  "));
         assertThatThrownBy(() -> createConfig(createMinimalConfig(mapWrapper)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("not contain whitespace characters");
+            .hasMessageContaining("not end or begin with whitespace characters");
     }
 
     @Test
@@ -120,8 +120,7 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
 
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "seedProperty",
-                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
+                "seedProperty", "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             String error = "Seed property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";

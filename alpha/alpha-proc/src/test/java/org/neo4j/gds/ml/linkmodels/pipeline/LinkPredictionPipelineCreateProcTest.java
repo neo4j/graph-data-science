@@ -65,7 +65,7 @@ public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create('   ')",
-            "`   ` must not contain space characters, but got `pipelineName`.");
+        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.create(' ')",
+            "`pipelineName` must not end or begin with whitespace characters, but got ` `.");
     }
 }

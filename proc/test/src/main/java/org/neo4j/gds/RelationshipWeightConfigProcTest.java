@@ -76,8 +76,8 @@ public final class RelationshipWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("blankRelationshipWeightProperty", () -> {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "  ");
-            var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
-            assertThat(algoConfig.relationshipWeightProperty()).isNull();
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, relationshipWeightConfig)).hasMessage(
+                "`relationshipWeightProperty` must not end or begin with whitespace characters, but got `  `.");
         });
     }
 

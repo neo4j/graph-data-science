@@ -21,13 +21,16 @@ package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.regex.Pattern;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class StringIdentifierValidations {
+    private static final Pattern TRAILING_WHITESPACES_PATTERN = Pattern.compile("(^\\s)|(\\s$)");
 
     public static @Nullable String validateNoWhiteCharacter(@Nullable String input, String paramterName) {
-        if (input != null && input.matches(".*\\s.*")) {
-            throw new IllegalArgumentException(formatWithLocale("`%s` must not contain whitespace characters, but got `%s`.", paramterName, input));
+        if (input != null && TRAILING_WHITESPACES_PATTERN.matcher(input).find()) {
+            throw new IllegalArgumentException(formatWithLocale("`%s` must not end or begin with whitespace characters, but got `%s`.", paramterName, input));
         }
 
         return input;

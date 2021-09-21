@@ -77,7 +77,7 @@ public final class WritePropertyConfigProcTest {
         return DynamicTest.dynamicTest("whitespaceWriteProperty", () -> {
             assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withString("writeProperty", "  ")))
                 .hasMessageContaining("writeProperty")
-                .hasMessageContaining("mandatory");
+                .hasMessageContaining("whitespace");
         });
     }
 

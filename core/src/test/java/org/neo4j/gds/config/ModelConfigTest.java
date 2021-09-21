@@ -31,17 +31,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ModelConfigTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"graph$", "+graph", "_?+"})
+    @ValueSource(strings = {"graph$", "+graph", "_?+", "my graph"})
     void validNames(String name) {
         assertThat(new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", name))))
             .matches(config -> config.modelName().equals(name));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"   ", "   graph", "graph ", " graph ", "my graph", "\tgraph"})
+    @ValueSource(strings = {"", " ", "   graph", "graph ", " graph ", "\tgraph"})
     void failOnWhiteSpaces(String invalidName) {
         assertThatThrownBy(() -> new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", invalidName))))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("must not contain space characters");
+            .hasMessageContaining("modelType")
+            .hasMessageContaining("must not end or begin with whitespace characters");
     }
 }
