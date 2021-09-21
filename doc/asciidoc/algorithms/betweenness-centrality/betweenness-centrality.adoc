@@ -9,6 +9,11 @@
 This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
+:directed:
+:undirected:
+:monopartite:
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-betweenness-centrality-intro]]
 == Introduction
