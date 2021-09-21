@@ -20,9 +20,10 @@
 package org.neo4j.gds.impl;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.container.Buckets;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.container.Buckets;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -73,7 +74,8 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     // multiplier used to scale an double to int
     private final double multiplier = 100_000D; // double type is intended
 
-    public ShortestPathDeltaStepping(Graph graph, long startNode, double delta) {
+    public ShortestPathDeltaStepping(Graph graph, long startNode, double delta, ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
         this.graph = graph;
         this.startNode = Math.toIntExact(graph.toMappedNodeId(startNode));
         this.delta = delta;
@@ -103,6 +105,8 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
 
     @Override
     public ShortestPathDeltaStepping compute() {
+        progressTracker.beginSubTask();
+
         // reset
         for (int i = 0; i < nodeCount; i++) {
             distance.set(i, Long.MAX_VALUE);
@@ -137,7 +141,12 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
             });
             ParallelUtil.run(light, executorService, futures);
             ParallelUtil.run(heavy, executorService, futures);
+
+            progressTracker.logProgress();
         }
+
+        progressTracker.endSubTask();
+
         return this;
     }
 

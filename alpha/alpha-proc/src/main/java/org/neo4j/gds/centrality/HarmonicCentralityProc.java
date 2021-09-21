@@ -21,15 +21,12 @@ package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -104,9 +101,9 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
 
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             var writeConcurrency = computationResult.config().writeConcurrency();
-            var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("HarmonicCentrality :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, writeConcurrency);
-            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             NodePropertyExporter exporter =  nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
@@ -149,27 +146,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
 
     @Override
     protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            protected String taskName() {
-                return "HarmonicCentrality";
-            }
-
-            @Override
-            protected HarmonicCentrality build(
-                Graph graph,
-                HarmonicCentralityConfig configuration,
-                AllocationTracker allocationTracker,
-                ProgressTracker progressTracker
-            ) {
-                return new HarmonicCentrality(
-                    graph,
-                    allocationTracker,
-                    configuration.concurrency(),
-                    Pools.DEFAULT
-                );
-            }
-        };
+        return new HarmonicCentralityAlgorithmFactory();
     }
 
     @SuppressWarnings("unused")

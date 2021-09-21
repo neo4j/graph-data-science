@@ -21,9 +21,14 @@ package org.neo4j.gds.impl.harmonic;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -31,6 +36,8 @@ import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 public class HarmonicCentralityTest {
@@ -59,9 +66,10 @@ public class HarmonicCentralityTest {
 
         var harmonicCentrality = new HarmonicCentrality(
             graph,
-            AllocationTracker.empty(),
             1,
-            Pools.DEFAULT
+            AllocationTracker.empty(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         );
 
         harmonicCentrality.compute();
@@ -71,5 +79,31 @@ public class HarmonicCentralityTest {
         assertThat(harmonicCentrality.getCentralityScore(idFunction.of("c"))).isEqualTo(0.375, within(0.1));
         assertThat(harmonicCentrality.getCentralityScore(idFunction.of("d"))).isEqualTo(0.25, within(0.1));
         assertThat(harmonicCentrality.getCentralityScore(idFunction.of("e"))).isEqualTo(0.25, within(0.1));
+    }
+
+    @Test
+    void testLogging() {
+        var task = Tasks.leaf("My task");
+        var progressLogger = new TestProgressLogger(task, 1);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+
+        var algo = new HarmonicCentrality(
+            graph,
+            1,
+            AllocationTracker.empty(),
+            Pools.DEFAULT,
+            progressTracker
+        );
+
+        algo.compute();
+
+        assertThat(progressLogger.getMessages(INFO))
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .containsExactly(
+                "My task :: Start",
+                "My task 100%",
+                "My task :: Finished"
+            );
     }
 }

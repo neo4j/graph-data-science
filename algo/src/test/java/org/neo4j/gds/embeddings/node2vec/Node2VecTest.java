@@ -35,6 +35,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -113,7 +114,7 @@ class Node2VecTest extends AlgoTestBase {
             progressTask,
             4
         );
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
         new Node2Vec(
             graph,
             config,

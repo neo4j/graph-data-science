@@ -149,7 +149,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             task,
             graphCreateConfig.readConcurrency()
         );
-        return new TaskProgressTracker(task, progressLogger);
+        return new TaskProgressTracker(task, progressLogger, loadingContext.taskRegistryFactory());
     }
 
     @Override

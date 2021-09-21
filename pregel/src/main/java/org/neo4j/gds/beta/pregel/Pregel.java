@@ -160,30 +160,41 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         computer.initComputation();
 
-        progressTracker.beginSubTask();
-        int iteration = 0;
-        for (; iteration < config.maxIterations(); iteration++) {
+        try {
             progressTracker.beginSubTask();
-            computer.initIteration(iteration);
-            messenger.initIteration(iteration);
-            computer.runIteration();
-            progressTracker.endSubTask();
 
-            progressTracker.beginSubTask();
-            didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
-            progressTracker.endSubTask();
+            int iteration = 0;
+            for (; iteration < config.maxIterations(); iteration++) {
+                try {
+                    progressTracker.beginSubTask();
 
-            if (didConverge) {
-                break;
+                    computer.initIteration(iteration);
+                    messenger.initIteration(iteration);
+                    computer.runIteration();
+                } finally {
+                    progressTracker.endSubTask();
+                }
+
+                try {
+                    progressTracker.beginSubTask();
+
+                    didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
+                } finally {
+                    progressTracker.endSubTask();
+                }
+
+                if (didConverge) {
+                    break;
+                }
             }
+            return ImmutablePregelResult.builder()
+                .nodeValues(nodeValues)
+                .didConverge(didConverge)
+                .ranIterations(iteration)
+                .build();
+        } finally {
+            progressTracker.endSubTask();
         }
-        progressTracker.endSubTask();
-
-        return ImmutablePregelResult.builder()
-            .nodeValues(nodeValues)
-            .didConverge(didConverge)
-            .ranIterations(iteration)
-            .build();
     }
 
     public void release() {

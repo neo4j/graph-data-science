@@ -20,14 +20,15 @@
 package org.neo4j.gds.impl;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -83,10 +84,11 @@ class ClosenessCentralityTest {
     void testGetCentrality() {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
-            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            false,
+            AllocationTracker.empty(),
             Pools.DEFAULT,
-            false
+            ProgressTracker.NULL_TRACKER
         );
         algo.compute();
         final double[] centrality = algo.exportToArray();
@@ -100,10 +102,11 @@ class ClosenessCentralityTest {
 
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
-            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            false,
+            AllocationTracker.empty(),
             Pools.DEFAULT,
-            false
+            ProgressTracker.NULL_TRACKER
         );
         algo.compute();
         algo.resultStream()

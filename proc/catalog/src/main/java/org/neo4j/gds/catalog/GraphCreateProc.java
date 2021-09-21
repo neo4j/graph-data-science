@@ -114,7 +114,7 @@ public class GraphCreateProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.create.cypher", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphCreateCypherResult> create(
+    public Stream<GraphCreateCypherResult> createCypher(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
@@ -258,7 +258,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphLoader loader = newLoader(config, allocationTracker());
+            GraphLoader loader = newLoader(config, allocationTracker(), taskRegistryFactory);
             GraphStore graphStore = loader.graphStore();
 
             builder

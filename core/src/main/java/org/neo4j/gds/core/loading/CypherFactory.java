@@ -186,7 +186,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             task,
             graphCreateConfig.readConcurrency()
         );
-        return new TaskProgressTracker(task, progressLogger);
+        return new TaskProgressTracker(task, progressLogger, loadingContext.taskRegistryFactory());
     }
 
     private String nodeQuery() {

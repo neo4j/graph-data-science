@@ -20,6 +20,11 @@
 package org.neo4j.gds.impl;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -27,9 +32,12 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.concurrent.Executors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 
 /**         5     5      5
@@ -96,7 +104,7 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void testSequential() {
-        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER);
 
         var sp = sssp.compute().getShortestPaths();
 
@@ -105,7 +113,7 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void testParallel() {
-        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3)
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3, ProgressTracker.NULL_TRACKER)
                 .withExecutorService(Executors.newFixedThreadPool(3));
 
         var sp = sssp.compute().getShortestPaths();
@@ -115,7 +123,7 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"),3);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"),3, ProgressTracker.NULL_TRACKER);
 
         var sp = sssp.compute().getShortestPaths();
 
@@ -124,7 +132,12 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void handleLargeDistances() {
-        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 3);
+        var sssp = new ShortestPathDeltaStepping(
+            largeWeightsGraph,
+            largeWeightsGraph.toOriginalNodeId("a"),
+            3,
+            ProgressTracker.NULL_TRACKER
+        );
 
         var sp = sssp.compute().getShortestPaths();
 
@@ -133,7 +146,12 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void failOnLowDeltaAndLargeDistance() {
-        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-5);
+        var sssp = new ShortestPathDeltaStepping(
+            largeWeightsGraph,
+            largeWeightsGraph.toOriginalNodeId("a"),
+            1e-5,
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThrows(ArithmeticException.class, () -> sssp.compute());
     }
@@ -142,7 +160,38 @@ final class ShortestPathDeltaSteppingTest {
     void failOnTooSmallDelta() {
         assertThrows(
             IllegalArgumentException.class,
-            () -> new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-12));
+            () -> new ShortestPathDeltaStepping(
+                largeWeightsGraph,
+                largeWeightsGraph.toOriginalNodeId("a"),
+                1e-12,
+                ProgressTracker.NULL_TRACKER
+            ));
+    }
+
+    @Test
+    void testLogging() {
+        var task = Tasks.leaf("My task");
+        var progressLogger = new TestProgressLogger(task, 1);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
+
+        var algo = new ShortestPathDeltaStepping(
+            graph,
+            largeWeightsGraph.toOriginalNodeId("a"),
+            .1,
+            progressTracker
+        );
+
+        algo.compute();
+
+        assertThat(progressLogger.getMessages(INFO))
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            // TODO add entries when open task log more (open PR by soeren
+            .containsExactly(
+                "My task :: Start",
+                "My task 100%",
+                "My task :: Finished"
+            );
     }
 
 }

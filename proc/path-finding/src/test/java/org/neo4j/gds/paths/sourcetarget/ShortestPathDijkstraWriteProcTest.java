@@ -23,13 +23,17 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -45,10 +49,10 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 
 class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
 
@@ -179,5 +183,33 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
         var messages = testLog.getMessages(TestLog.INFO);
         assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
+    }
+
+    @Test
+    void testProgressTracking() {
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+
+        applyOnProcedure(proc -> {
+            var pathProc = ((ShortestPathDijkstraWriteProc) proc);
+
+            var taskStore = new GlobalTaskStore();
+
+            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+
+            pathProc.write(
+                "graph",
+                Map.of(
+                    "sourceNode", config.sourceNode(),
+                    "targetNode", config.targetNode(),
+                    "relationshipWeightProperty", "cost",
+                    "writeRelationshipType", "BAR"
+                )
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+                "Dijkstra",
+                "WriteRelationshipStream"
+            );
+        });
     }
 }

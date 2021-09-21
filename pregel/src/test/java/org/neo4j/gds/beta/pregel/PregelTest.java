@@ -44,6 +44,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -135,7 +136,7 @@ class PregelTest {
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressLogger = new TestProgressLogger(task, config.concurrency());
 
-        var progressTracker = new TaskProgressTracker(task, progressLogger);
+        var progressTracker = new TaskProgressTracker(task, progressLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
             graph,
@@ -210,7 +211,9 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(taskStore.storeTaskCalls()).isGreaterThanOrEqualTo(1);
+        assertThat(taskStore.tasks()).isEmpty();
+        assertThat(taskStore.tasksSeen())
+            .containsExactlyInAnyOrder("TestPregelComputation");
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {

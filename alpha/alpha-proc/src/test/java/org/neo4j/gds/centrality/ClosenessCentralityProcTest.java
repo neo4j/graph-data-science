@@ -27,6 +27,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -34,6 +41,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -126,6 +134,33 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         });
 
         verifyMock();
+    }
+
+    @Test
+    void testProgressTracking() {
+        ProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
+            var taskStore = new GlobalTaskStore();
+
+            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                TransactionContext.of(proc.api, proc.procedureTransaction)
+            );
+
+            proc.write(
+                Map.of(
+                    "nodeProjection", "*",
+                    "relationshipProjection", "*",
+                    "writeProperty", "myProp"
+                ),
+                Map.of()
+            );
+
+            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+                "Loading",
+                "ClosenessCentrality",
+                "ClosenessCentrality :: WriteNodeProperties"
+            );
+        });
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {

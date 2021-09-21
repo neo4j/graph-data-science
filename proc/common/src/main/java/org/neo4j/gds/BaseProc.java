@@ -45,6 +45,7 @@ import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.AuraMaintenanceSettings;
@@ -148,7 +149,11 @@ public abstract class BaseProc {
         return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
-    protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker allocationTracker) {
+    protected final GraphLoader newLoader(
+        GraphCreateConfig createConfig,
+        AllocationTracker allocationTracker,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
         if (api == null) {
             return newFictitiousLoader(createConfig);
         }
@@ -159,6 +164,7 @@ public abstract class BaseProc {
                 .api(api)
                 .log(log)
                 .allocationTracker(allocationTracker)
+                .taskRegistryFactory(taskRegistryFactory)
                 .terminationFlag(TerminationFlag.wrap(transaction))
                 .build())
             .username(username())
@@ -262,13 +268,13 @@ public abstract class BaseProc {
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();
 
-            GraphLoader loader = newLoader(config, AllocationTracker.empty());
+            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
             graphStoreFactory = loader
                 .createConfig()
                 .graphStoreFactory()
                 .getWithDimension(loader.context(), estimateDimensions);
         } else {
-            GraphLoader loader = newLoader(config, AllocationTracker.empty());
+            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
             graphStoreFactory = loader.graphStoreFactory();
             estimateDimensions = graphStoreFactory.estimationDimensions();
         }

@@ -20,11 +20,12 @@
 package org.neo4j.gds.impl.harmonic;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.impl.msbfs.BfsConsumer;
-import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.impl.msbfs.BfsConsumer;
+import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 
@@ -40,20 +41,24 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
 
     public HarmonicCentrality(
         Graph graph,
-        AllocationTracker allocationTracker,
         int concurrency,
-        ExecutorService executorService
+        AllocationTracker allocationTracker,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.allocationTracker = allocationTracker;
+        this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
         this.nodeCount = graph.nodeCount();
     }
 
     @Override
     public HarmonicCentrality compute() {
+        progressTracker.beginSubTask();
+
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             double len = sourceNodeIds.size();
             inverseFarness.update(nodeId, currentValue -> currentValue + (len * (1.0 / depth)));
@@ -65,6 +70,8 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
             consumer,
             allocationTracker
         ).run(concurrency, executorService);
+
+        progressTracker.endSubTask();
 
         return this;
     }

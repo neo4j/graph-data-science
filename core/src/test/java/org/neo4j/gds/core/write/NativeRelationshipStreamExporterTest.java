@@ -29,6 +29,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -236,7 +237,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
-            .withLog(log)
+            .withLogging(log, EmptyTaskRegistryFactory.INSTANCE)
             .build();
 
         var relationshipsWritten = exporter.write("FOOBAR");

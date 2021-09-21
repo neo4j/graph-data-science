@@ -94,9 +94,9 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
         log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            var task = Tasks.leaf(algoName() + " :: WriteNodeProperties", graph.nodeCount());
+            var task = Tasks.leaf("Scc :: WriteNodeProperties", graph.nodeCount());
             var progressLogger = new BatchingProgressLogger(log, task, config.writeConcurrency());
-            var progressTracker = new TaskProgressTracker(task, progressLogger);
+            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
             NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
@@ -175,9 +175,16 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
 
             @Override
             protected SccAlgorithm build(
-                Graph graph, SccConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+                Graph graph,
+                SccConfig configuration,
+                AllocationTracker allocationTracker,
+                ProgressTracker progressTracker
             ) {
-                return new SccAlgorithm(graph, allocationTracker).withTerminationFlag(TerminationFlag.wrap(transaction));
+                return new SccAlgorithm(
+                    graph,
+                    allocationTracker,
+                    progressTracker
+                ).withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
     }

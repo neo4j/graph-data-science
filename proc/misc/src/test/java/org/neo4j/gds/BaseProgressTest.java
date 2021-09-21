@@ -23,7 +23,6 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -83,17 +82,5 @@ public class BaseProgressTest extends BaseTest {
         public final String field;
 
         public Bar(String field) {this.field = field;}
-    }
-
-    public static class NonReleasingTaskRegistry extends TaskRegistry {
-
-        NonReleasingTaskRegistry(TaskRegistry taskRegistry) {
-            super(taskRegistry);
-        }
-
-        @Override
-        public void unregisterTask() {
-            // skip un registering the task because we want to observe the messages after the algo is done
-        }
     }
 }

@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -169,7 +170,11 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
 
             var progressTask = factory.progressTask(graphStore.getUnion(), predictConfig);
             var progressLogger = new TestProgressLogger(progressTask, 1);
-            var progressTracker = new TaskProgressTracker(progressTask, progressLogger);
+            var progressTracker = new TaskProgressTracker(
+                progressTask,
+                progressLogger,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
 
             var predictAlgo = factory.build(
                 graphStore.getUnion(),

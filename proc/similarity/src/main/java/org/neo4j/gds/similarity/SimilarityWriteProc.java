@@ -95,7 +95,7 @@ public abstract class SimilarityWriteProc<
                                 task,
                                 RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY
                             );
-                            var progressTracker = new TaskProgressTracker(task, progressLogger);
+                            var progressTracker = new TaskProgressTracker(task, progressLogger, taskRegistryFactory);
                             var exporter = relationshipExporterBuilder
                                 .withIdMapping(rootNodeMapping)
                                 .withGraph(similarityGraph)

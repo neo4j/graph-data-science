@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.
@@ -60,15 +61,20 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
     private int minSetSize;
     private int maxSetSize;
 
-    public SccAlgorithm(Graph graph, AllocationTracker allocationTracker) {
+    public SccAlgorithm(
+        Graph graph,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
+    ) {
         this.graph = graph;
-        nodeCount = graph.nodeCount();
-        index = HugeLongArray.newArray(nodeCount, allocationTracker);
-        stack = new PagedLongStack(nodeCount, allocationTracker);
-        boundaries = new PagedLongStack(nodeCount, allocationTracker);
-        connectedComponents = HugeLongArray.newArray(nodeCount, allocationTracker);
-        visited = new BitSet(nodeCount);
-        todo = new PagedLongStack(nodeCount, allocationTracker);
+        this.progressTracker = progressTracker;
+        this.nodeCount = graph.nodeCount();
+        this.index = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.stack = new PagedLongStack(nodeCount, allocationTracker);
+        this.boundaries = new PagedLongStack(nodeCount, allocationTracker);
+        this.connectedComponents = HugeLongArray.newArray(nodeCount, allocationTracker);
+        this.visited = new BitSet(nodeCount);
+        this.todo = new PagedLongStack(nodeCount, allocationTracker);
     }
 
     /**
