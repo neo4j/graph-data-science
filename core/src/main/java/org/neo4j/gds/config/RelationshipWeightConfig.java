@@ -23,6 +23,9 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
+import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
+
 public interface RelationshipWeightConfig {
 
     @Value.Default
@@ -37,7 +40,7 @@ public interface RelationshipWeightConfig {
         return relationshipWeightProperty() != null;
     }
 
-    static String validatePropertyName(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "relationshipWeightProperty");
+    static @Nullable String validatePropertyName(String input) {
+        return validateNoWhiteCharacter(replaceBlankWithNull(input), "relationshipWeightProperty");
     }
 }

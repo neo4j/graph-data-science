@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
 public interface WritePropertyConfig extends WriteConfig {
@@ -29,7 +30,7 @@ public interface WritePropertyConfig extends WriteConfig {
     @Configuration.Key(WRITE_PROPERTY_KEY)
     String writeProperty();
 
-    static String validatePropertyName(String input) {
+    static @Nullable String validatePropertyName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "writeProperty");
     }
 }

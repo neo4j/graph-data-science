@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -93,7 +94,7 @@ public interface GraphCreateConfig extends BaseConfig {
     @Configuration.Ignore
     <R> R accept(Cases<R> visitor);
 
-    static String validateName(String input) {
+    static @Nullable String validateName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
     }
 

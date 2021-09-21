@@ -73,7 +73,7 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(seedPropertyKeyOverride(), "  "));
         assertThatThrownBy(() -> createConfig(createMinimalConfig(mapWrapper)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("not contain whitespace characters");
+            .hasMessageContaining("not end or begin with whitespace characters");
     }
 
     @Test

@@ -40,7 +40,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         return List.of(
             defaultNodeWeightProperty(proc, config),
-            whitespaceNodeWeightProperty(proc, config),
+            emptyNodeWeightProperty(proc, config),
             validNodeWeightProperty(proc, config),
             validateNodeWeightProperty(proc, config),
             validateNodeWeightPropertyFilteredGraph(proc, config)
@@ -55,7 +55,8 @@ public final class NodeWeightConfigProcTest {
             unspecifiedNodeWeightProperty(proc, config),
             validNodeWeightProperty(proc, config),
             validateNodeWeightProperty(proc, config),
-            validateNodeWeightPropertyFilteredGraph(proc, config)
+            validateNodeWeightPropertyFilteredGraph(proc, config),
+            trailingWhiteSpaceNodeWeightProperty(proc, config)
         );
     }
 
@@ -116,12 +117,23 @@ public final class NodeWeightConfigProcTest {
         });
     }
 
-    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest whitespaceNodeWeightProperty(
+    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest emptyNodeWeightProperty(
         AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
-            var nodeWeightConfig = config.withString("nodeWeightProperty", "  ");
+            var nodeWeightConfig = config.withString("nodeWeightProperty", "");
+            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
+            assertThat(algoConfig.nodeWeightProperty()).isNull();
+        });
+    }
+
+    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest trailingWhiteSpaceNodeWeightProperty(
+        AlgoBaseProc<?, ?, C> proc,
+        CypherMapWrapper config
+    ) {
+        return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
+            var nodeWeightConfig = config.withString("nodeWeightProperty", " a");
             var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });

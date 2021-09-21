@@ -23,6 +23,9 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
+import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
+
 public interface ConfigurableSeedConfig {
 
     @Value.Default
@@ -36,7 +39,7 @@ public interface ConfigurableSeedConfig {
         return "seedProperty";
     }
 
-    static String validateProperty(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "seedProperty");
+    static @Nullable String validateProperty(String input) {
+        return validateNoWhiteCharacter(replaceBlankWithNull(input), "seedProperty");
     }
 }

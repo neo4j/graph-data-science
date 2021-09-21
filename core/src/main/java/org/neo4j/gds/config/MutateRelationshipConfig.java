@@ -19,7 +19,11 @@
  */
 package org.neo4j.gds.config;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
+
+import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface MutateRelationshipConfig extends MutateConfig {
 
@@ -28,7 +32,7 @@ public interface MutateRelationshipConfig extends MutateConfig {
     @Configuration.ConvertWith("validateTypeIdentifier")
     String mutateRelationshipType();
 
-    static String validateTypeIdentifier(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "mutateRelationshipType");
+    static @Nullable String validateTypeIdentifier(String input) {
+        return validateNoWhiteCharacter(replaceBlankWithNull(input), "mutateRelationshipType");
     }
 }

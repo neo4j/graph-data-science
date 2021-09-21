@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -44,5 +45,12 @@ class ModelConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("modelType")
             .hasMessageContaining("must not end or begin with whitespace characters");
+    }
+
+    @Test
+    void nullOnEmptyString() {
+        assertThatThrownBy(() -> new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", ""))))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No value specified for the mandatory configuration parameter `modelName`");
     }
 }

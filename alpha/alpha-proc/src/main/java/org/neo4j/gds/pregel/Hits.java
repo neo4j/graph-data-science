@@ -20,6 +20,7 @@
 package org.neo4j.gds.pregel;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -187,11 +188,11 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
             return "auth";
         }
 
-        static String validateHubProperty(String input) {
+        static @Nullable String validateHubProperty(String input) {
             return StringIdentifierValidations.validateNoWhiteCharacter(input, "hubProperty");
         }
 
-        static String validateAuthProperty(String input) {
+        static @Nullable String validateAuthProperty(String input) {
             return StringIdentifierValidations.validateNoWhiteCharacter(input, "authProperty");
         }
 

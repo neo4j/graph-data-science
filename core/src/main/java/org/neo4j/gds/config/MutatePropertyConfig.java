@@ -19,7 +19,11 @@
  */
 package org.neo4j.gds.config;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
+
+import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface MutatePropertyConfig extends MutateConfig {
 
@@ -29,7 +33,7 @@ public interface MutatePropertyConfig extends MutateConfig {
     @Configuration.Key(MUTATE_PROPERTY_KEY)
     String mutateProperty();
 
-    static String validateProperty(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "mutateProperty");
+    static @Nullable String validateProperty(String input) {
+        return validateNoWhiteCharacter(replaceBlankWithNull(input), "mutateProperty");
     }
 }

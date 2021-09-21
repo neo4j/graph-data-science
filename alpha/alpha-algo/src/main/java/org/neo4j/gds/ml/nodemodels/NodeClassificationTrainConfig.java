@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -27,7 +28,6 @@ import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.config.StringIdentifierValidations;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.config.StringIdentifierValidations.replaceBlankWithNull;
+import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @ValueClass
 @Configuration
@@ -81,8 +84,8 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
         }
     }
 
-    static String validateProperty(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "targetProperty");
+    static @Nullable String validateProperty(String input) {
+        return validateNoWhiteCharacter(replaceBlankWithNull(input), "targetProperty");
     }
 
     static NodeClassificationTrainConfig of(
