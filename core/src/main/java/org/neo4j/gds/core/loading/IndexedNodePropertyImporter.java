@@ -260,7 +260,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                     propertiesBuilder.set(nodeId, propertyValue);
                     imported += 1;
                     if ((imported & 0x1_FFFFL) == 0L) {
-                        progressTracker.progressLogger().logProgress(imported - logged);
+                        progressTracker.logProgress(imported - logged);
                         logged = imported;
                         terminationFlag.assertRunning();
                     }
