@@ -9,6 +9,8 @@
 This section describes the PageRank algorithm in the Neo4j Graph Data Science library.
 --
 
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-page-rank-intro]]
 == Introduction

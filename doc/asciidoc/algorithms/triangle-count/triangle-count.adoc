@@ -9,6 +9,10 @@
 This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library.
 --
 
+:undirected: true
+:monopartite: true
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-triangle-count-intro]]
 == Introduction
