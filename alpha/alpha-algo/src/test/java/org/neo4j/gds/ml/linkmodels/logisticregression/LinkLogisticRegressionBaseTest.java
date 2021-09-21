@@ -63,7 +63,6 @@ class LinkLogisticRegressionBaseTest {
             .nodeFeatureDimension(2)
             .weights(weights)
             .build(),
-            featureProperties,
             extractors
         );
 

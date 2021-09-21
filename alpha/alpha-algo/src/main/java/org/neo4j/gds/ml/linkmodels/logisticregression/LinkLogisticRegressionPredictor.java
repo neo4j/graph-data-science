@@ -32,10 +32,9 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
 
     public LinkLogisticRegressionPredictor(
         LinkLogisticRegressionData modelData,
-        List<String> featureProperties,
         List<FeatureExtractor> extractors
     ) {
-        super(modelData, featureProperties, extractors);
+        super(modelData, extractors);
     }
 
     static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
@@ -50,10 +49,6 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
 
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
         return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
-    }
-
-    public LinkLogisticRegressionData modelData() {
-        return modelData;
     }
 
     public double predictedProbability(long sourceId, long targetId) {

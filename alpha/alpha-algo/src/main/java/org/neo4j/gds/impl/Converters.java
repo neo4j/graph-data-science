@@ -23,23 +23,12 @@ import org.neo4j.gds.api.IntBinaryPredicate;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
-
 /**
  * Warning: These conversions are not safe but will fail for very large graphs.
  * These are to be used by algorithms that migrate to the new SPI but are based on integers.
  * The same limitations apply for those algorithms as before, but failures for very large graphs will be contained in here.
  */
 public interface Converters {
-
-    static LongConsumer longToIntConsumer(IntConsumer p) {
-        return value -> {
-            // This will fail on very large graphs
-            int downCast = Math.toIntExact(value);
-            p.accept(downCast);
-        };
-    }
 
     static RelationshipConsumer longToIntConsumer(IntBinaryPredicate p) {
         return (sourceNodeId, targetNodeId) -> {

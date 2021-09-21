@@ -88,7 +88,7 @@ class LinkLogisticRegressionPredictorTest {
             .from(LinkLogisticRegressionData.from(graph, featureProperties, new SumCombiner()))
             .weights(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)))
             .build();
-        var predictor = new LinkLogisticRegressionPredictor(modelData, featureProperties, extractors);
+        var predictor = new LinkLogisticRegressionPredictor(modelData, extractors);
 
         var result = predictor.predictedProbability(idFunction.of(sourceNode), idFunction.of(targetNode));
 

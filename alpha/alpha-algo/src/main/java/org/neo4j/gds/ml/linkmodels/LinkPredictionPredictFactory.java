@@ -69,7 +69,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
         var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
 
         return new LinkPredictionPredict(
-            new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties(), extractors),
+            new LinkLogisticRegressionPredictor(model.data(), extractors),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

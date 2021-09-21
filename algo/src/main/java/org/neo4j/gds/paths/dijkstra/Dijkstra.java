@@ -116,10 +116,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         );
     }
 
-    public static MemoryEstimation memoryEstimation() {
-        return memoryEstimation(false);
-    }
-
     public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())

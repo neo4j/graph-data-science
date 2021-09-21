@@ -21,14 +21,12 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -94,10 +92,6 @@ class ScalePropertiesBaseConfigTest {
         );
 
         assertThat(ex.getMessage()).contains("Scaler `nonExistent` is not supported.");
-    }
-
-    private static Stream<Arguments> scalers() {
-        return Stream.of(Arguments.of("mean"), Arguments.of(List.of("mean")));
     }
 
     @Test

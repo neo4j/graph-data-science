@@ -56,7 +56,6 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
     private final AtomicInteger queue;
     private final int concurrency;
     private final int nodeCount;
-    private final AtomicInteger visitedNodes;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<Result> resultQueue;
 
@@ -87,7 +86,6 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.resultQueue = new ArrayBlockingQueue<>(concurrency << 10);
         this.runningThreads = new AtomicInteger();
-        this.visitedNodes = new AtomicInteger();
         this.queue = new AtomicInteger();
     }
 

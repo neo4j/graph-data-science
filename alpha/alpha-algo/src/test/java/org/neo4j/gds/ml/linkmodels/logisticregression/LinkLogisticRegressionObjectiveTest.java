@@ -72,7 +72,7 @@ class LinkLogisticRegressionObjectiveTest {
             featureProperties,
             LinkFeatureCombiners.L2
         );
-        var objective = new LinkLogisticRegressionObjective(data, featureProperties, extractors, 1.0, graph);
+        var objective = new LinkLogisticRegressionObjective(data, extractors, 1.0, graph);
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
@@ -89,7 +89,7 @@ class LinkLogisticRegressionObjectiveTest {
             featureProperties,
             LinkFeatureCombiners.L2
         );
-        var objective = new LinkLogisticRegressionObjective(data, featureProperties, extractors, 1.0, graph);
+        var objective = new LinkLogisticRegressionObjective(data, extractors, 1.0, graph);
         // we proceed to "injecting" non-zero values for the weights of the model
         var weights = objective.weights();
         var backingArray = weights.get(0).data().data();
