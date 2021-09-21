@@ -9,6 +9,10 @@
 This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
 --
 
+:undirected:
+:monopartite:
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-local-clustering-coefficient-intro]]
 == Introduction
