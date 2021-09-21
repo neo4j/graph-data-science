@@ -11,6 +11,13 @@
 This section describes the Yen's Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
+:directed:
+:undirected:
+:monopartite:
+:unweighted:
+:weighted:
+include::../shared/graph-variants.adoc[]
+
 
 [[algorithms-yens-intro]]
 == Introduction
