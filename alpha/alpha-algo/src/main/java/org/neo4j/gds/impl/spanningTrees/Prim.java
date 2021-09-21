@@ -23,10 +23,11 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.SharedIntPriorityQueue;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -55,10 +56,17 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     private SpanningTree spanningTree;
 
-    public Prim(IdMapping idMapping, Graph graph, DoubleUnaryOperator minMax, long startNodeId) {
+    public Prim(
+        IdMapping idMapping,
+        Graph graph,
+        DoubleUnaryOperator minMax,
+        long startNodeId,
+        ProgressTracker progressTracker
+    ) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
+        this.progressTracker = progressTracker;
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
     }
 

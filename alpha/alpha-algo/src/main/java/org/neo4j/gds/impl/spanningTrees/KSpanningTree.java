@@ -20,10 +20,10 @@
 package org.neo4j.gds.impl.spanningTrees;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.RelationshipProperties;
+import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -73,7 +73,8 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
             idMapping,
             graph,
             minMax,
-            graph.toOriginalNodeId(startNodeId)
+            graph.toOriginalNodeId(startNodeId),
+            progressTracker
         ).withTerminationFlag(getTerminationFlag());
 
         IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();
