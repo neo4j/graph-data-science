@@ -28,6 +28,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 
@@ -307,7 +308,7 @@ class LocalClusteringCoefficientTest {
             progressTask,
             4
         );
-        var progressTracker = new TaskProgressTracker(progressTask, testLogger);
+        var progressTracker = new TaskProgressTracker(progressTask, testLogger, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
             .build(graph, config, AllocationTracker.empty(), progressTracker)
