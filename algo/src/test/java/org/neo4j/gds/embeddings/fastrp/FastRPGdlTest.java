@@ -87,7 +87,7 @@ public class FastRPGdlTest {
         var arrayConfig = ImmutableFastRPExtendedStreamConfig.builder()
             .addAllFeatureProperties(properties)
             .embeddingDimension(64)
-            .propertyDimension(32)
+            .propertyRatio(0.5)
             .build();
 
         var fastRPArray = new FastRP(

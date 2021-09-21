@@ -107,14 +107,14 @@ class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtended
     @Test
     void shouldNotCrash() {
         int embeddingDimension = 128;
-        int propertyDimension = 127;
+        double propertyRatio = 127.0/128;
         String query = GdsCypher.call()
             .explicitCreation(mutateGraphName().get())
             .algo("gds.beta.fastRPExtended")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyDimension", propertyDimension)
+            .addParameter("propertyRatio", propertyRatio)
             .addParameter("featureProperties", List.of("f1", "f2"))
             .yields();
 

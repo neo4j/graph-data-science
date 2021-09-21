@@ -45,7 +45,7 @@ class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtended
     @Test
     void shouldNotCrash() {
         int embeddingDimension = 128;
-        int propertyDimension = 127;
+        double propertyRatio = 127.0/128;
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL")
@@ -53,7 +53,7 @@ class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtended
             .algo("gds.beta.fastRPExtended")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyDimension", propertyDimension)
+            .addParameter("propertyRatio", propertyRatio)
             .addParameter("featureProperties", List.of("f1", "f2"))
             .yields();
 

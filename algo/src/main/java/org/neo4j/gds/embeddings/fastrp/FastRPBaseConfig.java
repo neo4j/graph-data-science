@@ -38,9 +38,16 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
-    @Value.Default
+    @Value.Derived
+    @Configuration.Ignore
     default int propertyDimension() {
-        return 0;
+        return (int) (embeddingDimension() * propertyRatio());
+    }
+
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0, max = 1.0)
+    default double propertyRatio() {
+        return 0.0;
     }
 
     @Value.Default
@@ -59,12 +66,18 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         return 0.0f;
     }
 
-    static void validateCommon(List<? extends Number> iterationWeights) {
+    static void validateCommon(List<? extends Number> iterationWeights, double propertyRatio, List<String> featureProperties) {
+        //TODO featureProperties=[] and propertyRatio>0 (fixed in this PR)
         if (iterationWeights.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must not be empty.",
                 "iterationWeights"
             ));
+        }
+        if (propertyRatio > 0.0) {
+            if (featureProperties.isEmpty()) {
+                throw new IllegalArgumentException("When `propertyRatio` is non-zero, `featureProperties` may not be empty.");
+            }
         }
         for (Object weight : iterationWeights) {
             if (!(weight instanceof Number)) {

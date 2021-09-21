@@ -30,14 +30,6 @@ public interface FastRPExtendedBaseConfig extends FastRPBaseConfig {
 
     @Value.Check
     default void validate() {
-        List<? extends Number> iterationWeights = iterationWeights();
-        FastRPBaseConfig.validateCommon(iterationWeights);
-        if (propertyDimension() > embeddingDimension()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of propertyDimension %s may not exceed embeddingDimension %s.",
-                propertyDimension(),
-                embeddingDimension()
-            ));
-        }
+        FastRPBaseConfig.validateCommon(iterationWeights(), propertyRatio(), featureProperties());
     }
 }

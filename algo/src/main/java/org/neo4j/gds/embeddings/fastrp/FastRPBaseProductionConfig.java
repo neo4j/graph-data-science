@@ -36,20 +36,13 @@ public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
 
     @Override
     @Configuration.Ignore
-    default int propertyDimension() {
-        return 0;
+    default double propertyRatio() {
+        return 0.0;
     }
 
     @Value.Check
     default void validate() {
-        List<? extends Number> iterationWeights = iterationWeights();
-        FastRPBaseConfig.validateCommon(iterationWeights);
-        if (embeddingDimension() < 1) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of embeddingDimension is %s, but must be at least 1",
-                embeddingDimension()
-            ));
-        }
+        FastRPBaseConfig.validateCommon(iterationWeights(), propertyRatio(), featureProperties());
     }
 
 }

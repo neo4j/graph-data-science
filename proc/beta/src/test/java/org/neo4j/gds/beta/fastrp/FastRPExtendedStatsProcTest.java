@@ -50,7 +50,7 @@ class FastRPExtendedStatsProcTest extends FastRPExtendedProcTest<FastRPExtendedS
             .algo("gds.beta.fastRPExtended")
             .statsMode()
             .addParameter("embeddingDimension", 4)
-            .addParameter("propertyDimension", 2)
+            .addParameter("propertyRatio", 0.5)
             .addParameter("featureProperties", List.of("f1", "f2"))
             .yields();
 

@@ -203,7 +203,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
                           "  relationshipTypes: [$embeddingRelType]," +
                           "  mutateProperty: $mutateProperty, " +
                           "  embeddingDimension: 512, " +
-                          "  propertyDimension: 256, " +
+                          "  propertyRatio: 0.5, " +
                           "  randomSeed: 42, " +
                           "  featureProperties: ['z']" +
                           "})";

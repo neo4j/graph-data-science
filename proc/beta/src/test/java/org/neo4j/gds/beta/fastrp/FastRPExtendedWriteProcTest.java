@@ -73,7 +73,7 @@ class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedW
             .algo("gds.beta.fastRPExtended")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyDimension", embeddingDimension/2)
+            .addParameter("propertyRatio", 0.5)
             .addParameter("featureProperties", List.of("f1", "f2"))
             .addParameter("writeProperty", "embedding")
             .yields();

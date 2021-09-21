@@ -56,7 +56,7 @@ class FastRPTest extends AlgoTestBase {
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
         .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-        .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
+        .propertyRatio(0.5)
         .featureProperties(List.of("f1", "f2"))
         .addIterationWeight(1.0D)
         .randomSeed(42L)
@@ -160,7 +160,7 @@ class FastRPTest extends AlgoTestBase {
 
         var configBuilder = FastRPBaseConfig.builder()
             .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-            .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
+            .propertyRatio(0.5)
             .featureProperties(List.of("f1", "f2"))
             .addIterationWeight(1.0D)
             .minBatchSize(1)
