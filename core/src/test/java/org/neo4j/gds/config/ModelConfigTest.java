@@ -39,11 +39,11 @@ class ModelConfigTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", "   graph", "graph ", " graph ", "\tgraph"})
+    @ValueSource(strings = {" ", "   graph", "graph ", " graph ", "\tgraph"})
     void failOnWhiteSpaces(String invalidName) {
         assertThatThrownBy(() -> new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", invalidName))))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("modelType")
+            .hasMessageContaining("modelName")
             .hasMessageContaining("must not end or begin with whitespace characters");
     }
 

@@ -134,8 +134,8 @@ public final class NodeWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", " a");
-            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
-            assertThat(algoConfig.nodeWeightProperty()).isNull();
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, nodeWeightConfig))
+                .hasMessage("`nodeWeightProperty` must not end or begin with whitespace characters, but got ` a`.");
         });
     }
 

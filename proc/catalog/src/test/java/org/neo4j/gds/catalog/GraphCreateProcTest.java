@@ -56,7 +56,6 @@ import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
-import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -1409,7 +1408,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void failOnInvalidGraphName() {
         String invalidName = " na me ";
         String expectedMessage = formatWithLocale(
-            "`graphName` must not contain space characters, but got `%s`.",
+            "`graphName` must not end or begin with whitespace characters, but got `%s`.",
             invalidName
         );
 
