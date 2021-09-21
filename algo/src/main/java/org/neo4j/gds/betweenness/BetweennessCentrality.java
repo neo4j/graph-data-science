@@ -62,11 +62,11 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
-        this.progressTracker = progressTracker;
         this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, allocationTracker);
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);

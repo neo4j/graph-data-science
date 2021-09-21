@@ -52,9 +52,9 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
 
         this.configuration = configuration;
         this.concurrency = configuration.concurrency();

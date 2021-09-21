@@ -20,15 +20,16 @@
 package org.neo4j.gds.impl.triangle;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
-import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
+import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
+import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -78,6 +79,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         ExecutorService executorService,
         int concurrency
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.intersectConfig = ImmutableRelationshipIntersectConfig.builder().build();

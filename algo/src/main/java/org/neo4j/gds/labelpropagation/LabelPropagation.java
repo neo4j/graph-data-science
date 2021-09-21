@@ -66,6 +66,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.config = config;
@@ -92,8 +93,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         this.nodeWeights = nodeWeightProperty;
 
         maxLabelId = seedProperty.getMaxLongPropertyValue().orElse(NO_SUCH_LABEL);
-
-        this.progressTracker = progressTracker;
     }
 
     @Override

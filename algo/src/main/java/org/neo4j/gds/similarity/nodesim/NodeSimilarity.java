@@ -66,11 +66,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.config = config;
         this.executorService = executorService;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();

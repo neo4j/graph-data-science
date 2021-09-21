@@ -61,6 +61,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         double threshold,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.modelData = modelData;
         this.pipelineExecutor = pipelineExecutor;
         this.nodeLabels = nodeLabels;
@@ -69,7 +70,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         this.concurrency = concurrency;
         this.topN = topN;
         this.threshold = threshold;
-        this.progressTracker = progressTracker;
     }
 
     @Override

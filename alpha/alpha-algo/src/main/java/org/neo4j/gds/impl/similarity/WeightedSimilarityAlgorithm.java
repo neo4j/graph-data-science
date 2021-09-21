@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -35,16 +36,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.impl.utils.NumberUtils.getDoubleValue;
-import static org.neo4j.gds.impl.utils.NumberUtils.getLongValue;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.gds.impl.utils.NumberUtils.getDoubleValue;
+import static org.neo4j.gds.impl.utils.NumberUtils.getLongValue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 
     public WeightedSimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
-        super(config, api);
+        super(config, api, ProgressTracker.NULL_TRACKER);
     }
 
     @Override

@@ -61,12 +61,12 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
         this.wassermanFaust = wassermanFaust;
         farness = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);
         component = PagedAtomicIntegerArray.newArray(nodeCount, this.allocationTracker);

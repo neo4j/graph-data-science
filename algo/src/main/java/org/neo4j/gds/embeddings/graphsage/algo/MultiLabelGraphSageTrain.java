@@ -49,17 +49,16 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final AllocationTracker allocationTracker;
 
     public MultiLabelGraphSageTrain(
-
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
     }
 

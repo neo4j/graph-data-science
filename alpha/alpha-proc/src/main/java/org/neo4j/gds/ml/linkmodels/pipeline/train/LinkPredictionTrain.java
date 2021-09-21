@@ -77,11 +77,11 @@ public class LinkPredictionTrain
         PipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graphStore = graphStore;
         this.trainConfig = trainConfig;
         this.pipelineExecutor = pipelineExecutor;
         this.pipeline = pipeline;
-        this.progressTracker = progressTracker;
         this.allocationTracker = AllocationTracker.empty();
     }
 

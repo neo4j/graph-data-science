@@ -70,6 +70,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.steps = steps;
         this.concurrency = concurrency;
@@ -79,7 +80,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.inOutParam = inOutParam;
         this.randomSeed = randomSeed;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
         nodeIndex = new AtomicLong(0);
     }
 

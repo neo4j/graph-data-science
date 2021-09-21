@@ -80,11 +80,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.random = new Random(config.randomSeed().orElseGet(() -> new Random().nextLong()));
         this.executor = executor;
         this.config = config;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
 

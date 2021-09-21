@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +58,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         AllocationTracker allocationTracker,
         ExecutorService executor
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.config = config;
         this.allocationTracker = allocationTracker;

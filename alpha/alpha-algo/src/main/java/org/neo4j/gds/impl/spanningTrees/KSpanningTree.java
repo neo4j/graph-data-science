@@ -57,6 +57,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         long k,
         ProgressTracker progressTracker
 ) {
+        super(progressTracker);
         this.idMapping = idMapping;
         this.graph = graph;
         this.weights = weights;

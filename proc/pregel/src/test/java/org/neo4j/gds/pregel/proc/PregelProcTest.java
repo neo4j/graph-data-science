@@ -507,6 +507,7 @@ public class PregelProcTest extends BaseProcTest {
             ProgressTracker progressTracker,
             boolean throwInCompute
         ) {
+            super(progressTracker);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

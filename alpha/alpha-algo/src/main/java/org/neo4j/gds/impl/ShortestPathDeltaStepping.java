@@ -75,7 +75,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     private final double multiplier = 100_000D; // double type is intended
 
     public ShortestPathDeltaStepping(Graph graph, long startNode, double delta, ProgressTracker progressTracker) {
-        this.progressTracker = progressTracker;
+        super(progressTracker);
         this.graph = graph;
         this.startNode = Math.toIntExact(graph.toMappedNodeId(startNode));
         this.delta = delta;

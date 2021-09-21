@@ -196,6 +196,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.targets = targets;
@@ -205,7 +206,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         this.trainStats = trainStats;
         this.validationStats = validationStats;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
     }
 
     @Override

@@ -68,6 +68,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.predictor = predictor;
         this.graph = graph;
         this.concurrency = concurrency;
@@ -75,7 +76,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         this.produceProbabilities = produceProbabilities;
         this.featureProperties = featureProperties;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
     }
 
     @Override

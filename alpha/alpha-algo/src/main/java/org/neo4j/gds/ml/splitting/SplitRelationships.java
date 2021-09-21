@@ -20,8 +20,9 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 
 public class SplitRelationships extends Algorithm<SplitRelationships, SplitResult> {
 
@@ -30,6 +31,7 @@ public class SplitRelationships extends Algorithm<SplitRelationships, SplitResul
     private final SplitRelationshipsMutateConfig config;
 
     public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsMutateConfig config) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.config = config;

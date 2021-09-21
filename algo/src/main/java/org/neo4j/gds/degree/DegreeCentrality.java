@@ -58,10 +58,10 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.executor = executor;
         this.config = config;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
     }
 

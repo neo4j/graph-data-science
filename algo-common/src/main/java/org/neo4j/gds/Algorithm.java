@@ -23,9 +23,13 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
-    protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
+    protected final ProgressTracker progressTracker;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+
+    protected Algorithm(ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
+    }
 
     public abstract RESULT compute();
 
@@ -42,13 +46,6 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
             progressTracker.release();
             release();
         }
-    }
-
-    @Deprecated
-    // This is kept for alpha algorithms using the ProgressLoggerAdapter
-    public ME withProgressTracker(ProgressTracker progressTracker) {
-        this.progressTracker = progressTracker;
-        return me();
     }
 
     public ME withTerminationFlag(TerminationFlag terminationFlag) {

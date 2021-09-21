@@ -54,12 +54,12 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.model = config.model();
         this.executor = executor;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
     }
 
     @Override

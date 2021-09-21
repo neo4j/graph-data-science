@@ -48,9 +48,9 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
     }
 
     public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker, AllocationTracker allocationTracker) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
     }
 

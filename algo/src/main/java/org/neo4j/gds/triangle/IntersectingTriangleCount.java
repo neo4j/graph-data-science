@@ -102,6 +102,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.intersectConfig = ImmutableRelationshipIntersectConfig.of(config.maxDegree());
@@ -110,7 +111,6 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), allocationTracker);
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
-        this.progressTracker = progressTracker;
     }
 
     @Override

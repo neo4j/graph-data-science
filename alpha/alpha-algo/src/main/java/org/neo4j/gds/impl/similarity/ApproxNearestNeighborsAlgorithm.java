@@ -21,10 +21,9 @@ package org.neo4j.gds.impl.similarity;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
@@ -37,6 +36,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -77,9 +78,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         GraphDatabaseAPI api,
         Log log,
         ExecutorService executor,
+        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
-        super(config, api);
+        super(config, api, progressTracker);
         this.config = config;
         this.algorithm = algorithm;
         this.log = log;

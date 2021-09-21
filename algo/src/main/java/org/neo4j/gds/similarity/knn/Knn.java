@@ -65,6 +65,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         SimilarityComputer similarityComputer,
         KnnContext context
     ) {
+        super(context.progressTracker());
         this.nodeCount = nodeCount;
         this.config = config;
         this.context = context;
@@ -73,8 +74,6 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         this.random = this.config.randomSeed().isPresent()
             ? new SplittableRandom(this.config.randomSeed().get())
             : new SplittableRandom();
-
-        this.progressTracker = context.progressTracker();
     }
 
     public long nodeCount() {
