@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.logging.Log;
 
 import java.util.List;
@@ -188,6 +190,21 @@ public class TaskProgressTrackerTest {
                 "[test] root :: Finished"
             );
         }
+    }
+
+    @Test
+    void shouldRegisterBaseTaskOnBaseTaskStart() {
+        var task = Tasks.leaf("root");
+
+        var taskStore = new GlobalTaskStore();
+        var taskRegistry = new TaskRegistry("", taskStore);
+        var progressTracker = new TaskProgressTracker(task, new TestLog(), 1, () -> taskRegistry);
+
+        assertThat(taskStore.query("")).isEmpty();
+
+        progressTracker.beginSubTask();
+
+        assertThat(taskStore.query("")).containsValue(task);
     }
 
     private TaskProgressTracker progressTracker(Task task, Log log) {

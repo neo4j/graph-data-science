@@ -50,8 +50,6 @@ public class TaskProgressTracker implements ProgressTracker {
         );
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
-
-        taskRegistry.registerTask(baseTask);
     }
 
     @Override
@@ -62,6 +60,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void beginSubTask() {
+        registerBaseTask();
         var nextTask = currentTask.map(task -> {
             nestedTasks.add(task);
             return task.nextSubtask();
@@ -139,6 +138,12 @@ public class TaskProgressTracker implements ProgressTracker {
     @Nullable
     private Task parentTask() {
         return nestedTasks.isEmpty() ? null : nestedTasks.peek();
+    }
+
+    private void registerBaseTask() {
+        if (!taskRegistry.containsTask(baseTask)) {
+            taskRegistry.registerTask(baseTask);
+        }
     }
 
     private Task requireCurrentTask() {
