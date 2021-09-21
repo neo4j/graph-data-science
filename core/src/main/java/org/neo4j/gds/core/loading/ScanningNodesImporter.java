@@ -221,8 +221,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
                 .doubleValue();
 
-            progressTracker.logProgress(recordsImported);
-
             progressTracker.progressLogger().getLog().debug(formatWithLocale(
                 "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
                 recordsImported,
