@@ -40,4 +40,12 @@ ifndef::weighted[]
 [.not-supported]
 endif::[]
 Weighted
+
+ifdef::unweighted[]
+[.supported]
+endif::[]
+ifndef::unweighted[]
+[.not-supported]
+endif::[]
+Unweighted
 --
