@@ -19,25 +19,24 @@
  */
 package org.neo4j.gds;
 
-import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-public class TestTaskStore implements TaskStore {
+public class TestTaskStore extends GlobalTaskStore {
 
     private Map<JobId, String> tasks = new HashMap<>();
     private List<String> tasksSeen = new ArrayList<>();
 
     @Override
     public void store(String username, JobId jobId, Task task) {
+        super.store(username, jobId, task);
+
         tasks.put(jobId, task.description());
         tasksSeen.add(task.description());
     }
@@ -45,26 +44,6 @@ public class TestTaskStore implements TaskStore {
     @Override
     public void remove(String username, JobId jobId) {
         tasks.remove(jobId);
-    }
-
-    @Override
-    public @NotNull Map<JobId, Task> query(String username) {
-        return Map.of();
-    }
-
-    @Override
-    public Optional<Task> query(String username, JobId jobId) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Stream<Task> taskStream() {
-        return null;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
     }
 
     public List<String> tasksSeen() {
