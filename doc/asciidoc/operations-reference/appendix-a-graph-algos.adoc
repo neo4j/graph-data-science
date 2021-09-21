@@ -160,15 +160,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 [opts=header,cols="1, 1"]
 |===
 |Algorithm name | Operation
-.8+<.^|<<algorithms-embeddings-fastrp-extended, FastRPExtended>>
-| `gds.beta.fastRPExtended.mutate`
-| `gds.beta.fastRPExtended.mutate.estimate`
-| `gds.beta.fastRPExtended.stats`
-| `gds.beta.fastRPExtended.stats.estimate`
-| `gds.beta.fastRPExtended.stream`
-| `gds.beta.fastRPExtended.stream.estimate`
-| `gds.beta.fastRPExtended.write`
-| `gds.beta.fastRPExtended.write.estimate`
 .8+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
 | `gds.beta.graphSage.stream`
 | `gds.beta.graphSage.stream.estimate`

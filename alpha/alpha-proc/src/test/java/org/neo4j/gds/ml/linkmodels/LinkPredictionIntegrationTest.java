@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
@@ -114,7 +113,6 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         registerProcedures(
             GraphCreateProc.class,
             FastRPMutateProc.class,
-            FastRPExtendedMutateProc.class,
             GraphStreamRelationshipPropertiesProc.class,
             SplitRelationshipsMutateProc.class,
             LinkPredictionTrainProc.class,
@@ -137,7 +135,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         createGraph();
         testSplit();
         trainSplit();
-        fastRPExtendedEmbeddings();
+        fastRPEmbeddings();
         trainModel();
         predict();
         assertModelScore();
@@ -197,8 +195,8 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         );
     }
 
-    private void fastRPExtendedEmbeddings() {
-        var fastRpQuery = "CALL gds.beta.fastRPExtended.mutate($graphName, " +
+    private void fastRPEmbeddings() {
+        var fastRpQuery = "CALL gds.fastRP.mutate($graphName, " +
                           "{" +
                           "  relationshipTypes: [$embeddingRelType]," +
                           "  mutateProperty: $mutateProperty, " +

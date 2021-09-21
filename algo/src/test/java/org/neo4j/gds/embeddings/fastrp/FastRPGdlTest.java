@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.beta.fastrp.ImmutableFastRPExtendedStreamConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -84,7 +83,7 @@ public class FastRPGdlTest {
     }
 
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
-        var arrayConfig = ImmutableFastRPExtendedStreamConfig.builder()
+        var arrayConfig = ImmutableFastRPStreamConfig.builder()
             .addAllFeatureProperties(properties)
             .embeddingDimension(64)
             .propertyRatio(0.5)

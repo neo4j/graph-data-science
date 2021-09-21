@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 
@@ -114,5 +115,23 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         for (int i = 0; i < 128; i++) {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
         }
+    }
+
+    @Test
+    void shouldNotCrashWithFeatureProperties() {
+        int embeddingDimension = 128;
+        double propertyRatio = 127.0/128;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .algo("fastRP")
+            .streamMode()
+            .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .yields();
+
+        runQuery(query);
     }
 }

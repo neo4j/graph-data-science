@@ -24,10 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMutateProc;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutStreamProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedStatsProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedStreamProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedWriteProc;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStatsProc;
@@ -212,15 +208,6 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.graphSage.train.estimate",
         "gds.beta.graphSage.write",
         "gds.beta.graphSage.write.estimate",
-
-        "gds.beta.fastRPExtended.mutate",
-        "gds.beta.fastRPExtended.mutate.estimate",
-        "gds.beta.fastRPExtended.stats",
-        "gds.beta.fastRPExtended.stats.estimate",
-        "gds.beta.fastRPExtended.stream",
-        "gds.beta.fastRPExtended.stream.estimate",
-        "gds.beta.fastRPExtended.write",
-        "gds.beta.fastRPExtended.write.estimate",
 
         "gds.beta.graph.generate",
         "gds.beta.graph.create.subgraph",
@@ -419,10 +406,6 @@ class ListProcTest extends BaseProcTest {
             FastRPWriteProc.class,
             FastRPMutateProc.class,
             FastRPStatsProc.class,
-            FastRPExtendedStreamProc.class,
-            FastRPExtendedWriteProc.class,
-            FastRPExtendedMutateProc.class,
-            FastRPExtendedStatsProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,

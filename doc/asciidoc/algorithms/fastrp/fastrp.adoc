@@ -305,13 +305,13 @@ include::../shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (dan:Person {name: 'Dan'}),
-  (annie:Person {name: 'Annie'}),
-  (matt:Person {name: 'Matt'}),
-  (jeff:Person {name: 'Jeff'}),
-  (brie:Person {name: 'Brie'}),
-  (elsa:Person {name: 'Elsa'}),
-  (john:Person {name: 'John'}),
+  (dan:Person {name: 'Dan', age: 18}),
+  (annie:Person {name: 'Annie', age: 12}),
+  (matt:Person {name: 'Matt', age: 22}),
+  (jeff:Person {name: 'Jeff', age: 51}),
+  (brie:Person {name: 'Brie', age: 45}),
+  (elsa:Person {name: 'Elsa', age: 65}),
+  (john:Person {name: 'John', age: 64}),
 
   (dan)-[:KNOWS {weight: 1.0}]->(annie),
   (dan)-[:KNOWS {weight: 1.0}]->(matt),
@@ -346,7 +346,9 @@ CALL gds.graph.create(
       orientation: 'UNDIRECTED',
       properties: 'weight'
     }
-})
+  },
+  { nodeProperties: ['age'] }
+)
 ----
 
 
@@ -553,12 +555,11 @@ Since the initial state of the algorithm is randomised, it isn't possible to int
 [[algorithms-embeddings-fastrp-extended]]
 == Extended Algorithm: Using Node Properties
 
-include::../beta-aspect-note.adoc[]
-
 Most real-world graphs contain node properties which store information about the nodes and what they represent.
-An embedding algorithm which can process the node properties as features and incorporate them in the embeddings can therefore represent the graph more accurately.
+The FastRP algorithm in the GDS library extends the original FastRP algorithm with a capability to take node properties into account.
+The resulting embeddings can therefore represent the graph more accurately.
 
-The extended FastRP algorithm (FastRPExtended) has the additional configuration parameters `featureProperties` and `propertyRatio`.
+The node property aware aspect of the algorithm is configured via the parameters `featureProperties` and `propertyRatio`.
 Each node property in `featureProperties` is associated with a randomly generated vector of dimension `propertyDimension`, where `propertyDimension = embeddingDimension * propertyRatio`.
 Each node is then initialized with a vector of size `embeddingDimension` formed by concatenation of two parts:
 The first part is formed like in the FastRP algorithm, and the second one is a linear combination of the property vectors, using the property values of the node as weights.
@@ -566,161 +567,33 @@ The algorithm then proceeds with the same logic as the FastRP algorithm.
 Therefore, the algorithm will output arrays of size `embeddingDimension`.
 The last `propertyDimension` coordinates in the embedding captures information about property values of nearby nodes, and the remaining coordinates (`embeddingDimension` - `propertyDimension` of them) captures information about nearby presence of nodes.
 
-.FastRPExtended syntax per mode
-[.tabbed-example, caption = ]
-====
-
-[.include-with-stream]
-======
-.Run FastRPExtended in stream mode on a named graph.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.fastRPExtended.stream(
-  graphName: String,
-  configuration: Map
-) YIELD
-  nodeId: Integer,
-  embedding: List of Float
-----
-
-include::../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
-include::specific-configuration-ext.adoc[]
-
-.Results
-[opts="header",cols="1m,1,6"]
-|===
-| Name      | Type         | Description
-| nodeId    | Integer      | The Neo4j node ID.
-| embedding | List of Float  | The computed node embedding.
-|===
-======
-
-[.include-with-stats]
-======
-.Run FastRPExtended in stats mode on a graph stored in the catalog.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.fastRPExtended.stats(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  nodeCount: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
-include::specific-configuration-ext.adoc[]
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name               | Type                 | Description
-| nodeCount          | Integer              | The number of nodes processed.
-| createMillis       | Integer              | Milliseconds for loading data.
-| computeMillis      | Integer              | Milliseconds for running the algorithm.
-| configuration      | Map                  | The configuration used for running the algorithm.
-|===
-======
-
-[.include-with-mutate]
-======
-.Run FastRPExtended in mutate mode on a graph stored in the catalog.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.fastRPExtended.mutate(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  mutateMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
-
-include::specific-configuration-ext.adoc[]
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type                 | Description
-| nodeCount              | Integer              | The number of nodes processed.
-| nodePropertiesWritten  | Integer              | The number of node properties written.
-| createMillis           | Integer              | Milliseconds for loading data.
-| computeMillis          | Integer              | Milliseconds for running the algorithm.
-| mutateMillis           | Integer              | Milliseconds for adding properties to the in-memory graph.
-| configuration          | Map                  | The configuration used for running the algorithm.
-|===
-======
-
-[.include-with-write]
-======
-.Run FastRPExtended in write mode on a graph stored in the catalog.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.fastRPExtended.write(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../common-configuration/common-write-configuration-named-graph.adoc[]
-
-include::specific-configuration-ext.adoc[]
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type                 | Description
-| nodeCount              | Integer              | The number of nodes processed.
-| nodePropertiesWritten  | Integer              | The number of node properties written.
-| createMillis           | Integer              | Milliseconds for loading data.
-| computeMillis          | Integer              | Milliseconds for running the algorithm.
-| writeMillis            | Integer              | Milliseconds for writing result data back to Neo4j.
-| configuration          | Map                  | The configuration used for running the algorithm.
-|===
-======
-====
-
-Memory estimation for FastRPExtended works similarly to FastRP, which we can see in the following example for the stream mode:
-
 [role=query-example]
 --
-.The following will estimate the memory requirements for FastRPExtended:
+.The following will run FastRP with feature properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.fastRPExtended.stream.estimate('persons', {embeddingDimension: 128, propertyRatio: 0.5, featureProperties: ['p1', 'p2']})
-YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+CALL gds.fastRP.stream('persons', {
+    randomSeed: 42,
+    embeddingDimension: 2,
+    propertyRatio: 1.0,
+    featureProperties: ['age'],
+    iterationWeights: [1.0]
+}) YIELD nodeId, embedding
 ----
 
 .Results
-[opts="header", cols="1,1,1,1,1"]
+[opts="header", cols="1,1"]
 |===
-| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 18                | 11928    | 11928    | "11928 Bytes"
+| nodeId | embedding
+| 0 | [0.0, -1.0]
+| 1 | [0.0, -1.0]
+| 2 | [0.0, -0.9999999403953552]
+| 3 | [0.0, -1.0]
+| 4 | [0.0, -0.9999999403953552]
+| 5 | [0.0, -1.0]
+| 6 | [0.0, -1.0]
 |===
 --
+
+In this example, the embeddings are based on the `age` property.
+Because of L2 normalization which is applied to each iteration (here only one iteration), all nodes have the same embedding despite having different age values (apart from rounding errors).

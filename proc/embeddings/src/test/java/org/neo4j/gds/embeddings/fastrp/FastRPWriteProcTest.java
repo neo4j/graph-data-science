@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 
@@ -127,5 +128,23 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         float[] embeddingOfE = embeddings.get("e");
         scale(embeddingOfE, 2);
         assertThat(embeddings.get("b")).containsExactly(embeddingOfE);
+    }
+
+    @Test
+    void shouldNotCrashWithFeatureProperties() {
+        int embeddingDimension = 128;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .algo("fastRP")
+            .writeMode()
+            .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", 0.5)
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .addParameter("writeProperty", "embedding")
+            .yields();
+
+        runQuery(query);
     }
 }

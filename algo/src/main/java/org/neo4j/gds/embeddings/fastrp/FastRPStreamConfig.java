@@ -29,7 +29,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface FastRPStreamConfig extends FastRPBaseProductionConfig {
+public interface FastRPStreamConfig extends FastRPBaseConfig {
 
     static FastRPStreamConfig of(
         String username,

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -64,5 +65,21 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
             "computeMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
+    }
+
+    @Test
+    void shouldNotCrashWithFeatureProperties() {
+        var query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .algo("fastRP")
+            .statsMode()
+            .addParameter("embeddingDimension", 4)
+            .addParameter("propertyRatio", 0.5)
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .yields();
+
+        runQuery(query);
     }
 }

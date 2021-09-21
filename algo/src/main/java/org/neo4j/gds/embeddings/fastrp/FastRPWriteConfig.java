@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface FastRPWriteConfig extends FastRPBaseProductionConfig, WritePropertyConfig {
+public interface FastRPWriteConfig extends FastRPBaseConfig, WritePropertyConfig {
 
     static FastRPWriteConfig of(
         String username,

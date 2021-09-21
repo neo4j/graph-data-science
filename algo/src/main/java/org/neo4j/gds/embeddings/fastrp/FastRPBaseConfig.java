@@ -66,20 +66,21 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         return 0.0f;
     }
 
-    static void validateCommon(List<? extends Number> iterationWeights, double propertyRatio, List<String> featureProperties) {
-        //TODO featureProperties=[] and propertyRatio>0 (fixed in this PR)
-        if (iterationWeights.isEmpty()) {
+    @Value.Check
+    default void validate() {
+        if (iterationWeights().isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must not be empty.",
                 "iterationWeights"
             ));
         }
-        if (propertyRatio > 0.0) {
-            if (featureProperties.isEmpty()) {
+        if (propertyRatio() > 0.0) {
+            if (featureProperties().isEmpty()) {
                 throw new IllegalArgumentException("When `propertyRatio` is non-zero, `featureProperties` may not be empty.");
             }
         }
-        for (Object weight : iterationWeights) {
+        // propertyRatio=0 and non-empty featureProperties is allowed because otherwise it would be harder to change propertyRatio back and forth
+        for (Object weight : iterationWeights()) {
             if (!(weight instanceof Number)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Iteration weights must be numbers, but found `%s` of type `%s`",

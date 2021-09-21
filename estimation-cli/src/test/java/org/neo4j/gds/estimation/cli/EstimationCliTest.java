@@ -30,10 +30,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMutateProc;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutStreamProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedMutateProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedStatsProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedStreamProc;
-import org.neo4j.gds.beta.fastrp.FastRPExtendedWriteProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamProc;
@@ -667,27 +663,6 @@ final class EstimationCliTest {
 
     private static Stream<Pair<String, MemoryEstimateResult>> nodeEmbeddingEstimations() {
         return sorted(Stream.of(
-            runEstimation(
-                FastRPExtendedMutateProc.class, "estimate",
-                "mutateProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-            runEstimation(FastRPExtendedStatsProc.class, "estimate", "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(FastRPExtendedStreamProc.class, "estimate", "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(
-                FastRPExtendedWriteProc.class, "estimate",
-                "writeProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-
             runEstimation(Node2VecMutateProc.class, "estimate", "mutateProperty", "foo"),
             runEstimation(Node2VecStreamProc.class, "estimate"),
             runEstimation(Node2VecWriteProc.class, "estimate", "writeProperty", "foo"),

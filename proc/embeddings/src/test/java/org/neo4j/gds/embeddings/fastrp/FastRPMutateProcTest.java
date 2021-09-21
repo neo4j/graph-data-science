@@ -130,4 +130,21 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
                 .matches(vector -> FloatVectorOperations.anyMatch(vector, v -> v != 0.0));
         });
     }
+
+    @Test
+    void shouldNotCrashWithFeatureProperties() {
+        int embeddingDimension = 128;
+        double propertyRatio = 127.0/128;
+        String query = GdsCypher.call()
+            .explicitCreation(mutateGraphName().get())
+            .algo("fastRP")
+            .mutateMode()
+            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .yields();
+
+        runQuery(query);
+    }
 }

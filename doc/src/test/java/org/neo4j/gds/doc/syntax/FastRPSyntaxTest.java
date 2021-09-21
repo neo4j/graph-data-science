@@ -31,10 +31,10 @@ class FastRPSyntaxTest extends SyntaxTestBase {
     @Override
     protected List<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM, 2),
-            SyntaxModeMeta.of(STATS, 2),
-            SyntaxModeMeta.of(MUTATE, 2),
-            SyntaxModeMeta.of(WRITE, 2)
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(STATS),
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
         );
     }
 
