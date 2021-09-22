@@ -61,6 +61,7 @@ import java.util.stream.LongStream;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private final long randomSeed;
@@ -171,12 +172,7 @@ public class GraphSageModelTrainer {
 
             updater.update(meanGradients);
 
-            progressTracker.progressLogger().getLog().debug(
-                "Epoch %d LOSS: %.10f at iteration %d",
-                epoch,
-                totalLoss,
-                iteration
-            );
+            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", totalLoss));
 
             progressTracker.endSubTask();
         }

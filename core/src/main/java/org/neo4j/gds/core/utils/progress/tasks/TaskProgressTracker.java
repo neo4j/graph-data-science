@@ -121,6 +121,21 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void logDebug(String message) {
+//        progressLogger().getLog().debug(taskProgressLogger.taskDescription(parentTask(), requireCurrentTask()) + " :: " + message);
+    }
+
+    @Override
+    public void logWarning(String message) {
+//        progressLogger().getLog().warn(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), baseTask.description(), taskProgressLogger.taskDescription(parentTask(), requireCurrentTask()) + " :: " + message));
+    }
+
+    @Override
+    public void logMessage(String message) {
+        progressLogger().logMessage(":: " + message);
+    }
+
+    @Override
     public void release() {
         taskRegistry.unregisterTask();
         validateTaskFinishedOrCanceled();

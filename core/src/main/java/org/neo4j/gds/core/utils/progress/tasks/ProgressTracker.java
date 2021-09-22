@@ -50,6 +50,12 @@ public interface ProgressTracker {
 
     ProgressLogger progressLogger();
 
+    void logDebug(String message);
+
+    void logWarning(String message);
+
+    void logMessage(String message);
+
     void release();
 
     class EmptyProgressTracker implements ProgressTracker {
@@ -97,6 +103,21 @@ public interface ProgressTracker {
         @Override
         public ProgressLogger progressLogger() {
             return ProgressLogger.NULL_LOGGER;
+        }
+
+        @Override
+        public void logDebug(String message) {
+
+        }
+
+        @Override
+        public void logWarning(String message) {
+
+        }
+
+        @Override
+        public void logMessage(String message) {
+
         }
 
         @Override
