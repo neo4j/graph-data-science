@@ -228,7 +228,7 @@ class YensTest {
                 "Yens :: Start",
                 "Yens :: Searching path :: Start",
                 "Yens :: Searching path :: k 1 of 1 :: Start",
-                "Yens :: Searching path :: k 1 of 1 :: Start Dijkstra for spur node " + idFunction.of("h"),
+                "Yens :: Searching path :: k 1 of 1 :: Dijkstra for spur node " + idFunction.of("h"),
                 "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Start",
                 "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 100%",
                 "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Finished",
