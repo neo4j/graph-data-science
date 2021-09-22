@@ -34,6 +34,7 @@ import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,8 +45,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.core.Is.isA;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.cypherdsl.core.Cypher.call;
-import static org.neo4j.cypherdsl.core.Cypher.literalOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -256,8 +255,11 @@ class GraphDropProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
     @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
+        var params = new HashMap<String, Object>();
+        params.put("graphName", invalidName);
         assertError(
-            call("gds.graph.drop").withArgs(literalOf(invalidName)).build().getCypher(),
+            "CALL gds.graph.drop($graphName)",
+            params,
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
@@ -357,16 +359,21 @@ class GraphDropProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("invalidInputTypeValues")
     void failOnNonStringOrListInput(Object invalidInput) {
+        var params = new HashMap<String, Object>();
+        params.put("graphName", invalidInput);
         assertError(
-            call("gds.graph.drop").withArgs(literalOf(invalidInput)).build().getCypher(),
+            "CALL gds.graph.drop($graphName)",
+            params,
             formatWithLocale(
                 "Type mismatch: expected String but was %s",
                 invalidInput.getClass().getSimpleName()
             )
         );
 
+        params.put("graphName", List.of(invalidInput));
         assertError(
-            call("gds.graph.drop").withArgs(literalOf(List.of(invalidInput))).build().getCypher(),
+            "CALL gds.graph.drop($graphName)",
+            params,
             formatWithLocale(
                 "Type mismatch at index 0: expected String but was %s",
                 invalidInput.getClass().getSimpleName()
