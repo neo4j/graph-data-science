@@ -19,97 +19,41 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.logging.Log;
 
-import java.util.function.Supplier;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TaskProgressLogger implements ProgressLogger {
+class TaskProgressLogger extends BatchingProgressLogger {
 
-    private final ProgressLogger progressLogger;
     private final Task baseTask;
     private final LoggingLeafTaskVisitor loggingLeafTaskVisitor;
 
-    public TaskProgressLogger(ProgressLogger progressLogger, Task baseTask) {
-        this.progressLogger = progressLogger;
+    TaskProgressLogger(Log log, Task baseTask, int concurrency) {
+        super(log, baseTask, concurrency);
         this.baseTask = baseTask;
-        this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(progressLogger);
+        this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(this);
     }
 
     void logBeginSubTask(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
         if (parentTask == null) {
-            progressLogger.logStart(taskName);
+            logStart(taskName);
         } else {
-            progressLogger.startSubTask(taskName);
+            startSubTask(taskName);
         }
-        progressLogger.reset(task.getProgress().volume());
+        reset(task.getProgress().volume());
     }
 
     void logEndSubTask(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
         log100OnLeafTaskFinish(task);
         if (parentTask == null) {
-            progressLogger.logFinish(taskName);
+            logFinish(taskName);
         } else {
-            progressLogger.finishSubTask(taskName);
+            finishSubTask(taskName);
         }
-    }
-
-    ProgressLogger internalProgressLogger() {
-        return this.progressLogger;
-    }
-
-    @Override
-    public String getTask() {
-        return progressLogger.getTask();
-    }
-
-    @Override
-    public void setTask(String task) {
-        progressLogger.setTask(task);
-    }
-
-    @Override
-    public void logProgress(Supplier<String> msgFactory) {
-        progressLogger.logProgress(msgFactory);
-    }
-
-    @Override
-    public void logProgress(long progress, Supplier<String> msgFactory) {
-        progressLogger.logProgress(progress, msgFactory);
-    }
-
-    @Override
-    public void logFinishPercentage() {
-        progressLogger.logFinishPercentage();
-    }
-
-    @Override
-    public void logMessage(Supplier<String> msg) {
-        progressLogger.logMessage(msg);
-    }
-
-    @Override
-    public long reset(long newTaskVolume) {
-        return progressLogger.reset(newTaskVolume);
-    }
-
-    @Override
-    public void release() {
-        progressLogger.release();
-    }
-
-    @Override
-    public Log getLog() {
-        return progressLogger.getLog();
-    }
-
-    @Override
-    public void logProgress(double percentDone, Supplier<String> msg) {
-        progressLogger.logProgress(percentDone, msg);
     }
 
     private String boundedIterationsTaskName(
