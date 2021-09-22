@@ -24,7 +24,6 @@ import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -138,15 +137,16 @@ class BatchingProgressLoggerTest {
         var concurrency = 1;
         var taskVolume = 1337;
 
-        var logger = new TestProgressLogger(Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
+        TestLog log = new TestLog();
+        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
-        assertThat(logger.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly("Test 1%");
         logger.reset(420); // batchSize is now 4, which is smaller than the callCount 7
         logger.logProgress(10);
-        assertThat(logger.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly("Test 1%", "Test 2%"); // regardless of previous callCount, this should log an additional message
     }
@@ -154,26 +154,29 @@ class BatchingProgressLoggerTest {
     @Test
     void log100Percent() {
         try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
+            TestLog log = new TestLog();
+            var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
             testProgressLogger.reset(1337);
             testProgressLogger.logFinishPercentage();
-            assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
+            assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
         }
     }
 
     @Test
     void shouldLog100OnlyOnce() {
         try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            var testProgressLogger = new TestProgressLogger(Tasks.leaf("Test"), 1);
+            TestLog log = new TestLog();
+            var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
             testProgressLogger.reset(1);
             testProgressLogger.logProgress(1);
             testProgressLogger.logFinishPercentage();
-            assertThat(testProgressLogger.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
+            assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
         }
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
-        var logger = new TestProgressLogger(Tasks.leaf("Test", taskVolume), concurrency);
+        TestLog log = new TestLog();
+        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);
@@ -189,7 +192,7 @@ class BatchingProgressLoggerTest {
 
         ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
 
-        return logger
+        return log
             .getMessages(TestLog.INFO)
             .stream()
             .map(progress -> progress.split(" ")[2].replace("%", ""))
