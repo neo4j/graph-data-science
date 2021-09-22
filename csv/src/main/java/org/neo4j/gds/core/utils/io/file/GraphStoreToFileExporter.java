@@ -216,8 +216,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
         private void exportGraphInfo(GraphStoreInput graphStoreInput) {
             GraphInfo graphInfo = graphStoreInput.metaDataStore().graphInfo();
-            try (var namedDatabaseIdVisitor = graphInfoVisitorSupplier.get()) {
-                namedDatabaseIdVisitor.export(graphInfo);
+            try (var graphInfoVisitor = graphInfoVisitorSupplier.get()) {
+                graphInfoVisitor.export(graphInfo);
             }
         }
 

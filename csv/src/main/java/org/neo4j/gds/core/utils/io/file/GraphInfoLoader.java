@@ -57,6 +57,7 @@ public class GraphInfoLoader {
                 .namedDatabaseId(databaseId)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
+                .relationshipTypeCounts(line.relTypeCounts)
                 .bitIdMap(line.bitIdMap)
                 .build();
 
