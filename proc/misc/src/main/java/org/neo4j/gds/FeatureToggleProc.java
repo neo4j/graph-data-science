@@ -197,4 +197,19 @@ public final class FeatureToggleProc {
             this.value = value;
         }
     }
+
+    @Internal
+    @Procedure("gds.features.useNeoIdsForLabelImport")
+    @Description("")
+    public void useNeoIdsForLabelImport(@Name(value = "useNeoIdsForLabelImport") boolean useNeoIdsForLabelImport) {
+        GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.toggle(useNeoIdsForLabelImport);
+    }
+
+    @Internal
+    @Procedure("gds.features.useNeoIdsForLabelImport.reset")
+    @Description("")
+    public Stream<FeatureState> resetUseNeoIdsForLabelImport() {
+        GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()));
+    }
 }
