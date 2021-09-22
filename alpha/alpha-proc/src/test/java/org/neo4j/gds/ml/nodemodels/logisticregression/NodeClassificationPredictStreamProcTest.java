@@ -43,7 +43,8 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
 
     private  static final String DB_CYPHER =
         "CREATE " +
-        "  (n1:N {a: -1.36753705, b:  1.46853155})" +
+        "  (n0:Ignore {a: 42.0, b:  1337.0})" +
+        ", (n1:N {a: -1.36753705, b:  1.46853155})" +
         ", (n2:N {a: -1.45431768, b: -1.67820474})" +
         ", (n3:N {a: -0.34216825, b: -1.31498086})" +
         ", (n4:N {a: -0.60765016, b:  1.0186564})" +
@@ -86,12 +87,8 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
         assertCypherResult(query, List.of(
             // Use MapUtil because Map.of doesn't like nulls
             MapUtil.map(
-                "nodeId", 0L,
-                "predictedClass", 1L,
-                "predictedProbabilities", null
-            ), MapUtil.map(
                 "nodeId", 1L,
-                "predictedClass", 0L,
+                "predictedClass", 1L,
                 "predictedProbabilities", null
             ), MapUtil.map(
                 "nodeId", 2L,
@@ -99,10 +96,14 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
                 "predictedProbabilities", null
             ), MapUtil.map(
                 "nodeId", 3L,
-                "predictedClass", 1L,
+                "predictedClass", 0L,
                 "predictedProbabilities", null
             ), MapUtil.map(
                 "nodeId", 4L,
+                "predictedClass", 1L,
+                "predictedProbabilities", null
+            ), MapUtil.map(
+                "nodeId", 5L,
                 "predictedClass", 0L,
                 "predictedProbabilities", null
             )
@@ -124,23 +125,23 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(
             Map.of(
-                "nodeId", 0L,
+                "nodeId", 1L,
                 "predictedClass", 1L,
                 "predictedProbabilities", List.of(0.009623578250764023, 0.9903764217492359)
             ), Map.of(
-                "nodeId", 1L,
+                "nodeId", 2L,
                 "predictedClass", 0L,
                 "predictedProbabilities", List.of(0.6202234850274747, 0.37977651497252507)
             ), Map.of(
-                "nodeId", 2L,
+                "nodeId", 3L,
                 "predictedClass", 0L,
                 "predictedProbabilities", List.of(0.915589719616455, 0.08441028038354483)
             ), Map.of(
-                "nodeId", 3L,
+                "nodeId", 4L,
                 "predictedClass", 1L,
                 "predictedProbabilities", List.of(0.10339691434030411, 0.8966030856596957)
             ), Map.of(
-                "nodeId", 4L,
+                "nodeId", 5L,
                 "predictedClass", 0L,
                 "predictedProbabilities", List.of(0.6619185527831281, 0.3380814472168717)
             )

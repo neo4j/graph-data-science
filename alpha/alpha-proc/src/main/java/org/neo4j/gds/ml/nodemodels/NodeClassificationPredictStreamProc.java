@@ -79,7 +79,7 @@ public class NodeClassificationPredictStreamProc
                 .range(0, graph.nodeCount())
                 .boxed()
                 .map((nodeId) ->
-                    new StreamResult(nodeId, predictedClasses.get(nodeId), nodePropertiesAsList(predictedProbabilities, nodeId)));
+                    new StreamResult(graph.toOriginalNodeId(nodeId), predictedClasses.get(nodeId), nodePropertiesAsList(predictedProbabilities, nodeId)));
         });
     }
 
