@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
-
 import java.util.function.Supplier;
 
 public interface ProgressLogger {
-
-    ProgressLogger NULL_LOGGER = NullProgressLogger.INSTANCE;
 
     String TASK_SEPARATOR = " :: ";
 
@@ -97,8 +92,6 @@ public interface ProgressLogger {
     long reset(long newTaskVolume);
 
     void release();
-
-    Log getLog();
 
     @Deprecated
     void logProgress(double percentDone, Supplier<String> msg);
@@ -178,11 +171,6 @@ public interface ProgressLogger {
 
         @Override
         public void release() {
-        }
-
-        @Override
-        public Log getLog() {
-            return NullLog.getInstance();
         }
 
         @Override

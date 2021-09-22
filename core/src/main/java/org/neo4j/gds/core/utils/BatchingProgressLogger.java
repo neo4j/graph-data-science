@@ -176,11 +176,6 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public Log getLog() {
-        return this.log;
-    }
-
-    @Override
     public void logProgress(double percentDone, Supplier<String> msg) {
         throw new UnsupportedOperationException("BatchProgressLogger does not support logging percentages");
     }

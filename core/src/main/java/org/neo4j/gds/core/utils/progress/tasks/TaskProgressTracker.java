@@ -166,7 +166,7 @@ public class TaskProgressTracker implements ProgressTracker {
             // but only in our tests, we only use an assertion here
             assert false : message;
 
-            taskProgressLogger.getLog().warn(message);
+            taskProgressLogger.logWarning(message);
         }
     }
 

@@ -36,6 +36,7 @@ import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +47,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -424,7 +424,7 @@ class NodeClassificationTrainTest {
             graph,
             config,
             AllocationTracker.empty(),
-            NULL_LOGGER.getLog(),
+            NullLog.getInstance(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

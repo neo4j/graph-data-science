@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,8 +101,4 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
         batchingLogger.release();
     }
 
-    @Override
-    public Log getLog() {
-        return this;
-    }
 }
