@@ -133,9 +133,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             prepare();
             assertRunning();
 
-            progressTracker.progressLogger().logMessage("NodeSimilarity#computeToGraph");
-
-
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
                 : computeTopKMap();
@@ -228,8 +225,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAllParallel() {
-        progressTracker.progressLogger().logMessage("NodeSimilarity#computeAllParallel");
-
         return ParallelUtil.parallelStream(
             loggableAndTerminatableNodeStream(), config.concurrency(), stream -> stream
                 .boxed()

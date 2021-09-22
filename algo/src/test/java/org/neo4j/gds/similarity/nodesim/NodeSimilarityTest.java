@@ -68,6 +68,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -796,7 +797,7 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).build();
+        var config = configBuilder().topK(100).concurrency(concurrency).build();
 
         var progressLog = new TestLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
@@ -809,24 +810,26 @@ final class NodeSimilarityTest {
 
         nodeSimilarity.compute();
 
-        assertThat(progressLog.hasMessages(INFO)).isTrue();
-
-        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: prepare :: Start")).isTrue();
-        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: prepare :: Finished")).isTrue();
-
-        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: compare :: Start")).isTrue();
-        assertThat(progressLog.containsMessage(INFO, "NodeSimilarity :: compare :: Finished")).isTrue();
+        assertThat(progressLog.getMessages(INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "NodeSimilarity :: prepare :: Start",
+                "NodeSimilarity :: prepare :: Finished",
+                "NodeSimilarity :: compare node pairs :: Start",
+                "NodeSimilarity :: compare node pairs :: Finished"
+            );
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
+        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).topK(1).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
+        TestLog log = new TestLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
-            new TestLog(),
+            log,
             concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -845,7 +848,15 @@ final class NodeSimilarityTest {
 
         // Should log progress for prepare and actual comparisons
         assertEquals(4, progresses.size());
-
         assertEquals(graph.relationshipCount(), progresses.get(1).get());
+
+        assertThat(log.getMessages(INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "NodeSimilarity :: prepare :: Start",
+                "NodeSimilarity :: prepare :: Finished",
+                "NodeSimilarity :: compare node pairs :: Start",
+                "NodeSimilarity :: compare node pairs :: Finished"
+            );
     }
 }

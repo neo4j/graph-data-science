@@ -102,7 +102,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         return Tasks.task(
             taskName(),
             Tasks.leaf("prepare", graph.relationshipCount()),
-            Tasks.leaf("compare")
+            Tasks.leaf("compare node pairs")
         );
     }
 }
