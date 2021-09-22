@@ -65,7 +65,6 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 
         this.k = k;
-        this.progressTracker = progressTracker;
     }
 
     @Override

@@ -89,6 +89,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(pregelSpec.configTypeName(), configurationVar)
             .addParameter(AllocationTracker.class, "allocationTracker")
             .addParameter(ProgressTracker.class, "progressTracker")
+            .addStatement(CodeBlock.builder().add("super(progressTracker)").build())
             .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.create(" +
