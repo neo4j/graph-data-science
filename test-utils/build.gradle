@@ -30,8 +30,6 @@ dependencies {
             [group: 'net.jqwik',               name: 'jqwik',                   version: ver.'jqwik'],
             [group: 'io.qala.datagen',         name: 'qala-datagen-junit5',     version: ver.'qala-datagen'],
             [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
-            [group: 'org.ejml',                name: 'ejml-core',               version: ver.'ejml'],
-            [group: 'org.ejml',                name: 'ejml-ddense',             version: ver.'ejml'],
             [group: 'commons-io',              name: 'commons-io',              version: ver.'commons-io'],
             [group: 'com.github.marschall',    name: 'memoryfilesystem',        version: ver.'memoryfilesystem'],
     )
