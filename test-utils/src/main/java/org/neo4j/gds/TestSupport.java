@@ -35,8 +35,6 @@ import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.gds.extension.IdFunction;
@@ -46,9 +44,7 @@ import org.neo4j.gds.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.annotation.Retention;
@@ -60,8 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -72,11 +66,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
 
@@ -274,52 +268,6 @@ public final class TestSupport {
 
         assertEquals(expectedMinBytes, actual.min);
         assertEquals(expectedMaxBytes, actual.max);
-    }
-
-    /**
-     * This method assumes that the given algorithm calls {@link org.neo4j.gds.Algorithm#assertRunning()} at least once.
-     * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it checks the transaction state.
-     * A second thread will terminate the transaction during the sleep interval.
-     */
-    public static void assertAlgorithmTermination(
-        GraphDatabaseAPI db,
-        Algorithm<?, ?> algorithm,
-        Consumer<Algorithm<?, ?>> algoConsumer,
-        long sleepMillis
-    ) {
-        assert sleepMillis >= 100 && sleepMillis <= 10_000;
-
-        var timeoutTx = db.beginTx(10, TimeUnit.SECONDS);
-        KernelTransaction kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
-        algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
-
-        Runnable algorithmThread = () -> {
-            try {
-                algoConsumer.accept(algorithm);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        Runnable interruptingThread = () -> {
-            try {
-                Thread.sleep(sleepMillis / 2);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            kernelTx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
-        };
-
-        assertThrows(
-            TransactionTerminatedException.class,
-            () -> {
-                try {
-                    ParallelUtil.run(Arrays.asList(algorithmThread, interruptingThread), Pools.DEFAULT);
-                } catch (RuntimeException e) {
-                    throw e.getCause();
-                }
-            }
-        );
     }
 
     public static void assertTransactionTermination(Executable executable) {
