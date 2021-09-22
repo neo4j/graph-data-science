@@ -23,12 +23,14 @@ dependencies {
     )
 
     api (
-            platform(dep.junit5bom),
-            dep.junit5jupiter,
-            [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
-            [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
-            [group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'],
-            [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
+        platform(dep.junit5bom),
+        dep.junit5jupiter,
+        [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
+        [group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'],
+
+        // let annotation dependencies be transitive to avoid compiler warnings for users of this project on missing annotation methods
+        [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
+        [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
     )
 
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
