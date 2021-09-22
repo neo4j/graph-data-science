@@ -30,7 +30,6 @@ dependencies {
             [group: 'net.jqwik',               name: 'jqwik',                   version: ver.'jqwik'],
             [group: 'io.qala.datagen',         name: 'qala-datagen-junit5',     version: ver.'qala-datagen'],
             [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
-            [group: 'commons-io',              name: 'commons-io',              version: ver.'commons-io'],
     )
 
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
