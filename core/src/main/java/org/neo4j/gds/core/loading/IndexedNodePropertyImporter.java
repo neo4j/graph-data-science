@@ -253,11 +253,11 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private void importFromCursor(NodeValueIndexCursor indexCursor, int propertyOffset) {
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
-                var node = indexCursor.nodeReference();
-                var nodeId = idMap.toMappedNodeId(node);
+                var neoNodeId = indexCursor.nodeReference();
+                var nodeId = idMap.toMappedNodeId(neoNodeId);
                 if (nodeId >= 0) {
                     var propertyValue = indexCursor.propertyValue(propertyOffset);
-                    propertiesBuilder.set(nodeId, propertyValue);
+                    propertiesBuilder.set(nodeId, neoNodeId, propertyValue);
                     imported += 1;
                     if ((imported & 0x1_FFFFL) == 0L) {
                         progressTracker.logProgress(imported - logged);

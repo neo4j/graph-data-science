@@ -24,6 +24,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.utils.ValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -31,7 +32,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.OptionalLong;
 
-public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     // Value is changed with a VarHandle and needs to be non final for that
     // even though our favourite IDE/OS doesn't pick that up
@@ -52,17 +53,37 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         MAX_VALUE = maxValueHandle;
     }
 
-    private final HugeSparseLongArray.Builder valuesBuilder;
-
-    public LongNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
+    private LongNodePropertiesBuilder() {
         this.maxValue = Long.MIN_VALUE;
-        this.valuesBuilder = HugeSparseLongArray.builder(nodeCount, defaultValue.longValue(), allocationTracker);
     }
 
-    public void set(long nodeId, long value) {
-        valuesBuilder.set(nodeId, value);
-        updateMaxValue(value);
+    public static LongNodePropertiesBuilder of(
+        long nodeCount,
+        DefaultValue defaultValue,
+        AllocationTracker allocationTracker
+    ) {
+        return GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled()
+            ? sparse(defaultValue, allocationTracker)
+            : dense(nodeCount, defaultValue, allocationTracker);
     }
+
+    public static LongNodePropertiesBuilder sparse(DefaultValue defaultValue, AllocationTracker allocationTracker) {
+        var builder = HugeSparseLongArray.GrowingBuilder.create(defaultValue.longValue(), allocationTracker);
+        return new SparseLongNodePropertiesBuilder(builder);
+    }
+
+    public static LongNodePropertiesBuilder dense(
+        long nodeCount,
+        DefaultValue defaultValue,
+        AllocationTracker allocationTracker
+    ) {
+        var builder = HugeSparseLongArray.builder(nodeCount, defaultValue.longValue(), allocationTracker);
+        return new DenseLongNodePropertiesBuilder(builder);
+    }
+
+    public abstract void set(long nodeId, long neoNodeId, long value);
+
+    abstract HugeSparseLongArray build();
 
     @Override
     protected Class<?> valueClass() {
@@ -70,15 +91,15 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, long neoNodeId, Value value) {
         var longValue = ValueConversion.getLongValue(value);
-        valuesBuilder.set(nodeId, longValue);
+        set(nodeId, neoNodeId, longValue);
         updateMaxValue(longValue);
     }
 
     @Override
     public NodeProperties build(long size) {
-        HugeSparseLongArray propertyValues = valuesBuilder.build();
+        HugeSparseLongArray propertyValues = build();
 
         var maybeMaxValue = size > 0
             ? OptionalLong.of((long) MAX_VALUE.getVolatile(LongNodePropertiesBuilder.this))
@@ -145,6 +166,43 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         @Override
         public long size() {
             return size;
+        }
+    }
+
+    private static final class SparseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
+
+        private final HugeSparseLongArray.GrowingBuilder builder;
+
+        private SparseLongNodePropertiesBuilder(HugeSparseLongArray.GrowingBuilder builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public void set(long nodeId, long neoNodeId, long value) {
+            builder.set(neoNodeId, value);
+        }
+
+        @Override
+        HugeSparseLongArray build() {
+            return builder.build();
+        }
+    }
+
+    private static final class DenseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
+        private final HugeSparseLongArray.Builder builder;
+
+        DenseLongNodePropertiesBuilder(HugeSparseLongArray.Builder builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public void set(long nodeId, long neoNodeId, long value) {
+            builder.set(nodeId, value);
+        }
+
+        @Override
+        HugeSparseLongArray build() {
+            return builder.build();
         }
     }
 }

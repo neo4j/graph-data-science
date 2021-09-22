@@ -25,7 +25,7 @@ import org.neo4j.values.storable.Value;
 public abstract class InnerNodePropertiesBuilder {
     protected abstract Class<?> valueClass();
 
-    public abstract void setValue(long nodeId, Value value);
+    public abstract void setValue(long nodeId, long neoNodeId, Value value);
 
     public abstract NodeProperties build(long size);
 }

@@ -61,6 +61,8 @@ import static org.neo4j.gds.core.utils.paged.SparseLongArray.SUPER_BLOCK_SHIFT;
 
 final class NodesFilter {
 
+    public static final long UNUSED = -1L;
+
     @ValueClass
     interface FilteredNodes {
         NodeMapping nodeMapping();
@@ -278,7 +280,7 @@ final class NodesFilter {
 
         switch (inputNodeProperties.valueType()) {
             case LONG:
-                var longNodePropertiesBuilder = new LongNodePropertiesBuilder(
+                var longNodePropertiesBuilder = LongNodePropertiesBuilder.dense(
                     filteredNodeCount,
                     DefaultValue.forLong(),
                     allocationTracker
@@ -286,7 +288,7 @@ final class NodesFilter {
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(filteredNode, inputProperties.longValue(inputNode));
+                        propertyBuilder.set(filteredNode, UNUSED, inputProperties.longValue(inputNode));
                     }
                 };
                 break;

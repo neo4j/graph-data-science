@@ -100,7 +100,7 @@ class UnionNodePropertiesTest {
             1, AllocationTracker.empty(), defaultValue
         );
 
-        doubleNodePropertiesBuilder.set(0, propertyValue);
+        doubleNodePropertiesBuilder.set(0, 0, propertyValue);
 
         NodeProperties doubleNodeProperties = doubleNodePropertiesBuilder.build();
         NodeLabel label = NodeLabel.of("label");

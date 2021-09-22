@@ -336,6 +336,7 @@ public final class NodesBuilder {
                     MutableInt importedProperties = new MutableInt(0);
                     properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
                         internalId,
+                        nodeReference,
                         labelIds,
                         propertyKey,
                         propertyValue
@@ -356,7 +357,7 @@ public final class NodesBuilder {
             flushBuffer();
         }
 
-        private int importProperty(long nodeId, long[] labels, String propertyKey, Value value) {
+        private int importProperty(long nodeId, long neoNodeId, long[] labels, String propertyKey, Value value) {
             int propertiesImported = 0;
 
             for (long label : labels) {
@@ -366,7 +367,7 @@ public final class NodesBuilder {
 
                 var nodePropertyBuilder = propertyBuilderFn.apply((int) label, propertyKey);
                 if (nodePropertyBuilder != null) {
-                    nodePropertyBuilder.set(nodeId, value);
+                    nodePropertyBuilder.set(nodeId, neoNodeId, value);
                     propertiesImported++;
                 }
             }
@@ -376,7 +377,7 @@ public final class NodesBuilder {
                     .get(ANY_LABEL)
                     .get(propertyKey);
                 if (nodePropertiesBuilder != null) {
-                    nodePropertiesBuilder.set(nodeId, value);
+                    nodePropertiesBuilder.set(nodeId, neoNodeId, value);
                     propertiesImported++;
                 }
             }

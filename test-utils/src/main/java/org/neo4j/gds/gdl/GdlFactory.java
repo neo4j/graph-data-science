@@ -228,7 +228,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         dimensions.nodeCount(),
                         loadingContext.allocationTracker(),
                         DefaultValue.DEFAULT
-                    )).set(idMap.toMappedNodeId(vertex.getId()), Values.of(propertyValue));
+                    )).set(idMap.toMappedNodeId(vertex.getId()), vertex.getId(), Values.of(propertyValue));
             }));
 
         Map<PropertyMapping, NodeProperties> nodeProperties = propertyBuilders

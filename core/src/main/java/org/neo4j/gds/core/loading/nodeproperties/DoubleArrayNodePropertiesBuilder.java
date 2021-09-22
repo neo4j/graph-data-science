@@ -49,7 +49,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     }
 
     @Override
-    public void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, long neoNodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getDoubleArray(value));
     }
 

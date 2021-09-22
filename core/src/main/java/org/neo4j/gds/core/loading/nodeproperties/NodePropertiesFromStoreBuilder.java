@@ -74,12 +74,12 @@ public final class NodePropertiesFromStoreBuilder {
         this.size = new LongAdder();
     }
 
-    public void set(long nodeId, Value value) {
+    public void set(long nodeId, long neoNodeId, Value value) {
         if (value != null && value != NO_VALUE) {
             if (innerBuilder.get() == null) {
                 initializeWithType(value);
             }
-            innerBuilder.get().setValue(nodeId, value);
+            innerBuilder.get().setValue(nodeId, neoNodeId, value);
             size.increment();
         }
     }
@@ -100,7 +100,7 @@ public final class NodePropertiesFromStoreBuilder {
         if (innerBuilder.get() == null) {
             InnerNodePropertiesBuilder newBuilder;
             if (value instanceof IntegralValue) {
-                newBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
+                newBuilder = LongNodePropertiesBuilder.of(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof FloatingPointValue) {
                 newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof LongArray) {

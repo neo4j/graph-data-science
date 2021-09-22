@@ -78,7 +78,7 @@ public final class NativeNodePropertyImporter {
             Neo4jProxy.nodeProperties(kernelTransaction, neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
-                nodePropertiesRead += importProperty(nodeId, labelIds, pc);
+                nodePropertiesRead += importProperty(nodeId, neoNodeId, labelIds, pc);
             }
             return nodePropertiesRead;
         }
@@ -88,7 +88,7 @@ public final class NativeNodePropertyImporter {
         return buildersByLabel.build();
     }
 
-    private int importProperty(long nodeId, long[] labelIds, PropertyCursor propertyCursor) {
+    private int importProperty(long nodeId, long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
         int propertiesImported = 0;
         int propertyKey = propertyCursor.propertyKey();
 
@@ -101,6 +101,7 @@ public final class NativeNodePropertyImporter {
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
+                    neoNodeId,
                     propertyCursor,
                     propertyKey,
                     buildersByPropertyId
@@ -111,6 +112,7 @@ public final class NativeNodePropertyImporter {
         if (containsAnyLabelProjection) {
             propertiesImported += setPropertyValue(
                 nodeId,
+                neoNodeId,
                 propertyCursor,
                 propertyKey,
                 buildersByLabelIdAndPropertyId.get(ANY_LABEL)
@@ -122,7 +124,7 @@ public final class NativeNodePropertyImporter {
 
     private int setPropertyValue(
         long nodeId,
-        PropertyCursor propertyCursor,
+        long neoNodeId, PropertyCursor propertyCursor,
         int propertyId,
         BuildersByPropertyId buildersByPropertyId
     ) {
@@ -133,7 +135,7 @@ public final class NativeNodePropertyImporter {
             Value value = propertyCursor.propertyValue();
 
             for (NodePropertiesFromStoreBuilder builder : builders) {
-                builder.set(nodeId, value);
+                builder.set(nodeId, neoNodeId, value);
                 propertiesImported++;
             }
         }
