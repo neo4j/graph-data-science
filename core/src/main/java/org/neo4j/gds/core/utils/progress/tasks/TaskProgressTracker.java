@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.ProgressLogger;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -116,23 +115,18 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public ProgressLogger progressLogger() {
-        return taskProgressLogger;
-    }
-
-    @Override
     public void logDebug(String message) {
-        progressLogger().logDebug(":: " + message);
+        taskProgressLogger.logDebug(":: " + message);
     }
 
     @Override
     public void logWarning(String message) {
-        progressLogger().logWarning(":: " + message);
+        taskProgressLogger.logWarning(":: " + message);
     }
 
     @Override
     public void logMessage(String message) {
-        progressLogger().logMessage(":: " + message);
+        taskProgressLogger.logMessage(":: " + message);
     }
 
     @Override
@@ -172,7 +166,7 @@ public class TaskProgressTracker implements ProgressTracker {
             // but only in our tests, we only use an assertion here
             assert false : message;
 
-            progressLogger().getLog().warn(message);
+            taskProgressLogger.getLog().warn(message);
         }
     }
 
