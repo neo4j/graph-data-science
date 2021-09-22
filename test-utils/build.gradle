@@ -19,6 +19,7 @@ dependencies {
 
     implementation(
         [group: 'org.neo4j',               name: 'neo4j-cypher-dsl',        version: ver.'cypher-dsl'],
+        [group: 'com.github.s1ck',         name: 'gdl',                     version: ver.'gdl'],
     )
 
     api (
@@ -27,7 +28,6 @@ dependencies {
             [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
             [group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'],
-            [group: 'com.github.s1ck',         name: 'gdl',                     version: ver.'gdl'],
             [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
     )
 
