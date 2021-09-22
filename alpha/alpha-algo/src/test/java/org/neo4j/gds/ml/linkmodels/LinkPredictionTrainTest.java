@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestLog.DEBUG;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
@@ -293,9 +294,7 @@ class LinkPredictionTrainTest {
         );
         algo.compute();
 
-        var messagesInOrder = log.getMessages(INFO);
-
-        assertThat(messagesInOrder)
+        assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsSequence(
@@ -310,11 +309,19 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: ModelSelection :: Finished"
             ).containsSequence(
                 "LinkPredictionTrain :: Training :: Start",
-                "LinkPredictionTrain :: Training 10%",
-                "LinkPredictionTrain :: Training 20%",
-                "LinkPredictionTrain :: Training 30%",
-                "LinkPredictionTrain :: Training 40%"
-            ).containsSequence(
+                "LinkPredictionTrain :: Training :: Epoch 1 :: Start",
+                "LinkPredictionTrain :: Training :: Epoch 1 :: Loss: 0.6677047591195896",
+                "LinkPredictionTrain :: Training :: Epoch 1 100%",
+                "LinkPredictionTrain :: Training :: Epoch 1 :: Finished",
+                "LinkPredictionTrain :: Training :: Epoch 2 :: Start",
+                "LinkPredictionTrain :: Training :: Epoch 2 :: Loss: 0.6442681640854548",
+                "LinkPredictionTrain :: Training :: Epoch 2 100%",
+                "LinkPredictionTrain :: Training :: Epoch 2 :: Finished",
+                "LinkPredictionTrain :: Training :: Epoch 3 :: Start",
+                "LinkPredictionTrain :: Training :: Epoch 3 :: Loss: 0.6227985198045967",
+                "LinkPredictionTrain :: Training :: Epoch 3 100%",
+                "LinkPredictionTrain :: Training :: Epoch 3 :: Finished"
+                ).containsSequence(
                 "LinkPredictionTrain :: Training :: Finished",
                 "LinkPredictionTrain :: Evaluation :: Start",
                 "LinkPredictionTrain :: Evaluation :: Training :: Start",
@@ -326,5 +333,10 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: Evaluation :: Finished",
                 "LinkPredictionTrain :: Finished"
             );
+
+        assertThat(log.getMessages(DEBUG))
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .containsExactly();
     }
 }

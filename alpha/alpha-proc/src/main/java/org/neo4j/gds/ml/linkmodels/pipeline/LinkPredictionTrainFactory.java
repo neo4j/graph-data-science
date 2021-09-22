@@ -99,7 +99,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
                 "select model",
                pipeline.parameterSpace().size()
             ),
-            Tasks.leaf("train best model"),
+            Tasks.iterativeOpen("train best model", () -> List.of(Tasks.leaf("Epoch"))),
             Tasks.leaf("compute train metrics"),
             Tasks.task(
                 "evaluate on test data",

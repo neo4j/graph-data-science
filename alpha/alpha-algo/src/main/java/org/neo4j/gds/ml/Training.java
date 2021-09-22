@@ -42,6 +42,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Training {
     private final TrainingConfig config;
@@ -83,22 +84,24 @@ public class Training {
 
         while (!stopper.terminated()) {
             terminationFlag.assertRunning();
+            progressTracker.beginSubTask("Epoch");
 
             trainEpoch(objective, queueSupplier.get(), concurrency, updater);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
-            progressTracker.logProgress();
-            progressTracker.progressLogger().getLog().debug("Loss: %s, After Epoch: %d", lastLoss, epoch);
+
+            progressTracker.logMessage(formatWithLocale("Loss: %s", lastLoss));
+            progressTracker.endSubTask("Epoch");
         }
-        progressTracker.progressLogger().getLog().debug(
-            "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
+        progressTracker.logMessage(formatWithLocale(
+            "%s after %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             epoch,
             initialLoss,
             lastLoss,
             stopper.converged() ? "" : " Did not converge"
-        );
+        ));
     }
 
     private double evaluateLoss(Objective<?> objective, BatchQueue batches, int concurrency) {

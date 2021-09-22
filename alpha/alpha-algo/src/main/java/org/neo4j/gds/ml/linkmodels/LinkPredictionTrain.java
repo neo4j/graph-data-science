@@ -105,29 +105,30 @@ public class LinkPredictionTrain
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
 
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("ModelSelection");
         var modelSelectResult = modelSelect(nodeIds);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("ModelSelection");
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("Training");
         var modelData = trainModel(nodeIds, bestParameters, progressTracker);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Training");
 
         // evaluate the best model on the training and test graphs
-        progressTracker.beginSubTask();
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("Evaluation");
+        progressTracker.beginSubTask("Training");
         var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor(modelData, trainExtractors),
             progressTracker
         );
-        progressTracker.endSubTask();
-        progressTracker.beginSubTask();
+        progressTracker.endSubTask("Training");
+
+        progressTracker.beginSubTask("Testing");
         var testMetrics = computeMetric(testGraph, nodeIds, predictor(modelData, testExtractors), progressTracker);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Testing");
 
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Evaluation");
         progressTracker.endSubTask();
 
         return Model.of(
@@ -269,7 +270,6 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        progressTracker.setVolume(llrConfig.maxEpochs());
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
             trainSet,

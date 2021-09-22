@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.List;
+
 public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
 
     LinkPredictionTrainFactory() {
@@ -58,7 +60,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
         return Tasks.task(
             taskName(),
             Tasks.leaf("ModelSelection", modelSelectionTaskVolume),
-            Tasks.leaf("Training"),
+            Tasks.iterativeOpen("Training", () -> List.of(Tasks.leaf("Epoch"))),
             Tasks.task(
                 "Evaluation",
                 Tasks.leaf("Training"),

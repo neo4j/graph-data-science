@@ -67,16 +67,16 @@ public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<No
                 () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
                         Tasks.task(
                             "Split",
-                            Tasks.leaf("Train"),
+                            Tasks.iterativeOpen("Training", () -> List.of(Tasks.leaf("Epoch"))),
                             Tasks.leaf("Evaluate")
                         )
                     ), config.validationFolds())
                 ),
                 config.params().size()
             ),
-            Tasks.leaf("TrainSelectedOnRemainder"),
+            Tasks.iterativeOpen("TrainSelectedOnRemainder", () -> List.of(Tasks.leaf("Epoch"))),
             Tasks.leaf("EvaluateSelectedModel"),
-            Tasks.leaf("RetrainSelectedModel")
+            Tasks.iterativeOpen("RetrainSelectedModel", () -> List.of(Tasks.leaf("Epoch")))
         );
     }
 }

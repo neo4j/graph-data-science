@@ -249,9 +249,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
-                progressTracker.beginSubTask(modelParams.maxEpochs());
+                progressTracker.beginSubTask("Training");
                 var modelData = trainModel(trainSet, modelParams);
-                progressTracker.endSubTask();
+                progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
                 computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
@@ -280,10 +280,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ModelSelectResult modelSelectResult,
         NodeLogisticRegressionTrainConfig bestParameters
     ) {
-        int maxEpochs = bestParameters.maxEpochs();
-        progressTracker.beginSubTask(maxEpochs);
+        progressTracker.beginSubTask("TrainSelectedOnRemainder");
         NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
         var testMetrics = computeMetrics(classCounts, outerSplit.testSet(), bestModelData, metrics);
@@ -294,10 +293,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     }
 
     private NodeLogisticRegressionData retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
-        int maxEpochs = bestParameters.maxEpochs();
-        progressTracker.beginSubTask(maxEpochs);
+        progressTracker.beginSubTask("RetrainSelectedModel");
         var retrainedModelData = trainModel(nodeIds, bestParameters);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("RetrainSelectedModel");
         return retrainedModelData;
     }
 

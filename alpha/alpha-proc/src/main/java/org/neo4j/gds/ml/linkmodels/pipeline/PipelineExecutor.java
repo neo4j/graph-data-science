@@ -93,13 +93,13 @@ public class PipelineExecutor {
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes
     ) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("execute node property steps");
         for (NodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(caller, graphName, nodeLabels, relationshipTypes);
             progressTracker.endSubTask();
         }
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("execute node property steps");
     }
 
     public void splitRelationships(

@@ -167,7 +167,7 @@ public class LinkPredictionTrain
         FeaturesAndTargets trainData,
         HugeLongArray trainRelationshipIds
     ) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("select model");
 
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
@@ -213,7 +213,7 @@ public class LinkPredictionTrain
 
         var bestConfig = winner.params();
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("select model");
 
         return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
@@ -296,7 +296,7 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask(llrConfig.maxEpochs());
+        progressTracker.beginSubTask("train best model");
 
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
@@ -309,7 +309,7 @@ public class LinkPredictionTrain
 
         var modelData= llrTrain.compute();
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("train best model");
 
         return modelData;
     }
