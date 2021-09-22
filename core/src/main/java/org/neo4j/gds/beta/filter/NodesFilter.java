@@ -264,7 +264,7 @@ final class NodesFilter {
 
             builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount))
+                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, inputMapping))
             );
         });
         progressTracker.endSubTask();
@@ -452,8 +452,8 @@ final class NodesFilter {
 
         abstract void accept(long inputNode, long filteredNode);
 
-        NodeProperties build(long size) {
-            return propertyBuilder.build(size);
+        NodeProperties build(long size, NodeMapping nodeMapping) {
+            return propertyBuilder.build(size, nodeMapping);
         }
     }
 }

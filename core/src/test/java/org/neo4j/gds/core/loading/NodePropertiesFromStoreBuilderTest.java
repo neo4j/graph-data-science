@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.TestSupport.nodeMapping;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class NodePropertiesFromStoreBuilderTest {
@@ -59,7 +60,7 @@ final class NodePropertiesFromStoreBuilderTest {
             100_000,
             AllocationTracker.empty(),
             DefaultValue.of(42.0D)
-        ).build();
+        ).build(nodeMapping(0));
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
@@ -72,7 +73,7 @@ final class NodePropertiesFromStoreBuilderTest {
             100_000,
             AllocationTracker.empty(),
             DefaultValue.of(42L)
-        ).build();
+        ).build(nodeMapping(0));
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
@@ -246,8 +247,10 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void shouldHandleNullValues() {
+        var nodeCount = 100;
+
         var builder = NodePropertiesFromStoreBuilder.of(
-            100,
+            nodeCount,
             AllocationTracker.empty(),
             DefaultValue.DEFAULT
         );
@@ -255,7 +258,7 @@ final class NodePropertiesFromStoreBuilderTest {
         builder.set(0, 0, null);
         builder.set(1, 1, Values.longValue(42L));
 
-        var properties = builder.build();
+        var properties = builder.build(nodeMapping(nodeCount));
 
         assertEquals(ValueType.LONG, properties.valueType());
         assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, properties.longValue(0L));
@@ -295,7 +298,7 @@ final class NodePropertiesFromStoreBuilderTest {
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.SECONDS);
 
-        var properties = builder.build();
+        var properties = builder.build(nodeMapping(nodeSize));
         for (int i = 0; i < nodeSize; i++) {
             var expected = i == 1338 ? 0x1p41 : i == 1337 ? 0x1p42 : i % 2 == 0 ? 2.0 : 1.0;
             assertEquals(expected, properties.doubleValue(i), "" + i);
@@ -314,6 +317,6 @@ final class NodePropertiesFromStoreBuilderTest {
     static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = NodePropertiesFromStoreBuilder.of(size, AllocationTracker.empty(), DefaultValue.of(defaultValue));
         buildBlock.accept(builder);
-        return builder.build();
+        return builder.build(nodeMapping(size));
     }
 }

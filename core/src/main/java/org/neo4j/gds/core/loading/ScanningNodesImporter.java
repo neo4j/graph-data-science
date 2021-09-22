@@ -146,7 +146,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
 
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
             ? new HashMap<>()
-            : nodePropertyImporter.result();
+            : nodePropertyImporter.result(nodeMapping);
 
         if (!properties.indexedProperties().isEmpty()) {
             importPropertiesFromIndex(nodeMapping, nodeProperties);
@@ -207,7 +207,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 }
                 var nodeLabel = propertyImporter.nodeLabel();
                 var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
-                storeProperties.put(propertyImporter.mapping(), propertyImporter.build());
+                storeProperties.put(propertyImporter.mapping(), propertyImporter.build(nodeMapping));
                 recordsImported += propertyImporter.imported();
             }
 

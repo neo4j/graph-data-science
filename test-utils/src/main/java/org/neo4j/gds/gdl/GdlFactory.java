@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -200,12 +201,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                 .toArray(NodeLabel[]::new)
         ));
 
-        var idMap = nodesBuilder.build().nodeMapping();
+        var nodeMapping = nodesBuilder.build().nodeMapping();
 
-        return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
+        return IdsAndProperties.of(nodeMapping, loadNodeProperties(nodeMapping));
     }
 
-    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMapping idMap) {
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(NodeMapping nodeMapping) {
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 
@@ -228,13 +229,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         dimensions.nodeCount(),
                         loadingContext.allocationTracker(),
                         DefaultValue.DEFAULT
-                    )).set(idMap.toMappedNodeId(vertex.getId()), vertex.getId(), Values.of(propertyValue));
+                    )).set(nodeMapping.toMappedNodeId(vertex.getId()), vertex.getId(), Values.of(propertyValue));
             }));
 
         Map<PropertyMapping, NodeProperties> nodeProperties = propertyBuilders
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build(nodeMapping)));
 
         return propertyKeysByLabel.entrySet().stream()
             .collect(Collectors.toMap(

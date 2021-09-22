@@ -27,6 +27,7 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
@@ -84,8 +85,8 @@ public final class NativeNodePropertyImporter {
         }
     }
 
-    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result() {
-        return buildersByLabel.build();
+    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result(NodeMapping nodeMapping) {
+        return buildersByLabel.build(nodeMapping);
     }
 
     private int importProperty(long nodeId, long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
@@ -224,7 +225,7 @@ public final class NativeNodePropertyImporter {
             builders.forEach(action);
         }
 
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build() {
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> build(NodeMapping nodeMapping) {
             return builders
                 .entrySet()
                 .stream()
@@ -232,7 +233,7 @@ public final class NativeNodePropertyImporter {
                     Map.Entry::getKey,
                     entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        builderEntry -> builderEntry.getValue().build()
+                        builderEntry -> builderEntry.getValue().build(nodeMapping)
                     ))
                 ));
         }

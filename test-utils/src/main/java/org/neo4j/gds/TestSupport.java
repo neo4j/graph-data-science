@@ -32,10 +32,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.extension.GdlSupportExtension;
 import org.neo4j.gds.extension.IdFunction;
@@ -372,5 +377,20 @@ public final class TestSupport {
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseAPI api) {
         return TransactionContext.of(api, SecurityContext.AUTH_DISABLED);
+    }
+
+    public static NodeMapping nodeMapping(long nodeCount) {
+        var builder = GraphFactory
+            .initNodesBuilder()
+            .nodeCount(nodeCount)
+            .maxOriginalId(nodeCount - 1)
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+
+        for (long i = 0; i < nodeCount; i++) {
+            builder.addNode(i);
+        }
+
+        return builder.build().nodeMapping();
     }
 }

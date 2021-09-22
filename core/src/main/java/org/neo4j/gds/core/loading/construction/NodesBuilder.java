@@ -177,18 +177,19 @@ public final class NodesBuilder {
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
         if (hasProperties) {
-            nodeProperties = Optional.of(buildProperties());
+            nodeProperties = Optional.of(buildProperties(nodeMapping));
         }
         return ImmutableNodeMappingAndProperties.of(nodeMapping, nodeProperties);
     }
 
-    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties() {
+    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties(NodeMapping nodeMapping) {
         Map<NodeLabel, Map<String, NodeProperties>> nodePropertiesByLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
             nodeLabels.forEach(nodeLabel ->
                 propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByLabel
-                    .computeIfAbsent(nodeLabel, __ -> new HashMap<>()).put(propertyKey, propertyBuilder.build())
+                    .computeIfAbsent(nodeLabel, __ -> new HashMap<>())
+                    .put(propertyKey, propertyBuilder.build(nodeMapping))
                 )
             );
         }

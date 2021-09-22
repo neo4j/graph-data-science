@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -58,7 +59,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public LongArrayNodeProperties build(long size) {
+    public LongArrayNodeProperties build(long size, NodeMapping nodeMapping) {
         return new LongArrayStoreNodeProperties(objectArray, defaultValue, size);
     }
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -84,7 +85,7 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
-    public NodeProperties build() {
+    public NodeProperties build(NodeMapping nodeMapping) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
                 initializeWithType(Values.of(defaultValue.getObject()));
@@ -92,7 +93,8 @@ public final class NodePropertiesFromStoreBuilder {
                 throw new IllegalStateException("Cannot infer type of property");
             }
         }
-        return innerBuilder.get().build(this.size.sum());
+
+        return innerBuilder.get().build(this.size.sum(), nodeMapping);
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.

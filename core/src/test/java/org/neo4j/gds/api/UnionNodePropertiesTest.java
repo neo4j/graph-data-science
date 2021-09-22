@@ -102,11 +102,6 @@ class UnionNodePropertiesTest {
 
         doubleNodePropertiesBuilder.set(0, 0, propertyValue);
 
-        NodeProperties doubleNodeProperties = doubleNodePropertiesBuilder.build();
-        NodeLabel label = NodeLabel.of("label");
-        Map<NodeLabel, NodeProperties> propertiesMap = new HashMap<>();
-        propertiesMap.put(label, doubleNodeProperties);
-
         var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(1);
         sparseLongArrayBuilder.set(0);
         var sparseLongArray = sparseLongArrayBuilder.build();
@@ -118,12 +113,19 @@ class UnionNodePropertiesTest {
         builder.set(0, 0);
 
         HashMap<NodeLabel, BitSet> bitSets = new HashMap<>();
+        NodeLabel label = NodeLabel.of("label");
         BitSet bitSet = BitSet.newInstance();
         bitSet.set(0, 1);
         bitSets.put(label, bitSet);
 
+        var nodeMapping = new BitIdMap(sparseLongArray, LabelInformation.from(bitSets), AllocationTracker.empty());
+
+        NodeProperties doubleNodeProperties = doubleNodePropertiesBuilder.build(nodeMapping);
+        Map<NodeLabel, NodeProperties> propertiesMap = new HashMap<>();
+        propertiesMap.put(label, doubleNodeProperties);
+
         return new UnionNodeProperties(
-            new BitIdMap(sparseLongArray, LabelInformation.from(bitSets), AllocationTracker.empty()),
+            nodeMapping,
             propertiesMap
         );
     }

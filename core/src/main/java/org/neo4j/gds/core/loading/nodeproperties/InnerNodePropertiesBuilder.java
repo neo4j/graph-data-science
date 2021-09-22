@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 
@@ -27,5 +28,5 @@ public abstract class InnerNodePropertiesBuilder {
 
     public abstract void setValue(long nodeId, long neoNodeId, Value value);
 
-    public abstract NodeProperties build(long size);
+    public abstract NodeProperties build(long size, NodeMapping nodeMapping);
 }

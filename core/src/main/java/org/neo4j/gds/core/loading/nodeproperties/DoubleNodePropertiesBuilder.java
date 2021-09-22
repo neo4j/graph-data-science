@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
@@ -80,7 +81,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public DoubleNodeProperties build(long size) {
+    public DoubleNodeProperties build(long size, NodeMapping nodeMapping) {
         HugeSparseLongArray propertyValues = valuesBuilder.build();
         var maybeMaxValue = size > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
