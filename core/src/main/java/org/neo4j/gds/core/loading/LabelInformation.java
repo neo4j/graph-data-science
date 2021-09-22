@@ -260,13 +260,16 @@ public final class LabelInformation {
         }
 
         @Override
-        public synchronized void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId, long nodeCount) {
-            labelInformation
+        public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId, long nodeCount) {
+            var bitMap = labelInformation
                 .computeIfAbsent(
                     nodeLabel,
                     (ignored) -> Roaring64NavigableMap.bitmapOf()
-                )
-                .addLong(nodeId);
+                );
+
+            synchronized (bitMap) {
+                bitMap.addLong(nodeId);
+            }
         }
 
         @Override
