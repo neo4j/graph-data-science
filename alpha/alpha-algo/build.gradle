@@ -31,6 +31,8 @@ dependencies {
 
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
+
+    testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
 }
 
 test {

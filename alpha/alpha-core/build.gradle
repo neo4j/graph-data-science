@@ -20,4 +20,6 @@ dependencies {
 
     testImplementation project(':test-utils')
     testImplementation project(':core')
+
+    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
 }
