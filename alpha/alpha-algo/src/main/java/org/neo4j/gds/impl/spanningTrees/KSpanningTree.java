@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.RelationshipProperties;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.IntPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
@@ -54,7 +55,8 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         RelationshipProperties weights,
         DoubleUnaryOperator minMax,
         long startNodeId,
-        long k
+        long k,
+        ProgressTracker progressTracker
 ) {
         this.idMapping = idMapping;
         this.graph = graph;
@@ -64,11 +66,12 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 
         this.k = k;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public SpanningTree compute() {
-        progressTracker.beginSubTask(graph.nodeCount());
+        progressTracker.beginSubTask();
         Prim prim = new Prim(
             idMapping,
             graph,
@@ -80,6 +83,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();
         SpanningTree spanningTree = prim.compute();
         int[] parent = spanningTree.parent;
+        progressTracker.beginSubTask(parent.length);
         for (int i = 0; i < parent.length && running(); i++) {
             int p = parent[i];
             if (p == -1) {
@@ -88,11 +92,15 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
             priorityQueue.add(i, weights.relationshipProperty(p, i, 0.0D));
             progressTracker.logProgress();
         }
+        progressTracker.endSubTask();
+        progressTracker.beginSubTask(k - 1);
         // remove k-1 relationships
         for (int i = 0; i < k - 1 && running(); i++) {
             int cutNode = priorityQueue.pop();
             parent[cutNode] = -1;
+            progressTracker.logProgress();
         }
+        progressTracker.endSubTask();
         this.spanningTree = prim.getSpanningTree();
         progressTracker.endSubTask();
         return this.spanningTree;

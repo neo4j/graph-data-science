@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -154,6 +155,18 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
             }
 
             @Override
+            protected Task progressTask(
+                Graph graph, KSpanningTreeConfig config
+            ) {
+                return Tasks.task(
+                    taskName(),
+                    Tasks.leaf("SpanningTree", graph.nodeCount()),
+                    Tasks.leaf("Add relationship weights"),
+                    Tasks.leaf("Remove relationships")
+                );
+            }
+
+            @Override
             protected KSpanningTree build(
                 Graph graph,
                 KSpanningTreeConfig configuration,
@@ -161,7 +174,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
                 ProgressTracker progressTracker
             ) {
                 InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k());
+                return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k(), progressTracker);
             }
         };
     }

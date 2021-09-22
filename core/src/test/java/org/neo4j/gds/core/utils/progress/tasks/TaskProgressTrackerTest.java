@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 
