@@ -24,7 +24,6 @@ dependencies {
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
             [group: 'org.neo4j',               name: 'neo4j',                   version: ver.'neo4j'],
             [group: 'org.neo4j',               name: 'neo4j-cypher-dsl',        version: ver.'cypher-dsl'],
-            [group: 'org.mockito',             name: 'mockito-junit-jupiter',   version: ver.'mockito'],
             [group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'],
             [group: 'com.github.s1ck',         name: 'gdl',                     version: ver.'gdl'],
             [group: 'net.jqwik',               name: 'jqwik',                   version: ver.'jqwik'],
