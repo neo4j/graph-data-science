@@ -9,6 +9,31 @@ This chapter provides a brief introduction of the main concepts in the Neo4j Gra
 This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
 
 
+[[introduction-graph-variants]]
+== Graph variants
+
+The Graph Data Science library supports the following options when it comes to type of graphs:
+
+Directed::
+Relationships have specific direction. Relationships pointing to a node are referred to as _in-links_, respectively relationships originating from a node are called _out-links_.
+
+Undirected::
+Relationships are considered bidirectional (for example friendships).
+
+Monopartite::
+Graphs with one node type and relationship type are referred to as _monopartite_.
+
+Multi-partite::
+Graphs with multiple node types are referred to as _multi-partite_.
+Common case are _bi-partite_ graphs where we have two node types.
+
+Weighted::
+Weighted graphs have weight value(s) assigned to their relationships or nodes, these values can represent _cost_, _time_, _capacity_ or other _domain-specific property_.
+
+Unweighted::
+Unweighted graphs have no weight values assigned to their nodes or relationships.
+
+
 [[introduction-algorithms]]
 == Algorithms
 
