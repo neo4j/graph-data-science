@@ -797,7 +797,7 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = configBuilder().topK(100).concurrency(concurrency).build();
+        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).build();
 
         var progressLog = new TestLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
@@ -824,7 +824,7 @@ final class NodeSimilarityTest {
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).topK(1).concurrency(concurrency).build();
+        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
         TestLog log = new TestLog();
         var progressTracker = new TestProgressTracker(

@@ -156,6 +156,11 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
+    public void logWarning(String message) {
+        log.warn(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), taskName, message));
+    }
+
+    @Override
     public long reset(long newTaskVolume) {
         var remainingVolume = taskVolume - progressCounter.sum();
         this.taskVolume = newTaskVolume;

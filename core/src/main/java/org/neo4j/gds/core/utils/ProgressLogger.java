@@ -56,6 +56,8 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
+    void logWarning(String msg);
+
     default void logStart() {
         logStart("");
     }
@@ -144,6 +146,11 @@ public interface ProgressLogger {
 
         @Override
         public void logFinishPercentage() {
+
+        }
+
+        @Override
+        public void logWarning(String msg) {
 
         }
 

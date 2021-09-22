@@ -127,7 +127,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logWarning(String message) {
-//        progressLogger().getLog().warn(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), baseTask.description(), taskProgressLogger.taskDescription(parentTask(), requireCurrentTask()) + " :: " + message));
+        progressLogger().logWarning(":: " + message);
     }
 
     @Override

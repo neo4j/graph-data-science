@@ -82,6 +82,11 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     }
 
     @Override
+    public void logWarning(String msg) {
+        batchingLogger.logWarning(msg);
+    }
+
+    @Override
     public long reset(long newTaskVolume) {
         progresses.add(new AtomicLong(0));
         return batchingLogger.reset(newTaskVolume);

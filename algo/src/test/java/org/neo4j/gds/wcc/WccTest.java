@@ -20,6 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import com.carrotsearch.hppc.BitSet;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -51,6 +52,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.TestLog.WARN;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
@@ -109,6 +111,23 @@ class WccTest {
             }
             return true;
         });
+    }
+
+    @Test
+    void shouldWarnAboutThresholdOnUnweightedGraphs() {
+        var log = new TestLog();
+
+        new WccAlgorithmFactory<>().build(
+            createTestGraph(Orientation.NATURAL),
+            ImmutableWccStreamConfig.builder().relationshipWeightProperty("weights").build(),
+            AllocationTracker.empty(),
+            log,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        Assertions.assertThat(log.getMessages(WARN))
+            .extracting(removingThreadId())
+            .containsExactly("WCC :: Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
     }
 
     @ParameterizedTest
