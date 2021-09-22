@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.InputIterator;
 
 import java.io.IOException;
@@ -26,13 +27,16 @@ import java.io.IOException;
 final class ElementImportRunner implements Runnable {
     private final ElementVisitor<?, ?, ?> visitor;
     private final InputIterator inputIterator;
+    private final ProgressTracker progressTracker;
 
     ElementImportRunner(
         ElementVisitor<?, ?, ?> visitor,
-        InputIterator inputIterator
+        InputIterator inputIterator,
+        ProgressTracker progressTracker
     ) {
         this.visitor = visitor;
         this.inputIterator = inputIterator;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -40,7 +44,7 @@ final class ElementImportRunner implements Runnable {
         try (var chunk = inputIterator.newChunk()) {
             while (inputIterator.next(chunk)) {
                 while (chunk.next(visitor)) {
-
+                    progressTracker.logProgress();
                 }
                 visitor.flush();
             }

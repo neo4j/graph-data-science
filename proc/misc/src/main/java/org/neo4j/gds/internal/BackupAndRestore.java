@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.io.file.CsvGraphStoreImporter;
 import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.gds.utils.CheckedRunnable;
@@ -457,18 +458,18 @@ public final class BackupAndRestore {
     }
 
     private static void restoreGraph(Path path, Log log) {
-        var graphStoreImporter = CsvGraphStoreImporter.create(ConcurrencyConfig.DEFAULT_CONCURRENCY, path, log);
+        var graphStoreImporter = CsvGraphStoreImporter.create(ConcurrencyConfig.DEFAULT_CONCURRENCY, path, log, EmptyTaskRegistryFactory.INSTANCE);
 
-        graphStoreImporter.run(AllocationTracker.empty());
+        var userGraphStore = graphStoreImporter.run(AllocationTracker.empty());
 
-        var graphStore = graphStoreImporter.userGraphStore();
+        var graphStore = userGraphStore.graphStore();
 
         var graphName = path.getFileName().toString();
         var createConfig = GraphCreateFromStoreConfig.emptyWithName(
-            graphStore.userName(),
+            userGraphStore.userName(),
             graphName
         );
-        GraphStoreCatalog.set(createConfig, graphStore.graphStore());
+        GraphStoreCatalog.set(createConfig, graphStore);
     }
 
     private static void restoreModels(Path storePath, Log log) throws IOException {

@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.BitIdMap;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -82,10 +83,10 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog());
-        importer.run(AllocationTracker.empty());
+        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run(AllocationTracker.empty());
 
-        var importedGraphStore = importer.userGraphStore().graphStore();
+        var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graph, importedGraph);
     }
@@ -96,10 +97,10 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvGraphStoreImporter.create(4, graphLocation, new TestLog());
-        importer.run(AllocationTracker.empty());
+        var importer = CsvGraphStoreImporter.create(4, graphLocation, new TestLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run(AllocationTracker.empty());
 
-        var importedGraphStore = importer.userGraphStore().graphStore();
+        var importedGraphStore = userGraphStore.graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graphStore.getUnion(), importedGraph);
     }
@@ -132,10 +133,10 @@ class CsvGraphStoreImporterIntegrationTest {
 
             GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-            var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog());
-            importer.run(AllocationTracker.empty());
+            var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog(), EmptyTaskRegistryFactory.INSTANCE);
+            var userGraphStore = importer.run(AllocationTracker.empty());
 
-            var importedGraphStore = importer.userGraphStore().graphStore();
+            var importedGraphStore = userGraphStore.graphStore();
             var importedGraph = importedGraphStore.getUnion();
             assertThat(importedGraphStore.nodes()).isInstanceOf(BitIdMap.class);
             assertGraphEquals(expectedGraph, importedGraph);

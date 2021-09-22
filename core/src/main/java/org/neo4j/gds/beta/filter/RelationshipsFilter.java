@@ -78,7 +78,7 @@ final class RelationshipsFilter {
 
         for (RelationshipType relType : graphStore.relationshipTypes()) {
 
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask(graphStore.relationshipCount(relType));
             var outputRelationships = filterRelationshipType(
                 graphStore,
                 expression,

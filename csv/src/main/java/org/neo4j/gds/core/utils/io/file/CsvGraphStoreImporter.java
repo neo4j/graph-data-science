@@ -47,11 +47,12 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.io.GraphStoreExporter;
-import org.neo4j.gds.core.utils.io.ImmutableImportedProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
@@ -60,6 +61,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -75,21 +77,25 @@ public final class CsvGraphStoreImporter {
     private final int concurrency;
 
     private final GraphStoreBuilder graphStoreBuilder;
-    private String userName;
-
     private final Log log;
+    private final TaskRegistryFactory taskRegistryFactory;
+
+    private String userName;
+    private ProgressTracker progressTracker;
 
     public static CsvGraphStoreImporter create(
         int concurrency,
         Path importPath,
-        Log log
+        Log log,
+        TaskRegistryFactory taskRegistryFactory
     ) {
         return new CsvGraphStoreImporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
             concurrency,
             importPath,
-            log
+            log,
+            taskRegistryFactory
         );
     }
 
@@ -98,7 +104,8 @@ public final class CsvGraphStoreImporter {
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
         int concurrency,
         Path importPath,
-        Log log
+        Log log,
+        TaskRegistryFactory taskRegistryFactory
     ) {
         this.nodeVisitorBuilder = nodeVisitorBuilder;
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
@@ -106,30 +113,58 @@ public final class CsvGraphStoreImporter {
         this.importPath = importPath;
         this.graphStoreBuilder = new GraphStoreBuilder().concurrency(concurrency);
         this.log = log;
+        this.taskRegistryFactory = taskRegistryFactory;
     }
 
-    public UserGraphStore userGraphStore() {
-        return ImmutableUserGraphStore.of(userName, graphStoreBuilder.build());
-    }
-
-    public GraphStoreExporter.ImportedProperties run(AllocationTracker allocationTracker) {
+    public UserGraphStore run(AllocationTracker allocationTracker) {
         var fileInput = new FileInput(importPath);
-        graphStoreBuilder.allocationTracker(allocationTracker);
-        graphStoreBuilder.log(log);
-        this.userName = fileInput.userName();
-        return importGraph(fileInput, allocationTracker);
+        this.progressTracker = createProgressTracker(fileInput);
+        progressTracker.beginSubTask();
+        try {
+            graphStoreBuilder.progressTracker(progressTracker);
+            graphStoreBuilder.allocationTracker(allocationTracker);
+            this.userName = fileInput.userName();
+            importGraph(fileInput, allocationTracker);
+            return ImmutableUserGraphStore.of(userName, graphStoreBuilder.build());
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
-    private GraphStoreExporter.ImportedProperties importGraph(FileInput fileInput, AllocationTracker allocationTracker) {
+    private ProgressTracker createProgressTracker(FileInput fileInput) {
+        var graphInfo = fileInput.graphInfo();
+        var nodeCount = graphInfo.nodeCount();
+        var bitIdMap = graphInfo.bitIdMap();
+
+        var importTasks = new ArrayList<Task>();
+        importTasks.add(Tasks.leaf("Import nodes", nodeCount));
+        importTasks.add(Tasks.leaf("Import relationships"));
+
+        var nodePropertyCount = fileInput.nodeSchema().properties().values().stream().mapToLong(map -> map.keySet().size()).sum();
+        var numRelationshipTypes = fileInput.relationshipSchema().availableTypes().size();
+
+        if (bitIdMap) {
+            importTasks.add(GraphStoreFilter.progressTask(nodeCount, nodePropertyCount, numRelationshipTypes));
+        }
+
+        var task = Tasks.task(
+            "Csv import",
+            importTasks
+        );
+
+        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
+    }
+
+    private void importGraph(FileInput fileInput, AllocationTracker allocationTracker) {
         var nodes = importNodes(fileInput, allocationTracker);
-        var importedRelationships = importRelationships(fileInput, nodes, AllocationTracker.empty());
-        return ImmutableImportedProperties.of(nodes.nodeCount(), importedRelationships);
+        importRelationships(fileInput, nodes, AllocationTracker.empty());
     }
 
     private NodeMapping importNodes(
         FileInput fileInput,
         AllocationTracker allocationTracker
     ) {
+        progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
 
         GraphInfo graphInfo = fileInput.graphInfo();
@@ -148,7 +183,7 @@ public final class CsvGraphStoreImporter {
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner(nodeVisitorBuilder.build(), nodesIterator)
+            (index) -> new ElementImportRunner(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
@@ -161,6 +196,7 @@ public final class CsvGraphStoreImporter {
                 graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
             });
 
+        progressTracker.endSubTask();
         return nodeMappingAndProperties.nodeMapping();
     }
 
@@ -187,7 +223,8 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private long importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker allocationTracker) {
+    private void importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker allocationTracker) {
+        progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
         this.relationshipVisitorBuilder
@@ -200,7 +237,7 @@ public final class CsvGraphStoreImporter {
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner(relationshipVisitorBuilder.build(), relationshipsIterator)
+            (index) -> new ElementImportRunner(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
@@ -209,7 +246,8 @@ public final class CsvGraphStoreImporter {
 
         graphStoreBuilder.relationships(relationships.topologies());
         graphStoreBuilder.relationshipPropertyStores(relationships.properties());
-        return relationships.importedRelationships();
+
+        progressTracker.endSubTask();
     }
 
     static RelationshipTopologyAndProperties relationshipTopologyAndProperties(
@@ -309,7 +347,7 @@ public final class CsvGraphStoreImporter {
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
         boolean useBitIdMap,
-        Log log,
+        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
         var graphStore = CSRGraphStore.of(
@@ -336,12 +374,6 @@ public final class CsvGraphStoreImporter {
                 .originalConfig(GraphCreateFromStoreConfig.emptyWithName("user", "old"))
                 .build();
             try {
-                var progressTracker = new TaskProgressTracker(
-                    GraphStoreFilter.progressTask(graphStore),
-                    log,
-                    concurrency,
-                    EmptyTaskRegistryFactory.INSTANCE
-                );
                 return GraphStoreFilter.filter(
                     graphStore,
                     config,

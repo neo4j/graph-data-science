@@ -43,7 +43,9 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
@@ -386,12 +388,19 @@ class GraphStoreFilterTest {
 
             var log = new TestLog();
 
+            var progressTracker = new TaskProgressTracker(
+                GraphStoreFilter.progressTask(graphStore),
+                log,
+                1,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
             GraphStoreFilter.filter(
                 graphStore,
                 config("n:B", "*", 1),
                 Pools.DEFAULT,
                 AllocationTracker.empty(),
-                ProgressTracker.NULL_TRACKER
+                progressTracker
             );
 
             var messages = log.getMessages(TestLog.INFO);
@@ -411,10 +420,10 @@ class GraphStoreFilterTest {
                     "GraphStore Filter :: Node properties :: Finished",
                     "GraphStore Filter :: Relationships :: Start",
                     "GraphStore Filter :: Relationships :: Relationship type 1 of 2 :: Start",
-                    "GraphStore Filter :: Relationships :: Relationship type 1 of 2 45%",
+                    "GraphStore Filter :: Relationships :: Relationship type 1 of 2 100%",
                     "GraphStore Filter :: Relationships :: Relationship type 1 of 2 :: Finished",
                     "GraphStore Filter :: Relationships :: Relationship type 2 of 2 :: Start",
-                    "GraphStore Filter :: Relationships :: Relationship type 2 of 2 45%",
+                    "GraphStore Filter :: Relationships :: Relationship type 2 of 2 100%",
                     "GraphStore Filter :: Relationships :: Relationship type 2 of 2 :: Finished",
                     "GraphStore Filter :: Relationships :: Finished",
                     "GraphStore Filter :: Finished"

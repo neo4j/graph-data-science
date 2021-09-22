@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -32,6 +34,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.core.TestMethodRunner.runWithEEIdMap;
 
 class CsvGraphStoreImporterTest {
 
@@ -39,10 +42,9 @@ class CsvGraphStoreImporterTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = CsvGraphStoreImporter.create(concurrency, importPath(), new TestLog());
-        exporter.run(AllocationTracker.empty());
+        var exporter = CsvGraphStoreImporter.create(concurrency, importPath(), new TestLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = exporter.run(AllocationTracker.empty());
 
-        var userGraphStore = exporter.userGraphStore();
         var graphStore = userGraphStore.graphStore();
 
         assertThat(userGraphStore.userName()).isEqualTo("UserA");
@@ -63,6 +65,30 @@ class CsvGraphStoreImporterTest {
         );
         var actualGraph = graphStore.getUnion();
         assertGraphEquals(expectedGraph, actualGraph);
+    }
+
+    @Test
+    void shouldLogProgress() throws URISyntaxException {
+        runWithEEIdMap(() -> {
+            var log = new TestLog();
+            var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
+            exporter.run(AllocationTracker.empty());
+
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Nodes :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Nodes :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Node properties :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Node properties :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Relationships :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Relationships :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Finished");
+        });
     }
 
     private Path importPath() throws URISyntaxException {

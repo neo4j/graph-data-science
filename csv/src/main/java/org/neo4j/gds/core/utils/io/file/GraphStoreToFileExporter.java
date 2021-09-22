@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.UserInfoVisitor;
 import org.neo4j.gds.core.utils.io.file.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.utils.io.file.schema.RelationshipSchemaVisitor;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.nio.file.Path;
@@ -156,7 +157,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)
+            (index) -> new ElementImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
         ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
@@ -168,7 +169,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator)
+            (index) -> new ElementImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
         ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);

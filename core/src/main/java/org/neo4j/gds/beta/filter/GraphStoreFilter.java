@@ -42,21 +42,29 @@ import java.util.concurrent.ExecutorService;
 public final class GraphStoreFilter {
 
     public static Task progressTask(GraphStore graphStore) {
-        var nodesTask = Tasks.leaf("Nodes", graphStore.nodeCount());
         var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
+        return progressTask(
+            graphStore.nodeCount(),
+            nodePropertyCount,
+            graphStore.relationshipTypes().size()
+        );
+    }
+
+    public static Task progressTask(long nodeCount, long nodePropertyCount, int relationshipTypes) {
+        var nodesTask = Tasks.leaf("Nodes", nodeCount);
         var nodePropertiesTask = Tasks.iterativeOpen(
             "Node properties",
             () -> List.of(
-                Tasks.leaf("Label", graphStore.nodeCount() * nodePropertyCount)
+                Tasks.leaf("Label", nodeCount * nodePropertyCount)
             )
         );
 
         var relationshipsTask = Tasks.iterativeFixed(
             "Relationships",
             () -> List.of(
-                Tasks.leaf("Relationship type", graphStore.relationshipCount())
+                Tasks.leaf("Relationship type")
             ),
-            graphStore.relationshipTypes().size()
+            relationshipTypes
         );
 
         return Tasks.task(
