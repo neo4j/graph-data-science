@@ -212,4 +212,19 @@ public final class FeatureToggleProc {
         GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.reset();
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()));
     }
+
+    @Internal
+    @Procedure("gds.features.useNeoIdsForPropertyImport")
+    @Description("")
+    public void useNeoIdsForPropertyImport(@Name(value = "useNeoIdsForPropertyImport") boolean useNeoIdsForPropertyImport) {
+        GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.toggle(useNeoIdsForPropertyImport);
+    }
+
+    @Internal
+    @Procedure("gds.features.useNeoIdsForPropertyImport.reset")
+    @Description("")
+    public Stream<FeatureState> resetUseNeoIdsForPropertyImport() {
+        GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled()));
+    }
 }

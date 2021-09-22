@@ -37,6 +37,7 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT;
+import static org.neo4j.gds.utils.GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
@@ -256,5 +257,14 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(!useNeoIdsForLabelImport, USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled());
         runQuery("CALL gds.features.useNeoIdsForLabelImport($value)", Map.of("value", useNeoIdsForLabelImport));
         assertEquals(useNeoIdsForLabelImport, USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled());
+    }
+
+    @Test
+    void toggleUseNeoIdsForPropertyImport() {
+        var useNeoIdsForPropertyImport= USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled();
+        runQuery("CALL gds.features.useNeoIdsForPropertyImport($value)", Map.of("value", !useNeoIdsForPropertyImport));
+        assertEquals(!useNeoIdsForPropertyImport, USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled());
+        runQuery("CALL gds.features.useNeoIdsForPropertyImport($value)", Map.of("value", useNeoIdsForPropertyImport));
+        assertEquals(useNeoIdsForPropertyImport, USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled());
     }
 }
