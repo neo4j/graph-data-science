@@ -199,9 +199,9 @@ class YensTest {
             assertThat(log.containsMessage(TestLog.INFO, expected)).isTrue();
         }
         // multiple times within each k
-        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Start Dijkstra for spur node"))).isTrue();
-        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Start"))).isTrue();
-        assertThat(log.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra 1 :: Finished"))).isTrue();
+        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra for spur node");
+        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra 1 :: Start");
+        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra 1 :: Finished");
     }
 
     @Test

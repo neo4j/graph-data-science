@@ -216,7 +216,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     }
 
     private Optional<PathResult> computeDijkstra(long sourceNode) {
-        progressTracker.progressLogger().logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
+        progressTracker.logMessage(formatWithLocale("Dijkstra for spur node %d", sourceNode));
         return dijkstra.compute().findFirst();
     }
 
