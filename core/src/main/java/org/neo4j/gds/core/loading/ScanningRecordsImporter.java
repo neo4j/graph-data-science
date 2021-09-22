@@ -74,10 +74,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
         try (StoreScanner<Record> scanner = factory.newScanner(StoreScanner.DEFAULT_PREFETCH_SIZE, transaction)) {
             progressTracker.beginSubTask("Store Scan");
 
-            progressTracker
-                .progressLogger()
-                .getLog()
-                .debug("%s Store Scan: Start using %s", label, scanner.getClass().getSimpleName());
+            progressTracker.logDebug(formatWithLocale("Start using %s", scanner.getClass().getSimpleName()));
 
             InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
             InternalImporter importer = new InternalImporter(numberOfThreads, creator);
@@ -95,11 +92,10 @@ public abstract class ScanningRecordsImporter<Record, T> {
                 .divide(bigNanos)
                 .longValueExact();
 
-            progressTracker.progressLogger().getLog().debug(
+            progressTracker.logDebug(
                 formatWithLocale(
-                    "%s Store Scan (%s): Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
-                    label,
-                    scanner.getClass().getSimpleName(),
+                    "Imported %,d records and %,d properties from %s (%,d bytes);" +
+                    " took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
                     recordsImported,
                     propertiesImported,
                     humanReadable(requiredBytes),

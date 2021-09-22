@@ -136,10 +136,14 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
     }
 
     protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> allocationTracker) {
-        allocationTracker.ifPresent(progressTracker.progressLogger()::logMessage);
+        var allocationMessage = allocationTracker.map(AllocationTracker::get).orElse("");
+
+        if (!allocationMessage.isEmpty()) {
+            progressTracker.logMessage(allocationMessage);
+        }
 
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
-        progressTracker.progressLogger().logMessage(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+        progressTracker.logMessage(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
     }
 }

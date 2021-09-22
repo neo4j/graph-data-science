@@ -56,6 +56,8 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
+    void logDebug(String msg);
+
     void logWarning(String msg);
 
     default void logStart() {
@@ -151,6 +153,11 @@ public interface ProgressLogger {
 
         @Override
         public void logWarning(String msg) {
+
+        }
+
+        @Override
+        public void logDebug(String msg) {
 
         }
 

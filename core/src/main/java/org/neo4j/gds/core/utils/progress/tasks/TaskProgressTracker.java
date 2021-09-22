@@ -122,7 +122,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logDebug(String message) {
-//        progressLogger().getLog().debug(taskProgressLogger.taskDescription(parentTask(), requireCurrentTask()) + " :: " + message);
+        progressLogger().logDebug(":: " + message);
     }
 
     @Override

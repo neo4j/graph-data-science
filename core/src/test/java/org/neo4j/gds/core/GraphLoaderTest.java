@@ -118,13 +118,13 @@ class GraphLoaderTest extends BaseTest {
             .log(log)
             .build()
             .graph();
-        assertThat(log.getMessages(TestLog.DEBUG))
-            .anyMatch(message -> message.startsWith("Node Store Scan (NodeCursorBasedScanner): Imported 3 records and 1 properties"))
-            .anyMatch(message -> message.startsWith("Relationship Store Scan (RelationshipScanCursorBasedScanner): Imported 4 records and 0 properties"));
+        
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }
 
     @Test
-    public void shouldTrackProgressWithNativeLoading() throws Exception {
+    public void shouldTrackProgressWithNativeLoading() {
         TestLog log = new TestLog();
 
         new StoreLoaderBuilder()
@@ -154,6 +154,14 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Finished"
             )
             .doesNotContain("Loading :: Nodes :: Property Index Scan :: Start");
+
+        assertThat(log.getMessages(TestLog.DEBUG))
+            .extracting(removingThreadId())
+            .contains("Loading :: Nodes :: Store Scan :: Start using NodeCursorBasedScanner")
+            .contains("Loading :: Relationships :: Store Scan :: Start using RelationshipScanCursorBasedScanner");
+
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }
 
     @Test
@@ -181,6 +189,14 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Relationships :: Finished",
                 "Loading :: Finished"
             );
+
+        assertThat(log.getMessages(TestLog.DEBUG))
+            .extracting(removingThreadId())
+            .contains("Loading :: Nodes :: Store Scan :: Start using MultipleNodeLabelIndexBasedScanner")
+            .contains("Loading :: Relationships :: Store Scan :: Start using RelationshipScanCursorBasedScanner");
+
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Nodes :: Store Scan :: Imported 3 records and 1 properties");
+        log.assertContainsMessage(TestLog.DEBUG, "Loading :: Relationships :: Store Scan :: Imported 4 records and 0 properties");
     }
 
     @Test
@@ -211,6 +227,8 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Relationships :: Finished",
                 "Loading :: Finished"
             );
+
+        assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -386,7 +404,7 @@ class GraphLoaderTest extends BaseTest {
             .withLog(log)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
-        log.containsMessage(TestLog.INFO, "Actual memory usage of the loaded graph:");
+        log.containsMessage(TestLog.INFO, "Loading :: Actual memory usage of the loaded graph:");
     }
 
     @AllGraphStoreFactoryTypesTest

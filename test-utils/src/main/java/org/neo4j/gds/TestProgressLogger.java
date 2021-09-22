@@ -82,6 +82,11 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     }
 
     @Override
+    public void logDebug(String msg) {
+        batchingLogger.logDebug(msg);
+    }
+
+    @Override
     public void logWarning(String msg) {
         batchingLogger.logWarning(msg);
     }
