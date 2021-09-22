@@ -26,8 +26,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-
-import java.util.List;
+import org.neo4j.gds.ml.Training;
 
 public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
 
@@ -60,7 +59,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
         return Tasks.task(
             taskName(),
             Tasks.leaf("ModelSelection", modelSelectionTaskVolume),
-            Tasks.iterativeOpen("Training", () -> List.of(Tasks.leaf("Epoch"))),
+            Training.progressTask("Training"),
             Tasks.task(
                 "Evaluation",
                 Tasks.leaf("Training"),

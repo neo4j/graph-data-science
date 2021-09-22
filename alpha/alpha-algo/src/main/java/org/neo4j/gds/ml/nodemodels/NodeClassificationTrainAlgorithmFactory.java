@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.Training;
 
 import java.util.List;
 
@@ -67,16 +68,16 @@ public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<No
                 () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
                         Tasks.task(
                             "Split",
-                            Tasks.iterativeOpen("Training", () -> List.of(Tasks.leaf("Epoch"))),
+                            Training.progressTask("Training"),
                             Tasks.leaf("Evaluate")
                         )
                     ), config.validationFolds())
                 ),
                 config.params().size()
             ),
-            Tasks.iterativeOpen("TrainSelectedOnRemainder", () -> List.of(Tasks.leaf("Epoch"))),
+            Training.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
-            Tasks.iterativeOpen("RetrainSelectedModel", () -> List.of(Tasks.leaf("Epoch")))
+            Training.progressTask("RetrainSelectedModel")
         );
     }
 }

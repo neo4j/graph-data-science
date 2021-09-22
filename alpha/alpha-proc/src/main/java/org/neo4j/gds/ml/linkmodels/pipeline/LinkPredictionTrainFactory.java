@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.ml.Training;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
@@ -99,7 +100,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
                 "select model",
                pipeline.parameterSpace().size()
             ),
-            Tasks.iterativeOpen("train best model", () -> List.of(Tasks.leaf("Epoch"))),
+            Training.progressTask("train best model"),
             Tasks.leaf("compute train metrics"),
             Tasks.task(
                 "evaluate on test data",

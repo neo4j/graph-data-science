@@ -24,6 +24,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -60,6 +62,10 @@ public class Training {
         this.progressTracker = progressTracker;
         this.trainSize = trainSize;
         this.terminationFlag = terminationFlag;
+    }
+
+    public static Task progressTask(String taskName) {
+        return Tasks.iterativeOpen(taskName, () -> List.of(Tasks.leaf("Epoch")));
     }
 
     public static MemoryEstimation memoryEstimation(
