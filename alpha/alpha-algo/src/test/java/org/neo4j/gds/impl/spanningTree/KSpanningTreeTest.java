@@ -22,15 +22,16 @@ package org.neo4j.gds.impl.spanningTree;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
-import org.neo4j.gds.impl.spanningTrees.Prim;
-import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.impl.spanningTrees.KSpanningTree;
+import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -79,7 +80,7 @@ class KSpanningTreeTest {
 
     @Test
     void testMaximumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MAX_OPERATOR, a, 2)
+        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
                 .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(b));
@@ -91,7 +92,7 @@ class KSpanningTreeTest {
 
     @Test
     void testMinimumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, a, 2)
+        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
                 .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(d));
@@ -104,16 +105,10 @@ class KSpanningTreeTest {
     @Test
     @Disabled("Need to extend GdlGraph to generate offset node IDs and fix the test")
     void testNeoIdsWithOffset() {
-        // loadGraph();
-
-        SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 0, 2)
+        SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        // runQuery("MATCH (n) DETACH DELETE n");
-        // setupGraph();
-        // loadGraph();
-
-        SpanningTree otherSpanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 5, 2)
+        SpanningTree otherSpanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 5, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
         assertEquals(spanningTree, otherSpanningTree);
