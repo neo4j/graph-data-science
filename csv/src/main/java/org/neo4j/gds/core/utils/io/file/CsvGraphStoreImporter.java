@@ -51,6 +51,7 @@ import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.ImmutableImportedProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
@@ -335,13 +336,18 @@ public final class CsvGraphStoreImporter {
                 .originalConfig(GraphCreateFromStoreConfig.emptyWithName("user", "old"))
                 .build();
             try {
+                var progressTracker = new TaskProgressTracker(
+                    GraphStoreFilter.progressTask(graphStore),
+                    log,
+                    concurrency,
+                    EmptyTaskRegistryFactory.INSTANCE
+                );
                 return GraphStoreFilter.filter(
                     graphStore,
                     config,
                     Pools.DEFAULT,
-                    log,
                     allocationTracker,
-                    EmptyTaskRegistryFactory.INSTANCE
+                    progressTracker
                 );
             } catch (ParseException | SemanticErrors e) {
                 throw new RuntimeException(e);

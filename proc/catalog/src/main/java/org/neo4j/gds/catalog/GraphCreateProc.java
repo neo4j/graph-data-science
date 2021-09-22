@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;
@@ -206,13 +207,19 @@ public class GraphCreateProc extends CatalogProc {
 
         var progressTimer = ProgressTimer.start();
 
+        var progressTracker = new TaskProgressTracker(
+            GraphStoreFilter.progressTask(fromGraphStore),
+            log,
+            config.concurrency(),
+            taskRegistryFactory
+        );
+
         var graphStore = GraphStoreFilter.filter(
             fromGraphStore,
             config,
             Pools.DEFAULT,
-            log,
             allocationTracker(),
-            taskRegistryFactory
+            progressTracker
         );
 
         GraphStoreCatalog.set(config, graphStore);

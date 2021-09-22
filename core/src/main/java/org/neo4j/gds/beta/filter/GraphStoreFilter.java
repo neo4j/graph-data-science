@@ -30,10 +30,9 @@ import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
@@ -42,19 +41,8 @@ import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
 
-    @NotNull
-    public static GraphStore filter(
-        GraphStore graphStore,
-        GraphCreateFromGraphConfig config,
-        ExecutorService executorService,
-        Log log,
-        AllocationTracker allocationTracker,
-        TaskRegistryFactory taskRegistryFactory
-    ) throws ParseException, SemanticErrors {
-        var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
-
+    public static Task progressTask(GraphStore graphStore) {
         var nodesTask = Tasks.leaf("Nodes", graphStore.nodeCount());
-
         var nodePropertyCount = graphStore.nodePropertyKeys().values().stream().mapToInt(Set::size).sum();
         var nodePropertiesTask = Tasks.iterativeOpen(
             "Node properties",
@@ -71,50 +59,60 @@ public final class GraphStoreFilter {
             graphStore.relationshipTypes().size()
         );
 
-        var task = Tasks.task(
+        return Tasks.task(
             "GraphStore Filter",
             nodesTask,
             nodePropertiesTask,
             relationshipsTask
         );
+    }
+
+    @NotNull
+    public static GraphStore filter(
+        GraphStore graphStore,
+        GraphCreateFromGraphConfig config,
+        ExecutorService executorService,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
+    ) throws ParseException, SemanticErrors {
+        var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
         var inputNodes = graphStore.nodes();
 
-        var progressTracker = new TaskProgressTracker(task, log, config.concurrency(), taskRegistryFactory);
-
         progressTracker.beginSubTask();
+        try {
+            var filteredNodes = NodesFilter.filterNodes(
+                graphStore,
+                expressions.nodeExpression(),
+                config.concurrency(),
+                executorService,
+                progressTracker,
+                allocationTracker
+            );
 
-        var filteredNodes = NodesFilter.filterNodes(
-            graphStore,
-            expressions.nodeExpression(),
-            config.concurrency(),
-            executorService,
-            progressTracker,
-            allocationTracker
-        );
+            var filteredRelationships = RelationshipsFilter.filterRelationships(
+                graphStore,
+                expressions.relationshipExpression(),
+                inputNodes,
+                filteredNodes.nodeMapping(),
+                config.concurrency(),
+                executorService,
+                progressTracker,
+                allocationTracker
+            );
 
-        var filteredRelationships = RelationshipsFilter.filterRelationships(
-            graphStore,
-            expressions.relationshipExpression(),
-            inputNodes,
-            filteredNodes.nodeMapping(),
-            config.concurrency(),
-            executorService,
-            progressTracker,
-            allocationTracker
-        );
-
-        progressTracker.endSubTask();
-
-        return CSRGraphStore.of(
-            graphStore.databaseId(),
-            filteredNodes.nodeMapping(),
-            filteredNodes.propertyStores(),
-            filteredRelationships.topology(),
-            filteredRelationships.propertyStores(),
-            config.concurrency(),
-            allocationTracker
-        );
+            return CSRGraphStore.of(
+                graphStore.databaseId(),
+                filteredNodes.nodeMapping(),
+                filteredNodes.propertyStores(),
+                filteredRelationships.topology(),
+                filteredRelationships.propertyStores(),
+                config.concurrency(),
+                allocationTracker
+            );
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     @ValueClass

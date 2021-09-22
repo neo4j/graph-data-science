@@ -43,11 +43,10 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
-import org.neo4j.logging.NullLog;
 import org.neo4j.values.storable.NumberType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
@@ -391,9 +390,8 @@ class GraphStoreFilterTest {
                 graphStore,
                 config("n:B", "*", 1),
                 Pools.DEFAULT,
-                log,
                 AllocationTracker.empty(),
-                EmptyTaskRegistryFactory.INSTANCE
+                ProgressTracker.NULL_TRACKER
             );
 
             var messages = log.getMessages(TestLog.INFO);
@@ -517,9 +515,8 @@ class GraphStoreFilterTest {
             graphStore,
             config(nodeFilter, relationshipFilter, concurrency),
             Pools.DEFAULT,
-            NullLog.getInstance(),
             AllocationTracker.empty(),
-            EmptyTaskRegistryFactory.INSTANCE
+            ProgressTracker.NULL_TRACKER
         );
     }
 
