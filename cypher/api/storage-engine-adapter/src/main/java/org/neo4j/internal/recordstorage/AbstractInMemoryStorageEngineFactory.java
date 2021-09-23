@@ -189,23 +189,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
     }
 
     @Override
-    public void setExternalStoreUUID(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext,
-        UUID externalStoreId
-    ) throws IOException {
-        MetaDataStore.setExternalStoreUUID(
-            pageCache,
-            databaseLayout.metadataStore(),
-            externalStoreId,
-            databaseLayout.getDatabaseName(),
-            cursorContext
-        );
-    }
-
-    @Override
     public Optional<UUID> databaseIdUuid(
         FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {

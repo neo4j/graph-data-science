@@ -29,7 +29,8 @@ ext {
             ],
             'storage-engine-adapter': [
                     project(':storage-engine-adapter-unsupported'),
-                    project(':storage-engine-adapter-4.3'),
+                    project(':storage-engine-adapter-4.3.3'),
+                    project(':storage-engine-adapter-4.3.4+'),
             ]
     ]
 }
