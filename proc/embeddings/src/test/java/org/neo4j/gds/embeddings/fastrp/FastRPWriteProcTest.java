@@ -78,12 +78,16 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
+        List<String> featureProperties = List.of("f1", "f2");
+        var propertyRatio = 0.5;
         int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("writeProperty", "embedding");
 
         if (!weights.isEmpty()) {
@@ -103,16 +107,21 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
 
     @Test
     void shouldComputeAndWriteWithWeight() {
+        List<String> featureProperties = List.of("f1", "f2");
+        var propertyRatio = 0.5;
         int embeddingDimension = 128;
 
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
+            .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("writeProperty", "embedding")
             .yields();
@@ -128,23 +137,5 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         float[] embeddingOfE = embeddings.get("e");
         scale(embeddingOfE, 2);
         assertThat(embeddings.get("b")).containsExactly(embeddingOfE);
-    }
-
-    @Test
-    void shouldNotCrashWithFeatureProperties() {
-        int embeddingDimension = 128;
-        String query = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
-            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .algo("fastRP")
-            .writeMode()
-            .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyRatio", 0.5)
-            .addParameter("featureProperties", List.of("f1", "f2"))
-            .addParameter("writeProperty", "embedding")
-            .yields();
-
-        runQuery(query);
     }
 }

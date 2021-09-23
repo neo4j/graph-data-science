@@ -219,6 +219,11 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     }
 
     @TestOnly
+    float[][] propertyVectors() {
+        return propertyVectors;
+    }
+
+    @TestOnly
     HugeObjectArray<float[]> embeddings() {
         return embeddings;
     }

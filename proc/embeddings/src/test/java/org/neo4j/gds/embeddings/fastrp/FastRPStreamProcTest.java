@@ -56,11 +56,15 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
+        List<String> featureProperties = List.of("f1", "f2");
+        var propertyRatio = 0.5;
         int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
             .streamMode()
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("embeddingDimension", embeddingDimension);
 
         if (!weights.isEmpty()) {
@@ -77,6 +81,8 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Test
     void shouldComputeNonZeroEmbeddingsWhenFirstWeightIsZero() {
+        List<String> featureProperties = List.of("f1", "f2");
+        var propertyRatio = 0.5;
         int embeddingDimension = 128;
         var weights = List.of(0.0D, 1.0D, 2.0D, 4.0D);
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
@@ -84,6 +90,8 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("iterationWeights", weights);
 
         queryBuilder.addParameter("iterationWeights", weights);
@@ -97,15 +105,20 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Test
     void shouldComputeWithWeight() {
+        List<String> featureProperties = List.of("f1", "f2");
+        var propertyRatio = 0.5;
         int embeddingDimension = 128;
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
+            .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("relationshipWeightProperty", "weight")
             .yields();
 
@@ -115,23 +128,5 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         for (int i = 0; i < 128; i++) {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
         }
-    }
-
-    @Test
-    void shouldNotCrashWithFeatureProperties() {
-        int embeddingDimension = 128;
-        double propertyRatio = 127.0/128;
-        String query = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
-            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .algo("fastRP")
-            .streamMode()
-            .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyRatio", propertyRatio)
-            .addParameter("featureProperties", List.of("f1", "f2"))
-            .yields();
-
-        runQuery(query);
     }
 }

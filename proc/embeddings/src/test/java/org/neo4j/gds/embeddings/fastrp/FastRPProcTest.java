@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.BaseProcTest;
@@ -43,6 +44,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestSupport.crossArguments;
 
 public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
@@ -88,9 +90,16 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     }
 
     private static Stream<Arguments> weights() {
-        return Stream.of(
-            Arguments.of(Collections.emptyList()),
-            Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
+        return crossArguments(
+            () -> Stream.of(
+                Arguments.of(Collections.emptyList()),
+                Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
+            ),
+            () -> Stream.of(
+                Arguments.of(0f),
+                Arguments.of(0.5f),
+                Arguments.of(1f)
+            )
         );
     }
 
@@ -106,6 +115,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
         String graphCreateQuery = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
             .graphCreate(graphName)
             .yields();
         runQuery(graphCreateQuery);

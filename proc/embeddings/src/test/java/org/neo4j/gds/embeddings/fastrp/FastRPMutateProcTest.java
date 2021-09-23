@@ -25,6 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.functions.NodePropertyFunc;
@@ -33,6 +35,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,13 +106,16 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
-    void shouldMutateNonZeroEmbeddings(List<Float> weights) {
+    void shouldMutateNonZeroEmbeddings(List<Float> weights, double propertyRatio) {
+        List<String> featureProperties = propertyRatio == 0 ? List.of() : List.of("f1", "f2");
         int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(mutateGraphName().get())
             .algo("fastRP")
             .mutateMode()
             .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("propertyRatio", propertyRatio)
+            .addParameter("featureProperties", featureProperties)
             .addParameter("mutateProperty", mutateProperty());
 
         if (!weights.isEmpty()) {
@@ -132,19 +138,45 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     }
 
     @Test
-    void shouldNotCrashWithFeatureProperties() {
+    void shouldProduceEmbeddingsWithSpecificValues() {
+
+            String graphCreateQuery = GdsCypher.call()
+                .withNodeLabel("Node")
+                .withNodeLabel("Node2")
+                .withRelationshipType("REL2", Orientation.UNDIRECTED)
+                .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
+                .graphCreate("g2labels")
+                .yields();
+            runQuery(graphCreateQuery);
+
         int embeddingDimension = 128;
-        double propertyRatio = 127.0/128;
+        double propertyRatio = 0.5;
         String query = GdsCypher.call()
-            .explicitCreation(mutateGraphName().get())
+            .explicitCreation("g2labels")
             .algo("fastRP")
             .mutateMode()
-            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("mutateProperty", "embedding")
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("propertyRatio", propertyRatio)
             .addParameter("featureProperties", List.of("f1", "f2"))
+            .addParameter("randomSeed", 42)
             .yields();
 
         runQuery(query);
+
+        String expectedResultQuery = formatWithLocale(
+            "MATCH (n) WHERE n:Node OR n:Node2 RETURN gds.util.nodeProperty('%s', id(n), 'embedding') as embedding, id(n) as nodeId",
+            "g2labels"
+        );
+        var expectedEmbeddings = Map.of(
+            0, new float[]{0.0f, -0.11861968f, -0.07284536f, -0.19146505f, 0.04577432f, -0.26431042f, 0.0f, 0.07284536f, -0.11861968f, 0.11861968f, 0.0f, 0.26431042f, 0.11861968f, -0.11861968f, 0.0f, 0.0f, 0.07284536f, 0.0f, -0.19146505f, -0.11861968f, -0.04577432f, 0.0f, -0.07284536f, -0.11861968f, 0.0f, -0.19146505f, 0.04577432f, 0.0f, 0.11861968f, -0.11861968f, 0.0f, 0.0f, 0.04577432f, -0.07284536f, -0.11861968f, -0.11861968f, 0.0f, 0.07284536f, 0.0f, 0.07284536f, -0.19146505f, 0.07284536f, 0.0f, 0.11861968f, -0.11861968f, 0.26431042f, 0.14569072f, 0.0f, 0.07284536f, 0.11861968f, 0.0f, -0.07284536f, -0.07284536f, -0.07284536f, 0.027071044f, 0.0f, -0.19146505f, 0.0f, 0.11861968f, -0.11861968f, 0.0f, 0.07284536f, -0.11861968f, 0.07284536f, 0.19062826f, -0.20042314f, -0.19062826f, -0.20042314f, 0.20042314f, -0.20042314f, 0.0f, 0.19062826f, -0.20042314f, 0.20042314f, 0.0f, 0.39105138f, 0.20042314f, -0.20042314f, 0.0f, 0.0f, 0.19062826f, 0.0f, -0.39105138f, -0.20042314f, -0.20042314f, 0.0f, 0.0f, -0.20042314f, -0.19062826f, -0.009794861f, 0.20042314f, 0.0f, 0.009794861f, -0.20042314f, 0.0f, 0.0f, 0.39105138f, -0.19062826f, -0.39105138f, -0.20042314f, 0.19062826f, -0.19062826f, 0.0f, 0.19062826f, -0.20042314f, 0.0f, 0.19062826f, 0.20042314f, -0.20042314f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.0f, -0.20042314f, 0.0f, -0.20042314f, -0.19062826f, 0.39105138f, -0.39105138f, 0.0f, 0.0f, -0.20042314f, 0.0f},
+            1, new float[]{0.0f, -0.118619695f, -0.07284536f, -0.19146505f, 0.045774333f, -0.26431042f, 0.0f, 0.07284536f, -0.118619695f, 0.118619695f, 0.0f, 0.26431042f, 0.118619695f, -0.118619695f, 0.0f, 0.0f, 0.07284536f, 0.0f, -0.19146505f, -0.118619695f, -0.045774333f, 0.0f, -0.07284536f, -0.118619695f, 0.0f, -0.19146505f, 0.045774333f, 0.0f, 0.118619695f, -0.118619695f, 0.0f, 0.0f, 0.045774333f, -0.07284536f, -0.118619695f, -0.118619695f, 0.0f, 0.07284536f, 0.0f, 0.07284536f, -0.19146505f, 0.07284536f, 0.0f, 0.118619695f, -0.118619695f, 0.26431042f, 0.14569072f, 0.0f, 0.07284536f, 0.118619695f, 0.0f, -0.07284536f, -0.07284536f, -0.07284536f, 0.027071029f, 0.0f, -0.19146505f, 0.0f, 0.118619695f, -0.118619695f, 0.0f, 0.07284536f, -0.118619695f, 0.07284536f, 0.19062828f, -0.20042314f, -0.19062828f, -0.20042314f, 0.20042314f, -0.20042314f, 0.0f, 0.19062828f, -0.20042314f, 0.20042314f, 0.0f, 0.3910514f, 0.20042314f, -0.20042314f, 0.0f, 0.0f, 0.19062828f, 0.0f, -0.3910514f, -0.20042314f, -0.20042314f, 0.0f, 0.0f, -0.20042314f, -0.19062828f, -0.009794846f, 0.20042314f, 0.0f, 0.009794846f, -0.20042314f, 0.0f, 0.0f, 0.3910514f, -0.19062828f, -0.3910514f, -0.20042314f, 0.19062828f, -0.19062828f, 0.0f, 0.19062828f, -0.20042314f, 0.0f, 0.19062828f, 0.20042314f, -0.20042314f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.0f, -0.20042314f, 0.0f, -0.20042314f, -0.19062828f, 0.3910514f, -0.3910514f, 0.0f, 0.0f, -0.20042314f, 0.0f},
+            4, new float[]{0.0f, -0.118619695f, -0.07284536f, -0.19146505f, 0.045774333f, -0.26431042f, 0.0f, 0.07284536f, -0.118619695f, 0.118619695f, 0.0f, 0.26431042f, 0.118619695f, -0.118619695f, 0.0f, 0.0f, 0.07284536f, 0.0f, -0.19146505f, -0.118619695f, -0.045774333f, 0.0f, -0.07284536f, -0.118619695f, 0.0f, -0.19146505f, 0.045774333f, 0.0f, 0.118619695f, -0.118619695f, 0.0f, 0.0f, 0.045774333f, -0.07284536f, -0.118619695f, -0.118619695f, 0.0f, 0.07284536f, 0.0f, 0.07284536f, -0.19146505f, 0.07284536f, 0.0f, 0.118619695f, -0.118619695f, 0.26431042f, 0.14569072f, 0.0f, 0.07284536f, 0.118619695f, 0.0f, -0.07284536f, -0.07284536f, -0.07284536f, 0.027071029f, 0.0f, -0.19146505f, 0.0f, 0.118619695f, -0.118619695f, 0.0f, 0.07284536f, -0.118619695f, 0.07284536f, 0.19062828f, -0.20042314f, -0.19062828f, -0.20042314f, 0.20042314f, -0.20042314f, 0.0f, 0.19062828f, -0.20042314f, 0.20042314f, 0.0f, 0.3910514f, 0.20042314f, -0.20042314f, 0.0f, 0.0f, 0.19062828f, 0.0f, -0.3910514f, -0.20042314f, -0.20042314f, 0.0f, 0.0f, -0.20042314f, -0.19062828f, -0.009794846f, 0.20042314f, 0.0f, 0.009794846f, -0.20042314f, 0.0f, 0.0f, 0.3910514f, -0.19062828f, -0.3910514f, -0.20042314f, 0.19062828f, -0.19062828f, 0.0f, 0.19062828f, -0.20042314f, 0.0f, 0.19062828f, 0.20042314f, -0.20042314f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.20042314f, 0.0f, 0.0f, 0.0f, 0.0f, -0.20042314f, 0.0f, -0.20042314f, -0.19062828f, 0.3910514f, -0.3910514f, 0.0f, 0.0f, -0.20042314f, 0.0f}
+        );
+
+        runQueryWithRowConsumer(expectedResultQuery, row -> {
+            assertThat((float[]) row.get("embedding"))
+                .isEqualTo(expectedEmbeddings.get(Math.toIntExact((Long) row.get("nodeId"))));
+        });
     }
 }
