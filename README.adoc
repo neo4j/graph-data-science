@@ -72,7 +72,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -82,21 +82,21 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the alpha algorithms -->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-algo</artifactId>
-    <version>1.6.5</version>
+    <version>1.7.0</version>
 </dependency>
 ```
 
@@ -106,28 +106,28 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the alpha algorithm procedures-->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-proc</artifactId>
-    <version>1.6.5</version>
+    <version>1.7.0</version>
 </dependency>
 
 <!-- Required by the Write procedures, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>write-services</artifactId>
-  <version>1.6.5</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -148,7 +148,7 @@ To use the bundled JAR in Neo4j, place the JAR file in the `plugins` directory o
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
 Preview of the documentation::
-A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/1.7-preview/.
+A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/1.8-preview/.
 
 == Contributing
 
