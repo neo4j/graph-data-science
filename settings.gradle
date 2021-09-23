@@ -46,8 +46,8 @@ def registerSubModules(File file) {
                     projectName = ":${moduleDir.name}-unsupported";
                 } else if (parent.name == "4.3.3") {
                     projectName = ":${moduleDir.name}-4.3.3";
-                } else if (parent.name == "4.3.4+") {
-                    projectName = ":${moduleDir.name}-4.3.4+";
+                } else if (parent.name == "4.3.4plus") {
+                    projectName = ":${moduleDir.name}-4.3.4plus";
                 }
                 include(projectName)
                 project(projectName).projectDir = moduleDir
