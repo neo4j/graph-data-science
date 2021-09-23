@@ -19,24 +19,26 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private final NodeMapping filteredIdMap;
+    private AtomicLong relationshipCount;
 
     public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
         super(originalGraph);
@@ -85,6 +87,26 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     @Override
     public long rootNodeCount() {
         return filteredIdMap.rootNodeCount();
+    }
+
+    @Override
+    public long relationshipCount() {
+        if (relationshipCount == null) {
+            doCount();
+        }
+        return relationshipCount.get();
+    }
+
+    private void doCount() {
+        this.relationshipCount = new AtomicLong(0);
+        forEachNode(nodeId -> {
+            // we call our filter-safe method
+            forEachRelationship(nodeId, (src, target) -> {
+                relationshipCount.incrementAndGet();
+                return true;
+            });
+            return true;
+        });
     }
 
     @Override

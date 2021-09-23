@@ -30,17 +30,20 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
 class NodeFilteredGraphTest {
 
     @GdlGraph
-    static String GDL = " (:Person)," +
-                        " (:Ignore:Person)," +
-                        " (:Ignore:Person)," +
-                        " (:Person)," +
-                        " (:Ignore)";
+    static String GDL = " (a:Person)," +
+                        " (b:Ignore:Person)," +
+                        " (c:Ignore:Person)," +
+                        " (d:Person)," +
+                        " (e:Ignore)," +
+                        " (a)-->(b)," +
+                        " (a)-->(e)";
 
     @Inject
     GraphStore graphStore;
@@ -60,6 +63,16 @@ class NodeFilteredGraphTest {
             assertEquals(unfilteredGraph.toOriginalNodeId(nodeId), filteredGraph.toOriginalNodeId(nodeId));
             return true;
         });
+    }
+
+    @Test
+    void shouldFilterRelationshipCount() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+        assertThat(graph.relationshipCount()).isEqualTo(1L);
     }
 
 }
