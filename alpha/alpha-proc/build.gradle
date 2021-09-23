@@ -39,4 +39,6 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-beta')
     testImplementation project(':proc-embeddings')
+
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito'
 }
