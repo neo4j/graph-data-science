@@ -100,4 +100,22 @@ public interface TestMethodRunner {
     static <E extends Exception> void runWithOriginalIdsForLabelImport(CheckedRunnable<E> code) throws E {
         setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.enableAndRun(code));
     }
+
+    @TestOnly
+    static Stream<TestMethodRunner> propertyImportVariants() {
+        return Stream.of(
+            TestMethodRunner::runWithInternalIdsForPropertyImport,
+            TestMethodRunner::runWithOriginalIdsForPropertyImport
+        );
+    }
+
+    @TestOnly
+    static <E extends Exception> void runWithInternalIdsForPropertyImport(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.disableAndRun(code));
+    }
+
+    @TestOnly
+    static <E extends Exception> void runWithOriginalIdsForPropertyImport(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.enableAndRun(code));
+    }
 }

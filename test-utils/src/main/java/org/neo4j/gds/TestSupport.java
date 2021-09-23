@@ -393,4 +393,17 @@ public final class TestSupport {
 
         return builder.build().nodeMapping();
     }
+
+    public static NodeMapping nodeMapping(long[] originalIds) {
+        var builder = GraphFactory
+            .initNodesBuilder()
+            .nodeCount(originalIds.length)
+            .maxOriginalId(Arrays.stream(originalIds).max().orElse(0))
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+
+        Arrays.stream(originalIds).forEach(builder::addNode);
+
+        return builder.build().nodeMapping();
+    }
 }
