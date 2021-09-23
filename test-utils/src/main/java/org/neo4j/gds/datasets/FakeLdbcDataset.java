@@ -39,7 +39,7 @@ public final class FakeLdbcDataset extends Dataset {
     static final FakeLdbcDataset INSTANCE = new FakeLdbcDataset(NAME);
 
     @Override
-    public void generate(Path datasetDir, DbCreator dbCreator) {
+    protected void generate(Path datasetDir, DbCreator dbCreator) {
         Label[] labels = {
             Label.label("City"),
             Label.label("Comment"),

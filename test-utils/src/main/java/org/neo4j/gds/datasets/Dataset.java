@@ -29,7 +29,26 @@ public abstract class Dataset {
         this.id = id;
     }
 
-    public abstract void generate(Path datasetDir, DbCreator dbCreator) throws InterruptedException;
+    /**
+     * Create here means e.g. generate data in an embedded database, or download a dataset from a remote location.
+     *
+     * In the end database files end up in the dataset dir, ready for being started using a database.
+     */
+    public final void prepare(Path datasetDir, DbCreator dbCreator) throws InterruptedException {
+        if (isDownloadingKind()) download(datasetDir); else generate(datasetDir, dbCreator);
+    }
+
+    protected boolean isDownloadingKind() {
+        return false; // because majority are generators
+    }
+
+    protected void download(Path datasetDir) throws InterruptedException  {
+        // no-op
+    }
+
+    protected void generate(Path datasetDir, DbCreator dbCreator) {
+        // no-op
+    }
 
     public String getId() {
         return id;

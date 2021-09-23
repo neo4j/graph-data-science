@@ -32,7 +32,7 @@ public final class EmptyDataset extends Dataset {
     static final EmptyDataset INSTANCE = new EmptyDataset(NAME);
 
     @Override
-    public void generate(Path datasetDir, DbCreator dbCreator) {
+    protected void generate(Path datasetDir, DbCreator dbCreator) {
         // just initialise an empty store
         dbCreator.createEmbeddedDatabase(datasetDir).shutdown();
     }

@@ -63,7 +63,7 @@ public abstract class AbstractCora extends Dataset {
     }
 
     @Override
-    public void generate(Path datasetDir, DbCreator dbCreator) {
+    protected void generate(Path datasetDir, DbCreator dbCreator) {
         GdsGraphDatabaseAPI db = null;
         try {
             Files.createDirectories(datasetDir);

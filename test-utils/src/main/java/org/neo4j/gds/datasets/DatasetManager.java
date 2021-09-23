@@ -72,7 +72,7 @@ public final class DatasetManager {
         Path datasetDir = workingDir.resolve(datasetId);
         if (!hasDataset(datasetId)) {
             try {
-                datasets.get(datasetId).generate(datasetDir, dbCreator);
+                datasets.get(datasetId).prepare(datasetDir, dbCreator);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to download dataset" + datasetId, e);
             }
