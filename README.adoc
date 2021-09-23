@@ -67,7 +67,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -77,21 +77,21 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the alpha algorithms -->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-algo</artifactId>
-    <version>1.6.4</version>
+    <version>1.7.0</version>
 </dependency>
 ```
 
@@ -101,28 +101,28 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 
 <!-- Contains the alpha algorithm procedures-->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-proc</artifactId>
-    <version>1.6.4</version>
+    <version>1.7.0</version>
 </dependency>
 
 <!-- Required by the Write procedures, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>write-services</artifactId>
-  <version>1.6.4</version>
+  <version>1.7.0</version>
 </dependency>
 ```
 
@@ -140,10 +140,6 @@ Packaging the library::
 To package the library you can run `./gradlew packaging:shadowJar`.
 This will create the bundled JAR at `packaging/build/libs/neo4j-graph-data-science-VERSION.jar`.
 
-Preview of the Documentation::
-To generate a preview you can run `./gradlew doc:preview`.
-This will build the documentation and make it available under `http://localhost:8001/`.
-When you are done run `./gradlew doc:stopPreview` to stop the web server.
 
 == Contributing
 
