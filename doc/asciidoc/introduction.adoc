@@ -25,6 +25,7 @@ Relationships are considered bidirectional (for example friendships).
 [[introduction-monopartite]]
 Monopartite::
 Graphs with one node type and relationship type are referred to as _monopartite_.
+Algorithms that expect monopartite graphs do not validate the input graph, but may produce unuseful results when node and/or relationship types are mixed together.
 
 [[introduction-multipartite]]
 Multi-partite::
