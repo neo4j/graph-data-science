@@ -212,6 +212,12 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 | defaultValue              | Float or Integer    |  yes     |  `Double.NaN`            | The default value if the property is not defined for a node.
 |===
 
+Using the `orientation` field will control whether the resulting graph is directed or undirected.
+Any combination of `NATURAL` and `REVERSE` will create a <<introduction-directed, directed graph>>.
+This is the case also when the same source relationships are used in both of these orientations, resulting in a projected graph where each relationship is represented in either direction.
+In order to communicate to an algorithm that an <<introduction-undirected, undirected graph>> is used, the `UNDIRECTED` orientation should be specified on the relationship projections.
+It is not recommended to mix `UNDIRECTED` orientations with the other two types.
+
 
 [[graph-create-examples]]
 == Examples
