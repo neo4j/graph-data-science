@@ -19,41 +19,31 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class NodeFilteredGraphTest extends BaseTest {
+@GdlExtension
+class NodeFilteredGraphTest {
 
-    String DB_CYPHER = "CREATE" +
-                       "  (a:Ignore:Person)," +
-                       "  (b:Ignore:Person)," +
-                       "  (c:Person)," +
-                       "  (d:Person)";
+    @GdlGraph
+    static String GDL = " (:Person)," +
+                        " (:Ignore:Person)," +
+                        " (:Ignore:Person)," +
+                        " (:Person)," +
+                        " (:Ignore)";
 
+    @Inject
     GraphStore graphStore;
-
-    @BeforeEach
-    void setup() {
-        runQuery("CREATE (a:Foo), (b:Foo)");
-        runQuery("MATCH (n) DETACH DELETE n");
-        runQuery(DB_CYPHER);
-
-        graphStore = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabels("Person", "Ignore")
-            .build()
-            .graphStore();
-    }
 
     @Test
     void filteredIdMapThatIncludesAllNodes() {
@@ -65,6 +55,7 @@ class NodeFilteredGraphTest extends BaseTest {
             Optional.empty()
         );
 
+        assertEquals(4L, filteredGraph.nodeCount());
         filteredGraph.forEachNode(nodeId -> {
             assertEquals(unfilteredGraph.toOriginalNodeId(nodeId), filteredGraph.toOriginalNodeId(nodeId));
             return true;
