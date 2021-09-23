@@ -27,10 +27,15 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongPredicate;
@@ -99,14 +104,20 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private void doCount() {
         this.relationshipCount = new AtomicLong(0);
-        forEachNode(nodeId -> {
-            // we call our filter-safe method
-            forEachRelationship(nodeId, (src, target) -> {
-                relationshipCount.incrementAndGet();
-                return true;
-            });
-            return true;
-        });
+
+        var tasks = PartitionUtils.rangePartition(
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            nodeCount(),
+            partition -> (Runnable) () -> {
+                partition.consume(nodeId -> forEachRelationship(nodeId, (src, target) -> {
+                    // we call our filter-safe iterator and count every time
+                    relationshipCount.incrementAndGet();
+                    return true;
+                }));
+            },
+            Optional.empty()
+        );
+        ParallelUtil.runWithConcurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY, tasks, Pools.DEFAULT);
     }
 
     @Override
