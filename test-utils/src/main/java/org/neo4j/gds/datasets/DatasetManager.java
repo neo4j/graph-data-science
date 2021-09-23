@@ -73,7 +73,7 @@ public final class DatasetManager {
         if (!hasDataset(datasetId)) {
             try {
                 datasets.get(datasetId).prepare(datasetDir, dbCreator);
-            } catch (InterruptedException e) {
+            } catch (IOException e) {
                 throw new RuntimeException("Failed to download dataset" + datasetId, e);
             }
         }

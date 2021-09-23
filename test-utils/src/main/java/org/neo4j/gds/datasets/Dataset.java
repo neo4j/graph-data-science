@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.datasets;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public abstract class Dataset {
@@ -34,15 +35,15 @@ public abstract class Dataset {
      *
      * In the end database files end up in the dataset dir, ready for being started using a database.
      */
-    public final void prepare(Path datasetDir, DbCreator dbCreator) throws InterruptedException {
-        if (isDownloadingKind()) download(datasetDir); else generate(datasetDir, dbCreator);
+    public final void prepare(Path datasetDir, DbCreator dbCreator) throws IOException {
+        if (isDownloadingKind()) downloadAndInstall(datasetDir); else generate(datasetDir, dbCreator);
     }
 
     protected boolean isDownloadingKind() {
         return false; // because majority are generators
     }
 
-    protected void download(Path datasetDir) throws InterruptedException  {
+    protected void downloadAndInstall(Path datasetDir) throws IOException {
         // no-op
     }
 
