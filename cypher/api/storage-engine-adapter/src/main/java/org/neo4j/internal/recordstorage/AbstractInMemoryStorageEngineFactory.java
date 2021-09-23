@@ -178,8 +178,31 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         long upgradeTxChecksum,
         long upgradeTxCommitTimestamp
     ) throws IOException {
-        MetaDataStore.setStoreId( pageCache, databaseLayout.metadataStore(), storeId, upgradeTxChecksum, upgradeTxCommitTimestamp,
-            databaseLayout.getDatabaseName(), cursorContext );
+        MetaDataStore.setStoreId(pageCache,
+            databaseLayout.metadataStore(),
+            storeId,
+            upgradeTxChecksum,
+            upgradeTxCommitTimestamp,
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
+    }
+
+    @Override
+    public void setExternalStoreUUID(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext,
+        UUID externalStoreId
+    ) throws IOException {
+        MetaDataStore.setExternalStoreUUID(
+            pageCache,
+            databaseLayout.metadataStore(),
+            externalStoreId,
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
     }
 
     @Override
