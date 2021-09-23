@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
@@ -65,16 +64,21 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
     public static LongNodePropertiesBuilder of(
         long nodeCount,
         DefaultValue defaultValue,
-        AllocationTracker allocationTracker
+        AllocationTracker allocationTracker,
+        int concurrency
     ) {
         return GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled()
-            ? sparse(defaultValue, allocationTracker)
+            ? sparse(defaultValue, allocationTracker, concurrency)
             : dense(nodeCount, defaultValue, allocationTracker);
     }
 
-    public static LongNodePropertiesBuilder sparse(DefaultValue defaultValue, AllocationTracker allocationTracker) {
+    public static LongNodePropertiesBuilder sparse(
+        DefaultValue defaultValue,
+        AllocationTracker allocationTracker,
+        int concurrency
+    ) {
         var builder = HugeSparseLongArray.GrowingBuilder.create(defaultValue.longValue(), allocationTracker);
-        return new SparseLongNodePropertiesBuilder(builder, allocationTracker);
+        return new SparseLongNodePropertiesBuilder(builder, allocationTracker, concurrency);
     }
 
     public static LongNodePropertiesBuilder dense(
@@ -177,13 +181,16 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
     private static final class SparseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
 
         private final HugeSparseLongArray.GrowingBuilder builder;
+        private final int concurrency;
 
         private SparseLongNodePropertiesBuilder(
             HugeSparseLongArray.GrowingBuilder builder,
-            AllocationTracker allocationTracker
+            AllocationTracker allocationTracker,
+            int concurrency
         ) {
             super(allocationTracker);
             this.builder = builder;
+            this.concurrency = concurrency;
         }
 
         @Override
@@ -196,10 +203,9 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
             var propertiesByNeoIds = builder.build();
             var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(nodeMapping.nodeCount(), allocationTracker);
 
-            // TODO: Use actual concurrency specified by user for graph create procedure.
             ParallelUtil.parallelForEachNode(
                 nodeMapping.nodeCount(),
-                ConcurrencyConfig.DEFAULT_CONCURRENCY,
+                concurrency,
                 mappedId -> {
                     var neoId = nodeMapping.toOriginalNodeId(mappedId);
                     var value = propertiesByNeoIds.get(neoId);

@@ -97,7 +97,7 @@ class UnionNodePropertiesTest {
 
     private UnionNodeProperties initializeUnionNodeProperties(Value propertyValue, DefaultValue defaultValue) {
         NodePropertiesFromStoreBuilder doubleNodePropertiesBuilder = NodePropertiesFromStoreBuilder.of(
-            1, AllocationTracker.empty(), defaultValue
+            1, AllocationTracker.empty(), defaultValue, 1
         );
 
         doubleNodePropertiesBuilder.set(0, 0, propertyValue);

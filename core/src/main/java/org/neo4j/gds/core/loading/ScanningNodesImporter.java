@@ -244,6 +244,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             return NativeNodePropertyImporter
                 .builder()
                 .nodeCount(nodeCount)
+                .concurrency(concurrency)
                 .dimensions(dimensions)
                 .propertyMappings(propertyMappingsByLabel)
                 .allocationTracker(allocationTracker)

@@ -91,7 +91,8 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             NodePropertiesFromStoreBuilder.of(
                 idMap.nodeCount(),
                 allocationTracker,
-                mapping.defaultValue()
+                mapping.defaultValue(),
+                concurrency
             )
         );
     }

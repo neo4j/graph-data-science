@@ -31,6 +31,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -146,6 +147,7 @@ public final class NativeNodePropertyImporter {
 
     public static final class Builder {
         private long nodeCount;
+        private int concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
         private AllocationTracker allocationTracker = AllocationTracker.empty();
@@ -156,6 +158,11 @@ public final class NativeNodePropertyImporter {
 
         public Builder nodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
+            return this;
+        }
+
+        public Builder concurrency(int concurrency) {
+            this.concurrency = concurrency;
             return this;
         }
 
@@ -175,7 +182,12 @@ public final class NativeNodePropertyImporter {
         }
 
         public NativeNodePropertyImporter build() {
-            var nodePropertyBuilders = BuildersByLabel.create(propertyMappings, nodeCount, allocationTracker);
+            var nodePropertyBuilders = BuildersByLabel.create(
+                propertyMappings,
+                nodeCount,
+                concurrency,
+                allocationTracker
+            );
             var buildersByLabelIdAndPropertyId = BuildersByLabelIdAndPropertyId.create(
                 nodePropertyBuilders,
                 // TODO: We align on `id` over `token` in this class but need to carry that change on to the rest of
@@ -192,6 +204,7 @@ public final class NativeNodePropertyImporter {
         static BuildersByLabel create(
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
             long nodeCount,
+            int concurrency,
             AllocationTracker allocationTracker
         ) {
             var instance = new BuildersByLabel();
@@ -201,7 +214,8 @@ public final class NativeNodePropertyImporter {
                     var builder = NodePropertiesFromStoreBuilder.of(
                         nodeCount,
                         allocationTracker,
-                        propertyMapping.defaultValue()
+                        propertyMapping.defaultValue(),
+                        concurrency
                     );
                     instance.put(label, propertyMapping, builder);
                 }

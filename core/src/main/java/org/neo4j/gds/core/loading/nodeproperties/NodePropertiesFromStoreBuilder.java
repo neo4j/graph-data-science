@@ -57,20 +57,32 @@ public final class NodePropertiesFromStoreBuilder {
         return MEMORY_ESTIMATION;
     }
 
-    public static NodePropertiesFromStoreBuilder of(long nodeSize, AllocationTracker allocationTracker, DefaultValue defaultValue) {
-        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker);
+    public static NodePropertiesFromStoreBuilder of(
+        long nodeSize,
+        AllocationTracker allocationTracker,
+        DefaultValue defaultValue,
+        int concurrency
+    ) {
+        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker, concurrency);
     }
 
     private final DefaultValue defaultValue;
     private final long nodeSize;
     private final AllocationTracker allocationTracker;
+    private final int concurrency;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
     private final LongAdder size;
 
-    private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker allocationTracker) {
+    private NodePropertiesFromStoreBuilder(
+        DefaultValue defaultValue,
+        long nodeSize,
+        AllocationTracker allocationTracker,
+        int concurrency
+    ) {
         this.defaultValue = defaultValue;
         this.nodeSize = nodeSize;
         this.allocationTracker = allocationTracker;
+        this.concurrency = concurrency;
         this.innerBuilder = new AtomicReference<>();
         this.size = new LongAdder();
     }
@@ -102,7 +114,7 @@ public final class NodePropertiesFromStoreBuilder {
         if (innerBuilder.get() == null) {
             InnerNodePropertiesBuilder newBuilder;
             if (value instanceof IntegralValue) {
-                newBuilder = LongNodePropertiesBuilder.of(nodeSize, defaultValue, allocationTracker);
+                newBuilder = LongNodePropertiesBuilder.of(nodeSize, defaultValue, allocationTracker, concurrency);
             } else if (value instanceof FloatingPointValue) {
                 newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof LongArray) {

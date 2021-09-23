@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
@@ -44,7 +45,12 @@ public class LongNodePropertiesBuilderTest {
         var nodeMapping = nodeMapping(originalIds);
 
         runner.run(() -> {
-            var builder = LongNodePropertiesBuilder.of(nodeCount, defaultValue, AllocationTracker.empty());
+            var builder = LongNodePropertiesBuilder.of(
+                nodeCount,
+                defaultValue,
+                AllocationTracker.empty(),
+                ConcurrencyConfig.DEFAULT_CONCURRENCY
+            );
 
             for (int i = 0; i < nodeCount; i++) {
                 builder.set(i, originalIds[i], i * 1337L);

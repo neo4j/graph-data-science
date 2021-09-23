@@ -59,7 +59,8 @@ final class NodePropertiesFromStoreBuilderTest {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.empty(),
-            DefaultValue.of(42.0D)
+            DefaultValue.of(42.0D),
+            1
         ).build(nodeMapping(0));
 
         assertEquals(0L, properties.size());
@@ -72,7 +73,8 @@ final class NodePropertiesFromStoreBuilderTest {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.empty(),
-            DefaultValue.of(42L)
+            DefaultValue.of(42L),
+            1
         ).build(nodeMapping(0));
 
         assertEquals(0L, properties.size());
@@ -252,7 +254,8 @@ final class NodePropertiesFromStoreBuilderTest {
         var builder = NodePropertiesFromStoreBuilder.of(
             nodeCount,
             AllocationTracker.empty(),
-            DefaultValue.DEFAULT
+            DefaultValue.DEFAULT,
+            1
         );
 
         builder.set(0, 0, null);
@@ -269,7 +272,12 @@ final class NodePropertiesFromStoreBuilderTest {
     void threadSafety() throws InterruptedException {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
-        var builder = NodePropertiesFromStoreBuilder.of(nodeSize, AllocationTracker.empty(), DefaultValue.of(Double.NaN));
+        var builder = NodePropertiesFromStoreBuilder.of(
+            nodeSize,
+            AllocationTracker.empty(),
+            DefaultValue.of(Double.NaN),
+            1
+        );
 
         var phaser = new Phaser(3);
         pool.execute(() -> {
@@ -315,7 +323,12 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
-        var builder = NodePropertiesFromStoreBuilder.of(size, AllocationTracker.empty(), DefaultValue.of(defaultValue));
+        var builder = NodePropertiesFromStoreBuilder.of(
+            size,
+            AllocationTracker.empty(),
+            DefaultValue.of(defaultValue),
+            1
+        );
         buildBlock.accept(builder);
         return builder.build(nodeMapping(size));
     }
