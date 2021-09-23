@@ -145,8 +145,11 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 |Float[]   | null
 |Integer   |`Integer.MIN_VALUE`
 |Integer[] | null
-
 |===
+
+When node properties are projected into the graph, these can be used as weights to run an algorithm on a <<introduction-unweighted, weighted graph>>.
+Typically, this will need algorithm configuration using the <<common-configuration-node-weight-property, nodeWeightProperty>> configuration parameter.
+
 
 [[relationship-projection-syntax]]
 === Relationship Projection
@@ -217,6 +220,9 @@ Any combination of `NATURAL` and `REVERSE` will create a <<introduction-directed
 This is the case also when the same source relationships are used in both of these orientations, resulting in a projected graph where each relationship is represented in either direction.
 In order to communicate to an algorithm that an <<introduction-undirected, undirected graph>> is used, the `UNDIRECTED` orientation should be specified on the relationship projections.
 It is not recommended to mix `UNDIRECTED` orientations with the other two types.
+
+When relationship properties are projected into the graph, these can be used as weights to run an algorithm on a <<introduction-unweighted, weighted graph>>.
+Typically, this will need algorithm configuration using the <<common-configuration-relationship-weight-property, relationshipWeightProperty>> configuration parameter.
 
 
 [[graph-create-examples]]
