@@ -25,7 +25,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.core.GdsEdition;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
