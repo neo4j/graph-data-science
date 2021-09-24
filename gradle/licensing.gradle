@@ -97,44 +97,13 @@ def allowList = [
 ]
 // All licenses that we accept, and their aliases
 
-def publicModules = [
-    ':algo',
-    ':algo-common',
-    ':alpha-algo',
-    ':alpha-core',
-    ':alpha-embeddings',
-    ':alpha-proc',
-    ':annotations',
-    ':config-generator',
-    ':core',
-    ':neo4j-adapter',
-    ':neo4j-kernel-adapter',
-    ':neo4j-kernel-adapter-4.1',
-    ':neo4j-kernel-adapter-4.2',
-    ':neo4j-kernel-adapter-4.3',
-    ':neo4j-kernel-adapter-api',
-    ':neo4j-kernel-adapter-aura',
-    ':open-packaging',
-    ':packaging',
-    ':pregel-proc-generator',
-    ':proc',
-    ':proc-beta',
-    ':proc-catalog',
-    ':proc-centrality',
-    ':proc-common',
-    ':proc-community',
-    ':proc-embeddings',
-    ':proc-misc',
-    ':proc-similarity',
-    ':proc-test',
-    ':serialization',
-    ':test-utils',
-    ':pregel-example',
-    ':doc',
+def excludedModules = [
+    ':cherry-pick-tool',
+    ':benchmark-utils',
+    ':db-dump-test',
+    ':embedding-benchmarks-server',
+    ':ml-quality-benchmarks',
 ]
-
-
-
 
 allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
@@ -157,7 +126,7 @@ allprojects { proj ->
         }
         tasks.check.dependsOn tasks.license
 
-        if (proj.path in publicModules) {
+        if (proj.path !in excludedModules) {
             // Dependency license reporting
             downloadLicenses {
                 dependencyConfiguration = 'runtimeClasspath'
