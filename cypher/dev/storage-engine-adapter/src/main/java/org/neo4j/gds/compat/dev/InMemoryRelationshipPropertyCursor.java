@@ -43,6 +43,8 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     public void initRelationshipProperties(
         Reference reference, PropertySelection propertySelection, long ownerReference
     ) {
+        clear();
         setId(((LongReference) reference).id);
+        this.propertySelection = propertySelection;
     }
 }

@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
@@ -36,10 +37,12 @@ import java.util.stream.StreamSupport;
 
 public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
 
-    private String currentRelationshipPropertykey = null;
+    private String currentRelationshipPropertyKey = null;
 
     private final Map<String, ValueGroup> propertyKeyToTypeMapping;
     private final Set<Integer> seenRelationshipReferences;
+
+    protected PropertySelection propertySelection;
 
     protected AbstractInMemoryRelationshipPropertyCursor(
         CypherGraphStore graphStore,
@@ -69,18 +72,20 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
 
     @Override
     public int propertyKey() {
-        return tokenHolders.propertyKeyTokens().getIdByName(currentRelationshipPropertykey);
+        return tokenHolders.propertyKeyTokens().getIdByName(currentRelationshipPropertyKey);
     }
 
     @Override
     public ValueGroup propertyType() {
-        return propertyKeyToTypeMapping.get(currentRelationshipPropertykey);
+        return propertyKeyToTypeMapping.get(currentRelationshipPropertyKey);
     }
 
     @Override
     public Value propertyValue() {
-        if (currentRelationshipPropertykey != null) {
-            return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(getId(), currentRelationshipPropertykey));
+        if (currentRelationshipPropertyKey != null) {
+            return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(getId(),
+                currentRelationshipPropertyKey
+            ));
         }
         throw new IllegalStateException(
             "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
@@ -93,11 +98,11 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
                     .propertyKeyTokens()
                     .getAllTokens()
                     .spliterator(), false)
-                .filter(tokenHolder -> !seenRelationshipReferences.contains(tokenHolder.id()))
+                .filter(tokenHolder -> propertySelection.test(tokenHolder.id()) && !seenRelationshipReferences.contains(tokenHolder.id()))
                 .findFirst();
 
             if (maybeNextEntry.isPresent()) {
-                currentRelationshipPropertykey = maybeNextEntry.get().name();
+                currentRelationshipPropertyKey = maybeNextEntry.get().name();
                 seenRelationshipReferences.add(maybeNextEntry.get().id());
                 return true;
             }
@@ -111,7 +116,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     public void reset() {
         clear();
         this.setId(NO_ID);
-        this.currentRelationshipPropertykey = null;
+        this.currentRelationshipPropertyKey = null;
         this.seenRelationshipReferences.clear();
     }
 
