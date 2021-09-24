@@ -63,14 +63,6 @@ def allowList = [
                 [name: 'Eclipse Public License 1.0'],
                 [name: 'EPL', url: 'http://www.eclipse.org/legal/epl-v10.html']
         ]],
-        [name: 'Eclipse Public License v2.0', url: 'http://www.eclipse.org/legal/epl-v20.html', aliases: [
-                [name: 'Eclipse Public License - v 2.0'],
-                [name: 'Eclipse Public - License 2.0'],
-                [name: 'Eclipse Public License v2.0'],
-                [name: 'EPL 2.0'],
-                [name: 'EPL-2.0,'],
-        ]],
-        [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
         [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html', aliases: [
                 [name: 'GPL-2.0']
         ]],
@@ -103,6 +95,14 @@ def excludedModules = [
     ':db-dump-test',
     ':embedding-benchmarks-server',
     ':ml-quality-benchmarks',
+
+    ':browser-guide',
+    ':doc',
+    ':experimental-test-utils',
+    ':ml-test-utils',
+    ':api-diff',
+    ':test-utils',
+    ':proc-test',
 ]
 
 allprojects { proj ->
