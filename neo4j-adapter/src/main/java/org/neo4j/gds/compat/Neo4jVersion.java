@@ -106,6 +106,9 @@ public enum Neo4jVersion {
         if (version.equals("4.3.0-drop04.3")) {
             return Neo4jVersion.V_4_3_drop43;
         }
+        if (version.equals("4.3.0-drop04.4")) {
+            return Neo4jVersion.V_4_3_drop43;
+        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
