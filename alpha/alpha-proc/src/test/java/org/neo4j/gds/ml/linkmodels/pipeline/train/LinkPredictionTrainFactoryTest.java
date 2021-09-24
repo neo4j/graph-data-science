@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +36,10 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
+import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 

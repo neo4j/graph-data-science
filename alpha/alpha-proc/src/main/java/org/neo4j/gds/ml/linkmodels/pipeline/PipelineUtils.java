@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -30,7 +31,7 @@ public final class PipelineUtils {
 
     private PipelineUtils() {}
 
-    static TrainingPipeline getPipelineModelInfo(String pipelineName, String username) {
+    public static TrainingPipeline getPipelineModelInfo(String pipelineName, String username) {
        var model = ModelCatalog.getUntyped(username, pipelineName);
 
         assert model != null;

@@ -38,12 +38,12 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionTrainFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainFactory;
 
 import java.util.List;
 import java.util.Map;

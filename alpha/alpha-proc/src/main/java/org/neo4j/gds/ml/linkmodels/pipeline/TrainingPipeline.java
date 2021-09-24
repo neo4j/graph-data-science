@@ -95,15 +95,15 @@ public class TrainingPipeline implements Mappable {
         featureSteps.add(step);
     }
 
-    LinkPredictionSplitConfig splitConfig() {
+    public LinkPredictionSplitConfig splitConfig() {
         return splitConfig;
     }
 
-    void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
+    public void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
         this.splitConfig = splitConfig;
     }
 
-    List<Map<String, Object>> parameterSpace() {
+     public List<Map<String, Object>> parameterSpace() {
         return parameterSpace;
     }
 
@@ -125,7 +125,7 @@ public class TrainingPipeline implements Mappable {
             }).collect(Collectors.toList());
     }
 
-    List<LinkLogisticRegressionTrainConfig> parameterConfigs(int concurrency) {
+    public List<LinkLogisticRegressionTrainConfig> parameterConfigs(int concurrency) {
         return parameterSpace().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
             concurrency,
             params

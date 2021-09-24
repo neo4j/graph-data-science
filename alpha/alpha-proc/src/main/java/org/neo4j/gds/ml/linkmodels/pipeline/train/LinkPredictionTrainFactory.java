@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
@@ -30,6 +30,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.Training;
+import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
