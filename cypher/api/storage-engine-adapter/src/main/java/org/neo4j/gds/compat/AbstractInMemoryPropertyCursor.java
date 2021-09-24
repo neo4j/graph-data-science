@@ -33,13 +33,11 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementIdentifier, PROP_SCHEMA extends PropertySchema>
+public abstract class AbstractInMemoryPropertyCursor
     extends PropertyRecord implements StoragePropertyCursor {
 
     protected final CypherGraphStore graphStore;
@@ -48,7 +46,7 @@ public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementI
         value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
         justification = "Field will be initialized in the compat specific instances during initNodeProperties"
     )
-    protected DelegatePropertyCursor<IDENTIFIER, PROP_SCHEMA> delegate;
+    protected DelegatePropertyCursor<?, ?> delegate;
 
     public AbstractInMemoryPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
@@ -105,7 +103,6 @@ public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementI
         protected final TokenHolders tokenHolders;
 
         final Map<String, ValueGroup> propertyKeyToValueGroupMapping;
-        final Set<Integer> seenPropertyKeys;
 
         private final Iterator<NamedToken> namedTokensIterator;
 
@@ -118,7 +115,6 @@ public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementI
             this.graphStore = graphStore;
             this.tokenHolders = tokenHolders;
             this.propertyKeyToValueGroupMapping = new HashMap<>();
-            this.seenPropertyKeys = new HashSet<>();
             this.namedTokensIterator = tokenHolders.propertyKeyTokens().getAllTokens().iterator();
 
             populateKeyToValueGroupMapping();
@@ -143,11 +139,15 @@ public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementI
         @Override
         public boolean next() {
             if (getId() != NO_ID) {
+                // In Neo4j properties are retrieved by following a pointer
+                // to the first property of an element and then following
+                // the property chain to the next property and so on.
+                // We try to mimic this behaviour by iterating through
+                // all available properties in the graph store.
                 while (namedTokensIterator.hasNext()) {
                     var namedToken = namedTokensIterator.next();
-                    if (propertySelection.test(namedToken.id()) && !seenPropertyKeys.contains(namedToken.id())) {
+                    if (propertySelection.test(namedToken.id())) {
                         this.currentPropertyKey = namedToken.name();
-                        this.seenPropertyKeys.add(namedToken.id());
                         return true;
                     }
                 }
@@ -160,7 +160,6 @@ public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementI
             clear();
             this.setId(NO_ID);
             this.currentPropertyKey = null;
-            this.seenPropertyKeys.clear();
         }
 
         @Override
