@@ -35,7 +35,7 @@ public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationship
 
     @Override
     public long propertiesReference() {
-        return 0;
+        return NO_ID;
     }
 
     @Override
