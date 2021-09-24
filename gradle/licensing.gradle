@@ -161,7 +161,7 @@ allprojects { proj ->
                     tasks.downloadLicenses.dependencyToLicenseJson().dependencies
                         .findAll { dep -> !dep.name.matches(excludeNeo4jPattern) }
                         .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
-                        .each { dep -> logger.error("Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
+                        .each { dep -> logger.error("In project ${proj.name}: Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
                         .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
                 }
             }
