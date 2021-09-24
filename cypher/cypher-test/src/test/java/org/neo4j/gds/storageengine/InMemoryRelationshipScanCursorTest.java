@@ -23,10 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 
 import java.util.List;
 
@@ -66,6 +68,12 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldPerformScan() {
         relationshipScanCursor.scan();
 
@@ -88,6 +96,12 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldGetSingleRelationship() {
         relationshipScanCursor.single(2);
 
