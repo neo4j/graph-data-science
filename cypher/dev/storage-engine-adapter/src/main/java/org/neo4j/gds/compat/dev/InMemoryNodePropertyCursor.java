@@ -24,7 +24,6 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
-import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
@@ -35,18 +34,11 @@ public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCurs
 
     @Override
     public void initNodeProperties(Reference reference, PropertySelection selection, long ownerReference) {
+        clear();
         setId(((LongReference) reference).id);
     }
 
     @Override
     public void initRelationshipProperties(Reference reference, PropertySelection selection, long ownerReference) {
-    }
-
-    @Override
-    public void initRelationshipProperties(Reference reference, PropertySelection selection) {
-    }
-
-    @Override
-    public void initRelationshipProperties(StorageRelationshipCursor relationshipCursor, PropertySelection selection) {
     }
 }
