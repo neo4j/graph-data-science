@@ -186,9 +186,11 @@ allprojects { proj ->
                 group 'license'
                 description 'Checks dependency licenses against an allowlist'
                 dependsOn tasks.downloadLicenses
+                var excludeNeo4jPattern = /^(org|com)\.neo4j.*/
                 doLast {
                     def allowListedNames = allowList.collect { it.name }
                     tasks.downloadLicenses.dependencyToLicenseJson().dependencies
+                        .findAll { dep -> !dep.name.matches(excludeNeo4jPattern) }
                         .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
                         .each { dep -> logger.error("Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
                         .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
