@@ -22,6 +22,7 @@ package org.neo4j.gds.impl.sssp;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -280,6 +281,18 @@ public class DeltaStepping extends Algorithm<DeltaStepping, DeltaStepping.DeltaS
 
         public double distance(long nodeId) {
             return distances.get(nodeId);
+        }
+
+        @TestOnly
+        public long numberOfTargetNodes() {
+            long numberOfTargetNodes = 0;
+            for (long i = 0; i < distances.size(); i++) {
+                if (distances.get(i) != DIST_INF) {
+                    numberOfTargetNodes++;
+                }
+            }
+
+            return numberOfTargetNodes;
         }
     }
 }
