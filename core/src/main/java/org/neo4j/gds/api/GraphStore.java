@@ -127,6 +127,8 @@ public interface GraphStore {
 
     Set<String> relationshipPropertyKeys(RelationshipType relationshipType);
 
+    RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey);
+
     void addRelationshipType(
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,

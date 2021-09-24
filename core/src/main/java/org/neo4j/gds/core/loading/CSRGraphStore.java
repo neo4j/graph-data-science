@@ -308,6 +308,13 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public RelationshipProperty relationshipPropertyValues(
+        RelationshipType relationshipType, String propertyKey
+    ) {
+        return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).get(propertyKey);
+    }
+
+    @Override
     public void addRelationshipType(
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
