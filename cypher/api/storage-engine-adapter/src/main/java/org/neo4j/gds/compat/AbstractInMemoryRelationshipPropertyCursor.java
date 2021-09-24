@@ -19,133 +19,37 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 
-public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
-
-    private String currentRelationshipPropertyKey = null;
-
-    private final Map<String, ValueGroup> propertyKeyToTypeMapping;
-    private final Set<Integer> seenRelationshipReferences;
-
-    protected Predicate<Integer> propertySelection;
+public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<RelationshipType, RelationshipPropertySchema> {
 
     protected AbstractInMemoryRelationshipPropertyCursor(
         CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
         super(NO_ID, graphStore, tokenHolders);
-        this.seenRelationshipReferences = new HashSet<>();
-        this.propertyKeyToTypeMapping = new HashMap<>();
-        var propertySchemas = graphStore
-            .schema()
-            .relationshipSchema()
-            .properties()
-            .values();
-        graphStore.relationshipPropertyKeys(graphStore.relationshipTypes()).forEach(nodePropertyKey -> {
-            var valueType = propertySchemas
-                .stream()
-                .map(map -> map.get(nodePropertyKey))
-                .findFirst()
-                .get()
-                .valueType();
-
-            var valueGroup = valueGroupFromValueType(valueType);
-
-            propertyKeyToTypeMapping.put(nodePropertyKey, valueGroup);
-        });
     }
 
     @Override
-    public int propertyKey() {
-        return tokenHolders.propertyKeyTokens().getIdByName(currentRelationshipPropertyKey);
-    }
-
-    @Override
-    public ValueGroup propertyType() {
-        return propertyKeyToTypeMapping.get(currentRelationshipPropertyKey);
+    protected Map<RelationshipType, Map<String, RelationshipPropertySchema>> propertySchema() {
+        return graphStore.schema().relationshipSchema().properties();
     }
 
     @Override
     public Value propertyValue() {
-        if (currentRelationshipPropertyKey != null) {
+        if (currentPropertyKey != null) {
             return Values.doubleValue(graphStore.relationshipIds().propertyValueForId(getId(),
-                currentRelationshipPropertyKey
+                currentPropertyKey
             ));
         }
         throw new IllegalStateException(
             "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
-    }
-
-    @Override
-    public boolean next() {
-        if (getId() != NO_ID) {
-            Optional<NamedToken> maybeNextEntry = StreamSupport.stream(tokenHolders
-                    .propertyKeyTokens()
-                    .getAllTokens()
-                    .spliterator(), false)
-                .filter(tokenHolder -> propertySelection.test(tokenHolder.id()) && !seenRelationshipReferences.contains(tokenHolder.id()))
-                .findFirst();
-
-            if (maybeNextEntry.isPresent()) {
-                currentRelationshipPropertyKey = maybeNextEntry.get().name();
-                seenRelationshipReferences.add(maybeNextEntry.get().id());
-                return true;
-            }
-            return false;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public void reset() {
-        clear();
-        this.setId(NO_ID);
-        this.currentRelationshipPropertyKey = null;
-        this.seenRelationshipReferences.clear();
-    }
-
-    @Override
-    public void clear() {
-        super.clear();
-    }
-
-    @Override
-    public void setForceLoad() {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    private static ValueGroup valueGroupFromValueType(ValueType valueType) {
-        switch (valueType) {
-            case DOUBLE:
-            case LONG:
-                return ValueGroup.NUMBER;
-            case LONG_ARRAY:
-            case DOUBLE_ARRAY:
-            case FLOAT_ARRAY:
-                return ValueGroup.NUMBER_ARRAY;
-            default:
-                return ValueGroup.UNKNOWN;
-        }
     }
 }

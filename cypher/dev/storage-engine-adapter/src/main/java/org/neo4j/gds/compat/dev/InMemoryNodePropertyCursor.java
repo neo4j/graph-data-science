@@ -34,8 +34,9 @@ public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCurs
 
     @Override
     public void initNodeProperties(Reference reference, PropertySelection selection, long ownerReference) {
-        clear();
+        reset();
         setId(((LongReference) reference).id);
+        setPropertySelection(selection::test);
     }
 
     @Override

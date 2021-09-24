@@ -20,14 +20,27 @@
 package org.neo4j.gds.compat;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ElementIdentifier;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
-public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord implements StoragePropertyCursor {
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
+public abstract class AbstractInMemoryPropertyCursor<IDENTIFIER extends ElementIdentifier, PROP_SCHEMA extends PropertySchema>
+    extends PropertyRecord implements StoragePropertyCursor {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
@@ -35,7 +48,7 @@ public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord impl
         value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
         justification = "Field will be initialized in the compat specific instances during initNodeProperties"
     )
-    protected DelegatePropertyCursor delegate;
+    protected DelegatePropertyCursor<IDENTIFIER, PROP_SCHEMA> delegate;
 
     public AbstractInMemoryPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
@@ -85,15 +98,105 @@ public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord impl
         }
     }
 
-    abstract static class DelegatePropertyCursor extends PropertyRecord implements StoragePropertyCursor {
+    abstract static class DelegatePropertyCursor<IDENTIFIER extends ElementIdentifier, PROP_SCHEMA extends PropertySchema>
+        extends PropertyRecord implements StoragePropertyCursor {
 
         protected final CypherGraphStore graphStore;
         protected final TokenHolders tokenHolders;
+
+        final Map<String, ValueGroup> propertyKeyToValueGroupMapping;
+        final Set<Integer> seenPropertyKeys;
+
+        private final Iterator<NamedToken> namedTokensIterator;
+
+        @Nullable String currentPropertyKey;
+
+        private Predicate<Integer> propertySelection;
 
         DelegatePropertyCursor(long id, CypherGraphStore graphStore, TokenHolders tokenHolders) {
             super(id);
             this.graphStore = graphStore;
             this.tokenHolders = tokenHolders;
+            this.propertyKeyToValueGroupMapping = new HashMap<>();
+            this.seenPropertyKeys = new HashSet<>();
+            this.namedTokensIterator = tokenHolders.propertyKeyTokens().getAllTokens().iterator();
+
+            populateKeyToValueGroupMapping();
+        }
+
+        protected abstract Map<IDENTIFIER, Map<String, PROP_SCHEMA>> propertySchema();
+
+        protected void setPropertySelection(Predicate<Integer> propertySelection) {
+            this.propertySelection = propertySelection;
+        }
+
+        @Override
+        public int propertyKey() {
+            return tokenHolders.propertyKeyTokens().getIdByName(currentPropertyKey);
+        }
+
+        @Override
+        public ValueGroup propertyType() {
+            return propertyKeyToValueGroupMapping.get(currentPropertyKey);
+        }
+
+        @Override
+        public boolean next() {
+            if (getId() != NO_ID) {
+                while (namedTokensIterator.hasNext()) {
+                    var namedToken = namedTokensIterator.next();
+                    if (propertySelection.test(namedToken.id()) && !seenPropertyKeys.contains(namedToken.id())) {
+                        this.currentPropertyKey = namedToken.name();
+                        this.seenPropertyKeys.add(namedToken.id());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void reset() {
+            clear();
+            this.setId(NO_ID);
+            this.currentPropertyKey = null;
+            this.seenPropertyKeys.clear();
+        }
+
+        @Override
+        public void setForceLoad() {
+
+        }
+
+        @Override
+        public void close() {
+
+        }
+
+        private void populateKeyToValueGroupMapping() {
+            propertySchema()
+                .forEach((identifier, propertyMap) ->
+                    propertyMap.forEach((propertyKey, propertySchema) ->
+                        this.propertyKeyToValueGroupMapping.put(
+                            propertyKey,
+                            valueGroupFromValueType(propertySchema.valueType())
+                        )
+                    )
+                );
+        }
+
+        private static ValueGroup valueGroupFromValueType(ValueType valueType) {
+            switch (valueType) {
+                case DOUBLE:
+                case LONG:
+                    return ValueGroup.NUMBER;
+                case LONG_ARRAY:
+                case DOUBLE_ARRAY:
+                case FLOAT_ARRAY:
+                    return ValueGroup.NUMBER_ARRAY;
+                default:
+                    return ValueGroup.UNKNOWN;
+            }
         }
     }
 

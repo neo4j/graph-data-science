@@ -25,7 +25,7 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelationshipPropertyCursor {
 
-    protected InMemoryRelationshipPropertyCursor(
+    InMemoryRelationshipPropertyCursor(
         CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
@@ -39,7 +39,8 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
+        reset();
         setId(reference);
-        this.propertySelection = i -> true;
+        setPropertySelection(i -> true);
     }
 }

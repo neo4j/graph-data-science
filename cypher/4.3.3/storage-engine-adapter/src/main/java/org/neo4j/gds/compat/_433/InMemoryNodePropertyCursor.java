@@ -25,13 +25,15 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
 
-    public InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+    InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
+        reset();
         setId(reference);
+        setPropertySelection(i -> true);
     }
 
     @Override
