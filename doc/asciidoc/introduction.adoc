@@ -9,38 +9,6 @@ This chapter provides a brief introduction of the main concepts in the Neo4j Gra
 This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
 
 
-[[introduction-graph-variants]]
-== Graph variants
-
-The Graph Data Science library supports the following options when it comes to type of graphs:
-
-[[introduction-directed]]
-Directed::
-Relationships have specific direction. Relationships pointing to a node are referred to as _in-links_, respectively relationships originating from a node are called _out-links_.
-
-[[introduction-undirected]]
-Undirected::
-Relationships are considered bidirectional (for example friendships).
-
-[[introduction-monopartite]]
-Monopartite::
-Graphs with one node type and relationship type are referred to as _monopartite_.
-Algorithms that expect monopartite graphs do not validate the input graph, but may produce unuseful results when node and/or relationship types are mixed together.
-
-[[introduction-multipartite]]
-Multi-partite::
-Graphs with multiple node types are referred to as _multi-partite_.
-Common case are _bi-partite_ graphs where we have two node types.
-
-[[introduction-weighted]]
-Weighted::
-Weighted graphs have weight value(s) assigned to their relationships or nodes, these values can represent _cost_, _time_, _capacity_ or other _domain-specific property_.
-
-[[introduction-unweighted]]
-Unweighted::
-Unweighted graphs have no weight values assigned to their nodes or relationships.
-
-
 [[introduction-algorithms]]
 == Algorithms
 
@@ -56,6 +24,41 @@ Fortunately, optimized algorithms exist that utilize certain structures of the g
 Whenever possible, we've applied these optimizations.
 
 The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the <<algorithms, Algorithms>> chapter.
+
+
+[[introduction-algorithms-traits]]
+=== Algorithm traits
+
+Algorithms in GDS have specific ways to make use of various aspects of its input graph(s).
+We call these _algorithm traits_.
+When an algorithm supports an algorithm trait this indicates that the algorithm has been implemented to produce well-defined results in accordance with the trait.
+The following algorithm traits exist:
+
+[[introduction-algorithms-directed]]
+Directed::
+The algorithm is well-defined on a directed graph.
+
+[[introduction-algorithms-undirected]]
+Undirected::
+The algorithm is well-defined on an undirected graph.
+
+[[introduction-algorithms-homogeneous]]
+Homogeneous::
+The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type.
+If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
+
+[[introduction-algorithms-heterogeneous]]
+Heterogeneous::
+The algorithm supports configuration to distinguish between nodes and/or relationships of different types.
+
+[[introduction-algorithms-weighted]]
+Weighted::
+The algorithm supports configuration to set node and/or relationship properties to use as weights.
+These values can represent _cost_, _time_, _capacity_ or some other domain-specific property.
+
+[[introduction-algorithms-unweighted]]
+Unweighted::
+The algorithm will by default consider each node and/or relationship as equally important.
 
 
 [[introduction-catalog]]

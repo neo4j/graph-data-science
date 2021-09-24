@@ -1,4 +1,4 @@
-.Supported graph variants:
+.Supported algorithm traits:
 [.graph-variants, caption=]
 --
 ifdef::directed[]
@@ -7,7 +7,7 @@ endif::[]
 ifndef::directed[]
 [.not-supported]
 endif::[]
-<<introduction-directed,Directed>>
+<<introduction-algorithms-directed,Directed>>
 
 ifdef::undirected[]
 [.supported]
@@ -15,7 +15,7 @@ endif::[]
 ifndef::undirected[]
 [.not-supported]
 endif::[]
-<<introduction-undirected,Undirected>>
+<<introduction-algorithms-undirected,Undirected>>
 
 ifdef::monopartite[]
 [.supported]
@@ -23,7 +23,7 @@ endif::[]
 ifndef::monopartite[]
 [.not-supported]
 endif::[]
-<<introduction-monopartite,Monopartite>>
+<<introduction-algorithms-homogeneous,Homogeneous>>
 
 ifdef::multipartite[]
 [.supported]
@@ -31,7 +31,7 @@ endif::[]
 ifndef::multipartite[]
 [.not-supported]
 endif::[]
-<<introduction-multipartite,Multi-partite>>
+<<introduction-algorithms-heterogeneous,Heterogeneous>>
 
 ifdef::weighted[]
 [.supported]
@@ -39,7 +39,7 @@ endif::[]
 ifndef::weighted[]
 [.not-supported]
 endif::[]
-<<introduction-weighted,Weighted>>
+<<introduction-algorithms-weighted,Weighted>>
 
 ifdef::unweighted[]
 [.supported]
@@ -47,5 +47,5 @@ endif::[]
 ifndef::unweighted[]
 [.not-supported]
 endif::[]
-<<introduction-unweighted,Unweighted>>
+<<introduction-algorithms-unweighted,Unweighted>>
 --

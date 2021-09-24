@@ -12,7 +12,7 @@ This section describes the Betweenness Centrality algorithm in the Neo4j Graph D
 :directed:
 :undirected:
 :monopartite:
-include::../shared/graph-variants.adoc[]
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-betweenness-centrality-intro]]

@@ -11,7 +11,7 @@ This section describes the Triangle Count algorithm in the Neo4j Graph Data Scie
 
 :undirected:
 :monopartite:
-include::../shared/graph-variants.adoc[]
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-triangle-count-intro]]
