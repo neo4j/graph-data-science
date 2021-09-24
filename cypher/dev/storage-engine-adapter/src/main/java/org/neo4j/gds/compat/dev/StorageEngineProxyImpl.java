@@ -29,6 +29,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
@@ -139,6 +140,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         return new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public AbstractInMemoryRelationshipPropertyCursor inMemoryRelationshipPropertyCursor(
+        CypherGraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        return new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
     }
 
     @Override

@@ -129,6 +129,13 @@ public final class StorageEngineProxy {
         return IMPL.inMemoryRelationshipScanCursor(graphStore, tokenHolders);
     }
 
+    public static AbstractInMemoryRelationshipPropertyCursor inMemoryRelationshipPropertyCursor(
+        CypherGraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
+        return IMPL.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+    }
+
     public static Edition dbmsEdition(GraphDatabaseAPI api) {
         return IMPL.dbmsEdition(api);
     }
