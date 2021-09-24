@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
@@ -37,9 +38,9 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
@@ -120,7 +121,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
 
     @Test
     void progressTracking() {
-        ProcedureTestUtils.applyOnProcedure(db, caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             String trainModelName = "outputModel";
             var trainConfig = LinkPredictionTrainConfig.builder()
                 .graphName(GRAPH_NAME)

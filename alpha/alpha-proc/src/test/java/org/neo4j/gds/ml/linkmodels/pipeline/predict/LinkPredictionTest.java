@@ -23,11 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -36,19 +36,18 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,7 +105,7 @@ class LinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -158,7 +157,7 @@ class LinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -203,7 +202,7 @@ class LinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -268,7 +267,7 @@ class LinkPredictionTest extends BaseProcTest {
         );
 
         for (int i = 0; i < 2; i++) {
-            ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
                 var pipelineExecutor = new PipelineExecutor(
                     pipeline,
                     caller,

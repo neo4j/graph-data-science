@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -38,13 +38,13 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,7 +98,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var actual = computePropertiesAndLinkFeatures(
                 new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER)
             );
@@ -131,7 +131,7 @@ class PipelineExecutorTest extends BaseProcTest {
             "scaler", "MEAN"
         )));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
                 RELATIONSHIP_TYPE
@@ -153,7 +153,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var normD = Math.sqrt(42 * 42 + 9 * 9);
 
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
                 pipeline,
                 caller,
@@ -196,7 +196,7 @@ class PipelineExecutorTest extends BaseProcTest {
             0.6668064514098416
         );
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
                 pipeline,
                 caller,
@@ -229,7 +229,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -270,7 +270,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.setSplitConfig(splitConfig);
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -309,7 +309,7 @@ class PipelineExecutorTest extends BaseProcTest {
         var pipeline = new TrainingPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
-        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var executor = new PipelineExecutor(
                 pipeline,
                 caller,
