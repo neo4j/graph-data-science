@@ -29,12 +29,13 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnableForNeo4jVersion(Neo4jVersion.V_4_3)
 class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph
@@ -69,12 +70,6 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldTraverseRelationships() {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 
@@ -100,12 +95,6 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldSetCorrectIds() {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 

@@ -20,8 +20,6 @@
 package org.neo4j.internal.recordstorage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.storageengine.CypherTest;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -29,12 +27,15 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
+import org.neo4j.gds.storageengine.CypherTest;
 import org.neo4j.token.api.NamedToken;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnableForNeo4jVersion(Neo4jVersion.V_4_3)
 class InMemoryStorageEngineTest extends CypherTest {
 
     @Neo4jGraph
@@ -58,12 +59,6 @@ class InMemoryStorageEngineTest extends CypherTest {
     protected void onSetup() {}
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     void shouldPopulateTokenHolders() {
         var labelTokens = tokenHolders.labelTokens().getAllTokens();
         assertThat(labelTokens).extracting(NamedToken::name).containsExactlyInAnyOrder("A", "B");

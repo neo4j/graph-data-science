@@ -92,6 +92,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
     @Test
     void exportGraph() {
         createGraph();
@@ -114,6 +115,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
         createGraph();
@@ -144,6 +146,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
     @Test
     void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
         createGraph();
