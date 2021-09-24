@@ -39,7 +39,10 @@ import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.RelationshipSelection;
+import org.neo4j.storageengine.api.StorageEntityCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -147,6 +150,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         return new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public void properties(
+        StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection
+    ) {
+        storageCursor.properties(propertyCursor, PropertySelection.selection(propertySelection));
     }
 
     @Override

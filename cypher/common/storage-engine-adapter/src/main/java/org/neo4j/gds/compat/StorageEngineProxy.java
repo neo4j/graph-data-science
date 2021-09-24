@@ -31,6 +31,8 @@ import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEntityCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -134,6 +136,10 @@ public final class StorageEngineProxy {
         TokenHolders tokenHolders
     ) {
         return IMPL.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+    }
+
+    public static void properties(StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection) {
+        IMPL.properties(storageCursor, propertyCursor, propertySelection);
     }
 
     public static Edition dbmsEdition(GraphDatabaseAPI api) {

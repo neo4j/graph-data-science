@@ -30,6 +30,8 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEntityCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -82,6 +84,8 @@ public interface StorageEngineProxyApi {
     );
 
     AbstractInMemoryRelationshipScanCursor inMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders);
+
+    void properties(StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection);
 
     Edition dbmsEdition(GraphDatabaseAPI api);
 }

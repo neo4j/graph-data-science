@@ -21,7 +21,6 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
@@ -33,6 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 public abstract class AbstractInMemoryRelationshipPropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
@@ -42,7 +42,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     private final Map<String, ValueGroup> propertyKeyToTypeMapping;
     private final Set<Integer> seenRelationshipReferences;
 
-    protected PropertySelection propertySelection;
+    protected Predicate<Integer> propertySelection;
 
     protected AbstractInMemoryRelationshipPropertyCursor(
         CypherGraphStore graphStore,

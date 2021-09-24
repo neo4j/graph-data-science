@@ -40,5 +40,6 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
         setId(reference);
+        this.propertySelection = i -> true;
     }
 }
