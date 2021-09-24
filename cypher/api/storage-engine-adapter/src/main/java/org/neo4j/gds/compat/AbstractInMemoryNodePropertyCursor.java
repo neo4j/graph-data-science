@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
@@ -40,7 +40,7 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     private final Map<String, ValueGroup> propertyKeyToTypeMapping;
     private final Set<Integer> seenNodeReferences;
 
-    public AbstractInMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID, graphStore, tokenHolders);
         this.seenNodeReferences = new HashSet<>();
         this.propertyKeyToTypeMapping = new HashMap<>();

@@ -97,13 +97,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodeCursor inMemoryNodeCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         throw cypherUnsupportedException();
     }
 
     @Override
     public AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
-        GraphStore graphStore, TokenHolders tokenHolders
+        CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         throw cypherUnsupportedException();
     }

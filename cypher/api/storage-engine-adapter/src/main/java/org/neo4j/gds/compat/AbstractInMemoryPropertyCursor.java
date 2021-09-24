@@ -20,7 +20,7 @@
 package org.neo4j.gds.compat;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
@@ -29,7 +29,7 @@ import org.neo4j.values.storable.ValueGroup;
 
 public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord implements StoragePropertyCursor {
 
-    protected final GraphStore graphStore;
+    protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
     @SuppressFBWarnings(
         value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
@@ -37,7 +37,7 @@ public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord impl
     )
     protected DelegatePropertyCursor delegate;
 
-    public AbstractInMemoryPropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
@@ -87,10 +87,10 @@ public abstract class AbstractInMemoryPropertyCursor extends PropertyRecord impl
 
     abstract static class DelegatePropertyCursor extends PropertyRecord implements StoragePropertyCursor {
 
-        protected final GraphStore graphStore;
+        protected final CypherGraphStore graphStore;
         protected final TokenHolders tokenHolders;
 
-        DelegatePropertyCursor(long id, GraphStore graphStore, TokenHolders tokenHolders) {
+        DelegatePropertyCursor(long id, CypherGraphStore graphStore, TokenHolders tokenHolders) {
             super(id);
             this.graphStore = graphStore;
             this.tokenHolders = tokenHolders;

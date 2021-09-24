@@ -104,12 +104,12 @@ public final class StorageEngineProxy {
         return IMPL.setSkipDefaultIndexesOnCreationSetting(dbmsBuilder);
     }
 
-    public static AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public static AbstractInMemoryNodeCursor inMemoryNodeCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         return IMPL.inMemoryNodeCursor(graphStore, tokenHolders);
     }
 
     public static AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
         return IMPL.inMemoryNodePropertyCursor(graphStore, tokenHolders);

@@ -67,9 +67,9 @@ public interface StorageEngineProxyApi {
 
     DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder);
 
-    AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders);
+    AbstractInMemoryNodeCursor inMemoryNodeCursor(CypherGraphStore graphStore, TokenHolders tokenHolders);
 
-    AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders);
+    AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders);
 
     AbstractInMemoryRelationshipTraversalCursor inMemoryRelationshipTraversalCursor(
         CypherGraphStore graphStore,

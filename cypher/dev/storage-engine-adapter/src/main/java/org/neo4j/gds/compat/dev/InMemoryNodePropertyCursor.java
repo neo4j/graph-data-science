@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
@@ -29,7 +29,7 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
 
-    public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
