@@ -43,13 +43,13 @@ public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationship
 
     @Override
     public Reference propertiesReference() {
-        return LongReference.NULL_REFERENCE;
+        return LongReference.longReference(getId());
     }
 
     @Override
     public void properties(
         StoragePropertyCursor storagePropertyCursor, PropertySelection propertySelection
     ) {
-
+        storagePropertyCursor.initRelationshipProperties(propertiesReference(), propertySelection);
     }
 }

@@ -23,7 +23,6 @@ import org.neo4j.gds.compat.AbstractInMemoryPropertyCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
-import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
@@ -44,13 +43,5 @@ public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
         var delegate = new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
         delegate.initRelationshipProperties(reference, selection);
         this.delegate = delegate;
-    }
-
-    @Override
-    public void initRelationshipProperties(StorageRelationshipCursor relationshipCursor, PropertySelection selection) {
-    }
-
-    @Override
-    public void initRelationshipProperties(Reference reference, PropertySelection selection) {
     }
 }
