@@ -27,6 +27,7 @@ import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
@@ -63,7 +64,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public boolean hasProperties() {
-        return false;
+        return !graphStore.relationshipPropertyKeys(List.of(currentRelationshipCursor.relationshipType())).isEmpty();
     }
 
     @Override

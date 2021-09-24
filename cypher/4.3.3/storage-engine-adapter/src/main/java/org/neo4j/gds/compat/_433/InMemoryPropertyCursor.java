@@ -38,6 +38,8 @@ public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-
+        var delegate = new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+        delegate.initRelationshipProperties(reference);
+        this.delegate = delegate;
     }
 }

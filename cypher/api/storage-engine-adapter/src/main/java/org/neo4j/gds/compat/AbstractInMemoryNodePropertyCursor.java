@@ -47,7 +47,6 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
         var propertySchemas = graphStore
             .schema()
             .nodeSchema()
-            .filter(graphStore.nodeLabels())
             .properties()
             .values();
         graphStore.nodePropertyKeys(graphStore.nodeLabels()).forEach(nodePropertyKey -> {
