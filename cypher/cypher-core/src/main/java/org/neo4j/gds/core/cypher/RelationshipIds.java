@@ -37,6 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipIds {
 
+    private final GraphStore graphStore;
     private final List<RelationshipIdContext> relationshipIdContexts;
     private final TokenHolders tokenHolders;
 
@@ -48,18 +49,63 @@ public final class RelationshipIds {
             var offsets = computeAccumulatedOffsets(graph);
             relationshipIdContexts.add(ImmutableRelationshipIdContext.of(relType, relCount, graph, offsets));
         });
-        return new RelationshipIds(relationshipIdContexts, tokenHolders);
+        return new RelationshipIds(graphStore, relationshipIdContexts, tokenHolders);
     }
 
     private RelationshipIds(
+        GraphStore graphStore,
         List<RelationshipIdContext> relationshipIdContexts,
         TokenHolders tokenHolders
     ) {
+        this.graphStore = graphStore;
         this.relationshipIdContexts = relationshipIdContexts;
         this.tokenHolders = tokenHolders;
     }
 
     public CypherRelationshipCursor relationshipForId(long relationshipId) {
+        return resolveRelationshipId(relationshipId, (nodeId, offsetInAdjacency, relationshipIdContext) -> relationshipIdContext
+            .graph()
+            .streamRelationships(nodeId, Double.NaN)
+            .skip(offsetInAdjacency)
+            .findFirst()
+            .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId, relationshipIdContext.relationshipType()))
+            .orElseThrow(
+                () -> new IllegalArgumentException(formatWithLocale(
+                    "No relationship with id %d was found for relationship type %s",
+                    relationshipId,
+                    relationshipIdContext.relationshipType()
+                ))
+            ));
+    }
+
+    public double propertyValueForId(long relationshipId, String propertyKey) {
+        return resolveRelationshipId(relationshipId, ((nodeId, offsetInAdjacency, relationshipIdContext) -> {
+            var properties = graphStore
+                .relationshipPropertyValues(relationshipIdContext.relationshipType(), propertyKey)
+                .values();
+            var propertyCursor = properties.propertiesList().propertyCursor(nodeId);
+            for (int i = 0; i < offsetInAdjacency - 1; i++) {
+                if (!propertyCursor.hasNextLong()) {
+                    return Double.NaN;
+                }
+                propertyCursor.nextLong();
+            }
+            if (propertyCursor.hasNextLong()) {
+                return Double.longBitsToDouble(propertyCursor.nextLong());
+            }
+            return Double.NaN;
+        }));
+    }
+
+    public Iterator<CypherRelationshipCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
+        Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
+            var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());
+            return relationshipSelection.test(relTypeToken);
+        };
+        return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
+    }
+
+    private <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
         long graphLocalRelationshipId = relationshipId;
         // Find the correct RelationshipIdContext given a relationship id.
         // Relationship ids are created consecutively for each topology stored
@@ -81,31 +127,10 @@ public final class RelationshipIds {
                 // of that context.
                 var nodeId = relationshipIdContext.offsets().binarySearch(graphLocalRelationshipId);
                 var offsetInAdjacency = graphLocalRelationshipId - relationshipIdContext.offsets().get(nodeId);
-                return relationshipIdContext
-                    .graph()
-                    .streamRelationships(nodeId, Double.NaN)
-                    .skip(offsetInAdjacency)
-                    .findFirst()
-                    .map(relCursor -> CypherRelationshipCursor.fromRelationshipCursor(relCursor, relationshipId, relationshipIdContext.relationshipType()))
-                    .orElseThrow(
-                        () -> new IllegalArgumentException(formatWithLocale(
-                            "No relationship with id %d was found for relationship type %s",
-                            relationshipId,
-                            relationshipIdContext.relationshipType()
-                        ))
-                    );
+                return relationshipIdConsumer.accept(nodeId, offsetInAdjacency, relationshipIdContext);
             }
         }
-
         throw new IllegalArgumentException(formatWithLocale("No relationship with id %d was found.", relationshipId));
-    }
-
-    public Iterator<CypherRelationshipCursor> relationshipCursors(long nodeId, RelationshipSelection relationshipSelection) {
-        Predicate<RelationshipType> relationshipSelectionPredicate = relationshipType -> {
-            var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName(relationshipType.name());
-            return relationshipSelection.test(relTypeToken);
-        };
-        return new RelationshipWithIdCursorIterator(relationshipIdContexts, nodeId, relationshipSelectionPredicate);
     }
 
     private static HugeLongArray computeAccumulatedOffsets(Graph graph) {
@@ -117,6 +142,10 @@ public final class RelationshipIds {
             offset += graph.degree(i);
         }
         return offsets;
+    }
+
+    public interface ResolvedRelationshipIdFunction<T> {
+        T accept(long nodeId, long offsetInAdjacency, RelationshipIdContext relationshipIdContext);
     }
 
     @ValueClass
