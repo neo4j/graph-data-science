@@ -11,7 +11,7 @@ This section describes the Local Clustering Coefficient algorithm in the Neo4j G
 
 :undirected:
 :monopartite:
-include::../shared/graph-variants.adoc[]
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-local-clustering-coefficient-intro]]

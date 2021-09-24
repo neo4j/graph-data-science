@@ -15,7 +15,7 @@ The algorithm is based on the Jaccard Similarity score.
 :multipartite:
 :weighted:
 :unweighted:
-include::../shared/graph-variants.adoc[]
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-node-similarity-intro]]

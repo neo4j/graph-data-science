@@ -13,7 +13,7 @@ This section describes the Fast Random Projection (FastRP) node embedding algori
 :undirected:
 :monopartite:
 :unweighted:
-include::../shared/graph-variants.adoc[]
+include::../shared/algorithm-traits.adoc[]
 
 
 [[algorithms-embeddings-fastrp-introduction]]
