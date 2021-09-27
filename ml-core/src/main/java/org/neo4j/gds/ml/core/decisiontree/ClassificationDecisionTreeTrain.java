@@ -24,12 +24,12 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-public class ClassificationDecisionTree<L extends DecisionTreeLoss> extends DecisionTree<L, Integer> {
+public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends DecisionTreeTrain<L, Integer> {
 
     private final int[] classes;
     private final HugeIntArray allLabels;
 
-    public ClassificationDecisionTree(
+    public ClassificationDecisionTreeTrain(
         AllocationTracker allocationTracker,
         L lossFunction,
         HugeObjectArray<double[]> allFeatures,

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Stack;
 
-public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
+public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
     private final AllocationTracker allocationTracker;
     private final L lossFunction;
@@ -34,7 +34,7 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
     private final int maxDepth;
     private final int minSize;
 
-    public DecisionTree(
+    public DecisionTreeTrain(
         AllocationTracker allocationTracker,
         L lossFunction,
         HugeObjectArray<double[]> allFeatures,

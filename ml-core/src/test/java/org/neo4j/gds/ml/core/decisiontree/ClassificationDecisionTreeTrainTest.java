@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClassificationDecisionTreeTest {
+class ClassificationDecisionTreeTrainTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {0, 1};
@@ -87,7 +87,7 @@ class ClassificationDecisionTreeTest {
     @ParameterizedTest
     @MethodSource("sanePredictionParameters")
     void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
-        var decisionTree = new ClassificationDecisionTree<>(
+        var decisionTree = new ClassificationDecisionTreeTrain<>(
             AllocationTracker.empty(),
             giniIndexLoss,
             allFeatures,
