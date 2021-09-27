@@ -13,7 +13,7 @@ This section describes the Yen's Shortest Path algorithm in the Neo4j Graph Data
 
 :directed:
 :undirected:
-:monopartite:
+:homogeneous:
 :unweighted:
 include::../shared/algorithm-traits.adoc[]
 

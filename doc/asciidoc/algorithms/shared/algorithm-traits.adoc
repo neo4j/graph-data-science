@@ -17,18 +17,18 @@ ifndef::undirected[]
 endif::[]
 <<introduction-algorithms-undirected,Undirected>>
 
-ifdef::monopartite[]
+ifdef::homogeneous[]
 [.supported]
 endif::[]
-ifndef::monopartite[]
+ifndef::homogeneous[]
 [.not-supported]
 endif::[]
 <<introduction-algorithms-homogeneous,Homogeneous>>
 
-ifdef::multipartite[]
+ifdef::heterogeneous[]
 [.supported]
 endif::[]
-ifndef::multipartite[]
+ifndef::heterogeneous[]
 [.not-supported]
 endif::[]
 <<introduction-algorithms-heterogeneous,Heterogeneous>>

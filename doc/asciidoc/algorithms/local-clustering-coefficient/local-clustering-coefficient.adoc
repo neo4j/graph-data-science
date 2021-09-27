@@ -10,7 +10,7 @@ This section describes the Local Clustering Coefficient algorithm in the Neo4j G
 --
 
 :undirected:
-:monopartite:
+:homogeneous:
 include::../shared/algorithm-traits.adoc[]
 
 
