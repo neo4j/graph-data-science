@@ -54,10 +54,7 @@ The algorithm supports configuration to distinguish between nodes and/or relatio
 [[introduction-algorithms-weighted]]
 Weighted::
 The algorithm supports configuration to set node and/or relationship properties to use as weights.
-These values can represent _cost_, _time_, _capacity_ or some other domain-specific property.
-
-[[introduction-algorithms-unweighted]]
-Unweighted::
+These values can represent _cost_, _time_, _capacity_ or some other domain-specific property, specified via the <<common-configuration-node-weight-property, nodeWeightProperty>> and <<common-configuration-relationship-weight-property, relationshipWeightProperty>> configuration parameters.
 The algorithm will by default consider each node and/or relationship as equally important.
 
 

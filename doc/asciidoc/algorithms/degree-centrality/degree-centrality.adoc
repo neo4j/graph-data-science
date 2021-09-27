@@ -13,7 +13,6 @@ This section describes the Degree Centrality algorithm in the Neo4j Graph Data S
 :undirected:
 :monopartite:
 :weighted:
-:unweighted:
 include::../shared/algorithm-traits.adoc[]
 
 

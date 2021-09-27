@@ -12,7 +12,7 @@ This section describes the Fast Random Projection (FastRP) node embedding algori
 :directed:
 :undirected:
 :monopartite:
-:unweighted:
+:weighted:
 include::../shared/algorithm-traits.adoc[]
 
 
