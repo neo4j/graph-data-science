@@ -40,12 +40,4 @@ ifndef::weighted[]
 [.not-supported]
 endif::[]
 <<introduction-algorithms-weighted,Weighted>>
-
-ifdef::unweighted[]
-[.supported]
-endif::[]
-ifndef::unweighted[]
-[.not-supported]
-endif::[]
-<<introduction-algorithms-unweighted,Unweighted>>
 --

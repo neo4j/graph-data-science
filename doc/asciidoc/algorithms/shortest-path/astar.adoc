@@ -15,7 +15,6 @@ This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Sc
 :undirected:
 :monopartite:
 :unweighted:
-:weighted:
 include::../shared/algorithm-traits.adoc[]
 
 
