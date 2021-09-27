@@ -36,7 +36,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker;
 
-    RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
+    protected RelationshipStreamExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
         this.progressTracker = ProgressTracker.NULL_TRACKER;
@@ -60,7 +60,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
         return this;
     }
 
-    RelationshipStreamExporterBuilder<T> withBatchSize(int batchSize) {
+    public RelationshipStreamExporterBuilder<T> withBatchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
     }

@@ -39,7 +39,7 @@ public abstract class NodePropertyExporterBuilder<T extends NodePropertyExporter
     protected int writeConcurrency;
     protected ProgressTracker progressTracker;
 
-    NodePropertyExporterBuilder(TransactionContext transactionContext) {
+    protected NodePropertyExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.progressTracker = ProgressTracker.NULL_TRACKER;
