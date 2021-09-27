@@ -214,15 +214,19 @@ public final class LabelInformation {
         }
     }
 
-    static class DenseBuilder extends Builder {
+    static final class DenseBuilder extends Builder {
         private final Map<NodeLabel, HugeAtomicBitSet> labelInformation;
         private final AllocationTracker allocationTracker;
 
-        DenseBuilder(AllocationTracker allocationTracker) {
+        private DenseBuilder(AllocationTracker allocationTracker) {
             this(new ConcurrentHashMap<>(), List.of(), allocationTracker);
         }
 
-        DenseBuilder(Map<NodeLabel, HugeAtomicBitSet> labelInformation, List<NodeLabel> starNodeLabelMappings, AllocationTracker allocationTracker) {
+        private DenseBuilder(
+            Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+            List<NodeLabel> starNodeLabelMappings,
+            AllocationTracker allocationTracker
+        ) {
             super(starNodeLabelMappings);
             this.labelInformation = labelInformation;
             this.allocationTracker = allocationTracker;
@@ -247,14 +251,17 @@ public final class LabelInformation {
         }
     }
 
-    static class SparseBuilder extends Builder {
+    static final class SparseBuilder extends Builder {
         final Map<NodeLabel, Roaring64NavigableMap> labelInformation;
 
-        SparseBuilder() {
+        private SparseBuilder() {
             this(new ConcurrentHashMap<>(), List.of());
         }
 
-        SparseBuilder(Map<NodeLabel, Roaring64NavigableMap> labelInformation, List<NodeLabel> starNodeLabelMappings) {
+        private SparseBuilder(
+            Map<NodeLabel, Roaring64NavigableMap> labelInformation,
+            List<NodeLabel> starNodeLabelMappings
+        ) {
             super(starNodeLabelMappings);
             this.labelInformation = labelInformation;
         }
