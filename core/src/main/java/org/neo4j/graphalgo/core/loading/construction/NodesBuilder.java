@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
@@ -147,6 +146,10 @@ public final class NodesBuilder {
 
     public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
+    }
+
+    public void flush() {
+        this.threadLocalBuilder.get().flush();
     }
 
     public NodeMappingAndProperties build() {
@@ -284,7 +287,7 @@ public final class NodesBuilder {
             this.propertyBuilderFn = propertyBuilderFn;
 
             this.buffer = new NodesBatchBufferBuilder()
-                .capacity(SparseLongArray.toValidBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE))
+                .capacity(SparseLongArray.SUPER_BLOCK_SIZE)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
                 .build();
@@ -303,6 +306,11 @@ public final class NodesBuilder {
                     reset();
                 }
             }
+        }
+
+        public void flush() {
+            flushBuffer();
+            reset();
         }
 
         public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {

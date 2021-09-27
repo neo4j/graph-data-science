@@ -454,6 +454,12 @@ final class NodesFilter {
                 }
                 progressLogger.logProgress();
             });
+            if (IdMapImplementations.useBitIdMap()) {
+                // When using BitIdMap we need to make sure that all the nodes in the partition are written at once.
+                // Partitions passed into this task are block aligned, but the nodes are then filtered according to the
+                // nodes filter. This might lead to the situation where the content in the batch buffer spans partial blocks.
+                nodesBuilder.flush();
+            }
         }
     }
 
