@@ -77,8 +77,9 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         AllocationTracker allocationTracker,
         int concurrency
     ) {
-        var builder = HugeSparseLongArray.GrowingBuilder.create(defaultValue.longValue(), allocationTracker);
-        return new SparseLongNodePropertiesBuilder(builder, allocationTracker, concurrency);
+        var defaultLongValue = defaultValue.longValue();
+        var builder = HugeSparseLongArray.GrowingBuilder.create(defaultLongValue, allocationTracker);
+        return new SparseLongNodePropertiesBuilder(builder, defaultLongValue, concurrency, allocationTracker);
     }
 
     public static LongNodePropertiesBuilder dense(
@@ -181,15 +182,18 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
     private static final class SparseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
 
         private final HugeSparseLongArray.GrowingBuilder builder;
+        private final long defaultValue;
         private final int concurrency;
 
         private SparseLongNodePropertiesBuilder(
             HugeSparseLongArray.GrowingBuilder builder,
-            AllocationTracker allocationTracker,
-            int concurrency
+            long defaultValue,
+            int concurrency,
+            AllocationTracker allocationTracker
         ) {
             super(allocationTracker);
             this.builder = builder;
+            this.defaultValue = defaultValue;
             this.concurrency = concurrency;
         }
 
@@ -201,7 +205,11 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         @Override
         HugeSparseLongArray buildInner(NodeMapping nodeMapping) {
             var propertiesByNeoIds = builder.build();
-            var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(nodeMapping.nodeCount(), allocationTracker);
+            var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(
+                nodeMapping.nodeCount(),
+                defaultValue,
+                allocationTracker
+            );
 
             ParallelUtil.parallelForEachNode(
                 nodeMapping.nodeCount(),
