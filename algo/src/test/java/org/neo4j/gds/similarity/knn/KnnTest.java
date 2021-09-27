@@ -279,6 +279,7 @@ class KnnTest {
         var config = ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("knn")
             .randomSeed(42L)
+            .concurrency(1)
             .topK(1)
             .build();
 
