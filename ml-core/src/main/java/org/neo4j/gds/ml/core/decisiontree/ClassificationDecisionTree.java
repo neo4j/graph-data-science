@@ -19,25 +19,31 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+
 public class ClassificationDecisionTree<L extends DecisionTreeLoss> extends DecisionTree<L, Integer> {
 
     private final int[] classes;
-    private final int[] allLabels;
+    private final HugeIntArray allLabels;
 
     public ClassificationDecisionTree(
+        AllocationTracker allocationTracker,
         L lossFunction,
-        double[][] allFeatures,
+        HugeObjectArray<double[]> allFeatures,
         int maxDepth,
         int minSize,
         int[] classes,
-        int[] allLabels
+        HugeIntArray allLabels
     ) {
-        super(lossFunction, allFeatures, maxDepth, minSize);
+        super(allocationTracker, lossFunction, allFeatures, maxDepth, minSize);
 
         assert classes.length > 0;
         this.classes = classes;
 
-        assert allLabels.length == allFeatures.length;
+        assert allLabels.size() == allFeatures.size();
         this.allLabels = allLabels;
     }
 
@@ -58,17 +64,17 @@ public class ClassificationDecisionTree<L extends DecisionTreeLoss> extends Deci
     }
 
     @Override
-    protected Integer toTerminal(int[] group, int groupSize) {
+    protected Integer toTerminal(HugeLongArray group, long groupSize) {
         assert groupSize > 0;
-        assert group.length >= groupSize;
+        assert group.size() >= groupSize;
 
-        var classesInGroup = new int[classes.length];
+        var classesInGroup = new long[classes.length];
 
-        for (int i = 0; i < groupSize; i++) {
-            classesInGroup[allLabels[group[i]]]++;
+        for (long i = 0; i < groupSize; i++) {
+            classesInGroup[allLabels.get(group.get(i))]++;
         }
 
-        int max = -1;
+        long max = -1;
         int maxClass = 0;
         for (int i = 0; i < classesInGroup.length; i++) {
             if (classesInGroup[i] <= max) continue;

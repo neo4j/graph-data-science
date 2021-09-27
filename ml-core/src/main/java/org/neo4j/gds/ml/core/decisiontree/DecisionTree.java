@@ -19,25 +19,30 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-import java.util.stream.IntStream;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
 
+    private final AllocationTracker allocationTracker;
     private final L lossFunction;
-    private final double[][] allFeatures;
+    private final HugeObjectArray<double[]> allFeatures;
     private final int maxDepth;
     private final int minSize;
 
     public DecisionTree(
+        AllocationTracker allocationTracker,
         L lossFunction,
-        double[][] allFeatures,
+        HugeObjectArray<double[]> allFeatures,
         int maxDepth,
         int minSize
     ) {
-        assert allFeatures.length > 0;
+        assert allFeatures.size() > 0;
         assert maxDepth >= 1;
         assert minSize >= 0;
 
+        this.allocationTracker = allocationTracker;
         this.lossFunction = lossFunction;
         this.allFeatures = allFeatures;
         this.maxDepth = maxDepth;
@@ -45,58 +50,67 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
     }
 
     public TreeNode train() {
-        var rootSplit = bestSplit(IntStream.range(0, allFeatures.length).toArray(), allFeatures.length);
+        var startGroup = HugeLongArray.newArray(allFeatures.size(), allocationTracker);
+        startGroup.setAll(i -> i);
+
+        var rootSplit = bestSplit(startGroup, startGroup.size());
 
         return split(rootSplit, 1);
     }
 
     public abstract P predict(TreeNode node, double[] features);
 
-    protected abstract P toTerminal(int[] group, int groupSize);
+    protected abstract P toTerminal(HugeLongArray group, long groupSize);
 
-    private int[] computeSplit(
+    private long[] computeSplit(
         int index,
         double value,
-        int[] group,
-        int groupSize,
-        int[][] childGroups
+        HugeLongArray group,
+        long groupSize,
+        HugeLongArray[] childGroups
     ) {
         assert groupSize > 0;
-        assert group.length >= groupSize;
+        assert group.size() >= groupSize;
         assert childGroups.length == 2;
-        assert index >= 0 && index < allFeatures[0].length;
+        assert index >= 0 && index < allFeatures.get(0).length;
 
-        int leftGroupSize = 0;
-        int rightGroupSize = 0;
+        long leftGroupSize = 0;
+        long rightGroupSize = 0;
 
         for (int i = 0; i < groupSize; i++) {
-            var featuresIdx = group[i];
-            var features = allFeatures[featuresIdx];
+            var featuresIdx = group.get(i);
+            var features = allFeatures.get(featuresIdx);
             if (features[index] < value) {
-                childGroups[0][leftGroupSize++] = featuresIdx;
+                childGroups[0].set(leftGroupSize++, featuresIdx);
             } else {
-                childGroups[1][rightGroupSize++] = featuresIdx;
+                childGroups[1].set(rightGroupSize++, featuresIdx);
             }
         }
 
-        return new int[]{leftGroupSize, rightGroupSize};
+        return new long[]{leftGroupSize, rightGroupSize};
     }
 
-    private Split bestSplit(int[] group, int groupSize) {
+    private Split bestSplit(HugeLongArray group, long groupSize) {
         assert groupSize > 0;
-        assert group.length >= groupSize;
+        assert group.size() >= groupSize;
 
         int bestIdx = -1;
         double bestValue = Double.MAX_VALUE;
         double bestLoss = Double.MAX_VALUE;
 
-        int[][] childGroups = {new int[groupSize], new int[groupSize]};
-        int[][] bestChildGroups = {new int[groupSize], new int[groupSize]};
-        int[] bestGroupSizes = {-1, -1};
+        HugeLongArray[] childGroups = {
+            HugeLongArray.newArray(groupSize, allocationTracker),
+            HugeLongArray.newArray(groupSize, allocationTracker)
+        };
+        HugeLongArray[] bestChildGroups = {
+            HugeLongArray.newArray(groupSize, allocationTracker),
+            HugeLongArray.newArray(groupSize, allocationTracker)
+        };
+        long[] bestGroupSizes = {-1, -1};
 
-        for (int i = 0; i < allFeatures[0].length; i++) {
+        for (int i = 0; i < allFeatures.get(0).length; i++) {
             for (int j = 0; j < groupSize; j++) {
-                var features = allFeatures[group[j]];
+                var features = allFeatures.get(group.get(j));
 
                 var groupSizes = computeSplit(i, features[i], group, groupSize, childGroups);
 

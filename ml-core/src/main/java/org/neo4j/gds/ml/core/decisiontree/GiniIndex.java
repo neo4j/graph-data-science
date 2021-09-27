@@ -19,18 +19,21 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
 public class GiniIndex implements DecisionTreeLoss {
 
     private final int[] classes;
-    private final int[] allLabels;
+    private final HugeIntArray allLabels;
 
-    public GiniIndex(int[] classes, int[] allLabels) {
+    public GiniIndex(int[] classes, HugeIntArray allLabels) {
         this.classes = classes;
         this.allLabels = allLabels;
     }
 
     @Override
-    public double splitLoss(int[][] groups, int[] groupSizes) {
+    public double splitLoss(HugeLongArray[] groups, long[] groupSizes) {
         assert groups.length > 1;
         assert groups.length == groupSizes.length;
 
@@ -49,14 +52,14 @@ public class GiniIndex implements DecisionTreeLoss {
         return loss / totalSize;
     }
 
-    private double computeGroupLoss(int[] group, int groupSize) {
-        assert group.length >= groupSize;
+    private double computeGroupLoss(HugeLongArray group, long groupSize) {
+        assert group.size() >= groupSize;
 
         if (groupSize == 0) return 0;
 
-        var groupClassCounts = new int[classes.length];
-        for (int i = 0; i < groupSize; i++) {
-            groupClassCounts[allLabels[group[i]]]++;
+        final var groupClassCounts = new long[classes.length];
+        for (long i = 0; i < groupSize; i++) {
+            groupClassCounts[allLabels.get(group.get(i))]++;
         }
 
         double score = 0.0;

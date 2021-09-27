@@ -25,6 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.stream.Stream;
 
@@ -32,30 +35,54 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassificationDecisionTreeTest {
 
+    private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {0, 1};
-    private static final int[] ALL_LABELS = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
-    private static final double[][] ALL_FEATURES = {
-        {2.771244718, 1.784783929},
-        {1.728571309, 1.169761413},
-        {3.678319846, 3.31281357},
-        {6.961043357, 2.61995032},
-        {6.999208922, 2.209014212},
-        {7.497545867, 3.162953546},
-        {9.00220326, 3.339047188},
-        {7.444542326, 0.476683375},
-        {10.12493903, 3.234550982},
-        {6.642287351, 3.319983761}
-    };
+    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
+    private final HugeObjectArray<double[]> allFeatures = HugeObjectArray.newArray(
+        double[].class,
+        NUM_SAMPLES,
+        AllocationTracker.empty()
+    );
     private GiniIndex giniIndexLoss;
 
     @BeforeEach
     public void setup() {
-        giniIndexLoss = new GiniIndex(CLASSES, ALL_LABELS);
+        allLabels.set(0, 0);
+        allLabels.set(1, 0);
+        allLabels.set(2, 0);
+        allLabels.set(3, 0);
+        allLabels.set(4, 0);
+        allLabels.set(5, 1);
+        allLabels.set(6, 1);
+        allLabels.set(7, 1);
+        allLabels.set(8, 1);
+        allLabels.set(9, 1);
+
+        allFeatures.set(0, new double[]{2.771244718, 1.784783929});
+        allFeatures.set(1, new double[]{1.728571309, 1.169761413});
+        allFeatures.set(2, new double[]{3.678319846, 3.31281357});
+        allFeatures.set(3, new double[]{6.961043357, 2.61995032});
+        allFeatures.set(4, new double[]{6.999208922, 2.209014212});
+        allFeatures.set(5, new double[]{7.497545867, 3.162953546});
+        allFeatures.set(6, new double[]{9.00220326, 3.339047188});
+        allFeatures.set(7, new double[]{7.444542326, 0.476683375});
+        allFeatures.set(8, new double[]{10.12493903, 3.234550982});
+        allFeatures.set(9, new double[]{6.642287351, 3.319983761});
+
+        giniIndexLoss = new GiniIndex(CLASSES, allLabels);
     }
 
     @Test
     public void shouldTrainBestDepth1Tree() {
-        var decisionTree = new ClassificationDecisionTree(giniIndexLoss, ALL_FEATURES, 1, 1, CLASSES, ALL_LABELS);
+        var decisionTree = new ClassificationDecisionTree(
+            AllocationTracker.empty(),
+            giniIndexLoss,
+            allFeatures,
+            1,
+            1,
+            CLASSES,
+            allLabels
+        );
         var root = decisionTree.train();
 
         assertThat(root).isInstanceOf(NonLeafNode.class);
@@ -75,7 +102,15 @@ public class ClassificationDecisionTreeTest {
 
     @Test
     public void shouldTrainBestDepth2Tree() {
-        var decisionTree = new ClassificationDecisionTree(giniIndexLoss, ALL_FEATURES, 2, 1, CLASSES, ALL_LABELS);
+        var decisionTree = new ClassificationDecisionTree(
+            AllocationTracker.empty(),
+            giniIndexLoss,
+            allFeatures,
+            2,
+            1,
+            CLASSES,
+            allLabels
+        );
         var root = decisionTree.train();
 
         assertThat(root).isInstanceOf(NonLeafNode.class);
@@ -126,12 +161,13 @@ public class ClassificationDecisionTreeTest {
     @MethodSource("sanePredictionParameters")
     public void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
         var decisionTree = new ClassificationDecisionTree(
+            AllocationTracker.empty(),
             giniIndexLoss,
-            ALL_FEATURES,
+            allFeatures,
             maxDepth,
             minSize,
             CLASSES,
-            ALL_LABELS
+            allLabels
         );
 
         var root = decisionTree.train();

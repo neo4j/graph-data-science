@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 @ValueClass
 public interface Split {
@@ -27,9 +28,9 @@ public interface Split {
 
     double value();
 
-    int[] leftGroup();
-    int[] rightGroup();
+    HugeLongArray leftGroup();
+    HugeLongArray rightGroup();
 
-    int leftGroupSize();
-    int rightGroupSize();
+    long leftGroupSize();
+    long rightGroupSize();
 }
