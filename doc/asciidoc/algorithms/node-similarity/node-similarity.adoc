@@ -12,7 +12,8 @@ The algorithm is based on the Jaccard Similarity score.
 
 :directed:
 :undirected:
-:multipartite:
+:homogeneous:
+:heterogeneous:
 :weighted:
 include::../shared/algorithm-traits.adoc[]
 

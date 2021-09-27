@@ -11,7 +11,7 @@ This section describes the Weakly Connected Components (WCC) algorithm in the Ne
 
 :directed:
 :undirected:
-:monopartite:
+:homogeneous:
 :weighted:
 include::../shared/algorithm-traits.adoc[]
 

@@ -11,7 +11,7 @@ This section describes the Label Propagation algorithm in the Neo4j Graph Data S
 
 :directed:
 :undirected:
-:monopartite:
+:homogeneous:
 :weighted:
 include::../shared/algorithm-traits.adoc[]
 
