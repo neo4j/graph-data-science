@@ -22,6 +22,6 @@ package org.neo4j.gds.ml.core.decisiontree;
 import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
-public interface LeafNode extends TreeNode {
-    int prediction();
+public interface LeafNode<P> extends TreeNode {
+    P prediction();
 }

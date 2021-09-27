@@ -21,32 +21,24 @@ package org.neo4j.gds.ml.core.decisiontree;
 
 import java.util.stream.IntStream;
 
-public class DecisionTree<L extends DecisionTreeLoss> {
+public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
 
     private final L lossFunction;
-    private final int[] classes;
-    private final int[] allLabels;
     private final double[][] allFeatures;
     private final int maxDepth;
     private final int minSize;
 
     public DecisionTree(
         L lossFunction,
-        int[] classes,
-        int[] allLabels,
         double[][] allFeatures,
         int maxDepth,
         int minSize
     ) {
-        assert classes.length > 0;
-        assert allLabels.length > 0;
-        assert allFeatures.length == allLabels.length;
+        assert allFeatures.length > 0;
         assert maxDepth >= 1;
         assert minSize >= 0;
 
         this.lossFunction = lossFunction;
-        this.classes = classes;
-        this.allLabels = allLabels;
         this.allFeatures = allFeatures;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
@@ -58,20 +50,9 @@ public class DecisionTree<L extends DecisionTreeLoss> {
         return split(rootSplit, 1);
     }
 
-    public static int predict(TreeNode node, double[] features) {
-        assert features.length > 0;
+    public abstract P predict(TreeNode node, double[] features);
 
-        if (node instanceof LeafNode) {
-            return ((LeafNode) node).prediction();
-        }
-
-        var nonLeafNode = (NonLeafNode) node;
-        if (features[nonLeafNode.index()] < nonLeafNode.value()) {
-            return predict(nonLeafNode.leftChild(), features);
-        } else {
-            return predict(nonLeafNode.rightChild(), features);
-        }
-    }
+    protected abstract P toTerminal(int[] group, int groupSize);
 
     private int[] computeSplit(
         int index,
@@ -143,28 +124,6 @@ public class DecisionTree<L extends DecisionTreeLoss> {
             bestGroupSizes[0],
             bestGroupSizes[1]
         );
-    }
-
-    private int toTerminal(int[] group, int groupSize) {
-        assert groupSize > 0;
-        assert group.length >= groupSize;
-
-        var classesInGroup = new int[classes.length];
-
-        for (int i = 0; i < groupSize; i++) {
-            classesInGroup[allLabels[group[i]]]++;
-        }
-
-        int max = -1;
-        int maxClass = 0;
-        for (int i = 0; i < classesInGroup.length; i++) {
-            if (classesInGroup[i] <= max) continue;
-
-            max = classesInGroup[i];
-            maxClass = i;
-        }
-
-        return maxClass;
     }
 
     private TreeNode split(Split split, int depth) {

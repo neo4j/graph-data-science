@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DecisionTreeTest {
+public class ClassificationDecisionTreeTest {
 
     private static final int[] CLASSES = {0, 1};
     private static final int[] ALL_LABELS = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
@@ -55,7 +55,7 @@ public class DecisionTreeTest {
 
     @Test
     public void shouldTrainBestDepth1Tree() {
-        var decisionTree = new DecisionTree(giniIndexLoss, CLASSES, ALL_LABELS, ALL_FEATURES, 1, 1);
+        var decisionTree = new ClassificationDecisionTree(giniIndexLoss, ALL_FEATURES, 1, 1, CLASSES, ALL_LABELS);
         var root = decisionTree.train();
 
         assertThat(root).isInstanceOf(NonLeafNode.class);
@@ -75,7 +75,7 @@ public class DecisionTreeTest {
 
     @Test
     public void shouldTrainBestDepth2Tree() {
-        var decisionTree = new DecisionTree(giniIndexLoss, CLASSES, ALL_LABELS, ALL_FEATURES, 2, 1);
+        var decisionTree = new ClassificationDecisionTree(giniIndexLoss, ALL_FEATURES, 2, 1, CLASSES, ALL_LABELS);
         var root = decisionTree.train();
 
         assertThat(root).isInstanceOf(NonLeafNode.class);
@@ -125,7 +125,14 @@ public class DecisionTreeTest {
     @ParameterizedTest
     @MethodSource("sanePredictionParameters")
     public void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
-        var decisionTree = new DecisionTree(giniIndexLoss, CLASSES, ALL_LABELS, ALL_FEATURES, maxDepth, minSize);
+        var decisionTree = new ClassificationDecisionTree(
+            giniIndexLoss,
+            ALL_FEATURES,
+            maxDepth,
+            minSize,
+            CLASSES,
+            ALL_LABELS
+        );
 
         var root = decisionTree.train();
 
