@@ -30,7 +30,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
@@ -153,6 +152,10 @@ public final class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
     }
 
+    public void flush() {
+        this.threadLocalBuilder.get().flush();
+    }
+
     public NodeMappingAndProperties build() {
         return build(maxOriginalId, false);
     }
@@ -271,7 +274,7 @@ public final class NodesBuilder {
             this.propertyBuilderFn = propertyBuilderFn;
 
             this.buffer = new NodesBatchBufferBuilder()
-                .capacity(SparseLongArray.toValidBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE))
+                .capacity(SparseLongArray.SUPER_BLOCK_SIZE)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
                 .build();
@@ -290,6 +293,11 @@ public final class NodesBuilder {
                     reset();
                 }
             }
+        }
+
+        public void flush() {
+            flushBuffer();
+            reset();
         }
 
         public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
