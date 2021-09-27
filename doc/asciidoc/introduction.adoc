@@ -49,7 +49,7 @@ If multiple types of nodes or relationships exist in the graph, this must be tak
 
 [[introduction-algorithms-heterogeneous]]
 Heterogeneous::
-The algorithm supports configuration to distinguish between nodes and/or relationships of different types.
+The algorithm has the ability to distinguish between nodes and/or relationships of different types.
 
 [[introduction-algorithms-weighted]]
 Weighted::
