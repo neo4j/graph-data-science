@@ -435,7 +435,7 @@ class GraphStoreFilterTest {
 
             var generatedGraph = RandomGraphGenerator
                 .builder()
-                .nodeCount(100_0000)
+                .nodeCount(100_000)
                 .nodeLabelProducer((node) -> ThreadLocalRandom.current().nextDouble(0, 1) > 0.5 ? labelA : labelB)
                 .nodePropertyProducer(PropertyProducer.randomDouble("nodeProp", 0, 1))
                 .relationshipDistribution(RelationshipDistribution.POWER_LAW)
@@ -471,7 +471,7 @@ class GraphStoreFilterTest {
 
             var generatedGraph = RandomGraphGenerator
                 .builder()
-                .nodeCount(1_000_000)
+                .nodeCount(100_000)
                 .nodeLabelProducer((node) -> ThreadLocalRandom.current().nextDouble(0, 1) > 0.5 ? labelA : labelB)
                 .nodePropertyProducer(PropertyProducer.randomDouble("nodeProp", 0, 1))
                 .relationshipDistribution(RelationshipDistribution.POWER_LAW)
