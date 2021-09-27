@@ -479,7 +479,7 @@ class GraphStoreFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void testShouldFilterLabelsOnLargeGraphs(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var labelA = new NodeLabel[]{NodeLabel.of("A")};
