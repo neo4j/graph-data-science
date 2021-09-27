@@ -49,6 +49,11 @@ shadowJar {
     archiveClassifier.set("")
     exclude 'META-INF/versions/**/*'
     exclude 'module-info.class'
+    exclude 'LICENSE'
+    exclude 'LICENSE-*'
+    exclude 'THIRD-PARTY'
+    exclude '*.proto'
+    exclude '*.html'
     from licenseFile
     from generateLicensesFiles
 }
