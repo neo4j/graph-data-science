@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+
+import java.util.Stack;
 
 public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
 
@@ -49,24 +52,71 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
         this.minSize = minSize;
     }
 
-    public TreeNode train() {
-        var startGroup = HugeLongArray.newArray(allFeatures.size(), allocationTracker);
-        startGroup.setAll(i -> i);
+    public TreeNode<P> train() {
+        var stack = new Stack<StackRecord<P>>();
+        TreeNode<P> root;
 
-        var rootSplit = bestSplit(startGroup, startGroup.size());
+        {
+            var startGroup = HugeLongArray.newArray(allFeatures.size(), allocationTracker);
+            startGroup.setAll(i -> i);
+            root = splitAndPush(stack, startGroup, startGroup.size(), 1);
+        }
 
-        return split(rootSplit, 1);
+        while (!stack.empty()) {
+            var record = stack.pop();
+            var split = record.split();
+
+            if (record.depth() >= maxDepth || split.leftGroupSize() <= minSize) {
+                record.node().leftChild = new LeafNode<>(toTerminal(split.leftGroup(), split.leftGroupSize()));
+            } else {
+                record.node().leftChild = splitAndPush(
+                    stack,
+                    split.leftGroup(),
+                    split.leftGroupSize(),
+                    record.depth() + 1
+                );
+            }
+
+            if (record.depth() >= maxDepth || split.rightGroupSize() <= minSize) {
+                record.node().rightChild = new LeafNode<>(toTerminal(split.rightGroup(), split.rightGroupSize()));
+            } else {
+                record.node().rightChild = splitAndPush(
+                    stack,
+                    split.rightGroup(),
+                    split.rightGroupSize(),
+                    record.depth() + 1
+                );
+            }
+        }
+
+        return root;
     }
-
-    public abstract P predict(TreeNode node, double[] features);
 
     protected abstract P toTerminal(HugeLongArray group, long groupSize);
 
-    private long[] computeSplit(
-        int index,
-        double value,
+    private TreeNode<P> splitAndPush(Stack<StackRecord<P>> stack, HugeLongArray group, long groupSize, int depth) {
+        assert groupSize > 0;
+        assert group.size() >= groupSize;
+        assert depth >= 1;
+
+        var split = findBestSplit(group, groupSize);
+        if (split.rightGroupSize() == 0) {
+            return new LeafNode<>(toTerminal(split.leftGroup(), split.leftGroupSize()));
+        } else if (split.leftGroupSize() == 0) {
+            return new LeafNode<>(toTerminal(split.rightGroup(), split.rightGroupSize()));
+        }
+
+        var nonLeafNode = new NonLeafNode<P>(split.index(), split.value());
+        stack.push(ImmutableStackRecord.of(nonLeafNode, split, depth));
+
+        return nonLeafNode;
+    }
+
+    private long[] createSplit(
+        final int index,
+        final double value,
         HugeLongArray group,
-        long groupSize,
+        final long groupSize,
         HugeLongArray[] childGroups
     ) {
         assert groupSize > 0;
@@ -90,7 +140,7 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
         return new long[]{leftGroupSize, rightGroupSize};
     }
 
-    private Split bestSplit(HugeLongArray group, long groupSize) {
+    private Split findBestSplit(HugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
@@ -112,7 +162,7 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
             for (int j = 0; j < groupSize; j++) {
                 var features = allFeatures.get(group.get(j));
 
-                var groupSizes = computeSplit(i, features[i], group, groupSize, childGroups);
+                var groupSizes = createSplit(i, features[i], group, groupSize, childGroups);
 
                 var loss = lossFunction.splitLoss(childGroups, groupSizes);
 
@@ -140,48 +190,65 @@ public abstract class DecisionTree<L extends DecisionTreeLoss, P> {
         );
     }
 
-    private TreeNode split(Split split, int depth) {
-        assert depth <= maxDepth;
-        assert split.leftGroupSize() + split.rightGroupSize() > 0;
+    @ValueClass
+    interface Split {
+        int index();
 
-        if (split.leftGroupSize() == 0) {
-            return ImmutableLeafNode.of(toTerminal(split.rightGroup(), split.rightGroupSize()));
+        double value();
+
+        HugeLongArray leftGroup();
+
+        HugeLongArray rightGroup();
+
+        long leftGroupSize();
+
+        long rightGroupSize();
+    }
+
+    @ValueClass
+    interface StackRecord<P> {
+        NonLeafNode<P> node();
+
+        Split split();
+
+        int depth();
+    }
+
+    static class LeafNode<P> implements TreeNode<P> {
+        private final P prediction;
+
+        LeafNode(P prediction) {
+            this.prediction = prediction;
         }
 
-        if (split.rightGroupSize() == 0) {
-            return ImmutableLeafNode.of(toTerminal(split.leftGroup(), split.leftGroupSize()));
+        public P predict(double[] unused) {
+            return this.prediction;
+        }
+    }
+
+    static class NonLeafNode<P> implements TreeNode<P> {
+        private final int index;
+        private final double value;
+        private TreeNode<P> leftChild;
+        private TreeNode<P> rightChild;
+
+        NonLeafNode(int index, double value) {
+            assert index >= 0;
+
+            this.index = index;
+            this.value = value;
         }
 
-        if (depth >= maxDepth) {
-            return ImmutableNonLeafNode.of(
-                split.index(),
-                split.value(),
-                ImmutableLeafNode.of(toTerminal(split.leftGroup(), split.leftGroupSize())),
-                ImmutableLeafNode.of(toTerminal(split.rightGroup(), split.rightGroupSize()))
-            );
-        }
+        public P predict(double[] features) {
+            assert features.length > this.index;
+            assert this.leftChild != null;
+            assert this.rightChild != null;
 
-        TreeNode leftChild;
-        if (split.leftGroupSize() <= minSize) {
-            leftChild = ImmutableLeafNode.of(toTerminal(split.leftGroup(), split.leftGroupSize()));
-        } else {
-            var leftSplit = bestSplit(split.leftGroup(), split.leftGroupSize());
-            leftChild = split(leftSplit, depth + 1);
+            if (features[this.index] < this.value) {
+                return this.leftChild.predict(features);
+            } else {
+                return this.rightChild.predict(features);
+            }
         }
-
-        TreeNode rightChild;
-        if (split.rightGroupSize() <= minSize) {
-            rightChild = ImmutableLeafNode.of(toTerminal(split.rightGroup(), split.rightGroupSize()));
-        } else {
-            var rightSplit = bestSplit(split.rightGroup(), split.rightGroupSize());
-            rightChild = split(rightSplit, depth + 1);
-        }
-
-        return ImmutableNonLeafNode.of(
-            split.index(),
-            split.value(),
-            leftChild,
-            rightChild
-        );
     }
 }

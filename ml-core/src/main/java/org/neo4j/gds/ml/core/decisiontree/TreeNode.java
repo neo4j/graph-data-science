@@ -19,5 +19,6 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-public interface TreeNode {
+public interface TreeNode<P> {
+    P predict(double[] features);
 }

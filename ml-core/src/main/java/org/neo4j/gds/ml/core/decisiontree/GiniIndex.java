@@ -28,6 +28,9 @@ public class GiniIndex implements DecisionTreeLoss {
     private final HugeIntArray allLabels;
 
     public GiniIndex(int[] classes, HugeIntArray allLabels) {
+        assert classes.length > 0;
+        assert allLabels.size() > 0;
+
         this.classes = classes;
         this.allLabels = allLabels;
     }

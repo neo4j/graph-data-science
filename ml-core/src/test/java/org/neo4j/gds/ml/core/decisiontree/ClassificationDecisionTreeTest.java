@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.decisiontree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClassificationDecisionTreeTest {
+class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {0, 1};
@@ -46,7 +45,7 @@ public class ClassificationDecisionTreeTest {
     private GiniIndex giniIndexLoss;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         allLabels.set(0, 0);
         allLabels.set(1, 0);
         allLabels.set(2, 0);
@@ -72,78 +71,6 @@ public class ClassificationDecisionTreeTest {
         giniIndexLoss = new GiniIndex(CLASSES, allLabels);
     }
 
-    @Test
-    public void shouldTrainBestDepth1Tree() {
-        var decisionTree = new ClassificationDecisionTree(
-            AllocationTracker.empty(),
-            giniIndexLoss,
-            allFeatures,
-            1,
-            1,
-            CLASSES,
-            allLabels
-        );
-        var root = decisionTree.train();
-
-        assertThat(root).isInstanceOf(NonLeafNode.class);
-        var nonLeafRoot = (NonLeafNode) root;
-
-        assertThat(nonLeafRoot.index()).isEqualTo(0);
-        assertThat(nonLeafRoot.value()).isEqualTo(7.444542326);
-
-        assertThat(nonLeafRoot.leftChild()).isInstanceOf(LeafNode.class);
-        var leftChildLeaf = (LeafNode) nonLeafRoot.leftChild();
-        assertThat(leftChildLeaf.prediction()).isEqualTo(0);
-
-        assertThat(nonLeafRoot.rightChild()).isInstanceOf(LeafNode.class);
-        var rightChildLeaf = (LeafNode) nonLeafRoot.rightChild();
-        assertThat(rightChildLeaf.prediction()).isEqualTo(1);
-    }
-
-    @Test
-    public void shouldTrainBestDepth2Tree() {
-        var decisionTree = new ClassificationDecisionTree(
-            AllocationTracker.empty(),
-            giniIndexLoss,
-            allFeatures,
-            2,
-            1,
-            CLASSES,
-            allLabels
-        );
-        var root = decisionTree.train();
-
-        assertThat(root).isInstanceOf(NonLeafNode.class);
-        var nonLeafRoot = (NonLeafNode) root;
-
-        assertThat(nonLeafRoot.index()).isEqualTo(0);
-        assertThat(nonLeafRoot.value()).isEqualTo(7.444542326);
-
-        assertThat(nonLeafRoot.leftChild()).isInstanceOf(NonLeafNode.class);
-        var leftChildNonLeaf = (NonLeafNode) nonLeafRoot.leftChild();
-        assertThat(leftChildNonLeaf.index()).isEqualTo(1);
-        assertThat(leftChildNonLeaf.value()).isEqualTo(3.319983761);
-
-        assertThat(leftChildNonLeaf.leftChild()).isInstanceOf(LeafNode.class);
-        var leftLeftGrandChildLeaf = (LeafNode) leftChildNonLeaf.leftChild();
-        assertThat(leftLeftGrandChildLeaf.prediction()).isEqualTo(0);
-
-        assertThat(leftChildNonLeaf.rightChild()).isInstanceOf(LeafNode.class);
-        var leftRightGrandChildLeaf = (LeafNode) leftChildNonLeaf.rightChild();
-        assertThat(leftRightGrandChildLeaf.prediction()).isEqualTo(1);
-
-        assertThat(nonLeafRoot.rightChild()).isInstanceOf(NonLeafNode.class);
-        var rightChildNonLeaf = (NonLeafNode) nonLeafRoot.rightChild();
-
-        assertThat(rightChildNonLeaf.leftChild()).isInstanceOf(LeafNode.class);
-        var rightLeftGrandChildLeaf = (LeafNode) rightChildNonLeaf.leftChild();
-        assertThat(rightLeftGrandChildLeaf.prediction()).isEqualTo(1);
-
-        assertThat(rightChildNonLeaf.rightChild()).isInstanceOf(LeafNode.class);
-        var rightRightGrandChildLeaf = (LeafNode) rightChildNonLeaf.rightChild();
-        assertThat(rightRightGrandChildLeaf.prediction()).isEqualTo(1);
-    }
-
     private static Stream<Arguments> sanePredictionParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
@@ -159,8 +86,8 @@ public class ClassificationDecisionTreeTest {
 
     @ParameterizedTest
     @MethodSource("sanePredictionParameters")
-    public void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
-        var decisionTree = new ClassificationDecisionTree(
+    void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
+        var decisionTree = new ClassificationDecisionTree<>(
             AllocationTracker.empty(),
             giniIndexLoss,
             allFeatures,
@@ -172,6 +99,6 @@ public class ClassificationDecisionTreeTest {
 
         var root = decisionTree.train();
 
-        assertThat(decisionTree.predict(root, features)).isEqualTo(expectedPrediction);
+        assertThat(root.predict(features)).isEqualTo(expectedPrediction);
     }
 }

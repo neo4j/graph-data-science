@@ -48,22 +48,6 @@ public class ClassificationDecisionTree<L extends DecisionTreeLoss> extends Deci
     }
 
     @Override
-    public Integer predict(TreeNode node, double[] features) {
-        assert features.length > 0;
-
-        if (node instanceof LeafNode) {
-            return ((LeafNode<Integer>) node).prediction();
-        }
-
-        var nonLeafNode = (NonLeafNode) node;
-        if (features[nonLeafNode.index()] < nonLeafNode.value()) {
-            return predict(nonLeafNode.leftChild(), features);
-        } else {
-            return predict(nonLeafNode.rightChild(), features);
-        }
-    }
-
-    @Override
     protected Integer toTerminal(HugeLongArray group, long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;

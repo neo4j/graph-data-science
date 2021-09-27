@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GiniIndexTest {
+class GiniIndexTest {
 
     private static final int[] CLASSES = {0, 1};
 
@@ -72,7 +72,7 @@ public class GiniIndexTest {
 
     @ParameterizedTest
     @MethodSource("giniParameters")
-    public void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, long[] groupSizes, double expectedLoss) {
+    void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, long[] groupSizes, double expectedLoss) {
         var hugeLabels = HugeIntArray.newArray(allLabels.length, AllocationTracker.empty());
         for (int i = 0; i < allLabels.length; i++) {
             hugeLabels.set(i, allLabels[i]);
