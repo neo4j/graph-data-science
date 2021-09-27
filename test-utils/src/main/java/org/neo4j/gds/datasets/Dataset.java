@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.datasets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
 public abstract class Dataset {
+    private static final Logger Log = LoggerFactory.getLogger( Dataset.class );
 
     private final String id;
 
@@ -36,7 +40,14 @@ public abstract class Dataset {
      * In the end database files end up in the dataset dir, ready for being started using a database.
      */
     public final void prepare(Path datasetDir, DbCreator dbCreator) throws IOException {
-        if (isDownloadingKind()) downloadAndInstall(datasetDir); else generate(datasetDir, dbCreator);
+        Log.info("preparing dataset {}", id);
+        if (isDownloadingKind()) {
+            Log.info("downloading dataset");
+            downloadAndInstall(datasetDir);
+        } else {
+            Log.info("generating dataset");
+            generate(datasetDir, dbCreator);
+        }
     }
 
     protected boolean isDownloadingKind() {
