@@ -161,7 +161,7 @@ public final class LabelInformation {
         }
 
         static Builder empty(AllocationTracker allocationTracker) {
-            if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
+            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
                 return new SparseBuilder();
             } else {
                 return new DenseBuilder(allocationTracker);
@@ -173,11 +173,14 @@ public final class LabelInformation {
                           AllocationTracker allocationTracker) {
             var starNodeLabelMappings = labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, List.of());
 
-            if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
+            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
                 var nodeLabelBitSetMap = prepareLabelMap(labelTokenNodeLabelMapping, Roaring64NavigableMap::bitmapOf);
                 return new SparseBuilder(nodeLabelBitSetMap, starNodeLabelMappings);
             } else {
-                var nodeLabelBitSetMap = prepareLabelMap(labelTokenNodeLabelMapping, () -> HugeAtomicBitSet.create(nodeCount, allocationTracker));
+                var nodeLabelBitSetMap = prepareLabelMap(
+                    labelTokenNodeLabelMapping,
+                    () -> HugeAtomicBitSet.create(nodeCount, allocationTracker)
+                );
                 return new DenseBuilder(nodeLabelBitSetMap, starNodeLabelMappings, allocationTracker);
             }
         }

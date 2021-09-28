@@ -95,7 +95,7 @@ public class NodeImporter {
         var labelIds = buffer.labelIds();
 
         if (buffer.hasLabelInformation()) {
-            if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
+            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
                 setNodeLabelInformation(
                     batch,
                     batchLength,

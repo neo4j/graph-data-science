@@ -199,32 +199,17 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.useNeoIdsForLabelImport")
+    @Procedure("gds.features.usePartitionedIndexScan")
     @Description("")
-    public void useNeoIdsForLabelImport(@Name(value = "useNeoIdsForLabelImport") boolean useNeoIdsForLabelImport) {
-        GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.toggle(useNeoIdsForLabelImport);
+    public void usePartitionedIndexScan(@Name(value = "usePartitionedIndexScan") boolean useNeoIdsForLabelImport) {
+        GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.toggle(useNeoIdsForLabelImport);
     }
 
     @Internal
-    @Procedure("gds.features.useNeoIdsForLabelImport.reset")
+    @Procedure("gds.features.usePartitionedIndexScan.reset")
     @Description("")
-    public Stream<FeatureState> resetUseNeoIdsForLabelImport() {
-        GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()));
-    }
-
-    @Internal
-    @Procedure("gds.features.useNeoIdsForPropertyImport")
-    @Description("")
-    public void useNeoIdsForPropertyImport(@Name(value = "useNeoIdsForPropertyImport") boolean useNeoIdsForPropertyImport) {
-        GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.toggle(useNeoIdsForPropertyImport);
-    }
-
-    @Internal
-    @Procedure("gds.features.useNeoIdsForPropertyImport.reset")
-    @Description("")
-    public Stream<FeatureState> resetUseNeoIdsForPropertyImport() {
-        GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled()));
+    public Stream<FeatureState> resetUsePartitionedIndexScan() {
+        GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()));
     }
 }
