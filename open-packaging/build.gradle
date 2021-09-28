@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 description = 'Neo4j Graph Data Science :: Open Packaging'
-group = 'com.neo4j.gds'
+group = 'org.neo4j.gds'
 
 dependencies {
     implementation project(':proc')
@@ -68,58 +68,5 @@ task shadowCopy(type: Copy) {
     into distributionDir
 }
 
-task versionsJson {
-    ext.outFile = file("$distributionDir/versions.json")
-    def bucketUrl = "https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science"
-    def versionsJsonUrl = new URL("https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/versions.json")
-    outputs.file(outFile)
-    outputs.upToDateWhen { false }
-    doLast {
-        def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
-        def indexedVersionsJson = versionsJson.collectEntries {
-            [(it.neo4j): it]
-        }
-
-        def neo4jVersions
-        if (project.hasProperty('neo4jVersions')) {
-            neo4jVersions = project.property('neo4jVersions').split(',')
-        } else {
-            neo4jVersions = neos.findAll { !it.value.contains('drop') }.collect {it.value}
-        }
-
-        def gdsVersion = project.hasProperty('gdsVersion') ? project.property('gdsVersion') : project.version
-        def shouldUpdateVersion = gdsVersion.toString().matches("^(\\d+\\.){2}\\d+\$")
-        if (shouldUpdateVersion) {
-            shadowJar.version = gdsVersion
-            neo4jVersions.flatten().forEach { version ->
-                indexedVersionsJson[version] = [
-                        'version': gdsVersion,
-                        'neo4jVersion'  : version,
-                        'downloadUrl'    : "$bucketUrl/${shadowJar.archiveName}",
-                        'config': [
-                                '+:dbms.security.procedures.unrestricted': [
-                                        "gds.*"
-                                ]
-                        ],
-                        'neo4j'  : version,
-                        'jar'    : "$bucketUrl/${shadowJar.archiveName}",
-                ]
-            }
-
-            // Restore shadowJar version
-            shadowJar.version = project.version
-        }
-        outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
-    }
-}
-
-task distZip(type: Zip) {
-    description 'Create a ZIP archive of the main distribution JAR.'
-    archiveBaseName.set(shadowJar.archiveBaseName)
-    archiveClassifier.set(shadowJar.archiveClassifier)
-    from shadowJar
-    destinationDirectory.set(file(distributionDir))
-}
-
-ci.finalizedBy shadowCopy, versionsJson, distZip
-cipr.finalizedBy shadowCopy, versionsJson, distZip
+ci.finalizedBy shadowCopy
+cipr.finalizedBy shadowCopy
