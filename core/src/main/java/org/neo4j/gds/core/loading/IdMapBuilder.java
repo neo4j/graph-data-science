@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
@@ -64,6 +65,11 @@ public final class IdMapBuilder {
         AllocationTracker allocationTracker
     ) {
         HugeLongArray graphIds = idMapBuilder.build();
+
+        if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
+            highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().getAsLong();
+        }
+
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
             idMapBuilder.size(),
             highestNodeId,
@@ -103,7 +109,7 @@ public final class IdMapBuilder {
             nodeToGraphIds,
             labelInformationBuilder.build(),
             idMapBuilder.size(),
-            idMapBuilder.capacity(),
+            highestNodeId,
             allocationTracker
         );
     }
