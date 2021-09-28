@@ -114,7 +114,7 @@ def publicModules = [
     ':neo4j-kernel-adapter-4.3',
     ':neo4j-kernel-adapter-api',
     ':neo4j-kernel-adapter-aura',
-    ':packaging',
+    ':open-packaging',
     ':pregel-proc-generator',
     ':proc',
     ':proc-beta',
