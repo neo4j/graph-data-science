@@ -469,6 +469,42 @@ class GraphStoreFilterTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
+    void testShouldFilterLabelsOnLargeGraphs(TestMethodRunner runTest) throws Exception {
+        runTest.run(() -> {
+            var labelA = new NodeLabel[]{NodeLabel.of("A")};
+            var labelB = new NodeLabel[]{NodeLabel.of("B")};
+
+            var concurrency = 4;
+
+            var generatedGraph = RandomGraphGenerator
+                .builder()
+                .nodeCount(100_000)
+                .nodeLabelProducer((node) -> ThreadLocalRandom.current().nextDouble(0, 1) > 0.5 ? labelA : labelB)
+                .nodePropertyProducer(PropertyProducer.randomDouble("nodeProp", 0, 1))
+                .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 1))
+                .averageDegree(5)
+                .seed(42)
+                .build()
+                .generate();
+
+            var graphStore = CSRGraphStoreUtil.createFromGraph(
+                TestDatabaseIdRepository.randomNamedDatabaseId(),
+                generatedGraph,
+                "REL",
+                Optional.of("relProp"),
+                concurrency,
+                AllocationTracker.empty()
+            );
+
+            var graph = graphStore.getGraph("A", "REL", Optional.of("relProp"));
+
+            assertGraphEquals(graph, filter(graphStore, "n:A", "*", concurrency).getUnion());
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
     void testNonOverlappingNodeIdSpace(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
             var nodeCount = 10_000;
