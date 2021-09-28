@@ -168,7 +168,8 @@ public interface Neo4jProxyApi {
     StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize
+        int batchSize,
+        boolean usePartitionedScan
     );
 
     <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize);

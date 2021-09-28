@@ -323,10 +323,59 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize
+        int batchSize,
+        boolean usePartitionedScan
     ) {
+        if (!usePartitionedScan) {
+            var read = transaction.dataRead();
+            return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+        }
+
         var read = transaction.dataRead();
-        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+        var nodeCount = read.countsForNode(labelId);
+
+        int numberOfPartitions;
+        if (nodeCount > 0) {
+            // ceil div to try to get enough partitions so a single one does
+            // not include more nodes than batchSize
+            long partitions = ((nodeCount - 1) / batchSize) + 1;
+
+            // value must be positive
+            if (partitions < 1) {
+                partitions = 1;
+            }
+
+            numberOfPartitions = (int) Long.min(Integer.MAX_VALUE, partitions);
+        } else {
+            // we have no partitions to scan, but the value must still  be positive
+            numberOfPartitions = 1;
+        }
+
+        var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
+            transaction,
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
+        );
+
+        if (indexDescriptor == IndexDescriptor.NO_INDEX) {
+            throw new IllegalStateException("There is no index that can back a node label scan.");
+        }
+
+        try {
+            var session = read.tokenReadSession(indexDescriptor);
+
+            var partitionedScan = read.nodeLabelScan(
+                session,
+                numberOfPartitions,
+                transaction.cursorContext(),
+                new TokenPredicate(labelId)
+            );
+
+            return new PartitionedStoreScan(partitionedScan);
+        } catch (KernelException e) {
+            // should not happen, we check for the index existence and applicability
+            // before reading it
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
