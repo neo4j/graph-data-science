@@ -51,9 +51,18 @@ shadowJar {
     exclude 'module-info.class'
     exclude 'LICENSE'
     exclude 'LICENSE-*'
+    exclude 'META-INF/LICENSE*'
+    exclude 'META-INF/NOTICE*'
     exclude 'THIRD-PARTY'
-    exclude '*.proto'
     exclude '*.html'
+    // Exclude proto files
+    exclude 'config/'
+    exclude '*.proto'
+    exclude 'google/'
+    exclude 'ml/'
+    // Exclude french localization in commons-math
+    exclude 'assets/'
+
     from licenseFile
     from generateLicensesFiles
 }
