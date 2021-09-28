@@ -39,10 +39,9 @@ public abstract class RelationshipExporterBuilder<T extends RelationshipExporter
     protected TerminationFlag terminationFlag;
     protected Graph graph;
     protected ProgressTracker progressTracker;
+    protected RelationshipPropertyTranslator propertyTranslator;
 
-    RelationshipPropertyTranslator propertyTranslator;
-
-    RelationshipExporterBuilder(TransactionContext transactionContext) {
+    protected RelationshipExporterBuilder(TransactionContext transactionContext) {
         this.transactionContext = Objects.requireNonNull(transactionContext);
         this.propertyTranslator = Values::doubleValue;
         this.progressTracker = ProgressTracker.NULL_TRACKER;
