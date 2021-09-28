@@ -19,20 +19,21 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
@@ -337,5 +338,22 @@ class NodesBuilderTest {
 
             assertThat(builder.build().nodeMapping().nodeCount()).isEqualTo(1L);
         });
+    }
+
+    @Test
+    void shouldSetCorrectHighestNeoIdIfItIsUnknown() {
+        var builder = GraphFactory.initNodesBuilder()
+            .nodeCount(100)
+            .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+
+        for (int i = 0; i < 100; i++) {
+            builder.addNode(i + 100L);
+        }
+
+        var nodeMapping = builder.build().nodeMapping();
+        assertThat(nodeMapping.nodeCount()).isEqualTo(100L);
+        assertThat(nodeMapping.highestNeoId()).isEqualTo(199);
     }
 }
