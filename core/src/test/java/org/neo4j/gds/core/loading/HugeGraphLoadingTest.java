@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -31,6 +33,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
@@ -46,6 +49,24 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class HugeGraphLoadingTest extends BaseTest {
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
+    void testDefaultPropertyLoading(TestMethodRunner runner) {
+        // default value
+        runner.run(() -> testPropertyLoading(28));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
+    void testPagedPropertyLoading(TestMethodRunner runner) {
+        // set low page shift so that 100k nodes will trigger the usage of the paged
+        // huge array, which will trigger multi page code paths.
+        // we import nodes in batches of 54600 nodes, using a page shift of 14
+        // results in pages of 16384 elements, so we would have to write in multiple
+        // pages for a single batch
+        runner.run(() -> testPropertyLoading(14));
+    }
 
     @Test
     void testDefaultPropertyLoading() {
@@ -65,13 +86,22 @@ final class HugeGraphLoadingTest extends BaseTest {
 
     private void testPropertyLoading(int maxArrayLengthShift) {
         System.setProperty(
-                "org.neo4j.gds.core.utils.ArrayUtil.maxArrayLengthShift",
-                String.valueOf(maxArrayLengthShift));
+            "org.neo4j.gds.core.utils.ArrayUtil.maxArrayLengthShift",
+            String.valueOf(maxArrayLengthShift)
+        );
         // something larger than one batch
+        int offset = 10_000;
         int nodeCount = 60_000;
-        Label label = Label.label("Foo");
+
+        var unused = Label.label("Unused");
+        var label = Label.label("Foo");
+
         runInTransaction(db, tx -> {
-            for (int j = 0; j < nodeCount; j++) {
+            for (int i = 0; i < offset; i++) {
+                tx.createNode(unused);
+            }
+
+            for (int j = offset; j < offset + nodeCount; j++) {
                 Node node = tx.createNode(label);
                 node.setProperty("bar", node.getId());
             }
