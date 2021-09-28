@@ -21,6 +21,8 @@ package org.neo4j.gds.datasets;
 
 import org.apache.commons.io.file.PathUtils;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -34,6 +36,7 @@ import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 public final class DatasetManager {
+    private static final Logger Log = LoggerFactory.getLogger(DatasetManager.class);
 
     private final Map<String, Dataset> datasets = new HashMap<>() {{
         put(EmptyDataset.NAME, EmptyDataset.INSTANCE);
@@ -65,40 +68,58 @@ public final class DatasetManager {
     }
 
     public GdsGraphDatabaseAPI openDb(String datasetId) {
+        Log.info("opening dataset {}", datasetId);
+
         if (!datasets.containsKey(datasetId)) {
             throw new RuntimeException("Unknown dataset name " + datasetId);
         }
 
-        Path datasetDir = workingDir.resolve(datasetId);
+        Path datasetsDirectory = workingDir.resolve("datasets");
+        Path datasetDirectory = datasetsDirectory.resolve(datasetId);
+
         if (!hasDataset(datasetId)) {
+            Log.info("preparing dataset {}", datasetId);
             try {
-                datasets.get(datasetId).prepare(datasetDir, dbCreator);
+                this.datasets.get(datasetId).prepare(datasetDirectory, dbCreator);
+                Log.info("dataset {}  ready", datasetId);
+                Log.info(EnvironmentReporting.directoryContents(datasetsDirectory));
+                Log.info(EnvironmentReporting.diskUsage());
             } catch (IOException e) {
                 throw new RuntimeException("Failed to download dataset" + datasetId, e);
             }
         }
 
         String workingCopyId = datasetId + "-" + UUID.randomUUID();
-        Path workingCopy = workingDir.resolve(workingCopyId);
-        Path workingCopyGraph = workingCopy.resolve(workingCopyId);
+        Path workingCopiesDirectory = workingDir.resolve("working-copies");
+        Path workingCopyDirectory = workingCopiesDirectory.resolve(workingCopyId);
 
         try {
-            Files.createDirectories(workingCopyGraph);
-            PathUtils.copyDirectory(datasetDir, workingCopyGraph);
+            Files.createDirectories(workingCopyDirectory);
+            PathUtils.copyDirectory(datasetDirectory, workingCopyDirectory);
+            Log.info("working copy of {} ready in {}", datasetId, workingCopyDirectory);
+            Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory));
+            Log.info(EnvironmentReporting.diskUsage());
         } catch (IOException e) {
             throw new RuntimeException("Could not create working copy", e);
         }
 
-        return openDb(workingCopyGraph);
+        Log.info("starting Neo4j on {}", workingCopyDirectory);
+        return openDb(workingCopyDirectory);
     }
 
     public void closeDb(GdsGraphDatabaseAPI db) {
+        Log.info("closing database");
         if (db != null) {
             Path dbDir = db.dbHome(workingDir);
             db.shutdown();
             try {
+                Log.info("cleaning up database directory {}...", dbDir);
                 PathUtils.deleteDirectory(dbDir);
+                Log.info("cleanup successful");
+                Log.info(EnvironmentReporting.directoryContents(workingDir.resolve("working-copies")));
+                Log.info(EnvironmentReporting.diskUsage());
             } catch (IOException e) {
+                Log.error("cleanup unsuccessful");
                 throw new RuntimeException("Could not delete working copy", e);
             }
         }
@@ -110,12 +131,12 @@ public final class DatasetManager {
         return db;
     }
 
-    public boolean hasDataset(String datasetName) {
+    private boolean hasDataset(String datasetId) {
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(workingDir)) {
             Spliterator<Path> spliterator = directoryStream.spliterator();
             return StreamSupport
                 .stream(spliterator, false)
-                .anyMatch(folder -> folder.toFile().getName().equals(datasetName));
+                .anyMatch(folder -> folder.toFile().getName().equals(datasetId));
         } catch (IOException e) {
             throw new RuntimeException("Could not list existing datasets", e);
         }
