@@ -20,6 +20,7 @@
 package org.neo4j.gds.datasets;
 
 import org.apache.commons.io.file.PathUtils;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,30 +75,33 @@ public final class DatasetManager {
             throw new RuntimeException("Unknown dataset name " + datasetId);
         }
 
-        Path datasetsDirectory = workingDir.resolve("datasets");
-        Path datasetDirectory = datasetsDirectory.resolve(datasetId);
+        Path datasetDirectory = datasetsDirectory().resolve(datasetId);
 
         if (!hasDataset(datasetId)) {
             Log.info("preparing dataset {}", datasetId);
             try {
                 this.datasets.get(datasetId).prepare(datasetDirectory, dbCreator);
-                Log.info("dataset {}  ready", datasetId);
-                Log.info(EnvironmentReporting.directoryContents(datasetsDirectory));
-                Log.info(EnvironmentReporting.diskUsage());
             } catch (IOException e) {
                 throw new RuntimeException("Failed to download dataset" + datasetId, e);
             }
         }
 
+        try {
+            Log.info("dataset {} is ready", datasetId);
+            Log.info(EnvironmentReporting.directoryContents(datasetsDirectory()));
+            Log.info(EnvironmentReporting.diskUsage());
+        } catch (IOException ignore) {
+            // not ideal
+        }
+
         String workingCopyId = datasetId + "-" + UUID.randomUUID();
-        Path workingCopiesDirectory = workingDir.resolve("working-copies");
-        Path workingCopyDirectory = workingCopiesDirectory.resolve(workingCopyId);
+        Path workingCopyDirectory = workingCopiesDirectory().resolve(workingCopyId);
 
         try {
             Files.createDirectories(workingCopyDirectory);
             PathUtils.copyDirectory(datasetDirectory, workingCopyDirectory);
             Log.info("working copy of {} ready in {}", datasetId, workingCopyDirectory);
-            Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory));
+            Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
             Log.info(EnvironmentReporting.diskUsage());
         } catch (IOException e) {
             throw new RuntimeException("Could not create working copy", e);
@@ -116,7 +120,7 @@ public final class DatasetManager {
                 Log.info("cleaning up database directory {}...", dbDir);
                 PathUtils.deleteDirectory(dbDir);
                 Log.info("cleanup successful");
-                Log.info(EnvironmentReporting.directoryContents(workingDir.resolve("working-copies")));
+                Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
                 Log.info(EnvironmentReporting.diskUsage());
             } catch (IOException e) {
                 Log.error("cleanup unsuccessful");
@@ -132,7 +136,10 @@ public final class DatasetManager {
     }
 
     private boolean hasDataset(String datasetId) {
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(workingDir)) {
+        Log.info("looking for {} in {}", datasetId, datasetsDirectory());
+        if (! Files.exists(datasetsDirectory())) return false;
+
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(datasetsDirectory())) {
             Spliterator<Path> spliterator = directoryStream.spliterator();
             return StreamSupport
                 .stream(spliterator, false)
@@ -140,5 +147,15 @@ public final class DatasetManager {
         } catch (IOException e) {
             throw new RuntimeException("Could not list existing datasets", e);
         }
+    }
+
+    @NotNull
+    private Path workingCopiesDirectory() {
+        return workingDir.resolve("working-copies");
+    }
+
+    @NotNull
+    private Path datasetsDirectory() {
+        return workingDir.resolve("datasets");
     }
 }
