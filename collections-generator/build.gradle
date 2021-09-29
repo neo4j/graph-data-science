@@ -20,14 +20,19 @@
 
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Collections'
+description = 'Neo4j Graph Data Science :: Collections Generator'
 
 dependencies {
-    annotationProcessor(project(":collections-generator"))
+    annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
+
+    compileOnly group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
 
     implementation project(':annotations')
-    
+    implementation group: 'com.google.auto', name: 'auto-common', version: ver.'auto-common'
+    implementation group: 'com.squareup', name: 'javapoet', version: ver.'javapoet'
+
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
+    testImplementation group: 'com.google.testing.compile', name: 'compile-testing', version: ver.'compile-testing'
 }
