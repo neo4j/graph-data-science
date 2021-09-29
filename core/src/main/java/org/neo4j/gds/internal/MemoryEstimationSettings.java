@@ -25,23 +25,11 @@ import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
-import java.nio.file.Path;
-
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 import static org.neo4j.configuration.SettingValueParsers.BOOL;
-import static org.neo4j.configuration.SettingValueParsers.INT;
-import static org.neo4j.configuration.SettingValueParsers.PATH;
 
 @ServiceProvider
-public final class AuraMaintenanceSettings implements SettingsDeclaration {
-
-    @Description("Enable maintenance function.")
-    @DocumentedDefaultValue("false")
-    public static final Setting<Boolean> maintenance_function_enabled = newBuilder(
-        "gds.maintenance_function_enabled",
-        BOOL,
-        false
-    ).build();
+public class MemoryEstimationSettings implements SettingsDeclaration {
 
     @Description("Use maximum memory estimation in procedure memory guard.")
     @DocumentedDefaultValue("false")
@@ -49,19 +37,5 @@ public final class AuraMaintenanceSettings implements SettingsDeclaration {
         "gds.validate_using_max_memory_estimation",
         BOOL,
         false
-    ).build();
-
-    @Description("Sets the backup location for file based exports.")
-    public static final Setting<Path> backup_location_setting = newBuilder(
-        "gds.backup.location",
-        PATH,
-        null
-    ).build();
-
-    @Description("Sets the maximum number of allowed backups in the backup location.")
-    public static final Setting<Integer> max_number_of_backups = newBuilder(
-        "gds.backup.max_number_of_backups",
-        INT,
-        -1
     ).build();
 }

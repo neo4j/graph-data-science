@@ -48,7 +48,7 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.internal.AuraMaintenanceSettings;
+import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -241,7 +241,7 @@ public abstract class BaseProc {
             log.debug("Sudo mode: Won't check for available memory.");
         } else {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
+            var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
             validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
         }
 
