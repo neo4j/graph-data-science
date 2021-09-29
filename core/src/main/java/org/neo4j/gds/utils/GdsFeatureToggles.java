@@ -36,7 +36,7 @@ public enum GdsFeatureToggles {
     USE_UNCOMPRESSED_ADJACENCY_LIST(false),
     USE_REORDERED_ADJACENCY_LIST(false),
     USE_NEO_IDS_FOR_LABEL_IMPORT(false),
-    USE_NEO_IDS_FOR_PROPERTY_IMPORT(true);
+    USE_NEO_IDS_FOR_PROPERTY_IMPORT(false);
 
     public boolean isEnabled() {
         return current.get();

@@ -126,7 +126,8 @@ public final class NativeNodePropertyImporter {
 
     private int setPropertyValue(
         long nodeId,
-        long neoNodeId, PropertyCursor propertyCursor,
+        long neoNodeId,
+        PropertyCursor propertyCursor,
         int propertyId,
         BuildersByPropertyId buildersByPropertyId
     ) {
