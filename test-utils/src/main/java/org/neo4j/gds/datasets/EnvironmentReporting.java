@@ -20,7 +20,6 @@
 package org.neo4j.gds.datasets;
 
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -32,20 +31,30 @@ public final class EnvironmentReporting {
     public static String diskUsage() throws IOException {
         Process p = new ProcessBuilder("df", "-h").start();
         String stdout = IOUtils.toString(p.getInputStream(), Charset.defaultCharset());
-        return "$ df -h\r" + asMultilineCloudWatchLogMessage(stdout);
+        String diskUsage = "$ df -h\n" + stdout;
+        return asMultilineCloudWatchLogMessageIfAppropriate(diskUsage);
     }
 
     public static String directoryContents(Path directory) throws IOException {
         Process p = new ProcessBuilder("ls", "-l", directory.toAbsolutePath().toString()).start();
         String stdout = IOUtils.toString(p.getInputStream(), Charset.defaultCharset());
-        return "$ ls -l " + directory + "\r" + asMultilineCloudWatchLogMessage(stdout);
+        String directoryContents = "$ ls -l " + directory + "\n" + stdout;
+        return asMultilineCloudWatchLogMessageIfAppropriate(directoryContents);
+    }
+
+    /**
+     * Suggestion from benchmark team
+     */
+    public static boolean runningOnBenchmarkInfrastructure() {
+        return System.getenv("AWS_BATCH_JOB_ID") != null;
     }
 
     /**
      * https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html, multi_line_start_pattern
      */
-    @NotNull
-    private static String asMultilineCloudWatchLogMessage(String logMessage) {
-        return logMessage.replace('\n', '\r');
+    private static String asMultilineCloudWatchLogMessageIfAppropriate(String logMessage) {
+        if (runningOnBenchmarkInfrastructure()) return logMessage.replace('\n', '\r');
+
+        return logMessage;
     }
 }
