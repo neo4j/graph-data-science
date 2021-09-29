@@ -49,23 +49,25 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return
-            (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker)
-                -> checkDuplicateIds
-                ? IdMapBuilder.buildChecked(
+        return (idMapBuilder, labelInformationBuilder, highestNeoId, concurrency, checkDuplicateIds, allocationTracker) -> {
+            if (checkDuplicateIds) {
+                return IdMapBuilder.buildChecked(
                     idMapBuilder,
                     labelInformationBuilder,
-                    graphDimensions,
-                    concurrency,
-                    allocationTracker
-                )
-                : IdMapBuilder.build(
-                    idMapBuilder,
-                    labelInformationBuilder,
-                    graphDimensions,
+                    highestNeoId,
                     concurrency,
                     allocationTracker
                 );
+            } else {
+                return IdMapBuilder.build(
+                    idMapBuilder,
+                    labelInformationBuilder,
+                    highestNeoId,
+                    concurrency,
+                    allocationTracker
+                );
+            }
+        };
     }
 
     public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {
