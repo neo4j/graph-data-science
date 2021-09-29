@@ -38,7 +38,7 @@ public class CollectionsProcessor extends BasicAnnotationProcessor {
 
     @Override
     protected Iterable<? extends Step> steps() {
-        var hugeSparseArrayStep = new HugeSparseArrayStep(processingEnv);
+        var hugeSparseArrayStep = new HugeSparseArrayStep(processingEnv, getSupportedSourceVersion());
 
         return List.of(hugeSparseArrayStep);
     }

@@ -22,20 +22,34 @@ package org.neo4j.gds.collections.hsa;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.squareup.javapoet.JavaFile;
 import org.neo4j.gds.collections.HugeSparseArray;
 
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.tools.Diagnostic;
+import java.io.IOException;
 import java.util.Set;
 
 public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
-    private final HugeSparseArrayValidation validation;
-
     private static final Class<HugeSparseArray> ANNOTATION_CLASS = HugeSparseArray.class;
 
-    public HugeSparseArrayStep(ProcessingEnvironment processingEnv) {
-        this.validation = new HugeSparseArrayValidation(processingEnv.getMessager());
+    private final Messager messager;
+    private final Filer filer;
+
+    private final HugeSparseArrayValidation validation;
+    private final HugeSparseArrayGenerator generator;
+
+    public HugeSparseArrayStep(ProcessingEnvironment processingEnv, SourceVersion sourceVersion) {
+        this.validation = new HugeSparseArrayValidation(processingEnv.getElementUtils(), processingEnv.getMessager());
+        this.generator = new HugeSparseArrayGenerator(processingEnv.getElementUtils(), sourceVersion);
+
+        this.messager = processingEnv.getMessager();
+        this.filer = processingEnv.getFiler();
     }
 
     @Override
@@ -65,7 +79,23 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
             return ProcessResult.INVALID;
         }
 
-        return ProcessResult.PROCESSED;
+        var javaFile = generator.generate(validationResult.get());
+
+        return writeFile(element, javaFile);
+    }
+
+    private ProcessResult writeFile(Element element, JavaFile file) {
+        try {
+            file.writeTo(filer);
+            return ProcessResult.PROCESSED;
+        } catch (IOException e) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Could not write HugeSparseArray java file: " + e.getMessage(),
+                element
+            );
+            return ProcessResult.RETRY;
+        }
     }
 
     enum ProcessResult {
