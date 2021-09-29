@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Norm;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -54,6 +55,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     private static final int SPARSITY = 3;
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
+    private static final float EPSILON = 10f / Float.MAX_VALUE;
 
     private final Graph graph;
     private final int concurrency;
@@ -71,6 +73,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     private final int embeddingDimension;
     private final int baseEmbeddingDimension;
+    private final Number nodeSelfInfluence;
     private final List<Number> iterationWeights;
     private final int minBatchSize;
 
@@ -124,6 +127,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.embeddingDimension = config.embeddingDimension();
         this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();
         this.iterationWeights = config.iterationWeights();
+        this.nodeSelfInfluence= config.nodeSelfInfluence();
         this.normalizationStrength = config.normalizationStrength();
         this.concurrency = config.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
@@ -137,6 +141,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         progressTracker.beginSubTask();
         initPropertyVectors();
         initRandomVectors();
+        addInitialVectorsToEmbedding();
         propagateEmbeddings();
         progressTracker.endSubTask();
         return new FastRPResult(embeddings);
@@ -183,6 +188,21 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         progressTracker.endSubTask();
     }
 
+    void addInitialVectorsToEmbedding() {
+        if (nodeSelfInfluence.floatValue()==0f) return;
+
+        var partitions = PartitionUtils.degreePartition(
+            graph,
+            concurrency,
+            Function.identity(),
+            Optional.of(minBatchSize)
+        );
+
+        var tasks = partitions.stream()
+            .map(AddInitialStateToEmbeddingTask::new)
+            .collect(Collectors.toList());
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+    }
     void propagateEmbeddings() {
         progressTracker.beginSubTask();
         var partitions = PartitionUtils.degreePartition(graph, concurrency, Function.identity(), Optional.of(minBatchSize));
@@ -369,6 +389,21 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         }
     }
 
+    private final class AddInitialStateToEmbeddingTask implements Runnable {
+        private final Partition partition;
+
+        private AddInitialStateToEmbeddingTask(Partition partition) {this.partition = partition;}
+
+        @Override
+        public void run() {
+            partition.consume( nodeId -> {
+                var initialVector = embeddingB.get(nodeId);
+                var l2Norm= l2Norm( initialVector);
+                float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
+                addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue()/adjustedL2Norm);
+            });
+        }
+    }
     private final class PropagateEmbeddingsTask implements Runnable {
 
         private final Partition partition;

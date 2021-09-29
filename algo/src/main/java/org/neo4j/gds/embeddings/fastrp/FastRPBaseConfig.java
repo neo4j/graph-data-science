@@ -55,6 +55,9 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         return DEFAULT_ITERATION_WEIGHTS;
     }
 
+    @Value.Default
+    default Number nodeSelfInfluence() {return 0;}
+
     @Configuration.Ignore
     @Value.Derived
     default int iterations() {

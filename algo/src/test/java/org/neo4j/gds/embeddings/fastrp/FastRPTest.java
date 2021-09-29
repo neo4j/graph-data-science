@@ -51,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class FastRPTest extends AlgoTestBase {
@@ -147,6 +148,55 @@ class FastRPTest extends AlgoTestBase {
         l2Normalize(expected);
 
         assertThat(embeddings.get(0)).containsExactly(expected);
+    }
+
+    @Test
+    void shouldAddInitialVectors() {
+        var config = FastRPBaseConfig.builder()
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .propertyRatio(0.5)
+            .featureProperties(List.of("f1", "f2"))
+            .nodeSelfInfluence(0.6)
+            .addIterationWeight(0.0D)
+            .randomSeed(42L)
+            .build();
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
+            .build();
+
+        Graph graph = graphLoader.graph();
+
+        FastRP fastRP = new FastRP(
+            graph,
+            config,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+
+        fastRP.initPropertyVectors();
+        fastRP.initRandomVectors();
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
+        fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
+        fastRP.addInitialVectorsToEmbedding();
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
+
+        l2Normalize(randomVectors.get(0));
+        l2Normalize(randomVectors.get(1));
+        l2Normalize(randomVectors.get(2));
+
+        scale(randomVectors.get(0),config.nodeSelfInfluence().floatValue());
+        scale(randomVectors.get(1),config.nodeSelfInfluence().floatValue());
+        scale(randomVectors.get(2),config.nodeSelfInfluence().floatValue());
+
+        assertThat(embeddings.get(0)).containsExactly(randomVectors.get(0),Offset.offset(1e-6f));
+        assertThat(embeddings.get(1)).containsExactly(randomVectors.get(1),Offset.offset(1e-6f));
+        assertThat(embeddings.get(2)).containsExactly(randomVectors.get(2),Offset.offset(1e-6f));
     }
 
     @Test
@@ -391,7 +441,7 @@ class FastRPTest extends AlgoTestBase {
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertThat(estimate.min)
             .isEqualTo(estimate.max)
-            .isEqualTo(159_832);
+            .isEqualTo(159_840);
     }
 
     @Test
@@ -407,7 +457,7 @@ class FastRPTest extends AlgoTestBase {
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertThat(estimate.min)
             .isEqualTo(estimate.max)
-            .isEqualTo(159_832);
+            .isEqualTo(159_840);
     }
 
     private List<FeatureExtractor> defaultFeatureExtractors(Graph graph) {
