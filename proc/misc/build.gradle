@@ -30,7 +30,6 @@ dependencies {
 
     testImplementation project(':proc-test')
     testImplementation project(':ml-core')
-    testImplementation group: 'com.github.marschall', name: 'memoryfilesystem', version: ver.'memoryfilesystem'
 
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
