@@ -40,31 +40,31 @@ class GiniIndexTest {
             Arguments.of(
                 new int[]{1, 0, 1, 0},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                new long[]{2, 2},
+                ImmutableGroupSizes.of(2, 2),
                 0.5D
             ),
             Arguments.of(
                 new int[]{0, 0, 1, 1},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                new long[]{2, 2},
+                ImmutableGroupSizes.of(2, 2),
                 0.0D
             ),
             Arguments.of(
                 new int[]{1, 0, 0, 0},
                 new long[][]{new long[]{0}, new long[]{1, 2, 3}},
-                new long[]{1, 3},
+                ImmutableGroupSizes.of(1, 3),
                 0.0D
             ),
             Arguments.of(
                 new int[]{1, 0, 0, 0},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                new long[]{2, 2},
+                ImmutableGroupSizes.of(2, 2),
                 0.25D
             ),
             Arguments.of(
                 new int[]{1, 0, 0, 0},
                 new long[][]{new long[]{0, 1, 0, 0}, new long[]{2, 3, 1, 1}},
-                new long[]{2, 2},
+                ImmutableGroupSizes.of(2, 2),
                 0.25D
             )
         );
@@ -72,7 +72,7 @@ class GiniIndexTest {
 
     @ParameterizedTest
     @MethodSource("giniParameters")
-    void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, long[] groupSizes, double expectedLoss) {
+    void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, GroupSizes groupSizes, double expectedLoss) {
         var hugeLabels = HugeIntArray.newArray(allLabels.length, AllocationTracker.empty());
         for (int i = 0; i < allLabels.length; i++) {
             hugeLabels.set(i, allLabels[i]);
@@ -90,7 +90,7 @@ class GiniIndexTest {
 
         var giniIndexLoss = new GiniIndex(CLASSES, hugeLabels);
 
-        assertThat(giniIndexLoss.splitLoss(new HugeLongArray[]{leftGroup, rightGroup}, groupSizes))
+        assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));
     }
 }

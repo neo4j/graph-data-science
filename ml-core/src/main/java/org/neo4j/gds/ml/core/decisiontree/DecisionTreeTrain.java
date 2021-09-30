@@ -66,24 +66,24 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
             var record = stack.pop();
             var split = record.split();
 
-            if (record.depth() >= maxDepth || split.leftGroupSize() <= minSize) {
-                record.node().leftChild = new TreeNode<>(toTerminal(split.leftGroup(), split.leftGroupSize()));
+            if (record.depth() >= maxDepth || split.sizes().left() <= minSize) {
+                record.node().leftChild = new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
             } else {
                 record.node().leftChild = splitAndPush(
                     stack,
-                    split.leftGroup(),
-                    split.leftGroupSize(),
+                    split.groups().left(),
+                    split.sizes().left(),
                     record.depth() + 1
                 );
             }
 
-            if (record.depth() >= maxDepth || split.rightGroupSize() <= minSize) {
-                record.node().rightChild = new TreeNode<>(toTerminal(split.rightGroup(), split.rightGroupSize()));
+            if (record.depth() >= maxDepth || split.sizes().right() <= minSize) {
+                record.node().rightChild = new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
             } else {
                 record.node().rightChild = splitAndPush(
                     stack,
-                    split.rightGroup(),
-                    split.rightGroupSize(),
+                    split.groups().right(),
+                    split.sizes().right(),
                     record.depth() + 1
                 );
             }
@@ -100,10 +100,10 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         assert depth >= 1;
 
         var split = findBestSplit(group, groupSize);
-        if (split.rightGroupSize() == 0) {
-            return new TreeNode<>(toTerminal(split.leftGroup(), split.leftGroupSize()));
-        } else if (split.leftGroupSize() == 0) {
-            return new TreeNode<>(toTerminal(split.rightGroup(), split.rightGroupSize()));
+        if (split.sizes().right() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().left(), split.sizes().right()));
+        } else if (split.sizes().left() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
         }
 
         var node = new TreeNode<P>(split.index(), split.value());
@@ -112,16 +112,15 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         return node;
     }
 
-    private long[] createSplit(
+    private GroupSizes createSplit(
         final int index,
         final double value,
         HugeLongArray group,
         final long groupSize,
-        HugeLongArray[] childGroups
+        Groups groups
     ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
-        assert childGroups.length == 2;
         assert index >= 0 && index < allFeatures.get(0).length;
 
         long leftGroupSize = 0;
@@ -131,13 +130,13 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
             var featuresIdx = group.get(i);
             var features = allFeatures.get(featuresIdx);
             if (features[index] < value) {
-                childGroups[0].set(leftGroupSize++, featuresIdx);
+                groups.left().set(leftGroupSize++, featuresIdx);
             } else {
-                childGroups[1].set(rightGroupSize++, featuresIdx);
+                groups.right().set(rightGroupSize++, featuresIdx);
             }
         }
 
-        return new long[]{leftGroupSize, rightGroupSize};
+        return ImmutableGroupSizes.of(leftGroupSize, rightGroupSize);
     }
 
     private Split findBestSplit(HugeLongArray group, final long groupSize) {
@@ -148,15 +147,15 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         double bestValue = Double.MAX_VALUE;
         double bestLoss = Double.MAX_VALUE;
 
-        HugeLongArray[] childGroups = {
+        var childGroups = ImmutableGroups.of(
             HugeLongArray.newArray(groupSize, allocationTracker),
             HugeLongArray.newArray(groupSize, allocationTracker)
-        };
-        HugeLongArray[] bestChildGroups = {
+        );
+        var bestChildGroups = ImmutableGroups.of(
             HugeLongArray.newArray(groupSize, allocationTracker),
             HugeLongArray.newArray(groupSize, allocationTracker)
-        };
-        long[] bestGroupSizes = {-1, -1};
+        );
+        var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
         for (int i = 0; i < allFeatures.get(0).length; i++) {
             for (int j = 0; j < groupSize; j++) {
@@ -183,34 +182,23 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         return ImmutableSplit.of(
             bestIdx,
             bestValue,
-            bestChildGroups[0],
-            bestChildGroups[1],
-            bestGroupSizes[0],
-            bestGroupSizes[1]
+            bestChildGroups,
+            bestGroupSizes
         );
     }
 
     @ValueClass
     interface Split {
         int index();
-
         double value();
-
-        HugeLongArray leftGroup();
-
-        HugeLongArray rightGroup();
-
-        long leftGroupSize();
-
-        long rightGroupSize();
+        Groups groups();
+        GroupSizes sizes();
     }
 
     @ValueClass
     interface StackRecord<P> {
         TreeNode<P> node();
-
         Split split();
-
         int depth();
     }
 

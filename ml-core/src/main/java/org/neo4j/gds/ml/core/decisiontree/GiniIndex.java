@@ -36,21 +36,14 @@ public class GiniIndex implements DecisionTreeLoss {
     }
 
     @Override
-    public double splitLoss(HugeLongArray[] groups, long[] groupSizes) {
-        assert groups.length > 1;
-        assert groups.length == groupSizes.length;
-
-        double loss = 0;
-        long totalSize = 0;
-
-        for (int i = 0; i < groupSizes.length; i++) {
-            loss += computeGroupLoss(groups[i], groupSizes[i]);
-            totalSize += groupSizes[i];
-        }
+    public double splitLoss(Groups groups, GroupSizes groupSizes) {
+        long totalSize = groupSizes.left() + groupSizes.right();
 
         if (totalSize == 0) {
             throw new IllegalStateException("Cannot compute loss over only empty groups");
         }
+
+        double loss = computeGroupLoss(groups.left(), groupSizes.left()) + computeGroupLoss(groups.right(), groupSizes.right());
 
         return loss / totalSize;
     }
