@@ -36,6 +36,7 @@ class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {0, 1};
+
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
     private final HugeObjectArray<double[]> allFeatures = HugeObjectArray.newArray(
         double[].class,
@@ -46,16 +47,7 @@ class ClassificationDecisionTreeTest {
 
     @BeforeEach
     void setup() {
-        allLabels.set(0, 0);
-        allLabels.set(1, 0);
-        allLabels.set(2, 0);
-        allLabels.set(3, 0);
-        allLabels.set(4, 0);
-        allLabels.set(5, 1);
-        allLabels.set(6, 1);
-        allLabels.set(7, 1);
-        allLabels.set(8, 1);
-        allLabels.set(9, 1);
+        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
 
         allFeatures.set(0, new double[]{2.771244718, 1.784783929});
         allFeatures.set(1, new double[]{1.728571309, 1.169761413});
