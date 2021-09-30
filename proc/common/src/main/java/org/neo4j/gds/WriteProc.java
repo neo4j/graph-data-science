@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -77,14 +76,15 @@ public abstract class WriteProc<
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             Graph graph = computationResult.graph();
-            var progressTracker = createProgressTracker(graph, computationResult);
+            var progressTracker = createProgressTracker(
+                graph.nodeCount(),
+                computationResult.config().writeConcurrency()
+            );
             var exporter = createNodePropertyExporter(graph, progressTracker, computationResult);
 
             try {
-                progressTracker.beginSubTask();
                 exporter.write(nodePropertyList(computationResult));
             } finally {
-                progressTracker.endSubTask();
                 progressTracker.release();
             }
 
@@ -94,11 +94,15 @@ public abstract class WriteProc<
     }
 
     ProgressTracker createProgressTracker(
-        Graph graph,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
+        long taskVolume,
+        int writeConcurrency
     ) {
-        var task = Tasks.leaf(algoName() + " :: WriteNodeProperties", graph.nodeCount());
-        return new TaskProgressTracker(task, log, computationResult.config().writeConcurrency(), taskRegistryFactory);
+        return new TaskProgressTracker(
+            NodePropertyExporter.baseTask(algoName(), taskVolume),
+            log,
+            writeConcurrency,
+            taskRegistryFactory
+        );
     }
 
     NodePropertyExporter createNodePropertyExporter(

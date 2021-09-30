@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.ShortestPathDeltaStepping;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.DeltaSteppingProcResult;
@@ -119,9 +119,12 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
                 }
             };
 
-            var task = Tasks.leaf("ShortestPathDeltaStepping :: WriteNodeProperties", graph.nodeCount());
-            var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
-            progressTracker.beginSubTask();
+            var progressTracker = new TaskProgressTracker(
+                NodePropertyExporter.baseTask("ShortestPathDeltaStepping", graph.nodeCount()),
+                log,
+                config.writeConcurrency(),
+                taskRegistryFactory
+            );
             nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
@@ -132,7 +135,6 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
                     config.writeProperty(),
                     properties
                 );
-            progressTracker.endSubTask();
         }
 
         return Stream.of(builder.build());

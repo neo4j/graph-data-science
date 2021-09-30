@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
@@ -104,8 +104,12 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             var writeConcurrency = computationResult.config().writeConcurrency();
-            var task = Tasks.leaf("ClosenessCentrality :: WriteNodeProperties", graph.nodeCount());
-            var progressTracker = new TaskProgressTracker(task, log, writeConcurrency, taskRegistryFactory);
+            var progressTracker = new TaskProgressTracker(
+                NodePropertyExporter.baseTask("ClosenessCentrality", graph.nodeCount()),
+                log,
+                writeConcurrency,
+                taskRegistryFactory
+            );
             var exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())

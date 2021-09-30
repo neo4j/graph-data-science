@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.Collection;
 
@@ -35,4 +37,8 @@ public interface NodePropertyExporter {
     void write(Collection<NodeProperty> nodeProperties);
 
     long propertiesWritten();
+
+    static Task baseTask(String operationName, long taskVolume) {
+        return Tasks.leaf(operationName + " :: WriteNodeProperties", taskVolume);
+    }
 }

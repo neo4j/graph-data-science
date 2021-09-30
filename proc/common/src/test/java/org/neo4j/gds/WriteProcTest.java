@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -40,11 +41,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class WriteProcTest {
+
     @Test
-    void shouldReleaseProgressTrackerAfterCancellation() throws Exception {
+    void shouldReleaseProgressTrackerAfterCancellation() {
         /*
          * we need two mocks.
          *
@@ -79,7 +83,7 @@ class WriteProcTest {
 
             @Override
             @NotNull ProgressTracker createProgressTracker(
-                Graph graph, ComputationResult computationResult
+                long taskVolume, int writeConcurrency
             ) {
                 return progressTracker;
             }
@@ -136,7 +140,9 @@ class WriteProcTest {
 
                 @Override
                 public Graph graph() {
-                    return null;
+                    var mockGraph = mock(Graph.class);
+                    when(mockGraph.nodeCount()).thenReturn(1000L);
+                    return mockGraph;
                 }
 
                 @Override
@@ -146,7 +152,10 @@ class WriteProcTest {
 
                 @Override
                 public AlgoBaseConfig config() {
-                    return null;
+                    // Because we forhgoddaboud the generic types we gotta choose some class that has both .writeConcurrency() and is an AlgoBaseConfig ...
+                    var mockConfig = mock(MockConfig.class);
+                    when(mockConfig.writeConcurrency()).thenReturn(1337);
+                    return mockConfig;
                 }
             });
 
@@ -158,8 +167,11 @@ class WriteProcTest {
         }
 
         // proper resource management :thumbsup:
-        verify(progressTracker).beginSubTask();
-        verify(progressTracker).endSubTask();
+        // the writeProc is only responsible for releasing; the _real_ exporter starts/ends subtasks (tested in unit test)
+        verify(progressTracker, never()).beginSubTask();
+        verify(progressTracker, never()).endSubTask();
         verify(progressTracker).release();
     }
+
+    private interface MockConfig extends AlgoBaseConfig, WritePropertyConfig {}
 }

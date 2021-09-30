@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
@@ -93,8 +92,12 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
         log.info("Scc: overall memory usage: %s", allocationTracker.getUsageString());
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            var task = Tasks.leaf("Scc :: WriteNodeProperties", graph.nodeCount());
-            var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
+            var progressTracker = new TaskProgressTracker(
+                NodePropertyExporter.baseTask("Scc", graph.nodeCount()),
+                log,
+                config.writeConcurrency(),
+                taskRegistryFactory
+            );
             NodePropertyExporter exporter = nodePropertyExporterBuilder
                 .withIdMapping(graph)
                 .withTerminationFlag(algorithm.getTerminationFlag())
@@ -114,12 +117,10 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
                 }
             };
 
-            progressTracker.beginSubTask();
             exporter.write(
                     config.writeProperty(),
                     properties
             );
-            progressTracker.endSubTask();
 
             writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
