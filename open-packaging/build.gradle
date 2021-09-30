@@ -68,5 +68,5 @@ task shadowCopy(type: Copy) {
     into distributionDir
 }
 
-ci.finalizedBy shadowCopy
-cipr.finalizedBy shadowCopy
+ci.finalizedBy shadowJar
+cipr.finalizedBy shadowJar
