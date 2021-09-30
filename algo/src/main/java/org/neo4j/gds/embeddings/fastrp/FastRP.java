@@ -299,6 +299,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         private final Partition partition;
         private final float sqrtEmbeddingDimension;
+        private final PropertyVectorAdder propertyVectorAdder;
 
         private InitRandomVectorTask(
             Partition partition,
@@ -306,6 +307,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         ) {
             this.partition = partition;
             this.sqrtEmbeddingDimension = sqrtEmbeddingDimension;
+            this.propertyVectorAdder = new PropertyVectorAdder(null);
         }
 
         @Override
@@ -333,36 +335,41 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 randomVector[i] = computeRandomEntry(random, entryValue);
             }
 
-            float[] features = features(nodeId);
+            propertyVectorAdder.setRandomVector(randomVector);
+            FeatureExtraction.extract(nodeId, -1, featureExtractors, propertyVectorAdder);
 
-            for (int j = 0; j < features.length; j++) {
-                float featureValue = features[j];
-                if (featureValue != 0.0f) {
-                    for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
-                        randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
-                    }
-                }
-            }
             return randomVector;
         }
 
-        float[] features(long nodeId) {
-            var features = new float[inputDimension];
-            FeatureConsumer featureConsumer = new FeatureConsumer() {
-                @Override
-                public void acceptScalar(long ignored, int offset, double value) {
-                    features[offset] = (float)value;
-                }
+        private class PropertyVectorAdder implements FeatureConsumer {
+            private float[] randomVector;
 
-                @Override
-                public void acceptArray(long ignored, int offset, double[] values) {
-                    for (int i = 0; i < values.length; i++) {
-                        features[offset + i] = (float)values[i];
+            PropertyVectorAdder(float[] randomVector) {
+                this.randomVector = randomVector;
+            }
+
+            void setRandomVector(float[] randomVector) {
+                this.randomVector = randomVector;
+            }
+
+            @Override
+            public void acceptScalar(long ignored, int offset, double value) {
+                float floatValue = (float) value;
+                for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
+                    randomVector[i] += floatValue * propertyVectors[offset][i - baseEmbeddingDimension];
+                }
+            }
+
+            @Override
+            public void acceptArray(long ignored, int offset, double[] values) {
+                for (int j = 0; j < values.length; j++) {
+                    var value = (float) values[j];
+                    float[] propertyVector = propertyVectors[offset + j];
+                    for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
+                        randomVector[i] += value * propertyVector[i - baseEmbeddingDimension];
                     }
                 }
-            };
-            FeatureExtraction.extract(nodeId, -1, featureExtractors, featureConsumer);
-            return features;
+            }
         }
     }
 
