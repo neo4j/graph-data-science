@@ -56,12 +56,13 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void testEmptyDoubleProperties() {
+        var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
-            100_000,
+            nodeCount,
             AllocationTracker.empty(),
             DefaultValue.of(42.0D),
             1
-        ).build(nodeMapping(0));
+        ).build(nodeMapping(nodeCount));
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
@@ -70,12 +71,13 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void testEmptyLongProperties() {
+        var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
-            100_000,
+            nodeCount,
             AllocationTracker.empty(),
             DefaultValue.of(42L),
             1
-        ).build(nodeMapping(0));
+        ).build(nodeMapping(nodeCount));
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
