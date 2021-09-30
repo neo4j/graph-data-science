@@ -43,12 +43,15 @@ public class GiniIndex implements DecisionTreeLoss {
             throw new IllegalStateException("Cannot compute loss over only empty groups");
         }
 
-        double loss = computeGroupLoss(groups.left(), groupSizes.left()) + computeGroupLoss(groups.right(), groupSizes.right());
+        double loss = computeGroupLoss(groups.left(), groupSizes.left()) + computeGroupLoss(
+            groups.right(),
+            groupSizes.right()
+        );
 
         return loss / totalSize;
     }
 
-    private double computeGroupLoss(HugeLongArray group, long groupSize) {
+    private double computeGroupLoss(final HugeLongArray group, final long groupSize) {
         assert group.size() >= groupSize;
 
         if (groupSize == 0) return 0;

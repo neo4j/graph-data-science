@@ -48,11 +48,11 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
     }
 
     @Override
-    protected Integer toTerminal(HugeLongArray group, long groupSize) {
+    protected Integer toTerminal(final HugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
-        var classesInGroup = new long[classes.length];
+        final var classesInGroup = new long[classes.length];
 
         for (long i = 0; i < groupSize; i++) {
             classesInGroup[allLabels.get(group.get(i))]++;

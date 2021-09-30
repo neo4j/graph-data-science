@@ -126,20 +126,23 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         long leftGroupSize = 0;
         long rightGroupSize = 0;
 
+        final var leftGroup = groups.left();
+        final var rightGroup = groups.right();
+
         for (int i = 0; i < groupSize; i++) {
             var featuresIdx = group.get(i);
             var features = allFeatures.get(featuresIdx);
             if (features[index] < value) {
-                groups.left().set(leftGroupSize++, featuresIdx);
+                leftGroup.set(leftGroupSize++, featuresIdx);
             } else {
-                groups.right().set(rightGroupSize++, featuresIdx);
+                rightGroup.set(rightGroupSize++, featuresIdx);
             }
         }
 
         return ImmutableGroupSizes.of(leftGroupSize, rightGroupSize);
     }
 
-    private Split findBestSplit(HugeLongArray group, final long groupSize) {
+    private Split findBestSplit(final HugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
@@ -158,7 +161,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
         for (int i = 0; i < allFeatures.get(0).length; i++) {
-            for (int j = 0; j < groupSize; j++) {
+            for (long j = 0; j < groupSize; j++) {
                 var features = allFeatures.get(group.get(j));
 
                 var groupSizes = createSplit(i, features[i], group, groupSize, childGroups);
