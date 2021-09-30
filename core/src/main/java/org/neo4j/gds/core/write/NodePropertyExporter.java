@@ -41,4 +41,8 @@ public interface NodePropertyExporter {
     static Task baseTask(String operationName, long taskVolume) {
         return Tasks.leaf(operationName + " :: WriteNodeProperties", taskVolume);
     }
+
+    static Task innerTask(String innerName, long taskVolume) {
+        return Tasks.leaf(innerName, taskVolume);
+    }
 }
