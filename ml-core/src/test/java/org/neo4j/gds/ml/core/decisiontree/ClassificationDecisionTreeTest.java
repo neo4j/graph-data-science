@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClassificationDecisionTreeTrainTest {
+class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {0, 1};
@@ -97,8 +97,8 @@ class ClassificationDecisionTreeTrainTest {
             allLabels
         );
 
-        var root = decisionTree.train();
+        var decisionTreePredict = decisionTree.train();
 
-        assertThat(root.predict(features)).isEqualTo(expectedPrediction);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(expectedPrediction);
     }
 }

@@ -19,21 +19,30 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-class TreeNode<P> {
-    public P prediction;
-    public int index = -1;
-    public double value;
-    public TreeNode<P> leftChild = null;
-    public TreeNode<P> rightChild = null;
+public class DecisionTreePredict<P> {
 
-    TreeNode(int index, double value) {
-        assert index >= 0;
+    private final TreeNode<P> root;
 
-        this.index = index;
-        this.value = value;
+    DecisionTreePredict(TreeNode<P> root) {
+        this.root = root;
     }
 
-    TreeNode(P prediction) {
-        this.prediction = prediction;
+    public P predict(double[] features) {
+        assert features.length > 0;
+
+        TreeNode<P> node = root;
+
+        while (node.leftChild != null) {
+            assert features.length > node.index;
+            assert node.rightChild != null;
+
+            if (features[node.index] < node.value) {
+                node = node.leftChild;
+            } else {
+                node = node.rightChild;
+            }
+        }
+
+        return node.prediction;
     }
 }
