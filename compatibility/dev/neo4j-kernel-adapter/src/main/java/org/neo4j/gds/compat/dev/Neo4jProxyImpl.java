@@ -334,23 +334,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         var read = transaction.dataRead();
         var nodeCount = read.countsForNode(labelId);
 
-        int numberOfPartitions;
-        if (nodeCount > 0) {
-            // ceil div to try to get enough partitions so a single one does
-            // not include more nodes than batchSize
-            long partitions = ((nodeCount - 1) / batchSize) + 1;
-
-            // value must be positive
-            if (partitions < 1) {
-                partitions = 1;
-            }
-
-            numberOfPartitions = (int) Long.min(Integer.MAX_VALUE, partitions);
-        } else {
-            // we have no partitions to scan, but the value must still  be positive
-            numberOfPartitions = 1;
-        }
-
         var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             transaction,
             SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
@@ -359,6 +342,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         if (indexDescriptor == IndexDescriptor.NO_INDEX) {
             throw new IllegalStateException("There is no index that can back a node label scan.");
         }
+
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, batchSize);
 
         try {
             var session = read.tokenReadSession(indexDescriptor);
@@ -377,6 +362,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
