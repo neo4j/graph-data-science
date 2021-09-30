@@ -251,8 +251,6 @@ In the following examples we will demonstrate using the SLLPA algorithm on this 
 [[algorithms-sllpa-examples-stream]]
 === Stream
 
-=== Stream
-
 In the `stream` execution mode, the algorithm returns the {result} for each node.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
