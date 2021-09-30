@@ -44,7 +44,7 @@ class DatasetManagerTest {
     void testCloseRemovesDbDirectory(@TempDir Path tempDir) throws Exception {
         var dbCreator = CommunityDbCreator.getInstance();
         DatasetManager datasetManager = new DatasetManager(tempDir, dbCreator);
-        EmptyDataset.INSTANCE.prepare(tempDir.resolve(EmptyDataset.NAME), dbCreator);
+        EmptyDataset.INSTANCE.prepare(tempDir.resolve("datasets").resolve(EmptyDataset.NAME), dbCreator);
         List<Path> filesWithCachedDataset = Files.walk(tempDir).filter(Files::isRegularFile).collect(toList());
 
         GdsGraphDatabaseAPI db = datasetManager.openDb(EmptyDataset.NAME);
