@@ -24,43 +24,49 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Random;
 import java.util.Stack;
 
 public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
+    private final Random random = new Random();
     private final AllocationTracker allocationTracker;
     private final L lossFunction;
-    private final HugeObjectArray<double[]> allFeatures;
+    private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
+    private final int[] activeFeatureIndices;
+    private final HugeLongArray activeFeatureVectors;
 
     public DecisionTreeTrain(
         AllocationTracker allocationTracker,
         L lossFunction,
-        HugeObjectArray<double[]> allFeatures,
+        HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
-        int minSize
+        int minSize,
+        double numFeatureIndicesRatio,
+        double numFeatureVectorsRatio
     ) {
-        assert allFeatures.size() > 0;
+        assert allFeatureVectors.size() > 0;
         assert maxDepth >= 1;
         assert minSize >= 0;
+        assert numFeatureIndicesRatio >= 0.0 && numFeatureIndicesRatio <= 1.0;
+        assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         this.allocationTracker = allocationTracker;
         this.lossFunction = lossFunction;
-        this.allFeatures = allFeatures;
+        this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
+        this.activeFeatureIndices = sampleFeatureIndices(numFeatureIndicesRatio);
+        this.activeFeatureVectors = sampleFeatureVectors(numFeatureVectorsRatio);
     }
 
     public DecisionTreePredict<P> train() {
         var stack = new Stack<StackRecord<P>>();
-        TreeNode<P> root;
-
-        {
-            var startGroup = HugeLongArray.newArray(allFeatures.size(), allocationTracker);
-            startGroup.setAll(i -> i);
-            root = splitAndPush(stack, startGroup, startGroup.size(), 1);
-        }
+        TreeNode<P> root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
 
         while (!stack.empty()) {
             var record = stack.pop();
@@ -121,7 +127,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
     ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
-        assert index >= 0 && index < allFeatures.get(0).length;
+        assert index >= 0 && index < allFeatureVectors.get(0).length;
 
         long leftGroupSize = 0;
         long rightGroupSize = 0;
@@ -131,7 +137,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
         for (int i = 0; i < groupSize; i++) {
             var featuresIdx = group.get(i);
-            var features = allFeatures.get(featuresIdx);
+            var features = allFeatureVectors.get(featuresIdx);
             if (features[index] < value) {
                 leftGroup.set(leftGroupSize++, featuresIdx);
             } else {
@@ -160,9 +166,9 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
-        for (int i = 0; i < allFeatures.get(0).length; i++) {
+        for (int i : activeFeatureIndices) {
             for (long j = 0; j < groupSize; j++) {
-                var features = allFeatures.get(group.get(j));
+                var features = allFeatureVectors.get(group.get(j));
 
                 var groupSizes = createSplit(i, features[i], group, groupSize, childGroups);
 
@@ -188,20 +194,81 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
             bestChildGroups,
             bestGroupSizes
         );
+
+    }
+
+    private int[] sampleFeatureIndices(double numFeatureIndicesRatio) {
+        assert numFeatureIndicesRatio >= 0.0 && numFeatureIndicesRatio <= 1.0;
+
+        int totalNumIndices = allFeatureVectors.get(0).length;
+        final int numIndices = (int) Math.ceil(numFeatureIndicesRatio * allFeatureVectors.get(0).length);
+        final var chosenIndices = new int[numIndices];
+
+        var tmpAvailableIndices = new Integer[totalNumIndices];
+        Arrays.setAll(tmpAvailableIndices, i -> i);
+        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
+
+        for (int i = 0; i < numIndices; i++) {
+            int j = random.nextInt(availableIndices.size());
+            chosenIndices[i] = (availableIndices.get(j));
+            availableIndices.remove(j);
+        }
+
+        return chosenIndices;
+    }
+
+    private HugeLongArray sampleFeatureVectors(double numFeatureVectorsRatio) {
+        assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
+
+        if (new Double(0.0D).equals(numFeatureVectorsRatio)) {
+            var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
+            allVectors.setAll(i -> i);
+            return allVectors;
+        }
+
+        final long totalNumVectors = allFeatureVectors.size();
+        final long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
+        final var chosenVectors = HugeLongArray.newArray(numVectors, allocationTracker);
+
+        for (long i = 0; i < numVectors; i++) {
+            long j = randomNonNegativeLong(0, totalNumVectors);
+            chosenVectors.set(i, j);
+        }
+
+        return chosenVectors;
+    }
+
+    // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
+    // `min` is inclusive, and `max` is exclusive.
+    private long randomNonNegativeLong(long min, long max) {
+        assert min >= 0;
+        assert max > min;
+
+        long randomNum;
+        do {
+            randomNum = random.nextLong();
+        } while (randomNum == Long.MIN_VALUE);
+
+        return (Math.abs(randomNum) % (max - min)) + min;
     }
 
     @ValueClass
     interface Split {
         int index();
+
         double value();
+
         Groups groups();
+
         GroupSizes sizes();
     }
 
     @ValueClass
     interface StackRecord<P> {
         TreeNode<P> node();
+
         Split split();
+
         int depth();
     }
 

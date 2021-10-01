@@ -66,11 +66,11 @@ class ClassificationDecisionTreeTest {
     private static Stream<Arguments> sanePredictionParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 1, 1),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 1),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 2),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 100),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 100)
+                Arguments.of(new double[]{8.0, 0.0}, 1, 1, 1.0D, 0.0D),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 1, 1.0D, 0.0D),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 2, 1.0D, 0.0D),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 100, 1.0D, 0.0D),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 100, 1.0D, 0.0D)
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(3))
         );
@@ -78,13 +78,22 @@ class ClassificationDecisionTreeTest {
 
     @ParameterizedTest
     @MethodSource("sanePredictionParameters")
-    void shouldMakeSanePrediction(double[] features, int expectedPrediction, int maxDepth, int minSize) {
+    void shouldMakeSanePrediction(
+        double[] features,
+        int expectedPrediction,
+        int maxDepth,
+        double numFeatureIndicesRatio,
+        double numFeatureVectorsRatio,
+        int minSize
+    ) {
         var decisionTree = new ClassificationDecisionTreeTrain<>(
             AllocationTracker.empty(),
             giniIndexLoss,
             allFeatures,
             maxDepth,
             minSize,
+            numFeatureIndicesRatio,
+            numFeatureVectorsRatio,
             CLASSES,
             allLabels
         );

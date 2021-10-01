@@ -24,5 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 @ValueClass
 interface GroupSizes {
     long left();
+
     long right();
 }

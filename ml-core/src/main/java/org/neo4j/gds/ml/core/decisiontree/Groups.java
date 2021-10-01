@@ -25,5 +25,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 @ValueClass
 interface Groups {
     HugeLongArray left();
+
     HugeLongArray right();
 }

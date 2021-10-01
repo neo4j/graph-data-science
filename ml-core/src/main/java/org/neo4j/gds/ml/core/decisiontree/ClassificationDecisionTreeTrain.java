@@ -35,10 +35,21 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         HugeObjectArray<double[]> allFeatures,
         int maxDepth,
         int minSize,
+        double numFeatureIndicesRatio,
+        double numFeatureVectorsRatio,
         int[] classes,
         HugeIntArray allLabels
+
     ) {
-        super(allocationTracker, lossFunction, allFeatures, maxDepth, minSize);
+        super(
+            allocationTracker,
+            lossFunction,
+            allFeatures,
+            maxDepth,
+            minSize,
+            numFeatureIndicesRatio,
+            numFeatureVectorsRatio
+        );
 
         assert classes.length > 0;
         this.classes = classes;
