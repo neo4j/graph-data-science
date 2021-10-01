@@ -31,11 +31,11 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
-public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
+public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
 
     private final Random random;
     private final AllocationTracker allocationTracker;
-    private final L lossFunction;
+    private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
@@ -44,7 +44,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
     DecisionTreeTrain(
         AllocationTracker allocationTracker,
-        L lossFunction,
+        LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
         int minSize,
@@ -68,9 +68,9 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         this.activeFeatureVectors = sampleFeatureVectors(numFeatureVectorsRatio);
     }
 
-    public DecisionTreePredict<P> train() {
-        var stack = new Stack<StackRecord<P>>();
-        TreeNode<P> root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
+    public DecisionTreePredict<PREDICTION> train() {
+        var stack = new Stack<StackRecord<PREDICTION>>();
+        TreeNode<PREDICTION> root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
 
         while (!stack.empty()) {
             var record = stack.pop();
@@ -102,9 +102,14 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         return new DecisionTreePredict<>(root);
     }
 
-    protected abstract P toTerminal(HugeLongArray group, long groupSize);
+    protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
 
-    private TreeNode<P> splitAndPush(Stack<StackRecord<P>> stack, HugeLongArray group, long groupSize, int depth) {
+    private TreeNode<PREDICTION> splitAndPush(
+        Stack<StackRecord<PREDICTION>> stack,
+        HugeLongArray group,
+        long groupSize,
+        int depth
+    ) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
         assert depth >= 1;
@@ -116,7 +121,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
             return new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
         }
 
-        var node = new TreeNode<P>(split.index(), split.value());
+        var node = new TreeNode<PREDICTION>(split.index(), split.value());
         stack.push(ImmutableStackRecord.of(node, split, depth));
 
         return node;
@@ -268,8 +273,8 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
     }
 
     @ValueClass
-    interface StackRecord<P> {
-        TreeNode<P> node();
+    interface StackRecord<PREDICTION> {
+        TreeNode<PREDICTION> node();
 
         Split split();
 

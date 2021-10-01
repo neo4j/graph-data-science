@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
-public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends DecisionTreeTrain<L, Integer> {
+public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
 
     private final int[] classes;
     private final HugeIntArray allLabels;
@@ -36,7 +36,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
     public ClassificationDecisionTreeTrain(
         AllocationTracker allocationTracker,
-        L lossFunction,
+        LOSS lossFunction,
         HugeObjectArray<double[]> allFeatures,
         int maxDepth,
         int minSize,
@@ -68,10 +68,10 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         this.classToIdx = classToIdx;
     }
 
-    public static final class Builder<L extends DecisionTreeLoss> {
+    public static final class Builder<LOSS extends DecisionTreeLoss> {
 
         private final AllocationTracker allocationTracker;
-        private final L lossFunction;
+        private final LOSS lossFunction;
         private final HugeObjectArray<double[]> allFeatures;
         private final int maxDepth;
         private final int[] classes;
@@ -85,7 +85,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
         public Builder(
             AllocationTracker allocationTracker,
-            L lossFunction,
+            LOSS lossFunction,
             HugeObjectArray<double[]> allFeatures,
             int maxDepth,
             int[] classes,
@@ -101,7 +101,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             this.classToIdx = classToIdx;
         }
 
-        public ClassificationDecisionTreeTrain<L> build() {
+        public ClassificationDecisionTreeTrain<LOSS> build() {
             return new ClassificationDecisionTreeTrain<>(
                 allocationTracker,
                 lossFunction,
@@ -117,22 +117,22 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             );
         }
 
-        public Builder<L> withMinSize(int minSize) {
+        public Builder<LOSS> withMinSize(int minSize) {
             this.minSize = minSize;
             return this;
         }
 
-        public Builder<L> withNumFeatureIndicesRatio(double ratio) {
+        public Builder<LOSS> withNumFeatureIndicesRatio(double ratio) {
             this.numFeatureIndicesRatio = ratio;
             return this;
         }
 
-        public Builder<L> withNumFeatureVectorsRatio(double ratio) {
+        public Builder<LOSS> withNumFeatureVectorsRatio(double ratio) {
             this.numFeatureVectorsRatio = ratio;
             return this;
         }
 
-        public Builder<L> withRandomSeed(long seed) {
+        public Builder<LOSS> withRandomSeed(long seed) {
             this.random = Optional.of(new Random(seed));
             return this;
         }

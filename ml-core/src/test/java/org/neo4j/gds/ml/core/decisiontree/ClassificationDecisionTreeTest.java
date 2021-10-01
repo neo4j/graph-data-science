@@ -44,7 +44,7 @@ class ClassificationDecisionTreeTest {
         );
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
-    private final HugeObjectArray<double[]> allFeatures = HugeObjectArray.newArray(
+    private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
         double[].class,
         NUM_SAMPLES,
         AllocationTracker.empty()
@@ -55,16 +55,19 @@ class ClassificationDecisionTreeTest {
     void setup() {
         allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
 
-        allFeatures.set(0, new double[]{2.771244718, 1.784783929});
-        allFeatures.set(1, new double[]{1.728571309, 1.169761413});
-        allFeatures.set(2, new double[]{3.678319846, 3.31281357});
-        allFeatures.set(3, new double[]{6.961043357, 2.61995032});
-        allFeatures.set(4, new double[]{6.999208922, 2.209014212});
-        allFeatures.set(5, new double[]{7.497545867, 3.162953546});
-        allFeatures.set(6, new double[]{9.00220326, 3.339047188});
-        allFeatures.set(7, new double[]{7.444542326, 0.476683375});
-        allFeatures.set(8, new double[]{10.12493903, 3.234550982});
-        allFeatures.set(9, new double[]{6.642287351, 3.319983761});
+        // Class 1337 feature vectors.
+        allFeatureVectors.set(0, new double[]{2.771244718, 1.784783929});
+        allFeatureVectors.set(1, new double[]{1.728571309, 1.169761413});
+        allFeatureVectors.set(2, new double[]{3.678319846, 3.31281357});
+        allFeatureVectors.set(3, new double[]{6.961043357, 2.61995032});
+        allFeatureVectors.set(4, new double[]{6.999208922, 2.209014212});
+
+        // Class 42 feature vectors.
+        allFeatureVectors.set(5, new double[]{7.497545867, 3.162953546});
+        allFeatureVectors.set(6, new double[]{9.00220326, 3.339047188});
+        allFeatureVectors.set(7, new double[]{7.444542326, 0.476683375});
+        allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
+        allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
 
         giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
     }
@@ -93,7 +96,7 @@ class ClassificationDecisionTreeTest {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
             AllocationTracker.empty(),
             giniIndexLoss,
-            allFeatures,
+            allFeatureVectors,
             maxDepth,
             CLASSES,
             allLabels,
@@ -114,7 +117,7 @@ class ClassificationDecisionTreeTest {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
             AllocationTracker.empty(),
             giniIndexLoss,
-            allFeatures,
+            allFeatureVectors,
             1,
             CLASSES,
             allLabels,
@@ -142,7 +145,7 @@ class ClassificationDecisionTreeTest {
         var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
             AllocationTracker.empty(),
             giniIndexLoss,
-            allFeatures,
+            allFeatureVectors,
             1,
             CLASSES,
             allLabels,

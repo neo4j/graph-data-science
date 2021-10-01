@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-public class DecisionTreePredict<P> {
+public class DecisionTreePredict<PREDICTION> {
 
-    private final TreeNode<P> root;
+    private final TreeNode<PREDICTION> root;
 
-    DecisionTreePredict(TreeNode<P> root) {
+    DecisionTreePredict(TreeNode<PREDICTION> root) {
         this.root = root;
     }
 
-    public P predict(double[] features) {
+    public PREDICTION predict(double[] features) {
         assert features.length > 0;
 
-        TreeNode<P> node = root;
+        TreeNode<PREDICTION> node = root;
 
         while (node.leftChild != null) {
             assert features.length > node.index;

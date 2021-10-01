@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.ml.core.decisiontree;
 
-class TreeNode<P> {
-    public P prediction;
+class TreeNode<PREDICTION> {
+    public PREDICTION prediction;
     public int index = -1;
     public double value;
-    public TreeNode<P> leftChild = null;
-    public TreeNode<P> rightChild = null;
+    public TreeNode<PREDICTION> leftChild = null;
+    public TreeNode<PREDICTION> rightChild = null;
 
     TreeNode(int index, double value) {
         assert index >= 0;
@@ -33,7 +33,7 @@ class TreeNode<P> {
         this.value = value;
     }
 
-    TreeNode(P prediction) {
+    TreeNode(PREDICTION prediction) {
         this.prediction = prediction;
     }
 }
