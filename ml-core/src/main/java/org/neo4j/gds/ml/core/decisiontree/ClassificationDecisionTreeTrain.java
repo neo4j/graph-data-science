@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -31,6 +32,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
     private final int[] classes;
     private final HugeIntArray allLabels;
+    private final Map<Integer, Integer> classToIdx;
 
     public ClassificationDecisionTreeTrain(
         AllocationTracker allocationTracker,
@@ -42,7 +44,8 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         double numFeatureVectorsRatio,
         Optional<Random> random,
         int[] classes,
-        HugeIntArray allLabels
+        HugeIntArray allLabels,
+        Map<Integer, Integer> classToIdx
     ) {
         super(
             allocationTracker,
@@ -60,6 +63,9 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
         assert allLabels.size() == allFeatures.size();
         this.allLabels = allLabels;
+
+        assert classToIdx.keySet().size() == classes.length;
+        this.classToIdx = classToIdx;
     }
 
     public static final class Builder<L extends DecisionTreeLoss> {
@@ -70,6 +76,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         private final int maxDepth;
         private final int[] classes;
         private final HugeIntArray allLabels;
+        private final Map<Integer, Integer> classToIdx;
 
         private int minSize = 1;
         private double numFeatureIndicesRatio = 1.0;
@@ -82,7 +89,8 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             HugeObjectArray<double[]> allFeatures,
             int maxDepth,
             int[] classes,
-            HugeIntArray allLabels
+            HugeIntArray allLabels,
+            Map<Integer, Integer> classToIdx
         ) {
             this.allocationTracker = allocationTracker;
             this.lossFunction = lossFunction;
@@ -90,6 +98,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             this.maxDepth = maxDepth;
             this.classes = classes;
             this.allLabels = allLabels;
+            this.classToIdx = classToIdx;
         }
 
         public ClassificationDecisionTreeTrain<L> build() {
@@ -103,7 +112,8 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
                 numFeatureVectorsRatio,
                 random,
                 classes,
-                allLabels
+                allLabels,
+                classToIdx
             );
         }
 
@@ -136,18 +146,19 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         final var classesInGroup = new long[classes.length];
 
         for (long i = 0; i < groupSize; i++) {
-            classesInGroup[allLabels.get(group.get(i))]++;
+            int c = allLabels.get(group.get(i));
+            classesInGroup[classToIdx.get(c)]++;
         }
 
         long max = -1;
-        int maxClass = 0;
+        int maxClassIdx = 0;
         for (int i = 0; i < classesInGroup.length; i++) {
             if (classesInGroup[i] <= max) continue;
 
             max = classesInGroup[i];
-            maxClass = i;
+            maxClassIdx = i;
         }
 
-        return maxClass;
+        return classes[maxClassIdx];
     }
 }

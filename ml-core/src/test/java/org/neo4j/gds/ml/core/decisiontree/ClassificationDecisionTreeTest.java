@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassificationDecisionTreeTest {
 
     private static final long NUM_SAMPLES = 10;
-    private static final int[] CLASSES = {0, 1};
+    private static final int[] CLASSES = {1337, 42};
+    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
+            1337, 0,
+            42, 1
+        );
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
     private final HugeObjectArray<double[]> allFeatures = HugeObjectArray.newArray(
@@ -48,7 +53,7 @@ class ClassificationDecisionTreeTest {
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
+        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
 
         allFeatures.set(0, new double[]{2.771244718, 1.784783929});
         allFeatures.set(1, new double[]{1.728571309, 1.169761413});
@@ -61,17 +66,17 @@ class ClassificationDecisionTreeTest {
         allFeatures.set(8, new double[]{10.12493903, 3.234550982});
         allFeatures.set(9, new double[]{6.642287351, 3.319983761});
 
-        giniIndexLoss = new GiniIndex(CLASSES, allLabels);
+        giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 1, 1),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 1),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 2),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 100),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 100)
+                Arguments.of(new double[]{8.0, 0.0}, 42, 1),
+                Arguments.of(new double[]{3.0, 0.0}, 1337, 1),
+                Arguments.of(new double[]{0.0, 4.0}, 42, 2),
+                Arguments.of(new double[]{3.0, 0.0}, 1337, 100),
+                Arguments.of(new double[]{0.0, 4.0}, 42, 100)
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(3))
         );
@@ -91,7 +96,8 @@ class ClassificationDecisionTreeTest {
             allFeatures,
             maxDepth,
             CLASSES,
-            allLabels
+            allLabels,
+            CLASS_TO_IDX
         );
 
         var decisionTree = decisionTreeBuilder
@@ -111,7 +117,8 @@ class ClassificationDecisionTreeTest {
             allFeatures,
             1,
             CLASSES,
-            allLabels
+            allLabels,
+            CLASS_TO_IDX
         );
 
         var features = new double[]{8.0, 0.0};
@@ -121,13 +128,13 @@ class ClassificationDecisionTreeTest {
             .withRandomSeed(-6938002729576536314L)
             .build();
         var decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(1);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
         decisionTree = decisionTreeBuilder
             .withRandomSeed(42L)
             .build();
         decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(0);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }
 
     @Test
@@ -138,7 +145,8 @@ class ClassificationDecisionTreeTest {
             allFeatures,
             1,
             CLASSES,
-            allLabels
+            allLabels,
+            CLASS_TO_IDX
         );
 
         var features = new double[]{8.0, 0.0};
@@ -148,12 +156,12 @@ class ClassificationDecisionTreeTest {
             .withRandomSeed(5677377167946646799L)
             .build();
         var decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(1);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(42);
 
         decisionTree = decisionTreeBuilder
             .withRandomSeed(321328L)
             .build();
         decisionTreePredict = decisionTree.train();
-        assertThat(decisionTreePredict.predict(features)).isEqualTo(0);
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(1337);
     }
 }

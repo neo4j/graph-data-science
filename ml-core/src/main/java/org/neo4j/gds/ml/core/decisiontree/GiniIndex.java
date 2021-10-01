@@ -22,17 +22,26 @@ package org.neo4j.gds.ml.core.decisiontree;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.Map;
+
 public class GiniIndex implements DecisionTreeLoss {
 
     private final int[] classes;
     private final HugeIntArray allLabels;
+    private final Map<Integer, Integer> classToIdx;
 
-    public GiniIndex(int[] classes, HugeIntArray allLabels) {
+    public GiniIndex(
+        int[] classes,
+        HugeIntArray allLabels,
+        Map<Integer, Integer> classToIdx
+    ) {
         assert classes.length > 0;
         assert allLabels.size() > 0;
+        assert classToIdx.keySet().size() == classes.length;
 
         this.classes = classes;
         this.allLabels = allLabels;
+        this.classToIdx = classToIdx;
     }
 
     @Override
@@ -58,7 +67,8 @@ public class GiniIndex implements DecisionTreeLoss {
 
         final var groupClassCounts = new long[classes.length];
         for (long i = 0; i < groupSize; i++) {
-            groupClassCounts[allLabels.get(group.get(i))]++;
+            var label = allLabels.get(group.get(i));
+            groupClassCounts[classToIdx.get(label)]++;
         }
 
         double score = 0.0;

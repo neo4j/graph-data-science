@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.core.decisiontree.ClassificationDecisionTreeTrain;
 import org.neo4j.gds.ml.core.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.decisiontree.GiniIndex;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 public class ClassificationRandomForestTrain {
@@ -43,7 +44,6 @@ public class ClassificationRandomForestTrain {
     private final int numDecisionTrees;
     private final int[] classes;
     private final HugeIntArray allLabels;
-    private final GiniIndex giniIndex;
 
     public ClassificationRandomForestTrain(
         AllocationTracker allocationTracker,
@@ -69,21 +69,28 @@ public class ClassificationRandomForestTrain {
         this.numDecisionTrees = numDecisionTrees;
         this.classes = classes;
         this.allLabels = allLabels;
-        this.giniIndex = new GiniIndex(classes, allLabels);
     }
 
     public ClassificationRandomForestPredict train() {
         var decisionTrees = new DecisionTreePredict[this.numDecisionTrees];
 
+        var classToIdx = new HashMap<Integer, Integer>();
+        for (int i = 0; i < classes.length; i++) {
+            classToIdx.put(classes[i], i);
+        }
+
+        var giniIndex = new GiniIndex(classes, allLabels, classToIdx);
+
         var tasks = ParallelUtil.tasks(this.numDecisionTrees, index -> () -> {
             var decisionTreeBuilder =
                 new ClassificationDecisionTreeTrain.Builder<>(
                     this.allocationTracker,
-                    this.giniIndex,
+                    giniIndex,
                     this.allFeatureVectors,
                     this.maxDepth,
                     this.classes,
-                    this.allLabels
+                    this.allLabels,
+                    classToIdx
                 )
                     .withMinSize(this.minSize)
                     .withNumFeatureIndicesRatio(this.numFeatureIndicesRatio)
@@ -98,6 +105,6 @@ public class ClassificationRandomForestTrain {
         });
         ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
 
-        return new ClassificationRandomForestPredict(decisionTrees, this.classes, concurrency);
+        return new ClassificationRandomForestPredict(decisionTrees, this.classes, classToIdx, concurrency);
     }
 }

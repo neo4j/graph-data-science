@@ -23,7 +23,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.ml.core.decisiontree.DecisionTreePredict;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -37,15 +36,13 @@ public class ClassificationRandomForestPredict {
     public ClassificationRandomForestPredict(
         DecisionTreePredict<Integer>[] decisionTrees,
         int[] classes,
+        Map<Integer, Integer> classToIdx,
         int concurrency
     ) {
         this.decisionTrees = decisionTrees;
         this.classes = classes;
         this.concurrency = concurrency;
-        this.classToIdx = new HashMap<>();
-        for (int i = 0; i < classes.length; i++) {
-            this.classToIdx.put(classes[i], i);
-        }
+        this.classToIdx = classToIdx;
     }
 
     int predict(final double[] features) {

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,35 +35,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GiniIndexTest {
 
     private static final int[] CLASSES = {0, 1};
+    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
+        5, 0,
+        1, 1
+    );
 
     private static Stream<Arguments> giniParameters() {
         return Stream.of(
             Arguments.of(
-                new int[]{1, 0, 1, 0},
+                new int[]{1, 5, 1, 5},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
                 ImmutableGroupSizes.of(2, 2),
                 0.5D
             ),
             Arguments.of(
-                new int[]{0, 0, 1, 1},
+                new int[]{5, 5, 1, 1},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
                 ImmutableGroupSizes.of(2, 2),
                 0.0D
             ),
             Arguments.of(
-                new int[]{1, 0, 0, 0},
+                new int[]{1, 5, 5, 5},
                 new long[][]{new long[]{0}, new long[]{1, 2, 3}},
                 ImmutableGroupSizes.of(1, 3),
                 0.0D
             ),
             Arguments.of(
-                new int[]{1, 0, 0, 0},
+                new int[]{1, 5, 5, 5},
                 new long[][]{new long[]{0, 1}, new long[]{2, 3}},
                 ImmutableGroupSizes.of(2, 2),
                 0.25D
             ),
             Arguments.of(
-                new int[]{1, 0, 0, 0},
+                new int[]{1, 5, 5, 5},
                 new long[][]{new long[]{0, 1, 0, 0}, new long[]{2, 3, 1, 1}},
                 ImmutableGroupSizes.of(2, 2),
                 0.25D
@@ -88,7 +93,7 @@ class GiniIndexTest {
             rightGroup.set(i, groups[1][i]);
         }
 
-        var giniIndexLoss = new GiniIndex(CLASSES, hugeLabels);
+        var giniIndexLoss = new GiniIndex(CLASSES, hugeLabels, CLASS_TO_IDX);
 
         assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));

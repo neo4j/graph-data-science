@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
-    private static final int[] CLASSES = {0, 1};
+    private static final int[] CLASSES = {1337, 42};
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
     private final HugeObjectArray<double[]> allFeatures = HugeObjectArray.newArray(
@@ -43,7 +43,7 @@ public class ClassificationRandomForestTest {
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
+        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
 
         // Class 0 feature vectors.
         allFeatures.set(0, new double[]{2.771244718, 1.784783929});
@@ -80,7 +80,7 @@ public class ClassificationRandomForestTest {
         var randomForestPredict = randomForestTrain.train();
 
         var features = new double[]{8.0, 0.0};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(1);
+        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
     }
 
     @ParameterizedTest
@@ -103,6 +103,6 @@ public class ClassificationRandomForestTest {
         var randomForestPredict = randomForestTrain.train();
 
         var features = new double[]{8.0, 3.2};
-        assertThat(randomForestPredict.predict(features)).isEqualTo(1);
+        assertThat(randomForestPredict.predict(features)).isEqualTo(42);
     }
 }
