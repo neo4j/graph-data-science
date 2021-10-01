@@ -87,9 +87,9 @@ public final class DatasetManager {
         }
 
         try {
-            Log.info("dataset {} is ready", datasetId);
-            Log.info(EnvironmentReporting.directoryContents(datasetsDirectory()));
-            Log.info(EnvironmentReporting.diskUsage());
+            Log.debug("dataset {} is ready", datasetId);
+            Log.debug(EnvironmentReporting.directoryContents(datasetsDirectory()));
+            Log.debug(EnvironmentReporting.diskUsage());
         } catch (IOException ignore) {
             // not ideal
         }
@@ -101,8 +101,8 @@ public final class DatasetManager {
             Files.createDirectories(workingCopyDirectory);
             PathUtils.copyDirectory(datasetDirectory, workingCopyDirectory);
             Log.info("working copy of {} ready in {}", datasetId, workingCopyDirectory);
-            Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
-            Log.info(EnvironmentReporting.diskUsage());
+            Log.debug(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
+            Log.debug(EnvironmentReporting.diskUsage());
         } catch (IOException e) {
             throw new RuntimeException("Could not create working copy", e);
         }
@@ -120,8 +120,8 @@ public final class DatasetManager {
                 Log.info("cleaning up database directory {}...", dbDir);
                 PathUtils.deleteDirectory(dbDir);
                 Log.info("cleanup successful");
-                Log.info(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
-                Log.info(EnvironmentReporting.diskUsage());
+                Log.debug(EnvironmentReporting.directoryContents(workingCopiesDirectory()));
+                Log.debug(EnvironmentReporting.diskUsage());
             } catch (IOException e) {
                 Log.error("cleanup unsuccessful");
                 throw new RuntimeException("Could not delete working copy", e);
