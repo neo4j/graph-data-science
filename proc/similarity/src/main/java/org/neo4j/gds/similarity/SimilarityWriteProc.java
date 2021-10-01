@@ -28,7 +28,7 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 
 import java.util.Collections;
@@ -88,12 +88,8 @@ public abstract class SimilarityWriteProc<
                     procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            var task = Tasks.leaf(
-                                algoName() + " :: WriteRelationships",
-                                similarityGraph.relationshipCount()
-                            );
                             var progressTracker = new TaskProgressTracker(
-                                task,
+                                RelationshipExporter.baseTask(algoName(), similarityGraph.relationshipCount()),
                                 log,
                                 RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
                                 taskRegistryFactory
@@ -105,7 +101,6 @@ public abstract class SimilarityWriteProc<
                                 .withProgressTracker(progressTracker)
                                 .build();
 
-                            progressTracker.beginSubTask();
                             if (SimilarityProc.shouldComputeHistogram(callContext)) {
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(
@@ -120,7 +115,6 @@ public abstract class SimilarityWriteProc<
                             } else {
                                 exporter.write(writeRelationshipType, writeProperty);
                             }
-                            progressTracker.endSubTask();
                         }
                     }
                 );

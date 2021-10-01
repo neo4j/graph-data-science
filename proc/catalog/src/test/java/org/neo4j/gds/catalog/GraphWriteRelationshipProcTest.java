@@ -195,10 +195,10 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "WriteRelationships :: Start",
-                "WriteRelationships 50%",
-                "WriteRelationships 100%",
-                "WriteRelationships :: Finished"
+                "Graph :: WriteRelationships :: Start",
+                "Graph :: WriteRelationships 50%",
+                "Graph :: WriteRelationships 100%",
+                "Graph :: WriteRelationships :: Finished"
             );
     }
 }
