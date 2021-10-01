@@ -25,7 +25,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.decisiontree.GiniIndex;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClassificationRandomForestTest {
     private static final long NUM_SAMPLES = 10;
     private static final int[] CLASSES = {1337, 42};
+    private static final Map<Integer, Integer> CLASS_TO_IDX = Map.of(
+        1337, 0,
+        42, 1
+    );
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES, AllocationTracker.empty());
     private final HugeObjectArray<double[]> allFeatureVectors = HugeObjectArray.newArray(
@@ -40,6 +46,8 @@ public class ClassificationRandomForestTest {
         NUM_SAMPLES,
         AllocationTracker.empty()
     );
+
+    private GiniIndex giniIndexLoss;
 
     @BeforeEach
     void setup() {
@@ -58,6 +66,8 @@ public class ClassificationRandomForestTest {
         allFeatureVectors.set(7, new double[]{7.444542326, 0.476683375});
         allFeatureVectors.set(8, new double[]{10.12493903, 3.234550982});
         allFeatureVectors.set(9, new double[]{6.642287351, 3.319983761});
+
+        giniIndexLoss = new GiniIndex(CLASSES, allLabels, CLASS_TO_IDX);
     }
 
     @ParameterizedTest
@@ -65,6 +75,7 @@ public class ClassificationRandomForestTest {
     void usingOneTree(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain(
             AllocationTracker.empty(),
+            giniIndexLoss,
             allFeatureVectors,
             1,
             1,
@@ -88,6 +99,7 @@ public class ClassificationRandomForestTest {
     void usingTwentyTrees(int concurrency) {
         var randomForestTrain = new ClassificationRandomForestTrain(
             AllocationTracker.empty(),
+            giniIndexLoss,
             allFeatureVectors,
             2,
             1,

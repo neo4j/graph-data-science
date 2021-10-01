@@ -25,15 +25,16 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.decisiontree.ClassificationDecisionTreeTrain;
+import org.neo4j.gds.ml.core.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.ml.core.decisiontree.DecisionTreePredict;
-import org.neo4j.gds.ml.core.decisiontree.GiniIndex;
 
 import java.util.HashMap;
 import java.util.Optional;
 
-public class ClassificationRandomForestTrain {
+public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
 
     private final AllocationTracker allocationTracker;
+    private final LOSS lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
@@ -47,6 +48,7 @@ public class ClassificationRandomForestTrain {
 
     public ClassificationRandomForestTrain(
         AllocationTracker allocationTracker,
+        LOSS lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
         int minSize,
@@ -59,6 +61,7 @@ public class ClassificationRandomForestTrain {
         HugeIntArray allLabels
     ) {
         this.allocationTracker = allocationTracker;
+        this.lossFunction = lossFunction;
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
@@ -79,13 +82,11 @@ public class ClassificationRandomForestTrain {
             classToIdx.put(classes[i], i);
         }
 
-        var giniIndex = new GiniIndex(classes, allLabels, classToIdx);
-
         var tasks = ParallelUtil.tasks(this.numDecisionTrees, index -> () -> {
             var decisionTreeBuilder =
                 new ClassificationDecisionTreeTrain.Builder<>(
                     this.allocationTracker,
-                    giniIndex,
+                    this.lossFunction,
                     this.allFeatureVectors,
                     this.maxDepth,
                     this.classes,
