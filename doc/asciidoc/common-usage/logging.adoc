@@ -71,6 +71,7 @@ YIELD
 | status        | String    | The current status of the job, i.e. `RUNNING` or `CANCELED`.
 | timeStarted   | LocalTime | The local wall clock time when the task has been started.
 | elapsedTime   | Duration  | The duration from `timeStarted` to now.
+|===
 
 
 [[logging-progress-logging-examples]]
