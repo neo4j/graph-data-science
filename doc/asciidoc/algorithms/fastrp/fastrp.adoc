@@ -31,6 +31,7 @@ Conversely, two nodes that are not similar should be not be assigned similar emb
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described <<algorithms-embeddings-fastrp-extended,below>>.
+We will also use _projection of a node_ synonymously with the initial random vector of a node.
 
 The embedding stem:[e_n] of node stem:[n], which is to be returned by the algorithm, is initialized as
 [stem]
@@ -38,6 +39,7 @@ The embedding stem:[e_n] of node stem:[n], which is to be returned by the algori
 e_n = w_0 \frac{r_n}{\|r_n\|_2},
 ++++
 where stem:[w_0] is the value of `nodeSelfInfluence`, stem:[r_n] is the initial random vector for node stem:[n] and stem:[\|\bullet\|_2] denotes the L2 or https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[euclidean] norm.
+We will return to <<algorithms-embeddings-fastrp-node-self-influence,Node Self Influence>> later on.
 
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging either neighboring intermediate embeddings from the previous iteration, or the generated initial random vectors during the first iteration.
 
@@ -120,6 +122,28 @@ Typically, using at least a few iterations, for example three, is recommended.
 However, a too high value will consider nodes far away and may not be informative or even be detrimental.
 The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
 Of course, a greater number of iterations will also take more time to complete.
+
+[[algorithms-embeddings-fastrp-node-self-influence]]
+=== Node Self Influence
+
+Node Self Influence is a variation of the original FastRP algorithm.
+
+How much a node's embedding is affected by the intermediate embedding at iteration stem:[i] is controlled by the stem:[i]'th element of `iterationWeights`.
+This can also be seen as how much the initial random vectors, or projections, of nodes that can be reached in stem:[i] hops from a node affect the embedding of the node.
+Similarly, `nodeSelfInfluence` behaves like an iteration weight for a zeroth iteration, or the amount of influence the projection of a node has on the embedding of the same node.
+
+A reason for setting this parameter to a non-zero value is if your graph has low connectivity or a significant amount of isolated nodes.
+Isolated nodes combined with using `propertyRatio = 0.0` leads to embeddings that contain all zeros.
+However using node properties along with node self influence can thus produce more meaningful embeddings for such nodes.
+This can be seen as producing non-graphy fallback features when graph structure is (locally) missing.
+Moreover, sometimes a node's own properties are simply informative features and are good to include even if connectivity is high.
+Finally, node self influence can be used for pure dimensionality reduction to compress node properties used for node classification.
+
+If node properties are not used, the usefulness of `nodeSelfInfluence` is less clear.
+The intermediate embedding from the first iteration encodes information about the neighborhood of nodes.
+Therefore the similarity of first intermediate embeddings measures how much the neighborhoods of two nodes overlap but not whether the two nodes are neighbors or not.
+Using positive iteration weights for the first iteration together with positive node self influence gives embeddings that reflect neighborhood overlap and whose similarity increases further if the nodes are connected.
+However, because of the averaging and L2 normalization, if two nodes have high degree, their embedding similarity will have a low sensitivity to whether the nodes are neighbors or not.
 
 
 === Orientation
