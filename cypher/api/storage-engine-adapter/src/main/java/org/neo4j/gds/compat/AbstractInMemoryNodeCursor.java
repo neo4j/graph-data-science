@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.recordstorage.InMemoryNodeScan;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.storageengine.api.AllNodeScan;
-import org.neo4j.storageengine.api.Degrees;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageNodeCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
@@ -81,13 +80,6 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     @Override
     public int[] relationshipTypes() {
         return new int[0];
-    }
-
-    @Override
-    public void degrees(
-        RelationshipSelection selection, Degrees.Mutator mutator, boolean allowFastDegreeLookup
-    ) {
-
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
+import org.neo4j.storageengine.api.Degrees;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
@@ -62,5 +63,9 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
         long neighbourNodeReference
     ) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void degrees(RelationshipSelection selection, Degrees.Mutator mutator) {
     }
 }

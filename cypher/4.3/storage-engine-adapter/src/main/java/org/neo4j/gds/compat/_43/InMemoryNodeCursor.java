@@ -21,6 +21,8 @@ package org.neo4j.gds.compat._43;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
+import org.neo4j.storageengine.api.Degrees;
+import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -38,5 +40,11 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
     @Override
     public void properties(StoragePropertyCursor propertyCursor) {
         propertyCursor.initNodeProperties(propertiesReference());
+    }
+
+    @Override
+    public void degrees(
+        RelationshipSelection selection, Degrees.Mutator mutator, boolean allowFastDegreeLookup
+    ) {
     }
 }
