@@ -26,12 +26,13 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
 
 public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
-    private final Random random = new Random();
+    private final Random random;
     private final AllocationTracker allocationTracker;
     private final L lossFunction;
     private final HugeObjectArray<double[]> allFeatureVectors;
@@ -47,7 +48,8 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         int maxDepth,
         int minSize,
         double numFeatureIndicesRatio,
-        double numFeatureVectorsRatio
+        double numFeatureVectorsRatio,
+        Optional<Long> randomSeed
     ) {
         assert allFeatureVectors.size() > 0;
         assert maxDepth >= 1;
@@ -60,6 +62,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
+        this.random = new Random(randomSeed.orElseGet(() -> new Random().nextLong()));
         this.activeFeatureIndices = sampleFeatureIndices(numFeatureIndicesRatio);
         this.activeFeatureVectors = sampleFeatureVectors(numFeatureVectorsRatio);
     }

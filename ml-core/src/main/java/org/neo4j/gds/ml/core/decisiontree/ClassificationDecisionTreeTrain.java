@@ -24,6 +24,8 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
+import java.util.Optional;
+
 public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends DecisionTreeTrain<L, Integer> {
 
     private final int[] classes;
@@ -37,6 +39,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         int minSize,
         double numFeatureIndicesRatio,
         double numFeatureVectorsRatio,
+        Optional<Long> randomSeed,
         int[] classes,
         HugeIntArray allLabels
     ) {
@@ -47,7 +50,8 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             maxDepth,
             minSize,
             numFeatureIndicesRatio,
-            numFeatureVectorsRatio
+            numFeatureVectorsRatio,
+            randomSeed
         );
 
         assert classes.length > 0;
@@ -69,6 +73,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         private int minSize = 1;
         private double numFeatureIndicesRatio = 1.0;
         private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
+        private Optional<Long> randomSeed = Optional.empty();
 
         public Builder(
             AllocationTracker allocationTracker,
@@ -95,6 +100,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
                 minSize,
                 numFeatureIndicesRatio,
                 numFeatureVectorsRatio,
+                randomSeed,
                 classes,
                 allLabels
             );
@@ -112,6 +118,11 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
         public Builder<L> withNumFeatureVectorsRatio(double ratio) {
             this.numFeatureVectorsRatio = ratio;
+            return this;
+        }
+
+        public Builder<L> withRandomSeed(long seed) {
+            this.randomSeed = Optional.of(seed);
             return this;
         }
     }
