@@ -25,8 +25,6 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 public interface RelationshipExporter {
     void write(String relationshipType);
 
-    void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer);
-
     void write(String relationshipType, String propertyKey);
 
     void write(
