@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.collections;
 
-@HugeSparseArray(valueType = long.class)
-public interface HugeSparseLongArray {
+@HugeSparseArray(valueType = double.class)
+public interface HugeSparseDoubleArray {
 
     long capacity();
 
-    long get(long index);
+    double get(long index);
 
     boolean contains(long index);
 
     interface Builder {
-        void set(long index, long value);
+        void set(long index, double value);
 
-        boolean setIfAbsent(long index, long value);
+        boolean setIfAbsent(long index, double value);
 
-        void addTo(long index, long value);
+        void addTo(long index, double value);
 
-        HugeSparseLongArray build();
+        HugeSparseDoubleArray build();
     }
 }

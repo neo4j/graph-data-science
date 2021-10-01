@@ -28,5 +28,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface HugeSparseArray {
 
-    Class<?> type();
+    /**
+     * The type which is stored in the generated HugeSparseArray.
+     */
+    Class<?> valueType();
+
+    /**
+     * The page shift defines the page size used in the
+     * generated HugeSparseArray. The default value of 12
+     * leads so 2^12 = 4096 elements per page (array).
+     */
+    int pageShift() default 12;
 }

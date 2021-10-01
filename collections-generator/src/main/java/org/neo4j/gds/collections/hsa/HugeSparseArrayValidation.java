@@ -44,15 +44,16 @@ final class HugeSparseArrayValidation {
 
     Optional<Spec> validate(Element element) {
         var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseArray.class).get();
-        var annotationValue = (TypeMirror) getAnnotationValue(annotationMirror, "type").getValue();
+        var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
+        var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
 
-        if (!hasValidEnclosingElements(element, annotationValue)) {
+        if (!hasValidEnclosingElements(element, valueType)) {
             return Optional.empty();
         }
 
         var rootPackage = rootPackage(element);
 
-        return Optional.of(Spec.of(element, rootPackage));
+        return Optional.of(Spec.of(element, valueType, pageShift, rootPackage));
     }
 
     private Name rootPackage(Element element) {
@@ -73,14 +74,23 @@ final class HugeSparseArrayValidation {
     public interface Spec {
         Element element();
 
+        TypeMirror valueType();
+
+        int pageShift();
+
         Name rootPackage();
 
         default String className() {
             return element().getSimpleName() + "Son";
         }
 
-        static Spec of(Element element, Name rootPackage) {
-            return ImmutableSpec.builder().element(element).rootPackage(rootPackage).build();
+        static Spec of(Element element, TypeMirror valueType, int pageShift, Name rootPackage) {
+            return ImmutableSpec.builder()
+                .element(element)
+                .valueType(valueType)
+                .rootPackage(rootPackage)
+                .pageShift(pageShift)
+                .build();
         }
     }
 }
