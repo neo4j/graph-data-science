@@ -40,7 +40,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
     private final int[] activeFeatureIndices;
     private final HugeLongArray activeFeatureVectors;
 
-    public DecisionTreeTrain(
+    DecisionTreeTrain(
         AllocationTracker allocationTracker,
         L lossFunction,
         HugeObjectArray<double[]> allFeatureVectors,

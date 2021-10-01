@@ -63,40 +63,39 @@ class ClassificationDecisionTreeTest {
         giniIndexLoss = new GiniIndex(CLASSES, allLabels);
     }
 
-    private static Stream<Arguments> sanePredictionParameters() {
+    private static Stream<Arguments> predictionWithoutSamplingParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 1, 1, 1.0D, 0.0D),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 1, 1.0D, 0.0D),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 2, 1.0D, 0.0D),
-                Arguments.of(new double[]{3.0, 0.0}, 0, 100, 1.0D, 0.0D),
-                Arguments.of(new double[]{0.0, 4.0}, 1, 100, 1.0D, 0.0D)
+                Arguments.of(new double[]{8.0, 0.0}, 1, 1),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 1),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 2),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 100),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 100)
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(3))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("sanePredictionParameters")
+    @MethodSource("predictionWithoutSamplingParameters")
     void shouldMakeSanePrediction(
         double[] features,
         int expectedPrediction,
         int maxDepth,
-        double numFeatureIndicesRatio,
-        double numFeatureVectorsRatio,
         int minSize
     ) {
-        var decisionTree = new ClassificationDecisionTreeTrain<>(
+        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
             AllocationTracker.empty(),
             giniIndexLoss,
             allFeatures,
             maxDepth,
-            minSize,
-            numFeatureIndicesRatio,
-            numFeatureVectorsRatio,
             CLASSES,
             allLabels
         );
+
+        var decisionTree = decisionTreeBuilder
+            .withMinSize(minSize)
+            .build();
 
         var decisionTreePredict = decisionTree.train();
 

@@ -39,7 +39,6 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         double numFeatureVectorsRatio,
         int[] classes,
         HugeIntArray allLabels
-
     ) {
         super(
             allocationTracker,
@@ -56,6 +55,65 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
 
         assert allLabels.size() == allFeatures.size();
         this.allLabels = allLabels;
+    }
+
+    public static final class Builder<L extends DecisionTreeLoss> {
+
+        private final AllocationTracker allocationTracker;
+        private final L lossFunction;
+        private final HugeObjectArray<double[]> allFeatures;
+        private final int maxDepth;
+        private final int[] classes;
+        private final HugeIntArray allLabels;
+
+        private int minSize = 1;
+        private double numFeatureIndicesRatio = 1.0;
+        private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
+
+        public Builder(
+            AllocationTracker allocationTracker,
+            L lossFunction,
+            HugeObjectArray<double[]> allFeatures,
+            int maxDepth,
+            int[] classes,
+            HugeIntArray allLabels
+        ) {
+            this.allocationTracker = allocationTracker;
+            this.lossFunction = lossFunction;
+            this.allFeatures = allFeatures;
+            this.maxDepth = maxDepth;
+            this.classes = classes;
+            this.allLabels = allLabels;
+        }
+
+        public ClassificationDecisionTreeTrain<L> build() {
+            return new ClassificationDecisionTreeTrain<>(
+                allocationTracker,
+                lossFunction,
+                allFeatures,
+                maxDepth,
+                minSize,
+                numFeatureIndicesRatio,
+                numFeatureVectorsRatio,
+                classes,
+                allLabels
+            );
+        }
+
+        public Builder<L> withMinSize(int minSize) {
+            this.minSize = minSize;
+            return this;
+        }
+
+        public Builder<L> withNumFeatureIndicesRatio(double ratio) {
+            this.numFeatureIndicesRatio = ratio;
+            return this;
+        }
+
+        public Builder<L> withNumFeatureVectorsRatio(double ratio) {
+            this.numFeatureVectorsRatio = ratio;
+            return this;
+        }
     }
 
     @Override
