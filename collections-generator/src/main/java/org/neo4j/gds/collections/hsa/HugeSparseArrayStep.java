@@ -23,6 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.collections.HugeSparseArray;
 
 import javax.annotation.processing.Filer;
@@ -42,12 +43,9 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
     private final Filer filer;
 
     private final HugeSparseArrayValidation validation;
-    private final HugeSparseArrayGenerator generator;
 
     public HugeSparseArrayStep(ProcessingEnvironment processingEnv, SourceVersion sourceVersion) {
         this.validation = new HugeSparseArrayValidation(processingEnv.getElementUtils(), processingEnv.getMessager());
-        this.generator = new HugeSparseArrayGenerator(processingEnv.getElementUtils(), sourceVersion);
-
         this.messager = processingEnv.getMessager();
         this.filer = processingEnv.getFiler();
     }
@@ -79,9 +77,19 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
             return ProcessResult.INVALID;
         }
 
-        var javaFile = generator.generate(validationResult.get());
+        var spec = validationResult.get();
+        var typeSpec = HugeSparseArrayGenerator.generate(spec);
+        var javaFile = javaFile(spec.rootPackage().toString(), typeSpec);
 
         return writeFile(element, javaFile);
+    }
+
+    private static JavaFile javaFile(String rootPackage, TypeSpec typeSpec) {
+        return JavaFile
+            .builder(rootPackage, typeSpec)
+            .indent("    ")
+            .skipJavaLangImports(true)
+            .build();
     }
 
     private ProcessResult writeFile(Element element, JavaFile file) {

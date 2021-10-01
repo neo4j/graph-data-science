@@ -24,39 +24,32 @@ import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.Generated;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.locks.ReentrantLock;
 
-class HugeSparseArrayGenerator {
+final class HugeSparseArrayGenerator {
 
-    private final Elements elementUtils;
-    private final SourceVersion sourceVersion;
+    private HugeSparseArrayGenerator() {}
 
-    HugeSparseArrayGenerator(Elements elementUtils, SourceVersion sourceVersion) {
-        this.elementUtils = elementUtils;
-        this.sourceVersion = sourceVersion;
-    }
-
-    JavaFile generate(HugeSparseArrayValidation.Spec spec) {
-        var typeSpec = generateTypeSpec(spec);
-        return javaFile(spec, typeSpec);
-    }
-
-    private TypeSpec generateTypeSpec(HugeSparseArrayValidation.Spec spec) {
+    static TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className());
+        var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
+        var builderType = TypeName.get(spec.builderType());
 
         var builder = TypeSpec.classBuilder(className)
             .addModifiers(Modifier.FINAL)
-            .addSuperinterface(TypeName.get(spec.element().asType()))
+            .addSuperinterface(elementType)
             .addOriginatingElement(spec.element());
 
         // class annotation
@@ -92,64 +85,66 @@ class HugeSparseArrayGenerator {
         builder.addMethod(getMethod(valueType, pages, pageIndex, indexInPage, defaultValue));
         builder.addMethod(containsMethod(valueType, pages, pageIndex, indexInPage, defaultValue));
 
+        // GrowingBuilder
+        builder.addType(GrowingBuilderGenerator.growingBuilder(elementType, builderType, valueType));
+
         return builder.build();
     }
 
-    private TypeName pagesTypes(TypeName valueType) {
+    private static TypeName valueArrayType(TypeName valueType) {
         return ArrayTypeName.of(ArrayTypeName.of(valueType));
     }
 
-    private AnnotationSpec generatedAnnotation() {
+    private static AnnotationSpec generatedAnnotation() {
         return AnnotationSpec.builder(Generated.class)
             .addMember("value", "$S", HugeSparseArrayGenerator.class.getCanonicalName())
             .build();
     }
 
-    private FieldSpec pageShiftField(int pageShift) {
+    private static FieldSpec pageShiftField(int pageShift) {
         return FieldSpec
             .builder(TypeName.INT, "PAGE_SHIFT", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
             .initializer("$L", pageShift)
             .build();
     }
 
-    private FieldSpec pageSizeField(FieldSpec pageShiftField) {
+    private static FieldSpec pageSizeField(FieldSpec pageShiftField) {
         return FieldSpec
             .builder(TypeName.INT, "PAGE_SIZE", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
             .initializer("1 << $N", pageShiftField)
             .build();
     }
 
-    private FieldSpec pageMaskField(FieldSpec pageSizeField) {
+    private static FieldSpec pageMaskField(FieldSpec pageSizeField) {
         return FieldSpec
             .builder(TypeName.INT, "PAGE_MASK", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
             .initializer("$N - 1", pageSizeField)
             .build();
     }
 
-
-    private FieldSpec capacityField() {
+    private static FieldSpec capacityField() {
         return FieldSpec
             .builder(TypeName.LONG, "capacity", Modifier.PRIVATE, Modifier.FINAL)
             .build();
     }
 
-    private FieldSpec pagesField(TypeName valueType) {
+    private static FieldSpec pagesField(TypeName valueType) {
         return FieldSpec
-            .builder(pagesTypes(valueType), "pages", Modifier.PRIVATE, Modifier.FINAL)
+            .builder(valueArrayType(valueType), "pages", Modifier.PRIVATE, Modifier.FINAL)
             .build();
     }
 
-    private FieldSpec defaultValueField(TypeName valueType) {
+    private static FieldSpec defaultValueField(TypeName valueType) {
         return FieldSpec
             .builder(valueType, "defaultValue", Modifier.PRIVATE, Modifier.FINAL)
             .build();
     }
 
-    private MethodSpec constructor(TypeName valueType) {
+    private static MethodSpec constructor(TypeName valueType) {
         return MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PRIVATE)
             .addParameter(TypeName.LONG, "capacity")
-            .addParameter(pagesTypes(valueType), "pages")
+            .addParameter(valueArrayType(valueType), "pages")
             .addParameter(valueType, "defaultValue")
             .addStatement("this.capacity = capacity")
             .addStatement("this.pages = pages")
@@ -157,7 +152,7 @@ class HugeSparseArrayGenerator {
             .build();
     }
 
-    private MethodSpec pageIndexMethod(FieldSpec pageShift) {
+    private static MethodSpec pageIndexMethod(FieldSpec pageShift) {
         return MethodSpec.methodBuilder("pageIndex")
             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
             .addParameter(TypeName.LONG, "index")
@@ -166,7 +161,7 @@ class HugeSparseArrayGenerator {
             .build();
     }
 
-    private MethodSpec indexInPageMethod(FieldSpec pageMask) {
+    private static MethodSpec indexInPageMethod(FieldSpec pageMask) {
         return MethodSpec.methodBuilder("indexInPage")
             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
             .addParameter(TypeName.LONG, "index")
@@ -175,7 +170,7 @@ class HugeSparseArrayGenerator {
             .build();
     }
 
-    private MethodSpec capacityMethod(FieldSpec capacityField) {
+    private static MethodSpec capacityMethod(FieldSpec capacityField) {
         return MethodSpec.methodBuilder("capacity")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -184,7 +179,7 @@ class HugeSparseArrayGenerator {
             .build();
     }
 
-    private MethodSpec getMethod(
+    private static MethodSpec getMethod(
         TypeName valueType,
         FieldSpec pages,
         MethodSpec pageIndex,
@@ -219,7 +214,7 @@ class HugeSparseArrayGenerator {
         TypeName.DOUBLE, "Double.compare(page[indexInPage], $N) != 0"
     );
 
-    private MethodSpec containsMethod(
+    private static MethodSpec containsMethod(
         TypeName valueType,
         FieldSpec pages,
         MethodSpec pageIndex,
@@ -243,11 +238,105 @@ class HugeSparseArrayGenerator {
             .build();
     }
 
-    private JavaFile javaFile(HugeSparseArrayValidation.Spec spec, TypeSpec typeSpec) {
-        return JavaFile
-            .builder(spec.rootPackage().toString(), typeSpec)
-            .indent("    ")
-            .skipJavaLangImports(true)
-            .build();
+    private static class GrowingBuilderGenerator {
+
+        private static TypeSpec growingBuilder(TypeName elementType, TypeName builderType, TypeName valueType) {
+            var builder = TypeSpec.classBuilder("GrowingBuilder")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(builderType);
+
+            var arrayHandle = arrayHandleField(valueType);
+            var pageLock = newPageLockField();
+            var defaultValue = defaultValueField(valueType);
+            var pages = pagesField(valueType);
+
+            builder.addField(arrayHandle);
+            builder.addField(pageLock);
+            builder.addField(defaultValue);
+            builder.addField(pages);
+
+            builder.addMethod(constructor(valueType, pages, pageLock, defaultValue));
+
+            builder.addMethod(setMethod(valueType));
+            builder.addMethod(setIfAbsentMethod(valueType));
+            builder.addMethod(addTo(valueType));
+            builder.addMethod(buildMethod(elementType));
+
+            return builder.build();
+        }
+
+        private static FieldSpec newPageLockField() {
+            return FieldSpec
+                .builder(ReentrantLock.class, "newPageLock")
+                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                .build();
+        }
+
+        private static FieldSpec arrayHandleField(TypeName valueType) {
+            return FieldSpec
+                .builder(VarHandle.class, "ARRAY_HANDLE")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.arrayElementVarHandle($T.class)", MethodHandles.class, ArrayTypeName.of(valueType))
+                .build();
+        }
+
+        private static FieldSpec pagesField(TypeName valueType) {
+            return FieldSpec
+                .builder(ParameterizedTypeName.get(
+                    ClassName.get(AtomicReferenceArray.class),
+                    ArrayTypeName.of(valueType)
+                ), "pages")
+                .addModifiers(Modifier.PRIVATE)
+                .build();
+        }
+
+        private static MethodSpec constructor(TypeName valueType, FieldSpec pages, FieldSpec pageLock, FieldSpec defaultValue) {
+            return MethodSpec.constructorBuilder()
+                .addParameter(valueType, defaultValue.name)
+                .addStatement("this.$N = new $T(0)", pages, pages.type)
+                .addStatement("this.$N = $N", defaultValue, defaultValue)
+                .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)
+                .build();
+        }
+
+        private static MethodSpec setMethod(TypeName valueType) {
+            return MethodSpec.methodBuilder("set")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(TypeName.LONG, "index")
+                .addParameter(valueType, "value")
+                .build();
+        }
+
+        private static MethodSpec setIfAbsentMethod(TypeName valueType) {
+            return MethodSpec.methodBuilder("setIfAbsent")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.BOOLEAN)
+                .addParameter(TypeName.LONG, "index")
+                .addParameter(valueType, "value")
+                .addStatement("return false")
+                .build();
+        }
+
+        private static MethodSpec addTo(TypeName valueType) {
+            return MethodSpec.methodBuilder("addTo")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(TypeName.LONG, "index")
+                .addParameter(valueType, "value")
+                .build();
+        }
+
+        private static MethodSpec buildMethod(TypeName elementType) {
+            return MethodSpec.methodBuilder("build")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(elementType)
+                .addStatement("return null")
+                .build();
+        }
     }
 }

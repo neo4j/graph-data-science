@@ -40,10 +40,16 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     private final Messager messager;
     private final BuilderValidator validator;
 
+    private TypeElement builderType;
+
     ElementValidator(TypeMirror rootType, Messager messager) {
         super(false);
         this.messager = messager;
         this.validator = new BuilderValidator(rootType, messager);
+    }
+
+    TypeElement builderType() {
+        return this.builderType;
     }
 
     @Override
@@ -55,6 +61,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     @Override
     public Boolean visitType(TypeElement e, TypeMirror elementType) {
         e.getEnclosedElements().forEach(el -> el.accept(validator, elementType));
+        this.builderType = e;
         return true;
     }
 

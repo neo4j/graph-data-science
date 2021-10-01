@@ -47,26 +47,36 @@ final class HugeSparseArrayValidation {
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
 
-        if (!hasValidEnclosingElements(element, valueType)) {
+        var elementValidator = new ElementValidator(element.asType(), this.messager);
+
+        if (!isValid(element, elementValidator, valueType)) {
             return Optional.empty();
         }
 
+        var builderType = elementValidator.builderType().asType();
         var rootPackage = rootPackage(element);
 
-        return Optional.of(Spec.of(element, valueType, pageShift, rootPackage));
+        var spec = ImmutableSpec.builder()
+            .element(element)
+            .valueType(valueType)
+            .builderType(builderType)
+            .rootPackage(rootPackage)
+            .pageShift(pageShift)
+            .build();
+
+        return Optional.of(spec);
     }
 
     private Name rootPackage(Element element) {
         return elementUtils.getPackageOf(element).getQualifiedName();
     }
 
-    private boolean hasValidEnclosingElements(Element element, TypeMirror annotationValue) {
-        var elementValidator = new ElementValidator(element.asType(), this.messager);
+    private boolean isValid(Element element, ElementValidator validator, TypeMirror annotationValue) {
         return element
             .getEnclosedElements()
             .stream()
             // We do not use `allMatch` in order to run all validations and not stop on the first failing one.
-            .map(e -> e.accept(elementValidator, annotationValue))
+            .map(e -> e.accept(validator, annotationValue))
             .reduce(true, (a, b) -> a && b);
     }
 
@@ -76,21 +86,14 @@ final class HugeSparseArrayValidation {
 
         TypeMirror valueType();
 
+        TypeMirror builderType();
+
         int pageShift();
 
         Name rootPackage();
 
         default String className() {
             return element().getSimpleName() + "Son";
-        }
-
-        static Spec of(Element element, TypeMirror valueType, int pageShift, Name rootPackage) {
-            return ImmutableSpec.builder()
-                .element(element)
-                .valueType(valueType)
-                .rootPackage(rootPackage)
-                .pageShift(pageShift)
-                .build();
         }
     }
 }
