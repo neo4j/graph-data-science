@@ -35,7 +35,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreCatalog {
@@ -306,21 +305,13 @@ public final class GraphStoreCatalog {
         private NoSuchElementException graphNotFoundException(UserCatalogKey userCatalogKey) {
             var graphName = userCatalogKey.graphName();
 
-            var availableGraphNames = graphsByName
-                .keySet()
-                .stream()
-                .map(UserCatalogKey::graphName)
-                .collect(Collectors.toList());
-
-            return new NoSuchElementException(prettySuggestions(
+            return new NoSuchElementException(
                 formatWithLocale(
-                    "Graph with name `%s` does not exist on database `%s`.",
+                    "Graph with name `%s` does not exist on database `%s`. It might exist on another database.",
                     graphName,
                     userCatalogKey.databaseName()
-                ),
-                graphName,
-                availableGraphNames
-            ));
+                )
+            );
         }
 
         private Optional<Map<String, Object>> getDegreeDistribution(UserCatalogKey userCatalogKey) {

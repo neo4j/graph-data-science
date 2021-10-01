@@ -21,9 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -33,11 +30,9 @@ import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -109,24 +104,7 @@ class GraphStoreCatalogTest {
     @Test
     void getAsAdminThrowsIfNoGraphIsMatching() {
         assertThatThrownBy(() -> GraphStoreCatalog.get(CatalogRequest.ofAdmin("admin", DATABASE_ID), GRAPH_NAME))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
-    }
-
-    @Test
-    void getAsAdminSuggestsOnlyOwnGraphs() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
-
-        assertThatThrownBy(() -> GraphStoreCatalog.get(
-            CatalogRequest.ofAdmin("admin", DATABASE_ID),
-            GRAPH_NAME + "x"
-        ))
-            .hasMessage(
-                "Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?",
-                GRAPH_NAME + "x",
-                DATABASE_ID.name(),
-                GRAPH_NAME + "y"
-            );
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
     }
 
     @Test
@@ -176,7 +154,7 @@ class GraphStoreCatalogTest {
             CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
             GRAPH_NAME
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
     }
 
     @Test
@@ -188,7 +166,7 @@ class GraphStoreCatalogTest {
             CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
             GRAPH_NAME
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
     }
 
     @Test
@@ -244,7 +222,7 @@ class GraphStoreCatalogTest {
             graphStoreWithConfig -> fail("How did you remove a graph that never existed?"),
             true
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
     }
 
     @Test
@@ -256,25 +234,6 @@ class GraphStoreCatalogTest {
             false
         ))
             .doesNotThrowAnyException();
-    }
-
-    @Test
-    void removeAsAdminSuggestsOnlyOwnGraphs() {
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
-
-        assertThatThrownBy(() -> GraphStoreCatalog.remove(
-            CatalogRequest.ofAdmin("admin", DATABASE_ID),
-            GRAPH_NAME + "x",
-            graphStoreWithConfig -> fail("Should not have removed the graph"),
-            true
-        ))
-            .hasMessage(
-                "Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?",
-                GRAPH_NAME + "x",
-                DATABASE_ID.name(),
-                GRAPH_NAME + "y"
-            );
     }
 
     @Test
@@ -349,7 +308,7 @@ class GraphStoreCatalogTest {
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             true
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
 
         assertTrue(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
     }
@@ -365,7 +324,7 @@ class GraphStoreCatalogTest {
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             true
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
 
         assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
     }
@@ -443,62 +402,27 @@ class GraphStoreCatalogTest {
         assertFalse(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId1, "graph0"));
     }
 
-    static Stream<Arguments> graphInput() {
-        return Stream.of(
-            Arguments.of("db_0", List.of(), "graph", "Graph with name `graph` does not exist on database `db_0`."),
-            Arguments.of(
-                "db_1",
-                List.of("graph0"),
-                "graph1",
-                "Graph with name `graph1` does not exist on database `db_1`. Did you mean `graph0`?"
-            ),
-            Arguments.of(
-                "db_2",
-                List.of("graph0", "graph1"),
-                "graph2",
-                "Graph with name `graph2` does not exist on database `db_2`. Did you mean one of [`graph0`, `graph1`]?"
-            ),
-            Arguments.of(
-                "db_42",
-                List.of("graph0", "graph1", "foobar"),
-                "graph2",
-                "Graph with name `graph2` does not exist on database `db_42`. Did you mean one of [`graph0`, `graph1`]?"
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphInput")
-    void shouldThrowOnMissingGraph(
-        String dbName,
-        Iterable<String> existingGraphs,
-        String searchGraphName,
-        String expectedMessage
-    ) {
-        var dummyDatabaseId = DatabaseIdFactory.from(dbName, UUID.fromString("0-0-0-0-0"));
+    @Test
+    void shouldThrowOnMissingGraph() {
+        var dummyDatabaseId = DatabaseIdFactory.from("mydatabase", UUID.fromString("0-0-0-0-0"));
         var dummyGraphStore = GdlFactory.of("()").build().graphStore();
-
-        existingGraphs.forEach(existingGraphName -> {
-            var config = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, existingGraphName);
-            GraphStoreCatalog.set(config, dummyGraphStore);
-        });
 
         // test the get code path
         assertThatExceptionOfType(NoSuchElementException.class)
             .isThrownBy(() -> GraphStoreCatalog.get(
                 CatalogRequest.of(USER_NAME, dummyDatabaseId),
-                searchGraphName
+                "myGraph"
             ))
-            .withMessage(expectedMessage);
+            .withMessage("Graph with name `myGraph` does not exist on database `mydatabase`. It might exist on another database.");
 
         // test the drop code path
         assertThatExceptionOfType(NoSuchElementException.class)
             .isThrownBy(() -> GraphStoreCatalog.remove(
                 CatalogRequest.of(USER_NAME, dummyDatabaseId),
-                searchGraphName,
+                "myGraph",
                 graphStoreWithConfig -> {},
                 true
             ))
-            .withMessage(expectedMessage);
+            .withMessage("Graph with name `myGraph` does not exist on database `mydatabase`. It might exist on another database.");
     }
 }
