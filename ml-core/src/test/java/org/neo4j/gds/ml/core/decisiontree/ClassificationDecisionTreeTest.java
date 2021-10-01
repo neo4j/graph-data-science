@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.decisiontree;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -100,5 +101,59 @@ class ClassificationDecisionTreeTest {
         var decisionTreePredict = decisionTree.train();
 
         assertThat(decisionTreePredict.predict(features)).isEqualTo(expectedPrediction);
+    }
+
+    @Test
+    void indexSamplingShouldWork() {
+        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+            AllocationTracker.empty(),
+            giniIndexLoss,
+            allFeatures,
+            1,
+            CLASSES,
+            allLabels
+        );
+
+        var features = new double[]{8.0, 0.0};
+
+        var decisionTree = decisionTreeBuilder
+            .withNumFeatureIndicesRatio(0.5D) // Only one feature is used.
+            .withRandomSeed(-6938002729576536314L)
+            .build();
+        var decisionTreePredict = decisionTree.train();
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(1);
+
+        decisionTree = decisionTreeBuilder
+            .withRandomSeed(42L)
+            .build();
+        decisionTreePredict = decisionTree.train();
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(0);
+    }
+
+    @Test
+    void vectorSamplingShouldWork() {
+        var decisionTreeBuilder = new ClassificationDecisionTreeTrain.Builder<>(
+            AllocationTracker.empty(),
+            giniIndexLoss,
+            allFeatures,
+            1,
+            CLASSES,
+            allLabels
+        );
+
+        var features = new double[]{8.0, 0.0};
+
+        var decisionTree = decisionTreeBuilder
+            .withNumFeatureVectorsRatio(0.4D) // Use 40% of all training examples.
+            .withRandomSeed(5677377167946646799L)
+            .build();
+        var decisionTreePredict = decisionTree.train();
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(1);
+
+        decisionTree = decisionTreeBuilder
+            .withRandomSeed(321328L)
+            .build();
+        decisionTreePredict = decisionTree.train();
+        assertThat(decisionTreePredict.predict(features)).isEqualTo(0);
     }
 }
