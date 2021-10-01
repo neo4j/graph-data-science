@@ -71,9 +71,12 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     @Value.Check
     default void validate() {
-        if (iterationWeights().isEmpty()) {
+        if (nodeSelfInfluence().floatValue() < 0) {
+            throw new IllegalArgumentException("The value of `nodeSelfInfluence` may not be negative.");
+        }
+        if (iterationWeights().isEmpty() && nodeSelfInfluence().floatValue() == 0f) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must not be empty.",
+                "The value of `%s` must not be empty if `nodeSelfInfluence` is zero.",
                 "iterationWeights"
             ));
         }

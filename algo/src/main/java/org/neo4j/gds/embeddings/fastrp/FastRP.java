@@ -127,7 +127,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.embeddingDimension = config.embeddingDimension();
         this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();
         this.iterationWeights = config.iterationWeights();
-        this.nodeSelfInfluence= config.nodeSelfInfluence();
+        this.nodeSelfInfluence = config.nodeSelfInfluence();
         this.normalizationStrength = config.normalizationStrength();
         this.concurrency = config.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
@@ -189,7 +189,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     }
 
     void addInitialVectorsToEmbedding() {
-        if (nodeSelfInfluence.floatValue()==0f) return;
+        if (nodeSelfInfluence.floatValue() == 0f) return;
 
         var partitions = PartitionUtils.degreePartition(
             graph,
@@ -400,7 +400,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 var initialVector = embeddingB.get(nodeId);
                 var l2Norm= l2Norm( initialVector);
                 float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
-                addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue()/adjustedL2Norm);
+                addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
             });
         }
     }
