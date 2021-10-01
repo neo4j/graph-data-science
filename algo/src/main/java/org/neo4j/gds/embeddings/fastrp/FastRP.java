@@ -321,7 +321,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                     : (float) Math.pow(degree, normalizationStrength);
 
                 float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-                random.reseed(randomSeed ^ nodeId);
+                random.reseed(randomSeed ^ graph.toOriginalNodeId(nodeId));
                 var randomVector = computeRandomVector(nodeId, random, entryValue);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);

@@ -55,12 +55,11 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
         "CREATE" +
         "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
         ", (b:Node {name: 'b', f1: 2.1, f2: 0.5})" +
+        ", (e:Node2 {name: 'e'})" +
         ", (c:Isolated {name: 'c'})" +
         ", (d:Isolated {name: 'd'})" +
         ", (a)-[:REL]->(b)" +
 
-        // Used for the weighted case
-        ", (e:Node2 {name: 'e'})" +
         ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
         ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
