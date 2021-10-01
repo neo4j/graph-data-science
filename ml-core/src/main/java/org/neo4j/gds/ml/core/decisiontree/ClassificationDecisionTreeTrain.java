@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Optional;
+import java.util.Random;
 
 public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends DecisionTreeTrain<L, Integer> {
 
@@ -39,7 +40,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         int minSize,
         double numFeatureIndicesRatio,
         double numFeatureVectorsRatio,
-        Optional<Long> randomSeed,
+        Optional<Random> random,
         int[] classes,
         HugeIntArray allLabels
     ) {
@@ -51,7 +52,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
             minSize,
             numFeatureIndicesRatio,
             numFeatureVectorsRatio,
-            randomSeed
+            random
         );
 
         assert classes.length > 0;
@@ -73,7 +74,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         private int minSize = 1;
         private double numFeatureIndicesRatio = 1.0;
         private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
-        private Optional<Long> randomSeed = Optional.empty();
+        private Optional<Random> random = Optional.empty();
 
         public Builder(
             AllocationTracker allocationTracker,
@@ -100,7 +101,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
                 minSize,
                 numFeatureIndicesRatio,
                 numFeatureVectorsRatio,
-                randomSeed,
+                random,
                 classes,
                 allLabels
             );
@@ -122,7 +123,7 @@ public class ClassificationDecisionTreeTrain<L extends DecisionTreeLoss> extends
         }
 
         public Builder<L> withRandomSeed(long seed) {
-            this.randomSeed = Optional.of(seed);
+            this.random = Optional.of(new Random(seed));
             return this;
         }
     }

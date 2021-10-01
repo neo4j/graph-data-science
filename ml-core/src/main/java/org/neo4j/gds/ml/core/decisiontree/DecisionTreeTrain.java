@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
 
@@ -49,7 +50,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         int minSize,
         double numFeatureIndicesRatio,
         double numFeatureVectorsRatio,
-        Optional<Long> randomSeed
+        Optional<Random> random
     ) {
         assert allFeatureVectors.size() > 0;
         assert maxDepth >= 1;
@@ -62,7 +63,7 @@ public abstract class DecisionTreeTrain<L extends DecisionTreeLoss, P> {
         this.allFeatureVectors = allFeatureVectors;
         this.maxDepth = maxDepth;
         this.minSize = minSize;
-        this.random = new Random(randomSeed.orElseGet(() -> new Random().nextLong()));
+        this.random = random.orElseGet(ThreadLocalRandom::current);
         this.activeFeatureIndices = sampleFeatureIndices(numFeatureIndicesRatio);
         this.activeFeatureVectors = sampleFeatureVectors(numFeatureVectorsRatio);
     }
