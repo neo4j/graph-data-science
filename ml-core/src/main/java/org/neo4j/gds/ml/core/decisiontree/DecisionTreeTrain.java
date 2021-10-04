@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.core.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
@@ -40,8 +41,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private final int maxDepth;
     private final int minSize;
     private final boolean featureBagging;
+    private final double numFeatureVectorsRatio;
     private final int[] activeFeatureIndices;
-    private final HugeLongArray activeFeatureVectors;
+    // TODO: Implement HugeBitSet and use that instead of HugeByteArray.
+    private final HugeByteArray bootstrappedDataset;
 
     DecisionTreeTrain(
         AllocationTracker allocationTracker,
@@ -65,7 +68,8 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.maxDepth = maxDepth;
         this.minSize = minSize;
         this.random = random.orElseGet(ThreadLocalRandom::current);
-        this.activeFeatureVectors = bootstrapDataset(numFeatureVectorsRatio);
+        this.numFeatureVectorsRatio = numFeatureVectorsRatio;
+        this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size(), allocationTracker);
 
         int totalNumFeatures = allFeatureVectors.get(0).length;
         if (new Double(0.0D).equals(featureBaggingRatio)) {
@@ -81,7 +85,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
     public DecisionTreePredict<PREDICTION> train() {
         var stack = new Stack<StackRecord<PREDICTION>>();
-        TreeNode<PREDICTION> root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
+        TreeNode<PREDICTION> root;
+
+        {
+            var activeFeatureVectors = bootstrapDataset(numFeatureVectorsRatio);
+            root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
+        }
 
         while (!stack.empty()) {
             var record = stack.pop();
@@ -111,6 +120,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         }
 
         return new DecisionTreePredict<>(root);
+    }
+
+    public HugeByteArray bootstrappedDataset() {
+        return bootstrappedDataset;
     }
 
     protected abstract PREDICTION toTerminal(HugeLongArray group, long groupSize);
@@ -239,19 +252,22 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         if (new Double(0.0D).equals(numFeatureVectorsRatio)) {
             var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
             allVectors.setAll(i -> i);
+            bootstrappedDataset.fill((byte) 1);
+
             return allVectors;
         }
 
         final long totalNumVectors = allFeatureVectors.size();
         final long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
-        final var chosenVectors = HugeLongArray.newArray(numVectors, allocationTracker);
+        final var bootstrappedVectors = HugeLongArray.newArray(numVectors, allocationTracker);
 
         for (long i = 0; i < numVectors; i++) {
             long j = randomNonNegativeLong(0, totalNumVectors);
-            chosenVectors.set(i, j);
+            bootstrappedVectors.set(i, j);
+            bootstrappedDataset.set(j, (byte) 1);
         }
 
-        return chosenVectors;
+        return bootstrappedVectors;
     }
 
     // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.

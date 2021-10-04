@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.randomforest;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.decisiontree.ClassificationDecisionTreeTrain;
@@ -74,38 +75,43 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
         this.allLabels = allLabels;
     }
 
-    public ClassificationRandomForestPredict train() {
-        var decisionTrees = new DecisionTreePredict[this.numDecisionTrees];
+    public ClassificationRandomForestTrainResult train() {
+        var decisionTrees = new DecisionTreePredict[numDecisionTrees];
+        var bootstrappedDatasets = new HugeByteArray[numDecisionTrees];
 
         var classToIdx = new HashMap<Integer, Integer>();
         for (int i = 0; i < classes.length; i++) {
             classToIdx.put(classes[i], i);
         }
 
-        var tasks = ParallelUtil.tasks(this.numDecisionTrees, index -> () -> {
+        var tasks = ParallelUtil.tasks(numDecisionTrees, index -> () -> {
             var decisionTreeBuilder =
                 new ClassificationDecisionTreeTrain.Builder<>(
-                    this.allocationTracker,
-                    this.lossFunction,
-                    this.allFeatureVectors,
-                    this.maxDepth,
-                    this.classes,
-                    this.allLabels,
+                    allocationTracker,
+                    lossFunction,
+                    allFeatureVectors,
+                    maxDepth,
+                    classes,
+                    allLabels,
                     classToIdx
                 )
-                    .withMinSize(this.minSize)
-                    .withFeatureBaggingRatio(this.numFeatureIndicesRatio)
-                    .withNumFeatureVectorsRatio(this.numFeatureVectorsRatio);
+                    .withMinSize(minSize)
+                    .withFeatureBaggingRatio(numFeatureIndicesRatio)
+                    .withNumFeatureVectorsRatio(numFeatureVectorsRatio);
 
-            this.randomSeed.ifPresent(seed -> {
+            randomSeed.ifPresent(seed -> {
                 decisionTreeBuilder.withRandomSeed(seed + index);
             });
 
             var decisionTree = decisionTreeBuilder.build();
             decisionTrees[index] = decisionTree.train();
+            bootstrappedDatasets[index] = decisionTree.bootstrappedDataset();
         });
         ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
 
-        return new ClassificationRandomForestPredict(decisionTrees, this.classes, classToIdx, concurrency);
+        return ImmutableClassificationRandomForestTrainResult.of(
+            new ClassificationRandomForestPredict(decisionTrees, classes, classToIdx, concurrency, allocationTracker),
+            bootstrappedDatasets
+        );
     }
 }

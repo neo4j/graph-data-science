@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.randomforest;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -88,7 +89,7 @@ public class ClassificationRandomForestTest {
             allLabels
         );
 
-        var randomForestPredict = randomForestTrain.train();
+        var randomForestPredict = randomForestTrain.train().predictor();
 
         var features = new double[]{8.0, 0.0};
         assertThat(randomForestPredict.predict(features)).isEqualTo(42);
@@ -112,9 +113,35 @@ public class ClassificationRandomForestTest {
             allLabels
         );
 
-        var randomForestPredict = randomForestTrain.train();
+        var randomForestPredict = randomForestTrain.train().predictor();
 
         var features = new double[]{8.0, 3.2};
         assertThat(randomForestPredict.predict(features)).isEqualTo(42);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldMakeSaneErrorEstimation(int concurrency) {
+        var randomForestTrain = new ClassificationRandomForestTrain(
+            AllocationTracker.empty(),
+            giniIndexLoss,
+            allFeatureVectors,
+            2,
+            1,
+            0.0D,
+            1.0D,
+            Optional.of(1337L),
+            20,
+            concurrency,
+            CLASSES,
+            allLabels
+        );
+
+        var trainResult = randomForestTrain.train();
+        var randomForestPredict = trainResult.predictor();
+        var bootstrappedDatasets = trainResult.bootstrappedDatasets();
+
+        assertThat(randomForestPredict.outOfBagError(bootstrappedDatasets, allFeatureVectors, allLabels))
+            .isCloseTo(0.2, Offset.offset(0.000001D));
     }
 }
