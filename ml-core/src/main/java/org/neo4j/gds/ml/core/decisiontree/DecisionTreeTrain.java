@@ -39,6 +39,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
+    private final boolean featureBagging;
     private final int[] activeFeatureIndices;
     private final HugeLongArray activeFeatureVectors;
 
@@ -48,14 +49,14 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         HugeObjectArray<double[]> allFeatureVectors,
         int maxDepth,
         int minSize,
-        double numFeatureIndicesRatio,
+        double featureBaggingRatio,
         double numFeatureVectorsRatio,
         Optional<Random> random
     ) {
         assert allFeatureVectors.size() > 0;
         assert maxDepth >= 1;
         assert minSize >= 0;
-        assert numFeatureIndicesRatio >= 0.0 && numFeatureIndicesRatio <= 1.0;
+        assert featureBaggingRatio >= 0.0 && featureBaggingRatio <= 1.0;
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         this.allocationTracker = allocationTracker;
@@ -64,8 +65,18 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.maxDepth = maxDepth;
         this.minSize = minSize;
         this.random = random.orElseGet(ThreadLocalRandom::current);
-        this.activeFeatureIndices = sampleFeatureIndices(numFeatureIndicesRatio);
-        this.activeFeatureVectors = sampleFeatureVectors(numFeatureVectorsRatio);
+        this.activeFeatureVectors = bootstrapDataset(numFeatureVectorsRatio);
+
+        int totalNumFeatures = allFeatureVectors.get(0).length;
+        if (new Double(0.0D).equals(featureBaggingRatio)) {
+            this.activeFeatureIndices = new int[totalNumFeatures];
+            Arrays.setAll(this.activeFeatureIndices, i -> i);
+            this.featureBagging = false;
+        } else {
+            int numActiveFeatures = (int) Math.ceil(featureBaggingRatio * totalNumFeatures);
+            this.activeFeatureIndices = new int[numActiveFeatures];
+            this.featureBagging = true;
+        }
     }
 
     public DecisionTreePredict<PREDICTION> train() {
@@ -175,6 +186,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
+        if (featureBagging) {
+            featureBagging();
+        }
+
         for (int i : activeFeatureIndices) {
             for (long j = 0; j < groupSize; j++) {
                 var features = allFeatureVectors.get(group.get(j));
@@ -206,27 +221,19 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
     }
 
-    private int[] sampleFeatureIndices(double numFeatureIndicesRatio) {
-        assert numFeatureIndicesRatio >= 0.0 && numFeatureIndicesRatio <= 1.0;
-
-        int totalNumIndices = allFeatureVectors.get(0).length;
-        final int numIndices = (int) Math.ceil(numFeatureIndicesRatio * allFeatureVectors.get(0).length);
-        final var chosenIndices = new int[numIndices];
-
-        var tmpAvailableIndices = new Integer[totalNumIndices];
+    private void featureBagging() {
+        var tmpAvailableIndices = new Integer[allFeatureVectors.get(0).length];
         Arrays.setAll(tmpAvailableIndices, i -> i);
         final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
 
-        for (int i = 0; i < numIndices; i++) {
+        for (int i = 0; i < activeFeatureIndices.length; i++) {
             int j = random.nextInt(availableIndices.size());
-            chosenIndices[i] = (availableIndices.get(j));
+            activeFeatureIndices[i] = (availableIndices.get(j));
             availableIndices.remove(j);
         }
-
-        return chosenIndices;
     }
 
-    private HugeLongArray sampleFeatureVectors(double numFeatureVectorsRatio) {
+    private HugeLongArray bootstrapDataset(double numFeatureVectorsRatio) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
         if (new Double(0.0D).equals(numFeatureVectorsRatio)) {

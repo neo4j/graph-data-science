@@ -94,7 +94,7 @@ public class ClassificationRandomForestTrain<LOSS extends DecisionTreeLoss> {
                     classToIdx
                 )
                     .withMinSize(this.minSize)
-                    .withNumFeatureIndicesRatio(this.numFeatureIndicesRatio)
+                    .withFeatureBaggingRatio(this.numFeatureIndicesRatio)
                     .withNumFeatureVectorsRatio(this.numFeatureVectorsRatio);
 
             this.randomSeed.ifPresent(seed -> {

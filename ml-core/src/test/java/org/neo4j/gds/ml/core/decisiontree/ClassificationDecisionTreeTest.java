@@ -127,7 +127,7 @@ class ClassificationDecisionTreeTest {
         var features = new double[]{8.0, 0.0};
 
         var decisionTree = decisionTreeBuilder
-            .withNumFeatureIndicesRatio(0.5D) // Only one feature is used.
+            .withFeatureBaggingRatio(0.5D) // Only one feature is used.
             .withRandomSeed(-6938002729576536314L)
             .build();
         var decisionTreePredict = decisionTree.train();

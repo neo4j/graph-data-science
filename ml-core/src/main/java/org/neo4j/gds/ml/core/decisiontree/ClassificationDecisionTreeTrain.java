@@ -40,7 +40,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         HugeObjectArray<double[]> allFeatures,
         int maxDepth,
         int minSize,
-        double numFeatureIndicesRatio,
+        double featureBaggingRatio,
         double numFeatureVectorsRatio,
         Optional<Random> random,
         int[] classes,
@@ -53,7 +53,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             allFeatures,
             maxDepth,
             minSize,
-            numFeatureIndicesRatio,
+            featureBaggingRatio,
             numFeatureVectorsRatio,
             random
         );
@@ -79,7 +79,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         private final Map<Integer, Integer> classToIdx;
 
         private int minSize = 1;
-        private double numFeatureIndicesRatio = 1.0;
+        private double featureBaggingRatio = 0.0; // Use all feature indices.
         private double numFeatureVectorsRatio = 0.0; // Use all feature vectors.
         private Optional<Random> random = Optional.empty();
 
@@ -108,7 +108,7 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
                 allFeatures,
                 maxDepth,
                 minSize,
-                numFeatureIndicesRatio,
+                featureBaggingRatio,
                 numFeatureVectorsRatio,
                 random,
                 classes,
@@ -122,8 +122,8 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             return this;
         }
 
-        public Builder<LOSS> withNumFeatureIndicesRatio(double ratio) {
-            this.numFeatureIndicesRatio = ratio;
+        public Builder<LOSS> withFeatureBaggingRatio(double ratio) {
+            this.featureBaggingRatio = ratio;
             return this;
         }
 
