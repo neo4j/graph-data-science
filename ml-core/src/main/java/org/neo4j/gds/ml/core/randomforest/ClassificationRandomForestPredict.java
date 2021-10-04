@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.core.decisiontree.DecisionTreePredict;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ClassificationRandomForestPredict {
 
@@ -64,6 +65,7 @@ public class ClassificationRandomForestPredict {
 
         int max = -1;
         int maxClassIdx = 0;
+
         for (int i = 0; i < predictionsPerClass.length(); i++) {
             var numPredictions = predictionsPerClass.get(i);
 
@@ -91,7 +93,7 @@ public class ClassificationRandomForestPredict {
             allocationTracker
         );
 
-        var tasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {
+        var predictionTasks = ParallelUtil.tasks(decisionTrees.length, index -> () -> {
             final var tree = decisionTrees[index];
             final var bootstrappedDataset = bootstrappedDatasets[index];
 
@@ -102,35 +104,49 @@ public class ClassificationRandomForestPredict {
                 predictions.getAndAdd(i * numClasses + classToIdx.get(prediction), 1);
             }
         });
-        ParallelUtil.runWithConcurrency(this.concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, predictionTasks, Pools.DEFAULT);
 
-        long errors = 0;
-        long numOutOfAnyBagVectors = 0;
+        var totalMistakes = new AtomicLong(0);
+        var totalOutOfAnyBagVectors = new AtomicLong(0);
+        long batchSize = totalNumVectors / concurrency;
+        long remainder = Math.floorMod(totalNumVectors, concurrency);
 
-        // TODO: Should we parallelize or vectorize this loop?
-        for (long i = 0; i < totalNumVectors; i++) {
-            final long offset = i * numClasses;
-            long max = 0;
-            int maxClassIdx = 0;
+        var majorityVoteTasks = ParallelUtil.tasks(concurrency, index -> () -> {
+            long numMistakes = 0;
+            long numOutOfAnyBagVectors = 0;
+            final long startOffset = index * batchSize;
+            final long endOffset = index == concurrency - 1
+                ? startOffset + batchSize + remainder
+                : startOffset + batchSize;
 
-            for (int j = 0; j < numClasses; j++) {
-                var numPredictions = predictions.get(offset + j);
+            for (long i = startOffset; i < endOffset; i++) {
+                final long innerOffset = i * numClasses;
+                long max = 0;
+                int maxClassIdx = 0;
 
-                if (numPredictions <= max) continue;
+                for (int j = 0; j < numClasses; j++) {
+                    var numPredictions = predictions.get(innerOffset + j);
 
-                max = numPredictions;
-                maxClassIdx = j;
+                    if (numPredictions <= max) continue;
+
+                    max = numPredictions;
+                    maxClassIdx = j;
+                }
+
+                if (max == 0) continue;
+
+                // The ith feature vector was in at least one out-of-bag dataset.
+                numOutOfAnyBagVectors++;
+                if (classes[maxClassIdx] != allLabels.get(i)) {
+                    numMistakes++;
+                }
             }
 
-            if (max == 0) continue;
+            totalMistakes.addAndGet(numMistakes);
+            totalOutOfAnyBagVectors.addAndGet(numOutOfAnyBagVectors);
+        });
+        ParallelUtil.runWithConcurrency(concurrency, majorityVoteTasks, Pools.DEFAULT);
 
-            // The ith feature vector was in at least one out-of-bag dataset.
-            numOutOfAnyBagVectors++;
-            if (classes[maxClassIdx] != allLabels.get(i)) {
-                errors++;
-            }
-        }
-
-        return (double) errors / numOutOfAnyBagVectors;
+        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
     }
 }
