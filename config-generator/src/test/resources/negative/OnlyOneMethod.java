@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 import java.util.Collection;
 import java.util.List;
 
-@Configuration("OnlyOneMethod")
+@Configuration("OnlyOneMethodConfig")
 public interface OnlyOneMethod {
 
     @Configuration.GraphStoreValidation

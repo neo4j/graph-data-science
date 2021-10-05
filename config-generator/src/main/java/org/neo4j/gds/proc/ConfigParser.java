@@ -93,6 +93,7 @@ final class ConfigParser {
                 Diagnostic.Kind.ERROR,
                 "[ConfigParser]: Only one GraphStoreValidation-annotated method allowed"
             );
+            return;
         }
 
         members.forEach(output::addMember);
