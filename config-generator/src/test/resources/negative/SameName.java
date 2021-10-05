@@ -17,39 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package positive;
+package negative;
 
 import org.neo4j.gds.annotation.Configuration;
 
-public interface Inheritance {
-    public interface BaseConfig {
-        double inheritedValue();
-
-        default short inheritedDefaultValue() {
-            return 42;
-        }
-
-        int overriddenValue();
-
-        default long overwrittenValue() {
-            return 42;
-        }
-
-    }
-
-    @Configuration("MyConfigImpl")
-    public interface MyConfig extends BaseConfig {
-        String baseValue();
-
-        @Override
-        default int overriddenValue() {
-            return 1337;
-        }
-
-
-        @Override
-        default long overwrittenValue() {
-            return 1337;
-        }
-    }
-}
+@Configuration("SameName")
+public interface SameName {}

@@ -32,6 +32,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.Step {
@@ -84,9 +85,19 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             return ProcessResult.INVALID;
         }
         ConfigParser.Spec configSpec = configParser.process(element.asType());
+        var nameOfGeneratedClass = configClassName(element, configSpec);
+        if (nameOfGeneratedClass.isEmpty()) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Name of generated class must be different from name of annotated class.",
+                element
+            );
+            return ProcessResult.INVALID;
+        }
+
         JavaFile generatedConfig = generateConfiguration.generateConfig(
             configSpec,
-            configClassName(element, configSpec)
+            nameOfGeneratedClass.get()
         );
 
         try {
@@ -103,11 +114,15 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
     }
 
     @NotNull
-    private String configClassName(Element element, ConfigParser.Spec configSpec) {
+    private Optional<String> configClassName(Element element, ConfigParser.Spec configSpec) {
         Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
-        return configuration.value().isBlank()
+        var nameOfGeneratedClass = configuration.value().isBlank()
             ? configSpec.root().getSimpleName() + CONFIG_CLASS_SUFFIX
             : configuration.value();
+        if (nameOfGeneratedClass.contentEquals(configSpec.root().getSimpleName())) {
+            return Optional.empty();
+        }
+        return Optional.of(nameOfGeneratedClass);
     }
 
     enum ProcessResult {

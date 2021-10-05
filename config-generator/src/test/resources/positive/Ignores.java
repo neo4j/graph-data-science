@@ -32,7 +32,7 @@ public interface Ignores {
         long notIgnored();
     }
 
-    @Configuration("MyConfig")
+    @Configuration("MyConfigImpl")
     public interface MyConfig extends BaseConfig {
 
         @Configuration.Ignore

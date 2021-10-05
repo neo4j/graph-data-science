@@ -211,6 +211,21 @@ class ConfigurationProcessorTest {
         clause.withErrorContaining("Only one GraphStoreValidation-annotated method allowed").and().withErrorCount(1);
     }
 
+    @Test
+    void specifiedNameMustBeDifferent() {
+        JavaFileObject file = forResource(String.format(Locale.ENGLISH, "negative/%s.java", "SameName"));
+
+        CompileTester.UnsuccessfulCompilationClause clause = assertAbout(javaSource())
+            .that(file)
+            .processedWith(new ConfigurationProcessor())
+            .failsToCompile();
+
+        clause
+            .withErrorContaining("Name of generated class must be different from name of annotated class")
+            .and()
+            .withErrorCount(1);
+    }
+
     private void runNegativeTest(String className, ErrorCheck... expectations) {
         JavaFileObject file = forResource(String.format(Locale.ENGLISH,"negative/%s.java", className));
 

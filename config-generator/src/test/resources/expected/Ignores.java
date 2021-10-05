@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
-public final class MyConfig implements Ignores.MyConfig {
+public final class MyConfigImpl implements Ignores.MyConfig {
     private long notIgnored;
 
     public MyConfig(@NotNull CypherMapWrapper config) {
