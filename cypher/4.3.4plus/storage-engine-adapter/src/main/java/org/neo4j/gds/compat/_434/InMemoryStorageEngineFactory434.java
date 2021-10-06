@@ -89,7 +89,7 @@ public class InMemoryStorageEngineFactory434 extends AbstractInMemoryStorageEngi
             readOnlyChecker
         );
 
-        factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN);
+        factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN).close();
 
         return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider)
             .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
