@@ -109,9 +109,8 @@ public enum Neo4jVersion {
             case "4.3.0-drop04.3":
                 return Neo4jVersion.V_4_3_drop43;
             case "4.3.0-drop04.4":
-                return Neo4jVersion.V_4_3_drop44;
             case "4.3.0-drop04.5":
-                return Neo4jVersion.V_4_3_drop45;
+                return Neo4jVersion.V_4_3_drop44;
             default:
                 break;
         }
