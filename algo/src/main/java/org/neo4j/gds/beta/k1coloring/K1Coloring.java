@@ -88,11 +88,11 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.minBatchSize = minBatchSize;
         this.concurrency = concurrency;
         this.executor = executor;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
 
         this.nodeCount = graph.nodeCount();

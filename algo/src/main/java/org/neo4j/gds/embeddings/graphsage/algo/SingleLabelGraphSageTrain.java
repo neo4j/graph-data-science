@@ -45,10 +45,10 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
     }
 

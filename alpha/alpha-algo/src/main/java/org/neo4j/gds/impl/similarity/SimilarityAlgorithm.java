@@ -20,8 +20,9 @@
 package org.neo4j.gds.impl.similarity;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Comparator;
@@ -33,7 +34,12 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
     final SimilarityConfig config;
     final GraphDatabaseAPI api;
 
-    public SimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
+    public SimilarityAlgorithm(
+        SimilarityConfig config,
+        GraphDatabaseAPI api,
+        ProgressTracker progressTracker
+    ) {
+        super(progressTracker);
         this.config = config;
         this.api = api;
     }

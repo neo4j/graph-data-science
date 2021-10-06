@@ -137,6 +137,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.traversalPredicate = traversalPredicate;
@@ -149,7 +150,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.relationships = trackRelationships ? new HugeLongLongMap(allocationTracker) : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
-        this.progressTracker = progressTracker;
     }
 
     public Dijkstra withSourceNode(long sourceNode) {

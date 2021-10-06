@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
@@ -57,6 +58,7 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
         ObjLongConsumer<LongArrayDeque> nodeFunc,
         ObjDoubleConsumer<DoubleArrayDeque> weightFunc
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.startNodeId = startNodeId;

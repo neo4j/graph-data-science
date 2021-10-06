@@ -69,6 +69,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.config = config;
         this.rootGraph = graph;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
@@ -76,7 +77,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         this.allocationTracker = allocationTracker;
         this.dendrograms = new HugeLongArray[config.maxLevels()];
         this.modularities = new double[config.maxLevels()];
-        this.progressTracker = progressTracker;
     }
 
     @Override

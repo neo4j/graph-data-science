@@ -63,10 +63,10 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
         long startNodeId,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.progressTracker = progressTracker;
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
     }
 

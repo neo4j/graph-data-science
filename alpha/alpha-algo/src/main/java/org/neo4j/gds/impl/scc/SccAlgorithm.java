@@ -66,8 +66,8 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
-        this.progressTracker = progressTracker;
         this.nodeCount = graph.nodeCount();
         this.index = HugeLongArray.newArray(nodeCount, allocationTracker);
         this.stack = new PagedLongStack(nodeCount, allocationTracker);

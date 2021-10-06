@@ -39,11 +39,11 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         ProgressTracker progressTracker,
         boolean throwInCompute
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.allocationTracker = allocationTracker;
         this.memoryLimit = memoryLimit;
         this.throwInCompute = throwInCompute;
-        this.progressTracker = progressTracker;
     }
 
     @Override

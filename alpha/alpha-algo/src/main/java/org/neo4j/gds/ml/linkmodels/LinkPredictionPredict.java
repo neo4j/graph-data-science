@@ -60,13 +60,13 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         ProgressTracker progressTracker,
         double threshold
     ) {
+        super(progressTracker);
         this.predictor = predictor;
         this.graph = graph;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.topN = topN;
         this.threshold = threshold;
-        this.progressTracker = progressTracker;
     }
 
     @Override

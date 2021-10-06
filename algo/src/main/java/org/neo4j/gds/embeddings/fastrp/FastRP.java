@@ -105,13 +105,13 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         AllocationTracker allocationTracker,
         Optional<Long> randomSeed
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.relationshipWeightProperty = config.relationshipWeightProperty();
         this.relationshipWeightFallback = this.relationshipWeightProperty == null ? 1.0 : Double.NaN;
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
-        this.progressTracker = progressTracker;
         this.minBatchSize = config.minBatchSize();
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];

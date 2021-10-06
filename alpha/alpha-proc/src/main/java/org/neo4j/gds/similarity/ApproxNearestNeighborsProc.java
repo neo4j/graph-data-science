@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfigImpl;
@@ -111,6 +112,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
             api,
             log,
             Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER,
             allocationTracker
         );
     }

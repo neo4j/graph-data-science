@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.similarity;
 
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -29,7 +30,7 @@ import java.util.function.Supplier;
 public abstract class CategoricalSimilarityAlgorithm<ME extends CategoricalSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, CategoricalInput> {
 
     public CategoricalSimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
-        super(config, api);
+        super(config, api, ProgressTracker.NULL_TRACKER);
     }
 
     @Override

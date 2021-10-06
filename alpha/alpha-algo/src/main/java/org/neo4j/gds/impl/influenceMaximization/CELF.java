@@ -21,11 +21,12 @@ package org.neo4j.gds.impl.influenceMaximization;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.results.InfluenceMaximizationResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.results.InfluenceMaximizationResult;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +64,7 @@ public class CELF extends Algorithm<CELF, CELF> {
         int concurrency,
         AllocationTracker allocationTracker
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         long nodeCount = graph.nodeCount();
 

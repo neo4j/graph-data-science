@@ -27,6 +27,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntBinaryPredicate;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 
 import java.util.ArrayList;
@@ -39,8 +40,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.impl.walking.RandomWalk.NextNodeStrategy.NO_NEXT_NODE;
 import static org.neo4j.gds.impl.Converters.longToIntConsumer;
+import static org.neo4j.gds.impl.walking.RandomWalk.NextNodeStrategy.NO_NEXT_NODE;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
@@ -59,6 +60,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         int limit,
         PrimitiveIterator.OfInt idStream
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.steps = steps;
         this.strategy = strategy;

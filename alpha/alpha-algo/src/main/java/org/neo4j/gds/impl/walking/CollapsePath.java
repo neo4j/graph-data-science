@@ -20,10 +20,6 @@
 package org.neo4j.gds.impl.walking;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.impl.msbfs.ANPStrategy;
-import org.neo4j.gds.impl.msbfs.BfsConsumer;
-import org.neo4j.gds.impl.msbfs.BfsSources;
-import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -36,6 +32,11 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.impl.msbfs.ANPStrategy;
+import org.neo4j.gds.impl.msbfs.BfsConsumer;
+import org.neo4j.gds.impl.msbfs.BfsSources;
+import org.neo4j.gds.impl.msbfs.MultiSourceBFS;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -54,6 +55,7 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
         ExecutorService executorService,
         AllocationTracker allocationTracker
     ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
         this.config = config;

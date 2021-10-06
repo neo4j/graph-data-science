@@ -22,16 +22,17 @@ package org.neo4j.gds.similarity;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.CategoricalInput;
+import org.neo4j.gds.impl.similarity.ImmutableApproximateNearestNeighborsConfig;
+import org.neo4j.gds.impl.similarity.ImmutableJaccardConfig;
 import org.neo4j.gds.impl.similarity.JaccardAlgorithm;
 import org.neo4j.gds.impl.similarity.JaccardConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.impl.similarity.ImmutableApproximateNearestNeighborsConfig;
-import org.neo4j.gds.impl.similarity.ImmutableJaccardConfig;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -85,6 +86,7 @@ class ApproximateNearestNeighborsTest extends AlgoTestBase {
             db,
             new TestLog(),
             Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

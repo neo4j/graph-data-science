@@ -46,9 +46,9 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.allocationTracker = allocationTracker;
-        this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);

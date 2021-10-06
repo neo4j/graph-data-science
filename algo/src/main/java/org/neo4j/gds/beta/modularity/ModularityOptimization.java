@@ -95,6 +95,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.maxIterations = maxIterations;
@@ -102,7 +103,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
-        this.progressTracker = progressTracker;
         this.allocationTracker = allocationTracker;
         this.minBatchSize = minBatchSize;
 

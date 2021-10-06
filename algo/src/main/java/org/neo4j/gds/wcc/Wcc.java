@@ -103,6 +103,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.initialComponents = config.isIncremental()
@@ -128,8 +129,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ));
         }
         this.threadSize = (int) threadSize;
-
-        this.progressTracker = progressTracker;
     }
 
     @Override

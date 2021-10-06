@@ -92,6 +92,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     }
 
     private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         // Track nodes and relationships that are skipped in a single iteration.
@@ -104,8 +105,6 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             !nodeBlackList.contains(target) &&
             !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(relationshipId))
         );
-
-        this.progressTracker = progressTracker;
     }
 
     @Override

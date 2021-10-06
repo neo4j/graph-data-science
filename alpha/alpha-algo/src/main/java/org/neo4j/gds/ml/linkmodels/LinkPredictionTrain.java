@@ -87,12 +87,12 @@ public class LinkPredictionTrain
         LinkPredictionTrainConfig config,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.trainGraph = graph.relationshipTypeFilteredGraph(Set.of(config.trainRelationshipType()));
         this.testGraph = graph.relationshipTypeFilteredGraph(Set.of(config.testRelationshipType()));
         this.trainExtractors = FeatureExtraction.propertyExtractors(trainGraph, config.featureProperties());
         this.testExtractors = FeatureExtraction.propertyExtractors(testGraph, config.featureProperties());
         this.config = config;
-        this.progressTracker = progressTracker;
         this.allocationTracker = AllocationTracker.empty();
     }
 
