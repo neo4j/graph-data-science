@@ -151,6 +151,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop44)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop45)
     @Test
     void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
         createGraph();

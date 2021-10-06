@@ -46,6 +46,12 @@ class Neo4jVersionTest {
         "4.3.0-drop04, V_4_3",
         "4.3.0, V_4_3",
         "4.3.0-drop04.0, V_4_3_drop40",
+        "4.3.0-drop04.1, V_4_3_drop41",
+        "4.3.0-drop04.2, V_4_3_drop42",
+        "4.3.0-drop04.3, V_4_3_drop43",
+        "4.3.0-drop04.4, V_4_3_drop44",
+        "4.3.0-drop04.4, V_4_3_drop44",
+        "4.3.0-drop04.5, V_4_3_drop44",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
