@@ -131,9 +131,13 @@ public final class NodesBuilder {
         LongPredicate seenNodeIdPredicate = maxOriginalId == UNKNOWN_MAX_ID
             ? nodeId -> false
             : seenIds::getAndSet;
+        long highestNodeId = maxOriginalId == UNKNOWN_MAX_ID
+            ? Long.MAX_VALUE
+            : maxOriginalId;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
+                highestNodeId,
                 seenNodeIdPredicate,
                 hasLabelInformation,
                 hasProperties,
@@ -263,6 +267,7 @@ public final class NodesBuilder {
 
         ThreadLocalBuilder(
             NodeImporter nodeImporter,
+            long highestNodeId,
             LongPredicate seenNodeIdPredicate,
             boolean hasLabelInformation,
             boolean hasProperties,
@@ -276,6 +281,7 @@ public final class NodesBuilder {
 
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(SparseLongArray.SUPER_BLOCK_SIZE)
+                .highestNodeId(highestNodeId)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
                 .build();
