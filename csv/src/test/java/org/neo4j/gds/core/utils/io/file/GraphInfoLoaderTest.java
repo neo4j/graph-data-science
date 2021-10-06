@@ -22,11 +22,13 @@ package org.neo4j.gds.core.utils.io.file;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +44,8 @@ class GraphInfoLoaderTest {
         var databaseId = DatabaseIdFactory.from("my-database", uuid);
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId"),
-            String.join(", ", uuid.toString(), "my-database", "19", "1337")
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -56,6 +58,10 @@ class GraphInfoLoaderTest {
 
         assertThat(graphInfo.nodeCount()).isEqualTo(19L);
         assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);
+
+        assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
+            Map.of(RelationshipType.of("REL"), 42L)
+        );
     }
 
 }
