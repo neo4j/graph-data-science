@@ -119,6 +119,9 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         return NodesScanner.of(
             transaction,
             scanner,
+            // capacity is exclusive of the highest id
+            // batch buffer is inclusive, so we need to subtract one
+            idMapBuilder.capacity() - 1,
             dimensions.nodeLabelTokens(),
             progressTracker,
             new NodeImporter(

@@ -36,6 +36,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     public static InternalImporter.CreateScanner of(
         TransactionContext tx,
         StoreScanner<NodeReference> scanner,
+        long highestNodeId,
         LongSet labels,
         ProgressTracker progressTracker,
         NodeImporter importer,
@@ -43,18 +44,21 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         TerminationFlag terminationFlag
     ) {
         return new NodesScanner.Creator(
-                tx,
-                scanner,
-                labels,
-                progressTracker,
-                importer,
-                nodePropertyImporter,
-                terminationFlag);
+            tx,
+            scanner,
+            highestNodeId,
+            labels,
+            progressTracker,
+            importer,
+            nodePropertyImporter,
+            terminationFlag
+        );
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
         private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
+        private final long highestNodeId;
         private final LongSet labels;
         private final ProgressTracker progressTracker;
         private final NodeImporter importer;
@@ -64,6 +68,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         Creator(
             TransactionContext tx,
             StoreScanner<NodeReference> scanner,
+            long highestNodeId,
             LongSet labels,
             ProgressTracker progressTracker,
             NodeImporter importer,
@@ -72,6 +77,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         ) {
             this.tx = tx;
             this.scanner = scanner;
+            this.highestNodeId = highestNodeId;
             this.labels = labels;
             this.progressTracker = progressTracker;
             this.importer = importer;
@@ -82,14 +88,15 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         @Override
         public RecordScanner create(int index) {
             return new NodesScanner(
-                    tx,
-                    terminationFlag,
-                    scanner,
-                    labels,
-                    index,
-                    progressTracker,
-                    importer,
-                    nodePropertyImporter
+                tx,
+                terminationFlag,
+                scanner,
+                highestNodeId,
+                labels,
+                index,
+                progressTracker,
+                importer,
+                nodePropertyImporter
             );
         }
 
@@ -102,6 +109,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
 
     private final TerminationFlag terminationFlag;
     private final StoreScanner<NodeReference> scanner;
+    private final long highestNodeId;
     private final LongSet labels;
     private final int scannerIndex;
     private final ProgressTracker progressTracker;
@@ -114,6 +122,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         TransactionContext tx,
         TerminationFlag terminationFlag,
         StoreScanner<NodeReference> scanner,
+        long highestNodeId,
         LongSet labels,
         int threadIndex,
         ProgressTracker progressTracker,
@@ -123,6 +132,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         super(tx);
         this.terminationFlag = terminationFlag;
         this.scanner = scanner;
+        this.highestNodeId = highestNodeId;
         this.labels = labels;
         this.scannerIndex = threadIndex;
         this.progressTracker = progressTracker;
@@ -139,6 +149,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
+                .highestNodeId(highestNodeId)
                 .nodeLabelIds(labels)
                 .capacity(scanner.bufferSize())
                 .hasLabelInformation(!labels.isEmpty())
