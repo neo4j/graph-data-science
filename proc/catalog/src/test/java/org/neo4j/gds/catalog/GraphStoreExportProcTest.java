@@ -26,15 +26,15 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -47,9 +47,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStoreExportProcTest extends BaseProcTest {
 
@@ -93,6 +93,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop44)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop45)
     @Test
     void exportGraph() {
         createGraph();
@@ -116,6 +118,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop41)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop42)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop44)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop45)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
         createGraph();
