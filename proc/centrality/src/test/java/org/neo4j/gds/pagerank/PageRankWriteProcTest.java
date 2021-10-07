@@ -20,15 +20,14 @@
 package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher.ModeBuildStage;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,8 +44,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 
-    @TestFactory
-    Stream<DynamicTest> configTests() {
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
             WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);

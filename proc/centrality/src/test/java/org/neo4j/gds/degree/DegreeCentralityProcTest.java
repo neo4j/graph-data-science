@@ -27,13 +27,13 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -48,11 +48,16 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     MemoryEstimateTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
     HeapControlTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
 {
+
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(modeSpecificConfigTests(), Stream.of(
             RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        ).flatMap(Collection::stream));
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final String DEFAULT_RESULT_PROPERTY = "degreeScore";

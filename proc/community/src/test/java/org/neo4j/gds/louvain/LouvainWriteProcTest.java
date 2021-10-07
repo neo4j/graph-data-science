@@ -22,16 +22,15 @@ package org.neo4j.gds.louvain;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -48,15 +47,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
     ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {
 
-    @TestFactory
-    Stream<DynamicTest> configTests() {
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
             WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);

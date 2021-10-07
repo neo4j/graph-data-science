@@ -25,27 +25,27 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.test.config.IterationsConfigProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
-import org.neo4j.gds.SeedConfigTest;
-import org.neo4j.gds.test.config.ToleranceConfigProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.SeedConfigTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
+import org.neo4j.gds.test.config.ToleranceConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -65,12 +65,16 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     HeapControlTest<Louvain, CONFIG, Louvain> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
             RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        ).flatMap(Collection::stream));
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final List<List<Long>> RESULT = Arrays.asList(

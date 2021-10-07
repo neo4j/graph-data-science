@@ -23,7 +23,6 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,11 +31,11 @@ import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
@@ -56,8 +55,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
     ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
 
-    @TestFactory
-    Stream<DynamicTest> configTests() {
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
             WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
