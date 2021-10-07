@@ -24,16 +24,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.utils.MetricUtil.allValidMetricSpecifications;
 
 class NodeClassificationTrainConfigTest {
@@ -207,14 +204,4 @@ class NodeClassificationTrainConfigTest {
                 .build())
             .hasMessageContaining("No model candidates (params) specified, we require at least one");
     }
-
-    private Map<String, Object> protoToMap(String p) {
-        try {
-            return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        return Collections.emptyMap();
-    }
-
 }
