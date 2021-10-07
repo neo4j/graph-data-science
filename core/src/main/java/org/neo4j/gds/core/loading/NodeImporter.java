@@ -86,6 +86,8 @@ public class NodeImporter {
             return 0;
         }
 
+        batchLength = adder.allocatedSize();
+
         int importedProperties = 0;
 
         var batch = buffer.batch();

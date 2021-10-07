@@ -57,7 +57,7 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
             return null;
         }
         BulkAdder adder = adders.get();
-        adder.reset(startIndex);
+        adder.reset(startIndex, upperAllocation(startIndex, nodes));
         return adder;
     }
 
@@ -86,18 +86,25 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
         private final SparseLongArray.Builder builder;
 
         private long allocationIndex;
+        private int allocationSize;
 
         private BulkAdder(SparseLongArray.Builder builder) {
             this.builder = builder;
         }
 
-        private void reset(long allocationIndex) {
+        private void reset(long allocationIndex, long allocationEnd) {
             this.allocationIndex = allocationIndex;
+            this.allocationSize = (int) (allocationEnd - allocationIndex);
         }
 
         @Override
         public long startId() {
             return allocationIndex;
+        }
+
+        @Override
+        public int allocatedSize() {
+            return this.allocationSize;
         }
 
         @Override
@@ -110,7 +117,15 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
             long[][] labelIds
         ) {
             builder.set(allocationIndex, nodeIds, 0, length);
-            return propertyAllocator.allocateProperties(reader, nodeIds, properties, labelIds, 0, length, allocationIndex);
+            return propertyAllocator.allocateProperties(
+                reader,
+                nodeIds,
+                properties,
+                labelIds,
+                0,
+                length,
+                allocationIndex
+            );
         }
     }
 }

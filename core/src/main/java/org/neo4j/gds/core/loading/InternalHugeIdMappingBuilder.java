@@ -84,26 +84,26 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
     }
 
     public static final class BulkAdder implements IdMappingAllocator {
-        public long[] buffer;
-        public int offset;
-        public int length;
-        public long start;
+        private long[] buffer;
+        private int allocationSize;
+        private long start;
+        private int offset;
+        private int length;
         private final HugeLongArray array;
         private final HugeCursor<long[]> cursor;
 
-        private BulkAdder(
-                HugeLongArray array,
-                HugeCursor<long[]> cursor) {
+        private BulkAdder(HugeLongArray array, HugeCursor<long[]> cursor) {
             this.array = array;
             this.cursor = cursor;
         }
 
         private void reset(long start, long end) {
             array.initCursor(this.cursor, start, end);
+            this.buffer = null;
+            this.allocationSize = (int) (end - start);
             this.start = start;
-            buffer = null;
-            offset = 0;
-            length = 0;
+            this.offset = 0;
+            this.length = 0;
         }
 
         public boolean nextBuffer() {
@@ -120,6 +120,11 @@ public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuil
         @Override
         public long startId() {
             return start;
+        }
+
+        @Override
+        public int allocatedSize() {
+            return this.allocationSize;
         }
 
         @Override

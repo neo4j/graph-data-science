@@ -47,16 +47,14 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
     }
 
     @Override
-    public @Nullable InternalSequentialBitIdMappingBuilder.BulkAdder allocate(int batchLength) {
-        return this.allocate((long) batchLength);
-    }
-
-    public BulkAdder allocate(long nodes) {
-        long startIndex = allocationIndex.getAndAccumulate(nodes, this::upperAllocation);
+    public @Nullable BulkAdder allocate(int batchLength) {
+        long startIndex = allocationIndex.getAndAccumulate(batchLength, this::upperAllocation);
         if (startIndex == capacity) {
             return null;
         }
-        return adders.get();
+        var bulkAdder = adders.get();
+        bulkAdder.setAllocationSize((int) (upperAllocation(startIndex, batchLength) - startIndex));
+        return bulkAdder;
     }
 
     public SparseLongArray build() {
@@ -82,6 +80,7 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
 
     public static final class BulkAdder implements IdMappingAllocator {
         private final SparseLongArray.SequentialBuilder builder;
+        private int allocationSize;
 
         private BulkAdder(SparseLongArray.SequentialBuilder builder) {
             this.builder = builder;
@@ -90,6 +89,11 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
         @Override
         public long startId() {
             return -1;
+        }
+
+        @Override
+        public int allocatedSize() {
+            return this.allocationSize;
         }
 
         @Override
@@ -103,6 +107,10 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
         ) {
             builder.set(nodeIds, 0, length);
             return propertyAllocator.allocateProperties(reader, nodeIds, properties, labelIds, 0, length, -1);
+        }
+
+        private void setAllocationSize(int allocationSize) {
+            this.allocationSize = allocationSize;
         }
     }
 }
