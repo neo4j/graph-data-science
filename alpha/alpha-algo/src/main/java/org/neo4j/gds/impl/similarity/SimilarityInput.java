@@ -55,15 +55,6 @@ public interface SimilarityInput {
         return parallelStream(Arrays.stream(inputs),  concurrency, stream -> stream.mapToLong(SimilarityInput::getId).toArray());
     }
 
-    static int[] indexesFor(long[] inputIds, List<Long> sourceIds, String key) {
-        try {
-            return indexes(inputIds, sourceIds);
-        } catch(IllegalArgumentException exception) {
-            String message = formatWithLocale("%s: %s", formatWithLocale("Missing node ids in '%s' list ", key), exception.getMessage());
-            throw new RuntimeException(new IllegalArgumentException(message));
-        }
-    }
-
 
     static List<Number> extractValues(Object rawValues) {
         if (rawValues == null) {

@@ -45,19 +45,13 @@ public class TopKConsumer<T> implements Function<T, Integer> {
         maxValue = null;
     }
 
-    public static <T> List<T> topK(List<T> items, int topK, Comparator<T> comparator) {
-        TopKConsumer<T> consumer = new TopKConsumer<>(topK, comparator);
-        items.forEach(consumer::apply);
-        return consumer.list();
-    }
-
     public static <T> Stream<T> topK(Stream<T> items, int topK, Comparator<T> comparator) {
         TopKConsumer<T> consumer = new TopKConsumer<T>(topK, comparator);
         items.forEach(consumer::apply);
         return consumer.stream();
     }
 
-    public static TopKConsumer<SimilarityResult>[] initializeTopKConsumers(int length, int topK) {
+    static TopKConsumer<SimilarityResult>[] initializeTopKConsumers(int length, int topK) {
         Comparator<SimilarityResult> comparator = topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         topK = Math.abs(topK);
 
@@ -65,19 +59,6 @@ public class TopKConsumer<T> implements Function<T, Integer> {
         TopKConsumer<SimilarityResult>[] results = new TopKConsumer[length];
         for (int i = 0; i < results.length; i++) results[i] = new TopKConsumer<>(topK, comparator);
         return results;
-    }
-
-    static SimilarityConsumer assignSimilarityPairs(TopKConsumer<SimilarityResult>[] topKConsumers) {
-        return (s, t, result) -> {
-
-            int selectedIndex = result.reversed ? t : s;
-            topKConsumers[selectedIndex].apply(result);
-
-            if (result.bidirectional) {
-                SimilarityResult reverse = result.reverse();
-                topKConsumers[reverse.reversed ? t : s].apply(reverse);
-            }
-        };
     }
 
     public Stream<T> stream() {

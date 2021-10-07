@@ -27,8 +27,6 @@ import org.neo4j.gds.annotation.ValueClass;
 @SuppressWarnings("immutables:subtype")
 public interface ShortestPathYensBaseConfig extends ShortestPathBaseConfig {
 
-    String K_KEY = "k";
-
     // Number of shortest paths to compute
     @Configuration.IntegerRange(min = 1)
     int k();

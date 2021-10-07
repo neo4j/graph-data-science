@@ -31,9 +31,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep.INPUT_NODE_PROPERTIES;
 
 final class LinkFeatureStepFactoryTest {
+
+    private static final String INPUT_NODE_PROPERTIES = "nodeProperties";
 
     @Test
     public void testCreateHadamard() {

@@ -38,6 +38,20 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class SimilarityStreamGenerator<T> {
+
+    private static SimilarityConsumer assignSimilarityPairs(TopKConsumer<SimilarityResult>[] topKConsumers) {
+        return (s, t, result) -> {
+
+            int selectedIndex = result.reversed ? t : s;
+            topKConsumers[selectedIndex].apply(result);
+
+            if (result.bidirectional) {
+                SimilarityResult reverse = result.reverse();
+                topKConsumers[reverse.reversed ? t : s].apply(reverse);
+            }
+        };
+    }
+
     private final TerminationFlag terminationFlag;
     private final Supplier<RleDecoder> decoderFactory;
     private final SimilarityComputer<T> computer;
@@ -90,7 +104,7 @@ public class SimilarityStreamGenerator<T> {
         TopKConsumer<SimilarityResult>[] topKHolder = TopKConsumer.initializeTopKConsumers(length, topK);
         RleDecoder decoder = decoderFactory.get();
 
-        SimilarityConsumer consumer = TopKConsumer.assignSimilarityPairs(topKHolder);
+        SimilarityConsumer consumer = assignSimilarityPairs(topKHolder);
         for (int sourceId = 0; sourceId < length; sourceId++) {
             computeSimilarityForSourceIndex(sourceId, inputs, length, cutoff, consumer, computer, decoder);
         }
@@ -192,7 +206,7 @@ public class SimilarityStreamGenerator<T> {
         IntStream sourceRange = idRange(sourceIndexIds, length);
         Function<Integer, IntStream> targetRange = targetRange(targetIndexIds, length);
 
-        SimilarityConsumer consumer = TopKConsumer.assignSimilarityPairs(topKHolder);
+        SimilarityConsumer consumer = assignSimilarityPairs(topKHolder);
         sourceRange.forEach(sourceId -> computeSimilarityForSourceIndex(sourceId, inputs, cutoff, consumer, computer, decoder, targetRange));
 
         return Arrays.stream(topKHolder).flatMap(TopKConsumer::stream);

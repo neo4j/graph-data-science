@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface LinkFeatureStep extends Model.Mappable {
-    String INPUT_NODE_PROPERTIES = "nodeProperties";
-
     LinkFeatureAppender linkFeatureAppender(Graph graph);
 
     /**

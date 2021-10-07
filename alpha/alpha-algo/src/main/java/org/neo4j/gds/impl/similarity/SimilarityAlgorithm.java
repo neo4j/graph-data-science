@@ -26,10 +26,22 @@ import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INPUT>, INPUT extends SimilarityInput> extends Algorithm<ME, SimilarityAlgorithmResult> {
+
+    private static int[] indexesFor(long[] inputIds, List<Long> sourceIds, String key) {
+        try {
+            return SimilarityInput.indexes(inputIds, sourceIds);
+        } catch(IllegalArgumentException exception) {
+            String message = formatWithLocale("%s: %s", formatWithLocale("Missing node ids in '%s' list ", key), exception.getMessage());
+            throw new RuntimeException(new IllegalArgumentException(message));
+        }
+    }
 
     final SimilarityConfig config;
     final GraphDatabaseAPI api;
@@ -60,8 +72,8 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
 
         INPUT[] inputs = prepareInputs(config.data(), config);
         long[] inputIds = SimilarityInput.extractInputIds(inputs, config.concurrency());
-        int[] sourceIndexIds = SimilarityInput.indexesFor(inputIds, config.sourceIds(), "sourceIds");
-        int[] targetIndexIds = SimilarityInput.indexesFor(inputIds, config.targetIds(), "targetIds");
+        int[] sourceIndexIds = indexesFor(inputIds, config.sourceIds(), "sourceIds");
+        int[] targetIndexIds = indexesFor(inputIds, config.targetIds(), "targetIds");
         SimilarityComputer<INPUT> computer = similarityComputer(config.skipValue(), sourceIndexIds, targetIndexIds);
 
         builder.nodes(inputIds.length)

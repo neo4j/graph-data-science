@@ -43,8 +43,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
 
-    public static final double DEFAULT_WEIGHT = 1.0;
-
     private final long nodeCount;
     private final AllocationTracker allocationTracker;
     private final NodeProperties nodeProperties;

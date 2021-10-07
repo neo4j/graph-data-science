@@ -21,9 +21,10 @@ package org.neo4j.gds.impl.similarity;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -74,31 +75,31 @@ class TopKConsumerTest {
     
     @Test
     void testFindTopKHeap4() {
-        Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 4, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM3,ITEM2,ITEM1),topItems);
+        var topItems = TopKConsumer.topK(Stream.of(ITEM1, ITEM3, ITEM2, ITEM4), 4, Item::compareTo).collect(Collectors.toList());
+        assertEquals(List.of(ITEM4, ITEM3, ITEM2, ITEM1), topItems);
     }
 
     @Test
     void testFindTopKHeap2of4() {
-        Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM4), 4, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM2),topItems);
+        var topItems = TopKConsumer.topK(Stream.of(ITEM2, ITEM4), 4, Item::compareTo).collect(Collectors.toList());
+        assertEquals(List.of(ITEM4, ITEM2), topItems);
     }
     @Test
     void testFindTopKHeap4of3() {
-        Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM1, ITEM4, ITEM3), 3, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM3,ITEM2),topItems);
+        var topItems = TopKConsumer.topK(Stream.of(ITEM2, ITEM1, ITEM4, ITEM3), 3, Item::compareTo).collect(Collectors.toList());
+        assertEquals(List.of(ITEM4, ITEM3, ITEM2), topItems);
     }
 
     @Test
     void testFindTopKHeap() {
-        Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM3),topItems);
+        var topItems = TopKConsumer.topK(Stream.of(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo).collect(Collectors.toList());
+        assertEquals(List.of(ITEM4, ITEM3), topItems);
     }
 
     @Test
     void testFindTopKHeap2() {
-        List<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM3),topItems);
+        var topItems = TopKConsumer.topK(Stream.of(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo).collect(Collectors.toList());
+        assertEquals(List.of(ITEM4, ITEM3), topItems);
     }
 
     @Test
