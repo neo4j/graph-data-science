@@ -37,10 +37,7 @@ import org.neo4j.gds.impl.similarity.Computations;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
-import org.neo4j.gds.results.SimilarityExporter;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
 
 import java.util.Map;
@@ -76,7 +73,7 @@ abstract class AlphaSimilarityProc
         return result.stream();
     }
 
-    Stream<SimilaritySummaryResult> write(
+    Stream<AlphaSimilaritySummaryResult> write(
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
@@ -96,7 +93,7 @@ abstract class AlphaSimilarityProc
         return writeAndAggregateResults(result, config, compute.algorithm().getTerminationFlag());
     }
 
-    Stream<SimilarityStatsResult> stats(
+    Stream<AlphaSimilarityStatsResult> stats(
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
@@ -109,7 +106,7 @@ abstract class AlphaSimilarityProc
         assert result != null;
 
         if (result.isEmpty()) {
-            return Stream.of(SimilarityStatsResult.from(
+            return Stream.of(AlphaSimilarityStatsResult.from(
                 0,
                 0,
                 0,
@@ -125,7 +122,7 @@ abstract class AlphaSimilarityProc
             recorder.record(histogram);
             similarityPairs.getAndIncrement();
         });
-        return Stream.of(SimilarityStatsResult.from(
+        return Stream.of(AlphaSimilarityStatsResult.from(
             result.nodes(),
             result.sourceIdsLength(),
             result.targetIdsLength(),
@@ -202,9 +199,9 @@ abstract class AlphaSimilarityProc
         GraphStoreCatalog.remove(CatalogRequest.of(username(), databaseId()), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
     }
 
-    private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
+    private Stream<AlphaSimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
         return Stream.of(
-            SimilaritySummaryResult.from(
+            AlphaSimilaritySummaryResult.from(
                 0,
                 0,
                 0,
@@ -217,7 +214,7 @@ abstract class AlphaSimilarityProc
         );
     }
 
-    private Stream<SimilaritySummaryResult> writeAndAggregateResults(
+    private Stream<AlphaSimilaritySummaryResult> writeAndAggregateResults(
         SimilarityAlgorithmResult algoResult,
         CONFIG config,
         TerminationFlag terminationFlag
@@ -237,7 +234,7 @@ abstract class AlphaSimilarityProc
         );
         similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
 
-        return Stream.of(SimilaritySummaryResult.from(
+        return Stream.of(AlphaSimilaritySummaryResult.from(
             algoResult.nodes(),
             algoResult.sourceIdsLength(),
             algoResult.targetIdsLength(),

@@ -26,8 +26,6 @@ import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
 import org.neo4j.gds.impl.similarity.PearsonConfig;
 import org.neo4j.gds.impl.similarity.PearsonConfigImpl;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -56,7 +54,7 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
 
     @Procedure(name = "gds.alpha.similarity.pearson.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<SimilaritySummaryResult> pearsonWrite(
+    public Stream<AlphaSimilaritySummaryResult> pearsonWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,7 +63,7 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
 
     @Procedure(name = "gds.alpha.similarity.pearson.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SimilarityStatsResult> pearsonStats(
+    public Stream<AlphaSimilarityStatsResult> pearsonStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

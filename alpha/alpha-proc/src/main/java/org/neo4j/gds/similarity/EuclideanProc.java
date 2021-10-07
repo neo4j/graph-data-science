@@ -26,8 +26,6 @@ import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
 import org.neo4j.gds.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,7 +52,7 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
 
     @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<SimilaritySummaryResult> euclideanWrite(
+    public Stream<AlphaSimilaritySummaryResult> euclideanWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,7 +61,7 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SimilarityStatsResult> euclideanStats(
+    public Stream<AlphaSimilarityStatsResult> euclideanStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

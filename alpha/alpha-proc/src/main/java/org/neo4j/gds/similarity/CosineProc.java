@@ -26,8 +26,6 @@ import org.neo4j.gds.impl.similarity.CosineAlgorithm;
 import org.neo4j.gds.impl.similarity.CosineConfig;
 import org.neo4j.gds.impl.similarity.CosineConfigImpl;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,7 +52,7 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
 
     @Procedure(name = "gds.alpha.similarity.cosine.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<SimilaritySummaryResult> cosineWrite(
+    public Stream<AlphaSimilaritySummaryResult> cosineWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,7 +61,7 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
 
     @Procedure(name = "gds.alpha.similarity.cosine.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SimilarityStatsResult> cosineStats(
+    public Stream<AlphaSimilarityStatsResult> cosineStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

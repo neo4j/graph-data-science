@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Values;

@@ -26,8 +26,6 @@ import org.neo4j.gds.impl.similarity.OverlapAlgorithm;
 import org.neo4j.gds.impl.similarity.OverlapConfig;
 import org.neo4j.gds.impl.similarity.OverlapConfigImpl;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.results.SimilarityStatsResult;
-import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,7 +52,7 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
 
     @Procedure(name = "gds.alpha.similarity.overlap.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<SimilaritySummaryResult> overlapWrite(
+    public Stream<AlphaSimilaritySummaryResult> overlapWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,7 +61,7 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
 
     @Procedure(name = "gds.alpha.similarity.overlap.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SimilarityStatsResult> overlapStats(
+    public Stream<AlphaSimilarityStatsResult> overlapStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

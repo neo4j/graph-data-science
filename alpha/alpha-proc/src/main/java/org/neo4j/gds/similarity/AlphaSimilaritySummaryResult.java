@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SimilaritySummaryResult {
+public class AlphaSimilaritySummaryResult {
 
     public final long nodes;
     public final long sourceNodes;
@@ -45,7 +45,7 @@ public class SimilaritySummaryResult {
     public final double p999;
     public final double p100;
 
-    public SimilaritySummaryResult(
+    public AlphaSimilaritySummaryResult(
         long nodes, long sourceNodes, long targetNodes, long similarityPairs,
         long computations, String writeRelationshipType, String writeProperty,
         double min, double max, double mean, double stdDev,
@@ -73,7 +73,7 @@ public class SimilaritySummaryResult {
         this.p100 = p100;
     }
 
-    public static SimilaritySummaryResult from(
+    public static AlphaSimilaritySummaryResult from(
             long length,
             long sourceIdsLength,
             long targetIdsLength,
@@ -85,7 +85,7 @@ public class SimilaritySummaryResult {
         long sourceNodes = sourceIdsLength == 0 ? length : sourceIdsLength;
         long targetNodes = targetIdsLength == 0 ? length : targetIdsLength;
 
-        return new SimilaritySummaryResult(
+        return new AlphaSimilaritySummaryResult(
                 length,
                 sourceNodes,
                 targetNodes,

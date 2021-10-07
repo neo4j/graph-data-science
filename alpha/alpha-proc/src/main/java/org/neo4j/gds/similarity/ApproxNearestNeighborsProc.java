@@ -46,8 +46,6 @@ import org.neo4j.gds.impl.similarity.PearsonConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
-import org.neo4j.gds.results.ApproxSimilaritySummaryResult;
-import org.neo4j.gds.results.SimilarityExporter;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
