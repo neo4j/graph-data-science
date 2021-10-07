@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
@@ -37,12 +38,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.GdsEditionUtils.setToEnterpriseAndRun;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.DEFAULT;
 import static org.neo4j.gds.core.Aggregation.NONE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringJoining.join;
 
 public final class TestGraphLoader {
@@ -112,6 +113,7 @@ public final class TestGraphLoader {
         return graphStore(factoryType).getUnion();
     }
 
+    @TestOnly
     public GraphStore graphStore(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
             if (factoryType == TestSupport.FactoryType.NATIVE_BIT_ID_MAP) {

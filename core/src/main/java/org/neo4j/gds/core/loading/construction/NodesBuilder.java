@@ -132,7 +132,7 @@ public final class NodesBuilder {
             ? nodeId -> false
             : seenIds::getAndSet;
         long highestPossibleNodeCount = maxOriginalId == UNKNOWN_MAX_ID
-            ? nodeCount
+            ? Long.MAX_VALUE
             : maxOriginalId + 1;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
