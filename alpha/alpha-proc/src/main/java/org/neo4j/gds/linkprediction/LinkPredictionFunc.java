@@ -20,7 +20,6 @@
 package org.neo4j.gds.linkprediction;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.utils.Directions;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -28,6 +27,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -134,5 +134,78 @@ public class LinkPredictionFunc extends BaseProc {
         return Directions.fromString((String) config.getOrDefault(DIRECTION_KEY, Direction.BOTH.name()));
     }
 
+    /**
+     * Utility class for converting string representation used in cypher queries
+     * to neo4j kernel api Direction type.
+     *
+     *
+     * <p>
+     *      String parsing is case insensitive!
+     * <div>
+     *     <strong>OUTGOING</strong>
+     *     <ul>
+     *         <li>&gt;</li>
+     *         <li>o</li>
+     *         <li>out</li>
+     *         <li>outgoing</li>
+     *     </ul>
+     *     <strong>INCOMING</strong>
+     *     <ul>
+     *         <li>&lt;</li>
+     *         <li>i</li>
+     *         <li>in</li>
+     *         <li>incoming</li>
+     *     </ul>
+     *     <strong>BOTH</strong>
+     *     <ul>
+     *         <li>&lt;&gt;</li>
+     *         <li>b</li>
+     *         <li>both</li>
+     *     </ul>
+     * </div>
+     */
+    static final class Directions {
 
+        static final Direction DEFAULT_DIRECTION = Direction.OUTGOING;
+
+        private Directions() {}
+
+        static Direction fromString(String directionString) {
+            return fromString(directionString, DEFAULT_DIRECTION);
+        }
+
+        static Direction fromString(String directionString, Direction defaultDirection) {
+
+            if (null == directionString) {
+                return defaultDirection;
+            }
+
+            switch (directionString.toLowerCase(Locale.ENGLISH)) {
+
+                case "outgoing":
+                case "out":
+                case "o":
+                case ">":
+                    return Direction.OUTGOING;
+
+                case "incoming":
+                case "in":
+                case "i":
+                case "<":
+                    return Direction.INCOMING;
+
+                case "both":
+                case "b":
+                case "<>":
+                    return Direction.BOTH;
+
+                default:
+                    return defaultDirection;
+            }
+        }
+
+        public static String toString(Direction direction) {
+            return direction.name();
+        }
+    }
 }
