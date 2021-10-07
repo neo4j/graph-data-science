@@ -41,7 +41,7 @@ class BitIdMapTest {
     @CsvSource({
         "0,168,208,248",
         "100,176,216,256",
-        "100000000000,12988281408,12988281448,12988281488"
+        "100000000000,12988281400,12988281440,12988281480"
     })
     void shouldComputeMemoryEstimation(
         long highestPossibleNodeCount,

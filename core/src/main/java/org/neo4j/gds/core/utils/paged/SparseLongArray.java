@@ -304,7 +304,7 @@ public final class SparseLongArray {
                 idCount += Long.bitCount(array[page]);
             }
 
-            var highestNeoId = capacity;
+            var highestNeoId = capacity - 1;
             var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
             return new SparseLongArray(idCount, highestNeoId, array, blockOffsets, layouts.layout(), layouts.secondary());
         }

@@ -20,8 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -31,6 +29,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.utils.CheckedRunnable;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -43,8 +43,8 @@ class NativeFactoryTest {
     @Test
     @GdsEditionTest(Edition.EE)
     void memoryEstimationBitMapEnabled() {
-        var expectedMinUsage = 1813082040L;
-        var expectedMaxUsage = 3013268832L;
+        var expectedMinUsage = 1813082032L;
+        var expectedMaxUsage = 3013268824L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)

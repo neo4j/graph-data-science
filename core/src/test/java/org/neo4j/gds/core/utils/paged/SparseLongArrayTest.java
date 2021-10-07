@@ -283,8 +283,8 @@ class SparseLongArrayTest {
     @CsvSource({
         "10000,1432",
         "100000,13120",
-        "1000000,130024",
-        "1000000000000,129882812640"
+        "1000000,130016",
+        "1000000000000,129882812632"
     })
     void memoryEstimation(long highestPossibleNodeCount, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions
