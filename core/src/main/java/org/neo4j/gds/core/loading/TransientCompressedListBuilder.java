@@ -31,11 +31,9 @@ import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfByteArray;
 public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientCompressedList> {
 
     private final BumpAllocator<byte[]> builder;
-    private final AllocationTracker allocationTracker;
 
     TransientCompressedListBuilder(AllocationTracker allocationTracker) {
         this.builder = new BumpAllocator<>(allocationTracker, Factory.INSTANCE);
-        this.allocationTracker = allocationTracker;
     }
 
     @Override

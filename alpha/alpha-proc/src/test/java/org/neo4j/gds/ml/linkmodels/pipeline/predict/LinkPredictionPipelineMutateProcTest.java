@@ -71,8 +71,6 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
 
-    private Graph graph;
-
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -83,8 +81,6 @@ class LinkPredictionPipelineMutateProcTest extends BaseProcTest {
         withModelInCatalog();
 
         runQuery(createQuery("g", Orientation.UNDIRECTED));
-
-        graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getUnion();
     }
 
     @AfterEach

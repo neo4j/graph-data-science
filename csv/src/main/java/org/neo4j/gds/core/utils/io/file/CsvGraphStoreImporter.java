@@ -80,7 +80,6 @@ public final class CsvGraphStoreImporter {
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
 
-    private String userName;
     private ProgressTracker progressTracker;
 
     public static CsvGraphStoreImporter create(
@@ -123,9 +122,8 @@ public final class CsvGraphStoreImporter {
         try {
             graphStoreBuilder.progressTracker(progressTracker);
             graphStoreBuilder.allocationTracker(allocationTracker);
-            this.userName = fileInput.userName();
             importGraph(fileInput, allocationTracker);
-            return ImmutableUserGraphStore.of(userName, graphStoreBuilder.build());
+            return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
         } finally {
             progressTracker.endSubTask();
         }

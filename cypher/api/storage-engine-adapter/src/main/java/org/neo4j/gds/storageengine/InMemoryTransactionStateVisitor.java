@@ -29,11 +29,9 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
 
-    private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
 
     public InMemoryTransactionStateVisitor(GraphStore graphStore, TokenHolders tokenHolders) {
-        this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
     }
 

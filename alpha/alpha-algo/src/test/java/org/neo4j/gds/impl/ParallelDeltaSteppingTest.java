@@ -27,7 +27,6 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
-import org.neo4j.gds.graphbuilder.GridBuilder;
 
 import java.util.concurrent.Executors;
 
@@ -45,14 +44,13 @@ class ParallelDeltaSteppingTest extends AlgoTestBase {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GridBuilder gridBuilder;
     private static Graph graph;
     private static double[] reference;
     private static long rootNodeId;
 
     @BeforeEach
     void setup() {
-        gridBuilder = GraphBuilder.create(db)
+        var gridBuilder = GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
             .newGridBuilder()
