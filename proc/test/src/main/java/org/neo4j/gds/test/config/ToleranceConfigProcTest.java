@@ -17,62 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.test.config;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.IterationsConfig;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
+import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
-public final class IterationsConfigProcTest {
+public final class ToleranceConfigProcTest {
 
     public static List<DynamicTest> test(
         AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
         return List.of(
-            invalidMaxIterations(
-                proc,
-                config
-            ),
-            validMaxIterations(
-                proc,
-                config
-            )
+            invalidTolerance(proc, config),
+            validTolerance(proc, config)
         );
     }
 
-    private IterationsConfigProcTest() {}
+    private ToleranceConfigProcTest() {}
 
-    private static DynamicTest invalidMaxIterations(
+    private static DynamicTest invalidTolerance(
         AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
-        return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
-            assertThatThrownBy(() -> proc
-                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", 0)))
-                .hasMessageContaining("maxIterations")
-                .hasMessageContaining("0");
-            assertThatThrownBy(() -> proc
-                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", -10)))
-                .hasMessageContaining("maxIterations")
-                .hasMessageContaining("-10");
+        return DynamicTest.dynamicTest("invalidTolerance", () -> {
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withNumber("tolerance", -0.1)))
+                .hasMessageContaining("tolerance")
+                .hasMessageContaining("-0.1");
         });
     }
 
-    private static DynamicTest validMaxIterations(
+    private static DynamicTest validTolerance(
         AlgoBaseProc<?, ?, ?> proc,
         CypherMapWrapper config
     ) {
-        return DynamicTest.dynamicTest("validMaxIterations", () -> {
-            var iterationsConfig = config.withNumber("maxIterations", 3);
-            var algoConfig = ((IterationsConfig) proc.newConfig(GRAPH_NAME, iterationsConfig));
-            assertThat(algoConfig.maxIterations()).isEqualTo(3);
+        return DynamicTest.dynamicTest("validTolerance", () -> {
+            var toleranceConfig = config.withNumber("tolerance", 42.42);
+            var algoConfig = ((ToleranceConfig) proc.newConfig(GRAPH_NAME, toleranceConfig));
+            assertThat(algoConfig.tolerance()).isEqualTo(42.42);
         });
     }
 }

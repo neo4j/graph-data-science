@@ -32,7 +32,7 @@ import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;

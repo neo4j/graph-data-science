@@ -25,7 +25,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;

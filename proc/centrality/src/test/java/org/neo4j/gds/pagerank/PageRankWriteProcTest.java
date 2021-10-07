@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher.ModeBuildStage;
-import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.ScalarScaler;

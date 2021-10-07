@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.test.config;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -27,7 +28,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
+import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class WritePropertyConfigProcTest {
 

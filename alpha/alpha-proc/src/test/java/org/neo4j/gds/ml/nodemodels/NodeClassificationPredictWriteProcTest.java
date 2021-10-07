@@ -33,7 +33,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
