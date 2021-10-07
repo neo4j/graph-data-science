@@ -59,7 +59,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     ) {
         super(
             RelationshipScanCursorBasedScanner.FACTORY,
-            "Relationship",
             loadingContext,
             dimensions,
             progressTracker,

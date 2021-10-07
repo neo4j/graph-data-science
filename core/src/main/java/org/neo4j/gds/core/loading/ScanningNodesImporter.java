@@ -73,7 +73,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     ) {
         super(
             scannerFactory(loadingContext.transactionContext(), dimensions, log),
-            "Node",
             loadingContext,
             dimensions,
             progressTracker,

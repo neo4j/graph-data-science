@@ -39,7 +39,6 @@ public abstract class ScanningRecordsImporter<Record, T> {
     static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
     private final StoreScanner.Factory<Record> factory;
-    private final String label;
 
     protected final ExecutorService threadPool;
     protected final TransactionContext transaction;
@@ -48,16 +47,14 @@ public abstract class ScanningRecordsImporter<Record, T> {
     protected final ProgressTracker progressTracker;
     protected final int concurrency;
 
-    public ScanningRecordsImporter(
+    ScanningRecordsImporter(
         StoreScanner.Factory<Record> factory,
-        String label,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         int concurrency
     ) {
         this.factory = factory;
-        this.label = label;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
