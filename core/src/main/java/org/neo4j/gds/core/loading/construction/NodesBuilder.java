@@ -267,7 +267,7 @@ public final class NodesBuilder {
 
         ThreadLocalBuilder(
             NodeImporter nodeImporter,
-            long highestNodeId,
+            long highestPossibleNodeCount,
             LongPredicate seenNodeIdPredicate,
             boolean hasLabelInformation,
             boolean hasProperties,
@@ -281,7 +281,7 @@ public final class NodesBuilder {
 
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(SparseLongArray.SUPER_BLOCK_SIZE)
-                .highestNodeId(highestNodeId)
+                .highestPossibleNodeCount(highestPossibleNodeCount)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
                 .build();

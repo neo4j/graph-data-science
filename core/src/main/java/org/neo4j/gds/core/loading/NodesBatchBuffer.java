@@ -36,7 +36,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
     private static final long[] ANY_LABEL_LABELS = {TokenConstants.ANY_LABEL};
 
-    private final long highestNodeId;
+    private final long highestPossibleNodeCount;
     private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
     private final long[][] labelIds;
@@ -48,13 +48,13 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     @Builder.Constructor
     NodesBatchBuffer(
         int capacity,
-        long highestNodeId,
+        long highestPossibleNodeCount,
         Optional<LongSet> nodeLabelIds,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> readProperty
     ) {
         super(capacity);
-        this.highestNodeId = highestNodeId;
+        this.highestPossibleNodeCount = highestPossibleNodeCount;
         this.nodeLabelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new PropertyReference[capacity] : null;
@@ -68,7 +68,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
             return;
         }
 
-        if (record.nodeId() > this.highestNodeId) {
+        if (record.nodeId() >= this.highestPossibleNodeCount) {
             return;
         }
 
@@ -94,7 +94,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     }
 
     public void add(long nodeId, PropertyReference propertyReference, long[] labels) {
-        if (nodeId > this.highestNodeId) {
+        if (nodeId >= this.highestPossibleNodeCount) {
             return;
         }
 

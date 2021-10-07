@@ -40,37 +40,59 @@ class IdMapTest {
 
     @Test
     void shouldComputeMemoryEstimation() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(0).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(0)
+            .highestPossibleNodeCount(0)
+            .build();
         MemoryTree memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(56L + 40L + 40L), memRec.memoryUsage());
 
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L).build();
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(56L + 840L + 32832L), memRec.memoryUsage());
 
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(1L).highestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(1L)
+            .highestPossibleNodeCount(100_000_000_000L)
+            .build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(56L + 48L + 97_689_080L), memRec.memoryUsage());
 
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(10_000_000L).highestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(10_000_000L)
+            .highestPossibleNodeCount(100_000_000_000L)
+            .build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
-        assertEquals(MemoryRange.of(56L + 80_000_040L + 177_714_824L, 56L + 80_000_040L + 327_937_656_296L), memRec.memoryUsage());
+        assertEquals(
+            MemoryRange.of(56L + 80_000_040L + 177_714_824L, 56L + 80_000_040L + 327_937_656_296L),
+            memRec.memoryUsage()
+        );
 
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000_000L).highestNeoId(100_000_000_000L).build();
+        dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(100_000_000L)
+            .highestPossibleNodeCount(100_000_000_000L)
+            .build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
-        assertEquals(MemoryRange.of(56L + 800_000_040L + 898_077_656L, 56L + 800_000_040L + 800_488_297_688L), memRec.memoryUsage());
+        assertEquals(
+            MemoryRange.of(56L + 800_000_040L + 898_077_656L, 56L + 800_000_040L + 800_488_297_688L),
+            memRec.memoryUsage()
+        );
 
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMappings = new IntObjectHashMap<List<NodeLabel>>();
         labelTokenNodeLabelMappings.put(1, singletonList(NodeLabel.of("A")));
 
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(56L + 840L + 32832L + 56L), memRec.memoryUsage());
 
         labelTokenNodeLabelMappings.put(2, Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")));
-        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(56L + 840L + 32832L + 112L), memRec.memoryUsage());

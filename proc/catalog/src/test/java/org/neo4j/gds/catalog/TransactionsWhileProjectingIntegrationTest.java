@@ -42,11 +42,6 @@ class TransactionsWhileProjectingIntegrationTest extends BaseProcTest {
 
     @Test
     void concurrentUpdatesShouldNotBreakTheGraphProjection(SoftAssertions softly) throws InterruptedException {
-        var graphCreateQuery = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withAnyRelationshipType()
-            .graphCreate("g")
-            .yields();
 
         var phaser = new Phaser(2);
 
@@ -65,7 +60,13 @@ class TransactionsWhileProjectingIntegrationTest extends BaseProcTest {
             phaser.arriveAndAwaitAdvance();
 
             try {
-                runQuery(graphCreateQuery);
+                runQuery(
+                    GdsCypher.call()
+                        .withNodeLabel("Node")
+                        .withAnyRelationshipType()
+                        .graphCreate("g")
+                        .yields()
+                );
             } finally {
                 // before we are finished we deregister this thread as well
                 // the phaser now has all parties de-registered

@@ -262,7 +262,7 @@ public abstract class BaseProc {
 
             estimateDimensions = ImmutableGraphDimensions.builder()
                 .nodeCount(config.nodeCount())
-                .highestNeoId(config.nodeCount())
+                .highestPossibleNodeCount(config.nodeCount())
                 .estimationNodeLabelCount(labelCount)
                 .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
                 .maxRelCount(Math.max(config.relationshipCount(), 0))

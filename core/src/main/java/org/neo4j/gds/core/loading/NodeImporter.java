@@ -94,9 +94,21 @@ public class NodeImporter {
 
         if (buffer.hasLabelInformation()) {
             if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
-                setNodeLabelInformation(batch, batchLength, adder.startId(), labelIds, (nodeIds, startIndex, pos) -> nodeIds[pos]);
+                setNodeLabelInformation(
+                    batch,
+                    batchLength,
+                    adder.startId(),
+                    labelIds,
+                    (nodeIds, startIndex, pos) -> nodeIds[pos]
+                );
             } else {
-                setNodeLabelInformation(batch, batchLength, adder.startId(), labelIds, (nodeIds, startIndex, pos) -> startIndex + pos);
+                setNodeLabelInformation(
+                    batch,
+                    batchLength,
+                    adder.startId(),
+                    labelIds,
+                    (nodeIds, startIndex, pos) -> startIndex + pos
+                );
             }
         }
 

@@ -226,7 +226,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> bitIdMappingBuilderFactory() {
-        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestNeoId() + 1, loadingContext.allocationTracker());
+        return dimensions -> InternalBitIdMappingBuilder.of(
+            dimensions.highestPossibleNodeCount(),
+            loadingContext.allocationTracker()
+        );
     }
 
     @NotNull

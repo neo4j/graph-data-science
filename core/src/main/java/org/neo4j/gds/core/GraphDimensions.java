@@ -52,7 +52,7 @@ public interface GraphDimensions {
     }
 
     @Value.Default
-    default long highestNeoId() {
+    default long highestPossibleNodeCount() {
         return nodeCount();
     }
 

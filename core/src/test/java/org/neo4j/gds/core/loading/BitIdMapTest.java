@@ -44,12 +44,16 @@ class BitIdMapTest {
         "100000000000,12988281408,12988281448,12988281488"
     })
     void shouldComputeMemoryEstimation(
-        long highestNeoId,
+        long highestPossibleNodeCount,
         long expectedBytes,
         long expectedBytesWithOneToken,
         long expectedBytesWithTwoTokens
     ) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(highestNeoId).build();
+        GraphDimensions dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(0)
+            .highestPossibleNodeCount(highestPossibleNodeCount)
+            .build();
         MemoryTree memRec = BitIdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(expectedBytes), memRec.memoryUsage());
 
@@ -58,7 +62,7 @@ class BitIdMapTest {
 
         dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(0)
-            .highestNeoId(highestNeoId)
+            .highestPossibleNodeCount(highestPossibleNodeCount)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings)
             .build();
         memRec = BitIdMap.memoryEstimation().estimate(dimensions, 1);
@@ -67,7 +71,7 @@ class BitIdMapTest {
         labelTokenNodeLabelMappings.put(2, Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")));
         dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(0)
-            .highestNeoId(highestNeoId)
+            .highestPossibleNodeCount(highestPossibleNodeCount)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings)
             .build();
         memRec = BitIdMap.memoryEstimation().estimate(dimensions, 1);

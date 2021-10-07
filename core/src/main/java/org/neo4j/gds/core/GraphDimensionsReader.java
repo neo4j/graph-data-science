@@ -27,13 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.StatementFunction;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -100,7 +100,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)
-            .highestNeoId(allNodesCount)
+            .highestPossibleNodeCount(allNodesCount)
             .maxRelCount(maxRelCount)
             .relationshipCounts(relationshipCounts)
             .highestRelationshipId(allRelationshipsCount)

@@ -39,7 +39,7 @@ abstract class AbstractNodeCursorBasedScanner<EntityCursor extends Cursor, Attac
 
     @Override
     public final long storeSize(GraphDimensions graphDimensions) {
-        long recordsInUse = 1L + graphDimensions.highestNeoId();
+        long recordsInUse = graphDimensions.highestPossibleNodeCount();
         long idsInPages = ((recordsInUse + (recordsPerPage() - 1L)) / recordsPerPage()) * recordsPerPage();
         return idsInPages * (long) NodeRecordFormat.RECORD_SIZE;
     }

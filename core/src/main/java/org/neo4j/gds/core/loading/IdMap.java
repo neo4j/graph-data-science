@@ -49,7 +49,7 @@ public class IdMap implements NodeMapping {
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
             (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
-                dimensions.highestNeoId(),
+                dimensions.highestPossibleNodeCount(),
                 dimensions.nodeCount()
             )
         )

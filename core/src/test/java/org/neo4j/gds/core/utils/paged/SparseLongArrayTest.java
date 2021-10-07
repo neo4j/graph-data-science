@@ -53,8 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.paged.SparseLongArray.NOT_FOUND;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class SparseLongArrayTest {
 
@@ -286,8 +286,12 @@ class SparseLongArrayTest {
         "1000000,130024",
         "1000000000000,129882812640"
     })
-    void memoryEstimation(long highestNeoId, long expectedBytes) {
-        var dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(highestNeoId).build();
+    void memoryEstimation(long highestPossibleNodeCount, long expectedBytes) {
+        var dimensions = ImmutableGraphDimensions
+            .builder()
+            .nodeCount(0)
+            .highestPossibleNodeCount(highestPossibleNodeCount)
+            .build();
         // does not affect SLA memory estimation
         var concurrency = 42;
 

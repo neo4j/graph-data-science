@@ -36,7 +36,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     public static InternalImporter.CreateScanner of(
         TransactionContext tx,
         StoreScanner<NodeReference> scanner,
-        long highestNodeId,
+        long highestPossibleNodeCount,
         LongSet labels,
         ProgressTracker progressTracker,
         NodeImporter importer,
@@ -46,7 +46,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         return new NodesScanner.Creator(
             tx,
             scanner,
-            highestNodeId,
+            highestPossibleNodeCount,
             labels,
             progressTracker,
             importer,
@@ -58,7 +58,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     static final class Creator implements InternalImporter.CreateScanner {
         private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
-        private final long highestNodeId;
+        private final long highestPossibleNodeCount;
         private final LongSet labels;
         private final ProgressTracker progressTracker;
         private final NodeImporter importer;
@@ -68,7 +68,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         Creator(
             TransactionContext tx,
             StoreScanner<NodeReference> scanner,
-            long highestNodeId,
+            long highestPossibleNodeCount,
             LongSet labels,
             ProgressTracker progressTracker,
             NodeImporter importer,
@@ -77,7 +77,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         ) {
             this.tx = tx;
             this.scanner = scanner;
-            this.highestNodeId = highestNodeId;
+            this.highestPossibleNodeCount = highestPossibleNodeCount;
             this.labels = labels;
             this.progressTracker = progressTracker;
             this.importer = importer;
@@ -91,7 +91,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                 tx,
                 terminationFlag,
                 scanner,
-                highestNodeId,
+                highestPossibleNodeCount,
                 labels,
                 index,
                 progressTracker,
@@ -109,7 +109,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
 
     private final TerminationFlag terminationFlag;
     private final StoreScanner<NodeReference> scanner;
-    private final long highestNodeId;
+    private final long highestPossibleNodeCount;
     private final LongSet labels;
     private final int scannerIndex;
     private final ProgressTracker progressTracker;
@@ -122,7 +122,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         TransactionContext tx,
         TerminationFlag terminationFlag,
         StoreScanner<NodeReference> scanner,
-        long highestNodeId,
+        long highestPossibleNodeCount,
         LongSet labels,
         int threadIndex,
         ProgressTracker progressTracker,
@@ -132,7 +132,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         super(tx);
         this.terminationFlag = terminationFlag;
         this.scanner = scanner;
-        this.highestNodeId = highestNodeId;
+        this.highestPossibleNodeCount = highestPossibleNodeCount;
         this.labels = labels;
         this.scannerIndex = threadIndex;
         this.progressTracker = progressTracker;
@@ -149,7 +149,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
-                .highestNodeId(highestNodeId)
+                .highestPossibleNodeCount(highestPossibleNodeCount)
                 .nodeLabelIds(labels)
                 .capacity(scanner.bufferSize())
                 .hasLabelInformation(!labels.isEmpty())

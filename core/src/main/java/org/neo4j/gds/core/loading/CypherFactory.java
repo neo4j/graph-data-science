@@ -123,7 +123,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
     public GraphDimensions estimationDimensions() {
         return ImmutableGraphDimensions.builder()
             .from(dimensions)
-            .highestNeoId(getNodeEstimation().estimatedRows())
+            .highestPossibleNodeCount(getNodeEstimation().estimatedRows())
             .nodeCount(getNodeEstimation().estimatedRows())
             .maxRelCount(getRelationshipEstimation().estimatedRows())
             .build();

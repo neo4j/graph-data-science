@@ -87,7 +87,7 @@ public final class SparseLongArray {
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup("sparse long array", (dimensions, concurrency) -> {
-            var capacity = dimensions.highestNeoId() + 1;
+            var capacity = dimensions.highestPossibleNodeCount();
             var arraySize = BitUtil.ceilDiv(capacity, BLOCK_SIZE);
             var offsetSize = (arraySize >>> BLOCK_SHIFT) + 1;
 
@@ -304,9 +304,7 @@ public final class SparseLongArray {
                 idCount += Long.bitCount(array[page]);
             }
 
-            // Capacity is set to include the highest node id.
-            // The highest node id is therefore capacity - 1.
-            var highestNeoId = capacity - 1;
+            var highestNeoId = capacity;
             var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
             return new SparseLongArray(idCount, highestNeoId, array, blockOffsets, layouts.layout(), layouts.secondary());
         }

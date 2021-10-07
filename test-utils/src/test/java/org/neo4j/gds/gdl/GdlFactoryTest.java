@@ -229,7 +229,7 @@ class GdlFactoryTest {
 
         var importResult = factory.build();
 
-        assertThat(importResult.dimensions().highestNeoId()).isEqualTo(44L);
+        assertThat(importResult.dimensions().highestPossibleNodeCount()).isEqualTo(44L);
         assertThat(importResult.graphStore().nodes().highestNeoId()).isEqualTo(44L);
     }
 

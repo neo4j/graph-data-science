@@ -33,6 +33,7 @@ public final class InternalReadOps {
             try {
                 final IdGenerator idGenerator = idGeneratorFactory.get(idType);
                 if (idGenerator != null) {
+                    // getHighId returns the highestId + 1, which is actually a count
                     return OptionalLong.of(idGenerator.getHighId());
                 }
             } catch (Exception ignored) {

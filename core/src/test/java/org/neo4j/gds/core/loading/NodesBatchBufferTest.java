@@ -32,7 +32,7 @@ class NodesBatchBufferTest {
     void shouldIgnoreNodesThatAreOutOfBoundsOnAdd() {
         var nodesBatchBuffer = new NodesBatchBufferBuilder()
             .capacity(3)
-            .highestNodeId(42)
+            .highestPossibleNodeCount(43)
             .build();
 
         // within range
@@ -51,7 +51,7 @@ class NodesBatchBufferTest {
     void shouldIgnoreNodesThatAreOutOfBoundsOnAddWithLabelInformation() {
         var nodesBatchBuffer = new NodesBatchBufferBuilder()
             .capacity(3)
-            .highestNodeId(42)
+            .highestPossibleNodeCount(43)
             .hasLabelInformation(true)
             .nodeLabelIds(LongHashSet.from(0))
             .build();
@@ -72,7 +72,7 @@ class NodesBatchBufferTest {
     void shouldIgnoreNodesThatAreOutOfBoundsOnOffer() {
         var nodesBatchBuffer = new NodesBatchBufferBuilder()
             .capacity(3)
-            .highestNodeId(42)
+            .highestPossibleNodeCount(43)
             .build();
 
         // within range
@@ -91,7 +91,7 @@ class NodesBatchBufferTest {
     void shouldIgnoreNodesThatAreOutOfBoundsOnOfferWithLabelInformation() {
         var nodesBatchBuffer = new NodesBatchBufferBuilder()
             .capacity(3)
-            .highestNodeId(42)
+            .highestPossibleNodeCount(43)
             .hasLabelInformation(true)
             .nodeLabelIds(LongHashSet.from(0))
             .build();
