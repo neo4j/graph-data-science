@@ -140,7 +140,7 @@ public final class GraphFactory {
             allocationTracker
         )).orElseGet(() -> {
             boolean nodeProperties = hasProperties.orElse(false);
-            long nodes = nodeCount.orElse(-1L);
+            long nodes = nodeCount.orElseGet(() -> maxOriginalId + 1);
 
             if (nodeProperties && nodes <= 0) {
                 throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0");

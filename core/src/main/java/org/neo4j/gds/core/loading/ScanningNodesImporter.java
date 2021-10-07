@@ -138,7 +138,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         var nodeMapping = nodeMappingBuilder.build(
             idMapBuilder,
             labelInformationBuilder,
-            dimensions.highestPossibleNodeCount(),
+            dimensions.highestPossibleNodeCount() - 1,
             concurrency,
             false,
             allocationTracker

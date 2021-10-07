@@ -131,13 +131,13 @@ public final class NodesBuilder {
         LongPredicate seenNodeIdPredicate = maxOriginalId == UNKNOWN_MAX_ID
             ? nodeId -> false
             : seenIds::getAndSet;
-        long highestNodeId = maxOriginalId == UNKNOWN_MAX_ID
-            ? Long.MAX_VALUE
-            : maxOriginalId;
+        long highestPossibleNodeCount = maxOriginalId == UNKNOWN_MAX_ID
+            ? nodeCount
+            : maxOriginalId + 1;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
-                highestNodeId,
+                highestPossibleNodeCount,
                 seenNodeIdPredicate,
                 hasLabelInformation,
                 hasProperties,

@@ -187,7 +187,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
     private IdsAndProperties loadNodes() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(dimensions.highestPossibleNodeCount())
+            .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
             .concurrency(1)
             .allocationTracker(loadingContext.allocationTracker())
@@ -430,7 +430,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
             return ImmutableGraphDimensions.builder()
                 .nodeCount(nodeCount)
-                .highestPossibleNodeCount(highestId)
+                .highestPossibleNodeCount(highestId + 1)
                 .maxRelCount(relCount)
                 .build();
         }
