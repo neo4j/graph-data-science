@@ -14,6 +14,7 @@ dependencies {
 
     implementation project(':core')
     implementation project(':neo4j-kernel-adapter')
+    implementation project(':subgraph-filtering')
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver['jackson']

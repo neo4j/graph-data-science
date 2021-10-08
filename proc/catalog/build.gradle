@@ -15,7 +15,8 @@ dependencies {
     implementation(
         project(':neo4j-adapter'),
         project(':core'),
-        project(':csv')
+        project(':csv'),
+        project(':subgraph-filtering')
     )
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
