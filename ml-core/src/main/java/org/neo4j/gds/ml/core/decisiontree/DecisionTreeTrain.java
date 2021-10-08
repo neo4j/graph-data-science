@@ -72,7 +72,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         this.bootstrappedDataset = HugeByteArray.newArray(allFeatureVectors.size(), allocationTracker);
 
         int totalNumFeatures = allFeatureVectors.get(0).length;
-        if (new Double(0.0D).equals(featureBaggingRatio)) {
+        if (Double.valueOf(0.0D).equals(featureBaggingRatio)) {
             this.activeFeatureIndices = new int[totalNumFeatures];
             Arrays.setAll(this.activeFeatureIndices, i -> i);
             this.featureBagging = false;
@@ -249,7 +249,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private HugeLongArray bootstrapDataset(double numFeatureVectorsRatio) {
         assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
 
-        if (new Double(0.0D).equals(numFeatureVectorsRatio)) {
+        if (Double.valueOf(0.0D).equals(numFeatureVectorsRatio)) {
             var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
             allVectors.setAll(i -> i);
             bootstrappedDataset.fill((byte) 1);
