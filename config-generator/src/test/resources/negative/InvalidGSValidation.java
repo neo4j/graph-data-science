@@ -43,7 +43,7 @@ public interface InvalidGSValidation {
     );
 
     @Configuration.GraphStoreValidationCheck
-    int notVoid(
+    default int notVoid(
         List<String> graphStore,
         Collection<String> selectedLabels,
         Collection<String> selectedRelationshipTypes

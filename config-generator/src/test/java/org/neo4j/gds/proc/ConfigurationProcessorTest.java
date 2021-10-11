@@ -195,7 +195,8 @@ class ConfigurationProcessorTest {
     void invalidGraphStoreValidationChecks() {
         runNegativeTest("InvalidGSValidation",
             e("GraphStoreValidation and Checks must accept 3 parameters", 31, 18),
-            e("GraphStoreValidation and Checks must return void", 46, 9)
+            e("GraphStoreValidation and Checks must be declared default (cannot be abstract)", 39, 10),
+            e("GraphStoreValidation and Checks must return void", 46, 17)
         );
     }
 

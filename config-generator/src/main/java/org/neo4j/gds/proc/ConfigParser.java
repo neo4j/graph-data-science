@@ -231,11 +231,13 @@ final class ConfigParser {
     private void validateGraphStoreValidationAndChecks(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
         if (isAnnotationPresent(method, Configuration.GraphStoreValidation.class)) {
             requireVoidReturnType(method);
+            requireDefaultModifier(method);
 
             memberBuilder.graphStoreValidation(true);
         }
         if (isAnnotationPresent(method, Configuration.GraphStoreValidationCheck.class)) {
             requireVoidReturnType(method);
+            requireDefaultModifier(method);
 
             memberBuilder.graphStoreValidationCheck(true);
         }
@@ -246,6 +248,16 @@ final class ConfigParser {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "[ConfigParser]: GraphStoreValidation and Checks must return void",
+                method
+            );
+        }
+    }
+
+    private void requireDefaultModifier(ExecutableElement method) {
+        if (!method.getModifiers().contains(Modifier.DEFAULT)) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "[ConfigParser]: GraphStoreValidation and Checks must be declared default (cannot be abstract)",
                 method
             );
         }
