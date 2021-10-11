@@ -34,7 +34,7 @@ public class ModelDropProc extends ModelCatalogProc {
 
     @Procedure(name = "gds.beta.model.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelResult> drop(@Name(value = "modelName") String modelName) {
+    public Stream<ModelCatalogResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
         var model = ModelCatalog.getUntyped(username(), modelName);
@@ -45,6 +45,6 @@ public class ModelDropProc extends ModelCatalogProc {
             ModelCatalog.drop(username(), modelName);
         }
 
-        return Stream.of(new ModelResult(model));
+        return Stream.of(new ModelCatalogResult(model));
     }
 }

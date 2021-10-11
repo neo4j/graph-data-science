@@ -34,16 +34,16 @@ public class ModelListProc extends ModelCatalogProc {
 
     @Procedure(name = "gds.beta.model.list", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
+    public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
         if (modelName == null || modelName.equals(NO_VALUE)) {
             var models = ModelCatalog.list(username());
-            return models.stream().map(ModelResult::new);
+            return models.stream().map(ModelCatalogResult::new);
         } else {
             validateModelName(modelName);
             var model = ModelCatalog.list(username(), modelName);
             return model == null
                 ? Stream.empty()
-                : Stream.of(new ModelResult(model));
+                : Stream.of(new ModelCatalogResult(model));
         }
     }
 }

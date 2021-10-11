@@ -21,10 +21,6 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.configuration.Config;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.ModelStoreSettings;
-import org.neo4j.gds.model.catalog.ModelPublishProc;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
@@ -39,14 +35,14 @@ class ModelCatalogPublishDocTest extends ModelCatalogDocTest {
 
     @BeforeEach
     void setModelStoreLocation() {
-        GraphDatabaseApiProxy
-            .resolveDependency(db, Config.class)
-            .set(ModelStoreSettings.model_store_location, modelStoreLocation);
+//        GraphDatabaseApiProxy
+//            .resolveDependency(db, Config.class)
+//            .set(ModelStoreSettings.model_store_location, modelStoreLocation);
     }
 
     @Override
     List<Class<?>> procedures() {
-        return List.of(ModelPublishProc.class);
+        return List.of(/*ModelPublishProc.class*/);
     }
 
     @Override

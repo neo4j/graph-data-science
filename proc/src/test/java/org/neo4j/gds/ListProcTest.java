@@ -78,12 +78,9 @@ import org.neo4j.gds.louvain.LouvainStreamProc;
 import org.neo4j.gds.louvain.LouvainWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.gds.model.catalog.ModelDeleteProc;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 import org.neo4j.gds.model.catalog.ModelExistsProc;
 import org.neo4j.gds.model.catalog.ModelListProc;
-import org.neo4j.gds.model.catalog.ModelLoadProc;
-import org.neo4j.gds.model.catalog.ModelStoreProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.pagerank.PageRankStatsProc;
 import org.neo4j.gds.pagerank.PageRankStreamProc;
@@ -139,12 +136,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ListProcTest extends BaseProcTest {
 
-    private static final List<String> PROCEDURES = asList(
+    public static final List<String> PROCEDURES = asList(
         "gds.alpha.create.cypherdb",
-
-        "gds.alpha.model.delete",
-        "gds.alpha.model.load",
-        "gds.alpha.model.store",
 
         "gds.alpha.allShortestPaths.stream",
         "gds.alpha.bfs.stream",
@@ -437,12 +430,9 @@ class ListProcTest extends BaseProcTest {
             LouvainStreamProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
-            ModelDeleteProc.class,
             ModelDropProc.class,
             ModelExistsProc.class,
             ModelListProc.class,
-            ModelLoadProc.class,
-            ModelStoreProc.class,
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
