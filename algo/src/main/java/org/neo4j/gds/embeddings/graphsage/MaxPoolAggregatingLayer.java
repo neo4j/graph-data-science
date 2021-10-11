@@ -34,7 +34,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights<Vector> bias;
     private final ActivationFunction activationFunction;
 
-    MaxPoolAggregatingLayer(
+    public MaxPoolAggregatingLayer(
         int sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
