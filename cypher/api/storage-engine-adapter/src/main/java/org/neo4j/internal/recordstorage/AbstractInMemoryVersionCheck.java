@@ -26,14 +26,14 @@ import org.neo4j.storageengine.api.StoreVersionCheck;
 
 import java.util.Optional;
 
-public class InMemoryVersionCheck implements StoreVersionCheck {
+public abstract class AbstractInMemoryVersionCheck implements StoreVersionCheck {
 
-    public InMemoryVersionCheck() {
+    public AbstractInMemoryVersionCheck() {
     }
 
     @Override
     public Optional<String> storeVersion(CursorContext cursorContext) {
-        return Optional.of(InMemoryStoreVersion.STORE_VERSION);
+        return Optional.of(AbstractInMemoryStoreVersion.STORE_VERSION);
     }
 
     @Override
@@ -42,13 +42,8 @@ public class InMemoryVersionCheck implements StoreVersionCheck {
     }
 
     @Override
-    public StoreVersion versionInformation(String storeVersion) {
-        return new InMemoryStoreVersion();
-    }
-
-    @Override
     public Result checkUpgrade(String desiredVersion, CursorContext cursorContext) {
-        return new StoreVersionCheck.Result(Outcome.ok, InMemoryStoreVersion.STORE_VERSION, null);
+        return new StoreVersionCheck.Result(Outcome.ok, AbstractInMemoryStoreVersion.STORE_VERSION, null);
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
-import org.neo4j.internal.recordstorage.InMemoryStoreVersion;
+import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -44,12 +44,14 @@ import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.lock.LockService;
 import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
+import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.token.TokenHolders;
 
 import java.util.UUID;
@@ -126,6 +128,23 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+    }
+
+    @Override
+    public StoreVersionCheck versionCheck(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        LogService logService,
+        PageCacheTracer pageCacheTracer
+    ) {
+        return new InMemoryVersionCheck();
+    }
+
+    @Override
+    public StoreVersion versionInformation(String storeVersion) {
+        return new InMemoryStoreVersion();
     }
 
     @Override

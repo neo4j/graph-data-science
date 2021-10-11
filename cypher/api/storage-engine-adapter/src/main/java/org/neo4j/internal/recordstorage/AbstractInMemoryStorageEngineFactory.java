@@ -53,23 +53,6 @@ import java.util.UUID;
 public abstract class AbstractInMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
-    public StoreVersionCheck versionCheck(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        Config config,
-        PageCache pageCache,
-        LogService logService,
-        PageCacheTracer pageCacheTracer
-    ) {
-        return new InMemoryVersionCheck();
-    }
-
-    @Override
-    public StoreVersion versionInformation(String storeVersion) {
-        return new InMemoryStoreVersion();
-    }
-
-    @Override
     public List<StoreMigrationParticipant> migrationParticipants(
         FileSystemAbstraction fs,
         Config config,

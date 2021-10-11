@@ -39,10 +39,13 @@ import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.lock.LockService;
 import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.StorageEngine;
+import org.neo4j.storageengine.api.StoreVersion;
+import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.token.TokenHolders;
 
 @ServiceProvider
@@ -98,6 +101,23 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_43;
+    }
+
+    @Override
+    public StoreVersionCheck versionCheck(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        LogService logService,
+        PageCacheTracer pageCacheTracer
+    ) {
+        return new InMemoryVersionCheck();
+    }
+
+    @Override
+    public StoreVersion versionInformation(String storeVersion) {
+        return new InMemoryStoreVersion();
     }
 
     @Override

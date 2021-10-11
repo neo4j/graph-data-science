@@ -17,48 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.internal.recordstorage;
+package org.neo4j.gds.compat._433;
 
+import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
 import org.neo4j.storageengine.api.StoreVersion;
-import org.neo4j.storageengine.api.format.Capability;
-import org.neo4j.storageengine.api.format.CapabilityType;
 
 import java.util.Optional;
 
-public class InMemoryStoreVersion implements StoreVersion {
-
-    static final String STORE_VERSION = "gds-experimental";
-
-    @Override
-    public String storeVersion() {
-        return STORE_VERSION;
-    }
-
-    @Override
-    public boolean hasCapability(Capability capability) {
-        return false;
-    }
-
-    @Override
-    public boolean hasCompatibleCapabilities(
-        StoreVersion otherVersion, CapabilityType type
-    ) {
-        return false;
-    }
-
-    @Override
-    public String introductionNeo4jVersion() {
-        return "foo";
-    }
-
+public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     @Override
     public Optional<StoreVersion> successor() {
         return Optional.empty();
-    }
-
-    @Override
-    public boolean isCompatibleWith(StoreVersion otherVersion) {
-        return otherVersion.storeVersion().equals(storeVersion());
     }
 
     @Override
