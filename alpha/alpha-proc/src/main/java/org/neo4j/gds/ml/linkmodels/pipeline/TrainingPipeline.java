@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
@@ -48,10 +47,8 @@ public class TrainingPipeline implements Mappable {
     public TrainingPipeline() {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.splitConfig = LinkPredictionSplitConfig.of(CypherMapWrapper.empty());
-        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig
-            .of(ConcurrencyConfig.DEFAULT_CONCURRENCY, Map.of())
-            .toMap());
+        this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
+        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap());
     }
 
     public TrainingPipeline copy() {

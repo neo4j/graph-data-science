@@ -46,6 +46,7 @@ public interface LinkPredictionSplitConfig extends Model.Mappable {
 
     String TEST_FRACTION_KEY = "testFraction";
     String TRAIN_FRACTION_KEY = "trainFraction";
+    LinkPredictionSplitConfig DEFAULT_CONFIG = LinkPredictionSplitConfig.of(CypherMapWrapper.empty());
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
