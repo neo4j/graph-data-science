@@ -224,8 +224,8 @@ include::pipelineInfoResult.adoc[]
 === Supported feature types
 
 A feature step can use node properties that exist in the input graph or are added by the pipeline.
-For each node in a node pair of interest, the values of `nodeProperties` are concatenated, in the configured order, into a vector.
-We denote the entries of the vectors of a pair by `a[i]` and `b[i]`, and we take `f[i]` to be the `i`-th entry of the output of a feature step.
+For each node in each potential link, the values of `nodeProperties` are concatenated, in the configured order, into a vector stem:[f].
+That is, for each potential link the feature vector for the source node, stem:[s=\[s_1,s_2, \ldots,s_d\]], is combined with the one for the target node,  stem:[t=\[t_1,t_2, \ldots,t_d\]], into a single feature vector stem:[f].
 
 The supported types of features can then be described as follows:
 
@@ -233,9 +233,9 @@ The supported types of features can then be described as follows:
 [opts="header",cols="1,4"]
 |===
 | Feature Type           | Formula / Description
-| L2                     | f[i] = (a[i] - b[i])^2
-| HADAMARD               | f[i] = a[i] * b[i]
-| COSINE                 | f[0] = cosine similarity of vectors a and b
+| L2                     | stem:[f=\[(s_1 - t_1)^2 , (s_2 - t_2)^2, ..., (s_d - t_d)^2\]]
+| HADAMARD               | stem:[f=\[s_1 * t_1, s_2 * t_2, ..., s_d * t_d\]]
+| COSINE                 | stem:[f=\frac {\sum_{i=1}^{d}s_{i}t_{i}}{\sqrt {\sum _{i=1}^{d}s_{i}^{2}}\sqrt {\sum _{i=1}^{d}t_{i}^{2}}}]
 |===
 
 === Example
