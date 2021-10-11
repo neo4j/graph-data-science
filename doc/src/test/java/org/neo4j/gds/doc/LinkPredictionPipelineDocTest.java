@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
@@ -28,14 +29,18 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class LinkPredictionPipelineDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             LinkPredictionPipelineCreateProc.class,
             LinkPredictionPipelineMutateProc.class,
             LinkPredictionPipelineTrainProc.class,
@@ -48,7 +53,7 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/linkprediction-pipeline/linkprediction.adoc";
     }
 

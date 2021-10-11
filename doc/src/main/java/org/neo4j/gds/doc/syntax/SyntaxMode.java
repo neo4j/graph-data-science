@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-enum SyntaxMode {
+public enum SyntaxMode {
     STATS("include-with-stats"),
     STREAM("include-with-stream"),
     MUTATE("include-with-mutate"),

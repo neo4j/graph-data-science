@@ -24,15 +24,20 @@ import org.neo4j.gds.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamProc;
 import org.neo4j.gds.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class K1ColoringDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             K1ColoringStreamProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStatsProc.class,
@@ -42,7 +47,7 @@ class K1ColoringDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/k1coloring.adoc";
     }
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class LocalClusteringCoefficientSyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/local-clustering-coefficient/local-clustering-coefficient.adoc";
     }
 }

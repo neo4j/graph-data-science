@@ -85,7 +85,7 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
             .collect(Collectors.toList());
     }
 
-    List<String> procedures() {
+    public List<String> procedures() {
         return procedures;
     }
 }

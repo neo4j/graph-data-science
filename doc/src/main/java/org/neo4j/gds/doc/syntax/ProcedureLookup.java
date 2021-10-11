@@ -35,37 +35,24 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ProcedureLookup {
 
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.gds"
-    );
-
     private final List<Method> procedureMethods;
-    private static final ProcedureLookup INSTANCE = new ProcedureLookup();
 
-    private ProcedureLookup() {
-        procedureMethods = PACKAGES_TO_SCAN.stream()
-            .map(this::createReflections)
+    public static ProcedureLookup forPackages(List<String> packages) {
+        var methods = packages.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
             .map(r -> r.getMethodsAnnotatedWith(Procedure.class))
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+
+        return new ProcedureLookup(methods);
     }
 
-    private Method findProcedureMethod(String fullyQualifiedProcedureName) {
-        return procedureMethods
-            .stream()
-            .filter(method -> {
-                var annotation = method.getAnnotation(Procedure.class);
-                return annotation.name().equals(fullyQualifiedProcedureName) || annotation.value().equals(fullyQualifiedProcedureName);
-            })
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
-                "Unknown procedure: `%s`",
-                fullyQualifiedProcedureName
-            )));
+    private ProcedureLookup(List<Method> procedureMethods) {
+        this.procedureMethods = procedureMethods;
     }
 
-    static Class<?> findResultType(String fullyQualifiedProcedureName) {
-        var method = INSTANCE.findProcedureMethod(fullyQualifiedProcedureName);
+    Class<?> findResultType(String fullyQualifiedProcedureName) {
+        var method = findProcedureMethod(fullyQualifiedProcedureName);
         var resultType = (ParameterizedType) method.getGenericReturnType();
         var actualTypeArgument = resultType.getActualTypeArguments()[0];
         if (actualTypeArgument instanceof Class) {
@@ -78,8 +65,8 @@ final class ProcedureLookup {
         ));
     }
 
-    static List<String> findArgumentNames(String fullyQualifiedProcedureName) {
-        var method = INSTANCE.findProcedureMethod(fullyQualifiedProcedureName);
+    List<String> findArgumentNames(String fullyQualifiedProcedureName) {
+        var method = findProcedureMethod(fullyQualifiedProcedureName);
 
         var parameters = method.getParameters();
         var result = new ArrayList<String>(parameters.length);
@@ -94,10 +81,17 @@ final class ProcedureLookup {
         return result;
     }
 
-    private Reflections createReflections(String pkg) {
-        return new Reflections(
-            pkg,
-            new MethodAnnotationsScanner()
-        );
+    private Method findProcedureMethod(String fullyQualifiedProcedureName) {
+        return procedureMethods
+            .stream()
+            .filter(method -> {
+                var annotation = method.getAnnotation(Procedure.class);
+                return annotation.name().equals(fullyQualifiedProcedureName) || annotation.value().equals(fullyQualifiedProcedureName);
+            })
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "Unknown procedure: `%s`",
+                fullyQualifiedProcedureName
+            )));
     }
 }

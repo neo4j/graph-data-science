@@ -28,7 +28,7 @@ class ModelCatalogDropSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "model-catalog/catalog-model-drop.adoc";
     }
 }

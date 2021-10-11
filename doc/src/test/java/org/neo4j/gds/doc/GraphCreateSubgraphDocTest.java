@@ -21,20 +21,19 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 
-import java.util.Collections;
 import java.util.List;
 
 final class GraphCreateSubgraphDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Collections.singletonList(
+    protected List<Class<?>> procedures() {
+        return List.of(
             GraphCreateProc.class
         );
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-create-subgraph.adoc";
     }
 

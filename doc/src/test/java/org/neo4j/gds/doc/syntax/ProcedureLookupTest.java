@@ -21,16 +21,18 @@ package org.neo4j.gds.doc.syntax;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ProcedureLookupTest {
 
     @Test
     void findArgumentNames() {
-
-        var foundArguments = ProcedureLookup.findArgumentNames("gds.labelPropagation.stream");
+        var foundArguments = ProcedureLookup
+            .forPackages(List.of("org.neo4j.gds"))
+            .findArgumentNames("gds.labelPropagation.stream");
         assertThat(foundArguments).containsExactlyInAnyOrder("graphName", "configuration");
-
     }
 
 }

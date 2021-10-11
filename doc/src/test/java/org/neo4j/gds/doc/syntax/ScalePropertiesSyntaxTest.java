@@ -34,7 +34,7 @@ class ScalePropertiesSyntaxTest extends SyntaxTestBase {
         );
     }
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/scale-properties/scale-properties.adoc";
     }
 

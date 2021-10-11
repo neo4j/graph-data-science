@@ -22,21 +22,20 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.walking.CollapsePathMutateProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class CollapsePathDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    protected List<Class<?>> procedures() {
+        return List.of(
             CollapsePathMutateProc.class,
             GraphCreateProc.class
         );
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/collapse-path/collapse-path.adoc";
     }
 

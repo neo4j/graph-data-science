@@ -35,7 +35,7 @@ class ApproxMaxKCutSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/approx-max-k-cut/approx-max-k-cut.adoc";
     }
 }

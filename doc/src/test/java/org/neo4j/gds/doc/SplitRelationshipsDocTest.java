@@ -29,7 +29,7 @@ import java.util.List;
 class SplitRelationshipsDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return Arrays.asList(
             SplitRelationshipsMutateProc.class,
             GraphStreamRelationshipPropertiesProc.class,
@@ -38,7 +38,7 @@ class SplitRelationshipsDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/split-relationships/split-relationships.adoc";
     }
 

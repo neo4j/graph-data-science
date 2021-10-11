@@ -37,7 +37,7 @@ class Node2VecSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/node2vec/node2vec.adoc";
     }
 }

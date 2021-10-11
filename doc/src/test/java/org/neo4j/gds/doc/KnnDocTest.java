@@ -20,19 +20,24 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.knn.KnnMutateProc;
 import org.neo4j.gds.similarity.knn.KnnStatsProc;
 import org.neo4j.gds.similarity.knn.KnnStreamProc;
 import org.neo4j.gds.similarity.knn.KnnWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class KnnDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             KnnStreamProc.class,
             KnnWriteProc.class,
             KnnStatsProc.class,
@@ -42,7 +47,7 @@ class KnnDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/knn.adoc";
     }
 }

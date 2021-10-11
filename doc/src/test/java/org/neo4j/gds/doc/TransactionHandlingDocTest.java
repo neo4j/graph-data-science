@@ -28,7 +28,7 @@ import java.util.List;
 class TransactionHandlingDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return Arrays.asList(
             WccStatsProc.class,
             GraphCreateProc.class
@@ -36,7 +36,7 @@ class TransactionHandlingDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "production-deployment/transaction-handling.adoc";
     }
 

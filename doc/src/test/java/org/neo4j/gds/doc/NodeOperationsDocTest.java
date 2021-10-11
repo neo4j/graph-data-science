@@ -32,7 +32,7 @@ import java.util.List;
 final class NodeOperationsDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(
             GraphCreateProc.class,
             DegreeCentralityMutateProc.class,
@@ -51,7 +51,7 @@ final class NodeOperationsDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-catalog-node-ops.adoc";
     }
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class NodeSimilaritySyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/node-similarity/node-similarity.adoc";
     }
 }

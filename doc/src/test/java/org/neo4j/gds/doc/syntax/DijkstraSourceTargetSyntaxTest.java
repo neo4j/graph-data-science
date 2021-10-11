@@ -36,7 +36,7 @@ class DijkstraSourceTargetSyntaxTest extends SyntaxTestBase {
         );
     }
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/shortest-path/dijkstra-source-target.adoc";
     }
 

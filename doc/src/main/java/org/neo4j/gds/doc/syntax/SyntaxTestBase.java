@@ -43,7 +43,8 @@ import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
 import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 
 @ExtendWith(SoftAssertionsExtension.class)
-abstract class SyntaxTestBase {
+public abstract class SyntaxTestBase {
+
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
 
     private Asciidoctor asciidoctor;
@@ -82,9 +83,14 @@ abstract class SyntaxTestBase {
         );
     }
 
-    abstract String adocFile();
+    protected abstract String adocFile();
+
+    protected List<String> procedurePackages() {
+        return List.of("org.neo4j.gds");
+    }
 
     private ProcedureSyntaxAutoChecker syntaxPostProcessor(SoftAssertions syntaxAssertions) {
-        return new ProcedureSyntaxAutoChecker(syntaxModes(), syntaxAssertions);
+        var procedureLookup = ProcedureLookup.forPackages(procedurePackages());
+        return new ProcedureSyntaxAutoChecker(syntaxModes(), syntaxAssertions, procedureLookup);
     }
 }

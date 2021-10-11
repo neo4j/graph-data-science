@@ -20,19 +20,24 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pagerank.ArticleRankMutateProc;
 import org.neo4j.gds.pagerank.ArticleRankStatsProc;
 import org.neo4j.gds.pagerank.ArticleRankStreamProc;
 import org.neo4j.gds.pagerank.ArticleRankWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class ArticleRankDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             ArticleRankStreamProc.class,
             ArticleRankWriteProc.class,
             ArticleRankMutateProc.class,
@@ -42,7 +47,7 @@ class ArticleRankDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/article-rank/article-rank.adoc";
     }
 }

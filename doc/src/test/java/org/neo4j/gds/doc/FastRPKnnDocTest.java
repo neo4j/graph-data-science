@@ -23,14 +23,13 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.similarity.knn.KnnWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class FastRPKnnDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    protected List<Class<?>> procedures() {
+        return List.of(
             GraphCreateProc.class,
             FastRPMutateProc.class,
             KnnWriteProc.class
@@ -38,7 +37,7 @@ class FastRPKnnDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "end-to-end-examples/fastrp-knn-example.adoc";
     }
 

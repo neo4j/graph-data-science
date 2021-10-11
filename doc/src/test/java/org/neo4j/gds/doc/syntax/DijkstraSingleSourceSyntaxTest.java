@@ -37,7 +37,7 @@ class DijkstraSingleSourceSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/shortest-path/dijkstra-single-source.adoc";
     }
 

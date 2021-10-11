@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class EigenvectorCentralitySyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/eigenvector-centrality/eigenvector-centrality.adoc";
     }
 

@@ -33,12 +33,12 @@ class GraphCreateCypherDocTest extends DocTestBase {
     }
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(GraphCreateProc.class, GraphStreamRelationshipPropertiesProc.class);
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-create-cypher.adoc";
     }
 }

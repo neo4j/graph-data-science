@@ -20,23 +20,28 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.pregel.SpeakerListenerLPAStreamProc;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class SpeakerListenerLPADocTest extends DocTestBase {
+class SpeakerListenerLPADocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             SpeakerListenerLPAStreamProc.class,
             GraphCreateProc.class
         );
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/sllpa/sllpa.adoc";
     }
 

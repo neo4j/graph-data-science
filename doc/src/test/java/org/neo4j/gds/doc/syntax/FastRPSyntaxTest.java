@@ -39,7 +39,7 @@ class FastRPSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/fastrp/fastrp.adoc";
     }
 }

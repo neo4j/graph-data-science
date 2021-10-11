@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class PageRankSyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/page-rank/page-rank.adoc";
     }
 }

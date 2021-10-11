@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
@@ -33,7 +34,12 @@ import java.util.List;
 class NodeClassificationDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
         return List.of(
             NodeClassificationTrainProc.class,
             NodeClassificationPredictStreamProc.class,
@@ -53,7 +59,7 @@ class NodeClassificationDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/nodeclassification/nodeclassification.adoc";
     }
 }

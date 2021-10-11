@@ -56,13 +56,16 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
 
     private final Iterable<SyntaxModeMeta> syntaxModesPerPage;
     private final SoftAssertions syntaxAssertions;
+    private final ProcedureLookup procedureLookup;
 
     public ProcedureSyntaxAutoChecker(
         Iterable<SyntaxModeMeta> syntaxModesPerPage,
-        SoftAssertions syntaxAssertions
+        SoftAssertions syntaxAssertions,
+        ProcedureLookup procedureLookup
     ) {
         this.syntaxModesPerPage = syntaxModesPerPage;
         this.syntaxAssertions = syntaxAssertions;
+        this.procedureLookup = procedureLookup;
     }
 
     @Override
@@ -80,7 +83,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var procedureName = ProcedureNameExtractor.findProcedureName(codeSnippet);
 
             var documentedArguments = ProcedureArgumentsExtractor.findArguments(codeSnippet);
-            var expectedArguments = ProcedureLookup.findArgumentNames(procedureName);
+            var expectedArguments = procedureLookup.findArgumentNames(procedureName);
 
             if (mode.syntaxMode().hasParameters) {
                 syntaxAssertions.assertThat(documentedArguments)
@@ -91,7 +94,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             }
 
             // YIELD fields
-            var resultClass = ProcedureLookup.findResultType(procedureName);
+            var resultClass = procedureLookup.findResultType(procedureName);
             var expectedResultFieldsFromCode = extractExpectedResultFields(resultClass);
 
             var yieldResultColumns = extractDocResultFields(codeSnippet);

@@ -24,15 +24,20 @@ import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.degree.DegreeCentralityStatsProc;
 import org.neo4j.gds.degree.DegreeCentralityStreamProc;
 import org.neo4j.gds.degree.DegreeCentralityWriteProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class DegreeCentralityDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             DegreeCentralityStreamProc.class,
             DegreeCentralityWriteProc.class,
             DegreeCentralityMutateProc.class,
@@ -42,7 +47,7 @@ class DegreeCentralityDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/degree-centrality/degree-centrality.adoc";
     }
 }

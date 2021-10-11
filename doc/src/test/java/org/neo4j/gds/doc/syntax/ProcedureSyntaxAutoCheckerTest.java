@@ -224,7 +224,8 @@ class ProcedureSyntaxAutoCheckerTest {
             .postprocessor(
                 new ProcedureSyntaxAutoChecker(
                     List.of(SyntaxModeMeta.of(STREAM)),
-                    softAssertions
+                    softAssertions,
+                    ProcedureLookup.forPackages(List.of("org.neo4j.gds"))
                 ));
         return asciidoctor;
     }
