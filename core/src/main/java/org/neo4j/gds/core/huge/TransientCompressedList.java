@@ -213,14 +213,9 @@ public final class TransientCompressedList implements AdjacencyList {
             return decompress.peek(remaining);
         }
 
-        // TODO: I think this documentation if either out of date or misleading.
-        //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
         /**
          * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
-         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
+         * If there are no such targets before this cursor is exhausted, {@link org.neo4j.gds.api.AdjacencyCursor#NOT_FOUND -1} is returned.
          */
         @Override
         public long skipUntil(long target) {
@@ -231,10 +226,7 @@ public final class TransientCompressedList implements AdjacencyList {
 
         /**
          * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
-         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
+         * If there are no such targets before this cursor is exhausted, {@link org.neo4j.gds.api.AdjacencyCursor#NOT_FOUND -1} is returned.
          */
         @Override
         public long advance(long target) {
