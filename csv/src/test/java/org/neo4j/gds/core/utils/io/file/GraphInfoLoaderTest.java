@@ -38,14 +38,13 @@ class GraphInfoLoaderTest {
 
     @Test
     void shouldLoadGraphInfo(@TempDir Path exportDir) throws IOException {
-
         var uuid = UUID.randomUUID();
 
         var databaseId = DatabaseIdFactory.from("my-database", uuid);
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
-            String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42")
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "bitIdMap"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42", "true")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -62,6 +61,30 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
             Map.of(RelationshipType.of("REL"), 42L)
         );
+
+        assertThat(graphInfo.bitIdMap()).isTrue();
+    }
+
+    /**
+     * Test for backwards compatibility by leaving out `relTypeCounts`
+     */
+    @Test
+    void shouldLoadGraphInfoWithoutRelTypeCounts(@TempDir Path exportDir) throws IOException {
+        var uuid = UUID.randomUUID();
+
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "bitIdMap"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "true")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo.relationshipTypeCounts()).isEmpty();
+
+        assertThat(graphInfo.bitIdMap()).isTrue();
     }
 
 }

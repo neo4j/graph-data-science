@@ -86,11 +86,11 @@ public class GraphInfoLoader {
         @JsonProperty
         long maxOriginalId;
 
+        @JsonDeserialize(using = RelationshipTypesDeserializer.class)
+        Map<RelationshipType, Long> relTypeCounts = Map.of();
+
         @JsonProperty
         boolean bitIdMap;
-
-        @JsonDeserialize(using = RelationshipTypesDeserializer.class)
-        Map<RelationshipType, Long> relTypeCounts;
     }
 
     static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {
