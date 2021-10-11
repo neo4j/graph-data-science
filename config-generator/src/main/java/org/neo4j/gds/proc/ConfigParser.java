@@ -233,7 +233,8 @@ final class ConfigParser {
             requireVoidReturnType(method);
 
             memberBuilder.graphStoreValidation(true);
-        } else if (isAnnotationPresent(method, Configuration.GraphStoreValidationCheck.class)) {
+        }
+        if (isAnnotationPresent(method, Configuration.GraphStoreValidationCheck.class)) {
             requireVoidReturnType(method);
 
             memberBuilder.graphStoreValidationCheck(true);
