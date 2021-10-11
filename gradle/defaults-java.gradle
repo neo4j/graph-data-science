@@ -70,5 +70,13 @@ allprojects {
                     '-Xmaxerrs', '1337'
             ]
         }
+
+        afterEvaluate {
+            if (group.startsWith('com.neo4j.gds')) {
+                javadoc {
+                    enabled false
+                }
+            }
+        }
     }
 }
