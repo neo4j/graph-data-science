@@ -126,8 +126,13 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
                         nodeCFromB = neighboursB.advance(nodeCFromA);
-                        if (degreeFilter.test(degree(nodeCFromB))) {
-                            checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCFromA, nodeCFromB, triangleC);
+                        // B had some more nodes, but none of them were >= Ca, so we skip it
+                        if (nodeCFromB != NOT_FOUND) {
+                            var degreeCFromB = degree(nodeCFromB);
+
+                            if (degreeFilter.test(degreeCFromB)) {
+                                checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCFromA, nodeCFromB, triangleC);
+                            }
                         }
                     }
                 }
@@ -135,6 +140,11 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
             // skip until the next neighbour B of A with id > (current) B
             nodeB = neighboursAMain.skipUntil(nodeB);
+
+            // There are no more neighbors that are relevant to us
+            if (nodeB == NOT_FOUND) {
+                return;
+            }
         }
 
         cacheA = neighboursA;
@@ -151,6 +161,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     ) {
         // if Ca = Cb there exists a triangle
         // if Ca = triangleC we have already counted it
+        // Ca might also be NOT_FOUND, we ignore those as well
         if (nodeCa == nodeCb && nodeCa > triangleC) {
             consumer.accept(nodeA, nodeB, nodeCa);
             return nodeCa;
