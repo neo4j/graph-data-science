@@ -143,8 +143,8 @@ Running tests::
 To run all tests you can simply run `./gradlew check`
 
 Packaging the library::
-To package the library you can run `./gradlew :open-packaging:shadowJar`.
-This will create the bundled JAR at `open-packaging/build/libs/`.
+To package the library you can run `./gradlew :open-packaging:shadowCopy`.
+This will create a bundled JAR called `openGDS-VERSION-plugin.jar` in the directory `build/distributions/`.
 To use the bundled JAR in Neo4j, place the JAR file in the `plugins` directory of your Neo4j database and restart the database.
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
