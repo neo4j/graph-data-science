@@ -50,6 +50,7 @@ public final class GdsEdition {
 
     private GdsEdition() {
         this.currentState = State.COMMUNITY;
+        this.errorMessage = Optional.empty();
     }
 
     public boolean isOnEnterpriseEdition() {
