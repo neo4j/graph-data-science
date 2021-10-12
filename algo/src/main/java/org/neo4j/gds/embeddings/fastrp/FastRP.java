@@ -307,7 +307,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         ) {
             this.partition = partition;
             this.sqrtEmbeddingDimension = sqrtEmbeddingDimension;
-            this.propertyVectorAdder = new PropertyVectorAdder(null);
+            this.propertyVectorAdder = new PropertyVectorAdder();
         }
 
         @Override
@@ -343,10 +343,6 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         private class PropertyVectorAdder implements FeatureConsumer {
             private float[] randomVector;
-
-            PropertyVectorAdder(float[] randomVector) {
-                this.randomVector = randomVector;
-            }
 
             void setRandomVector(float[] randomVector) {
                 this.randomVector = randomVector;
