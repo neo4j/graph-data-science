@@ -1,14 +1,15 @@
-= Neo4j Graph Data Science Library
+= Neo4j Graph Data Science
 
-This repository hosts the sources of the Neo4j Graph Data Science (GDS) library.
+This repository hosts the open sources of the Neo4j Graph Data Science (GDS) library.
 The GDS library is a plugin for the Neo4j graph database.
 The library consists of a number of graph algorithms, exposed as procedures and executed in Neo4j.
 
 The Neo4j Graph Data Science library is the successor of the Neo4j Graph Algorithms library.
 
+
 == Downloading and installing releases
 
-The latest releases of the Graph Data Science library can always be found at the https://neo4j.com/graph-data-science-software/[Neo4j Graph Data Science Download Page].
+The latest releases of Neo4j GDS can always be found at the https://neo4j.com/graph-data-science-software/[Neo4j Graph Data Science Download Page].
 To install the plugin in Neo4j place the downloaded JAR file it in the `plugins` directory of your Neo4j database and restart the database.
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
@@ -63,10 +64,19 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
 
 
-== Developing with the library
+== OpenGDS
 
-The Graph Data Science library is also available on https://search.maven.org/search?q=g:org.neo4j.gds[Maven Central].
-If you want to include the Graph Data Science library in your own project you can simply add it to your project as a dependency.
+The Neo4j Graph Data Science library as built and distributed by Neo4j includes the sources in this repository as well a suite of closed sources.
+Neo4j GDS is available to download and use under the constraints of its license.
+
+However, the sources in this repository can be also be assembled into a fully functioning library, which we call OpenGDS.
+OpenGDS is available to build, use, and extend under the constraints of the GNU Public License version 3.0.
+
+
+== Developing with OpenGDS
+
+OpenGDS is also available on https://search.maven.org/search?q=g:org.neo4j.gds[Maven Central].
+If you want to include the OpenGDS in your own project you can simply add it as a dependency.
 
 For the most basic set of features, like graph loading and the graph representation, you need to include the `core` module:
 ```
@@ -101,7 +111,7 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 </dependency>
 ```
 
-The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules :
+The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules:
 ```
 <!-- Contains the basic procedure infrastructure -->
 <dependency>
@@ -135,9 +145,9 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 
 == Building the library
 
-The Neo4j Graph Data Science library uses the build tool `Gradle`.
+OpenGDS uses the build tool `Gradle`.
 Gradle is shipped with this repository using the Gradle Wrapper.
-This means you can simply run all Gradle commands by running `./gradlew TASK` from the repository root.
+This means you can simply run any Gradle task by running `./gradlew TASK` from the repository root.
 
 Running tests::
 To run all tests you can simply run `./gradlew check`
@@ -151,13 +161,15 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 Preview of the documentation::
 A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/1.8-preview/.
 
+
 == Contributing
 
 Please report any bugs, concerns, or other questions as GitHub issues to this repository.
 
 For more information see the link:CONTRIBUTING.md[contribution guidelines for this project].
 
+
 == License
 
-The Neo4j Graph Data Science library is licensed under the GNU Public License version 3.0.
+OpenGDS is licensed under the GNU Public License version 3.0.
 All content is copyright © Neo4j Sweden AB.
