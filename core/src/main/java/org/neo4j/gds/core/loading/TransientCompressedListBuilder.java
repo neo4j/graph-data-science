@@ -20,13 +20,13 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.huge.TransientCompressedList;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
 
 public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientCompressedList> {
 

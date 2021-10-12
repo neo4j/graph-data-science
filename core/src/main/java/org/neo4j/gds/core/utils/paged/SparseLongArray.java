@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.lang.invoke.MethodHandles;

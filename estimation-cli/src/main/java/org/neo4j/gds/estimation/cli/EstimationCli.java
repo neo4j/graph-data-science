@@ -78,7 +78,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJE
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
 import static org.neo4j.gds.utils.CheckedFunction.function;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

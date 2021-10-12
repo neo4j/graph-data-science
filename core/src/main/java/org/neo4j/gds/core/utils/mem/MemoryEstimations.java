@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.Collection;

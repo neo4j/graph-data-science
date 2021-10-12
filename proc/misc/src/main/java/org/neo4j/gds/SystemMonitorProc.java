@@ -21,9 +21,9 @@ package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.GdsEdition;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;

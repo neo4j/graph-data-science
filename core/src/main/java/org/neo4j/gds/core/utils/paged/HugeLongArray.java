@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;

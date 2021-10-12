@@ -24,14 +24,14 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfByteArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArray {
 

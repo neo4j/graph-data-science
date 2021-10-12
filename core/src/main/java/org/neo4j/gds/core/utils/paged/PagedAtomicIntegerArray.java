@@ -23,8 +23,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicIntegerArray> {
 

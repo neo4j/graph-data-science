@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -30,15 +31,14 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.api.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.matrix;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.extract;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLogisticRegressionData> {
 

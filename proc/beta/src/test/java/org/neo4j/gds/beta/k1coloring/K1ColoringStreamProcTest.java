@@ -22,10 +22,10 @@ package org.neo4j.gds.beta.k1coloring;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;

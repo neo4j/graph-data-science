@@ -33,8 +33,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class AdjacencyBuilder {

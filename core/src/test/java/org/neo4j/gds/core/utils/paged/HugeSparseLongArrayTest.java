@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 
 final class HugeSparseLongArrayTest {
 

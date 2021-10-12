@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.linkmodels.metrics;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 
 import java.util.ArrayList;
 import java.util.Map;

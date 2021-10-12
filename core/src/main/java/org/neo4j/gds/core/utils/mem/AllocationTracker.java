@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.compat.MemoryTrackerProxy;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.function.Supplier;

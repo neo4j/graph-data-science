@@ -31,7 +31,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class ScanningRecordsImporter<Record, T> {

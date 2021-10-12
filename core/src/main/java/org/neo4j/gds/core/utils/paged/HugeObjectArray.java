@@ -34,14 +34,14 @@ import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
  * A long-indexable version of a Object array ({@code T[]}) that can contain more than 2 bn. elements.

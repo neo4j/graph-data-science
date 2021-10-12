@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
+import org.neo4j.gds.mem.MemoryUsage;
+
 import java.util.Objects;
 
 /**

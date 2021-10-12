@@ -35,7 +35,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResu
 
 import java.util.List;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {

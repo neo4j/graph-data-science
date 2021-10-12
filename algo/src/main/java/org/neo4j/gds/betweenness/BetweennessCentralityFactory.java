@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends AlgorithmFactory<BetweennessCentrality, CONFIG> {
 

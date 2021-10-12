@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;

@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 class NeighborList {
 

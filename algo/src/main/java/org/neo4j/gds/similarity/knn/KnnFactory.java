@@ -34,10 +34,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<Knn, CONFIG> {
 

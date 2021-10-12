@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.reflect.Array;
 import java.util.function.Supplier;

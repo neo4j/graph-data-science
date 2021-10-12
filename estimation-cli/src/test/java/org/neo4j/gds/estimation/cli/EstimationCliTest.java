@@ -142,7 +142,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsEditionTest(value = Edition.EE)

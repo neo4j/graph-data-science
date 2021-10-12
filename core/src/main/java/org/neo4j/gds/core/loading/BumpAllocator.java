@@ -27,8 +27,8 @@ import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArrayElements;
 
 /**
  * "Bump" refers to the implementation in that there is a local allocator that is able to do a fast-path allocation

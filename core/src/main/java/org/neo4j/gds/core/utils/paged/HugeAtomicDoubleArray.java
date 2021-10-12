@@ -29,15 +29,15 @@ import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 
 public abstract class HugeAtomicDoubleArray {
 

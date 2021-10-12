@@ -37,7 +37,7 @@ import java.util.List;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
 public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {

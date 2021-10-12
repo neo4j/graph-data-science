@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.StringFormatting;
 
 public final class HugeAtomicBitSet {

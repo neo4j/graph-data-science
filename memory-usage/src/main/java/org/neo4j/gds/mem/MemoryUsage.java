@@ -17,18 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.mem;
+package org.neo4j.gds.mem;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.Containers;
+import com.carrotsearch.hppc.HashContainers;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.core.utils.BitUtil;
-import org.neo4j.io.NullOutputStream;
 import org.openjdk.jol.info.GraphWalker;
 import org.openjdk.jol.vm.VM;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,9 +38,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
-import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
-import static com.carrotsearch.hppc.HashContainers.MIN_HASH_ARRAY_LENGTH;
 import static java.lang.Integer.numberOfTrailingZeros;
 
 public final class MemoryUsage {
@@ -131,14 +129,15 @@ public final class MemoryUsage {
                     }
                     try {
                         final Object vmOption = getVMOptionMethod.invoke(
-                                hotSpotBean,
-                                "ObjectAlignmentInBytes");
+                            hotSpotBean,
+                            "ObjectAlignmentInBytes"
+                        );
                         objectAlignment = Integer.parseInt(vmOption
-                                .getClass()
-                                .getMethod("getValue")
-                                .invoke(vmOption)
-                                .toString());
-                        objectAlignment = BitUtil.nextHighestPowerOfTwo(objectAlignment);
+                            .getClass()
+                            .getMethod("getValue")
+                            .invoke(vmOption)
+                            .toString());
+                        objectAlignment = nextHighestPowerOfTwo(objectAlignment);
                     } catch (ReflectiveOperationException | RuntimeException ignored) {
                     }
                 }
@@ -242,7 +241,7 @@ public final class MemoryUsage {
     }
 
     public static long sizeOfEmptyOpenHashContainer() {
-        return sizeOfOpenHashContainer(DEFAULT_EXPECTED_ELEMENTS);
+        return sizeOfOpenHashContainer(Containers.DEFAULT_EXPECTED_ELEMENTS);
     }
 
     public static long sizeOfOpenHashContainer(final long elements) {
@@ -250,13 +249,13 @@ public final class MemoryUsage {
             throw new IllegalArgumentException(
                 "Number of elements must be >= 0: " + elements);
         }
-        long newElements = Math.max(elements, DEFAULT_EXPECTED_ELEMENTS);
+        long newElements = Math.max(elements, Containers.DEFAULT_EXPECTED_ELEMENTS);
 
-        long length = (long) Math.ceil(newElements / (double) DEFAULT_LOAD_FACTOR);
+        long length = (long) Math.ceil(newElements / (double) HashContainers.DEFAULT_LOAD_FACTOR);
         if (length == newElements) {
             length++;
         }
-        length = Math.max(MIN_HASH_ARRAY_LENGTH, BitUtil.nextHighestPowerOfTwo(length));
+        length = Math.max(HashContainers.MIN_HASH_ARRAY_LENGTH, nextHighestPowerOfTwo(length));
 
         return length + 1;
     }
@@ -337,6 +336,59 @@ public final class MemoryUsage {
         // we can never arrive here, longs are not large enough to
         // represent > 16384 yobibytes
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * returns the next highest power of two, or the current value if it's already a power of two or zero
+     */
+    private static int nextHighestPowerOfTwo(int v) {
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        v++;
+        return v;
+    }
+
+    /**
+     * returns the next highest power of two, or the current value if it's already a power of two or zero
+     */
+    private static long nextHighestPowerOfTwo(long v) {
+        v--;
+        v |= v >> 1L;
+        v |= v >> 2L;
+        v |= v >> 4L;
+        v |= v >> 8L;
+        v |= v >> 16L;
+        v |= v >> 32L;
+        v++;
+        return v;
+    }
+
+    private static final class NullOutputStream extends OutputStream {
+
+        static final OutputStream NULL_OUTPUT_STREAM = new NullOutputStream();
+
+        private NullOutputStream() {
+        }
+
+        @Override
+        public void write(int b) {
+            //nothing
+        }
+
+        @Override
+        public void write(byte[] b) {
+            // nothing
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            // nothing
+        }
+
     }
 
     private MemoryUsage() {

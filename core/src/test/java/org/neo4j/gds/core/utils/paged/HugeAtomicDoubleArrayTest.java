@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.gds.core.utils.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.concurrent.Executor;

@@ -29,10 +29,10 @@ import org.neo4j.gds.core.utils.mem.MemoryTree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 class KnnFactoryTest {
 

@@ -45,7 +45,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.SysInfoProc.DebugValue.value;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
 
 // don't extend BaseProc and only inject GraphDatabaseService so that
 // we can run this procedure even if unrestricted=gds.* had not been configured

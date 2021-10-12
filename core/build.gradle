@@ -23,6 +23,7 @@ dependencies {
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
+            project(':memory-usage'),
             project(':graph-projection-api'),
             project(':string-formatting'),
             [group: 'org.bouncycastle',        name: 'bcpkix-jdk15on',           version: ver.'bouncycastle'],
@@ -35,8 +36,6 @@ dependencies {
             [group: 'org.ejml',                name: 'ejml-ddense',              version: ver.'ejml'],
             [group: 'de.siegmar',              name: 'fastcsv',                  version: ver.'fastcsv'],
             [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
-            [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-            [group: 'org.openjdk.jol',         name: 'jol-core',                 version: ver.'jol'],
             [group: 'org.jctools',             name: 'jctools-core',             version: ver.'jctools-core'],
             [group: 'io.jsonwebtoken',         name: 'jjwt-api',                 version: ver.'jjwt'],
     )

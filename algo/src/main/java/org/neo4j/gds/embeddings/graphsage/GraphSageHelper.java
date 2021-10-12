@@ -20,6 +20,15 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
@@ -31,15 +40,6 @@ import org.neo4j.gds.ml.core.features.HugeObjectArrayFeatureConsumer;
 import org.neo4j.gds.ml.core.functions.NormalizeRows;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeMapping;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,12 +51,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.featureCount;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public final class GraphSageHelper {
 

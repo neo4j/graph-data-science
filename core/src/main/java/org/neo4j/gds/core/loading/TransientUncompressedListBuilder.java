@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public final class TransientUncompressedListBuilder implements CsrListBuilder<long[], TransientUncompressedList> {
 

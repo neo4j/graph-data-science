@@ -33,8 +33,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
 
