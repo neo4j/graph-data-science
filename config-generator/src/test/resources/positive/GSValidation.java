@@ -21,35 +21,25 @@ package positive;
 
 import org.neo4j.gds.annotation.Configuration;
 
-public interface Inheritance {
-    public interface BaseConfig {
-        double inheritedValue();
+import java.util.Collection;
+import java.util.List;
 
-        default short inheritedDefaultValue() {
-            return 42;
-        }
+@Configuration("GSValidationConfig")
+public interface GSValidation {
 
-        int overriddenValue();
-
-        default long overwrittenValue() {
-            return 42;
-        }
-
+    @Configuration.GraphStoreValidationCheck
+    default void classSpecificName(
+        List<String> graphStore,
+        Collection<String> selectedLabels,
+        Collection<String> selectedRelationshipTypes
+    ) {
+        assert true;
     }
 
-    @Configuration("MyConfigImpl")
-    public interface MyConfig extends BaseConfig {
-        String baseValue();
-
-        @Override
-        default int overriddenValue() {
-            return 1337;
-        }
-
-
-        @Override
-        default long overwrittenValue() {
-            return 1337;
-        }
-    }
+    @Configuration.GraphStoreValidation
+    default void graphStoreValidation(
+        List<String> graphStore,
+        Collection<String> selectedLabels,
+        Collection<String> selectedRelationshipTypes
+    ) {}
 }

@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
-public final class MyConfig implements Inheritance.MyConfig {
+public final class MyConfigImpl implements Inheritance.MyConfig {
     private String baseValue;
 
     private int overriddenValue;

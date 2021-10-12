@@ -21,7 +21,10 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collection;
@@ -68,4 +71,13 @@ public interface BaseConfig {
     default Map<String, Object> toMap() {
         return Collections.emptyMap();
     }
+
+    @Configuration.GraphStoreValidation
+    @Value.Auxiliary
+    @Value.Default
+    default void graphStoreValidation(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {}
 }

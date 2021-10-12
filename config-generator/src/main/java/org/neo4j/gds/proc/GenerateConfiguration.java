@@ -778,6 +778,31 @@ final class GenerateConfiguration {
         }
     }
 
+    private void injectGraphStoreValidationCode(
+        ConfigParser.Member validationMethod,
+        ConfigParser.Spec config,
+        MethodSpec.Builder builder
+    ) {
+        List<ConfigParser.Member> validationChecks = config
+            .members()
+            .stream()
+            .filter(ConfigParser.Member::graphStoreValidationCheck)
+            .collect(Collectors.toList());
+
+        var parameters = validationMethod.method().getParameters();
+
+        validationChecks
+            .stream()
+            .map(check -> CodeBlock.of(
+                "$N($N, $N, $N)",
+                check.methodName(),
+                parameters.get(0).getSimpleName(),
+                parameters.get(1).getSimpleName(),
+                parameters.get(2).getSimpleName()
+            ))
+            .forEach(builder::addStatement);
+    }
+
     @NotNull
     private CodeBlock getMapValueCode(ConfigParser.Member configMember) {
         String getter = configMember.methodName();
@@ -833,31 +858,31 @@ final class GenerateConfiguration {
         return config
             .members()
             .stream()
-            .map(member -> defineGetter(config, names, member))
+            .map(member -> generateMethodCode(config, names, member))
             .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
             .collect(Collectors.toList());
     }
 
-    private Optional<MethodSpec> defineGetter(
+    private Optional<MethodSpec> generateMethodCode(
         ConfigParser.Spec config,
         NameAllocator names,
         ConfigParser.Member member
     ) {
-        if (member.isConfigValue() || member.collectsKeys() || member.toMap()) {
-            MethodSpec.Builder builder = MethodSpec
-                .overriding(member.method())
-                .returns(member.typeSpecWithAnnotation(Nullable.class));
-            if (member.collectsKeys()) {
-                builder.addStatement(collectKeysCode(config));
-            } else if (member.toMap()) {
-                injectToMapCode(config, builder);
-            }
-            else {
-                builder.addStatement("return this.$N", names.get(member));
-            }
-            return Optional.of(builder.build());
+        MethodSpec.Builder builder = MethodSpec
+            .overriding(member.method())
+            .returns(member.typeSpecWithAnnotation(Nullable.class));
+        if (member.collectsKeys()) {
+            builder.addStatement(collectKeysCode(config));
+        } else if (member.toMap()) {
+            injectToMapCode(config, builder);
+        } else if (member.graphStoreValidation()) {
+            injectGraphStoreValidationCode(member, config, builder);
+        } else if (member.isConfigValue()) {
+            builder.addStatement("return this.$N", names.get(member));
+        } else {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(builder.build());
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {

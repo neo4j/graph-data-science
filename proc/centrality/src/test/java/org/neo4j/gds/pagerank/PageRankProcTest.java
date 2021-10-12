@@ -28,27 +28,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.IterationsConfigProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.RelationshipWeightConfigProcTest;
-import org.neo4j.gds.SourceNodesConfigTest;
-import org.neo4j.gds.ToleranceConfigProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.ImmutablePropertyMapping;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.SourceNodesConfigTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
+import org.neo4j.gds.test.config.ToleranceConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -70,12 +70,16 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
             RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        ).flatMap(Collection::stream));
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final double RESULT_ERROR = 1e-5;

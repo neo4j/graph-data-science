@@ -17,13 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package negative;
 
-import java.util.Optional;
+import org.neo4j.gds.annotation.Configuration;
 
-final class ConfigProcTestHelpers {
+import java.util.Collection;
+import java.util.List;
 
-    static final Optional<String> GRAPH_NAME = Optional.of("ignored");
+@Configuration("OnlyOneMethodConfig")
+public interface OnlyOneMethod {
 
-    private ConfigProcTestHelpers() {}
+    @Configuration.GraphStoreValidation
+    default void firstValidation(
+        List<String> graphStore,
+        Collection<String> selectedLabels,
+        Collection<String> selectedRelationshipTypes
+    ) {}
+
+    @Configuration.GraphStoreValidation
+    default void secondValidation(
+        List<String> graphStore,
+        Collection<String> selectedLabels,
+        Collection<String> selectedRelationshipTypes
+    ) {}
 }

@@ -80,15 +80,51 @@ final class ConfigParser {
     }
 
     private void process(ImmutableSpec.Builder output, Set<String> seen, TypeElement configElement, TypeElement root) {
-        methodsIn(configElement.getEnclosedElements())
+        var members = methodsIn(configElement.getEnclosedElements())
             .stream()
             .map(m -> validateMember(seen, root, m))
             .flatMap(Streams::stream)
-            .forEach(output::addMember);
+            .map(this::validateParameters)
+            .flatMap(Streams::stream)
+            .collect(Collectors.toList());
+
+        if (members.stream().filter(Member::graphStoreValidation).count() > 1) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "[ConfigParser]: Only one GraphStoreValidation-annotated method allowed"
+            );
+            return;
+        }
+
+        members.forEach(output::addMember);
 
         for (TypeMirror implemented : configElement.getInterfaces()) {
             process(output, seen, asTypeElement(implemented), root);
         }
+    }
+
+    private Optional<Member> validateParameters(Member member) {
+        var method = member.method();
+        if (member.graphStoreValidation() || member.graphStoreValidationCheck()) {
+            if (method.getParameters().size() != 3) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "[ConfigParser]: GraphStoreValidation and Checks must accept 3 parameters",
+                    method
+                );
+                return Optional.empty();
+            }
+        } else {
+            if (!method.getParameters().isEmpty()) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "[ConfigParser]: Method may not have any parameters",
+                    method
+                );
+                return Optional.empty();
+            }
+        }
+        return Optional.of(member);
     }
 
     private Optional<Member> validateMember(Collection<String> seen, TypeElement root, ExecutableElement method) {
@@ -97,16 +133,6 @@ final class ConfigParser {
             return Optional.empty();
         }
         if (!seen.add(method.getSimpleName().toString()) || method.getModifiers().contains(Modifier.STATIC)) {
-            return Optional.empty();
-        }
-
-
-        if (!method.getParameters().isEmpty()) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Method may not have any parameters",
-                method
-            );
             return Optional.empty();
         }
 
@@ -141,6 +167,8 @@ final class ConfigParser {
         memberBuilder.validatesDoubleRange(isAnnotationPresent(method, Configuration.DoubleRange.class));
 
         validateValueCheck(method, memberBuilder);
+
+        validateGraphStoreValidationAndChecks(method, memberBuilder);
 
         Key key = method.getAnnotation(Key.class);
         if (key != null) {
@@ -200,6 +228,41 @@ final class ConfigParser {
         }
     }
 
+    private void validateGraphStoreValidationAndChecks(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+        if (isAnnotationPresent(method, Configuration.GraphStoreValidation.class)) {
+            requireVoidReturnType(method);
+            requireDefaultModifier(method);
+
+            memberBuilder.graphStoreValidation(true);
+        }
+        if (isAnnotationPresent(method, Configuration.GraphStoreValidationCheck.class)) {
+            requireVoidReturnType(method);
+            requireDefaultModifier(method);
+
+            memberBuilder.graphStoreValidationCheck(true);
+        }
+    }
+
+    private void requireVoidReturnType(ExecutableElement method) {
+        if (!typeUtils.isSameType(method.getReturnType(), typeUtils.getNoType(TypeKind.VOID))) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "[ConfigParser]: GraphStoreValidation and Checks must return void",
+                method
+            );
+        }
+    }
+
+    private void requireDefaultModifier(ExecutableElement method) {
+        if (!method.getModifiers().contains(Modifier.DEFAULT)) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "[ConfigParser]: GraphStoreValidation and Checks must be declared default (cannot be abstract)",
+                method
+            );
+        }
+    }
+
     private void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
         if (isAnnotationPresent(method, Value.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
@@ -255,12 +318,18 @@ final class ConfigParser {
         }
 
         @Value.Default
+        public boolean graphStoreValidation() { return false; }
+
+        @Value.Default
+        public boolean graphStoreValidationCheck() { return false; }
+
+        @Value.Default
         public boolean normalizes() {
             return false;
         }
 
         final boolean isConfigValue() {
-            return !collectsKeys() && !toMap() && !validates() && !normalizes();
+            return !collectsKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
         }
 
         final boolean isMapParameter() {

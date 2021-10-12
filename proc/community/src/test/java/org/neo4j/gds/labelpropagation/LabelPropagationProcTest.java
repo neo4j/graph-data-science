@@ -25,25 +25,25 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.IterationsConfigProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.NodeWeightConfigProcTest;
-import org.neo4j.gds.RelationshipWeightConfigProcTest;
-import org.neo4j.gds.SeedConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.SeedConfigTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
+import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -56,8 +56,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
@@ -66,12 +66,16 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig()),
             RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        ).flatMap(Collection::stream));
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);

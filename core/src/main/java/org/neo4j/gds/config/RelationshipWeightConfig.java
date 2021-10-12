@@ -21,7 +21,16 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.utils.StringJoining;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
@@ -42,5 +51,28 @@ public interface RelationshipWeightConfig {
 
     static @Nullable String validatePropertyName(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "relationshipWeightProperty");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void relationshipWeightValidation(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        String weightProperty = relationshipWeightProperty();
+        if (weightProperty != null) {
+            var relTypesWithoutProperty = selectedRelationshipTypes.stream()
+                .filter(relType -> !graphStore.hasRelationshipProperty(relType, weightProperty))
+                .collect(Collectors.toSet());
+            if (!relTypesWithoutProperty.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
+                    weightProperty,
+                    StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
+                    StringJoining.join(graphStore.relationshipPropertyKeys(selectedRelationshipTypes))
+                ));
+            }
+        }
     }
 }

@@ -84,6 +84,14 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             return ProcessResult.INVALID;
         }
         ConfigParser.Spec configSpec = configParser.process(element.asType());
+        if (!validClassName(element, configSpec)) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Name of generated class must be different from name of annotated class.",
+                element
+            );
+            return ProcessResult.INVALID;
+        }
         JavaFile generatedConfig = generateConfiguration.generateConfig(
             configSpec,
             configClassName(element, configSpec)
@@ -102,11 +110,18 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
         }
     }
 
+    private boolean validClassName(Element element, ConfigParser.Spec configSpec) {
+        var nameOfClassToGenerate = element.getAnnotation(ANNOTATION_CLASS).value();
+        var nameOfAnnotatedClass = configSpec.root().getSimpleName();
+        return !nameOfAnnotatedClass.contentEquals(nameOfClassToGenerate);
+    }
+
     @NotNull
     private String configClassName(Element element, ConfigParser.Spec configSpec) {
+        var nameOfAnnotatedClass = configSpec.root().getSimpleName();
         Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
         return configuration.value().isBlank()
-            ? configSpec.root().getSimpleName() + CONFIG_CLASS_SUFFIX
+            ? nameOfAnnotatedClass + CONFIG_CLASS_SUFFIX
             : configuration.value();
     }
 

@@ -96,6 +96,18 @@ public @interface Configuration {
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
+    @interface GraphStoreValidation {
+    }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
+    @interface GraphStoreValidationCheck {
+    }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
     @interface IntegerRange {
         int min() default Integer.MIN_VALUE;
         int max() default Integer.MAX_VALUE;

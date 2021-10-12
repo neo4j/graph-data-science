@@ -172,6 +172,11 @@ public abstract class AlgoBaseProc<
         GraphCreateConfig graphCreateConfig,
         CONFIG config
     ) {
+        config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        );
         GraphStoreValidation.validate(graphStore, config);
         validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
     }

@@ -17,39 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package positive;
+package org.neo4j.gds.test.config;
 
-import org.neo4j.gds.annotation.Configuration;
+import java.util.Optional;
 
-public interface Inheritance {
-    public interface BaseConfig {
-        double inheritedValue();
+final class ConfigProcTestHelpers {
 
-        default short inheritedDefaultValue() {
-            return 42;
-        }
+    static final Optional<String> GRAPH_NAME = Optional.of("ignored");
 
-        int overriddenValue();
-
-        default long overwrittenValue() {
-            return 42;
-        }
-
-    }
-
-    @Configuration("MyConfigImpl")
-    public interface MyConfig extends BaseConfig {
-        String baseValue();
-
-        @Override
-        default int overriddenValue() {
-            return 1337;
-        }
-
-
-        @Override
-        default long overwrittenValue() {
-            return 1337;
-        }
-    }
+    private ConfigProcTestHelpers() {}
 }
