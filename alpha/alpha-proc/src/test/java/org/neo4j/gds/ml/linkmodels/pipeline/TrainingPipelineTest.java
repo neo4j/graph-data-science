@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.data.Index;
+import org.assertj.core.data.MapEntry;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
@@ -86,16 +88,9 @@ class TrainingPipelineTest {
             Map.of("penalty", 19)
         ));
 
-        assertThat(pipeline)
-            .returns(List.of(Map.of(
-                "batchSize", 100,
-                "maxEpochs", 100,
-                "minEpochs", 1,
-                "patience", 1,
-                "penalty", 19.0,
-                "tolerance", 0.001,
-                "useBiasFeature", true
-            )), TrainingPipeline::parameterSpace);
+        assertThat(pipeline.parameterSpace())
+            .hasSize(1)
+            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 19D)), Index.atIndex(0));
     }
 
     @Test
@@ -110,25 +105,11 @@ class TrainingPipelineTest {
             Map.of("penalty", 42)
         ));
 
-        assertThat(pipeline)
-            .returns(List.of(
-                Map.of(
-                "batchSize", 100,
-                "maxEpochs", 100,
-                "minEpochs", 1,
-                "patience", 1,
-                "penalty", 1337.0,
-                "tolerance", 0.001,
-                "useBiasFeature", true
-            ), Map.of(
-                "batchSize", 100,
-                "maxEpochs", 100,
-                "minEpochs", 1,
-                "patience", 1,
-                "penalty", 42.0,
-                "tolerance", 0.001,
-                "useBiasFeature", true
-            )), TrainingPipeline::parameterSpace);
+        var parameterSpace = pipeline.parameterSpace();
+        assertThat(parameterSpace)
+            .hasSize(2)
+            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 1337D)), Index.atIndex(0))
+            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 42D)), Index.atIndex(1));
     }
 
     @Test
