@@ -29,7 +29,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.values.storable.Values;
 
 import java.io.File;
@@ -37,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-abstract class DocTestBase extends BaseProcTest {
+public abstract class DocTestBase extends BaseProcTest {
 
     @TempDir
     File workDir;
@@ -56,9 +54,9 @@ abstract class DocTestBase extends BaseProcTest {
     private List<String> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
 
-    abstract String adocFile();
+    protected abstract String adocFile();
 
-    abstract List<Class<?>> procedures();
+    protected abstract List<Class<?>> procedures();
 
     @BeforeEach
     void setUp() throws Exception {
@@ -121,9 +119,7 @@ abstract class DocTestBase extends BaseProcTest {
         });
     }
 
-    List<Class<?>> functions() {
-        return Collections.singletonList(AsNodeFunc.class);
-    }
+    List<Class<?>> functions() { return List.of(); }
 
     Runnable cleanup() {
         return GraphStoreCatalog::removeAllLoadedGraphs;

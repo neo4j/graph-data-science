@@ -41,7 +41,7 @@ public class MeanAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
     private final ActivationFunction activation;
 
-    MeanAggregator(
+    public MeanAggregator(
         Weights<Matrix> weights,
         ActivationFunction activationFunction
     ) {
@@ -86,7 +86,7 @@ public class MeanAggregator implements Aggregator {
         return activation;
     }
 
-    Matrix weightsData() {
+    public Matrix weightsData() {
         return weights.data();
     }
 }

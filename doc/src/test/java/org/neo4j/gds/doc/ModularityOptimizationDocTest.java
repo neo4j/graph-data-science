@@ -23,15 +23,20 @@ import org.neo4j.gds.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class ModularityOptimizationDocTest extends DocTestBase {
+class ModularityOptimizationDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
@@ -40,7 +45,7 @@ public class ModularityOptimizationDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/modularity-optimization.adoc";
     }
 }

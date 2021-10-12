@@ -20,18 +20,23 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class DijkstraSingleSourceDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             AllShortestPathsDijkstraStreamProc.class,
             AllShortestPathsDijkstraWriteProc.class,
             AllShortestPathsDijkstraMutateProc.class,
@@ -40,7 +45,7 @@ class DijkstraSingleSourceDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/shortest-path/dijkstra-single-source.adoc";
     }
 

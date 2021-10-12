@@ -20,23 +20,22 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictMutateProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictStreamProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictWriteProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.functions.AsNodeFunc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class LinkPredictionDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    protected List<Class<?>> procedures() {
+        return List.of(
             LinkPredictionTrainProc.class,
             LinkPredictionPredictStreamProc.class,
             LinkPredictionPredictMutateProc.class,
@@ -48,7 +47,7 @@ class LinkPredictionDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/linkprediction/linkprediction.adoc";
     }
 

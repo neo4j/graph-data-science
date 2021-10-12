@@ -44,7 +44,7 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
     private final ActivationFunction activation;
 
-    MaxPoolingAggregator(
+    public MaxPoolingAggregator(
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
@@ -107,19 +107,19 @@ public class MaxPoolingAggregator implements Aggregator {
         return activation;
     }
 
-    Matrix poolWeights() {
+    public Matrix poolWeights() {
         return poolWeights.data();
     }
 
-    Matrix selfWeights() {
+    public Matrix selfWeights() {
         return selfWeights.data();
     }
 
-    Matrix neighborsWeights() {
+    public Matrix neighborsWeights() {
         return neighborsWeights.data();
     }
 
-    Vector bias() {
+    public Vector bias() {
         return bias.data();
     }
 

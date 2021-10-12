@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamProc;
@@ -30,7 +31,12 @@ import java.util.List;
 class LabelPropagationDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
         return List.of(
             LabelPropagationStreamProc.class,
             LabelPropagationStatsProc.class,
@@ -40,7 +46,7 @@ class LabelPropagationDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/label-propagation/label-propagation.adoc";
     }
 

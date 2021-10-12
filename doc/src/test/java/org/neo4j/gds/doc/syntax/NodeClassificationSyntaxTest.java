@@ -39,7 +39,7 @@ class NodeClassificationSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/nodeclassification/nodeclassification.adoc";
     }
 }

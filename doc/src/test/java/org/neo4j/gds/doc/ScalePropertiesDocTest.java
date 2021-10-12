@@ -29,7 +29,7 @@ import java.util.List;
 class ScalePropertiesDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(
             GraphCreateProc.class,
             ScalePropertiesStreamProc.class,
@@ -43,7 +43,7 @@ class ScalePropertiesDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/scale-properties/scale-properties.adoc";
     }
 }

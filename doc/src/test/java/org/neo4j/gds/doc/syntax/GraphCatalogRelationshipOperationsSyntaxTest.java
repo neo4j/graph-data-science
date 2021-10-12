@@ -34,7 +34,7 @@ class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-catalog-relationship-ops.adoc";
     }
 }

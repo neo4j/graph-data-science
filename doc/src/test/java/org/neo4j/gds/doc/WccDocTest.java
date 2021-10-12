@@ -20,20 +20,25 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.wcc.WccStatsProc;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.gds.wcc.WccWriteProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
-import java.util.Arrays;
 import java.util.List;
 
 class WccDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             WccStreamProc.class,
             WccWriteProc.class,
             WccMutateProc.class,
@@ -56,7 +61,7 @@ class WccDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/wcc/wcc.adoc";
     }
 

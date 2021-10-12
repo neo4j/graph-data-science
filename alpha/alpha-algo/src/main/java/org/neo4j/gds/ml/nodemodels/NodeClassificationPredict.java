@@ -58,7 +58,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final List<String> featureProperties;
     private final AllocationTracker allocationTracker;
 
-    NodeClassificationPredict(
+    public NodeClassificationPredict(
         NodeLogisticRegressionPredictor predictor,
         Graph graph,
         int batchSize,

@@ -20,19 +20,24 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class NodeSimilarityDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             NodeSimilarityStreamProc.class,
             NodeSimilarityWriteProc.class,
             NodeSimilarityStatsProc.class,
@@ -42,7 +47,7 @@ class NodeSimilarityDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/node-similarity/node-similarity.adoc";
     }
 }

@@ -21,12 +21,6 @@ package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
-
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 abstract class ModelCatalogProc extends BaseProc {
 
@@ -36,34 +30,4 @@ abstract class ModelCatalogProc extends BaseProc {
         CypherMapWrapper.failOnBlank("modelName", modelName);
     }
 
-    @SuppressWarnings("unused")
-    public static class ModelResult {
-        public final Map<String, Object> modelInfo;
-        public final Map<String, Object> trainConfig;
-        public final Map<String, Object> graphSchema;
-        public final boolean loaded;
-        public final boolean stored;
-        public final ZonedDateTime creationTime;
-        public final boolean shared;
-
-        public ModelResult(Model<?, ?, ?> model) {
-            shared = !model.sharedWith().isEmpty();
-            modelInfo = Stream.concat(
-                Map.of(
-                    "modelName", model.name(),
-                    "modelType", model.algoType()
-                ).entrySet().stream(),
-                model.customInfo().toMap().entrySet().stream()
-            ).collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue)
-            );
-
-            trainConfig = model.trainConfig().toMap();
-            graphSchema = model.graphSchema().toMap();
-            loaded = model.loaded();
-            stored = model.stored();
-            creationTime = model.creationTime();
-        }
-    }
 }

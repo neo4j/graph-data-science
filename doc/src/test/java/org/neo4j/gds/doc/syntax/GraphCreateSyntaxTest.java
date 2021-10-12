@@ -31,7 +31,7 @@ class GraphCreateSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-create.adoc";
     }
 }

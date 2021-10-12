@@ -30,7 +30,7 @@ public class MeanAggregatingLayer implements Layer {
     private final Weights<Matrix> weights;
     private final ActivationFunction activationFunction;
 
-    MeanAggregatingLayer(
+    public MeanAggregatingLayer(
         Weights<Matrix> weights,
         int sampleSize,
         ActivationFunction activationFunction,

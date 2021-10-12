@@ -27,12 +27,12 @@ import java.util.List;
 class GraphListDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(GraphCreateProc.class, GraphListProc.class);
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-list.adoc";
     }
 }

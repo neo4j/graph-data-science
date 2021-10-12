@@ -32,7 +32,7 @@ import java.util.List;
 
 class GraphSageDocTest extends DocTestBase {
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(
             GraphCreateProc.class,
             GraphSageTrainProc.class,
@@ -44,7 +44,7 @@ class GraphSageDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/graph-sage/graph-sage.adoc";
     }
 

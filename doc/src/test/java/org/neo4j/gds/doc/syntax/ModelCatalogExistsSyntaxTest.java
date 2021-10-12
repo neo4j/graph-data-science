@@ -28,7 +28,7 @@ class ModelCatalogExistsSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "model-catalog/catalog-model-exists.adoc";
     }
 }

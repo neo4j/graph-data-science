@@ -35,8 +35,9 @@ class YensSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(WRITE)
         );
     }
+
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/shortest-path/yens.adoc";
     }
 

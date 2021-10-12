@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class LouvainSyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/louvain/louvain.adoc";
     }
 }

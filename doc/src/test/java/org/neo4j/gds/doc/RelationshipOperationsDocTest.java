@@ -23,6 +23,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.List;
@@ -30,7 +31,12 @@ import java.util.List;
 final class RelationshipOperationsDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
         return List.of(
             GraphCreateProc.class,
             NodeSimilarityMutateProc.class,
@@ -41,7 +47,7 @@ final class RelationshipOperationsDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/graph-catalog/graph-catalog-relationship-ops.adoc";
     }
 

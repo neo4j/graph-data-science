@@ -30,7 +30,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class LayerFactory {
     private LayerFactory() {}
 
-    static Layer createLayer(
+    public static Layer createLayer(
         LayerConfig layerConfig
     ) {
         int rows = layerConfig.rows();

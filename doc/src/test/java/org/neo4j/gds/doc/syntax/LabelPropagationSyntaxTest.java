@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class LabelPropagationSyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/label-propagation/label-propagation.adoc";
     }
 }

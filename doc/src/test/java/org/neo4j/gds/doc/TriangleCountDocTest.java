@@ -20,20 +20,25 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.triangle.TriangleCountMutateProc;
 import org.neo4j.gds.triangle.TriangleCountStatsProc;
 import org.neo4j.gds.triangle.TriangleCountStreamProc;
 import org.neo4j.gds.triangle.TriangleCountWriteProc;
 import org.neo4j.gds.triangle.TriangleProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class TriangleCountDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             TriangleCountStreamProc.class,
             TriangleCountWriteProc.class,
             TriangleCountMutateProc.class,
@@ -44,7 +49,7 @@ class TriangleCountDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/triangle-count/triangle-count.adoc";
     }
 

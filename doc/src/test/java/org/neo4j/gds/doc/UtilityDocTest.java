@@ -20,29 +20,28 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.functions.VersionFunc;
+import org.neo4j.gds.pagerank.PageRankMutateProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class UtilityDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> functions() {
-        return Arrays.asList(AsNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
+        return List.of(AsNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
     }
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(GraphCreateProc.class, PageRankMutateProc.class);
+    protected List<Class<?>> procedures() {
+        return List.of(GraphCreateProc.class, PageRankMutateProc.class);
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "management-ops/utility-functions.adoc";
     }
 

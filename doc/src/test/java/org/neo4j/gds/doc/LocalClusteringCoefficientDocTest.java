@@ -20,20 +20,25 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateProc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsProc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamProc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteProc;
 import org.neo4j.gds.triangle.TriangleCountMutateProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class LocalClusteringCoefficientDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
+    protected List<Class<?>> procedures() {
+        return List.of(
             LocalClusteringCoefficientStreamProc.class,
             LocalClusteringCoefficientWriteProc.class,
             LocalClusteringCoefficientMutateProc.class,
@@ -44,7 +49,7 @@ class LocalClusteringCoefficientDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/local-clustering-coefficient/local-clustering-coefficient.adoc";
     }
 

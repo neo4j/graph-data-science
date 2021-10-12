@@ -20,20 +20,25 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.influenceΜaximization.GreedyProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class GreedyDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(GreedyProc.class, GraphCreateProc.class);
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override
-    String adocFile() {
+    protected List<Class<?>> procedures() {
+        return List.of(GreedyProc.class, GraphCreateProc.class);
+    }
+
+    @Override
+    protected String adocFile() {
         return "algorithms/alpha/influence-maximization/greedy.adoc";
     }
 }

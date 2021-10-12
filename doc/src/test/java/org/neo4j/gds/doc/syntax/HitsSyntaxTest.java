@@ -31,7 +31,7 @@ public class HitsSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/alpha/hits/hits.adoc";
     }
 

@@ -27,7 +27,7 @@ import java.util.List;
 class Node2VecDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(
             Node2VecStreamProc.class,
             GraphCreateProc.class
@@ -35,7 +35,7 @@ class Node2VecDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/beta/node2vec/node2vec.adoc";
     }
 }

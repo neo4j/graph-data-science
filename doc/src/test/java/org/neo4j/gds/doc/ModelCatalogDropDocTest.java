@@ -26,12 +26,12 @@ import java.util.List;
 class ModelCatalogDropDocTest extends ModelCatalogDocTest {
 
     @Override
-    List<Class<?>> procedures() {
+    protected List<Class<?>> procedures() {
         return List.of(ModelDropProc.class);
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "model-catalog/catalog-model-drop.adoc";
     }
 }

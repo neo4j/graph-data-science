@@ -22,7 +22,7 @@ package org.neo4j.gds.doc.syntax;
 class TriangleCountSyntaxTest extends SyntaxTestBase {
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/triangle-count/triangle-count.adoc";
     }
 }

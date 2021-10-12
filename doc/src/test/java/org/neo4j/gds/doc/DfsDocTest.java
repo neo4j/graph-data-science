@@ -20,20 +20,25 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.traverse.TraverseProc;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class DfsDocTest extends DocTestBase {
+class DfsDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(TraverseProc.class, GraphCreateProc.class);
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override
-    String adocFile() {
+    protected List<Class<?>> procedures() {
+        return List.of(TraverseProc.class, GraphCreateProc.class);
+    }
+
+    @Override
+    protected String adocFile() {
         return "algorithms/alpha/alpha-dfs.adoc";
     }
 }

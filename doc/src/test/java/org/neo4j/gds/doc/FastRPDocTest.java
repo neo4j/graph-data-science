@@ -25,14 +25,13 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class FastRPDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
+    protected List<Class<?>> procedures() {
+        return List.of(
             FastRPStreamProc.class,
             FastRPStatsProc.class,
             FastRPMutateProc.class,
@@ -42,7 +41,7 @@ class FastRPDocTest extends DocTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "algorithms/fastrp/fastrp.adoc";
     }
 

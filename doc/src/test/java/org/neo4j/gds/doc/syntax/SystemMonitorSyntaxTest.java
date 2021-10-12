@@ -31,7 +31,7 @@ class SystemMonitorSyntaxTest extends SyntaxTestBase {
     }
 
     @Override
-    String adocFile() {
+    protected String adocFile() {
         return "common-usage/monitoring-system.adoc";
     }
 }
