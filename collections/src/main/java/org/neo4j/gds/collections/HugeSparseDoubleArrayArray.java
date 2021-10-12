@@ -21,24 +21,24 @@ package org.neo4j.gds.collections;
 
 import java.util.function.LongConsumer;
 
-@HugeSparseArray(valueType = long[].class)
-public interface HugeSparseLongArrayArray {
+@HugeSparseArray(valueType = double[].class)
+public interface HugeSparseDoubleArrayArray {
 
     long capacity();
 
-    long[] get(long index);
+    double[] get(long index);
 
     boolean contains(long index);
 
-    static Builder growingBuilder(long[] defaultValue, LongConsumer trackAllocation) {
-        return new HugeSparseLongArrayArraySon.GrowingBuilder(defaultValue, trackAllocation);
+    static Builder growingBuilder(double[] defaultValue, LongConsumer trackAllocation) {
+        return new HugeSparseDoubleArrayArraySon.GrowingBuilder(defaultValue, trackAllocation);
     }
 
     interface Builder {
-        void set(long index, long[] value);
+        void set(long index, double[] value);
 
-        boolean setIfAbsent(long index, long[] value);
+        boolean setIfAbsent(long index, double[] value);
 
-        HugeSparseLongArrayArray build();
+        HugeSparseDoubleArrayArray build();
     }
 }
