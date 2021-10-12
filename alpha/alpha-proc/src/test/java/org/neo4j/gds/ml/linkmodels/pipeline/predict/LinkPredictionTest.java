@@ -137,7 +137,7 @@ class LinkPredictionTest extends BaseProcTest {
                 PredictedLink.of(0, 2, 2.0547103309367397E-4),
                 PredictedLink.of(2, 3, 2.810228605019867E-9)
             );
-            assertThat(expectedLinks).containsAll(predictedLinks);
+            assertThat(predictedLinks).containsAll(expectedLinks);
         });
     }
 

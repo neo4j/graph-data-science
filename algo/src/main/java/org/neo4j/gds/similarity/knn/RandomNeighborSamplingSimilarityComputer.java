@@ -440,6 +440,10 @@ public class RandomNeighborSamplingSimilarityComputer {
             assert base != joiner;
             assert n > 1 && k > 0;
 
+            if (!computer.filterNodePair(base, joiner)) {
+                return 0;
+            }
+
             var similarity = computer.safeSimilarity(base, joiner);
             var neighbors = allNeighbors.get(base);
             synchronized (neighbors) {

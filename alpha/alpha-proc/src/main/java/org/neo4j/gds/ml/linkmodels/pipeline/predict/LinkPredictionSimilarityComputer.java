@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.similarity.knn.SimilarityComputer;
@@ -27,13 +28,16 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final LinkLogisticRegressionPredictor predictor;
+    private final Graph graph;
 
     LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
-        LinkLogisticRegressionPredictor predictor
+        LinkLogisticRegressionPredictor predictor,
+        Graph graph
     ) {
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.predictor = predictor;
+        this.graph = graph;
     }
 
     @Override
@@ -44,6 +48,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     @Override
     public boolean filterNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId < secondNodeId;
+        // Self-loops are always very similar
+        if (firstNodeId == secondNodeId) {
+            return false;
+        }
+        // TODO This is a very naive (slow) approach and should be replaced by a dedicated data structure
+        return graph.exists(firstNodeId, secondNodeId);
     }
 }

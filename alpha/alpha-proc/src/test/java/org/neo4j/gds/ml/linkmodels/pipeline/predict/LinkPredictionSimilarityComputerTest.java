@@ -20,10 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -33,13 +31,11 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @GdlExtension
 class LinkPredictionSimilarityComputerTest {
@@ -48,10 +44,10 @@ class LinkPredictionSimilarityComputerTest {
         "CREATE" +
         "  (a { prop1: 4,  prop2: [1L, 0L, 0L, 0L]})" +
         "  (b { prop1: 100,  prop2: [0L, 10L, 0L, 0L]})" +
-        ", (c { prop1: 1, prop2: [2L, 1L, 0L, 0L]})";
-//    ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
-//    ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
-//    ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
+        ", (c { prop1: 1, prop2: [2L, 1L, 0L, 0L]})"+
+        ", (a)-->(a)" +
+        ", (a)-->(b)"+
+        ", (c)-->(a)";
 
 
     @Inject
@@ -74,7 +70,8 @@ class LinkPredictionSimilarityComputerTest {
         );
         var lpSimComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
-            new LinkLogisticRegressionPredictor(modelData)
+            new LinkLogisticRegressionPredictor(modelData),
+            graph
         );
         assertThat(lpSimComputer.similarity(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(
             0.5099986668799655);
@@ -82,4 +79,28 @@ class LinkPredictionSimilarityComputerTest {
             0.7098853299317623);
     }
 
+    @Test
+    void filterExistingRelationships() {
+        var linkFeatureSteps = List.<LinkFeatureStep>of();
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            Weights.ofMatrix(1, 2),
+            Weights.ofScalar(0)
+        );
+        var lpSimComputer = new LinkPredictionSimilarityComputer(
+            linkFeatureExtractor,
+            new LinkLogisticRegressionPredictor(modelData),
+            graph
+        );
+        // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
+    }
 }

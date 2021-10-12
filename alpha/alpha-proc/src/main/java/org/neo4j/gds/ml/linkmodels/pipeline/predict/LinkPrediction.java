@@ -77,7 +77,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
             concurrency,
             topN,
             threshold,
-            ImmutableKnnBaseConfig.builder().sampleRate(1.0D).nodeWeightProperty("foo").build(),
+            ImmutableKnnBaseConfig.builder().sampleRate(0.9999D).nodeWeightProperty("foo").build(),
             progressTracker
         );
     }
@@ -152,7 +152,8 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     ) {
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
             featureExtractor,
-            predictor
+            predictor,
+            graph
         );
         var random = this.knnConfig.randomSeed().isPresent()
             ? new SplittableRandom(this.knnConfig.randomSeed().get())

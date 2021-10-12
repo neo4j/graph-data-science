@@ -38,6 +38,10 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
+    default boolean filterNodePair(long firstNodeId, long secondNodeId) {
+        return false;
+    }
+
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
