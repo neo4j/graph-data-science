@@ -69,7 +69,34 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         double threshold,
         ProgressTracker progressTracker
     ) {
+        this(
+            modelData,
+            pipelineExecutor,
+            nodeLabels,
+            relationshipTypes,
+            graphStore,
+            concurrency,
+            topN,
+            threshold,
+            ImmutableKnnBaseConfig.builder().sampleRate(1.0D).nodeWeightProperty("foo").build(),
+            progressTracker
+        );
+    }
+
+    public LinkPrediction(
+        LinkLogisticRegressionData modelData,
+        PipelineExecutor pipelineExecutor,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relationshipTypes,
+        GraphStore graphStore,
+        int concurrency,
+        int topN,
+        double threshold,
+        KnnBaseConfig knnConfig,
+        ProgressTracker progressTracker
+    ) {
         super(progressTracker);
+
         this.modelData = modelData;
         this.pipelineExecutor = pipelineExecutor;
         this.nodeLabels = nodeLabels;
@@ -79,7 +106,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         this.topN = topN;
         this.threshold = threshold;
 
-        this.knnConfig = ImmutableKnnBaseConfig.builder().nodeWeightProperty("foo").build();
+        this.knnConfig = knnConfig;
     }
 
     @Override
@@ -108,9 +135,9 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         var result = new LinkPredictionResult(topN);
 
         if (knnConfig.sampleRate() == 1.0D) {
-            predictLinksApproximate(graph, featureExtractor, predictor, result);
-        } else {
             predictLinksGlobal(graph, featureExtractor, predictor, result);
+        } else {
+            predictLinksApproximate(graph, featureExtractor, predictor, result);
         }
 
         progressTracker.endSubTask();
