@@ -22,14 +22,15 @@ package org.neo4j.gds.similarity.knn;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateRelationshipWithPropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutablePropertyMapping;
+import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +41,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
-    implements MutateRelationshipWithPropertyTest<Knn, KnnMutateConfig, Knn.Result> {
+    implements MutateRelationshipWithPropertyTest<Knn, KnnMutateConfig, Result> {
 
     @Override
     public String mutateRelationshipType() {
@@ -69,7 +70,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Result, KnnMutateConfig>> getProcedureClazz() {
         return KnnMutateProc.class;
     }
 

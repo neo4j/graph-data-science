@@ -26,26 +26,27 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.test.config.IterationsConfigProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
+import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -54,14 +55,14 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
+import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
-    MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
-    HeapControlTest<Knn, CONFIG, Knn.Result> {
+    MemoryEstimateTest<Knn, CONFIG, Result>,
+    HeapControlTest<Knn, CONFIG, Result> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -110,7 +111,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     }
 
     @Override
-    public void assertResultEquals(Knn.Result result1, Knn.Result result2) {
+    public void assertResultEquals(Result result1, Result result2) {
         assertSimilarityStreamsAreEqual(result1.streamSimilarityResult(), result2.streamSimilarityResult());
     }
 

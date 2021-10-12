@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult, KnnStreamConfig> {
+public class KnnStreamProc extends StreamProc<Knn, Result, SimilarityResult, KnnStreamConfig> {
 
     @Procedure(value = "gds.beta.knn.stream", mode = READ)
     @Description(KNN_DESCRIPTION)
@@ -46,7 +47,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Knn, Knn.Result, KnnStreamConfig> result = compute(graphNameOrConfig, configuration);
+        ComputationResult<Knn, Result, KnnStreamConfig> result = compute(graphNameOrConfig, configuration);
         Graph graph = result.graph();
 
         if (result.isGraphEmpty()) {

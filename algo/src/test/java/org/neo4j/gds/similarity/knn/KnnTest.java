@@ -43,6 +43,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 
 import java.util.Comparator;
 import java.util.stream.LongStream;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.reverseNeighbors;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -121,7 +123,7 @@ class KnnTest {
     }
 
     private void assertCorrectNeighborList(
-        Knn.Result result,
+        Result result,
         long nodeId,
         long... expectedNeighbors
     ) {
@@ -152,7 +154,7 @@ class KnnTest {
 
         assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(Result::size)
             .isEqualTo(3L);
     }
 
@@ -179,7 +181,7 @@ class KnnTest {
 
         softly.assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(Result::size)
             .isEqualTo(3L);
 
         long nodeAId = idFunction.of("a");
@@ -198,7 +200,7 @@ class KnnTest {
         var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, AllocationTracker.empty());
 
         // no old elements, don't add something to the reverse neighbors
-        Knn.reverseNeighbors(0, neighbors, reverseNeighbors);
+        reverseNeighbors(0, neighbors, reverseNeighbors);
         assertThat(reverseNeighbors.get(0)).isNull();
 
         var neighborsFrom0 = LongArrayList.from(LongStream.range(1, nodeCount).toArray());
@@ -216,7 +218,7 @@ class KnnTest {
         var neighborsFrom0 = LongArrayList.from(LongStream.range(1, nodeCount).toArray());
         neighbors.set(0, neighborsFrom0);
 
-        Knn.reverseNeighbors(0, neighbors, reverseNeighbors);
+        reverseNeighbors(0, neighbors, reverseNeighbors);
         // 0 has no reverse neighbors
         assertThat(reverseNeighbors.get(0)).isNull();
         // every other node points to 0
@@ -243,7 +245,7 @@ class KnnTest {
         neighbors.setAll(nodeId -> nodeId == 0 ? null : LongArrayList.from(0));
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            Knn.reverseNeighbors(nodeId, neighbors, reverseNeighbors);
+            reverseNeighbors(nodeId, neighbors, reverseNeighbors);
         }
 
         // all nodes point to 0

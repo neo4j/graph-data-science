@@ -32,6 +32,7 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -50,7 +51,7 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, SimilarityMutateResult, KnnMutateConfig> {
+public class KnnMutateProc extends MutatePropertyProc<Knn, Result, SimilarityMutateResult, KnnMutateConfig> {
 
     @Procedure(name = "gds.beta.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)
@@ -81,7 +82,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityMutateResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityMutateResult> resultBuilder(ComputationResult<Knn, Result, KnnMutateConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
@@ -91,7 +92,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
     }
 
     @Override
-    protected Stream<SimilarityMutateResult> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
+    protected Stream<SimilarityMutateResult> mutate(ComputationResult<Knn, Result, KnnMutateConfig> computationResult) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
             KnnMutateConfig config = computationResult.config();
 
