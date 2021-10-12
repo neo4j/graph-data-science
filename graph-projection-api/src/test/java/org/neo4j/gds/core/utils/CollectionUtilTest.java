@@ -23,8 +23,10 @@ import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static java.util.Collections.emptyList;
 
@@ -38,15 +40,15 @@ class CollectionUtilTest {
         Assertions.assertEquals(emptyList(), pairs);
     }
 
-//    @Test
-//    void testEnumerateSomeCollection() {
-//        Collection<Long> items = LazyBatchCollection.of(42, 1, (start, length) -> start);
-//        List<IntObjectPair<Long>> pairs = CollectionUtil
-//            .enumerate(items)
-//            .collect(Collectors.toList());
-//        Assertions.assertEquals(42, pairs.size());
-//        for (IntObjectPair<Long> pair : pairs) {
-//            Assertions.assertEquals(pair.getOne(), pair.getTwo());
-//        }
-//    }
+    @Test
+    void testEnumerateSomeCollection() {
+        Collection<Long> items = LongStream.range(0, 42).boxed().collect(Collectors.toList());
+        List<IntObjectPair<Long>> pairs = CollectionUtil
+            .enumerate(items)
+            .collect(Collectors.toList());
+        Assertions.assertEquals(42, pairs.size());
+        for (IntObjectPair<Long> pair : pairs) {
+            Assertions.assertEquals(pair.getOne(), pair.getTwo());
+        }
+    }
 }
