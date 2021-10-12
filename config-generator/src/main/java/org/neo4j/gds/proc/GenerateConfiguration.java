@@ -858,32 +858,31 @@ final class GenerateConfiguration {
         return config
             .members()
             .stream()
-            .map(member -> defineGetter(config, names, member))
+            .map(member -> generateMethodCode(config, names, member))
             .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
             .collect(Collectors.toList());
     }
 
-    private Optional<MethodSpec> defineGetter(
+    private Optional<MethodSpec> generateMethodCode(
         ConfigParser.Spec config,
         NameAllocator names,
         ConfigParser.Member member
     ) {
-        if (member.isConfigValue() || member.collectsKeys() || member.toMap() || member.graphStoreValidation()) {
-            MethodSpec.Builder builder = MethodSpec
-                .overriding(member.method())
-                .returns(member.typeSpecWithAnnotation(Nullable.class));
-            if (member.collectsKeys()) {
-                builder.addStatement(collectKeysCode(config));
-            } else if (member.toMap()) {
-                injectToMapCode(config, builder);
-            } else if (member.graphStoreValidation()) {
-                injectGraphStoreValidationCode(member, config, builder);
-            } else {
-                builder.addStatement("return this.$N", names.get(member));
-            }
-            return Optional.of(builder.build());
+        MethodSpec.Builder builder = MethodSpec
+            .overriding(member.method())
+            .returns(member.typeSpecWithAnnotation(Nullable.class));
+        if (member.collectsKeys()) {
+            builder.addStatement(collectKeysCode(config));
+        } else if (member.toMap()) {
+            injectToMapCode(config, builder);
+        } else if (member.graphStoreValidation()) {
+            injectGraphStoreValidationCode(member, config, builder);
+        } else if (member.isConfigValue()) {
+            builder.addStatement("return this.$N", names.get(member));
+        } else {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(builder.build());
     }
 
     private <T> Optional<T> error(CharSequence message, Element element) {
