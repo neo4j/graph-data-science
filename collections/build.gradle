@@ -26,6 +26,7 @@ dependencies {
     annotationProcessor(project(":collections-generator"))
 
     implementation project(':annotations')
+    implementation project(':memory-usage')
     
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter

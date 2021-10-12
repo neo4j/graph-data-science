@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.service.AutoService;
 import org.neo4j.gds.collections.hsa.HugeSparseArrayStep;
@@ -38,7 +37,7 @@ public class CollectionsProcessor extends BasicAnnotationProcessor {
 
     @Override
     protected Iterable<? extends Step> steps() {
-        var hugeSparseArrayStep = new HugeSparseArrayStep(processingEnv, getSupportedSourceVersion());
+        var hugeSparseArrayStep = new HugeSparseArrayStep(processingEnv);
 
         return List.of(hugeSparseArrayStep);
     }

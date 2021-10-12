@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import java.util.function.LongConsumer;
+
 @HugeSparseArray(valueType = long.class)
 public interface HugeSparseLongArray {
 
@@ -27,6 +29,10 @@ public interface HugeSparseLongArray {
     long get(long index);
 
     boolean contains(long index);
+
+    static Builder growingBuilder(long defaultValue, LongConsumer trackAllocation) {
+        return new HugeSparseLongArraySon.GrowingBuilder(defaultValue, trackAllocation);
+    }
 
     interface Builder {
         void set(long index, long value);

@@ -26,24 +26,38 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor9;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasSingleLongParameter;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeAtIndex;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.isAbstract;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.isNotGeneric;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.isStatic;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.mustReturn;
 
 final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
 
+    private final Types typeUtils;
     private final Messager messager;
     private final BuilderValidator validator;
+    private final TypeMirror longConsumerType;
 
     private TypeElement builderType;
 
-    ElementValidator(TypeMirror rootType, Messager messager) {
+    ElementValidator(
+        Types typeUtils,
+        TypeMirror rootType,
+        TypeMirror longConsumerType,
+        Messager messager
+    ) {
         super(false);
+        this.typeUtils = typeUtils;
+        this.longConsumerType = longConsumerType;
         this.messager = messager;
         this.validator = new BuilderValidator(rootType, messager);
     }
@@ -74,6 +88,8 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateGetMethod(e, elementType);
             case "contains":
                 return validateContainsMethod(e);
+            case "growingBuilder":
+                return validateGrowingBuilderMethod(e, elementType);
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
@@ -103,5 +119,13 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);
+    }
+
+    private boolean validateGrowingBuilderMethod(ExecutableElement e, TypeMirror elementType) {
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 2, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
     }
 }

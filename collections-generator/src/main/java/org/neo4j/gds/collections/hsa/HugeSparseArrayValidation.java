@@ -28,16 +28,20 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
 final class HugeSparseArrayValidation {
 
+    private final Types typeUtils;
     private final Elements elementUtils;
     private final Messager messager;
 
-    HugeSparseArrayValidation(Elements elementUtils, Messager messager) {
+    HugeSparseArrayValidation(Types typeUtils, Elements elementUtils, Messager messager) {
+        this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.messager = messager;
     }
@@ -46,8 +50,9 @@ final class HugeSparseArrayValidation {
         var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseArray.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
+        var longConsumerType = elementUtils.getTypeElement(LongConsumer.class.getName()).asType();
 
-        var elementValidator = new ElementValidator(element.asType(), this.messager);
+        var elementValidator = new ElementValidator(typeUtils, element.asType(), longConsumerType, this.messager);
 
         if (!isValid(element, elementValidator, valueType)) {
             return Optional.empty();

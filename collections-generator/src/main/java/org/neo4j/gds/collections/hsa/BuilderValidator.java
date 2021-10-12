@@ -29,8 +29,8 @@ import javax.tools.Diagnostic;
 
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterAtIndex;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.isAbstract;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.isNotGeneric;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.mustReturn;
@@ -72,8 +72,8 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
     private boolean validateSetMethod(ExecutableElement e, TypeMirror elementType) {
         return mustReturn(e, TypeKind.VOID, messager)
                && hasParameterCount(e, 2, messager)
-               && hasParameterAtIndex(e, 0, TypeKind.LONG, messager)
-               && hasParameterAtIndex(e, 1, elementType.getKind(), messager)
+               && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
+               && hasTypeKindAtIndex(e, 1, elementType.getKind(), messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);
@@ -82,8 +82,8 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
     private boolean validateSetIfAbsentMethod(ExecutableElement e, TypeMirror elementType) {
         return mustReturn(e, TypeKind.BOOLEAN, messager)
                && hasParameterCount(e, 2, messager)
-               && hasParameterAtIndex(e, 0, TypeKind.LONG, messager)
-               && hasParameterAtIndex(e, 1, elementType.getKind(), messager)
+               && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
+               && hasTypeKindAtIndex(e, 1, elementType.getKind(), messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);
@@ -92,8 +92,8 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
     private boolean validateAddToMethod(ExecutableElement e, TypeMirror elementType) {
         return mustReturn(e, TypeKind.VOID, messager)
                && hasParameterCount(e, 2, messager)
-               && hasParameterAtIndex(e, 0, TypeKind.LONG, messager)
-               && hasParameterAtIndex(e, 1, elementType.getKind(), messager)
+               && hasTypeKindAtIndex(e, 0, TypeKind.LONG, messager)
+               && hasTypeKindAtIndex(e, 1, elementType.getKind(), messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);

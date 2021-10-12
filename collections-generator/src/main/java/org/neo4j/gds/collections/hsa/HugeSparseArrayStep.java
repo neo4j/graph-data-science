@@ -29,7 +29,6 @@ import org.neo4j.gds.collections.HugeSparseArray;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -44,8 +43,13 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
     private final HugeSparseArrayValidation validation;
 
-    public HugeSparseArrayStep(ProcessingEnvironment processingEnv, SourceVersion sourceVersion) {
-        this.validation = new HugeSparseArrayValidation(processingEnv.getElementUtils(), processingEnv.getMessager());
+    public HugeSparseArrayStep(ProcessingEnvironment processingEnv) {
+        this.validation = new HugeSparseArrayValidation(
+            processingEnv.getTypeUtils(),
+            processingEnv.getElementUtils(),
+            processingEnv.getMessager()
+        );
+
         this.messager = processingEnv.getMessager();
         this.filer = processingEnv.getFiler();
     }
