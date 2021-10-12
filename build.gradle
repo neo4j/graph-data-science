@@ -10,6 +10,8 @@ plugins {
     id 'com.google.protobuf'                        version '0.8.16'                apply false
 }
 
+description = 'Neo4j Graph Data Science :: OpenGDS'
+
 ext {
     distributionDir = "$buildDir/distributions"
     cliDistributionDir = "$buildDir/distributions/estimation-cli"
