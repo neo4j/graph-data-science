@@ -56,7 +56,7 @@ public final class FloatVectorOperations {
 
     public static float l2Norm(float[] data) {
         float sum = 0.0f;
-        for (double value : data) {
+        for (float value : data) {
             sum += value * value;
         }
 
@@ -64,12 +64,7 @@ public final class FloatVectorOperations {
     }
 
     public static void l2Normalize(float[] array) {
-        float sum = 0.0f;
-        for (float value : array) {
-            sum += value * value;
-        }
-
-        float euclideanLength = (float) Math.sqrt(sum);
+        float euclideanLength = l2Norm(array);
         if (euclideanLength > 0) {
             scale(array, 1 / euclideanLength);
         }
