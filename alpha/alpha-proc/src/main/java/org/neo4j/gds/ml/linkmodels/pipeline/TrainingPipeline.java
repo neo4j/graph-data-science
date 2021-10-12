@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TrainingPipeline implements Mappable {
@@ -77,6 +78,7 @@ public class TrainingPipeline implements Mappable {
     }
 
     public void addNodePropertyStep(NodePropertyStep step) {
+        validateUniqueMutateProperty(step);
         this.nodePropertySteps.add(step);
     }
 
@@ -148,5 +150,21 @@ public class TrainingPipeline implements Mappable {
             throw new IllegalArgumentException(
                 "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
         }
+    }
+
+    private void validateUniqueMutateProperty(NodePropertyStep step) {
+        this.nodePropertySteps.forEach(nodePropertyStep -> {
+            var newMutatePropertyName = step.config.get(MUTATE_PROPERTY_KEY);
+            var existingMutatePropertyName = nodePropertyStep.config.get(MUTATE_PROPERTY_KEY);
+            var existingProcedureName = nodePropertyStep.procMethod.getName();
+            if (newMutatePropertyName.equals(existingMutatePropertyName)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The value of `%s` is expected to be unique, but %s was already specified in the %s procedure.",
+                    MUTATE_PROPERTY_KEY,
+                    newMutatePropertyName,
+                    existingProcedureName
+                ));
+            }
+        });
     }
 }

@@ -102,6 +102,15 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
+    void failOnDuplicateMutateProperty() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', destroyEverything: true})");
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', destroyEverything: true})",
+            "The value of `mutateProperty` is expected to be unique, but pr was already specified in the pageRank procedure."
+        );
+    }
+
+    @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', destroyEverything: true})",
