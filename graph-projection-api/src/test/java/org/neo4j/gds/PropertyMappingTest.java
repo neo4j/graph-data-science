@@ -20,9 +20,10 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
+
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,11 +44,11 @@ class PropertyMappingTest {
     void testFromObjectWithMap() {
         PropertyMapping propertyMapping = PropertyMapping.fromObject(
             "transaction_count",
-            MapUtil.map(
+            Map.of(
                 "property", "usd",
                 "aggregation", "MIN",
                 "defaultValue", 42.0
-        ));
+            ));
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "usd");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
@@ -58,10 +59,10 @@ class PropertyMappingTest {
     void testFromObjectMapWithDefaultPropertyKey() {
         PropertyMapping propertyMapping = PropertyMapping.fromObject(
             "transaction_count",
-            MapUtil.map(
+            Map.of(
                 "aggregation", "MIN",
                 "defaultValue", 42.0
-        ));
+            ));
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
@@ -71,9 +72,9 @@ class PropertyMappingTest {
     @Test
     void failsOnWrongKeyType() {
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", MapUtil.map(
-                        "property", 42
-                )));
+            IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", Map.of(
+                "property", 42
+            )));
         assertThat(ex.getMessage(), containsString("Expected the value of 'property' to be of type String, but was 'Integer'."));
     }
 }

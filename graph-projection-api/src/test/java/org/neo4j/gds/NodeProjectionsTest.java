@@ -27,6 +27,7 @@ import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -38,7 +39,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
@@ -64,8 +64,8 @@ class NodeProjectionsTest {
 
     @Test
     void shouldParseWithProperties() {
-        NodeProjections actual = NodeProjections.fromObject(map(
-            "MY_LABEL", map(
+        NodeProjections actual = NodeProjections.fromObject(Map.of(
+            "MY_LABEL", Map.of(
                 "label", "A",
                 "properties", asList(
                     "prop1", "prop2"
@@ -156,10 +156,10 @@ class NodeProjectionsTest {
                 singletonList("A")
             ),
             Arguments.of(
-                map("A", map(LABEL_KEY, "A"))
+                Map.of("A", Map.of(LABEL_KEY, "A"))
             ),
             Arguments.of(
-                map("A", map(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
+                Map.of("A", Map.of(LABEL_KEY, "A", PROPERTIES_KEY, emptyMap()))
             )
         );
     }

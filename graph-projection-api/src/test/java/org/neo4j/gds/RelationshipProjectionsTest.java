@@ -38,7 +38,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
@@ -49,13 +48,13 @@ class RelationshipProjectionsTest {
 
     @Test
     void shouldParse() {
-        Map<String, Object> noProperties = map(
-            "MY_TYPE", map(
+        Map<String, Object> noProperties = Map.of(
+            "MY_TYPE", Map.of(
                 "type", "T",
                 "orientation", "NATURAL",
                 "aggregation", "SINGLE"
             ),
-            "ANOTHER", map(
+            "ANOTHER", Map.of(
                 "type", "FOO",
                 "properties", Arrays.asList(
                     "prop1", "prop2"
@@ -133,14 +132,14 @@ class RelationshipProjectionsTest {
 
     @Test
     void shouldPropagateAggregationToProperty() {
-        Map<String, Object> projection = map(
-            "MY_TYPE", map(
+        Map<String, Object> projection = Map.of(
+            "MY_TYPE", Map.of(
                 "type", "T",
                 "orientation", "NATURAL",
                 "aggregation", "SINGLE",
-                "properties", map(
+                "properties", Map.of(
                     "weight",
-                    map("property", "weight")
+                    Map.of("property", "weight")
                 )
             )
         );
@@ -184,18 +183,18 @@ class RelationshipProjectionsTest {
                 singletonList("T")
             ),
             Arguments.of(
-                map("T", map(TYPE_KEY, "T"))
+                Map.of("T", Map.of(TYPE_KEY, "T"))
             ),
             Arguments.of(
-                map("T", map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name()))
+                Map.of("T", Map.of(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name()))
             ),
             Arguments.of(
-                map("T", map(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
+                Map.of("T", Map.of(TYPE_KEY, "T", PROPERTIES_KEY, emptyMap()))
             ),
             Arguments.of(
-                map(
+                Map.of(
                     "T",
-                    map(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name(), PROPERTIES_KEY, emptyMap())
+                    Map.of(TYPE_KEY, "T", ORIENTATION_KEY, Orientation.NATURAL.name(), PROPERTIES_KEY, emptyMap())
                 )
             )
         );

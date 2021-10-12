@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.huge.HugeGraph;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,15 +46,16 @@ class PropertyMappingsTest {
 
     @Test
     void testFromObjectWithMultiplePropertieMappings() {
-        PropertyMappings mappings = PropertyMappings.fromObject(MapUtil.map(
-                "total_usd", MapUtil.map(
-                        "property", "usd",
-                        "aggregation", "MIN",
-                        "defaultValue", 42.0),
-                "transaction_count", MapUtil.map(
-                        "property", "usd",
-                        "aggregation", "SUM"
-                )
+        PropertyMappings mappings = PropertyMappings.fromObject(Map.of(
+            "total_usd", Map.of(
+                "property", "usd",
+                "aggregation", "MIN",
+                "defaultValue", 42.0
+            ),
+            "transaction_count", Map.of(
+                "property", "usd",
+                "aggregation", "SUM"
+            )
         ));
         assertEquals(mappings.numberOfMappings(), 2);
 
@@ -69,7 +70,7 @@ class PropertyMappingsTest {
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
         assertEquals(transactionCountMapping.aggregation(), Aggregation.SUM);
-        assertEquals(transactionCountMapping.defaultValue().doubleValue(), HugeGraph.NO_PROPERTY_VALUE);
+        Assertions.assertEquals(transactionCountMapping.defaultValue().doubleValue(), Double.NaN);
     }
 
     @Test
