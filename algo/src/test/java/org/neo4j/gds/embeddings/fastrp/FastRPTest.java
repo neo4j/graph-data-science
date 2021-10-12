@@ -102,6 +102,7 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
+        fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.empty());
@@ -134,6 +135,7 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
+        fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
@@ -178,6 +180,7 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
+        fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
@@ -329,6 +332,7 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
+        fastRP.initDegreePartition();
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());

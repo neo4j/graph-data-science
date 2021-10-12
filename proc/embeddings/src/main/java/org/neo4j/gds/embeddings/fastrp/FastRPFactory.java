@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AlgorithmFactory<FastRP, CONFIG> {
@@ -59,14 +60,19 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AlgorithmFac
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        var tasks = new ArrayList<Task>();
+        tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
+        if (config.nodeSelfInfluence().floatValue() != 0.0) {
+            tasks.add(Tasks.leaf("Apply node self-influence", graph.nodeCount()));
+        }
+        tasks.add(Tasks.iterativeFixed(
+            "Propagate embeddings",
+            () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
+            config.iterationWeights().size()
+        ));
         return Tasks.task(
             taskName(),
-            Tasks.leaf("Initialize Random Vectors", graph.nodeCount()),
-            Tasks.iterativeFixed(
-                "Propagate embeddings",
-                () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
-                config.iterationWeights().size()
-            )
+            tasks
         );
     }
 }

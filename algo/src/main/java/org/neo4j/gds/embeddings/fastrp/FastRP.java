@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -76,6 +77,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final Number nodeSelfInfluence;
     private final List<Number> iterationWeights;
     private final int minBatchSize;
+    private List<DegreePartition> partitions;
 
     public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
@@ -139,6 +141,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     @Override
     public FastRPResult compute() {
         progressTracker.beginSubTask();
+        initDegreePartition();
         initPropertyVectors();
         initRandomVectors();
         addInitialVectorsToEmbedding();
@@ -156,6 +159,15 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     public void release() {
         this.embeddingA.release();
         this.embeddingB.release();
+    }
+
+    public void initDegreePartition() {
+        this.partitions = PartitionUtils.degreePartition(
+            graph,
+            concurrency,
+            Function.identity(),
+            Optional.of(minBatchSize)
+        );
     }
 
     void initPropertyVectors() {
@@ -190,22 +202,17 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     void addInitialVectorsToEmbedding() {
         if (nodeSelfInfluence.floatValue() == 0f) return;
-
-        var partitions = PartitionUtils.degreePartition(
-            graph,
-            concurrency,
-            Function.identity(),
-            Optional.of(minBatchSize)
-        );
+        progressTracker.beginSubTask();
 
         var tasks = partitions.stream()
             .map(AddInitialStateToEmbeddingTask::new)
             .collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        progressTracker.endSubTask();
     }
+
     void propagateEmbeddings() {
         progressTracker.beginSubTask();
-        var partitions = PartitionUtils.degreePartition(graph, concurrency, Function.identity(), Optional.of(minBatchSize));
 
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressTracker.beginSubTask();
@@ -402,6 +409,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 float adjustedL2Norm = l2Norm < EPSILON ? 1f : l2Norm;
                 addWeightedInPlace(embeddings.get(nodeId), initialVector, nodeSelfInfluence.floatValue() / adjustedL2Norm);
             });
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
     private final class PropagateEmbeddingsTask implements Runnable {
