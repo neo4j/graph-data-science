@@ -38,10 +38,12 @@ import static org.neo4j.gds.collections.hsa.ValidatorUtils.mustReturn;
 class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
 
     private final TypeMirror rootType;
+    private final boolean isArrayType;
     private final Messager messager;
 
-    BuilderValidator(TypeMirror rootType, Messager messager) {
+    BuilderValidator(TypeMirror rootType, boolean isArrayType, Messager messager) {
         this.rootType = rootType;
+        this.isArrayType = isArrayType;
         this.messager = messager;
     }
 
@@ -59,7 +61,15 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
             case "setIfAbsent":
                 return validateSetIfAbsentMethod(e, elementType);
             case "addTo":
-                return validateAddToMethod(e, elementType);
+                if (!isArrayType) {
+                    return validateAddToMethod(e, elementType);
+                }
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "addTo method is not valid for array types",
+                    e
+                );
+                return false;
             case "build":
                 return validateBuildMethod(e);
             default:

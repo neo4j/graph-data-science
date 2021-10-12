@@ -53,13 +53,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         Types typeUtils,
         TypeMirror rootType,
         TypeMirror longConsumerType,
+        boolean isArrayType,
         Messager messager
     ) {
         super(false);
         this.typeUtils = typeUtils;
         this.longConsumerType = longConsumerType;
         this.messager = messager;
-        this.validator = new BuilderValidator(rootType, messager);
+        this.validator = new BuilderValidator(rootType, isArrayType, messager);
     }
 
     TypeElement builderType() {

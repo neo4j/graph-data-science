@@ -35,6 +35,7 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -209,6 +210,22 @@ final class HugeSparseArrayGenerator {
         MethodSpec indexInPage,
         FieldSpec defaultValue
     ) {
+        var returnStatementBuilder = CodeBlock.builder();
+
+        if (valueType.isPrimitive()) {
+            returnStatementBuilder.addStatement("return page[indexInPage]");
+        } else {
+            returnStatementBuilder
+                .addStatement("$T value = page[indexInPage]", valueType)
+                .beginControlFlow("if (value != null)")
+                .addStatement("return value")
+                .nextControlFlow("else")
+                .addStatement("return $N", defaultValue)
+                .endControlFlow();
+        }
+
+        var returnStatement = returnStatementBuilder.build();
+
         return MethodSpec.methodBuilder("get")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
@@ -220,7 +237,7 @@ final class HugeSparseArrayGenerator {
                 .beginControlFlow("if (pageIndex < $N.length)", pages)
                 .addStatement("$T[] page = $N[pageIndex]", valueType, pages)
                 .beginControlFlow("if (page != null)")
-                .addStatement("return page[indexInPage]")
+                .add(returnStatement)
                 .endControlFlow()
                 .endControlFlow()
                 .addStatement("return $N", defaultValue)
@@ -228,14 +245,22 @@ final class HugeSparseArrayGenerator {
             .build();
     }
 
-    private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.of(
-        TypeName.BYTE, "%s != %s",
-        TypeName.SHORT, "%s != %s",
-        TypeName.INT, "%s != %s",
-        TypeName.LONG, "%s != %s",
-        TypeName.FLOAT, "Float.compare(%s, %s) != 0",
-        TypeName.DOUBLE, "Double.compare(%s, %s) != 0"
-    );
+    private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = new HashMap<>();
+
+    static {
+        NOT_EQUAL_PREDICATES.put(TypeName.BYTE, "%s != %s");
+        NOT_EQUAL_PREDICATES.put(TypeName.SHORT, "%s != %s");
+        NOT_EQUAL_PREDICATES.put(TypeName.INT, "%s != %s");
+        NOT_EQUAL_PREDICATES.put(TypeName.LONG, "%s != %s");
+        NOT_EQUAL_PREDICATES.put(TypeName.FLOAT, "Float.compare(%s, %s) != 0");
+        NOT_EQUAL_PREDICATES.put(TypeName.DOUBLE, "Double.compare(%s, %s) != 0");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.BYTE), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.SHORT), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.INT), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.LONG), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+        NOT_EQUAL_PREDICATES.put(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)");
+    }
 
     private static <LHS, RHS> CodeBlock isNotEqual(
         TypeName typeName,
@@ -276,7 +301,7 @@ final class HugeSparseArrayGenerator {
                 .addStatement("int indexInPage = $N(index)", indexInPage)
                 .addStatement("$T[] page = $N[pageIndex]", valueType, pages)
                 .beginControlFlow("if (page != null)")
-                .addStatement("return " + isNotEqual(valueType, "$L", "$N", "page[indexInPage]", defaultValue))
+                .addStatement("return " + isNotEqual(valueType, "$1L", "$2N", "page[indexInPage]", defaultValue))
                 .endControlFlow()
                 .addStatement("return false")
                 .build())
@@ -314,14 +339,17 @@ final class HugeSparseArrayGenerator {
 
             builder.addMethod(constructor(valueType, pages, pageLock, defaultValue, trackAllocation));
 
+            // public methods
+            builder.addMethod(setMethod(valueType, pageIndex, indexInPage, arrayHandle));
+            builder.addMethod(setIfAbsentMethod(valueType, pageIndex, indexInPage, arrayHandle, defaultValue));
+            builder.addMethod(buildMethod(valueType, elementType, pages, pageShift, defaultValue, className));
+            if (valueType.isPrimitive()) {
+                builder.addMethod(addToMethod(valueType, pageIndex, indexInPage, arrayHandle));
+            }
+
             // helper methods
             var grow = growMethod(valueType, pageLock, pages);
             builder.addMethod(grow);
-
-            builder.addMethod(setMethod(valueType, pageIndex, indexInPage, arrayHandle));
-            builder.addMethod(setIfAbsentMethod(valueType, pageIndex, indexInPage, arrayHandle, defaultValue));
-            builder.addMethod(addToMethod(valueType, pageIndex, indexInPage, arrayHandle));
-            builder.addMethod(buildMethod(valueType, elementType, pages, pageShift, defaultValue, className));
             builder.addMethod(getPageMethod(valueType, pages));
             builder.addMethod(allocateNewPageMethod(
                 valueType,
@@ -454,9 +482,7 @@ final class HugeSparseArrayGenerator {
                         valueType,
                         arrayHandle
                     )
-
                     .beginControlFlow("while (true)")
-
                     .addStatement("var newValueToStore = expectedCurrentValue + value")
                     .addStatement(
                         "$T actualCurrentValue = ($T) $N.compareAndExchange(page, indexInPage, expectedCurrentValue, newValueToStore)",
@@ -464,15 +490,11 @@ final class HugeSparseArrayGenerator {
                         valueType,
                         arrayHandle
                     )
-
                     .beginControlFlow("if (actualCurrentValue == expectedCurrentValue)")
                     .addStatement("return")
                     .endControlFlow()
-
                     .addStatement("expectedCurrentValue = actualCurrentValue")
-
                     .endControlFlow() // eo while
-
                     .build()
                 )
                 .build();
@@ -486,6 +508,25 @@ final class HugeSparseArrayGenerator {
             FieldSpec defaultValue,
             ClassName className
         ) {
+            var newPagesBlockBuilder = CodeBlock.builder();
+
+            if (valueType.isPrimitive()) {
+                newPagesBlockBuilder.addStatement(
+                    "$T newPages = new $T[numPages][]",
+                    ArrayTypeName.of(ArrayTypeName.of(valueType)),
+                    valueType
+                );
+            } else {
+                var componentType = ((ArrayTypeName) valueType).componentType;
+                newPagesBlockBuilder.addStatement(
+                    "$T newPages = new $T[numPages][][]",
+                    ArrayTypeName.of(ArrayTypeName.of(valueType)),
+                    componentType
+                );
+            }
+
+            var newPagesBlock = newPagesBlockBuilder.build();
+
             return MethodSpec.methodBuilder("build")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -493,11 +534,7 @@ final class HugeSparseArrayGenerator {
                 .addCode(CodeBlock.builder()
                     .addStatement("int numPages = $N.length()", pages)
                     .addStatement("long capacity = ((long) numPages) << $N", pageShift)
-                    .addStatement(
-                        "$T newPages = new $T[numPages][]",
-                        ArrayTypeName.of(ArrayTypeName.of(valueType)),
-                        valueType
-                    )
+                    .add(newPagesBlock)
                     .addStatement("$T.setAll(newPages, $N::get)", ClassName.get(Arrays.class), pages)
                     .addStatement("return new $T(capacity, newPages, $N)", className, defaultValue)
                     .build()
@@ -572,40 +609,51 @@ final class HugeSparseArrayGenerator {
             FieldSpec trackAllocation,
             FieldSpec pageSizeInBytes
         ) {
+            var pageAssignmentBlockBuilder = CodeBlock.builder();
+
+            if (valueType.isPrimitive()) {
+                pageAssignmentBlockBuilder.addStatement("page = new $T[$N]", valueType, pageSize);
+            } else {
+                var componentType = ((ArrayTypeName) valueType).componentType;
+                pageAssignmentBlockBuilder.addStatement("page = new $T[$N][]", componentType, pageSize);
+            }
+
+            var pageAssignmentBlock = pageAssignmentBlockBuilder.build();
+
+            // 💪
+            var bodyBuilder = CodeBlock.builder()
+                .addStatement("$N.lock()", pageLock)
+                .beginControlFlow("try")
+                .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)
+                .beginControlFlow("if (page != null)")
+                .addStatement("return page")
+                .endControlFlow()
+                .addStatement("$N.accept($N)", trackAllocation, pageSizeInBytes)
+                .add(pageAssignmentBlock);
+
+            // The following is an optimization applicable for primitive
+            // types only: If the default value is equal to the default
+            // value for the type, there is no need to call Array.fill().
+            if (valueType.isPrimitive()) {
+                bodyBuilder.beginControlFlow(
+                        "if ($L)",
+                        isNotEqual(valueType, "$1N", "$2L", defaultValue, DEFAULT_VALUES.get(valueType))
+                    )
+                    .addStatement("$T.fill(page, $N)", ClassName.get(Arrays.class), defaultValue)
+                    .endControlFlow();
+            }
+
+            bodyBuilder.addStatement("$N.set(pageIndex, page)", pages)
+                .addStatement("return page")
+                .nextControlFlow("finally")
+                .addStatement("$N.unlock()", pageLock)
+                .endControlFlow();  // eo try/finally
+
             return MethodSpec.methodBuilder("allocateNewPage")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(ArrayTypeName.of(valueType))
                 .addParameter(TypeName.INT, "pageIndex")
-                .addCode(CodeBlock.builder()
-                    .addStatement("$N.lock()", pageLock)
-
-                    .beginControlFlow("try")
-
-                    .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)
-                    .beginControlFlow("if (page != null)")
-                    .addStatement("return page")
-                    .endControlFlow()
-
-                    .addStatement("$N.accept($N)", trackAllocation, pageSizeInBytes)
-                    .addStatement("page = new $T[$N]", valueType, pageSize)
-                    .beginControlFlow(
-                        "if ($L)",
-                        isNotEqual(valueType, "$N", "$L", defaultValue, DEFAULT_VALUES.get(valueType))
-                    )
-                    .addStatement("$T.fill(page, $N)", ClassName.get(Arrays.class), defaultValue)
-                    .endControlFlow()
-
-                    .addStatement("$N.set(pageIndex, page)", pages)
-                    .addStatement("return page")
-
-                    .endControlFlow() // eo try
-
-                    .beginControlFlow("finally")
-                    .addStatement("$N.unlock()", pageLock)
-                    .endControlFlow()
-
-                    .build()
-                )
+                .addCode(bodyBuilder.build())
                 .build();
         }
     }

@@ -20,15 +20,19 @@
 package org.neo4j.gds.collections.hsa;
 
 import com.google.auto.common.MoreElements;
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.HugeSparseArray;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 import java.util.Optional;
 import java.util.function.LongConsumer;
 
@@ -49,10 +53,22 @@ final class HugeSparseArrayValidation {
     Optional<Spec> validate(Element element) {
         var annotationMirror = MoreElements.getAnnotationMirror(element, HugeSparseArray.class).get();
         var valueType = (TypeMirror) getAnnotationValue(annotationMirror, "valueType").getValue();
+        var isArrayType = valueType.getKind() == TypeKind.ARRAY;
+
+        if (!isValidValueType(valueType)) {
+            return Optional.empty();
+        }
+
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
         var longConsumerType = elementUtils.getTypeElement(LongConsumer.class.getName()).asType();
 
-        var elementValidator = new ElementValidator(typeUtils, element.asType(), longConsumerType, this.messager);
+        var elementValidator = new ElementValidator(
+            typeUtils,
+            element.asType(),
+            longConsumerType,
+            isArrayType,
+            this.messager
+        );
 
         if (!isValid(element, elementValidator, valueType)) {
             return Optional.empty();
@@ -83,6 +99,28 @@ final class HugeSparseArrayValidation {
             // We do not use `allMatch` in order to run all validations and not stop on the first failing one.
             .map(e -> e.accept(validator, annotationValue))
             .reduce(true, (a, b) -> a && b);
+    }
+
+    private boolean isValidValueType(TypeMirror valueType) {
+        var isPrimitive = valueType.getKind().isPrimitive();
+        var isArray = valueType.getKind() == TypeKind.ARRAY;
+
+        var errorMsg = "value type must be a primitive type or a primitive array type";
+
+        if (!isPrimitive && !isArray) {
+            messager.printMessage(Diagnostic.Kind.ERROR, errorMsg);
+            return false;
+        }
+
+        if (isArray) {
+            var componentType = ((ArrayTypeName) TypeName.get(valueType)).componentType;
+            if (!componentType.isPrimitive()) {
+                messager.printMessage(Diagnostic.Kind.ERROR, errorMsg);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @ValueClass
