@@ -24,26 +24,28 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 class IntersectingTriangleCountTest {
 
     private static Stream<Arguments> noTriangleQueries() {
         return Stream.of(
-            Arguments.of(fromGdl("CREATE ()-[:T]->()-[:T]->()", UNDIRECTED), "line"),
-            Arguments.of(fromGdl("CREATE (), (), ()", UNDIRECTED), "no rels"),
-            Arguments.of(fromGdl("CREATE ()-[:T]->(), ()", UNDIRECTED), "one rel"),
-            Arguments.of(fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", UNDIRECTED), "back and forth")
+            Arguments.of(fromGdl("CREATE ()-[:T]->()-[:T]->()"), "line"),
+            Arguments.of(fromGdl("CREATE (), (), ()"), "no rels"),
+            Arguments.of(fromGdl("CREATE ()-[:T]->(), ()"), "one rel"),
+            Arguments.of(fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()"), "back and forth")
         );
     }
 
@@ -67,10 +69,10 @@ class IntersectingTriangleCountTest {
             gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
 
-        TriangleCountResult result = compute(fromGdl(gdl.toString(), UNDIRECTED));
+        TriangleCountResult result = compute(fromGdl(gdl.toString()));
 
         assertEquals(nbrOfTriangles, result.globalTriangles());
-        assertEquals(3 * nbrOfTriangles, result.localTriangles().size());
+        assertEquals(3L * nbrOfTriangles, result.localTriangles().size());
         for (int i = 0; i < result.localTriangles().size(); ++i) {
             assertEquals(1, result.localTriangles().get(i));
         }
@@ -89,8 +91,7 @@ class IntersectingTriangleCountTest {
             " (a2)-[:T]->(a5), " +
             " (a3)-[:T]->(a4), " +
             " (a3)-[:T]->(a5), " +
-            " (a4)-[:T]->(a5)",
-            UNDIRECTED
+            " (a4)-[:T]->(a5)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -115,8 +116,7 @@ class IntersectingTriangleCountTest {
             " (a2)-[:T2]->(a5), " +
             " (a3)-[:T3]->(a4), " +
             " (a3)-[:T1]->(a5), " +
-            " (a4)-[:T4]->(a5)",
-            UNDIRECTED
+            " (a4)-[:T4]->(a5)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -133,8 +133,7 @@ class IntersectingTriangleCountTest {
         var graph = fromGdl(
             "CREATE " +
             "  (a)-[:T]->()-[:T]->()-[:T]->(a) " +
-            ", (a)-[:T]->()-[:T]->()-[:T]->(a)",
-            UNDIRECTED
+            ", (a)-[:T]->()-[:T]->()-[:T]->(a)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -149,8 +148,7 @@ class IntersectingTriangleCountTest {
             "CREATE " +
             "  (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
             ", (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
-            ", (a)-[:T]->(q)",
-            UNDIRECTED
+            ", (a)-[:T]->(q)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -165,7 +163,7 @@ class IntersectingTriangleCountTest {
 
     @Test
     void selfLoop() {
-        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
+        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)");
 
         TriangleCountResult result = compute(graph);
 
@@ -176,7 +174,7 @@ class IntersectingTriangleCountTest {
 
     @Test
     void selfLoop2() {
-        var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
+        var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
 
         TriangleCountResult result = compute(graph);
 
@@ -192,8 +190,7 @@ class IntersectingTriangleCountTest {
         var graph = fromGdl(
             "CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ", (a)-[:T]->(b)",
-            UNDIRECTED
+            ", (a)-[:T]->(b)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -210,8 +207,7 @@ class IntersectingTriangleCountTest {
         var graph = fromGdl(
             "CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)",
-            UNDIRECTED
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -230,8 +226,7 @@ class IntersectingTriangleCountTest {
             "  (n0)-[:REL]->(n1)" +
             ", (n1)-[:REL]->(n2)" +
             ", (n0)-[:REL]->(n3)" +
-            ", (n1)-[:REL]->(n3)",
-            UNDIRECTED
+            ", (n1)-[:REL]->(n3)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -252,8 +247,7 @@ class IntersectingTriangleCountTest {
             ", (n1)-[:REL]->(n2)" +
             ", (n0)-[:REL]->(n3)" +
             ", (n0)-[:REL]->(n4)" +
-            ", (n1)-[:REL]->(n3)",
-            UNDIRECTED
+            ", (n1)-[:REL]->(n3)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -276,8 +270,7 @@ class IntersectingTriangleCountTest {
             ", (n0)-[:REL]->(n3)" +
             ", (n0)-[:REL]->(n4)" +
             ", (n0)-[:REL]->(n5)" +
-            ", (n1)-[:REL]->(n3)",
-            UNDIRECTED
+            ", (n1)-[:REL]->(n3)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -300,8 +293,7 @@ class IntersectingTriangleCountTest {
             ", (n1)-[:REL]->(n2)" +
             ", (n0)-[:REL]->(n3)" +
             ", (n0)-[:REL]->(n4)" +
-            ", (n1)-[:REL]->(n4)",
-            UNDIRECTED
+            ", (n1)-[:REL]->(n4)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -325,8 +317,7 @@ class IntersectingTriangleCountTest {
             ", (n0)-[:REL]->(n4)" +
             ", (n0)-[:REL]->(n5)" +
             ", (n1)-[:REL]->(n4)" +
-            ", (n1)-[:REL]->(n6)",
-            UNDIRECTED
+            ", (n1)-[:REL]->(n6)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -354,8 +345,7 @@ class IntersectingTriangleCountTest {
             ", (n3)-[:REL]->(n4)" +
             ", (n1)-[:REL]->(n6)" +
             ", (n0)-[:REL]->(n2)" +
-            ", (n0)-[:REL]->(n6)",
-            UNDIRECTED
+            ", (n0)-[:REL]->(n6)"
         );
 
         TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
@@ -387,8 +377,7 @@ class IntersectingTriangleCountTest {
             ", (n3)-[:REL]->(n0)" +
             ", (n3)-[:REL]->(n4)" +
             ", (n3)-[:REL]->(n5)" +
-            ", (n3)-[:REL]->(n6)",
-            UNDIRECTED
+            ", (n3)-[:REL]->(n6)"
         );
 
         TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
@@ -420,8 +409,7 @@ class IntersectingTriangleCountTest {
             ", (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e)" +
             ", (k)-[:T]->(l)" +
             ", (k)-[:T]->(m)-[:T]->(n)-[:T]->(j)" +
-            ", (o)",
-            UNDIRECTED
+            ", (o)"
         );
 
         TriangleCountResult result = compute(graph);
@@ -449,16 +437,15 @@ class IntersectingTriangleCountTest {
     void testTriangleCountingWithMaxDegree() {
         var graph = fromGdl(
             "CREATE" +
-            "  (a)-[:T]->(b)"+
-            " ,(a)-[:T]->(c)"+
-            " ,(a)-[:T]->(d)"+
-            " ,(b)-[:T]->(c)"+
-            " ,(b)-[:T]->(d)"+
+            "  (a)-[:T]->(b)" +
+            " ,(a)-[:T]->(c)" +
+            " ,(a)-[:T]->(d)" +
+            " ,(b)-[:T]->(c)" +
+            " ,(b)-[:T]->(d)" +
 
-            " ,(e)-[:T]->(f)"+
-            " ,(f)-[:T]->(g)"+
-            " ,(g)-[:T]->(e)",
-            UNDIRECTED
+            " ,(e)-[:T]->(f)" +
+            " ,(f)-[:T]->(g)" +
+            " ,(g)-[:T]->(e)"
         );
 
         TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
@@ -483,16 +470,15 @@ class IntersectingTriangleCountTest {
     void testTriangleCountingWithMaxDegreeOnUnionGraph() {
         var graph = fromGdl(
             "CREATE" +
-            "  (a)-[:T1]->(b)"+
-            " ,(a)-[:T2]->(c)"+
-            " ,(a)-[:T2]->(d)"+
-            " ,(b)-[:T1]->(c)"+
-            " ,(b)-[:T2]->(d)"+
+            "  (a)-[:T1]->(b)" +
+            " ,(a)-[:T2]->(c)" +
+            " ,(a)-[:T2]->(d)" +
+            " ,(b)-[:T1]->(c)" +
+            " ,(b)-[:T2]->(d)" +
 
-            " ,(e)-[:T1]->(f)"+
-            " ,(f)-[:T1]->(g)"+
-            " ,(g)-[:T1]->(e)",
-            UNDIRECTED
+            " ,(e)-[:T1]->(f)" +
+            " ,(f)-[:T1]->(g)" +
+            " ,(g)-[:T1]->(e)"
         );
 
         TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
@@ -513,6 +499,33 @@ class IntersectingTriangleCountTest {
         assertEquals(1, result.globalTriangles());
     }
 
+    @Test
+    void testTriangleCountingOnUnionGraphWithIncompleteTriangles() {
+        // triangle would be (a)-(b)-(c), but it is not complete, there is no (b)-(c)
+        // (b) is connected to (x) and (y), both have smaller ids than (c)
+        // TC tries to find (b)-(c) und the union graph has to exhaust all cursors during advance
+        // to learn that there are only nodes that are smaller than (c)
+        var testGraph = TestSupport.fromGdl(
+            "CREATE" +
+            "  (a)-[:T]->(b)" +
+            " ,(b)-[:X]->(x)" +
+            " ,(b)-[:Y]->(y)" +
+            " ,(a)-[:T]->(c)",
+            UNDIRECTED
+        );
+
+        var config = ImmutableTriangleCountBaseConfig.builder().build();
+        var result = compute(testGraph.graph(), config);
+
+        assertThat(result.globalTriangles()).isEqualTo(0L);
+        assertThat(result.localTriangles())
+            .returns(0L, t -> t.get(testGraph.toMappedNodeId("a")))
+            .returns(0L, t -> t.get(testGraph.toMappedNodeId("b")))
+            .returns(0L, t -> t.get(testGraph.toMappedNodeId("c")))
+            .returns(0L, t -> t.get(testGraph.toMappedNodeId("x")))
+            .returns(0L, t -> t.get(testGraph.toMappedNodeId("y")));
+    }
+
     private TriangleCountResult compute(Graph graph) {
         TriangleCountStatsConfig config = ImmutableTriangleCountStatsConfig.builder().build();
         return compute(graph, config);
@@ -520,5 +533,9 @@ class IntersectingTriangleCountTest {
 
     private TriangleCountResult compute(Graph graph, TriangleCountBaseConfig config) {
         return IntersectingTriangleCount.create(graph, config, Pools.DEFAULT).compute();
+    }
+
+    private static Graph fromGdl(String gdl) {
+        return TestSupport.fromGdl(gdl, Orientation.UNDIRECTED).graph();
     }
 }
