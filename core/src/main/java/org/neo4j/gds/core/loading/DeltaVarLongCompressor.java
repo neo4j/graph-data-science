@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
@@ -26,9 +27,8 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
@@ -108,7 +108,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         @Override
         public boolean supportsProperties() {
-            // TODO temporary until Geri does support properties
             return adjacencyBuilder instanceof TransientCompressedListBuilder;
         }
     }
