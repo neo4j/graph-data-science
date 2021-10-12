@@ -135,7 +135,7 @@ Similarly, `nodeSelfInfluence` behaves like an iteration weight for a zeroth ite
 A reason for setting this parameter to a non-zero value is if your graph has low connectivity or a significant amount of isolated nodes.
 Isolated nodes combined with using `propertyRatio = 0.0` leads to embeddings that contain all zeros.
 However using node properties along with node self influence can thus produce more meaningful embeddings for such nodes.
-This can be seen as producing non-graphy fallback features when graph structure is (locally) missing.
+This can be seen as producing fallback features when graph structure is (locally) missing.
 Moreover, sometimes a node's own properties are simply informative features and are good to include even if connectivity is high.
 Finally, node self influence can be used for pure dimensionality reduction to compress node properties used for node classification.
 
