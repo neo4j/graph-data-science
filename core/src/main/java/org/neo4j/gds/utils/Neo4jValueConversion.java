@@ -27,9 +27,11 @@ import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 
+import static org.neo4j.gds.api.ValueConversion.exactDoubleToLong;
+import static org.neo4j.gds.api.ValueConversion.exactLongToDouble;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ValueConversion {
+public final class Neo4jValueConversion {
 
     public static long getLongValue(Value value) {
         if (value instanceof IntegralValue) {
@@ -75,56 +77,6 @@ public final class ValueConversion {
         }
     }
 
-    // TODO delegate to graph-projection-api::ValueConversion
-    public static long exactDoubleToLong(double d) {
-        if (d % 1 == 0) {
-            return (long) d;
-        } else {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Cannot safely convert %.2f into an long value",
-                d
-            ));
-        }
-    }
-
-    // TODO delegate to graph-projection-api::ValueConversion
-    public static double exactLongToDouble(long l) {
-        if (l <= 1L << 53) {
-            return (double) l;
-        } else {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Cannot safely convert %d into an double value",
-                l
-            ));
-        }
-    }
-
-    // TODO delegate to graph-projection-api::ValueConversion
-    public static float exactLongToFloat(long l) {
-        // Math.ulp() tells us that integer precision for float is > 1.0
-        // for the values checked for below.
-        if (l >= 1L << 24 || l <= -(1L << 24)) {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Cannot safely convert %d into a float value",
-                l
-            ));
-        }
-
-        return (float) l;
-    }
-
-    // TODO delegate to graph-projection-api::ValueConversion
-    public static float notOverflowingDoubleToFloat(double d) {
-        if (d > Float.MAX_VALUE || d < -Float.MAX_VALUE) {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Cannot safely convert %.2f into a float value",
-                d
-            ));
-        }
-
-        return (float) d;
-    }
-
     @NotNull
     private static UnsupportedOperationException conversionError(Value value, String expected) {
         return new UnsupportedOperationException(formatWithLocale(
@@ -134,5 +86,5 @@ public final class ValueConversion {
         ));
     }
 
-    private ValueConversion() {}
+    private Neo4jValueConversion() {}
 }

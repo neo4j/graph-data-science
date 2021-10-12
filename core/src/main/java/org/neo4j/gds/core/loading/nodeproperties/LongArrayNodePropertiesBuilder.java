@@ -24,7 +24,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.utils.ValueConversion;
+import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
@@ -51,7 +51,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
-        objectArray.set(nodeId, ValueConversion.getLongArray(value));
+        objectArray.set(nodeId, Neo4jValueConversion.getLongArray(value));
     }
 
     public void setValue(long nodeId, long[] value) {

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.gds.utils.ValueConversion;
+import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 import java.lang.invoke.MethodHandles;
@@ -102,7 +102,7 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
 
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
-        var longValue = ValueConversion.getLongValue(value);
+        var longValue = Neo4jValueConversion.getLongValue(value);
         set(nodeId, neoNodeId, longValue);
         updateMaxValue(longValue);
     }

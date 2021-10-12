@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.ValueConversion;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.Value;
@@ -35,15 +36,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class ValueConversionTest {
+class Neo4jValueConversionTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longConversion")
     void testGettingALong(Value value, Long expected) {
         if (expected != null) {
-            Assertions.assertEquals(expected, ValueConversion.getLongValue(value));
+            Assertions.assertEquals(expected, Neo4jValueConversion.getLongValue(value));
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getLongValue(value));
+            assertThrows(UnsupportedOperationException.class, () -> Neo4jValueConversion.getLongValue(value));
         }
     }
 
@@ -67,9 +68,9 @@ class ValueConversionTest {
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleConversion")
     void testGettingADouble(Value value, Double expected) {
         if (expected != null) {
-            assertEquals(expected, ValueConversion.getDoubleValue(value), 0.1);
+            assertEquals(expected, Neo4jValueConversion.getDoubleValue(value), 0.1);
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getDoubleValue(value));
+            assertThrows(UnsupportedOperationException.class, () -> Neo4jValueConversion.getDoubleValue(value));
         }
     }
 
@@ -133,9 +134,9 @@ class ValueConversionTest {
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longArrayConversion")
     void testGettingALongArray(Value value, long[] expected) {
         if (expected != null) {
-            assertArrayEquals(expected, ValueConversion.getLongArray(value));
+            assertArrayEquals(expected, Neo4jValueConversion.getLongArray(value));
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getLongArray(value));
+            assertThrows(UnsupportedOperationException.class, () -> Neo4jValueConversion.getLongArray(value));
         }
     }
 
@@ -153,9 +154,9 @@ class ValueConversionTest {
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleArrayConversion")
     void testGettingADoubleArray(Value value, double[] expected) {
         if (expected != null) {
-            assertArrayEquals(expected, ValueConversion.getDoubleArray(value), 0.1);
+            assertArrayEquals(expected, Neo4jValueConversion.getDoubleArray(value), 0.1);
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getDoubleArray(value));
+            assertThrows(UnsupportedOperationException.class, () -> Neo4jValueConversion.getDoubleArray(value));
         }
     }
 
@@ -173,9 +174,9 @@ class ValueConversionTest {
     @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatArrayConversion")
     void testGettingAFloatArray(Value value, float[] expected) {
         if (expected != null) {
-            assertArrayEquals(expected, ValueConversion.getFloatArray(value), 0.1f);
+            assertArrayEquals(expected, Neo4jValueConversion.getFloatArray(value), 0.1f);
         } else {
-            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getFloatArray(value));
+            assertThrows(UnsupportedOperationException.class, () -> Neo4jValueConversion.getFloatArray(value));
         }
     }
 

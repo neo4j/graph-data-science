@@ -21,7 +21,7 @@ package org.neo4j.gds.api.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.utils.ValueConversion;
+import org.neo4j.gds.api.ValueConversion;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

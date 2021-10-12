@@ -24,7 +24,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
-import org.neo4j.gds.utils.ValueConversion;
+import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 import java.lang.invoke.MethodHandles;
@@ -75,7 +75,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
-        double doubleValue = ValueConversion.getDoubleValue(value);
+        double doubleValue = Neo4jValueConversion.getDoubleValue(value);
         valuesBuilder.set(nodeId, Double.doubleToLongBits(doubleValue));
         updateMaxValue(doubleValue);
     }
