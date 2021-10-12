@@ -75,6 +75,7 @@ public final class ValueConversion {
         }
     }
 
+    // TODO delegate to graph-projection-api::ValueConversion
     public static long exactDoubleToLong(double d) {
         if (d % 1 == 0) {
             return (long) d;
@@ -86,6 +87,7 @@ public final class ValueConversion {
         }
     }
 
+    // TODO delegate to graph-projection-api::ValueConversion
     public static double exactLongToDouble(long l) {
         if (l <= 1L << 53) {
             return (double) l;
@@ -97,6 +99,7 @@ public final class ValueConversion {
         }
     }
 
+    // TODO delegate to graph-projection-api::ValueConversion
     public static float exactLongToFloat(long l) {
         // Math.ulp() tells us that integer precision for float is > 1.0
         // for the values checked for below.
@@ -110,6 +113,7 @@ public final class ValueConversion {
         return (float) l;
     }
 
+    // TODO delegate to graph-projection-api::ValueConversion
     public static float notOverflowingDoubleToFloat(double d) {
         if (d > Float.MAX_VALUE || d < -Float.MAX_VALUE) {
             throw new UnsupportedOperationException(formatWithLocale(

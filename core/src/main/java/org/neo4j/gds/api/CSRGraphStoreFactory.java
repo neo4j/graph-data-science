@@ -22,7 +22,6 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -126,7 +125,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     ),
                     propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()
-                        : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                        : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
                     propertyMapping.aggregation()
                 )
             );

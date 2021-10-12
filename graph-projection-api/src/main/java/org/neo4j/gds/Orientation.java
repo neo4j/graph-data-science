@@ -21,10 +21,8 @@ package org.neo4j.gds;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum Orientation {
 
@@ -39,12 +37,13 @@ public enum Orientation {
 
     public static Orientation parse(Object input) {
         if (input instanceof String) {
-            var inputString = toUpperCaseWithLocale((String) input);
+            var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
             if (VALUES.contains(inputString)) {
                 return Orientation.valueOf(inputString);
             }
 
-            throw new IllegalArgumentException(formatWithLocale(
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
                 "Orientation `%s` is not supported. Must be one of: %s.",
                 inputString,
                 VALUES
@@ -54,7 +53,8 @@ public enum Orientation {
             return (Orientation) input;
         }
 
-        throw new IllegalArgumentException(formatWithLocale(
+        throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
             "Expected Orientation or String. Got %s.",
             input.getClass().getSimpleName()
         ));

@@ -32,9 +32,8 @@ import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.compat.MapUtil.genericMap;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -115,7 +114,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     }
 
     public static NodeProjections single(NodeLabel label, NodeProjection projection) {
-        return NodeProjections.of(genericMap(label, projection));
+        return NodeProjections.of(Map.of(label, projection));
     }
 
     public static NodeProjections all() {

@@ -68,7 +68,7 @@ public interface RelationshipProperty {
     ) {
         return ImmutableRelationshipProperty.of(
             values,
-            RelationshipPropertySchema.of(key, ValueType.fromNumberType(type), defaultValue, state, aggregation)
+            RelationshipPropertySchema.of(key, ValueTypes.fromNumberType(type), defaultValue, state, aggregation)
         );
     }
 }

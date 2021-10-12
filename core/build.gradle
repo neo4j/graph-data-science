@@ -23,6 +23,8 @@ dependencies {
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
+            project(':graph-projection-api'),
+            project(':string-formatting'),
             [group: 'org.bouncycastle',        name: 'bcpkix-jdk15on',           version: ver.'bouncycastle'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
             [group: 'org.opencypher',          name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false],

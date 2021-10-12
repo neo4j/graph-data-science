@@ -20,7 +20,6 @@
 package org.neo4j.gds.api.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -280,19 +279,6 @@ public enum ValueType {
 
     public Object fromCsvValue(String csvValue) {
         return fromCsvValue(csvValue, fallbackValue());
-    }
-
-    public static ValueType fromNumberType(NumberType nt) {
-        switch (nt) {
-            case FLOATING_POINT:
-                return DOUBLE;
-            case INTEGRAL:
-                return LONG;
-            case NO_NUMBER:
-                return UNKNOWN;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
-        }
     }
 
     public static ValueType fromCsvName(String csvName) {

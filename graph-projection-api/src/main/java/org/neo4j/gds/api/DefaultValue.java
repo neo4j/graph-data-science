@@ -22,7 +22,6 @@ package org.neo4j.gds.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.utils.ValueConversion;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,8 +31,6 @@ import static org.neo4j.gds.api.DefaultValueUtil.parseFloatArrayValue;
 import static org.neo4j.gds.api.DefaultValueUtil.parseLongArrayValue;
 import static org.neo4j.gds.api.DefaultValueUtil.transformObjectToPrimitiveArray;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.ValueConversion.exactDoubleToLong;
-import static org.neo4j.gds.utils.ValueConversion.exactLongToDouble;
 
 public final class DefaultValue {
     public static final DefaultValue DEFAULT = DefaultValue.ofFallBackValue(null);
@@ -136,7 +133,7 @@ public final class DefaultValue {
         } else if (defaultValue instanceof Float && Float.isNaN((float) defaultValue)) {
             return LONG_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Double || defaultValue instanceof Float) {
-            return exactDoubleToLong(((Number) defaultValue).doubleValue());
+            return ValueConversion.exactDoubleToLong(((Number) defaultValue).doubleValue());
         } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).longValue();
         }
@@ -147,7 +144,7 @@ public final class DefaultValue {
         if (defaultValue instanceof Long && defaultValue.equals(LONG_DEFAULT_FALLBACK)) {
             return DOUBLE_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Long || defaultValue instanceof Integer) {
-            return exactLongToDouble((((Number) defaultValue).longValue()));
+            return ValueConversion.exactLongToDouble((((Number) defaultValue).longValue()));
         } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).doubleValue();
         } else if (defaultValue == null) {

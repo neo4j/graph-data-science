@@ -31,13 +31,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -70,7 +70,8 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
                 List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();
                 for (PropertyMapping propertyMapping : propertyMappings) {
                     if (builder.mappings != null && builder.mappings.contains(propertyMapping)) {
-                        throw new IllegalStateException(formatWithLocale(
+                        throw new IllegalStateException(String.format(
+                            Locale.ENGLISH,
                             "Duplicate property key `%s`",
                             propertyMapping.propertyKey()
                         ));
@@ -87,7 +88,8 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             });
             return builder.build();
         } else {
-            throw new IllegalArgumentException(formatWithLocale(
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
                 "Expected String or Map for property mappings. Got %s.",
                 relPropertyMapping.getClass().getSimpleName()
             ));
@@ -125,7 +127,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
-                (u, v) -> { throw new IllegalStateException(formatWithLocale("Duplicate key %s", u)); },
+                (u, v) -> {throw new IllegalStateException(String.format(Locale.ENGLISH, "Duplicate key %s", u));},
                 LinkedHashMap::new
             ));
     }

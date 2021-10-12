@@ -23,15 +23,15 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
@@ -144,7 +144,7 @@ public final class CSRGraphStoreUtil {
                         relationships.properties().get(),
                         relationshipPropertySchema.defaultValue().isUserDefined()
                             ? relationshipPropertySchema.defaultValue()
-                            : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                            : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
                         relationshipPropertySchema.aggregation()
                     )
                 ).build()

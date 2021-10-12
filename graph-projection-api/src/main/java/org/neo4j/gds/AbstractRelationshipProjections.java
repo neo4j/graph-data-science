@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,8 +33,8 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -90,7 +91,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             RelationshipProjection filter = RelationshipProjection.fromObject(spec, relationshipType);
             // sanity
             if (projections.put(relationshipType, filter) != null) {
-                throw new IllegalStateException(formatWithLocale("Duplicate key: %s", name));
+                throw new IllegalStateException(StringFormatting.formatWithLocale("Duplicate key: %s", name));
             }
         });
         return create(projections);
@@ -180,7 +181,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_RELATIONSHIPS.name())) {
-            throw new IllegalArgumentException(formatWithLocale(
+            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                 "%s is a reserved node label and may not be used",
                 ALL_RELATIONSHIPS.name()
             ));

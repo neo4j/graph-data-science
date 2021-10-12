@@ -23,11 +23,10 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.DataClass;
 import org.neo4j.gds.core.ConfigKeyValidation;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {
@@ -65,7 +64,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
             return fromMap(map, nodeLabel);
         }
-        throw new IllegalArgumentException(formatWithLocale(
+        throw new IllegalArgumentException(StringFormatting.formatWithLocale(
             "Cannot construct a node filter out of a %s",
             object.getClass().getName()
         ));
