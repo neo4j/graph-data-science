@@ -32,7 +32,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.tools.Diagnostic;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 
 public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.Step {
@@ -85,8 +84,7 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             return ProcessResult.INVALID;
         }
         ConfigParser.Spec configSpec = configParser.process(element.asType());
-        var nameOfGeneratedClass = configClassName(element, configSpec);
-        if (nameOfGeneratedClass.isEmpty()) {
+        if (!validClassName(element, configSpec)) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "Name of generated class must be different from name of annotated class.",
@@ -94,10 +92,9 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             );
             return ProcessResult.INVALID;
         }
-
         JavaFile generatedConfig = generateConfiguration.generateConfig(
             configSpec,
-            nameOfGeneratedClass.get()
+            configClassName(element, configSpec)
         );
 
         try {
@@ -113,16 +110,19 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
         }
     }
 
+    private boolean validClassName(Element element, ConfigParser.Spec configSpec) {
+        var nameOfClassToGenerate = element.getAnnotation(ANNOTATION_CLASS).value();
+        var nameOfAnnotatedClass = configSpec.root().getSimpleName();
+        return !nameOfAnnotatedClass.contentEquals(nameOfClassToGenerate);
+    }
+
     @NotNull
-    private Optional<String> configClassName(Element element, ConfigParser.Spec configSpec) {
+    private String configClassName(Element element, ConfigParser.Spec configSpec) {
+        var nameOfAnnotatedClass = configSpec.root().getSimpleName();
         Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
-        var nameOfGeneratedClass = configuration.value().isBlank()
-            ? configSpec.root().getSimpleName() + CONFIG_CLASS_SUFFIX
+        return configuration.value().isBlank()
+            ? nameOfAnnotatedClass + CONFIG_CLASS_SUFFIX
             : configuration.value();
-        if (nameOfGeneratedClass.contentEquals(configSpec.root().getSimpleName())) {
-            return Optional.empty();
-        }
-        return Optional.of(nameOfGeneratedClass);
     }
 
     enum ProcessResult {
