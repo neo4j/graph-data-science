@@ -199,9 +199,7 @@ class NativeRelationshipExporterTest extends BaseTest {
             .build();
 
         // when writing properties
-        progressTracker.beginSubTask();
         exporter.write("T");
-        progressTracker.endSubTask();
 
         // then assert messages
         assertThat(log.getMessages(TestLog.INFO))

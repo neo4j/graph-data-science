@@ -35,7 +35,6 @@ import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.LongTestProperties;
 
@@ -162,8 +161,12 @@ class NativeNodePropertyExporterTest extends BaseTest {
         // with a node exporter
         var log = new TestLog();
         var writeConcurrency = 4;
-        var task = Tasks.leaf("WriteNodeProperties", graph.nodeCount());
-        var progressTracker = new TaskProgressTracker(task, log, writeConcurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(
+            NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
+            log,
+            writeConcurrency,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var exporterBuilder = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
             .withProgressTracker(progressTracker);
@@ -173,36 +176,34 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var exporter = exporterBuilder.build();
 
         // when writing properties
-        progressTracker.beginSubTask();
         exporter.write("newProp1", new LongTestProperties(nodeId -> 1L));
-        progressTracker.endSubTask();
 
         // then assert messages
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly(
-                "WriteNodeProperties :: Start",
-                "WriteNodeProperties 5%",
-                "WriteNodeProperties 10%",
-                "WriteNodeProperties 15%",
-                "WriteNodeProperties 20%",
-                "WriteNodeProperties 25%",
-                "WriteNodeProperties 30%",
-                "WriteNodeProperties 35%",
-                "WriteNodeProperties 40%",
-                "WriteNodeProperties 45%",
-                "WriteNodeProperties 50%",
-                "WriteNodeProperties 55%",
-                "WriteNodeProperties 60%",
-                "WriteNodeProperties 65%",
-                "WriteNodeProperties 70%",
-                "WriteNodeProperties 75%",
-                "WriteNodeProperties 80%",
-                "WriteNodeProperties 85%",
-                "WriteNodeProperties 90%",
-                "WriteNodeProperties 95%",
-                "WriteNodeProperties 100%",
-                "WriteNodeProperties :: Finished"
+                "AlgoNameGoesHere :: WriteNodeProperties :: Start",
+                "AlgoNameGoesHere :: WriteNodeProperties 5%",
+                "AlgoNameGoesHere :: WriteNodeProperties 10%",
+                "AlgoNameGoesHere :: WriteNodeProperties 15%",
+                "AlgoNameGoesHere :: WriteNodeProperties 20%",
+                "AlgoNameGoesHere :: WriteNodeProperties 25%",
+                "AlgoNameGoesHere :: WriteNodeProperties 30%",
+                "AlgoNameGoesHere :: WriteNodeProperties 35%",
+                "AlgoNameGoesHere :: WriteNodeProperties 40%",
+                "AlgoNameGoesHere :: WriteNodeProperties 45%",
+                "AlgoNameGoesHere :: WriteNodeProperties 50%",
+                "AlgoNameGoesHere :: WriteNodeProperties 55%",
+                "AlgoNameGoesHere :: WriteNodeProperties 60%",
+                "AlgoNameGoesHere :: WriteNodeProperties 65%",
+                "AlgoNameGoesHere :: WriteNodeProperties 70%",
+                "AlgoNameGoesHere :: WriteNodeProperties 75%",
+                "AlgoNameGoesHere :: WriteNodeProperties 80%",
+                "AlgoNameGoesHere :: WriteNodeProperties 85%",
+                "AlgoNameGoesHere :: WriteNodeProperties 90%",
+                "AlgoNameGoesHere :: WriteNodeProperties 95%",
+                "AlgoNameGoesHere :: WriteNodeProperties 100%",
+                "AlgoNameGoesHere :: WriteNodeProperties :: Finished"
             );
     }
 

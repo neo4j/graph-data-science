@@ -21,11 +21,11 @@ package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public interface RelationshipExporter {
     void write(String relationshipType);
-
-    void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer);
 
     void write(String relationshipType, String propertyKey);
 
@@ -34,4 +34,8 @@ public interface RelationshipExporter {
         @Nullable String propertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     );
+
+    static Task baseTask(String operationName, long taskVolume) {
+        return Tasks.leaf(operationName + " :: WriteRelationships", taskVolume);
+    }
 }

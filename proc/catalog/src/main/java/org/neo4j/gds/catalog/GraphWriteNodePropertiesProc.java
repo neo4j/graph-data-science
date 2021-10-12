@@ -25,6 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
@@ -92,44 +93,45 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         var task = Tasks.iterativeFixed(
             "WriteNodeProperties",
             () -> List.of(
-                Tasks.leaf("Label")
+                NodePropertyExporter.innerTask("Label", Task.UNKNOWN_VOLUME)
             ),
             validNodeLabels.size()
         );
         var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
 
         progressTracker.beginSubTask();
-        for (var label : validNodeLabels) {
-            var subGraph = graphStore.getGraph(
-                Collections.singletonList(label),
-                graphStore.relationshipTypes(),
-                Optional.empty()
-            );
+        try {
+            for (var label : validNodeLabels) {
+                var subGraph = graphStore.getGraph(
+                    Collections.singletonList(label),
+                    graphStore.relationshipTypes(),
+                    Optional.empty()
+                );
 
-            var exporter = nodePropertyExporterBuilder
-                .withIdMapping(subGraph)
-                .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .withProgressTracker(progressTracker)
-                .build();
+                var exporter = nodePropertyExporterBuilder
+                    .withIdMapping(subGraph)
+                    .withTerminationFlag(TerminationFlag.wrap(transaction))
+                    .parallel(Pools.DEFAULT, config.writeConcurrency())
+                    .withProgressTracker(progressTracker)
+                    .build();
 
-            var writeNodeProperties =
-                config.nodeProperties().stream()
-                    .map(nodePropertyKey ->
-                        ImmutableNodeProperty.of(
-                            nodePropertyKey,
-                            subGraph.nodeProperties(nodePropertyKey)
+                var writeNodeProperties =
+                    config.nodeProperties().stream()
+                        .map(nodePropertyKey ->
+                            ImmutableNodeProperty.of(
+                                nodePropertyKey,
+                                subGraph.nodeProperties(nodePropertyKey)
+                            )
                         )
-                    )
-                    .collect(Collectors.toList());
+                        .collect(Collectors.toList());
 
-            progressTracker.beginSubTask(subGraph.nodeCount());
-            exporter.write(writeNodeProperties);
+                exporter.write(writeNodeProperties);
+
+                propertiesWritten += exporter.propertiesWritten();
+            }
+        } finally {
             progressTracker.endSubTask();
-
-            propertiesWritten += exporter.propertiesWritten();
         }
-        progressTracker.endSubTask();
 
         return propertiesWritten;
     }

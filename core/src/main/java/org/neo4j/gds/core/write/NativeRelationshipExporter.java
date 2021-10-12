@@ -118,12 +118,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     }
 
     @Override
-    public void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
-        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        write(relationshipToken, NO_SUCH_PROPERTY_KEY, afterWriteConsumer);
-    }
-
-    @Override
     public void write(String relationshipType, String propertyKey) {
         var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
         var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
@@ -144,13 +138,23 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        PartitionUtils.degreePartitionWithBatchSize(graph, NativeNodePropertyExporter.MIN_BATCH_SIZE, partition -> createBatchRunnable(
-            relationshipTypeToken,
-            propertyKeyToken,
-            partition,
-            afterWriteConsumer
-        ))
-            .forEach(runnable -> ParallelUtil.run(runnable, executorService));
+        var tasks = PartitionUtils.degreePartitionWithBatchSize(
+            graph,
+            NativeNodePropertyExporter.MIN_BATCH_SIZE,
+            partition -> createBatchRunnable(
+                relationshipTypeToken,
+                propertyKeyToken,
+                partition,
+                afterWriteConsumer
+            )
+        );
+
+        progressTracker.beginSubTask();
+        try {
+            tasks.forEach(runnable -> ParallelUtil.run(runnable, executorService));
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     private Runnable createBatchRunnable(

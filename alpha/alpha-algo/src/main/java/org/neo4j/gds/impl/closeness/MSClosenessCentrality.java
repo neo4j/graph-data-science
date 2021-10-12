@@ -101,12 +101,10 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
             }
         };
 
-        progressTracker.beginSubTask();
         exporter.write(
             propertyName,
             properties
         );
-        progressTracker.endSubTask();
     }
 
     public Stream<MSClosenessCentrality.Result> resultStream() {

@@ -128,10 +128,15 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
 
-        if (ParallelUtil.canRunInParallel(executorService)) {
-            writeParallel(resolvedNodeProperties);
-        } else {
-            writeSequential(resolvedNodeProperties);
+        progressTracker.beginSubTask(nodeCount);
+        try {
+            if (ParallelUtil.canRunInParallel(executorService)) {
+                writeParallel(resolvedNodeProperties);
+            } else {
+                writeSequential(resolvedNodeProperties);
+            }
+        } finally {
+            progressTracker.endSubTask();
         }
     }
 
