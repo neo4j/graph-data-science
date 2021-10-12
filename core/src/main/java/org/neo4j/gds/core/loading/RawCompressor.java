@@ -107,11 +107,6 @@ public final class RawCompressor implements AdjacencyCompressor {
                 aggregations
             );
         }
-
-        @Override
-        public boolean supportsProperties() {
-            return adjacencyBuilder instanceof TransientUncompressedListBuilder;
-        }
     }
 
     private final CsrListBuilder.Allocator<long[]> adjacencyAllocator;

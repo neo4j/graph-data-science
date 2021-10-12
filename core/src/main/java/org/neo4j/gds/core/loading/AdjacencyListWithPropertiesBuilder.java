@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -134,10 +134,6 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
         return new ThreadLocalRelationshipsBuilder(adjacencyCompressor.createCompressor());
-    }
-
-    boolean supportsProperties() {
-        return adjacencyCompressor.supportsProperties();
     }
 
     public AdjacencyListsWithProperties build() {

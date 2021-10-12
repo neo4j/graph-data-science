@@ -27,11 +27,6 @@ public interface AdjacencyCompressorBlueprint {
     AdjacencyCompressor createCompressor();
 
     /**
-     * @return true iff this compressor can deal with properties.
-     */
-    boolean supportsProperties();
-
-    /**
      * Implementors may choose to buffer some internal data and only write it intermittently to its final location.
      * This method is called at the end to ensure that all possible in-flight data can be cleaned up.
      *

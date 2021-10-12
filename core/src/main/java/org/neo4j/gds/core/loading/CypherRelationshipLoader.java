@@ -26,23 +26,23 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyFactory;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
@@ -315,7 +315,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             return new SingleTypeRelationshipImporter.Builder(
                 relationshipType,
                 relationshipProjection,
-                adjacencyBuilder.supportsProperties(),
                 NO_SUCH_RELATIONSHIP_TYPE,
                 relationshipImporter,
                 relationshipCounter,

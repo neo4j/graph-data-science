@@ -237,10 +237,6 @@ public final class AdjacencyBuilder {
         return atLeastOnePropertyToLoad;
     }
 
-    boolean supportsProperties() {
-        return this.globalBuilder.supportsProperties();
-    }
-
     private void addAdjacencyImporter(AllocationTracker allocationTracker, int pageIndex) {
         allocationTracker.add(sizeOfObjectPage);
         allocationTracker.add(sizeOfObjectPage);

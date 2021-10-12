@@ -132,7 +132,6 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         return new SingleTypeRelationshipImporter.Builder(
             relationshipType,
             projection,
-            adjacencyBuilder.supportsProperties(),
             typeId,
             importer,
             relationshipCounter,

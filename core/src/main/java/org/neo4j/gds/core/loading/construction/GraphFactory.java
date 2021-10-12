@@ -311,7 +311,6 @@ public final class GraphFactory {
         var importerBuilder = new SingleTypeRelationshipImporter.Builder(
             relationshipType,
             projection,
-            loadRelationshipProperties,
             NO_SUCH_RELATIONSHIP_TYPE,
             relationshipImporter,
             relationshipCounter,

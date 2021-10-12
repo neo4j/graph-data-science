@@ -105,11 +105,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 aggregations
             );
         }
-
-        @Override
-        public boolean supportsProperties() {
-            return adjacencyBuilder instanceof TransientCompressedListBuilder;
-        }
     }
 
     private final CsrListBuilder.Allocator<byte[]> adjacencyAllocator;
