@@ -35,6 +35,7 @@ import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
@@ -245,7 +246,7 @@ final class HugeSparseArrayGenerator {
     ) {
         return CodeBlock
             .builder()
-            .add(String.format(NOT_EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
+            .add(String.format(Locale.ENGLISH, NOT_EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
             .build();
     }
 
