@@ -39,7 +39,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class Neo4jValueConversionTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#longConversion")
     void testGettingALong(Value value, Long expected) {
         if (expected != null) {
             Assertions.assertEquals(expected, Neo4jValueConversion.getLongValue(value));
@@ -65,7 +65,7 @@ class Neo4jValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#doubleConversion")
     void testGettingADouble(Value value, Double expected) {
         if (expected != null) {
             assertEquals(expected, Neo4jValueConversion.getDoubleValue(value), 0.1);
@@ -101,7 +101,7 @@ class Neo4jValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#floatConversion")
     void testGettingAFloat(Value value, Float expected) {
         if (expected != null) {
             assertEquals(expected, getFloatValue(value), 0.1);
@@ -131,7 +131,7 @@ class Neo4jValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#longArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#longArrayConversion")
     void testGettingALongArray(Value value, long[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, Neo4jValueConversion.getLongArray(value));
@@ -151,7 +151,7 @@ class Neo4jValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#doubleArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#doubleArrayConversion")
     void testGettingADoubleArray(Value value, double[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, Neo4jValueConversion.getDoubleArray(value), 0.1);
@@ -171,7 +171,7 @@ class Neo4jValueConversionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.utils.ValueConversionTest#floatArrayConversion")
+    @MethodSource("org.neo4j.gds.utils.Neo4jValueConversionTest#floatArrayConversion")
     void testGettingAFloatArray(Value value, float[] expected) {
         if (expected != null) {
             assertArrayEquals(expected, Neo4jValueConversion.getFloatArray(value), 0.1f);
