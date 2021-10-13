@@ -15,7 +15,10 @@ This section describes the Node Classification Model in the Neo4j Graph Data Sci
 [[algorithms-ml-nodeclassification-intro]]
 == Introduction
 
-Node Classification is a common machine learning task applied to graphs: training a model to learn in which class a node belongs.
+Node Classification is a common machine learning task applied to graph: training a model to learn in which class a node belongs.
+There are two major classes of classification problems: Binary-class and Multi-class.
+In Binary-class classifications, the given dataset is categorized into two classes and in Multi-class classification, the given dataset is categorized into several classes.
+Neo4j GDS supports both of the above.
 Neo4j GDS trains supervised machine learning models based on node properties (features) in your graph to predict what class an unseen or future node would belong to.
 Node Classification can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
 
@@ -281,6 +284,7 @@ include::specific-write-mutate-configuration.adoc[]
 In this section we will show examples of training a Node Classification Model on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the model in a real setting.
 We will do this on a small graph of a handful of nodes representing houses.
+This is an example of Multi-class classification, the `class` node property distinct values determine the number of classes, in this case three (0, 1 and 2).
 The example graph looks like this:
 
 image::example-graphs/node_classification.svg[align="center"]
