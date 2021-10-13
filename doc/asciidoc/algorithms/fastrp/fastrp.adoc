@@ -129,7 +129,7 @@ Node Self Influence is a variation of the original FastRP algorithm.
 
 How much a node's embedding is affected by the intermediate embedding at iteration stem:[i] is controlled by the stem:[i]'th element of `iterationWeights`.
 This can also be seen as how much the initial random vectors, or projections, of nodes that can be reached in stem:[i] hops from a node affect the embedding of the node.
-Similarly, `nodeSelfInfluence` behaves like an iteration weight for a zeroth iteration, or the amount of influence the projection of a node has on the embedding of the same node.
+Similarly, `nodeSelfInfluence` behaves like an iteration weight for a stem:[0]:th iteration, or the amount of influence the projection of a node has on the embedding of the same node.
 
 A reason for setting this parameter to a non-zero value is if your graph has low connectivity or a significant amount of isolated nodes.
 Isolated nodes combined with using `propertyRatio = 0.0` leads to embeddings that contain all zeros.
