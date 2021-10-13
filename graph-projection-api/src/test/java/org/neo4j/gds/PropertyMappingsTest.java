@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.Aggregation;
 
@@ -75,7 +74,7 @@ class PropertyMappingsTest {
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
         assertEquals(transactionCountMapping.aggregation(), Aggregation.SUM);
-        Assertions.assertEquals(transactionCountMapping.defaultValue().doubleValue(), Double.NaN);
+        assertEquals(transactionCountMapping.defaultValue().doubleValue(), Double.NaN);
     }
 
     @Test
