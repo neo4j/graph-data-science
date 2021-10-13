@@ -27,6 +27,7 @@ dependencies {
 
     implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap', version: ver.'RoaringBitmap'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
+    implementation group: 'org.openjdk.jol',    name: 'jol-core',      version: ver.'jol'
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 
