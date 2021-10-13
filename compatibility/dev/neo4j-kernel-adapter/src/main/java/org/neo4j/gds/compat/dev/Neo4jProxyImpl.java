@@ -323,11 +323,46 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize
+        int batchSize,
+        boolean usePartitionedScan
     ) {
+        if (!usePartitionedScan) {
+            var read = transaction.dataRead();
+            return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+        }
+
         var read = transaction.dataRead();
-        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+        var nodeCount = read.countsForNode(labelId);
+
+        var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
+            transaction,
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
+        );
+
+        if (indexDescriptor == IndexDescriptor.NO_INDEX) {
+            throw new IllegalStateException("There is no index that can back a node label scan.");
+        }
+
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, batchSize);
+
+        try {
+            var session = read.tokenReadSession(indexDescriptor);
+
+            var partitionedScan = read.nodeLabelScan(
+                session,
+                numberOfPartitions,
+                transaction.cursorContext(),
+                new TokenPredicate(labelId)
+            );
+
+            return new PartitionedStoreScan(partitionedScan);
+        } catch (KernelException e) {
+            // should not happen, we check for the index existence and applicability
+            // before reading it
+            throw new RuntimeException(e);
+        }
     }
+
 
     @Override
     public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {

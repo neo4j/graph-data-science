@@ -46,7 +46,7 @@ final class NodeLabelIndexLookupImpl {
         var iterator = schemaRead.index(schemaDescriptor);
         while (iterator.hasNext()) {
             var index = iterator.next();
-            if (index.getIndexType() != IndexType.FULLTEXT && indexIsOnline(schemaRead, index)) {
+            if (index.getIndexType() == IndexType.LOOKUP && indexIsOnline(schemaRead, index)) {
                 return index;
             }
         }

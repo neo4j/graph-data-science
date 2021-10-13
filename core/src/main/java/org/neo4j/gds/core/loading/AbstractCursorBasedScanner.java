@@ -142,7 +142,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         var bulkSize = prefetchSize * recordsPerPage();
 
         // We need to make sure that we scan aligned to the super block size, as we are not
-            // allowed to write into the same block multiple times.
+        // allowed to write into the same block multiple times.
         bulkSize = SparseLongArray.toValidBatchSize(bulkSize);
 
         // The label scan cursor on Neo4j <= 4.1 has a bug where it would add 64 to the bulks size

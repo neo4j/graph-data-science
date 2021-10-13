@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LabelInformationTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#labelImportVariants")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
     void singleLabelAssignment(TestMethodRunner runner) {
         runner.run(() -> {
             var nodeIds = LongStream.range(0, 10).boxed().collect(Collectors.toList());
@@ -47,14 +47,14 @@ class LabelInformationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#labelImportVariants")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
     void singleLabelAssignmentWithNonDirectMapping(TestMethodRunner runner) {
         runner.run(() -> {
             var nodeMapping = LongStream
                 .range(0, 10)
                 .boxed()
                 .collect(Collectors.toMap(nodeId -> 42 * (nodeId + 1337), nodeId -> nodeId));
-            if (GdsFeatureToggles.USE_NEO_IDS_FOR_LABEL_IMPORT.isEnabled()) {
+            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
                 testLabelAssignment(nodeMapping.keySet(), nodeMapping::get);
             } else {
                 testLabelAssignment(nodeMapping.values(), node -> node);

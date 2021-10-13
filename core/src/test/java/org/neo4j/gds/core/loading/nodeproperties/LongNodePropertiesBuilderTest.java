@@ -32,7 +32,7 @@ import static org.neo4j.gds.TestSupport.nodeMapping;
 public class LongNodePropertiesBuilderTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#propertyImportVariants")
+    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
     void singleLabelAssignmentWithNonDirectMapping(TestMethodRunner runner) {
         int nodeCount = 10;
         var defaultValue = DefaultValue.of(10L);

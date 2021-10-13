@@ -24,22 +24,29 @@ import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class InternalBitIdMappingBuilder implements InternalIdMappingBuilder<InternalBitIdMappingBuilder.BulkAdder> {
 
-    private final SparseLongArray.Builder builder;
+    private final SparseLongArrayBuilder builder;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
     public static InternalBitIdMappingBuilder of(long length, AllocationTracker allocationTracker) {
-        var builder = SparseLongArray.builder(length);
+        SparseLongArrayBuilder builder;
+        if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
+            builder = new SequentialBuilder(SparseLongArray.sequentialBuilder(length));
+        } else {
+            builder = new AlignedBuilder(SparseLongArray.builder(length));
+        }
+
         return new InternalBitIdMappingBuilder(builder, length);
     }
 
-    private InternalBitIdMappingBuilder(SparseLongArray.Builder builder, final long length) {
+    private InternalBitIdMappingBuilder(SparseLongArrayBuilder builder, final long length) {
         this.builder = builder;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -83,12 +90,12 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
     }
 
     public static final class BulkAdder implements IdMappingAllocator {
-        private final SparseLongArray.Builder builder;
+        private final SparseLongArrayBuilder builder;
 
         private long allocationIndex;
         private int allocationSize;
 
-        private BulkAdder(SparseLongArray.Builder builder) {
+        private BulkAdder(SparseLongArrayBuilder builder) {
             this.builder = builder;
         }
 
@@ -126,6 +133,43 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
                 length,
                 allocationIndex
             );
+        }
+    }
+
+    interface SparseLongArrayBuilder {
+        SparseLongArray build();
+        void set(long allocationIndex, long[] originalIds, int offset, int length);
+    }
+
+    static class SequentialBuilder implements SparseLongArrayBuilder {
+        private final SparseLongArray.SequentialBuilder sequentialBuilder;
+
+        SequentialBuilder(SparseLongArray.SequentialBuilder sequentialBuilder) {this.sequentialBuilder = sequentialBuilder;}
+
+        @Override
+        public SparseLongArray build() {
+            return sequentialBuilder.build();
+        }
+
+        @Override
+        public void set(long allocationIndex, long[] originalIds, int offset, int length) {
+            sequentialBuilder.set(originalIds, offset, length);
+        }
+    }
+
+    static class AlignedBuilder implements SparseLongArrayBuilder {
+        private final SparseLongArray.Builder alignedBuilder;
+
+        AlignedBuilder(SparseLongArray.Builder alignedBuilder) {this.alignedBuilder = alignedBuilder;}
+
+        @Override
+        public SparseLongArray build() {
+            return alignedBuilder.build();
+        }
+
+        @Override
+        public void set(long allocationIndex, long[] originalIds, int offset, int length) {
+            alignedBuilder.set(allocationIndex, originalIds, offset, length);
         }
     }
 }

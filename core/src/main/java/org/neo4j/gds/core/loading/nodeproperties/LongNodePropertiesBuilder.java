@@ -67,7 +67,7 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         AllocationTracker allocationTracker,
         int concurrency
     ) {
-        return GdsFeatureToggles.USE_NEO_IDS_FOR_PROPERTY_IMPORT.isEnabled()
+        return GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()
             ? sparse(defaultValue, allocationTracker, concurrency)
             : dense(nodeCount, defaultValue, allocationTracker);
     }
