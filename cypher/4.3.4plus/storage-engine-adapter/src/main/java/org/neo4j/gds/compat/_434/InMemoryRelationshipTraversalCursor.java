@@ -32,11 +32,11 @@ public class InMemoryRelationshipTraversalCursor extends AbstractInMemoryRelatio
 
     @Override
     public long propertiesReference() {
-        return 0;
+        return getId();
     }
 
     @Override
     public void properties(StoragePropertyCursor propertyCursor) {
-
+        propertyCursor.initRelationshipProperties(propertiesReference());
     }
 }

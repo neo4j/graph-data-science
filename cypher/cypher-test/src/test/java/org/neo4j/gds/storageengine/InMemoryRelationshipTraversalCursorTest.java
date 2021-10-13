@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
@@ -32,7 +33,6 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.values.storable.Values;
 
