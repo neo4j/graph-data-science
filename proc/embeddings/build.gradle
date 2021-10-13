@@ -10,6 +10,7 @@ dependencies {
     api project(':proc-common')
 
     implementation project(':annotations')
+    implementation project(':core')
     implementation project(':ml-core')
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')

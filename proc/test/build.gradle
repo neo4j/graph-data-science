@@ -9,6 +9,7 @@ dependencies {
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
     implementation project(':algo-common')
+    implementation project(':core')
     implementation project(':pregel')
     implementation project(':string-formatting')
 

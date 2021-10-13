@@ -3,7 +3,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Machine Learning Test Utilities'
 
 dependencies {
+    implementation project(':core')
+    implementation project(':ml-core')
     implementation project(':test-utils')
-
-    compileOnly project(':ml-core')
 }

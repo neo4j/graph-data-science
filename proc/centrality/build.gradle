@@ -11,6 +11,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':core')
     implementation project(':neo4j-adapter')
     implementation project(':pregel')
     implementation project(':string-formatting')
