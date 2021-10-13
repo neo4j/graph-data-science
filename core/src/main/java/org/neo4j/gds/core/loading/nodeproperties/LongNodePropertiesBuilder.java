@@ -26,7 +26,6 @@ import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -34,7 +33,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.OptionalLong;
 
-public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     // Value is changed with a VarHandle and needs to be non final for that
     // even though our favourite IDE/OS doesn't pick that up
@@ -43,6 +42,9 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
 
     private static final VarHandle MAX_VALUE;
     protected final AllocationTracker allocationTracker;
+    private final HugeSparseLongArray.Builder builder;
+    private final long defaultValue;
+    private final int concurrency;
 
     static {
         VarHandle maxValueHandle;
@@ -56,7 +58,15 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         MAX_VALUE = maxValueHandle;
     }
 
-    private LongNodePropertiesBuilder(AllocationTracker allocationTracker) {
+    private LongNodePropertiesBuilder(
+        HugeSparseLongArray.Builder builder,
+        long defaultValue,
+        int concurrency,
+        AllocationTracker allocationTracker
+    ) {
+        this.builder = builder;
+        this.defaultValue = defaultValue;
+        this.concurrency = concurrency;
         this.allocationTracker = allocationTracker;
         this.maxValue = Long.MIN_VALUE;
     }
@@ -66,48 +76,47 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         AllocationTracker allocationTracker,
         int concurrency
     ) {
-        return GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()
-            ? sparse(defaultValue, allocationTracker, concurrency)
-            : dense(defaultValue, allocationTracker);
-    }
-
-    public static LongNodePropertiesBuilder sparse(
-        DefaultValue defaultValue,
-        AllocationTracker allocationTracker,
-        int concurrency
-    ) {
         var defaultLongValue = defaultValue.longValue();
         var builder = HugeSparseLongArray.growingBuilder(defaultLongValue, allocationTracker::add);
-        return new SparseLongNodePropertiesBuilder(builder, defaultLongValue, concurrency, allocationTracker);
+        return new LongNodePropertiesBuilder(builder, defaultLongValue, concurrency, allocationTracker);
     }
-
-    public static LongNodePropertiesBuilder dense(
-        DefaultValue defaultValue,
-        AllocationTracker allocationTracker
-    ) {
-        var builder = HugeSparseLongArray.growingBuilder(defaultValue.longValue(), allocationTracker::add);
-        return new DenseLongNodePropertiesBuilder(builder, allocationTracker);
-    }
-
-    public abstract void set(long nodeId, long neoNodeId, long value);
-
-    abstract HugeSparseLongArray buildInner(NodeMapping nodeMapping);
 
     @Override
     protected Class<?> valueClass() {
         return long.class;
     }
 
+    public void set(long neoNodeId, long value) {
+        builder.set(neoNodeId, value);
+        updateMaxValue(value);
+    }
+
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
         var longValue = Neo4jValueConversion.getLongValue(value);
-        set(nodeId, neoNodeId, longValue);
-        updateMaxValue(longValue);
+        set(neoNodeId, longValue);
     }
 
     @Override
     public NodeProperties build(long size, NodeMapping nodeMapping) {
-        HugeSparseLongArray propertyValues = buildInner(nodeMapping);
+        var propertiesByNeoIds = builder.build();
+        var propertiesByMappedIdsBuilder = HugeSparseLongArray.growingBuilder(
+            defaultValue,
+            allocationTracker::add
+        );
+
+        ParallelUtil.parallelForEachNode(
+            nodeMapping.nodeCount(),
+            concurrency,
+            mappedId -> {
+                var neoId = nodeMapping.toOriginalNodeId(mappedId);
+                if (propertiesByNeoIds.contains(neoId)) {
+                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+                }
+            }
+        );
+
+        HugeSparseLongArray propertyValues = propertiesByMappedIdsBuilder.build();
 
         var maybeMaxValue = size > 0
             ? OptionalLong.of((long) MAX_VALUE.getVolatile(LongNodePropertiesBuilder.this))
@@ -174,74 +183,6 @@ public abstract class LongNodePropertiesBuilder extends InnerNodePropertiesBuild
         @Override
         public long size() {
             return size;
-        }
-    }
-
-    private static final class SparseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
-
-        private final HugeSparseLongArray.Builder builder;
-        private final long defaultValue;
-        private final int concurrency;
-
-        private SparseLongNodePropertiesBuilder(
-            HugeSparseLongArray.Builder builder,
-            long defaultValue,
-            int concurrency,
-            AllocationTracker allocationTracker
-        ) {
-            super(allocationTracker);
-            this.builder = builder;
-            this.defaultValue = defaultValue;
-            this.concurrency = concurrency;
-        }
-
-        @Override
-        public void set(long nodeId, long neoNodeId, long value) {
-            builder.set(neoNodeId, value);
-        }
-
-        @Override
-        HugeSparseLongArray buildInner(NodeMapping nodeMapping) {
-            var propertiesByNeoIds = builder.build();
-            var propertiesByMappedIdsBuilder = HugeSparseLongArray.growingBuilder(
-                defaultValue,
-                allocationTracker::add
-            );
-
-            ParallelUtil.parallelForEachNode(
-                nodeMapping.nodeCount(),
-                concurrency,
-                mappedId -> {
-                    var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                    if (propertiesByNeoIds.contains(neoId)) {
-                        propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
-                    }
-                }
-            );
-
-            return propertiesByMappedIdsBuilder.build();
-        }
-    }
-
-    private static final class DenseLongNodePropertiesBuilder extends LongNodePropertiesBuilder {
-        private final HugeSparseLongArray.Builder builder;
-
-        DenseLongNodePropertiesBuilder(
-            HugeSparseLongArray.Builder builder,
-            AllocationTracker allocationTracker
-        ) {
-            super(allocationTracker);
-            this.builder = builder;
-        }
-
-        @Override
-        public void set(long nodeId, long neoNodeId, long value) {
-            builder.set(nodeId, value);
-        }
-
-        @Override
-        HugeSparseLongArray buildInner(NodeMapping nodeMapping) {
-            return builder.build();
         }
     }
 }

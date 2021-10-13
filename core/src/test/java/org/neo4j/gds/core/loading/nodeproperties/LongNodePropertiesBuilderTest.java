@@ -52,13 +52,13 @@ public class LongNodePropertiesBuilderTest {
             );
 
             for (int i = 0; i < nodeCount; i++) {
-                builder.set(i, originalIds[i], i * 1337L);
+                builder.set(originalIds[i], i * 1337L);
             }
 
-            var longNodeProperties = builder.buildInner(nodeMapping);
+            var longNodeProperties = builder.build(10, nodeMapping);
 
             for (int i = 0; i < nodeCount; i++) {
-                assertThat(longNodeProperties.get(i)).isEqualTo(i * 1337L);
+                assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);
             }
         });
     }

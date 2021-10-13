@@ -245,9 +245,11 @@ final class NodesFilter {
             var propertyState = inputGraphStore.nodePropertyState(propertyKey);
 
             NodePropertiesBuilder<?> nodePropertiesBuilder = getPropertiesBuilder(
+                inputMapping,
                 filteredNodeCount,
                 allocationTracker,
-                nodeProperties
+                nodeProperties,
+                concurrency
             );
 
             ParallelUtil.parallelForEachNode(
@@ -270,23 +272,26 @@ final class NodesFilter {
     }
 
     private static NodePropertiesBuilder<?> getPropertiesBuilder(
+        IdMapping nodeMapping,
         long filteredNodeCount,
         AllocationTracker allocationTracker,
-        NodeProperties inputNodeProperties
+        NodeProperties inputNodeProperties,
+        int concurrency
     ) {
         NodePropertiesBuilder<?> propertiesBuilder = null;
 
         switch (inputNodeProperties.valueType()) {
             case LONG:
-                var longNodePropertiesBuilder = LongNodePropertiesBuilder.dense(
+                var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
-                    allocationTracker
+                    allocationTracker,
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        long neoNodeIdNotUsed = -1;
-                        propertyBuilder.set(filteredNode, neoNodeIdNotUsed, inputProperties.longValue(inputNode));
+
+                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.longValue(inputNode));
                     }
                 };
                 break;
