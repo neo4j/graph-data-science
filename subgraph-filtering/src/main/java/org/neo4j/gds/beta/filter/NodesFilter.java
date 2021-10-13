@@ -298,14 +298,14 @@ final class NodesFilter {
 
             case DOUBLE:
                 var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
-                    filteredNodeCount,
                     DefaultValue.forDouble(),
-                    allocationTracker
+                    allocationTracker,
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(filteredNode, inputProperties.doubleValue(inputNode));
+                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
                     }
                 };
                 break;

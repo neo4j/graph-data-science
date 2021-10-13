@@ -22,8 +22,9 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.collections.HugeSparseDoubleArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
@@ -52,20 +53,24 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         MAX_VALUE = maxValueHandle;
     }
 
-    private final HugeSparseLongArray.Builder valuesBuilder;
+    private final HugeSparseDoubleArray.Builder builder;
+    private final DefaultValue defaultValue;
+    private final int concurrency;
+    private final AllocationTracker allocationTracker;
 
-    public DoubleNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
+    public DoubleNodePropertiesBuilder(
+        DefaultValue defaultValue,
+        AllocationTracker allocationTracker,
+        int concurrency
+    ) {
+        this.defaultValue = defaultValue;
+        this.concurrency = concurrency;
+        this.allocationTracker = allocationTracker;
         this.maxValue = Double.NEGATIVE_INFINITY;
-        this.valuesBuilder = HugeSparseLongArray.builder(
-            nodeCount,
-            Double.doubleToLongBits(defaultValue.doubleValue()),
-            allocationTracker
+        this.builder = HugeSparseDoubleArray.growingBuilder(
+            defaultValue.doubleValue(),
+            allocationTracker::add
         );
-    }
-
-    public void set(long nodeId, double value) {
-        valuesBuilder.set(nodeId, Double.doubleToLongBits(value));
-        updateMaxValue(value);
     }
 
     @Override
@@ -73,19 +78,44 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         return double.class;
     }
 
+    public void set(long neoNodeId, double value) {
+        builder.set(neoNodeId, value);
+        updateMaxValue(value);
+    }
+
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
         double doubleValue = Neo4jValueConversion.getDoubleValue(value);
-        valuesBuilder.set(nodeId, Double.doubleToLongBits(doubleValue));
-        updateMaxValue(doubleValue);
+        set(neoNodeId, doubleValue);
     }
 
     @Override
     public DoubleNodeProperties build(long size, NodeMapping nodeMapping) {
-        HugeSparseLongArray propertyValues = valuesBuilder.build();
+        var propertiesByNeoIds = builder.build();
+        var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.growingBuilder(
+            defaultValue.doubleValue(),
+            allocationTracker::add
+        );
+
+        ParallelUtil.parallelForEachNode(
+            nodeMapping.nodeCount(),
+            concurrency,
+            mappedId -> {
+                var neoId = nodeMapping.toOriginalNodeId(mappedId);
+                if (propertiesByNeoIds.contains(neoId)) {
+                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+                }
+            }
+        );
+
+        var propertyValues = propertiesByMappedIdsBuilder.build();
+
+
         var maybeMaxValue = size > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
             : OptionalDouble.empty();
+
+
 
         return new DoubleStoreNodeProperties(propertyValues, size, maybeMaxValue);
     }
@@ -125,11 +155,11 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     static class DoubleStoreNodeProperties implements DoubleNodeProperties {
-        private final HugeSparseLongArray propertyValues;
+        private final HugeSparseDoubleArray propertyValues;
         private final long size;
         private final OptionalDouble maxValue;
 
-        DoubleStoreNodeProperties(HugeSparseLongArray propertyValues, long size, OptionalDouble maxValue) {
+        DoubleStoreNodeProperties(HugeSparseDoubleArray propertyValues, long size, OptionalDouble maxValue) {
             this.propertyValues = propertyValues;
             this.size = size;
             this.maxValue = maxValue;
@@ -137,7 +167,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
         @Override
         public double doubleValue(long nodeId) {
-            return Double.longBitsToDouble(propertyValues.get(nodeId));
+            return propertyValues.get(nodeId);
         }
 
         @Override
