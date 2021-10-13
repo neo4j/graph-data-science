@@ -86,7 +86,20 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         TreeNode<PREDICTION> root;
 
         {
-            var activeFeatureVectors = bootstrapDataset(numFeatureVectorsRatio);
+            HugeLongArray activeFeatureVectors;
+            if (Double.valueOf(0.0D).equals(numFeatureVectorsRatio)) {
+                var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
+                allVectors.setAll(i -> i);
+                bootstrappedDataset.fill((byte) 1);
+                activeFeatureVectors = allVectors;
+            } else {
+                activeFeatureVectors = DatasetBootstrapper.bootstrap(
+                    random,
+                    numFeatureVectorsRatio,
+                    bootstrappedDataset,
+                    allocationTracker
+                );
+            }
             root = splitAndPush(stack, activeFeatureVectors, activeFeatureVectors.size(), 1);
         }
 
@@ -230,44 +243,6 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             bestGroupSizes
         );
 
-    }
-
-    private HugeLongArray bootstrapDataset(double numFeatureVectorsRatio) {
-        assert numFeatureVectorsRatio >= 0.0 && numFeatureVectorsRatio <= 1.0;
-
-        if (Double.valueOf(0.0D).equals(numFeatureVectorsRatio)) {
-            var allVectors = HugeLongArray.newArray(allFeatureVectors.size(), allocationTracker);
-            allVectors.setAll(i -> i);
-            bootstrappedDataset.fill((byte) 1);
-
-            return allVectors;
-        }
-
-        final long totalNumVectors = allFeatureVectors.size();
-        final long numVectors = (long) Math.ceil(numFeatureVectorsRatio * totalNumVectors);
-        final var bootstrappedVectors = HugeLongArray.newArray(numVectors, allocationTracker);
-
-        for (long i = 0; i < numVectors; i++) {
-            long j = randomNonNegativeLong(0, totalNumVectors);
-            bootstrappedVectors.set(i, j);
-            bootstrappedDataset.set(j, (byte) 1);
-        }
-
-        return bootstrappedVectors;
-    }
-
-    // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
-    // `min` is inclusive, and `max` is exclusive.
-    private long randomNonNegativeLong(long min, long max) {
-        assert min >= 0;
-        assert max > min;
-
-        long randomNum;
-        do {
-            randomNum = random.nextLong();
-        } while (randomNum == Long.MIN_VALUE);
-
-        return (Math.abs(randomNum) % (max - min)) + min;
     }
 
     @ValueClass
