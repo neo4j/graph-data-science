@@ -16,7 +16,7 @@ dependencies {
         }
     }
 
-    api project(':core')
+    implementation project(':core')
     api project(':storage-engine-adapter')
 
     testImplementation project(":test-utils")

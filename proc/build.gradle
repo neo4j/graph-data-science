@@ -15,6 +15,7 @@ dependencies {
         }
     }
 
+    implementation project(':core')
     implementation project(':string-formatting')
 
     api project(':proc-common')

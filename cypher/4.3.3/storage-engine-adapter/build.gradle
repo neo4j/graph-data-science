@@ -3,6 +3,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Storage Engine Adapter up to 4.3.3'
 
 dependencies {
+    implementation project(':core')
     implementation project(':storage-engine-adapter-api')
 
     annotationProcessor project(':annotations')

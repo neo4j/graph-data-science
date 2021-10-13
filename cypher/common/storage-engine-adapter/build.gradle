@@ -17,6 +17,8 @@ dependencies {
         }
     }
 
+    implementation project(':core')
+
     api project(':storage-engine-adapter-api')
 
     compatibilityModules.'storage-engine-adapter'.each {

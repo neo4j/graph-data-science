@@ -18,9 +18,9 @@ dependencies {
         }
     }
 
+    implementation project(':core')
     implementation project(':string-formatting')
 
-    api project(':core')
     api project(':cypher-core')
     api project(':neo4j-adapter')
 }
