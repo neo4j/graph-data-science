@@ -22,7 +22,6 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
-import org.neo4j.gds.core.EnterpriseLicensingExtension;
 import org.neo4j.gds.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -68,7 +67,6 @@ public abstract class BaseTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder.impermanent();
         builder.noOpSystemGraphInitializer();
-        builder.addExtension(new EnterpriseLicensingExtension());
         builder.addExtension(new AllocationTrackerExtensionFactory());
         // A change in 4.3.0-drop02.0 is enabling the feature to track cursor.close() events by default
         // for test databases. We would like to additionally enable the feature to trace cursors,
