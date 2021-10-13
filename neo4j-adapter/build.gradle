@@ -19,8 +19,8 @@ dependencies {
         }
     }
 
-
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation group: 'org.neo4j',       name: 'neo4j-kernel',       version: ver.'neo4j'
+    testImplementation group: 'org.assertj',     name: 'assertj-core',       version: ver.'assertj'
 }

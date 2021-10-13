@@ -56,7 +56,7 @@ public enum Neo4jVersion {
     }
 
     static String neo4jVersion() {
-        var neo4jVersion = Objects.requireNonNullElse(Version.getNeo4jVersion(), "dev");
+        var neo4jVersion = Objects.requireNonNull(Version.class.getPackage().getImplementationVersion());
         // some versions have a build thing attached at the end
         // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
         // This regex follows the logic from org.neo4j.kernel.internal.Version.parseReleaseVersion
@@ -88,7 +88,6 @@ public enum Neo4jVersion {
             case "4.2":
                 return Neo4jVersion.V_4_2;
             case "4.3":
-            case "dev":
                 return Neo4jVersion.V_4_3;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);

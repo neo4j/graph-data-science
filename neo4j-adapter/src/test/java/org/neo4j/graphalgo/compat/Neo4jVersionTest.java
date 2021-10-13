@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.kernel.internal.Version;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Neo4jVersionTest {
@@ -41,11 +42,17 @@ class Neo4jVersionTest {
         "4.2, V_4_2",
         "4.2-foo, V_4_2",
         "4.2.1, V_4_2",
-        "4.2.1-foo, V_4_2",
-        "dev, V_4_3",
+        "4.2.1-foo, V_4_2"
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
+    }
+
+    @Test
+    void cannotRunOnDev() {
+        assertThatThrownBy(() -> Neo4jVersion.parse("dev"))
+            .isExactlyInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Cannot run on Neo4j Version dev");
     }
 
     @Test
