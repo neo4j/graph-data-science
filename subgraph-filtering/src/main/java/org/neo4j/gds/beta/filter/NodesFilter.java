@@ -312,14 +312,14 @@ final class NodesFilter {
 
             case DOUBLE_ARRAY:
                 var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
-                    filteredNodeCount,
                     DefaultValue.forDoubleArray(),
-                    allocationTracker
+                    allocationTracker,
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(filteredNode, inputProperties.doubleArrayValue(inputNode));
+                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
                     }
                 };
                 break;
