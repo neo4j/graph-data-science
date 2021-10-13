@@ -24,7 +24,7 @@ description = 'Neo4j Graph Data Science :: String Formatting'
 
 dependencies {
 
-    api (
+    implementation (
         [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
     )
 
