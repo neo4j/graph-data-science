@@ -81,7 +81,7 @@ final class HugeSparseArrayGenerator {
 
         // static methods
         var pageIndex = pageIndexMethod(pageShift);
-        var indexInPage = indexInPageMethod(pageShift);
+        var indexInPage = indexInPageMethod(pageMask);
         builder.addMethod(pageIndex);
         builder.addMethod(indexInPage);
 
