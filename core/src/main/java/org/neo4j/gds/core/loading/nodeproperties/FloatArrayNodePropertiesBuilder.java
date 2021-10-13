@@ -22,26 +22,31 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
-    private final HugeObjectArray<float[]> objectArray;
+    private final HugeSparseFloatArrayArray.Builder builder;
     private final DefaultValue defaultValue;
+    private final AllocationTracker allocationTracker;
+    private final int concurrency;
 
-    public FloatArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
+    public FloatArrayNodePropertiesBuilder(DefaultValue defaultValue, AllocationTracker allocationTracker, int concurrency) {
+        this.allocationTracker = allocationTracker;
+        this.concurrency = concurrency;
         // validate defaultValue is a float array
         defaultValue.floatArrayValue();
 
         this.defaultValue = defaultValue;
-        this.objectArray = HugeObjectArray.newArray(float[].class, nodeCount, allocationTracker);
+        this.builder = HugeSparseFloatArrayArray.growingBuilder(defaultValue.floatArrayValue(), allocationTracker::add);
     }
 
-    public void set(long nodeId, float[] value) {
-        objectArray.set(nodeId, value);
+    public void set(long neoNodeId, float[] value) {
+        builder.set(neoNodeId, value);
     }
 
     @Override
@@ -51,36 +56,49 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
 
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
-        objectArray.set(nodeId, Neo4jValueConversion.getFloatArray(value));
+        set(neoNodeId, Neo4jValueConversion.getFloatArray(value));
     }
 
     @Override
     public FloatArrayNodeProperties build(long size, NodeMapping nodeMapping) {
-        return new FloatArrayStoreNodeProperties(objectArray, defaultValue, size);
+        var propertiesByNeoIds = builder.build();
+        var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.growingBuilder(
+            defaultValue.floatArrayValue(),
+            allocationTracker::add
+        );
+
+        ParallelUtil.parallelForEachNode(
+            nodeMapping.nodeCount(),
+            concurrency,
+            mappedId -> {
+                var neoId = nodeMapping.toOriginalNodeId(mappedId);
+                if (propertiesByNeoIds.contains(neoId)) {
+                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+                }
+            }
+        );
+
+        var propertyValues = propertiesByMappedIdsBuilder.build();
+
+
+        return new FloatArrayStoreNodeProperties(propertyValues, size);
     }
 
     static class FloatArrayStoreNodeProperties implements FloatArrayNodeProperties {
-        private final HugeObjectArray<float[]> propertyValues;
-        private final float[] defaultFloatArray;
+        private final HugeSparseFloatArrayArray propertyValues;
         private final long size;
 
         FloatArrayStoreNodeProperties(
-            HugeObjectArray<float[]> propertyValues,
-            DefaultValue defaultValue,
+            HugeSparseFloatArrayArray propertyValues,
             long size
         ) {
             this.propertyValues = propertyValues;
-            this.defaultFloatArray = defaultValue.floatArrayValue();
             this.size = size;
         }
 
         @Override
         public float[] floatArrayValue(long nodeId) {
-            float[] data = propertyValues.get(nodeId);
-            if (data == null) {
-                return defaultFloatArray;
-            }
-            return data;
+            return propertyValues.get(nodeId);
         }
 
         @Override

@@ -122,7 +122,7 @@ public final class NodePropertiesFromStoreBuilder {
             } else if (value instanceof DoubleArray) {
                 newBuilder = new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             } else if (value instanceof FloatArray) {
-                newBuilder = new FloatArrayNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
+                newBuilder = new FloatArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             } else {
                 throw new UnsupportedOperationException(formatWithLocale(
                     "Loading of values of type %s is currently not supported",

@@ -326,15 +326,15 @@ final class NodesFilter {
 
             case FLOAT_ARRAY:
                 var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
-                    filteredNodeCount,
                     DefaultValue.forFloatArray(),
-                    allocationTracker
+                    allocationTracker,
+                    concurrency
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, floatArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(filteredNode, inputProperties.floatArrayValue(inputNode));
+                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
                     }
                 };
                 break;
