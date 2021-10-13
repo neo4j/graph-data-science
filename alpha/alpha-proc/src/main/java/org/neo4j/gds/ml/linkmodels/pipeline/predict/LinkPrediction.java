@@ -38,7 +38,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer;
-import org.neo4j.gds.similarity.knn.SimilarityComputer;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -208,26 +207,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     @Override
     public void release() {
 
-    }
-
-    static class LinkPredictionSimilarityComputer implements SimilarityComputer {
-
-        private final LinkFeatureExtractor linkFeatureExtractor;
-        private final LinkLogisticRegressionPredictor predictor;
-
-        LinkPredictionSimilarityComputer(
-            LinkFeatureExtractor linkFeatureExtractor,
-            LinkLogisticRegressionPredictor predictor
-        ) {
-            this.linkFeatureExtractor = linkFeatureExtractor;
-            this.predictor = predictor;
-        }
-
-        @Override
-        public double similarity(long sourceId, long targetId) {
-            var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-            return predictor.predictedProbability(features);
-        }
     }
 
     private final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
