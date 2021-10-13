@@ -35,11 +35,9 @@ import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.SplittableRandom;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;

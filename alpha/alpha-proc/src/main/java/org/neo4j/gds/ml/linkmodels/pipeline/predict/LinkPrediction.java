@@ -19,31 +19,20 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
-import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
-import org.neo4j.gds.similarity.knn.KnnBaseConfig;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.SplittableRandom;
-import java.util.function.Consumer;
-import java.util.stream.LongStream;
 
 public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
 
@@ -99,6 +88,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
             .totalSize() : "Model must contain a weight for each feature.";
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
+
         var result = predictLinks(graph, featureExtractor, predictor);
         progressTracker.endSubTask();
         return result;

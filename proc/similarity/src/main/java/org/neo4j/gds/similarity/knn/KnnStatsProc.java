@@ -31,7 +31,6 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityStatsResult;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -47,7 +46,7 @@ import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class KnnStatsProc extends StatsProc<Knn, Result, SimilarityStatsResult, KnnStatsConfig> {
+public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityStatsResult, KnnStatsConfig> {
 
     @Procedure(name = "gds.beta.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -83,12 +82,12 @@ public final class KnnStatsProc extends StatsProc<Knn, Result, SimilarityStatsRe
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityStatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Result, KnnStatsConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityStatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
     @Override
-    public Stream<SimilarityStatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Result, KnnStatsConfig> computationResult) {
+    public Stream<SimilarityStatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             KnnStatsConfig config = computationResult.config();
 

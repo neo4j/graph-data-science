@@ -34,7 +34,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 
 import java.util.Map;
 import java.util.Optional;
@@ -46,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Result> {
+class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Knn.Result> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Result, KnnWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig>> getProcedureClazz() {
         return KnnWriteProc.class;
     }
 

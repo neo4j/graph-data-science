@@ -47,10 +47,10 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean filterNodePair(long firstNodeId, long secondNodeId) {
+    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
         // Self-loops are always very similar
         if (firstNodeId == secondNodeId) {
-            return false;
+            return true;
         }
         // TODO This is a very naive (slow) approach and should be replaced by a dedicated data structure
         return graph.exists(firstNodeId, secondNodeId);

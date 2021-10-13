@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -42,7 +41,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Result, KnnStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStreamConfig>> getProcedureClazz() {
         return KnnStreamProc.class;
     }
 

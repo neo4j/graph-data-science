@@ -93,14 +93,14 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
-        assertThat(lpSimComputer.filterNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
     }
 }

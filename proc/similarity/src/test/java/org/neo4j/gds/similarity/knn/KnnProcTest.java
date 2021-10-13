@@ -44,7 +44,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -61,8 +60,8 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KE
 import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
-    MemoryEstimateTest<Knn, CONFIG, Result>,
-    HeapControlTest<Knn, CONFIG, Result> {
+    MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
+    HeapControlTest<Knn, CONFIG, Knn.Result> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -111,7 +110,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     }
 
     @Override
-    public void assertResultEquals(Result result1, Result result2) {
+    public void assertResultEquals(Knn.Result result1, Knn.Result result2) {
         assertSimilarityStreamsAreEqual(result1.streamSimilarityResult(), result2.streamSimilarityResult());
     }
 

@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 
 import java.util.List;
 import java.util.Map;
@@ -164,7 +163,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Knn, Result, KnnStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnStatsConfig>> getProcedureClazz() {
         return KnnStatsProc.class;
     }
 

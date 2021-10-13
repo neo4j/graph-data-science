@@ -38,7 +38,7 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    default boolean filterNodePair(long firstNodeId, long secondNodeId) {
+    default boolean excludeNodePair(long firstNodeId, long secondNodeId) {
         return false;
     }
 

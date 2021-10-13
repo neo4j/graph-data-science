@@ -29,7 +29,6 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityWriteProc;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.knn.RandomNeighborSamplingSimilarityComputer.Result;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,7 +42,7 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KnnWriteProc extends SimilarityWriteProc<Knn, Result, KnnWriteConfig> {
+public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteConfig> {
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
@@ -84,7 +83,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Result, KnnWriteConfi
     }
 
     @Override
-    protected SimilarityGraphResult similarityGraphResult(ComputationResult<Knn, Result, KnnWriteConfig> computationResult) {
+    protected SimilarityGraphResult similarityGraphResult(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
         Knn algorithm = Objects.requireNonNull(computationResult.algorithm());
         KnnWriteConfig config = computationResult.config();
         return computeToGraph(
@@ -100,7 +99,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Result, KnnWriteConfi
         Graph graph,
         long nodeCount,
         int concurrency,
-        Result result,
+        Knn.Result result,
         KnnContext context
     ) {
         Graph similarityGraph = new SimilarityGraphBuilder(
