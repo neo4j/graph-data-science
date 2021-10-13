@@ -22,26 +22,28 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.collections.HugeSparseLongArrayArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
-    private final HugeObjectArray<long[]> objectArray;
+    private final HugeSparseLongArrayArray.Builder builder;
     private final DefaultValue defaultValue;
+    private final AllocationTracker allocationTracker;
+    private final int concurrency;
 
-    public LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker allocationTracker) {
-        // validate defaultValue is a long array
-        defaultValue.longArrayValue();
-
+    public LongArrayNodePropertiesBuilder(DefaultValue defaultValue, AllocationTracker allocationTracker, int concurrency) {
         this.defaultValue = defaultValue;
-        this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker);
+        this.allocationTracker = allocationTracker;
+        this.concurrency = concurrency;
+        this.builder = HugeSparseLongArrayArray.growingBuilder(defaultValue.longArrayValue(), allocationTracker::add);
     }
 
-    public void set(long nodeId, long[] value) {
-        objectArray.set(nodeId, value);
+    public void set(long neoNodeId, long[] value) {
+        builder.set(neoNodeId, value);
     }
 
     @Override
@@ -51,40 +53,53 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     @Override
     public void setValue(long nodeId, long neoNodeId, Value value) {
-        objectArray.set(nodeId, Neo4jValueConversion.getLongArray(value));
+        set(neoNodeId, Neo4jValueConversion.getLongArray(value));
     }
 
     public void setValue(long nodeId, long[] value) {
-        objectArray.set(nodeId, value);
+        builder.set(nodeId, value);
     }
 
     @Override
     public LongArrayNodeProperties build(long size, NodeMapping nodeMapping) {
-        return new LongArrayStoreNodeProperties(objectArray, defaultValue, size);
+        var propertiesByNeoIds = builder.build();
+        var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.growingBuilder(
+            defaultValue.longArrayValue(),
+            allocationTracker::add
+        );
+
+        ParallelUtil.parallelForEachNode(
+            nodeMapping.nodeCount(),
+            concurrency,
+            mappedId -> {
+                var neoId = nodeMapping.toOriginalNodeId(mappedId);
+                if (propertiesByNeoIds.contains(neoId)) {
+                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+                }
+            }
+        );
+
+        var propertyValues = propertiesByMappedIdsBuilder.build();
+
+
+        return new LongArrayStoreNodeProperties(propertyValues, size);
     }
 
     static class LongArrayStoreNodeProperties implements LongArrayNodeProperties {
-        private final HugeObjectArray<long[]> propertyValues;
-        private final long[] defaultLongArray;
+        private final HugeSparseLongArrayArray propertyValues;
         private final long size;
 
         LongArrayStoreNodeProperties(
-            HugeObjectArray<long[]> propertyValues,
-            DefaultValue defaultValue,
+            HugeSparseLongArrayArray propertyValues,
             long size
         ) {
             this.propertyValues = propertyValues;
-            this.defaultLongArray= defaultValue.longArrayValue();
             this.size = size;
         }
 
         @Override
         public long[] longArrayValue(long nodeId) {
-            long[] data = propertyValues.get(nodeId);
-            if (data == null) {
-                return defaultLongArray;
-            }
-            return data;
+            return propertyValues.get(nodeId);
         }
 
         @Override

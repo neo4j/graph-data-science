@@ -341,15 +341,15 @@ final class NodesFilter {
 
             case LONG_ARRAY:
                 var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
-                    filteredNodeCount,
-                    DefaultValue.forLongArray(),
-                    allocationTracker
+                    DefaultValue.forFloatArray(),
+                    allocationTracker,
+                    concurrency
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(filteredNode, inputProperties.longArrayValue(inputNode));
+                        propertyBuilder.set(nodeMapping.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
                     }
                 };
                 break;

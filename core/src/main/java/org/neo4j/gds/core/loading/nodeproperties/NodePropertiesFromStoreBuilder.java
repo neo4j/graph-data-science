@@ -118,7 +118,7 @@ public final class NodePropertiesFromStoreBuilder {
             } else if (value instanceof FloatingPointValue) {
                 newBuilder = new DoubleNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             } else if (value instanceof LongArray) {
-                newBuilder = new LongArrayNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
+                newBuilder = new LongArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             } else if (value instanceof DoubleArray) {
                 newBuilder = new DoubleArrayNodePropertiesBuilder(defaultValue, allocationTracker, concurrency);
             } else if (value instanceof FloatArray) {
