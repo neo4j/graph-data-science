@@ -191,7 +191,7 @@ public final class GraphFactory {
             nodeSchema.properties().get(nodeLabel).forEach((propertyKey, propertySchema) ->
                 builderByLabelTokenAndPropertyToken.get(labelToken).put(
                     propertyKey,
-                    NodePropertiesFromStoreBuilder.of(nodeCount, allocationTracker, propertySchema.defaultValue(), concurrency)
+                    NodePropertiesFromStoreBuilder.of(allocationTracker, propertySchema.defaultValue(), concurrency)
                 ));
         });
 

@@ -97,10 +97,10 @@ class UnionNodePropertiesTest {
 
     private UnionNodeProperties initializeUnionNodeProperties(Value propertyValue, DefaultValue defaultValue) {
         NodePropertiesFromStoreBuilder doubleNodePropertiesBuilder = NodePropertiesFromStoreBuilder.of(
-            1, AllocationTracker.empty(), defaultValue, 1
+            AllocationTracker.empty(), defaultValue, 1
         );
 
-        doubleNodePropertiesBuilder.set(0, 0, propertyValue);
+        doubleNodePropertiesBuilder.set(0, propertyValue);
 
         var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(1);
         sparseLongArrayBuilder.set(0);

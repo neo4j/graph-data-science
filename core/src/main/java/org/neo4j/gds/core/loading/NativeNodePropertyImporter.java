@@ -70,7 +70,6 @@ public final class NativeNodePropertyImporter {
     }
 
     int importProperties(
-        long nodeId,
         long neoNodeId,
         long[] labelIds,
         PropertyReference propertiesReference,
@@ -80,7 +79,7 @@ public final class NativeNodePropertyImporter {
             Neo4jProxy.nodeProperties(kernelTransaction, neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
-                nodePropertiesRead += importProperty(nodeId, neoNodeId, labelIds, pc);
+                nodePropertiesRead += importProperty(neoNodeId, labelIds, pc);
             }
             return nodePropertiesRead;
         }
@@ -90,7 +89,7 @@ public final class NativeNodePropertyImporter {
         return buildersByLabel.build(nodeMapping);
     }
 
-    private int importProperty(long nodeId, long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
+    private int importProperty(long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
         int propertiesImported = 0;
         int propertyKey = propertyCursor.propertyKey();
 
@@ -102,7 +101,6 @@ public final class NativeNodePropertyImporter {
             var buildersByPropertyId = buildersByLabelIdAndPropertyId.get(labelId);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
-                    nodeId,
                     neoNodeId,
                     propertyCursor,
                     propertyKey,
@@ -113,7 +111,6 @@ public final class NativeNodePropertyImporter {
 
         if (containsAnyLabelProjection) {
             propertiesImported += setPropertyValue(
-                nodeId,
                 neoNodeId,
                 propertyCursor,
                 propertyKey,
@@ -125,7 +122,6 @@ public final class NativeNodePropertyImporter {
     }
 
     private int setPropertyValue(
-        long nodeId,
         long neoNodeId,
         PropertyCursor propertyCursor,
         int propertyId,
@@ -138,7 +134,7 @@ public final class NativeNodePropertyImporter {
             Value value = propertyCursor.propertyValue();
 
             for (NodePropertiesFromStoreBuilder builder : builders) {
-                builder.set(nodeId, neoNodeId, value);
+                builder.set(neoNodeId, value);
                 propertiesImported++;
             }
         }
@@ -147,7 +143,6 @@ public final class NativeNodePropertyImporter {
     }
 
     public static final class Builder {
-        private long nodeCount;
         private int concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
@@ -155,11 +150,6 @@ public final class NativeNodePropertyImporter {
 
 
         private Builder() {
-        }
-
-        public Builder nodeCount(long nodeCount) {
-            this.nodeCount = nodeCount;
-            return this;
         }
 
         public Builder concurrency(int concurrency) {
@@ -185,7 +175,6 @@ public final class NativeNodePropertyImporter {
         public NativeNodePropertyImporter build() {
             var nodePropertyBuilders = BuildersByLabel.create(
                 propertyMappings,
-                nodeCount,
                 concurrency,
                 allocationTracker
             );
@@ -204,7 +193,6 @@ public final class NativeNodePropertyImporter {
 
         static BuildersByLabel create(
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
-            long nodeCount,
             int concurrency,
             AllocationTracker allocationTracker
         ) {
@@ -213,7 +201,6 @@ public final class NativeNodePropertyImporter {
                 var label = entry.getKey();
                 for (var propertyMapping : entry.getValue()) {
                     var builder = NodePropertiesFromStoreBuilder.of(
-                        nodeCount,
                         allocationTracker,
                         propertyMapping.defaultValue(),
                         concurrency

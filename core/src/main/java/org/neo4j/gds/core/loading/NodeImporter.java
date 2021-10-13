@@ -63,7 +63,6 @@ public class NodeImporter {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
             if (propertyImporter != null) {
                 return propertyImporter.importProperties(
-                    internalId,
                     nodeReference,
                     labelIds,
                     propertiesReference,

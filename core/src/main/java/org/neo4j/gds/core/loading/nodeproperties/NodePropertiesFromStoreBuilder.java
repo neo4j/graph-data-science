@@ -58,16 +58,14 @@ public final class NodePropertiesFromStoreBuilder {
     }
 
     public static NodePropertiesFromStoreBuilder of(
-        long nodeSize,
         AllocationTracker allocationTracker,
         DefaultValue defaultValue,
         int concurrency
     ) {
-        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, allocationTracker, concurrency);
+        return new NodePropertiesFromStoreBuilder(defaultValue, allocationTracker, concurrency);
     }
 
     private final DefaultValue defaultValue;
-    private final long nodeSize;
     private final AllocationTracker allocationTracker;
     private final int concurrency;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
@@ -75,19 +73,17 @@ public final class NodePropertiesFromStoreBuilder {
 
     private NodePropertiesFromStoreBuilder(
         DefaultValue defaultValue,
-        long nodeSize,
         AllocationTracker allocationTracker,
         int concurrency
     ) {
         this.defaultValue = defaultValue;
-        this.nodeSize = nodeSize;
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.innerBuilder = new AtomicReference<>();
         this.size = new LongAdder();
     }
 
-    public void set(long nodeId, long neoNodeId, Value value) {
+    public void set(long neoNodeId, Value value) {
         if (value != null && value != NO_VALUE) {
             if (innerBuilder.get() == null) {
                 initializeWithType(value);

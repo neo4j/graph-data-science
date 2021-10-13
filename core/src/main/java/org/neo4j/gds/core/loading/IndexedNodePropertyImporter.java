@@ -89,7 +89,6 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             executorService,
             index.schema().getPropertyId(),
             NodePropertiesFromStoreBuilder.of(
-                idMap.nodeCount(),
                 allocationTracker,
                 mapping.defaultValue(),
                 concurrency
@@ -259,7 +258,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 var nodeId = idMap.toMappedNodeId(neoNodeId);
                 if (nodeId >= 0) {
                     var propertyValue = indexCursor.propertyValue(propertyOffset);
-                    propertiesBuilder.set(nodeId, neoNodeId, propertyValue);
+                    propertiesBuilder.set(neoNodeId, propertyValue);
                     imported += 1;
                     if ((imported & 0x1_FFFFL) == 0L) {
                         progressTracker.logProgress(imported - logged);
