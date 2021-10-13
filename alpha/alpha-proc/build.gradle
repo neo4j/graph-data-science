@@ -28,7 +28,8 @@ dependencies {
     implementation project(':proc-pregel')
     implementation project(':string-formatting')
 
-    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
+    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
     api project(':alpha-algo')
     api project(':storage-engine-adapter')

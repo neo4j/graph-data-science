@@ -18,6 +18,8 @@ dependencies {
     implementation project(':annotations')
     implementation project(':string-formatting')
 
+    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+
     api(
         project(':core')
     )
