@@ -33,22 +33,21 @@ The FastRP algorithm initially assigns random vectors to all nodes using a techn
 Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described <<algorithms-embeddings-fastrp-extended,below>>.
 We will also use _projection of a node_ synonymously with the initial random vector of a node.
 
-The embedding stem:[e_n] of node stem:[n], which is to be returned by the algorithm, is initialized as
+Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ stem:[e^i_n] for each node stem:[n].
+More precisely,
 [stem]
 ++++
-e_n = w_0 \frac{r_n}{\|r_n\|_2},
+e^i_n = \text{avg}({e^{i-1}_m}),
 ++++
-where stem:[w_0] is the value of `nodeSelfInfluence`, stem:[r_n] is the initial random vector for node stem:[n] and stem:[\|\bullet\|_2] denotes the L2 or https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[euclidean] norm.
+where stem:[m] ranges over neighbors of stem:[n] and stem:[e^0_n] is the node's initial random vector .
+
+The embedding stem:[e_n] of node stem:[n], which is the output of the algorithm, is a combination of the vectors and embeddings defined above:
+[stem]
+++++
+e_n = w_0 \cdot \text{normalize}(r_n) + \sum_{i=1}^{i=k}w_i \cdot \text{normalize}(e^i_n),
+++++
+where stem:[\text{normalize}] is the function which divides a vector with its https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 norm], the value of `nodeSelfInfluence` is stem:[w_0], and the values of `iterationWeights` are stem:[[w_1, w_2, \ldots, w_k]].
 We will return to <<algorithms-embeddings-fastrp-node-self-influence,Node Self Influence>> later on.
-
-The algorithm then iteratively constructs _intermediate_ embeddings by averaging either neighboring intermediate embeddings from the previous iteration, or the generated initial random vectors during the first iteration.
-
-At iteration stem:[i], the embedding for node stem:[n] is updated as follows:
-[stem]
-++++
-e_n \leftarrow e_n + w_i \frac{e^i_n}{\|e^i_n\|_2},
-++++
-where stem:[e^i_n] is the stem:[i]th intermediate embedding for node stem:[n], the values of `iterationWeights` are stem:[[w_1, w_2, \ldots, w_I]].
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
