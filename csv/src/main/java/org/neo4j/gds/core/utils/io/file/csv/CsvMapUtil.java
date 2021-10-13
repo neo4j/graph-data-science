@@ -29,29 +29,31 @@ import java.util.function.Function;
 
 public final class CsvMapUtil {
 
+    private static final char LIST_DELIMITER = ';';
+
     private CsvMapUtil() {}
 
     public static String relationshipCountsToString(Map<RelationshipType, Long> map) {
         return toString(map, ElementIdentifier::name, l -> Long.toString(l));
     }
 
-    public static <KEY, VALUE> String toString(Map<KEY, VALUE> map, Function<KEY, String> keySerializer, Function<VALUE, String> valueSerializer) {
-        var stringBuilder = new StringBuilder();
-        map.keySet().stream().sorted(Comparator.comparing(keySerializer, Comparator.naturalOrder())).forEach(key -> {
-            stringBuilder.append(keySerializer.apply(key));
-            stringBuilder.append(';');
-            stringBuilder.append(valueSerializer.apply(map.get(key)));
-            stringBuilder.append(';');
-        });
-        return stringBuilder.toString();
-    }
-
     public static <KEY, VALUE> Map<KEY, VALUE> fromString(String mapString, Function<String, KEY> keyParser, Function<String, VALUE> valueParser) {
-        var listElements = mapString.split(";");
+        var listElements = mapString.split(String.valueOf(LIST_DELIMITER));
         var map = new HashMap<KEY, VALUE>();
         for (int i = 0; i < listElements.length; i+=2) {
             map.put(keyParser.apply(listElements[i]), valueParser.apply(listElements[i + 1]));
         }
         return map;
+    }
+
+    private static <KEY, VALUE> String toString(Map<KEY, VALUE> map, Function<KEY, String> keySerializer, Function<VALUE, String> valueSerializer) {
+        var stringBuilder = new StringBuilder();
+        map.keySet().stream().sorted(Comparator.comparing(keySerializer, Comparator.naturalOrder())).forEach(key -> {
+            stringBuilder.append(keySerializer.apply(key));
+            stringBuilder.append(LIST_DELIMITER);
+            stringBuilder.append(valueSerializer.apply(map.get(key)));
+            stringBuilder.append(LIST_DELIMITER);
+        });
+        return stringBuilder.toString();
     }
 }
