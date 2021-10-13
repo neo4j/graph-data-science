@@ -16,7 +16,7 @@ This section describes the Node Classification Model in the Neo4j Graph Data Sci
 == Introduction
 
 Node Classification is a common machine learning task applied to graph: training a model to learn in which class a node belongs.
-There are two major classes of classification problems: Binary-class and Multi-class.
+There are two major classes of classification problems: binary and multiclass.
 In Binary-class classifications, the given dataset is categorized into two classes and in Multi-class classification, the given dataset is categorized into several classes.
 Neo4j GDS supports both of the above.
 Neo4j GDS trains supervised machine learning models based on node properties (features) in your graph to predict what class an unseen or future node would belong to.
