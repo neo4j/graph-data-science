@@ -28,12 +28,7 @@ import java.util.stream.Collectors;
 public enum Neo4jVersion {
     V_4_1,
     V_4_2,
-    V_4_3,
-    V_4_3_drop31,
-    V_4_3_drop40,
-    V_4_3_drop41,
-    V_4_3_drop42,
-    V_Dev;
+    V_4_3;
 
     @Override
     public String toString() {
@@ -44,16 +39,6 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
-            case V_4_3_drop31:
-                return "4.3.0-drop03.1";
-            case V_4_3_drop40:
-                return "4.3.0-drop04.0";
-            case V_4_3_drop41:
-                return "4.3.0-drop04.1";
-            case V_4_3_drop42:
-                return "4.3.0-drop04.2";
-            case V_Dev:
-                return "dev";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -68,7 +53,7 @@ public enum Neo4jVersion {
     }
 
     static String neo4jVersion() {
-        var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "dev");
+        var neo4jVersion = Objects.requireNonNull(Version.class.getPackage().getImplementationVersion());
         // some versions have a build thing attached at the end
         // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
         // This regex follows the logic from org.neo4j.kernel.internal.Version.parseReleaseVersion
@@ -88,18 +73,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        if (version.equals("4.3.0-drop03.1")) {
-            return Neo4jVersion.V_4_3_drop31;
-        }
-        if (version.equals("4.3.0-drop04.0")) {
-            return Neo4jVersion.V_4_3_drop40;
-        }
-        if (version.equals("4.3.0-drop04.1")) {
-            return Neo4jVersion.V_4_3_drop41;
-        }
-        if (version.equals("4.3.0-drop04.2")) {
-            return Neo4jVersion.V_4_3_drop42;
-        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -112,8 +85,6 @@ public enum Neo4jVersion {
             case "4.3":
                 return Neo4jVersion.V_4_3;
             case "4.4":
-            case "dev":
-                return Neo4jVersion.V_Dev;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }
