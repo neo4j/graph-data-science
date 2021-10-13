@@ -45,53 +45,22 @@ import java.util.SplittableRandom;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
-public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
+public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
 
     private final LinkLogisticRegressionData modelData;
     private final PipelineExecutor pipelineExecutor;
     private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relationshipTypes;
     private final GraphStore graphStore;
-    private final int concurrency;
-    private final int topN;
-    private final KnnBaseConfig knnConfig;
-    private final double threshold;
+    protected final int concurrency;
 
-    public LinkPrediction(
+    LinkPrediction(
         LinkLogisticRegressionData modelData,
         PipelineExecutor pipelineExecutor,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         GraphStore graphStore,
         int concurrency,
-        int topN,
-        double threshold,
-        ProgressTracker progressTracker
-    ) {
-        this(
-            modelData,
-            pipelineExecutor,
-            nodeLabels,
-            relationshipTypes,
-            graphStore,
-            concurrency,
-            topN,
-            threshold,
-            ImmutableKnnBaseConfig.builder().sampleRate(0.9999D).nodeWeightProperty("foo").build(),
-            progressTracker
-        );
-    }
-
-    public LinkPrediction(
-        LinkLogisticRegressionData modelData,
-        PipelineExecutor pipelineExecutor,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes,
-        GraphStore graphStore,
-        int concurrency,
-        int topN,
-        double threshold,
-        KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -102,10 +71,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         this.relationshipTypes = relationshipTypes;
         this.graphStore = graphStore;
         this.concurrency = concurrency;
-        this.topN = topN;
-        this.threshold = threshold;
-
-        this.knnConfig = knnConfig;
     }
 
     @Override
@@ -114,7 +79,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
         assertRunning();
 
-        var result = predictLinks();
+        var result = predict();
 
         pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
         progressTracker.endSubTask();
@@ -122,83 +87,30 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         return result;
     }
 
-    private LinkPredictionResult predictLinks() {
+    private LinkPredictionResult predict() {
         progressTracker.beginSubTask();
         // retrieve the graph containing the node-properties added by executing the node property steps
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
         var featureExtractor = pipelineExecutor.linkFeatureExtractor(graph);
 
-        assert featureExtractor.featureDimension() == modelData.weights().data().totalSize() : "Model must contain a weight for each feature.";
+        assert featureExtractor.featureDimension() == modelData
+            .weights()
+            .data()
+            .totalSize() : "Model must contain a weight for each feature.";
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
-        var result = new LinkPredictionResult(topN);
-
-        if (knnConfig.sampleRate() == 1.0D) {
-            predictLinksGlobal(graph, featureExtractor, predictor, result);
-        } else {
-            predictLinksApproximate(graph, featureExtractor, predictor, result);
-        }
-
+        var result = predictLinks(graph, featureExtractor, predictor);
         progressTracker.endSubTask();
-
         return result;
     }
 
-    private void predictLinksApproximate(
+
+    abstract LinkPredictionResult predictLinks(
         Graph graph,
         LinkFeatureExtractor featureExtractor,
-        LinkLogisticRegressionPredictor predictor,
-        LinkPredictionResult result
-    ) {
-        var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
-            featureExtractor,
-            predictor,
-            graph
-        );
-        var random = this.knnConfig.randomSeed().isPresent()
-            ? new SplittableRandom(this.knnConfig.randomSeed().get())
-            : new SplittableRandom();
-        var randomSamplingSimilarityResult = new RandomNeighborSamplingSimilarityComputer(
-            knnConfig,
-            random,
-            linkPredictionSimilarityComputer,
-            graph.nodeCount(),
-            Pools.DEFAULT,
-            progressTracker,
-            AllocationTracker.empty()
-        ).compute();
+        LinkLogisticRegressionPredictor predictor
+    );
 
-        randomSamplingSimilarityResult
-            .streamSimilarityResult()
-            .forEach(similarityResult -> {
-                var similarity = similarityResult.similarity;
-                if (similarity >= threshold) {
-                    result.add(
-                        similarityResult.node1,
-                        similarityResult.node2,
-                        similarity
-                    );
-                }
-            });
-    }
-
-    private void predictLinksGlobal(
-        Graph graph,
-        LinkFeatureExtractor featureExtractor,
-        LinkLogisticRegressionPredictor predictor,
-        LinkPredictionResult result
-    ) {
-        var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
-        batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
-                graph.concurrentCopy(),
-                featureExtractor,
-                predictor,
-                result,
-                progressTracker
-            ),
-            terminationFlag
-        );
-    }
 
     @Override
     public LinkPrediction me() {
@@ -208,57 +120,5 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     @Override
     public void release() {
 
-    }
-
-    private final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
-        private final Graph graph;
-        private final LinkFeatureExtractor linkFeatureExtractor;
-        private final LinkLogisticRegressionPredictor predictor;
-        private final LinkPredictionResult predictedLinks;
-        private final ProgressTracker progressTracker;
-
-        private LinkPredictionScoreByIdsConsumer(
-            Graph graph,
-            LinkFeatureExtractor linkFeatureExtractor,
-            LinkLogisticRegressionPredictor predictor,
-            LinkPredictionResult predictedLinks,
-            ProgressTracker progressTracker
-        ) {
-            this.graph = graph;
-            this.linkFeatureExtractor = linkFeatureExtractor;
-            this.predictor = predictor;
-            this.predictedLinks = predictedLinks;
-            this.progressTracker = progressTracker;
-        }
-
-        @Override
-        public void accept(Batch batch) {
-            for (long sourceId : batch.nodeIds()) {
-                var largerNeighbors = largerNeighbors(sourceId);
-                // since graph is undirected, only process pairs where sourceId < targetId
-                var smallestTarget = sourceId + 1;
-                LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
-                        if (largerNeighbors.contains(targetId)) return;
-                        var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-                        var probability = predictor.predictedProbability(features);
-                        if (probability < threshold) return;
-                        predictedLinks.add(sourceId, targetId, probability);
-                    }
-                );
-            }
-
-            progressTracker.logProgress(batch.size());
-        }
-
-        private LongHashSet largerNeighbors(long sourceId) {
-            var neighbors = new LongHashSet();
-            graph.forEachRelationship(
-                sourceId, (src, trg) -> {
-                    if (src < trg) neighbors.add(trg);
-                    return true;
-                }
-            );
-            return neighbors;
-        }
     }
 }

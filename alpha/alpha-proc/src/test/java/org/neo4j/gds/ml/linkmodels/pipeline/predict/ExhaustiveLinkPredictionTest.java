@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkPredictionTest extends BaseProcTest {
+class ExhaustiveLinkPredictionTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
     @Neo4jGraph
@@ -114,7 +114,7 @@ class LinkPredictionTest extends BaseProcTest {
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
             );
-            var linkPrediction = new LinkPrediction(
+            var linkPrediction = new ExhaustiveLinkPrediction(
                 modelData,
                 pipelineExecutor,
                 List.of(NodeLabel.of("N")),
@@ -137,7 +137,10 @@ class LinkPredictionTest extends BaseProcTest {
                 PredictedLink.of(0, 2, 2.0547103309367397E-4),
                 PredictedLink.of(2, 3, 2.810228605019867E-9)
             );
-            assertThat(predictedLinks).containsAll(expectedLinks);
+            var endIndex = Math.min(topN, expectedLinks.size());
+            assertThat(predictedLinks).containsExactly(expectedLinks
+                .subList(0, endIndex)
+                .toArray(PredictedLink[]::new));
         });
     }
 
@@ -166,7 +169,7 @@ class LinkPredictionTest extends BaseProcTest {
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
             );
-            var linkPrediction = new LinkPrediction(
+            var linkPrediction = new ExhaustiveLinkPrediction(
                 modelData,
                 executor,
                 List.of(NodeLabel.of("N")),
@@ -211,7 +214,7 @@ class LinkPredictionTest extends BaseProcTest {
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
             );
-            var linkPrediction = new LinkPrediction(
+            var linkPrediction = new ExhaustiveLinkPrediction(
                 modelData,
                 pipelineExecutor,
                 List.of(NodeLabel.of("N")),
@@ -276,7 +279,7 @@ class LinkPredictionTest extends BaseProcTest {
                     GRAPH_NAME,
                     ProgressTracker.NULL_TRACKER
                 );
-                var linkPrediction = new LinkPrediction(
+                var linkPrediction = new ExhaustiveLinkPrediction(
                     modelData,
                     pipelineExecutor,
                     List.of(NodeLabel.of("N")),
