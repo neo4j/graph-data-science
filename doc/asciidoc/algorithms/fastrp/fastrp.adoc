@@ -138,12 +138,7 @@ This can be seen as producing fallback features when graph structure is (locally
 Moreover, sometimes a node's own properties are simply informative features and are good to include even if connectivity is high.
 Finally, node self influence can be used for pure dimensionality reduction to compress node properties used for node classification.
 
-If node properties are not used, the usefulness of `nodeSelfInfluence` is less clear.
-The intermediate embedding from the first iteration encodes information about the neighborhood of nodes.
-Therefore the similarity of first intermediate embeddings measures how much the neighborhoods of two nodes overlap but not whether the two nodes are neighbors or not.
-Using positive iteration weights for the first iteration together with positive node self influence gives embeddings that reflect neighborhood overlap and whose similarity increases further if the nodes are connected.
-However, because of the averaging and L2 normalization, if two nodes have high degree, their embedding similarity will have a low sensitivity to whether the nodes are neighbors or not.
-
+If node properties are not used, using `nodeSelfInfluence` may also have a positive effect, depending on other settings and on the problem.
 
 === Orientation
 
