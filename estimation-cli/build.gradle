@@ -13,6 +13,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':memory-usage')
     implementation project(':proc')
+    implementation project(':string-formatting')
 
     implementation group: 'info.picocli',       name: 'picocli',             version: ver.'picocli'
     implementation group: 'org.reflections',    name: 'reflections',         version: ver.doc.'reflections'

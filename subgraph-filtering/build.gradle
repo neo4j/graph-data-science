@@ -18,6 +18,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':core')
+    implementation project(':string-formatting')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'

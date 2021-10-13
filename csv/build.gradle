@@ -15,6 +15,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':core')
     implementation project(':neo4j-kernel-adapter')
+    implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'

@@ -20,6 +20,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':memory-usage')
+    implementation project(':string-formatting')
 
     api(project(':algo-common'))
 

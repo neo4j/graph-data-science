@@ -10,6 +10,7 @@ dependencies {
     implementation project(':proc-catalog')
     implementation project(':proc-common')
     implementation project(':proc-embeddings')
+    implementation project(':string-formatting')
 
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     neodeps.each {

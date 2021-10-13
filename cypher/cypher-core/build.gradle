@@ -17,6 +17,7 @@ dependencies {
         }
     }
 
+    implementation project(':string-formatting')
     api project(':core')
 
     testImplementation project(":test-utils")

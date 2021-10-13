@@ -19,6 +19,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':memory-usage')
+    implementation project(':string-formatting')
 
     api project(':alpha-core')
     api project(':ml-core')

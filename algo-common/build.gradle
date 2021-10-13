@@ -16,6 +16,7 @@ dependencies {
     }
 
     implementation project(':annotations')
+    implementation project(':string-formatting')
 
     api(
         project(':core')

@@ -10,6 +10,7 @@ dependencies {
 
     implementation     project(':annotations')
     implementation     project(':proc-pregel')
+    implementation     project(':string-formatting')
     implementation     project(':test-utils')
 
     implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'

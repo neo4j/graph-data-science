@@ -7,9 +7,12 @@ dependencies {
     compileOnly project(':annotations')
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
     implementation project(':algo-common')
+    implementation project(':pregel')
+    implementation project(':string-formatting')
+
     api project(':proc-common')
     api project(':test-utils')
     api project(':proc-catalog')
-    implementation project(':pregel')
 }

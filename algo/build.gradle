@@ -24,6 +24,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':pregel')
+    implementation project(':string-formatting')
 
     // TEST DEPENDENCIES
 

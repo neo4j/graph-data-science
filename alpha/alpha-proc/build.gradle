@@ -26,6 +26,7 @@ dependencies {
     implementation project(':proc-community')
     implementation project(':proc-path-finding')
     implementation project(':proc-pregel')
+    implementation project(':string-formatting')
 
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 

@@ -14,6 +14,7 @@ dependencies {
     implementation project(':core')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
+    implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
