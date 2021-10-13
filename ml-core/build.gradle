@@ -18,6 +18,9 @@ dependencies {
         }
     }
 
+    implementation group: 'org.ejml', name: 'ejml-core',   version: ver.'ejml'
+    implementation group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml'
+
     implementation project(':annotations')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
