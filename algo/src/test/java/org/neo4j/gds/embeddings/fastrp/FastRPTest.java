@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
-import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class FastRPTest extends AlgoTestBase {
@@ -158,8 +157,9 @@ class FastRPTest extends AlgoTestBase {
 
     @Test
     void shouldAddInitialVectors() {
+        var embeddingDimension = 6;
         var config = FastRPBaseConfig.builder()
-            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .embeddingDimension(embeddingDimension)
             .propertyRatio(0.5)
             .featureProperties(List.of("f1", "f2"))
             .nodeSelfInfluence(0.6)
@@ -185,25 +185,44 @@ class FastRPTest extends AlgoTestBase {
         );
 
         fastRP.initDegreePartition();
-        fastRP.initPropertyVectors();
+        // needed to avoid NPE. the randomvectors are overwritten below.
         fastRP.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
-        fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
+
+        var initialRandomVectors = fastRP.currentEmbedding(-1);
+        var initial0 = new float[embeddingDimension];
+        var initial1 = new float[embeddingDimension];
+        var initial2 = new float[embeddingDimension];
+        initial0[0] = 1.0f;
+        initial0[3] = -1.0f;
+        initial1[1] = 2.4f;
+        initial1[2] = -0.5f;
+        initial2[5] = -3.0f;
+        initial2[4] = -0.5f;
+        initialRandomVectors.set(0, initial0);
+        initialRandomVectors.set(1, initial1);
+        initialRandomVectors.set(2, initial2);
+
         fastRP.addInitialVectorsToEmbedding();
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
-        l2Normalize(randomVectors.get(0));
-        l2Normalize(randomVectors.get(1));
-        l2Normalize(randomVectors.get(2));
 
-        scale(randomVectors.get(0),config.nodeSelfInfluence().floatValue());
-        scale(randomVectors.get(1),config.nodeSelfInfluence().floatValue());
-        scale(randomVectors.get(2),config.nodeSelfInfluence().floatValue());
+        var expected0 = new float[embeddingDimension];
+        var expected1 = new float[embeddingDimension];
+        var expected2 = new float[embeddingDimension];
+        var scale0 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(2);
+        var scale1 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(2.4 * 2.4 + 0.5 * 0.5);
+        var scale2 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(3.0 * 3.0 + 0.5 * 0.5);
+        expected0[0] = 1.0f * scale0;
+        expected0[3] = -1.0f * scale0;
+        expected1[1] = 2.4f * scale1;
+        expected1[2] = -0.5f * scale1;
+        expected2[5] = -3.0f * scale2;
+        expected2[4] = -0.5f * scale2;
 
-        assertThat(embeddings.get(0)).containsExactly(randomVectors.get(0),Offset.offset(1e-6f));
-        assertThat(embeddings.get(1)).containsExactly(randomVectors.get(1),Offset.offset(1e-6f));
-        assertThat(embeddings.get(2)).containsExactly(randomVectors.get(2),Offset.offset(1e-6f));
+        assertThat(embeddings.get(0)).containsExactly(expected0, Offset.offset(1e-6f));
+        assertThat(embeddings.get(1)).containsExactly(expected1, Offset.offset(1e-6f));
+        assertThat(embeddings.get(2)).containsExactly(expected2, Offset.offset(1e-6f));
     }
 
     @Test
