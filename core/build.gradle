@@ -34,6 +34,8 @@ dependencies {
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'org.ejml',                name: 'ejml-core',                version: ver.'ejml'],
             [group: 'org.ejml',                name: 'ejml-ddense',              version: ver.'ejml'],
+            [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
+            [group: 'org.openjdk.jol',         name: 'jol-core',                 version: ver.'jol'],
             [group: 'de.siegmar',              name: 'fastcsv',                  version: ver.'fastcsv'],
             [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
             [group: 'org.jctools',             name: 'jctools-core',             version: ver.'jctools-core'],

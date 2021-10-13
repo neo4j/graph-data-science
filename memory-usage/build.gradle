@@ -23,7 +23,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Memory Usage'
 
 dependencies {
-    api (
+    implementation (
         project(':annotations'),
         [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
         [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
