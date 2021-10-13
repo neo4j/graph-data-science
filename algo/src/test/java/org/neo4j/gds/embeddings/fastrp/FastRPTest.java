@@ -28,6 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -36,7 +37,9 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -50,6 +53,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -462,6 +466,54 @@ class FastRPTest extends AlgoTestBase {
         assertThat(estimate.min)
             .isEqualTo(estimate.max)
             .isEqualTo(159_840);
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var config = FastRPBaseConfig.builder()
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .propertyRatio(0.5)
+            .featureProperties(List.of("f1", "f2"))
+            .nodeSelfInfluence(0.6)
+            .addIterationWeight(0.0D)
+            .randomSeed(42L)
+            .build();
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
+            .build();
+
+        Graph graph = graphLoader.graph();
+        var factory = new FastRPFactory();
+
+        var progressTask = factory.progressTask(graph, config);
+        var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+
+        factory
+            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "FastRP :: Start",
+                "FastRP :: Initialize random vectors :: Start",
+                "FastRP :: Initialize random vectors 100%",
+                "FastRP :: Initialize random vectors :: Finished",
+                "FastRP :: Apply node self-influence :: Start",
+                "FastRP :: Apply node self-influence 100%",
+                "FastRP :: Apply node self-influence :: Finished",
+                "FastRP :: Propagate embeddings :: Start",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Start",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 100%",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Finished",
+                "FastRP :: Propagate embeddings :: Finished",
+                "FastRP :: Finished"
+            );
     }
 
     private List<FeatureExtractor> defaultFeatureExtractors(Graph graph) {
