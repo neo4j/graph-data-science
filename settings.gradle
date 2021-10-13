@@ -21,7 +21,6 @@ def registerSubModules(File file) {
     moduleDirectories.stream()
             .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
             .filter { moduleDir -> moduleDir.name != 'pregel-bootstrap' }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.2" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.3" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.4" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.5" }

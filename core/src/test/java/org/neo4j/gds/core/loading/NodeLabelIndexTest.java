@@ -41,7 +41,6 @@ public class NodeLabelIndexTest extends BaseTest {
     @Test
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_1, message = "Label index is mandatory in 4.1.")
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_2, message = "Label index is mandatory in 4.2.")
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_3_drop42, message = "Label index is mandatory in Neo4j 4.3.0-drop04.2.")
     void shouldLoadWithoutNodeLabelIndex() {
         runQueryWithResultConsumer(
             "SHOW INDEXES WHERE entityType = 'NODE'",
