@@ -37,8 +37,6 @@ public interface HugeSparseLongArrayArray {
     interface Builder {
         void set(long index, long[] value);
 
-        boolean setIfAbsent(long index, long[] value);
-
         HugeSparseLongArrayArray build();
     }
 }

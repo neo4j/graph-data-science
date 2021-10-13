@@ -242,6 +242,21 @@ final class HugeSparseArrayGenerator {
             .build();
     }
 
+    private static final Map<TypeName, String> EQUAL_PREDICATES = Map.ofEntries(
+        entry(TypeName.BYTE, "%s == %s"),
+        entry(TypeName.SHORT, "%s == %s"),
+        entry(TypeName.INT, "%s == %s"),
+        entry(TypeName.LONG, "%s == %s"),
+        entry(TypeName.FLOAT, "Float.compare(%s, %s) == 0"),
+        entry(TypeName.DOUBLE, "Double.compare(%s, %s) == 0"),
+        entry(ArrayTypeName.of(TypeName.BYTE), "Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.SHORT), "Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.INT), "Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.LONG), "Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.FLOAT), "Arrays.equals(%1$s, %2$s)"),
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "Arrays.equals(%1$s, %2$s)")
+    );
+
     private static final Map<TypeName, String> NOT_EQUAL_PREDICATES = Map.ofEntries(
         entry(TypeName.BYTE, "%s != %s"),
         entry(TypeName.SHORT, "%s != %s"),
@@ -256,6 +271,19 @@ final class HugeSparseArrayGenerator {
         entry(ArrayTypeName.of(TypeName.FLOAT), "%1$s != null && !Arrays.equals(%1$s, %2$s)"),
         entry(ArrayTypeName.of(TypeName.DOUBLE), "%1$s != null && !Arrays.equals(%1$s, %2$s)")
     );
+
+    private static <LHS, RHS> CodeBlock isEqual(
+        TypeName typeName,
+        String lhsType,
+        String rhsType,
+        LHS lhs,
+        RHS rhs
+    ) {
+        return CodeBlock
+            .builder()
+            .add(String.format(Locale.ENGLISH, EQUAL_PREDICATES.get(typeName), lhsType, rhsType), lhs, rhs)
+            .build();
+    }
 
     private static <LHS, RHS> CodeBlock isNotEqual(
         TypeName typeName,
@@ -336,9 +364,10 @@ final class HugeSparseArrayGenerator {
 
             // public methods
             builder.addMethod(setMethod(valueType, pageIndex, indexInPage, arrayHandle));
-            builder.addMethod(setIfAbsentMethod(valueType, pageIndex, indexInPage, arrayHandle, defaultValue));
             builder.addMethod(buildMethod(valueType, elementType, pages, pageShift, defaultValue, className));
+
             if (valueType.isPrimitive()) {
+                builder.addMethod(setIfAbsentMethod(valueType, pageIndex, indexInPage, arrayHandle, defaultValue));
                 builder.addMethod(addToMethod(valueType, pageIndex, indexInPage, arrayHandle));
             }
 
@@ -450,7 +479,7 @@ final class HugeSparseArrayGenerator {
                     arrayHandle,
                     defaultValue
                 )
-                .addStatement("return storedValue == $N", defaultValue)
+                .addStatement("return " + isEqual(valueType, "$1L", "$2N", "storedValue", defaultValue))
                 .build();
         }
 

@@ -59,6 +59,14 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
             case "set":
                 return validateSetMethod(e, elementType);
             case "setIfAbsent":
+                if (isArrayType) {
+                    messager.printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "setIfAbsent method is not valid for array types",
+                        e
+                    );
+                    return false;
+                }
                 return validateSetIfAbsentMethod(e, elementType);
             case "addTo":
                 if (isArrayType) {
