@@ -56,6 +56,7 @@ ext {
         'hppc'                 : '0.7.3',
         'immutables'           : '2.8.8',
         'jackson'              : '2.11.1',
+        'jackson-databind'     : '2.9.10.6',
         'javapoet'             : '1.11.1',
         'jctools-core'         : '3.1.0',
         'jetbrains-annotations': '18.0.0',
