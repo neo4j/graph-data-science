@@ -18,6 +18,8 @@ dependencies {
         }
     }
 
+    implementation project(':memory-usage')
+
     api(project(':algo-common'))
 
     // TEST DEPENDENCIES

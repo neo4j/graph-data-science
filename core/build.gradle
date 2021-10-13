@@ -20,10 +20,11 @@ dependencies {
     }
     compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
 
+    implementation project(':memory-usage')
+
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
-            project(':memory-usage'),
             project(':graph-projection-api'),
             project(':string-formatting'),
             [group: 'org.bouncycastle',        name: 'bcpkix-jdk15on',           version: ver.'bouncycastle'],

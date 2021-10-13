@@ -14,11 +14,10 @@ dependencies {
 
     api(project(':algo'))
 
-    implementation(
-        project(':neo4j-adapter'),
-        project(':algo-common'),
-        project(':pregel')
-    )
+    implementation project(':algo-common')
+    implementation project(':memory-usage')
+    implementation project(':neo4j-adapter')
+    implementation project(':pregel')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

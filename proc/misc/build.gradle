@@ -2,12 +2,13 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Misc'
 dependencies {
-    implementation project(':proc-common')
-    implementation project(':proc-catalog')
-    implementation project(':proc-embeddings')
-    implementation project(':neo4j-adapter')
     implementation project(':core')
     implementation project(':csv')
+    implementation project(':memory-usage')
+    implementation project(':neo4j-adapter')
+    implementation project(':proc-catalog')
+    implementation project(':proc-common')
+    implementation project(':proc-embeddings')
 
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     neodeps.each {

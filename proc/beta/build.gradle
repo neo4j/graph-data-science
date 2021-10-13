@@ -9,11 +9,10 @@ dependencies {
 
     api project(':proc-common')
 
-    implementation(
-        project(':neo4j-adapter'),
-        project(':ml-core'),
-        project(':pregel')
-    )
+    implementation project(':memory-usage')
+    implementation project(':ml-core')
+    implementation project(':neo4j-adapter')
+    implementation project(':pregel')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
