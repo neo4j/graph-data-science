@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.DataClass;
@@ -72,7 +71,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     public static RelationshipProjections fromString(@Nullable String typeString) {
         validateIdentifierName(typeString);
 
-        if (StringUtils.isEmpty(typeString)) {
+        if (StringFormatting.isEmpty(typeString)) {
             create(emptyMap());
         }
         if (typeString.equals(ElementProjection.PROJECT_ALL)) {

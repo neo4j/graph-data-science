@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,7 +70,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     public static NodeProjections fromString(@Nullable String labelString) {
         validateIdentifierName(labelString);
 
-        if (StringUtils.isEmpty(labelString)) {
+        if (StringFormatting.isEmpty(labelString)) {
             create(emptyMap());
         }
         if (labelString.equals(ElementProjection.PROJECT_ALL)) {

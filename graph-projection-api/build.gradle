@@ -11,7 +11,7 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    api(
+    implementation(
             project(':annotations'),
             project(':string-formatting'),
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],

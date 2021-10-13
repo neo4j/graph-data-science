@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Objects;
 
@@ -33,7 +33,7 @@ public abstract class ElementIdentifier {
     ElementIdentifier(@NotNull String name) {
         if (name.equals(ElementProjection.PROJECT_ALL)) {
             throw new IllegalArgumentException("name cannot be `*`");
-        } else if (StringUtils.isEmpty(name)) {
+        } else if (StringFormatting.isEmpty(name)) {
             throw new IllegalArgumentException("name cannot be empty");
         }
         this.name = name;

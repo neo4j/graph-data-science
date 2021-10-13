@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Locale;
 
 public final class StringFormatting {
@@ -35,5 +37,9 @@ public final class StringFormatting {
 
     public static String toUpperCaseWithLocale(String string) {
         return string.toUpperCase(Locale.ENGLISH);
+    }
+
+    public static boolean isEmpty(String string) {
+        return StringUtils.isEmpty(string);
     }
 }
