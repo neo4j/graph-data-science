@@ -302,9 +302,9 @@ final class HugeSparseArrayGenerator {
         TypeName.BYTE, Byte.toString((new byte[1])[0]),
         TypeName.SHORT, Short.toString((new short[1])[0]),
         TypeName.INT, Integer.toString((new int[1])[0]),
-        TypeName.LONG, Long.toString((new long[1])[0]),
-        TypeName.FLOAT, Float.toString((new float[1])[0]),
-        TypeName.DOUBLE, Double.toString((new double[1])[0])
+        TypeName.LONG, (new long[1])[0] + "L",
+        TypeName.FLOAT, (new float[1])[0] + "F",
+        TypeName.DOUBLE, (new double[1])[0] + "D"
     );
 
     private static MethodSpec containsMethod(
