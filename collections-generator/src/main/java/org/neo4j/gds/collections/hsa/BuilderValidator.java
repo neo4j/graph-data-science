@@ -61,15 +61,16 @@ class BuilderValidator extends SimpleElementVisitor9<Boolean, TypeMirror> {
             case "setIfAbsent":
                 return validateSetIfAbsentMethod(e, elementType);
             case "addTo":
-                if (!isArrayType) {
-                    return validateAddToMethod(e, elementType);
+                if (isArrayType) {
+                    messager.printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "addTo method is not valid for array types",
+                        e
+                    );
+                    return false;
                 }
-                messager.printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "addTo method is not valid for array types",
-                    e
-                );
-                return false;
+                return validateAddToMethod(e, elementType);
+
             case "build":
                 return validateBuildMethod(e);
             default:
