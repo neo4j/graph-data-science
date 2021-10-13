@@ -9,6 +9,7 @@ dependencies {
 
     api project(':proc-common')
 
+    implementation project(':annotations')
     implementation project(':algo-common')
     implementation project(':core')
     implementation project(':memory-usage')

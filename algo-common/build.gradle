@@ -15,6 +15,8 @@ dependencies {
         }
     }
 
+    implementation project(':annotations')
+
     api(
         project(':core')
     )

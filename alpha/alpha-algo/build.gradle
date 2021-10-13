@@ -17,6 +17,7 @@ dependencies {
         }
     }
 
+    implementation project(':annotations')
     implementation project(':memory-usage')
 
     api project(':alpha-core')

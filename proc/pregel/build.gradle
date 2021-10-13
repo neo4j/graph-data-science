@@ -11,6 +11,7 @@ dependencies {
         }
     }
 
+    implementation project(':annotations')
     implementation project(':algo-common')
     implementation project(':proc-common')
 

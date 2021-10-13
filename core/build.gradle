@@ -20,10 +20,10 @@ dependencies {
     }
     compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
 
+    implementation project(':annotations')
     implementation project(':memory-usage')
 
     api(
-            project(':annotations'),
             project(':neo4j-kernel-adapter'),
             project(':graph-projection-api'),
             project(':string-formatting'),

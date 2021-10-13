@@ -11,6 +11,7 @@ dependencies {
     api project(':proc-common')
     api group: 'commons-io', name: 'commons-io', version: ver.'commons-io'
 
+    implementation project(':annotations')
     implementation project(':core')
     implementation project(':csv')
     implementation project(':memory-usage')

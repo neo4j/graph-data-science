@@ -13,6 +13,7 @@ dependencies {
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
     compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':annotations')
     implementation project(':core')
     implementation project(':write-services')
 

@@ -2,6 +2,7 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Misc'
 dependencies {
+    implementation project(':annotations')
     implementation project(':core')
     implementation project(':csv')
     implementation project(':memory-usage')

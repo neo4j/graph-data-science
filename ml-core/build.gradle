@@ -18,6 +18,7 @@ dependencies {
         }
     }
 
+    implementation project(':annotations')
     implementation project(':memory-usage')
 
     api(project(':algo-common'))

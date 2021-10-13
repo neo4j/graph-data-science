@@ -14,6 +14,7 @@ dependencies {
 
     api(project(':algo'))
 
+    implementation project(':annotations')
     implementation project(':algo-common')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
