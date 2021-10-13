@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
@@ -40,11 +39,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
     private final HugeObjectArray<double[]> allFeatureVectors;
     private final int maxDepth;
     private final int minSize;
-    private final boolean featureBagging;
     private final double numFeatureVectorsRatio;
-    private final int[] activeFeatureIndices;
+    private final int[] featureBag;
     // TODO: Implement HugeBitSet and use that instead of HugeByteArray.
     private final HugeByteArray bootstrappedDataset;
+    private FeatureBagger featureBagger = null;
 
     DecisionTreeTrain(
         AllocationTracker allocationTracker,
@@ -73,13 +72,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
 
         int totalNumFeatures = allFeatureVectors.get(0).length;
         if (Double.valueOf(0.0D).equals(featureBaggingRatio)) {
-            this.activeFeatureIndices = new int[totalNumFeatures];
-            Arrays.setAll(this.activeFeatureIndices, i -> i);
-            this.featureBagging = false;
+            this.featureBag = new int[totalNumFeatures];
+            Arrays.setAll(this.featureBag, i -> i);
         } else {
             int numActiveFeatures = (int) Math.ceil(featureBaggingRatio * totalNumFeatures);
-            this.activeFeatureIndices = new int[numActiveFeatures];
-            this.featureBagging = true;
+            this.featureBag = new int[numActiveFeatures];
+            this.featureBagger = new FeatureBagger(this.random, totalNumFeatures);
         }
     }
 
@@ -199,11 +197,11 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         );
         var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
 
-        if (featureBagging) {
-            featureBagging();
+        if (featureBagger != null) {
+            featureBagger.sample(featureBag);
         }
 
-        for (int i : activeFeatureIndices) {
+        for (int i : featureBag) {
             for (long j = 0; j < groupSize; j++) {
                 var features = allFeatureVectors.get(group.get(j));
 
@@ -232,18 +230,6 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             bestGroupSizes
         );
 
-    }
-
-    private void featureBagging() {
-        var tmpAvailableIndices = new Integer[allFeatureVectors.get(0).length];
-        Arrays.setAll(tmpAvailableIndices, i -> i);
-        final var availableIndices = new LinkedList<>(Arrays.asList(tmpAvailableIndices));
-
-        for (int i = 0; i < activeFeatureIndices.length; i++) {
-            int j = random.nextInt(availableIndices.size());
-            activeFeatureIndices[i] = (availableIndices.get(j));
-            availableIndices.remove(j);
-        }
     }
 
     private HugeLongArray bootstrapDataset(double numFeatureVectorsRatio) {
