@@ -84,7 +84,6 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-
         return new DoubleArrayStoreNodeProperties(propertyValues, size);
     }
 

@@ -81,7 +81,6 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-
         return new LongArrayStoreNodeProperties(propertyValues, size);
     }
 

@@ -80,7 +80,6 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-
         return new FloatArrayStoreNodeProperties(propertyValues, size);
     }
 

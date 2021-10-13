@@ -115,8 +115,6 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
             : OptionalDouble.empty();
 
-
-
         return new DoubleStoreNodeProperties(propertyValues, size, maybeMaxValue);
     }
 
