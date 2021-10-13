@@ -44,7 +44,6 @@ class Neo4jVersionTest {
         "4.4.0-dev, V_Dev",
         "4.3.0-drop04, V_4_3",
         "4.3.0, V_4_3",
-        "4.3.0-drop04.1, V_4_3_drop41",
         "4.3.0-drop04.2, V_4_3_drop42",
         "4.3.0-drop04.3, V_4_3_drop43",
         "4.3.0-drop04.4, V_4_3_drop44",
