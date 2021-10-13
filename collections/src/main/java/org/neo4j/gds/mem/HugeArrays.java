@@ -85,7 +85,6 @@ public final class HugeArrays {
         }
     }
 
-
     private HugeArrays() {
         throw new UnsupportedOperationException("No instances");
     }

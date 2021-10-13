@@ -36,7 +36,7 @@ import java.util.Set;
 
 public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
-    private static final Class<HugeSparseArray> ANNOTATION_CLASS = HugeSparseArray.class;
+    private static final Class<HugeSparseArray> HSA_ANNOTATION = HugeSparseArray.class;
 
     private final Messager messager;
     private final Filer filer;
@@ -56,12 +56,12 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
     @Override
     public Set<String> annotations() {
-        return Set.of(ANNOTATION_CLASS.getCanonicalName());
+        return Set.of(HSA_ANNOTATION.getCanonicalName());
     }
 
     @Override
     public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-        var elements = elementsByAnnotation.get(ANNOTATION_CLASS.getCanonicalName());
+        var elements = elementsByAnnotation.get(HSA_ANNOTATION.getCanonicalName());
 
         ImmutableSet.Builder<Element> elementsToRetry = ImmutableSet.builder();
 
