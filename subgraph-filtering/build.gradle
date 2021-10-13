@@ -20,6 +20,9 @@ dependencies {
     implementation project(':core')
     implementation project(':string-formatting')
 
+    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
+    implementation group: 'org.opencypher', name: 'cypher-ast-factory-9.0',   version: ver.'opencypher-front-end', transitive: false
+
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 

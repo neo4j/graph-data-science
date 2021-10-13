@@ -21,6 +21,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson-databind'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
     implementation group: 'de.siegmar', name: 'fastcsv', version: ver.'fastcsv'
+    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
 
     neodeps.each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
