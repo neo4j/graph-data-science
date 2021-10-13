@@ -31,7 +31,9 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Set;
 
 public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
@@ -42,6 +44,7 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
     private final Filer filer;
 
     private final HugeSparseArrayValidation validation;
+    private final Path sourcePath;
 
     public HugeSparseArrayStep(ProcessingEnvironment processingEnv) {
         this.validation = new HugeSparseArrayValidation(
@@ -52,6 +55,7 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
         this.messager = processingEnv.getMessager();
         this.filer = processingEnv.getFiler();
+        this.sourcePath = fetchSourcePath();
     }
 
     @Override
@@ -82,10 +86,19 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
         }
 
         var spec = validationResult.get();
-        var typeSpec = HugeSparseArrayGenerator.generate(spec);
-        var javaFile = javaFile(spec.rootPackage().toString(), typeSpec);
 
-        return writeFile(element, javaFile);
+        var typeSpec = HugeSparseArrayGenerator.generate(spec);
+        var mainFile = javaFile(spec.rootPackage().toString(), typeSpec);
+
+        var result = writeFile(element, mainFile);
+        if (result != ProcessResult.PROCESSED) {
+            return result;
+        }
+
+        var testTypeSpec = HugeSparseArrayTestGenerator.generate(spec);
+        var testFile = javaFile(spec.rootPackage().toString(), testTypeSpec);
+
+        return writeTestFile(element, testFile);
     }
 
     private static JavaFile javaFile(String rootPackage, TypeSpec typeSpec) {
@@ -94,6 +107,33 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
             .indent("    ")
             .skipJavaLangImports(true)
             .build();
+    }
+
+    private ProcessResult writeTestFile(Element element, JavaFile file) {
+        var testSourcePath = sourcePath.resolve("test");
+
+        try {
+            file.writeTo(testSourcePath);
+            return ProcessResult.PROCESSED;
+        } catch (IOException e) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Could not write HugeSparseArray java file: " + e.getMessage(),
+                element
+            );
+            return ProcessResult.RETRY;
+        }
+    }
+
+    private Path fetchSourcePath() {
+        try {
+            JavaFileObject generationForPath = filer.createSourceFile("tmpFile");
+            return Path.of(generationForPath.toUri()).getParent().getParent();
+        } catch (IOException e) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Unable to determine source path");
+        }
+
+        return null;
     }
 
     private ProcessResult writeFile(Element element, JavaFile file) {

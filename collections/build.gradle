@@ -31,4 +31,13 @@ dependencies {
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
+
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs += ['build/generated/sources/annotationProcessor/java/test']
+        }
+    }
 }
