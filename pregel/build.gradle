@@ -13,11 +13,10 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(":core")
     implementation project(':annotations')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
-
-    api project(":core")
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
