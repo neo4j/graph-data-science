@@ -55,7 +55,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     }
 
     @Override
-    public void setValue(long nodeId, long neoNodeId, Value value) {
+    public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getFloatArray(value));
     }
 

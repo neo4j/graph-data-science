@@ -92,7 +92,7 @@ public final class NodePropertiesFromStoreBuilder {
             if (innerBuilder.get() == null) {
                 initializeWithType(value);
             }
-            innerBuilder.get().setValue(nodeId, neoNodeId, value);
+            innerBuilder.get().setValue(neoNodeId, value);
             size.increment();
         }
     }

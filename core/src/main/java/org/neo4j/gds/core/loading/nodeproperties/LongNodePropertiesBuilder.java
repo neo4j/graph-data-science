@@ -92,7 +92,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public void setValue(long nodeId, long neoNodeId, Value value) {
+    public void setValue(long neoNodeId, Value value) {
         var longValue = Neo4jValueConversion.getLongValue(value);
         set(neoNodeId, longValue);
     }

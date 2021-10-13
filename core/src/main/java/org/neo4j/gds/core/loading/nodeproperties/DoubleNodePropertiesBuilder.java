@@ -84,7 +84,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public void setValue(long nodeId, long neoNodeId, Value value) {
+    public void setValue(long neoNodeId, Value value) {
         double doubleValue = Neo4jValueConversion.getDoubleValue(value);
         set(neoNodeId, doubleValue);
     }
