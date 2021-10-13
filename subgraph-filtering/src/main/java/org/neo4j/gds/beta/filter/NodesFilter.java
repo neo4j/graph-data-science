@@ -279,7 +279,6 @@ final class NodesFilter {
         switch (inputNodeProperties.valueType()) {
             case LONG:
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.dense(
-                    filteredNodeCount,
                     DefaultValue.forLong(),
                     allocationTracker
                 );

@@ -46,7 +46,6 @@ public class LongNodePropertiesBuilderTest {
 
         runner.run(() -> {
             var builder = LongNodePropertiesBuilder.of(
-                nodeCount,
                 defaultValue,
                 AllocationTracker.empty(),
                 ConcurrencyConfig.DEFAULT_CONCURRENCY

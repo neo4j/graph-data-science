@@ -114,7 +114,7 @@ public final class NodePropertiesFromStoreBuilder {
         if (innerBuilder.get() == null) {
             InnerNodePropertiesBuilder newBuilder;
             if (value instanceof IntegralValue) {
-                newBuilder = LongNodePropertiesBuilder.of(nodeSize, defaultValue, allocationTracker, concurrency);
+                newBuilder = LongNodePropertiesBuilder.of(defaultValue, allocationTracker, concurrency);
             } else if (value instanceof FloatingPointValue) {
                 newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, allocationTracker);
             } else if (value instanceof LongArray) {
