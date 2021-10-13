@@ -25,6 +25,7 @@ import org.neo4j.gds.core.Aggregation;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -45,18 +46,22 @@ class PropertyMappingsTest {
     }
 
     @Test
-    void testFromObjectWithMultiplePropertieMappings() {
-        PropertyMappings mappings = PropertyMappings.fromObject(Map.of(
+    void testFromObjectWithMultiplePropertyMappings() {
+        var propertyProjections = new LinkedHashMap<>();
+        propertyProjections.put(
             "total_usd", Map.of(
                 "property", "usd",
                 "aggregation", "MIN",
                 "defaultValue", 42.0
-            ),
-            "transaction_count", Map.of(
+            )
+        );
+        propertyProjections.put("transaction_count", Map.of(
                 "property", "usd",
                 "aggregation", "SUM"
             )
-        ));
+        );
+
+        var mappings = PropertyMappings.fromObject(propertyProjections);
         assertEquals(mappings.numberOfMappings(), 2);
 
         Iterator<PropertyMapping> mappingIterator = mappings.iterator();

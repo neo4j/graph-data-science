@@ -27,6 +27,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -48,12 +49,14 @@ class RelationshipProjectionsTest {
 
     @Test
     void shouldParse() {
-        Map<String, Object> noProperties = Map.of(
+        var noProperties = new LinkedHashMap<>();
+        noProperties.put(
             "MY_TYPE", Map.of(
                 "type", "T",
                 "orientation", "NATURAL",
                 "aggregation", "SINGLE"
-            ),
+            ));
+        noProperties.put(
             "ANOTHER", Map.of(
                 "type", "FOO",
                 "properties", Arrays.asList(
