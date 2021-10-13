@@ -51,11 +51,24 @@ final class HugeSparseArrayTestGenerator {
         builder.addMethod(addShouldSetAndGet(valueType, elementType));
         if (valueType.isPrimitive()) {
             builder.addMethod(addShouldOnlySetIfAbsent(valueType, elementType));
+            builder.addMethod(addShouldAddToAndGet(valueType, elementType));
+            builder.addMethod(addShouldAddToAndGetWithDefaultZero(valueType, elementType));
         }
         builder.addMethod(addShouldReturnDefaultValue(valueType, elementType));
+        builder.addMethod(addShouldHaveSaneCapacity(valueType, elementType));
+        builder.addMethod(addShouldReportContainsCorrectly(valueType, elementType));
 
         return builder.build();
     }
+
+    private static final Map<TypeName, String> ZERO_VALUES = Map.of(
+        TypeName.BYTE, "(byte) 0",
+        TypeName.SHORT, "(short) 0",
+        TypeName.INT, "0",
+        TypeName.LONG, "0L",
+        TypeName.FLOAT, "0.0F",
+        TypeName.DOUBLE, "0.0D"
+    );
 
     private static final Map<TypeName, String> DEFAULT_VALUES = Map.ofEntries(
         entry(TypeName.BYTE, "(byte) 42"),
@@ -160,6 +173,62 @@ final class HugeSparseArrayTestGenerator {
             .build();
     }
 
+    private static MethodSpec addShouldAddToAndGet(TypeName valueType, TypeName elementType) {
+        var defaultValue = DEFAULT_VALUES.get(valueType);
+
+        return MethodSpec.methodBuilder("shouldAddToAndGet")
+            .addAnnotation(Test.class)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .addStatement(
+                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    elementType,
+                    defaultValue
+                )
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, defaultValue)
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement(
+                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
+                    Assertions.class,
+                    valueType,
+                    defaultValue
+                )
+                .build())
+            .build();
+    }
+
+    private static MethodSpec addShouldAddToAndGetWithDefaultZero(TypeName valueType, TypeName elementType) {
+        var defaultValue = DEFAULT_VALUES.get(valueType);
+
+        return MethodSpec.methodBuilder("shouldAddToAndGetWithDefaultZero")
+            .addAnnotation(Test.class)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .addStatement(
+                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    elementType,
+                    ZERO_VALUES.get(valueType)
+                )
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, defaultValue)
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement(
+                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L))",
+                    Assertions.class,
+                    valueType,
+                    defaultValue
+                )
+                .build())
+            .build();
+    }
+
     private static MethodSpec addShouldReturnDefaultValue(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldReturnDefaultValue")
             .addAnnotation(Test.class)
@@ -186,6 +255,47 @@ final class HugeSparseArrayTestGenerator {
                     Assertions.class,
                     NON_DEFAULT_VALUES.get(valueType)
                 )
+                .build())
+            .build();
+    }
+
+    private static MethodSpec addShouldHaveSaneCapacity(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldHaveSaneCapacity")
+            .addAnnotation(Test.class)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement(
+                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    elementType,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .addStatement("// > PAGE_SIZE")
+                .addStatement("var index = 224242")
+                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.set(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", Assertions.class)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec addShouldReportContainsCorrectly(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldReportContainsCorrectly")
+            .addAnnotation(Test.class)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .addStatement(
+                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    elementType,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.set(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement("$T.assertThat(array.contains(index)).isTrue()", Assertions.class)
+                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", Assertions.class)
                 .build())
             .build();
     }

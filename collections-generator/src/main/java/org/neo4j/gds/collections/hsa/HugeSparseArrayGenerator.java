@@ -506,7 +506,7 @@ final class HugeSparseArrayGenerator {
                         arrayHandle
                     )
                     .beginControlFlow("while (true)")
-                    .addStatement("var newValueToStore = expectedCurrentValue + value")
+                    .addStatement("$1T newValueToStore = ($1T) (expectedCurrentValue + value)", valueType)
                     .addStatement(
                         "$T actualCurrentValue = ($T) $N.compareAndExchange(page, indexInPage, expectedCurrentValue, newValueToStore)",
                         valueType,
