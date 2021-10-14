@@ -20,11 +20,8 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -33,6 +30,10 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @GdlGraph
-    static String gdl = "(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)";
+    static String gdl = "(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)";
 
     @Inject
     TestGraph graph;
@@ -65,7 +66,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(3L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
-        assertThat(remainingRels.properties()).isEmpty();
+        assertThat(remainingRels.properties()).isNotEmpty();
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
@@ -100,7 +101,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(3L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
-        assertThat(remainingRels.properties()).isEmpty();
+        assertThat(remainingRels.properties()).isNotEmpty();
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
@@ -181,5 +182,20 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
+    }
+
+    @Test
+    void shouldPreserveRelationshipWeights() {
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
+        EdgeSplitter.SplitResult split = splitter.split(graph, 0.01);
+        var maybeProp = split.remainingRels().properties();
+        assertThat(maybeProp).isPresent();
+        graph.forEachNode(nodeId -> {
+            PropertyCursor propertyCursor = maybeProp.get().propertiesList().propertyCursor(nodeId);
+            while (propertyCursor.hasNextLong()) {
+                assertThat(Double.longBitsToDouble(propertyCursor.nextLong())).isEqualTo(5.0);
+            }
+            return true;
+        });
     }
 }

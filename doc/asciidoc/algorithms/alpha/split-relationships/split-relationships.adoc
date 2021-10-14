@@ -20,6 +20,9 @@ The class is indicated by a `label` property on the relationships.
 This enables the holdout set to be used for training or testing a machine learning model.
 Both, the holdout and the remaining relationships are added to the in-memory graph.
 
+If the configuration option `relationshipWeightProperty` is specified, then the corresponding relationship property is preserved on the remaining set of relationships.
+Note however that the holdout set only has the `label` property; it is not possible to induce relationship weights on the holdout set as it also contains negative samples.
+
 
 [[algorithms-split-relationships-syntax]]
 == Syntax
@@ -54,13 +57,15 @@ include::../../common-configuration/common-mutate-configuration-named-graph.adoc
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                          | Type          | Default         | Optional  | Description
-| holdoutFraction               | Float         | n/a             | no        | The fraction of all relationships being used as holdout set.
-| negativeSamplingRatio         | Float         | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
-| holdoutRelationshipType       | String        | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
-| remainingRelationshipType     | String        | n/a             | no        | Relationship type used for the remaining set.
-| nonNegativeRelationshipTypes  | List of String      | n/a             | yes       | Additional relationship types that are used for negative sampling.
-| randomSeed                    | Integer       | n/a             | yes       | An optional seed value for the random selection of relationships.
+| Name                          | Type           | Default         | Optional  | Description
+| holdoutFraction               | Float          | n/a             | no        | The fraction of all relationships being used as holdout set.
+| negativeSamplingRatio         | Float          | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
+| holdoutRelationshipType       | String         | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
+| remainingRelationshipType     | String         | n/a             | no        | Relationship type used for the remaining set.
+| nonNegativeRelationshipTypes  | List of String | n/a             | yes       | Additional relationship types that are used for negative sampling.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>>
+                                | String         | null            | yes       | Name of the relationship property that is inherited by the `remainingRelationshipType`.
+| randomSeed                    | Integer        | n/a             | yes       | An optional seed value for the random selection of relationships.
 |===
 
 .Results
@@ -96,11 +101,11 @@ CREATE
     (n4:Label),
     (n5:Label),
 
-    (n0)-[:TYPE]->(n1),
-    (n1)-[:TYPE]->(n2),
-    (n2)-[:TYPE]->(n3),
-    (n3)-[:TYPE]->(n4),
-    (n4)-[:TYPE]->(n5)
+    (n0)-[:TYPE { prop: 0} ]->(n1),
+    (n1)-[:TYPE { prop: 1} ]->(n2),
+    (n2)-[:TYPE { prop: 4} ]->(n3),
+    (n3)-[:TYPE { prop: 9} ]->(n4),
+    (n4)-[:TYPE { prop: 16} ]->(n5)
 ----
 
 Given the above graph, we want to use 20% of the relationships as holdout set.
@@ -159,15 +164,15 @@ CREATE
     (n4:Label),
     (n5:Label),
 
-    (n2)-[:TYPE_HOLDOUT { label: 0 }]->(n5), // negative, non-existing
-    (n3)-[:TYPE_HOLDOUT { label: 1 }]->(n2), // positive, existing
+    (n2)-[:TYPE_HOLDOUT { label: 0 } ]->(n5), // negative, non-existing
+    (n3)-[:TYPE_HOLDOUT { label: 1 } ]->(n2), // positive, existing
 
-    (n0)<-[:TYPE_REMAINING]-(n1),
-    (n1)<-[:TYPE_REMAINING]-(n2),
-    (n3)<-[:TYPE_REMAINING]-(n4),
-    (n4)<-[:TYPE_REMAINING]-(n5),
-    (n0)-[:TYPE_REMAINING]->(n1),
-    (n1)-[:TYPE_REMAINING]->(n2),
-    (n3)-[:TYPE_REMAINING]->(n4),
-    (n4)-[:TYPE_REMAINING]->(n5)
+    (n0)<-[:TYPE_REMAINING { prop: 0} ]-(n1),
+    (n1)<-[:TYPE_REMAINING { prop: 1} ]-(n2),
+    (n3)<-[:TYPE_REMAINING { prop: 9} ]-(n4),
+    (n4)<-[:TYPE_REMAINING { prop: 16} ]-(n5),
+    (n0)-[:TYPE_REMAINING { prop: 0} ]->(n1),
+    (n1)-[:TYPE_REMAINING { prop: 1} ]->(n2),
+    (n3)-[:TYPE_REMAINING { prop: 9} ]->(n4),
+    (n4)-[:TYPE_REMAINING { prop: 16} ]->(n5)
 ----

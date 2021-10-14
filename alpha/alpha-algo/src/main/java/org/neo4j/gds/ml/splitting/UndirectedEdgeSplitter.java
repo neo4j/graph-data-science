@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Optional;
@@ -65,7 +66,12 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
-        RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
+        RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
+            ? newRelationshipsBuilderWithProp(graph, Orientation.UNDIRECTED)
+            : newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
+        RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
+            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t, w); return true; }
+            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t); return true; };
 
         var positiveSamples = (long) (graph.relationshipCount() * holdoutFraction) / 2;
         var positiveSamplesRemaining = new AtomicLong(positiveSamples);
@@ -77,7 +83,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             positiveSampling(
                 graph,
                 selectedRelsBuilder,
-                remainingRelsBuilder,
+                remainingRelsConsumer,
                 positiveSamplesRemaining,
                 edgesRemaining,
                 nodeId
@@ -99,12 +105,12 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
     private void positiveSampling(
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
-        RelationshipsBuilder remainingRelsBuilder,
+        RelationshipWithPropertyConsumer remainingRelsConsumer,
         AtomicLong positiveSamplesRemaining,
         AtomicLong edgesRemaining,
         long nodeId
     ) {
-        graph.forEachRelationship(nodeId, (source, target) -> {
+        graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
             if (source == target) {
                 edgesRemaining.decrementAndGet();
             }
@@ -119,7 +125,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                         selectedRelsBuilder.addFromInternal(target, source, POSITIVE);
                     }
                 } else {
-                    remainingRelsBuilder.addFromInternal(source, target);
+                    remainingRelsConsumer.accept(source, target, weight);
                 }
                 // because of reverse edge
                 edgesRemaining.addAndGet(-2);

@@ -48,11 +48,11 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                             ",(n3:A {id: 3})" +
                                             ",(n4:A {id: 4})" +
                                             ",(n5:A {id: 5})" +
-                                            ",(n0)-[:T]->(n1)" +
-                                            ",(n1)-[:T]->(n2)" +
-                                            ",(n2)-[:T]->(n3)" +
-                                            ",(n3)-[:T]->(n4)" +
-                                            ",(n4)-[:T]->(n5)";
+                                            ",(n0)-[:T {foo: 0}]->(n1)" +
+                                            ",(n1)-[:T {foo: 1}]->(n2)" +
+                                            ",(n2)-[:T {foo: 4}]->(n3)" +
+                                            ",(n3)-[:T {foo: 9}]->(n4)" +
+                                            ",(n4)-[:T {foo: 16}]->(n5)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -62,6 +62,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperty("id")
             .withRelationshipType("T", Orientation.UNDIRECTED)
+            .withRelationshipProperty("foo")
             .graphCreate("graph")
             .yields();
         runQuery(createQuery);
@@ -249,5 +250,31 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         assertFalse(testGraph.isUndirected());
         TestSupport.assertGraphEquals(fromGdl(expectedTest), testGraph);
         TestSupport.assertGraphEquals(fromGdl(expectedTrain), trainGraph);
+    }
+
+    @Test
+    void shouldPreserveRelationshipWeights() {
+
+        var query = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.alpha.ml.splitRelationships")
+            .mutateMode()
+            .addParameter("holdoutRelationshipType", "baz")
+            .addParameter("remainingRelationshipType", "remaining")
+            .addParameter("relationshipWeightProperty", "foo")
+            .addParameter("holdoutFraction", 0.2)
+            .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 2.0)
+            .yields();
+        runQuery(query);
+        var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore();
+        var remainingGraph = graphStore.getGraph(RelationshipType.of("remaining"), Optional.of("foo"));
+        remainingGraph.forEachNode(nodeId -> {
+            remainingGraph.forEachRelationship(nodeId, Double.NaN, (s, t, w) -> {
+                assertThat(w).isEqualTo(Math.pow(Math.min(s, t), 2));
+                return true;
+            });
+            return true;
+        });
     }
 }

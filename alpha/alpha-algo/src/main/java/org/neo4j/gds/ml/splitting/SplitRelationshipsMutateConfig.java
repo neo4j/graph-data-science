@@ -27,6 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.stream.Stream;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig, SplitRelationshipsBaseConfig, RandomSeedConfig {
+public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig, SplitRelationshipsBaseConfig, RandomSeedConfig, RelationshipWeightConfig {
 
     @Configuration.Ignore
     @Value.Derived

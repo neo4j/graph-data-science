@@ -111,8 +111,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             computationResult.graphStore().addRelationshipType(
                 config.remainingRelationshipType(),
-                Optional.empty(),
-                Optional.empty(),
+                Optional.ofNullable(config.relationshipWeightProperty()),
+                Optional.of(NumberType.FLOATING_POINT),
                 computationResult.result().remainingRels()
             );
             computationResult.graphStore().addRelationshipType(

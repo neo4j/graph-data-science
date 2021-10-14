@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Optional;
@@ -49,7 +50,12 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
-        RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
+        RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
+            ? newRelationshipsBuilderWithProp(graph, Orientation.NATURAL)
+            : newRelationshipsBuilder(graph, Orientation.NATURAL);
+        RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
+            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t, w); return true; }
+            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(s, t); return true; };
 
         int positiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
         var positiveSamplesRemaining = new AtomicLong(positiveSamples);
@@ -60,7 +66,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             positiveSampling(
                 graph,
                 selectedRelsBuilder,
-                remainingRelsBuilder,
+                remainingRelsConsumer,
                 positiveSamplesRemaining,
                 nodeId
             );
@@ -81,7 +87,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
     private void positiveSampling(
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
-        RelationshipsBuilder remainingRelsBuilder,
+        RelationshipWithPropertyConsumer remainingRelsConsumer,
         AtomicLong positiveSamplesRemaining,
         long nodeId
     ) {
@@ -95,7 +101,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         var localSelectedRemaining = new AtomicLong(relsToSelectFromThisNode);
         var targetsRemaining = new AtomicLong(degree);
 
-        graph.forEachRelationship(nodeId, (source, target) -> {
+        graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
             double localSelectedDouble = localSelectedRemaining.get();
             var isSelected = sample(localSelectedDouble / targetsRemaining.getAndDecrement());
             if (relsToSelectFromThisNode > 0 && localSelectedDouble > 0 && isSelected) {
@@ -103,7 +109,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 localSelectedRemaining.decrementAndGet();
                 selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
             } else {
-                remainingRelsBuilder.addFromInternal(source, target);
+                remainingRelsConsumer.accept(source, target, weight);
             }
             return true;
         });
