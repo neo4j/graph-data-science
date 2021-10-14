@@ -20,11 +20,17 @@
 package org.neo4j.gds.core.utils.io.file;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor;
+import org.neo4j.gds.core.utils.io.file.csv.CsvMapUtil;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
@@ -32,6 +38,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.UUID;
 
 public class GraphInfoLoader {
@@ -57,6 +64,7 @@ public class GraphInfoLoader {
                 .namedDatabaseId(databaseId)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
+                .relationshipTypeCounts(line.relTypeCounts)
                 .bitIdMap(line.bitIdMap)
                 .build();
 
@@ -78,7 +86,29 @@ public class GraphInfoLoader {
         @JsonProperty
         long maxOriginalId;
 
+        @JsonDeserialize(using = RelationshipTypesDeserializer.class)
+        Map<RelationshipType, Long> relTypeCounts = Map.of();
+
         @JsonProperty
         boolean bitIdMap;
+    }
+
+    static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {
+
+        public RelationshipTypesDeserializer() {
+            this(null);
+        }
+
+        RelationshipTypesDeserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override
+        public Map<RelationshipType, Long> deserialize(
+            JsonParser parser, DeserializationContext ctxt
+        ) throws IOException {
+            String mapString = parser.getText();
+            return CsvMapUtil.fromString(mapString, RelationshipType::of, Long::parseLong);
+        }
     }
 }

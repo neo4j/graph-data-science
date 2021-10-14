@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.kernel.database.NamedDatabaseId;
+
+import java.util.Map;
 
 @ValueClass
 public interface GraphInfo {
     NamedDatabaseId namedDatabaseId();
     long nodeCount();
     long maxOriginalId();
+    Map<RelationshipType, Long> relationshipTypeCounts();
     boolean bitIdMap();
 }

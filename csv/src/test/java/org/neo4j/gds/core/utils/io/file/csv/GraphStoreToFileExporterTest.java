@@ -23,21 +23,21 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +45,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,13 +53,13 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 public class GraphStoreToFileExporterTest extends CsvTest {
@@ -315,6 +316,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                     CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
                     CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                     CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+                    CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
                     CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
                 ),
                 List.of(
@@ -322,6 +324,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                     graphStore.databaseId().name(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(3L),
+                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 3L, RelationshipType.of("REL1"), 3L)),
                     Boolean.toString(false)
                 )
             )
@@ -450,6 +453,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                         CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
                         CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                         CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+                        CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
                         CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
                     ),
                     List.of(
@@ -457,6 +461,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                         graphStore.databaseId().name(),
                         Long.toString(graphStore.nodeCount()),
                         Long.toString(1L),
+                        CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.ALL_RELATIONSHIPS, 0L)),
                         Boolean.toString(bitIdMap)
                     )
                 )

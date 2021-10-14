@@ -22,11 +22,13 @@ package org.neo4j.gds.core.utils.io.file;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,14 +38,13 @@ class GraphInfoLoaderTest {
 
     @Test
     void shouldLoadGraphInfo(@TempDir Path exportDir) throws IOException {
-
         var uuid = UUID.randomUUID();
 
         var databaseId = DatabaseIdFactory.from("my-database", uuid);
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId"),
-            String.join(", ", uuid.toString(), "my-database", "19", "1337")
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "bitIdMap"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42", "true")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -56,6 +57,34 @@ class GraphInfoLoaderTest {
 
         assertThat(graphInfo.nodeCount()).isEqualTo(19L);
         assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);
+
+        assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
+            Map.of(RelationshipType.of("REL"), 42L)
+        );
+
+        assertThat(graphInfo.bitIdMap()).isTrue();
+    }
+
+    /**
+     * Test for backwards compatibility by leaving out `relTypeCounts`
+     */
+    @Test
+    void shouldLoadGraphInfoWithoutRelTypeCounts(@TempDir Path exportDir) throws IOException {
+        var uuid = UUID.randomUUID();
+
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "bitIdMap"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "true")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo.relationshipTypeCounts()).isEmpty();
+
+        assertThat(graphInfo.bitIdMap()).isTrue();
     }
 
 }
