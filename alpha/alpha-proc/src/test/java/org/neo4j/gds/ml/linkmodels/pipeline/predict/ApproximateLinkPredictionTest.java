@@ -150,12 +150,13 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 PredictedLink.of(2, 1, 0.0953494648991095),
                 PredictedLink.of(1, 2, 0.0953494648991095),
                 PredictedLink.of(2, 3, 2.810228605019867E-9),
-                PredictedLink.of(3, 2, 2.810228605019867E-9),
-                PredictedLink.of(2, 4, 2.3398956983617682E-4),
-                PredictedLink.of(4, 2, 2.3398956983617682E-4)
+                PredictedLink.of(3, 2, 2.810228605019867E-9)
             );
 
-            assertThat(predictedLinks).isSubsetOf(expectedLinks);
+            var graph = graphStore.getUnion();
+            assertThat(predictedLinks)
+                .isSubsetOf(expectedLinks)
+                .allMatch(prediction -> !graph.exists(prediction.sourceId(), prediction.targetId()));
         });
     }
 

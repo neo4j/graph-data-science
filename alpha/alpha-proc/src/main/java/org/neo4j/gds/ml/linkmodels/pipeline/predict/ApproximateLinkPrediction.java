@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -111,26 +112,30 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             )
         ).compute();
 
-        return new Result(knnResult);
+        // Knn can always contain existing relationships. As predictions over existing relationships give false quality metrics we need to exclude them
+        Stream<SimilarityResult> predictions = knnResult
+            .streamSimilarityResult()
+            .filter(i -> !graph.exists(i.sourceNodeId(), i.targetNodeId()));
+
+        return new Result(predictions);
     }
 
     static class Result implements LinkPredictionResult {
-        private final Knn.Result predictions;
+        private final Stream<SimilarityResult> predictions;
 
-        Result(Knn.Result predictions) {this.predictions = predictions;}
+        // reverse entries
+        // existing relationships
+
+        Result(Stream<SimilarityResult> predictions) {this.predictions = predictions;}
 
         @Override
         public Stream<PredictedLink> stream() {
-            return predictions
-                .streamSimilarityResult()
-                .map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
+            return predictions.map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
         }
 
         @Override
         public Stream<Relationship> relationshipStream() {
-            return predictions
-                .streamSimilarityResult()
-                .map(i -> ImmutableRelationship.of(i.node1, i.node2, new Value[]{Values.doubleValue(i.similarity)}));
+            return predictions.map(i -> ImmutableRelationship.of(i.node1, i.node2, new Value[]{Values.doubleValue(i.similarity)}));
         }
     }
 }
