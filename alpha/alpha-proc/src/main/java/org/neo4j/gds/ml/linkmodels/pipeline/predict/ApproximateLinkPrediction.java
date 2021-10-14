@@ -26,16 +26,22 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
@@ -55,25 +61,46 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         double sampleRate,
         ProgressTracker progressTracker
     ) {
-        super(modelData, pipelineExecutor, nodeLabels, relationshipTypes, graphStore, concurrency, progressTracker);
-        this.knnConfig = ImmutableKnnBaseConfig
-            .builder()
-            .concurrency(concurrency)
-            .randomSeed(randomSeed)
-            .topK(topK)
-            .randomJoins(randomJoins)
-            .deltaThreshold(deltaThreshold)
-            .maxIterations(maxIterations)
-            .sampleRate(sampleRate)
-            .build();
+        this(
+            modelData,
+            pipelineExecutor,
+            nodeLabels,
+            relationshipTypes,
+            graphStore,
+            ImmutableKnnBaseConfig
+                .builder()
+                // FIXME wait for API decision
+                .nodeWeightProperty("DUMMY")
+                .concurrency(concurrency)
+                .randomSeed(randomSeed)
+                .topK(topK)
+                .randomJoins(randomJoins)
+                .deltaThreshold(deltaThreshold)
+                .maxIterations(maxIterations)
+                .sampleRate(sampleRate)
+                .build(),
+            progressTracker
+        );
     }
 
+    public ApproximateLinkPrediction(
+        LinkLogisticRegressionData modelData,
+        PipelineExecutor pipelineExecutor,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relationshipTypes,
+        GraphStore graphStore,
+        KnnBaseConfig knnConfig,
+        ProgressTracker progressTracker
+    ) {
+        super(modelData, pipelineExecutor, nodeLabels, relationshipTypes, graphStore, knnConfig.concurrency(), progressTracker);
+        this.knnConfig = knnConfig;
+    }
     @Override
     LinkPredictionResult predictLinks(
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
-        var randomSamplingSimilarityResult = new Knn(
+        var knnResult = new Knn(
             graph.nodeCount(),
             knnConfig,
             linkPredictionSimilarityComputer,
@@ -84,16 +111,26 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             )
         ).compute();
 
-//        randomSamplingSimilarityResult
-//            .streamSimilarityResult()
-//            .forEach(similarityResult -> {
-//                result.add(
-//                    similarityResult.node1,
-//                    similarityResult.node2,
-//                    similarityResult.similarity
-//                );
-//            });
-        // TODO fix this
-        return new LinkPredictionResult(1);
+        return new Result(knnResult);
+    }
+
+    static class Result implements LinkPredictionResult {
+        private final Knn.Result predictions;
+
+        Result(Knn.Result predictions) {this.predictions = predictions;}
+
+        @Override
+        public Stream<PredictedLink> stream() {
+            return predictions
+                .streamSimilarityResult()
+                .map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
+        }
+
+        @Override
+        public Stream<Relationship> relationshipStream() {
+            return predictions
+                .streamSimilarityResult()
+                .map(i -> ImmutableRelationship.of(i.node1, i.node2, new Value[]{Values.doubleValue(i.similarity)}));
+        }
     }
 }

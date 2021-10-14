@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
-public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, LinkPredictionResult> {
+public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, ExhaustiveLinkPredictionResult> {
 
     private final LinkLogisticRegressionPredictor predictor;
     private final Graph graph;
@@ -70,9 +70,9 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
     }
 
     @Override
-    public LinkPredictionResult compute() {
+    public ExhaustiveLinkPredictionResult compute() {
         progressTracker.beginSubTask();
-        var result = new LinkPredictionResult(topN);
+        var result = new ExhaustiveLinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
@@ -99,13 +99,13 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
     private final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
         private final Graph graph;
         private final LinkLogisticRegressionPredictor predictor;
-        private final LinkPredictionResult predictedLinks;
+        private final ExhaustiveLinkPredictionResult predictedLinks;
         private final ProgressTracker progressTracker;
 
         private LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkLogisticRegressionPredictor predictor,
-            LinkPredictionResult predictedLinks,
+            ExhaustiveLinkPredictionResult predictedLinks,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;

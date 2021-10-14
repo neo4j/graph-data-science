@@ -39,7 +39,7 @@ import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIP
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsProc<LinkPredictionPredict, LinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
+public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -86,7 +86,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
 
     @Override
     protected AbstractResultBuilder<StandardWriteRelationshipsResult> resultBuilder(
-        ComputationResult<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictWriteConfig> computeResult
+        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictWriteConfig> computeResult
     ) {
         return new StandardWriteRelationshipsResult.Builder();
     }

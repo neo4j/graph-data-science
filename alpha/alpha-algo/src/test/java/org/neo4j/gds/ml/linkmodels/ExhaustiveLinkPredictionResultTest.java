@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.Executors.callable;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkPredictionResultTest {
+class ExhaustiveLinkPredictionResultTest {
 
     @RepeatedTest(100)
     void test() throws InterruptedException {
-        var queue = new LinkPredictionResult(10);
+        var queue = new ExhaustiveLinkPredictionResult(10);
 
         Runnable lowPrio = () -> queue.add(1, 2, -1);
         Runnable highPrio = () -> queue.add(2, 3, 1);

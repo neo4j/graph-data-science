@@ -47,7 +47,7 @@ import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndire
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
+public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -94,7 +94,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictMutateConfig> computeResult
+        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
     }
@@ -102,7 +102,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictMutateConfig> computationResult
+        ComputationResult<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateConfig> computationResult
     ) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)

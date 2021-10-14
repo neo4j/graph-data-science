@@ -27,7 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 
@@ -64,11 +64,11 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     @Override
-    LinkPredictionResult predictLinks(
+    ExhaustiveLinkPredictionResult predictLinks(
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
-        var result = new LinkPredictionResult(topN);
+        var result = new ExhaustiveLinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
@@ -84,13 +84,13 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
         private final Graph graph;
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
-        private final LinkPredictionResult predictedLinks;
+        private final ExhaustiveLinkPredictionResult predictedLinks;
         private final ProgressTracker progressTracker;
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
-            LinkPredictionResult predictedLinks,
+            ExhaustiveLinkPredictionResult predictedLinks,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;

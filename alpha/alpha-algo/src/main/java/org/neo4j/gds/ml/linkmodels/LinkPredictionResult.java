@@ -19,77 +19,14 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.core.write.RelationshipStreaming;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
-import java.util.Iterator;
-import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-public class LinkPredictionResult implements RelationshipStreaming {
-
-    static MemoryEstimation memoryEstimation(int topN) {
-        return MemoryEstimations.builder(LinkPredictionResult.class)
-            .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
-            .build();
-    }
-
-    private final BoundedLongLongPriorityQueue queue;
-
-    public LinkPredictionResult(int top) {
-        assert top > 0;
-
-        this.queue = BoundedLongLongPriorityQueue.max(top);
-    }
-
-    public synchronized void add(long node1, long node2, double probability) {
-        queue.offer(node1, node2, probability);
-    }
-
-    public Stream<PredictedLink> stream() {
-        Iterable<PredictedLink> iterable = () -> new Iterator<>() {
-
-            final PrimitiveIterator.OfLong elements1Iter = queue.elements1().iterator();
-            final PrimitiveIterator.OfLong elements2Iter = queue.elements2().iterator();
-            final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return elements1Iter.hasNext();
-            }
-
-            @Override
-            public PredictedLink next() {
-                return PredictedLink.of(
-                    elements1Iter.nextLong(),
-                    elements2Iter.nextLong(),
-                    prioritiesIter.nextDouble()
-                );
-            }
-        };
-
-        return StreamSupport.stream(iterable.spliterator(), true);
-    }
+public interface LinkPredictionResult extends RelationshipStreaming {
+    Stream<PredictedLink> stream();
 
     @Override
-    public Stream<Relationship> relationshipStream() {
-        var natural = stream().map(link -> ImmutableRelationship.of(
-            link.sourceId(),
-            link.targetId(),
-            new Value[]{Values.doubleValue(link.probability())}
-        ));
-        var reverse = stream().map(link -> ImmutableRelationship.of(
-            link.targetId(),
-            link.sourceId(),
-            new Value[]{Values.doubleValue(link.probability())}
-        ));
-        return Stream.concat(natural, reverse);
-    }
+    Stream<Relationship> relationshipStream();
 }
