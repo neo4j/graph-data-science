@@ -55,4 +55,8 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         // TODO This is a very naive (slow) approach and should be replaced by a dedicated data structure
         return graph.exists(firstNodeId, secondNodeId);
     }
+
+    public LinkPredictionSimilarityComputer concurrentCopy() {
+        return new LinkPredictionSimilarityComputer(linkFeatureExtractor, predictor, graph.concurrentCopy());
+    }
 }

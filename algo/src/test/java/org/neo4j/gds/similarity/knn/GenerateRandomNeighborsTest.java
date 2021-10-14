@@ -25,6 +25,7 @@ import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Comparator;
@@ -56,10 +57,11 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             nodeCount,
             k,
             k,
+            Partition.of(0, nodeCount),
             ProgressTracker.NULL_TRACKER
         );
 
-        generateRandomNeighbors.apply(0, nodeCount);
+        generateRandomNeighbors.run();
 
         var possibleNeighbors = LongStream.range(0, nodeCount).toArray();
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {

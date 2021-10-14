@@ -25,15 +25,16 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 
+import java.util.Optional;
 import java.util.SplittableRandom;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
@@ -148,20 +149,23 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
         var neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount, this.context.allocationTracker());
 
-        ParallelUtil.readParallel(
-            this.config.concurrency(),
+        var randomNeighborGenerators = PartitionUtils.rangePartition(
+            config.concurrency(),
             nodeCount,
-            this.context.executor(),
-            new GenerateRandomNeighbors(
+            partition -> new GenerateRandomNeighbors(
                 random,
-                this.computer,
+                this.computer.concurrentCopy(),
                 neighbors,
                 nodeCount,
                 k,
                 boundedK,
+                partition,
                 progressTracker
-            )
+            ),
+            Optional.of(config.minBatchSize())
         );
+
+        ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, context.executor());
 
         return neighbors;
     }
@@ -212,26 +216,32 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         );
         progressTracker.endSubTask();
 
-        var neighborsJoiner = new JoinNeighbors(
-            this.random,
-            this.computer,
-            neighbors,
-            allOldNeighbors,
-            allNewNeighbors,
-            reverseOldNeighbors,
-            reverseNewNeighbors,
+        var neighborsJoiners = PartitionUtils.rangePartition(
+            concurrency,
             nodeCount,
-            this.config.topK(),
-            sampledK,
-            this.config.randomJoins(),
-            progressTracker
+            partition -> new JoinNeighbors(
+                this.random,
+                this.computer.concurrentCopy(),
+                neighbors,
+                allOldNeighbors,
+                allNewNeighbors,
+                reverseOldNeighbors,
+                reverseNewNeighbors,
+                nodeCount,
+                this.config.topK(),
+                sampledK,
+                this.config.randomJoins(),
+                partition,
+                progressTracker
+            ),
+            Optional.of(config.minBatchSize())
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executor, neighborsJoiner);
+        ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, executor);
         progressTracker.endSubTask();
 
-        return neighborsJoiner.updateCount.sum();
+        return neighborsJoiners.stream().mapToLong(joiner -> joiner.updateCount).sum();
     }
 
     private static void reverseOldAndNewNeighbors(
@@ -269,7 +279,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         }
     }
 
-    private static final class JoinNeighbors implements BiLongConsumer {
+    private static final class JoinNeighbors implements Runnable {
         private final SplittableRandom random;
         private final SimilarityComputer computer;
         private final HugeObjectArray<NeighborList> neighbors;
@@ -282,7 +292,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         private final int sampledK;
         private final int randomJoins;
         private final ProgressTracker progressTracker;
-        private final LongAdder updateCount;
+        private long updateCount;
+        private final Partition partition;
 
         private JoinNeighbors(
             SplittableRandom random,
@@ -296,6 +307,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             int k,
             int sampledK,
             int randomJoins,
+            Partition partition,
             ProgressTracker progressTracker
         ) {
             this.random = random;
@@ -309,12 +321,13 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.k = k;
             this.sampledK = sampledK;
             this.randomJoins = randomJoins;
+            this.partition = partition;
             this.progressTracker = progressTracker;
-            this.updateCount = new LongAdder();
+            this.updateCount = 0;
         }
 
         @Override
-        public void apply(long start, long end) {
+        public void run() {
             var rng = random.split();
             var computer = this.computer;
             var n = this.n;
@@ -326,8 +339,10 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             var allReverseNewNeighbors = this.allReverseNewNeighbors;
             var allReverseOldNeighbors = this.allReverseOldNeighbors;
 
-            long updateCount = 0;
-            for (long nodeId = start; nodeId < end; nodeId++) {
+            var startNode = partition.startNode();
+            long endNode = startNode + partition.nodeCount();
+
+            for (long nodeId = startNode; nodeId < endNode; nodeId++) {
                 // old[v] ∪ Sample(old′[v], ρK)
                 var oldNeighbors = allOldNeighbors.get(nodeId);
                 if (oldNeighbors != null) {
@@ -338,7 +353,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 // new[v] ∪ Sample(new′[v], ρK)
                 var newNeighbors = allNewNeighbors.get(nodeId);
                 if (newNeighbors != null) {
-                    updateCount += joinNewNeighbors(
+                    this.updateCount += joinNewNeighbors(
                         rng,
                         computer,
                         n,
@@ -356,8 +371,6 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 randomJoins(rng, computer, n, k, allNeighbors, nodeId, this.randomJoins);
                 progressTracker.logProgress();
             }
-
-            this.updateCount.add(updateCount);
         }
 
         private void joinOldNeighbors(

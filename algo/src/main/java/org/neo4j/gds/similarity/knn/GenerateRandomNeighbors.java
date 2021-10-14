@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
@@ -29,7 +29,7 @@ import java.util.SplittableRandom;
 /**
  * Initial step in KNN calculation.
  */
-final class GenerateRandomNeighbors implements BiLongConsumer {
+final class GenerateRandomNeighbors implements Runnable {
     private final SplittableRandom random;
     private final SimilarityComputer computer;
     private final HugeObjectArray<NeighborList> neighbors;
@@ -37,6 +37,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
     private final int k;
     private final int k2;
     private final ProgressTracker progressTracker;
+    private final Partition partition;
 
     GenerateRandomNeighbors(
         SplittableRandom random,
@@ -45,6 +46,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
         long n,
         int k,
         int k2,
+        Partition partition,
         ProgressTracker progressTracker
     ) {
         this.random = random;
@@ -54,10 +56,11 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
         this.k = k;
         this.k2 = k2;
         this.progressTracker = progressTracker;
+        this.partition = partition;
     }
 
     @Override
-    public void apply(long start, long end) {
+    public void run() {
         var rng = random.split();
         var computer = this.computer;
         var n = this.n;
@@ -65,7 +68,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
         var k2 = this.k2;
         var chosen = new LongHashSet(k2);
 
-        for (long nodeId = start; nodeId < end; nodeId++) {
+        partition.consume(nodeId -> {
             chosen.clear();
 
             for (int i = 0; i < k2; i++) {
@@ -91,6 +94,6 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
 
             progressTracker.logProgress();
             this.neighbors.set(nodeId, neighbors);
-        }
+        });
     }
 }

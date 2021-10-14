@@ -42,6 +42,10 @@ public interface SimilarityComputer {
         return false;
     }
 
+    default SimilarityComputer concurrentCopy() {
+        return this;
+    };
+
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
             graph.nodeProperties(propertyName),
