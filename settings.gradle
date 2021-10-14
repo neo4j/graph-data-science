@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'graph-data-science'
+rootProject.name = 'open-gds'
 
 def registerSubModules(File file) {
     def moduleDirectories = new LinkedList<File>()
