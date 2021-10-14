@@ -25,8 +25,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.Modifier;
 import java.util.Map;
@@ -36,13 +34,17 @@ import static java.util.Map.entry;
 
 final class HugeSparseArrayTestGenerator {
 
+    // To avoid having implementation dependencies on
+    // junit / assertj, we use fully qualified names instead.
+    private static final ClassName ASSERTJ_ASSERTIONS = ClassName.get("org.assertj.core.api", "Assertions");
+    private static final ClassName TEST_ANNOTATION = ClassName.get("org.junit.jupiter.api", "Test");
+
     private HugeSparseArrayTestGenerator() {}
 
     static TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
         var className = ClassName.get(spec.rootPackage().toString(), spec.className() + "Test");
         var elementType = TypeName.get(spec.element().asType());
         var valueType = TypeName.get(spec.valueType());
-        var builderType = TypeName.get(spec.builderType());
 
         var builder = TypeSpec.classBuilder(className)
             .addModifiers(Modifier.FINAL)
@@ -136,7 +138,7 @@ final class HugeSparseArrayTestGenerator {
 
     private static MethodSpec addShouldSetAndGet(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldSetAndGet")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
@@ -149,14 +151,14 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("$T value = $L", valueType, randomValue(valueType))
                 .addStatement("builder.set(index, value)")
                 .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.get(index)).isEqualTo(value)", Assertions.class)
+                .addStatement("$T.assertThat(array.get(index)).isEqualTo(value)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
 
     private static MethodSpec addShouldOnlySetIfAbsent(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldOnlySetIfAbsent")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
@@ -167,8 +169,8 @@ final class HugeSparseArrayTestGenerator {
                 )
                 .addStatement("long index = $L", randomIndex())
                 .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isTrue()", Assertions.class)
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isFalse()", Assertions.class)
+                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isFalse()", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
@@ -177,7 +179,7 @@ final class HugeSparseArrayTestGenerator {
         var defaultValue = DEFAULT_VALUES.get(valueType);
 
         return MethodSpec.methodBuilder("shouldAddToAndGet")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
@@ -193,7 +195,7 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("var array = builder.build()")
                 .addStatement(
                     "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
-                    Assertions.class,
+                    ASSERTJ_ASSERTIONS,
                     valueType,
                     defaultValue
                 )
@@ -205,7 +207,7 @@ final class HugeSparseArrayTestGenerator {
         var defaultValue = DEFAULT_VALUES.get(valueType);
 
         return MethodSpec.methodBuilder("shouldAddToAndGetWithDefaultZero")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
@@ -221,7 +223,7 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("var array = builder.build()")
                 .addStatement(
                     "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L))",
-                    Assertions.class,
+                    ASSERTJ_ASSERTIONS,
                     valueType,
                     defaultValue
                 )
@@ -231,7 +233,7 @@ final class HugeSparseArrayTestGenerator {
 
     private static MethodSpec addShouldReturnDefaultValue(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldReturnDefaultValue")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement(
@@ -246,13 +248,13 @@ final class HugeSparseArrayTestGenerator {
                 .beginControlFlow("for (long i = 0; i < index; i++)")
                 .addStatement(
                     "$T.assertThat(array.get(i)).isEqualTo($N)",
-                    Assertions.class,
+                    ASSERTJ_ASSERTIONS,
                     DEFAULT_VALUES.get(valueType)
                 )
                 .endControlFlow()
                 .addStatement(
                     "$T.assertThat(array.get(index)).isEqualTo($N)",
-                    Assertions.class,
+                    ASSERTJ_ASSERTIONS,
                     NON_DEFAULT_VALUES.get(valueType)
                 )
                 .build())
@@ -261,7 +263,7 @@ final class HugeSparseArrayTestGenerator {
 
     private static MethodSpec addShouldHaveSaneCapacity(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldHaveSaneCapacity")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement(
@@ -274,14 +276,14 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
                 .addStatement("builder.set(index, value)")
                 .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", Assertions.class)
+                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
 
     private static MethodSpec addShouldReportContainsCorrectly(TypeName valueType, TypeName elementType) {
         return MethodSpec.methodBuilder("shouldReportContainsCorrectly")
-            .addAnnotation(Test.class)
+            .addAnnotation(TEST_ANNOTATION)
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
@@ -294,8 +296,8 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
                 .addStatement("builder.set(index, value)")
                 .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.contains(index)).isTrue()", Assertions.class)
-                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", Assertions.class)
+                .addStatement("$T.assertThat(array.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }

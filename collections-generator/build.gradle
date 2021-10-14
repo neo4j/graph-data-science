@@ -35,10 +35,4 @@ dependencies {
     implementation group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     implementation group: 'com.google.auto', name: 'auto-common', version: ver.'auto-common'
     implementation group: 'com.squareup', name: 'javapoet', version: ver.'javapoet'
-
-    implementation platform(dep.junit5bom)
-    implementation dep.junit5jupiter
-    implementation dep.junit5migration
-    implementation group: 'com.google.testing.compile', name: 'compile-testing', version: ver.'compile-testing'
-    implementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
 }
