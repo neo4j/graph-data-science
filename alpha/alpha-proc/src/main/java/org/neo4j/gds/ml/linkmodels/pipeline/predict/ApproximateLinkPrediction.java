@@ -28,9 +28,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -58,7 +56,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         ProgressTracker progressTracker
     ) {
         super(modelData, pipelineExecutor, nodeLabels, relationshipTypes, graphStore, concurrency, progressTracker);
-        knnConfig = ImmutableKnnBaseConfig
+        this.knnConfig = ImmutableKnnBaseConfig
             .builder()
             .concurrency(concurrency)
             .randomSeed(randomSeed)
@@ -73,15 +71,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     @Override
     LinkPredictionResult predictLinks(
         Graph graph,
-        LinkFeatureExtractor featureExtractor,
-        LinkLogisticRegressionPredictor predictor
+        LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
-        var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
-            featureExtractor,
-            predictor,
-            graph
-        );
-
         var randomSamplingSimilarityResult = new Knn(
             graph.nodeCount(),
             knnConfig,

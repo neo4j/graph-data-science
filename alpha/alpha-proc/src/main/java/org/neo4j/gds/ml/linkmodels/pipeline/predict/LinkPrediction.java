@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
@@ -89,18 +88,21 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
 
-        var result = predictLinks(graph, featureExtractor, predictor);
+        var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
+            featureExtractor,
+            predictor,
+            graph
+        );
+
+        var result = predictLinks(graph, linkPredictionSimilarityComputer);
         progressTracker.endSubTask();
         return result;
     }
 
-
     abstract LinkPredictionResult predictLinks(
         Graph graph,
-        LinkFeatureExtractor featureExtractor,
-        LinkLogisticRegressionPredictor predictor
+        LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     );
-
 
     @Override
     public LinkPrediction me() {

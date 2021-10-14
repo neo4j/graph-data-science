@@ -29,9 +29,7 @@ import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -68,15 +66,13 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     @Override
     LinkPredictionResult predictLinks(
         Graph graph,
-        LinkFeatureExtractor featureExtractor,
-        LinkLogisticRegressionPredictor predictor
+        LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
-                featureExtractor,
-                predictor,
+                linkPredictionSimilarityComputer,
                 result,
                 progressTracker
             ),
@@ -87,21 +83,18 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
     final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
         private final Graph graph;
-        private final LinkFeatureExtractor linkFeatureExtractor;
-        private final LinkLogisticRegressionPredictor predictor;
+        private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final LinkPredictionResult predictedLinks;
         private final ProgressTracker progressTracker;
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
-            LinkFeatureExtractor linkFeatureExtractor,
-            LinkLogisticRegressionPredictor predictor,
+            LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
             LinkPredictionResult predictedLinks,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
-            this.linkFeatureExtractor = linkFeatureExtractor;
-            this.predictor = predictor;
+            this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
             this.predictedLinks = predictedLinks;
             this.progressTracker = progressTracker;
         }
@@ -114,8 +107,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 var smallestTarget = sourceId + 1;
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (largerNeighbors.contains(targetId)) return;
-                        var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-                        var probability = predictor.predictedProbability(features);
+                        var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
                         if (probability < threshold) return;
                         predictedLinks.add(sourceId, targetId, probability);
                     }
