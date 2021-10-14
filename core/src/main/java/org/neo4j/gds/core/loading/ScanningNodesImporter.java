@@ -114,7 +114,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 ? LabelInformation.emptyBuilder(allocationTracker)
                 : LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, allocationTracker);
 
-        nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
+        nodePropertyImporter = initializeNodePropertyImporter();
 
         return NodesScanner.of(
             transaction,
@@ -233,7 +233,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     }
 
     @Nullable
-    private NativeNodePropertyImporter initializeNodePropertyImporter(long nodeCount) {
+    private NativeNodePropertyImporter initializeNodePropertyImporter() {
         var propertyMappingsByLabel = properties.storedProperties();
         boolean loadProperties = propertyMappingsByLabel
             .values()
@@ -243,7 +243,6 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         if (loadProperties) {
             return NativeNodePropertyImporter
                 .builder()
-                .nodeCount(nodeCount)
                 .concurrency(concurrency)
                 .dimensions(dimensions)
                 .propertyMappings(propertyMappingsByLabel)
