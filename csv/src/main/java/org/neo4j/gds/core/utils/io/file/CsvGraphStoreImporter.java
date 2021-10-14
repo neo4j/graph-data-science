@@ -136,7 +136,11 @@ public final class CsvGraphStoreImporter {
 
         var importTasks = new ArrayList<Task>();
         importTasks.add(Tasks.leaf("Import nodes", nodeCount));
-        importTasks.add(Tasks.leaf("Import relationships"));
+
+        var relationshipTaskVolume = graphInfo.relationshipTypeCounts().isEmpty()
+            ? Task.UNKNOWN_VOLUME
+            : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
+        importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
 
         var nodePropertyCount = fileInput.nodeSchema().properties().values().stream().mapToLong(map -> map.keySet().size()).sum();
         var numRelationshipTypes = fileInput.relationshipSchema().availableTypes().size();

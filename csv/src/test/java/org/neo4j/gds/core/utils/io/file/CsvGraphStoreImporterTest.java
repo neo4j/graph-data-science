@@ -78,6 +78,11 @@ class CsvGraphStoreImporterTest {
             log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");
             log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Finished");
             log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Start");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 20%");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 40%");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 60%");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 80%");
+            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 100%");
             log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
             log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Start");
             log.assertContainsMessage(TestLog.INFO, "Csv import :: GraphStore Filter :: Nodes :: Start");
