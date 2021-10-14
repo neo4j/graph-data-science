@@ -41,8 +41,8 @@ shadowJar {
     relocate('javassist', 'org.neo4j.gds.shaded.javassist')
 
     mergeServiceFiles()
-    archiveBaseName.set("openGDS")
-    archiveClassifier.set("plugin")
+    archiveBaseName.set("open-gds")
+    archiveClassifier.set("")
     exclude 'META-INF/versions/**/*'
     exclude 'module-info.class'
     exclude 'LICENSE'
