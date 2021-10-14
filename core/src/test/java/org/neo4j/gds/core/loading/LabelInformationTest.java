@@ -20,12 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,29 +33,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LabelInformationTest {
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
-    void singleLabelAssignment(TestMethodRunner runner) {
-        runner.run(() -> {
-            var nodeIds = LongStream.range(0, 10).boxed().collect(Collectors.toList());
-            testLabelAssignment(nodeIds, node -> node);
-        });
+    @Test
+    void singleLabelAssignment() {
+        var nodeIds = LongStream.range(0, 10).boxed().collect(Collectors.toList());
+        testLabelAssignment(nodeIds, node -> node);
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
-    void singleLabelAssignmentWithNonDirectMapping(TestMethodRunner runner) {
-        runner.run(() -> {
-            var nodeMapping = LongStream
-                .range(0, 10)
-                .boxed()
-                .collect(Collectors.toMap(nodeId -> 42 * (nodeId + 1337), nodeId -> nodeId));
-            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
-                testLabelAssignment(nodeMapping.keySet(), nodeMapping::get);
-            } else {
-                testLabelAssignment(nodeMapping.values(), node -> node);
-            }
-        });
+    @Test
+    void singleLabelAssignmentWithNonDirectMapping() {
+        var nodeMapping = LongStream
+            .range(0, 10)
+            .boxed()
+            .collect(Collectors.toMap(nodeId -> 42 * (nodeId + 1337), nodeId -> nodeId));
+            testLabelAssignment(nodeMapping.keySet(), nodeMapping::get);
     }
 
     private void testLabelAssignment(Collection<Long> nodeIds, LongUnaryOperator nodeIdMapping) {
@@ -69,10 +55,10 @@ class LabelInformationTest {
 
         tokenLabelsMap.put(0, List.of(label));
 
-        var builder = LabelInformation.builder(10, tokenLabelsMap, AllocationTracker.empty());
+        var builder = LabelInformation.builder(tokenLabelsMap);
 
         for (var nodeId : nodeIds) {
-            builder.addNodeIdToLabel(label, nodeId, nodeCount);
+            builder.addNodeIdToLabel(label, nodeId);
         }
 
         var labelInformation = builder.build(nodeCount, nodeIdMapping);

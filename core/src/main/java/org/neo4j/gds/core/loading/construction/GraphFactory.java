@@ -113,7 +113,7 @@ public final class GraphFactory {
 
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
         if (useBitIdMap && disjointPartitions && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
+            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1);
             nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else if (useBitIdMap && !labelInformation && maxOriginalIdKnown) {
@@ -131,7 +131,6 @@ public final class GraphFactory {
 
         return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
-            nodeCount.orElseThrow(() -> new IllegalArgumentException("Required parameter [nodeCount] is missing")),
             nodeMappingBuilder,
             internalIdMappingBuilder,
             threadCount,
@@ -148,7 +147,6 @@ public final class GraphFactory {
 
             return new NodesBuilder(
                 maxOriginalId,
-                nodes,
                 threadCount,
                 new ObjectIntScatterMap<>(),
                 new IntObjectHashMap<>(),
@@ -164,7 +162,6 @@ public final class GraphFactory {
 
     private static NodesBuilder fromSchema(
         long maxOriginalId,
-        long nodeCount,
         NodeMappingBuilder.Capturing nodeMappingBuilder,
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder,
         int concurrency,
@@ -197,7 +194,6 @@ public final class GraphFactory {
 
         return new NodesBuilder(
             maxOriginalId,
-            nodeCount,
             concurrency,
             elementIdentifierLabelTokenMapping,
             labelTokenNodeLabelMapping,

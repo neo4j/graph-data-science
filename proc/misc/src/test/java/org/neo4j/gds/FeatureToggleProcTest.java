@@ -37,7 +37,6 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
@@ -247,20 +246,5 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("value", (long) defaultValue))
         );
         assertEquals(defaultValue, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
-    }
-
-    @Test
-    void toggleUsePartitionedIndexScan() {
-        var usePartitionedIndexScan = USE_PARTITIONED_INDEX_SCAN.isEnabled();
-        runQuery(
-            "CALL gds.features.usePartitionedIndexScan($value)",
-            Map.of("value", !usePartitionedIndexScan)
-        );
-        assertEquals(!usePartitionedIndexScan, USE_PARTITIONED_INDEX_SCAN.isEnabled());
-        runQuery(
-            "CALL gds.features.usePartitionedIndexScan($value)",
-            Map.of("value", usePartitionedIndexScan)
-        );
-        assertEquals(usePartitionedIndexScan, USE_PARTITIONED_INDEX_SCAN.isEnabled());
     }
 }

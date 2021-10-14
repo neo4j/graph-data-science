@@ -23,7 +23,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -43,8 +42,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
 
     @Override
     StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        var usePartitionedScan = GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled();
-        return Neo4jProxy.nodeLabelIndexScan(transaction, labelId, batchSize(), usePartitionedScan);
+        return Neo4jProxy.nodeLabelIndexScan(transaction, labelId, batchSize());
     }
 
     @Override

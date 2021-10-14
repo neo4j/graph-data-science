@@ -67,7 +67,6 @@ public final class NodesBuilder {
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
-    private final long nodeCount;
     private final int concurrency;
     private final AllocationTracker allocationTracker;
 
@@ -88,7 +87,6 @@ public final class NodesBuilder {
 
     NodesBuilder(
         long maxOriginalId,
-        long nodeCount,
         int concurrency,
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
@@ -100,10 +98,9 @@ public final class NodesBuilder {
         AllocationTracker allocationTracker
     ) {
         this.maxOriginalId = maxOriginalId;
-        this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
-        this.labelInformationBuilder = LabelInformation.emptyBuilder(allocationTracker);
+        this.labelInformationBuilder = LabelInformation.emptyBuilder();
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.allocationTracker = allocationTracker;
         this.nextLabelId = 0;

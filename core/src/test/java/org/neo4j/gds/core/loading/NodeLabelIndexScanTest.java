@@ -26,7 +26,6 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashSet;
@@ -74,8 +73,7 @@ class NodeLabelIndexScanTest extends BaseTest {
             var storeScan = Neo4jProxy.nodeLabelIndexScan(
                 ktx,
                 aToken,
-                SparseLongArray.SUPER_BLOCK_SIZE,
-                GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()
+                SparseLongArray.SUPER_BLOCK_SIZE
             );
 
             var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);

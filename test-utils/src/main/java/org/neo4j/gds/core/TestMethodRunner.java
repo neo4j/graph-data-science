@@ -82,24 +82,4 @@ public interface TestMethodRunner {
             GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
                 GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
     }
-
-    @TestOnly
-    static Stream<TestMethodRunner> usePartitionedIndexScan() {
-        return Stream.of(
-            TestMethodRunner::runWithPartitionedLabelIndexScan,
-            TestMethodRunner::runWithLabelIndexScan
-        );
-    }
-
-    @TestOnly
-    private static <E extends Exception> void runWithPartitionedLabelIndexScan(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.enableAndRun(code));
-    }
-
-    @TestOnly
-    private static <E extends Exception> void runWithLabelIndexScan(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.disableAndRun(code));
-    }
 }

@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collections;
@@ -55,7 +54,7 @@ public class NodeImporter {
             : IdMappingAllocator.PropertyAllocator.EMPTY;
     }
 
-    public long importNodes(
+    long importNodes(
         NodesBatchBuffer buffer,
         KernelTransaction kernelTransaction,
         @Nullable NativeNodePropertyImporter propertyImporter
@@ -94,23 +93,13 @@ public class NodeImporter {
         var labelIds = buffer.labelIds();
 
         if (buffer.hasLabelInformation()) {
-            if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
-                setNodeLabelInformation(
-                    batch,
-                    batchLength,
-                    adder.startId(),
-                    labelIds,
-                    (nodeIds, startIndex, pos) -> nodeIds[pos]
-                );
-            } else {
-                setNodeLabelInformation(
-                    batch,
-                    batchLength,
-                    adder.startId(),
-                    labelIds,
-                    (nodeIds, startIndex, pos) -> startIndex + pos
-                );
-            }
+            setNodeLabelInformation(
+                batch,
+                batchLength,
+                adder.startId(),
+                labelIds,
+                (nodeIds, startIndex, pos) -> nodeIds[pos]
+            );
         }
 
         importedProperties += adder.insert(batch, batchLength, propertyAllocator, reader, properties, labelIds);
@@ -129,7 +118,7 @@ public class NodeImporter {
                     Collections.emptyList()
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, nodeId, idMapBuilder.capacity());
+                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, nodeId);
                 }
             }
         }

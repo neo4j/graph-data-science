@@ -21,32 +21,24 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class InternalBitIdMappingBuilder implements InternalIdMappingBuilder<InternalBitIdMappingBuilder.BulkAdder> {
 
-    private final SparseLongArrayBuilder builder;
+    private final Builder builder;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalBitIdMappingBuilder of(long length, AllocationTracker allocationTracker) {
-        SparseLongArrayBuilder builder;
-        if (GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()) {
-            builder = new SequentialBuilder(SparseLongArray.sequentialBuilder(length));
-        } else {
-            builder = new AlignedBuilder(SparseLongArray.builder(length));
-        }
-
+    public static InternalBitIdMappingBuilder of(long length) {
+        var builder = new Builder(SparseLongArray.sequentialBuilder(length));
         return new InternalBitIdMappingBuilder(builder, length);
     }
 
-    private InternalBitIdMappingBuilder(SparseLongArrayBuilder builder, final long length) {
+    private InternalBitIdMappingBuilder(Builder builder, final long length) {
         this.builder = builder;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -90,12 +82,12 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
     }
 
     public static final class BulkAdder implements IdMappingAllocator {
-        private final SparseLongArrayBuilder builder;
+        private final Builder builder;
 
         private long allocationIndex;
         private int allocationSize;
 
-        private BulkAdder(SparseLongArrayBuilder builder) {
+        private BulkAdder(Builder builder) {
             this.builder = builder;
         }
 
@@ -123,7 +115,7 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
             PropertyReference[] properties,
             long[][] labelIds
         ) {
-            builder.set(allocationIndex, nodeIds, 0, length);
+            builder.set(nodeIds, 0, length);
             return propertyAllocator.allocateProperties(
                 reader,
                 nodeIds,
@@ -136,40 +128,17 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
         }
     }
 
-    interface SparseLongArrayBuilder {
-        SparseLongArray build();
-        void set(long allocationIndex, long[] originalIds, int offset, int length);
-    }
-
-    static class SequentialBuilder implements SparseLongArrayBuilder {
+    static class Builder {
         private final SparseLongArray.SequentialBuilder sequentialBuilder;
 
-        SequentialBuilder(SparseLongArray.SequentialBuilder sequentialBuilder) {this.sequentialBuilder = sequentialBuilder;}
+        Builder(SparseLongArray.SequentialBuilder sequentialBuilder) {this.sequentialBuilder = sequentialBuilder;}
 
-        @Override
         public SparseLongArray build() {
             return sequentialBuilder.build();
         }
 
-        @Override
-        public void set(long allocationIndex, long[] originalIds, int offset, int length) {
+        public void set(long[] originalIds, int offset, int length) {
             sequentialBuilder.set(originalIds, offset, length);
-        }
-    }
-
-    static class AlignedBuilder implements SparseLongArrayBuilder {
-        private final SparseLongArray.Builder alignedBuilder;
-
-        AlignedBuilder(SparseLongArray.Builder alignedBuilder) {this.alignedBuilder = alignedBuilder;}
-
-        @Override
-        public SparseLongArray build() {
-            return alignedBuilder.build();
-        }
-
-        @Override
-        public void set(long allocationIndex, long[] originalIds, int offset, int length) {
-            alignedBuilder.set(allocationIndex, originalIds, offset, length);
         }
     }
 }

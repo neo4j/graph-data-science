@@ -197,19 +197,4 @@ public final class FeatureToggleProc {
             this.value = value;
         }
     }
-
-    @Internal
-    @Procedure("gds.features.usePartitionedIndexScan")
-    @Description("")
-    public void usePartitionedIndexScan(@Name(value = "usePartitionedIndexScan") boolean useNeoIdsForLabelImport) {
-        GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.toggle(useNeoIdsForLabelImport);
-    }
-
-    @Internal
-    @Procedure("gds.features.usePartitionedIndexScan.reset")
-    @Description("")
-    public Stream<FeatureState> resetUsePartitionedIndexScan() {
-        GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PARTITIONED_INDEX_SCAN.isEnabled()));
-    }
 }

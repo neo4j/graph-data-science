@@ -328,14 +328,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize,
-        boolean usePartitionedScan
+        int batchSize
     ) {
-        if (!usePartitionedScan) {
-            var read = transaction.dataRead();
-            return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
-        }
-
         var read = transaction.dataRead();
         var nodeCount = read.countsForNode(labelId);
 
@@ -501,7 +495,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
             @Override
             public long pageCacheMemory() {
-                return pageCacheMemory.orElseGet(() -> Configuration.super.pageCacheMemory());
+                return pageCacheMemory.orElseGet(Configuration.super::pageCacheMemory);
             }
 
             @Override

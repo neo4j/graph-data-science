@@ -111,8 +111,8 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         labelInformationBuilder =
             graphCreateConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder(allocationTracker)
-                : LabelInformation.builder(nodeCount, labelTokenNodeLabelMapping, allocationTracker);
+                ? LabelInformation.emptyBuilder()
+                : LabelInformation.builder(labelTokenNodeLabelMapping);
 
         nodePropertyImporter = initializeNodePropertyImporter();
 

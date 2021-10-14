@@ -248,10 +248,9 @@ public final class Neo4jProxy {
     public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize,
-        boolean usePartitionedScan
+        int batchSize
     ) {
-        return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize, usePartitionedScan);
+        return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize);
     }
 
     public static <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
