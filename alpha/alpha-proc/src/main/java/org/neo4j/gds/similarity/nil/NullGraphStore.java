@@ -26,6 +26,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.RelationshipProperty;
+import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -178,6 +180,13 @@ public class NullGraphStore implements GraphStore {
     @Override
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
         return Set.of();
+    }
+
+    @Override
+    public RelationshipProperty relationshipPropertyValues(
+        RelationshipType relationshipType, String propertyKey
+    ) {
+        return RelationshipPropertyStore.empty().get(propertyKey);
     }
 
     @Override

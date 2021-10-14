@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -187,6 +188,13 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     @Override
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
         return graphStore.relationshipPropertyKeys(relationshipType);
+    }
+
+    @Override
+    public RelationshipProperty relationshipPropertyValues(
+        RelationshipType relationshipType, String propertyKey
+    ) {
+        return graphStore.relationshipPropertyValues(relationshipType, propertyKey);
     }
 
     @Override

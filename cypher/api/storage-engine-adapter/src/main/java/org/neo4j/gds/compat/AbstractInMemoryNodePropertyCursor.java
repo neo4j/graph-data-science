@@ -19,65 +19,32 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
+import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.ValueGroup;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.StreamSupport;
+import java.util.function.Predicate;
 
-public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor {
+public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemoryPropertyCursor.DelegatePropertyCursor<NodeLabel, PropertySchema> {
 
-    private String currentNodePropertyKey = null;
-
-    private final Map<String, ValueGroup> propertyKeyToTypeMapping;
-    private final Set<Integer> seenNodeReferences;
-
-    public AbstractInMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID, graphStore, tokenHolders);
-        this.seenNodeReferences = new HashSet<>();
-        this.propertyKeyToTypeMapping = new HashMap<>();
-        var propertySchemas = graphStore
-            .schema()
-            .nodeSchema()
-            .filter(graphStore.nodeLabels())
-            .properties()
-            .values();
-        graphStore.nodePropertyKeys(graphStore.nodeLabels()).forEach(nodePropertyKey -> {
-            var valueType = propertySchemas
-                .stream()
-                .map(map -> map.get(nodePropertyKey))
-                .findFirst()
-                .get()
-                .valueType();
-
-            var valueGroup = valueGroupFromValueType(valueType);
-
-            propertyKeyToTypeMapping.put(nodePropertyKey, valueGroup);
-        });
     }
 
     @Override
-    public int propertyKey() {
-        return tokenHolders.propertyKeyTokens().getIdByName(currentNodePropertyKey);
-    }
-
-    @Override
-    public ValueGroup propertyType() {
-        return propertyKeyToTypeMapping.get(currentNodePropertyKey);
+    protected Map<NodeLabel, Map<String, PropertySchema>> propertySchema() {
+        return graphStore.schema().nodeSchema().properties();
     }
 
     @Override
     public Value propertyValue() {
-        if (currentNodePropertyKey != null) {
-            return graphStore.nodePropertyValues(currentNodePropertyKey).value(getId());
+        if (currentPropertyKey != null) {
+            return graphStore.nodePropertyValues(currentPropertyKey).value(getId());
         } else {
             throw new IllegalStateException(
                 "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
@@ -85,25 +52,17 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
     }
 
     @Override
-    public boolean next() {
-        if (getId() != NO_ID) {
-            Optional<NamedToken> maybeNextEntry = StreamSupport.stream(tokenHolders
-                .propertyKeyTokens()
-                .getAllTokens()
-                .spliterator(), false)
-                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) &&
-                                       propertyPresentOnNode(tokenHolder))
-                .findFirst();
-
-            if (maybeNextEntry.isPresent()) {
-                currentNodePropertyKey = maybeNextEntry.get().name();
-                seenNodeReferences.add(maybeNextEntry.get().id());
-                return true;
+    protected void setPropertySelection(Predicate<Integer> propertySelection) {
+        super.setPropertySelection(
+            propertyToken -> {
+                try {
+                    var namedPropertyToken = tokenHolders.propertyKeyTokens().getTokenById(propertyToken);
+                    return propertySelection.test(propertyToken) && propertyPresentOnNode(namedPropertyToken);
+                } catch (TokenNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            return false;
-        } else {
-            return false;
-        }
+        );
     }
 
     private boolean propertyPresentOnNode(NamedToken tokenHolder) {
@@ -111,42 +70,5 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
             graphStore.nodes().nodeLabels(getId()),
             tokenHolder.name()
         );
-    }
-
-    @Override
-    public void reset() {
-        clear();
-        this.setId(NO_ID);
-        this.currentNodePropertyKey = null;
-        this.seenNodeReferences.clear();
-    }
-
-    @Override
-    public void clear() {
-        super.clear();
-    }
-
-    @Override
-    public void setForceLoad() {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    private static ValueGroup valueGroupFromValueType(ValueType valueType) {
-        switch (valueType) {
-            case DOUBLE:
-            case LONG:
-                return ValueGroup.NUMBER;
-            case LONG_ARRAY:
-            case DOUBLE_ARRAY:
-            case FLOAT_ARRAY:
-                return ValueGroup.NUMBER_ARRAY;
-            default:
-                return ValueGroup.UNKNOWN;
-        }
     }
 }

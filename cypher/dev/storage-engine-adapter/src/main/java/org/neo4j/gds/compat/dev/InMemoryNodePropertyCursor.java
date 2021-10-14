@@ -19,34 +19,27 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
-import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
 
-    public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
     @Override
     public void initNodeProperties(Reference reference, PropertySelection selection, long ownerReference) {
+        reset();
         setId(((LongReference) reference).id);
+        setPropertySelection(selection::test);
     }
 
     @Override
     public void initRelationshipProperties(Reference reference, PropertySelection selection, long ownerReference) {
-    }
-
-    @Override
-    public void initRelationshipProperties(Reference reference, PropertySelection selection) {
-    }
-
-    @Override
-    public void initRelationshipProperties(StorageRelationshipCursor relationshipCursor, PropertySelection selection) {
     }
 }

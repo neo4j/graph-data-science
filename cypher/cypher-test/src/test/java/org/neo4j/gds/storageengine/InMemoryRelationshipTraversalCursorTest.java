@@ -20,6 +20,10 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
@@ -30,8 +34,11 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
+import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,8 +50,8 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
                                     "  (a:A)" +
                                     ", (b:B)" +
                                     ", (c:A)" +
-                                    ", (a)-[:REL]->(b)" +
-                                    ", (a)-[:REL]->(c)";
+                                    ", (a)-[:REL { prop1: 42.0, prop2: 12.0 }]->(b)" +
+                                    ", (a)-[:REL { prop1: 13.37, prop2: 4.2 }]->(c)";
 
     @Inject
     IdFunction idFunction;
@@ -58,6 +65,8 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
             .addNodeLabel("A")
             .addNodeLabel("B")
             .addRelationshipType("REL")
+            .addRelationshipProperty(PropertyMapping.of("prop1"))
+            .addRelationshipProperty(PropertyMapping.of("prop2"))
             .build()
             .graphStore();
     }
@@ -95,7 +104,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     }
 
     @Test
-    void shouldSetCorrectIds() {
+    void shouldSetCorrectIdsAndTypes() {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 
         StorageEngineProxy.initRelationshipTraversalCursorForRelType(
@@ -106,8 +115,69 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         assertThat(relationshipCursor.next()).isTrue();
         assertThat(relationshipCursor.getId()).isEqualTo(0L);
+        assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
 
         assertThat(relationshipCursor.next()).isTrue();
         assertThat(relationshipCursor.getId()).isEqualTo(1L);
+        assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertyFilterAndExpectedValues")
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
+    void shouldGetPropertyValues(Map<String, Double> expectedValues) {
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
+        );
+
+        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+
+        assertThat(relationshipCursor.next()).isTrue();
+        var propertyTokens = expectedValues
+            .keySet()
+            .stream()
+            .mapToInt(propertyKey -> tokenHolders.propertyKeyTokens().getIdByName(propertyKey))
+            .toArray();
+        StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
+
+        expectedValues.forEach((propertyKey, expectedValue) -> {
+            assertThat(propertyCursor.next()).isTrue();
+            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
+        });
+    }
+
+    @Test
+    void shouldGetPropertyValues() {
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
+        );
+
+        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+
+        var expectedValues = Map.of("prop1", 42.0D, "prop2", 12.0D);
+
+        assertThat(relationshipCursor.next()).isTrue();
+        StorageEngineProxy.properties(relationshipCursor, propertyCursor, new int[0]);
+
+        expectedValues.forEach((propertyKey, expectedValue) -> {
+            assertThat(propertyCursor.next()).isTrue();
+            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
+        });
+    }
+
+    static Stream<Arguments> propertyFilterAndExpectedValues() {
+        return Stream.of(
+            Arguments.of(Map.of("prop1", 42.0D)),
+            Arguments.of(Map.of("prop2", 12.0D)),
+            Arguments.of(Map.of("prop1", 42.0D, "prop2", 12.0D))
+        );
     }
 }

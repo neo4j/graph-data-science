@@ -17,29 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._433;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.gds.compat.AbstractInMemoryPropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 
-public class InMemoryPropertyCursor extends AbstractInMemoryPropertyCursor {
+public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelationshipPropertyCursor {
 
-    public InMemoryPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+    InMemoryRelationshipPropertyCursor(
+        CypherGraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
         super(graphStore, tokenHolders);
     }
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
-        var delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
-        delegate.initNodeProperties(reference);
-        this.delegate = delegate;
+
     }
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-        var delegate = new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
-        delegate.initRelationshipProperties(reference);
-        this.delegate = delegate;
+        reset();
+        setId(reference);
+        setPropertySelection(i -> true);
     }
 }

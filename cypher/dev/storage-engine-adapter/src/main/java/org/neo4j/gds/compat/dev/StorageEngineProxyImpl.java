@@ -29,6 +29,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
@@ -38,7 +39,10 @@ import org.neo4j.internal.recordstorage.InMemoryStorageReaderDev;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.RelationshipSelection;
+import org.neo4j.storageengine.api.StorageEntityCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -115,13 +119,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodeCursor inMemoryNodeCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         return new InMemoryNodeCursor(graphStore, tokenHolders);
     }
 
     @Override
     public AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
-        GraphStore graphStore,
+        CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
         return new InMemoryNodePropertyCursor(graphStore, tokenHolders);
@@ -139,6 +143,20 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         return new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public AbstractInMemoryRelationshipPropertyCursor inMemoryRelationshipPropertyCursor(
+        CypherGraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        return new InMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    public void properties(
+        StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection
+    ) {
+        storageCursor.properties(propertyCursor, PropertySelection.selection(propertySelection));
     }
 
     @Override

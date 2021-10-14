@@ -28,6 +28,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
@@ -37,6 +38,8 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEntityCursor;
+import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -97,13 +100,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public AbstractInMemoryNodeCursor inMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryNodeCursor inMemoryNodeCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         throw cypherUnsupportedException();
     }
 
     @Override
     public AbstractInMemoryNodePropertyCursor inMemoryNodePropertyCursor(
-        GraphStore graphStore, TokenHolders tokenHolders
+        CypherGraphStore graphStore, TokenHolders tokenHolders
     ) {
         throw cypherUnsupportedException();
     }
@@ -118,6 +121,20 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public AbstractInMemoryRelationshipScanCursor inMemoryRelationshipScanCursor(
         CypherGraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public AbstractInMemoryRelationshipPropertyCursor inMemoryRelationshipPropertyCursor(
+        CypherGraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public void properties(
+        StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection
     ) {
         throw cypherUnsupportedException();
     }

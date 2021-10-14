@@ -20,7 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.cypher.RelationshipWithIdCursor;
+import org.neo4j.gds.core.cypher.CypherRelationshipCursor;
 import org.neo4j.gds.core.cypher.SingleElementIterator;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
@@ -41,7 +41,7 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
     public void scan() {
         relationshipCursors = LongStream.range(0, graphStore.nodeCount())
             .mapToObj(nodeId -> graphStore.relationshipIds().relationshipCursors(nodeId, RelationshipSelection.ALL_RELATIONSHIPS))
-            .map(cursor -> (Iterable<RelationshipWithIdCursor>) () -> cursor)
+            .map(cursor -> (Iterable<CypherRelationshipCursor>) () -> cursor)
             .flatMap(relationshipCursors -> StreamSupport.stream(relationshipCursors.spliterator(), false))
             .iterator();
     }

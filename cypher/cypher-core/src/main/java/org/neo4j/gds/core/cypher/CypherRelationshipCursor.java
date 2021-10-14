@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._434;
+package org.neo4j.gds.core.cypher;
 
-import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
-import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.token.TokenHolders;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.RelationshipCursor;
 
-public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
+@ValueClass
+public interface CypherRelationshipCursor extends RelationshipCursor {
+    long id();
+    RelationshipType relationshipType();
 
-    InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
-        super(graphStore, tokenHolders);
-    }
-
-    @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-        reset();
-        setId(reference);
-        setPropertySelection(i -> true);
-    }
-
-    @Override
-    public void initRelationshipProperties(long reference, long ownerReference) {
-
+    static CypherRelationshipCursor fromRelationshipCursor(
+        RelationshipCursor relationshipCursor,
+        long id,
+        RelationshipType relationshipType
+    ) {
+        return ImmutableCypherRelationshipCursor.of(
+            relationshipCursor.sourceId(),
+            relationshipCursor.targetId(),
+            relationshipCursor.property(),
+            id,
+            relationshipType
+        );
     }
 }

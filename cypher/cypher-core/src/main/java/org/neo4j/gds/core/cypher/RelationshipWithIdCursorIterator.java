@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class RelationshipWithIdCursorIterator implements Iterator<RelationshipWithIdCursor> {
+public class RelationshipWithIdCursorIterator implements Iterator<CypherRelationshipCursor> {
 
     private final List<RelationshipIds.RelationshipIdContext> relationshipIdContexts;
     private final long nodeId;
@@ -68,13 +68,12 @@ public class RelationshipWithIdCursorIterator implements Iterator<RelationshipWi
     }
 
     @Override
-    public RelationshipWithIdCursor next() {
+    public CypherRelationshipCursor next() {
         var relationshipCursor = currentRelCursor.next();
-        return ImmutableRelationshipWithIdCursor.of(
-            relationshipCursor.sourceId(),
-            relationshipCursor.targetId(),
-            relationshipCursor.property(),
-            relationshipId++
+        return CypherRelationshipCursor.fromRelationshipCursor(
+            relationshipCursor,
+            relationshipId++,
+            currentRelContext.relationshipType()
         );
     }
 

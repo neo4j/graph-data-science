@@ -19,19 +19,21 @@
  */
 package org.neo4j.gds.compat._433;
 
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 
 public class InMemoryNodePropertyCursor extends AbstractInMemoryNodePropertyCursor {
 
-    public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
+    InMemoryNodePropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 
     @Override
     public void initNodeProperties(long reference, long ownerReference) {
+        reset();
         setId(reference);
+        setPropertySelection(i -> true);
     }
 
     @Override

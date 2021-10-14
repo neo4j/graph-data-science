@@ -21,6 +21,7 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
@@ -34,13 +35,13 @@ public class InMemoryRelationshipTraversalCursor extends AbstractInMemoryRelatio
 
     @Override
     public Reference propertiesReference() {
-        return null;
+        return LongReference.longReference(getId());
     }
 
     @Override
     public void properties(
         StoragePropertyCursor propertyCursor, PropertySelection selection
     ) {
-
+        propertyCursor.initRelationshipProperties(propertiesReference(), selection);
     }
 }

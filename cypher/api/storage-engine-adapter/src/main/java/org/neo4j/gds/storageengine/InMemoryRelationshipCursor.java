@@ -20,21 +20,22 @@
 package org.neo4j.gds.storageengine;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.cypher.RelationshipWithIdCursor;
+import org.neo4j.gds.core.cypher.CypherRelationshipCursor;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.storageengine.api.RelationshipVisitor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
 
-    protected Iterator<RelationshipWithIdCursor> relationshipCursors;
-    protected RelationshipWithIdCursor currentRelationshipCursor;
+    protected Iterator<CypherRelationshipCursor> relationshipCursors;
+    protected CypherRelationshipCursor currentRelationshipCursor;
 
     public InMemoryRelationshipCursor(CypherGraphStore graphStore, TokenHolders tokenHolders, long id) {
         super(id);
@@ -48,7 +49,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public int type() {
-        return 0;
+        return getType();
     }
 
     @Override
@@ -63,7 +64,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public boolean hasProperties() {
-        return false;
+        return !graphStore.relationshipPropertyKeys(List.of(currentRelationshipCursor.relationshipType())).isEmpty();
     }
 
     @Override
@@ -76,6 +77,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         if (relationshipCursors.hasNext()) {
             currentRelationshipCursor = relationshipCursors.next();
             setId(currentRelationshipCursor.id());
+            setType(tokenHolders.relationshipTypeTokens().getIdByName(currentRelationshipCursor.relationshipType().name()));
             return true;
         }
         return false;
