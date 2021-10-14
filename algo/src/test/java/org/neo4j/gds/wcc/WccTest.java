@@ -20,11 +20,14 @@
 package org.neo4j.gds.wcc;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestLog;
@@ -47,9 +50,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -109,6 +114,60 @@ class WccTest {
             }
             return true;
         });
+    }
+
+    static Stream<Arguments> orientationAndGraphs() {
+        var monoGraph = " (a {componentId: 0})-->(b {componentId: 0})<--(c {componentId: 0})" +
+                        ",(d {componentId: 1})-->(e {componentId: 1})<--(f {componentId: 1})" +
+                        ",(g {componentId: 2})-->(h {componentId: 2})<--(i {componentId: 2})" +
+                        ",(j {componentId: 3})-->(k {componentId: 3})<--(l {componentId: 3})" +
+                        ",(m)-->(n)<--(o)";
+
+        var unionGraph = " (a: L1 {componentId: 0})-[:A]->(b: L2 {componentId: 0})<-[:B]-(c: L1 {componentId: 0})" +
+                         ",(d: L1 {componentId: 1})-[:A]->(e: L2 {componentId: 1})<-[:B]-(f: L1 {componentId: 1})" +
+                         ",(g: L1 {componentId: 2})-[:A]->(h: L2 {componentId: 2})<-[:B]-(i: L1 {componentId: 2})" +
+                         ",(j: L1 {componentId: 3})-[:A]->(k: L2 {componentId: 3})<-[:B]-(l: L1 {componentId: 3})" +
+                         ",(m: L1)-[:A]->(n: L2)<-[:B]-(o: L1)";
+
+        return Stream.of(
+            arguments(Orientation.NATURAL, monoGraph, "natural mono"),
+            arguments(Orientation.REVERSE, monoGraph, "reverse mono"),
+            arguments(Orientation.UNDIRECTED, monoGraph, "undirected mono"),
+            arguments(Orientation.NATURAL, unionGraph, "natural union"),
+            arguments(Orientation.REVERSE, unionGraph, "reverse union"),
+            arguments(Orientation.UNDIRECTED, unionGraph, "undirected union")
+        );
+    }
+
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("orientationAndGraphs")
+    void seededWccOnUnionGraphs(Orientation orientation, String gdl, @SuppressWarnings("unused") String testName) {
+        var graph = fromGdl(gdl, orientation);
+
+        var result = run(graph, ImmutableWccStreamConfig.builder()
+            .seedProperty("componentId")
+            .build());
+
+        var seen = new LongHashSet();
+
+        for (char node = 'a'; node <= 'o'; node += 3) {
+            var nodeId1 = graph.toMappedNodeId(String.valueOf(node));
+            var nodeId2 = graph.toMappedNodeId(String.valueOf((char) (node + 1)));
+            var nodeId3 = graph.toMappedNodeId(String.valueOf((char) (node + 2)));
+
+            var component = result.setIdOf(nodeId1);
+
+            assertThat(component)
+                .isEqualTo(result.setIdOf(nodeId2))
+                .isEqualTo(result.setIdOf(nodeId3));
+
+            // true == setId was not seen before
+            assertThat(seen.add(component))
+                .as("Node %s with component %d belongs to a set outside of its actual component", node, component)
+                .isTrue();
+        }
+
+        assertThat(getSetCount(result)).isEqualTo(5);
     }
 
     @ParameterizedTest
