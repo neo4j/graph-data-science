@@ -214,8 +214,8 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             featureBagger.sample(featureBag);
         }
 
-        for (int i : featureBag) {
-            for (long j = 0; j < groupSize; j++) {
+        for (long j = 0; j < groupSize; j++) {
+            for (int i : featureBag) {
                 var features = allFeatureVectors.get(group.get(j));
 
                 var groupSizes = createSplit(i, features[i], group, groupSize, childGroups);
