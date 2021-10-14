@@ -1,23 +1,15 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Collections'
+description = 'Neo4j Graph Data Science :: Collections Memory Estimation'
 
 dependencies {
-    annotationProcessor(project(":collections-generator"))
-
-    implementation project(':annotations')
+    implementation project(':core')
     implementation project(':memory-usage')
-    
+    implementation project(':collections')
+
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
-}
-
-sourceSets {
-    test {
-        java {
-            srcDirs += ['build/generated/sources/annotationProcessor/java/test']
-        }
-    }
+    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
 }
