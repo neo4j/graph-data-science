@@ -28,14 +28,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.TestGraphLoader;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -54,12 +54,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
 class CypherFactoryTest extends BaseTest {
 
@@ -369,8 +369,8 @@ class CypherFactoryTest extends BaseTest {
                 "Node properties",
                 "MATCH (n) RETURN id(n) as id, n.id as idProp",
                 "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
-                659320,
-                659320
+                659312,
+                659312
             ),
 
             Arguments.of(
