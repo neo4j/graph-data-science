@@ -31,16 +31,19 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -69,28 +72,28 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(p:Ignore {noise: -1, z: -1, array: [1.0]}), " +
 
-        "(a)-[:REL]->(b), " +
+        "(a)-[:REL { weight: 1.0 } ]->(b), " +
         "(a)-[:REL]->(c), " +
-        "(a)-[:REL]->(d), " +
+        "(a)-[:REL { weight: 1.0 } ]->(d), " +
         "(b)-[:REL]->(c), " +
         "(b)-[:REL]->(d), " +
-        "(c)-[:REL]->(d), " +
-        "(e)-[:REL]->(f), " +
+        "(c)-[:REL { weight: 1.0 } ]->(d), " +
+        "(e)-[:REL { weight: 1.0 } ]->(f), " +
         "(e)-[:REL]->(g), " +
-        "(f)-[:REL]->(g), " +
+        "(f)-[:REL { weight: 1.0 } ]->(g), " +
         "(h)-[:REL]->(i), " +
-        "(j)-[:REL]->(k), " +
+        "(j)-[:REL { weight: 1.0 } ]->(k), " +
         "(j)-[:REL]->(l), " +
-        "(k)-[:REL]->(l), " +
-        "(m)-[:REL]->(n), " +
-        "(m)-[:REL]->(o), " +
-        "(n)-[:REL]->(o), " +
+        "(k)-[:REL { weight: 1.0 } ]->(l), " +
+        "(m)-[:REL { weight: 1.0 } ]->(n), " +
+        "(m)-[:REL { weight: 1.0 } ]->(o), " +
+        "(n)-[:REL { weight: 1.0 } ]->(o), " +
         "(a)-[:REL]->(p), " +
 
-        "(a)-[:IGNORED]->(e), " +
-        "(m)-[:IGNORED]->(a), " +
-        "(m)-[:IGNORED]->(b), " +
-        "(m)-[:IGNORED]->(c) ";
+        "(a)-[:IGNORED { weight: 1.0 } ]->(e), " +
+        "(m)-[:IGNORED { weight: 1.0 } ]->(a), " +
+        "(m)-[:IGNORED { weight: 1.0 } ]->(b), " +
+        "(m)-[:IGNORED { weight: 1.0 } ]->(c) ";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -108,11 +111,22 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
+            .withRelationshipProperty("weight", DefaultValue.of(1.0))
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
             .graphCreate(GRAPH_NAME)
             .yields();
 
+        String createQueryWeighted = GdsCypher.call()
+            .withNodeLabels("N", "Ignore")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
+            .withRelationshipProperty("weight", DefaultValue.of(100000.0))
+            .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
+            .graphCreate("weighted_graph")
+            .yields();
+
         runQuery(createQuery);
+        runQuery(createQueryWeighted);
     }
 
     @AfterEach
@@ -240,5 +254,76 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         );
 
         assertThat(firstModelInfo).usingRecursiveComparison().isNotEqualTo(secondModelInfo);
+    }
+
+    @Test
+    void trainIsDeterministic() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0}] )");
+
+        String trainQuery =
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            ")";
+
+        Map<String, Object> firstModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+
+        runQuery("CALL gds.beta.model.drop('trainedModel')");
+
+        Map<String, Object> secondModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+
+        assertThat(firstModelInfo).usingRecursiveComparison().isEqualTo(secondModelInfo);
+    }
+
+    @Test
+    void trainUsesRelationshipWeight() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0}] )");
+
+        String trainQuery =
+            "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
+            "   $graphName, " +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            ")";
+
+        Map<String, Object> firstModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+        var weights1 = weights();
+
+        runQuery("CALL gds.beta.model.drop('trainedModel')");
+
+        Map<String, Object> secondModelInfo = runQuery(
+            trainQuery,
+            Map.of("graphName", "weighted_graph", "relFilter", List.of("*")),
+            row -> (Map<String, Object>) row.next().get("modelInfo")
+        );
+
+        var weights2 = weights();
+        assertThat(weights1).doesNotContain(weights2);
+    }
+
+    private double[] weights() {
+        Stream<Model<?, ?, ?>> allModels = ModelCatalog.getAllModels();
+        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
+        LinkLogisticRegressionData data = (LinkLogisticRegressionData) model.data();
+        return data.weights().data().data();
     }
 }

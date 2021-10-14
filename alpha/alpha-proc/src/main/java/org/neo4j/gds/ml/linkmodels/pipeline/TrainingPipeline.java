@@ -28,11 +28,14 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -150,6 +153,28 @@ public class TrainingPipeline implements Mappable {
             throw new IllegalArgumentException(
                 "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
         }
+    }
+
+    public Map<String, List<String>> tasksByRelationshipProperty() {
+        Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
+        nodePropertySteps().forEach(existingStep -> {
+            if (existingStep.config.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
+                var existingProperty = (String) existingStep.config.get(RELATIONSHIP_WEIGHT_PROPERTY);
+                var tasks = tasksByRelationshipProperty.computeIfAbsent(
+                    existingProperty,
+                    key -> new ArrayList<>()
+                );
+                tasks.add(existingStep.procName);
+            }
+        });
+        return tasksByRelationshipProperty;
+    }
+
+    public Optional<String> relationshipWeightProperty() {
+        var relationshipWeightPropertySet = tasksByRelationshipProperty().keySet();
+        return relationshipWeightPropertySet.isEmpty()
+            ? Optional.empty()
+            : Optional.of(relationshipWeightPropertySet.iterator().next());
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

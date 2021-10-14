@@ -284,7 +284,8 @@ class PipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 List.of("*"),
                 List.of(NODE_LABEL.name),
-                Optional.of(42L)
+                Optional.of(42L),
+                Optional.empty()
             ))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage(expectedError);
@@ -323,7 +324,8 @@ class PipelineExecutorTest extends BaseProcTest {
                 invalidGraphStore,
                 List.of("*"),
                 List.of(NODE_LABEL.name),
-                Optional.of(42L)
+                Optional.of(42L),
+                Optional.empty()
             ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The relationship types ['_TEST_', '_TEST_COMPLEMENT_'] are in the input graph, but are reserved for splitting.");

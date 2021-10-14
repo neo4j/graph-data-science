@@ -36,6 +36,7 @@ import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface RelationshipWeightConfig {
+    String RELATIONSHIP_WEIGHT_PROPERTY = "relationshipWeightProperty";
 
     @Value.Default
     @Configuration.ConvertWith("validatePropertyName")
@@ -50,7 +51,7 @@ public interface RelationshipWeightConfig {
     }
 
     static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "relationshipWeightProperty");
+        return validateNoWhiteCharacter(emptyToNull(input), RELATIONSHIP_WEIGHT_PROPERTY);
     }
 
     @Configuration.GraphStoreValidationCheck

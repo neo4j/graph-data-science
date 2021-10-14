@@ -31,8 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
@@ -48,6 +50,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
         var pipeline = getPipelineModelInfo(pipelineName, username());
+        validateRelationshipProperty(pipeline, procedureConfig);
 
         if (reservedConfigKeys.stream().anyMatch(procedureConfig::containsKey)) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -83,5 +86,31 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         pipeline.addFeatureStep(featureType, config);
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+    }
+
+    // check if adding would result in more than one relationshipWeightProperty
+    private void validateRelationshipProperty(
+        TrainingPipeline pipeline,
+        Map<String, Object> procedureConfig
+    ) {
+        if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;
+        var tasksByRelationshipProperty = pipeline.tasksByRelationshipProperty();
+        if (tasksByRelationshipProperty.isEmpty()) return;
+        var property = (String) procedureConfig.get(RELATIONSHIP_WEIGHT_PROPERTY);
+        // not adding a new relationship property, so ok
+        if (tasksByRelationshipProperty.containsKey(property)) return;
+
+        String relationshipProperty = tasksByRelationshipProperty.keySet().iterator().next();
+        String tasks = tasksByRelationshipProperty.get(relationshipProperty)
+            .stream()
+            .map(s -> "`" + s + "`")
+            .collect(Collectors.joining(", "));
+        throw new IllegalArgumentException(formatWithLocale(
+            "Node property steps added to a pipeline may not have different non-null values for `%s`. " +
+            "Pipeline already contains tasks %s which use the value `%s`.",
+            RELATIONSHIP_WEIGHT_PROPERTY,
+            tasks,
+            relationshipProperty
+        ));
     }
 }

@@ -95,7 +95,13 @@ public class LinkPredictionTrain
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
-        pipelineExecutor.splitRelationships(graphStore, relationshipTypes, trainConfig.nodeLabels(), trainConfig.randomSeed());
+        pipelineExecutor.splitRelationships(
+            graphStore,
+            relationshipTypes,
+            trainConfig.nodeLabels(),
+            trainConfig.randomSeed(),
+            pipeline.relationshipWeightProperty()
+        );
 
         assertRunning();
 

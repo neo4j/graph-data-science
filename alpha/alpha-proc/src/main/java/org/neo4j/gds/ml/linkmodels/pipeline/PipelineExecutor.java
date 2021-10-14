@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -106,7 +107,8 @@ public class PipelineExecutor {
         GraphStore graphStore,
         List<String> relationshipTypes,
         List<String> nodeLabels,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
     ) {
         progressTracker.beginSubTask();
 
@@ -118,13 +120,13 @@ public class PipelineExecutor {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(), nodeLabels, relationshipTypes, randomSeed);
+        relationshipSplit(splitConfig.testSplit(), nodeLabels, relationshipTypes, randomSeed, relationshipWeightProperty);
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed);
+        relationshipSplit(splitConfig.trainSplit(), nodeLabels, List.of(testComplementRelationshipType), randomSeed, relationshipWeightProperty);
         validateTrainSplit(graphStore);
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
@@ -177,11 +179,13 @@ public class PipelineExecutor {
         SplitRelationshipsBaseConfig splitConfig,
         List<String> nodeLabels,
         List<String> relationshipTypes,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
     ) {
         var splitRelationshipProcConfig = new HashMap<>(splitConfig.toSplitMap()) {{
             put("nodeLabels", nodeLabels);
             put("relationshipTypes", relationshipTypes);
+            relationshipWeightProperty.ifPresent(s -> put(RELATIONSHIP_WEIGHT_PROPERTY, s));
             randomSeed.ifPresent(seed -> put("randomSeed", seed));
         }};
 

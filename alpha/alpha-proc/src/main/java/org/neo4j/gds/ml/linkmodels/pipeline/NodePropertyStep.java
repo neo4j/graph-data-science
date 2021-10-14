@@ -34,9 +34,11 @@ import java.util.stream.Collectors;
 
 public class NodePropertyStep implements Model.Mappable {
     public final Method procMethod;
+    public final String procName;
     public final Map<String, Object> config;
 
-    private NodePropertyStep(Method procMethod, Map<String, Object> config) {
+    private NodePropertyStep(String procName, Method procMethod, Map<String, Object> config) {
+        this.procName = procName;
         this.procMethod = procMethod;
         this.config = config;
     }
@@ -44,7 +46,7 @@ public class NodePropertyStep implements Model.Mappable {
     public static NodePropertyStep of(String procName,  Map<String, Object> config) {
         var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(procName);
 
-        return new NodePropertyStep(procedureMethod, config);
+        return new NodePropertyStep(procName, procedureMethod, config);
     }
 
     public void execute(BaseProc caller, String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relTypes) {

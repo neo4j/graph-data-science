@@ -121,6 +121,15 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
+    void failOnDifferentRelationshipWeightProperties() {
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'foo'})");
+        assertError(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'bar'})",
+            "Node property steps added to a pipeline may not have different non-null values for `relationshipWeightProperty`. Pipeline already contains tasks `pageRank` which use the value `foo`."
+        );
+    }
+
+    @Test
     void shouldAddNodeAndFeatureSteps() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})");
