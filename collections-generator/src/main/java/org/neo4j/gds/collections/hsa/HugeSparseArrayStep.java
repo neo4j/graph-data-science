@@ -31,7 +31,6 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
@@ -127,8 +126,17 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
 
     private Path fetchSourcePath() {
         try {
-            JavaFileObject generationForPath = filer.createSourceFile("tmpFile");
-            return Path.of(generationForPath.toUri()).getParent().getParent();
+            // We want to retrieve the path for generated source files managed
+            // by the filer object and its underlying FileManager. In order to
+            // retrieve it, we create a temporary file, convert it into a Path
+            // object and navigate to the parent directories.
+            var tempFile = filer.createSourceFile("tmpFile").toUri();
+            // build/generated/sources/annotationProcessor/java/main/tmpFile
+            var tmpFilePath = Path.of(tempFile);
+            // build/generated/sources/annotationProcessor/java/main
+            var mainPath = tmpFilePath.getParent();
+            // build/generated/sources/annotationProcessor/java
+            return mainPath.getParent();
         } catch (IOException e) {
             messager.printMessage(Diagnostic.Kind.ERROR, "Unable to determine source path");
         }
