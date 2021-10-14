@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,9 +29,8 @@ import static org.neo4j.gds.TestSupport.nodeMapping;
 
 public class LongNodePropertiesBuilderTest {
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#usePartitionedIndexScan")
-    void singleLabelAssignmentWithNonDirectMapping(TestMethodRunner runner) {
+    @Test
+    void singleLabelAssignmentWithNonDirectMapping() {
         int nodeCount = 10;
         var defaultValue = DefaultValue.of(10L);
 
@@ -44,22 +41,20 @@ public class LongNodePropertiesBuilderTest {
 
         var nodeMapping = nodeMapping(originalIds);
 
-        runner.run(() -> {
-            var builder = LongNodePropertiesBuilder.of(
-                defaultValue,
-                AllocationTracker.empty(),
-                ConcurrencyConfig.DEFAULT_CONCURRENCY
-            );
+        var builder = LongNodePropertiesBuilder.of(
+            defaultValue,
+            AllocationTracker.empty(),
+            ConcurrencyConfig.DEFAULT_CONCURRENCY
+        );
 
-            for (int i = 0; i < nodeCount; i++) {
-                builder.set(originalIds[i], i * 1337L);
-            }
+        for (int i = 0; i < nodeCount; i++) {
+            builder.set(originalIds[i], i * 1337L);
+        }
 
-            var longNodeProperties = builder.build(10, nodeMapping);
+        var longNodeProperties = builder.build(10, nodeMapping);
 
-            for (int i = 0; i < nodeCount; i++) {
-                assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);
-            }
-        });
+        for (int i = 0; i < nodeCount; i++) {
+            assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);
+        }
     }
 }
