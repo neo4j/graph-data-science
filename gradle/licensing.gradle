@@ -1,3 +1,4 @@
+// All licenses that we accept, and their aliases:
 def allowList = [
         [name: 'BSD-2-Clause', url: 'http://opensource.org/licenses/BSD-2-Clause', aliases: [
                 [name: 'BSD-style', url: 'http://www.opensource.org/licenses/bsd-license.php'],
@@ -63,6 +64,14 @@ def allowList = [
                 [name: 'Eclipse Public License 1.0'],
                 [name: 'EPL', url: 'http://www.eclipse.org/legal/epl-v10.html']
         ]],
+        [name: 'Eclipse Public License v2.0', url: 'http://www.eclipse.org/legal/epl-v20.html', aliases: [
+                [name: 'Eclipse Public License - v 2.0'],
+                [name: 'Eclipse Public - License 2.0'],
+                [name: 'Eclipse Public License v2.0'],
+                [name: 'EPL 2.0'],
+                [name: 'EPL-2.0,'],
+        ]],
+        [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
         [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html', aliases: [
                 [name: 'GPL-2.0']
         ]],
@@ -87,23 +96,6 @@ def allowList = [
                 [name: 'CDDL + GPLv2 with classpath exception']
         ]]
 ]
-// All licenses that we accept, and their aliases
-
-def excludedModules = [
-    ':cherry-pick-tool',
-    ':benchmark-utils',
-    ':db-dump-test',
-    ':embedding-benchmarks-server',
-    ':ml-quality-benchmarks',
-
-    ':browser-guide',
-    ':doc',
-    ':experimental-test-utils',
-    ':ml-test-utils',
-    ':api-diff',
-    ':test-utils',
-    ':proc-test',
-]
 
 allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
@@ -126,82 +118,78 @@ allprojects { proj ->
         }
         tasks.check.dependsOn tasks.license
 
-        if (proj.path !in excludedModules) {
-            // Dependency license reporting
-            downloadLicenses {
-                dependencyConfiguration = 'runtimeClasspath'
-                aliases = allowList.collectEntries { lic ->
-                    def actual = license(lic.name, lic.url)
-                    def alternatives = lic.aliases.collect { it.url ? license(it.name, it.url) : it.name }
-                    [(actual): alternatives]
-                }
+        // Dependency license reporting
+        downloadLicenses {
+            dependencyConfiguration = 'runtimeClasspath'
+            aliases = allowList.collectEntries { lic ->
+                def actual = license(lic.name, lic.url)
+                def alternatives = lic.aliases.collect { it.url ? license(it.name, it.url) : it.name }
+                [(actual): alternatives]
             }
-            tasks.downloadLicenses.outputs.upToDateWhen { false }
-
-            tasks.downloadLicenses.ext.licenseToDependencyJson = { ->
-                def jsonDir = tasks.downloadLicenses.jsonDestination
-                def jsonFile = file("$jsonDir/license-dependency.json")
-                new groovy.json.JsonSlurper().parseText(jsonFile.text)
-            }
-
-            tasks.downloadLicenses.ext.dependencyToLicenseJson = { ->
-                def jsonDir = tasks.downloadLicenses.jsonDestination
-                def jsonFile = file("$jsonDir/dependency-license.json")
-                new groovy.json.JsonSlurper().parseText(jsonFile.text)
-            }
-
-            // Dependency license validation
-            task validateLicenses {
-                group 'license'
-                description 'Checks dependency licenses against an allowlist'
-                dependsOn tasks.downloadLicenses
-                var excludeNeo4jPattern = /^(org|com)\.neo4j.*/
-                doLast {
-                    def allowListedNames = allowList.collect { it.name }
-                    tasks.downloadLicenses.dependencyToLicenseJson().dependencies
-                        .findAll { dep -> !dep.name.matches(excludeNeo4jPattern) }
-                        .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
-                        .each { dep -> logger.error("In project ${proj.name}: Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
-                        .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
-                }
-            }
-            tasks.check.dependsOn tasks.validateLicenses
-
-            // Compound dependency licenses files
-            task generateLicensesFiles {
-                description 'Generates dependency license report files'
-                dependsOn tasks.downloadLicenses, tasks.validateLicenses
-                ext.licensesFile = file("$tasks.downloadLicenses.jsonDestination/LICENSES.txt")
-                ext.noticeFile = file("$tasks.downloadLicenses.jsonDestination/NOTICE.txt")
-                outputs.file(ext.licensesFile)
-                outputs.file(ext.noticeFile)
-                doLast {
-                    licensesFile.createNewFile()
-                    licensesFile.text = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
-                    tasks.downloadLicenses.licenseToDependencyJson().licences
-                        .findAll { lic -> allowList.any { lic.name == it.name }}
-                        .sort { it.name }.each {
-                        licensesFile << '\n\n'
-                        licensesFile << "------------------------------------------------------------------------------\n"
-                        licensesFile << "$it.name\n"
-                        it.dependencies.sort { it }.each { licensesFile << "  $it\n" }
-                        licensesFile << "------------------------------------------------------------------------------\n"
-                        licensesFile << '\n'
-                        licensesFile << rootProject.file("$publicDir/etc/licenses/text/$it.name").text
-                    }
-                    noticeFile.createNewFile()
-                    noticeFile.text = rootProject.file("$publicDir/etc/licenses/headers/NOTICE-header.txt").text
-                    noticeFile << '\n\n'
-                    noticeFile << "Third-party licenses\n"
-                    noticeFile << "--------------------\n"
-                    tasks.downloadLicenses.licenseToDependencyJson().licences.sort { it.name }.each {
-                        noticeFile << '\n'
-                        noticeFile << "$it.name\n"
-                        it.dependencies.sort { it }.each { noticeFile << "  $it\n" }
-                    }
-                }
-            }
-            tasks.check.dependsOn tasks.generateLicensesFiles
         }
+        tasks.downloadLicenses.outputs.upToDateWhen { false }
+
+        tasks.downloadLicenses.ext.licenseToDependencyJson = { ->
+            def jsonDir = tasks.downloadLicenses.jsonDestination
+            def jsonFile = file("$jsonDir/license-dependency.json")
+            new groovy.json.JsonSlurper().parseText(jsonFile.text)
+        }
+
+        tasks.downloadLicenses.ext.dependencyToLicenseJson = { ->
+            def jsonDir = tasks.downloadLicenses.jsonDestination
+            def jsonFile = file("$jsonDir/dependency-license.json")
+            new groovy.json.JsonSlurper().parseText(jsonFile.text)
+        }
+
+        // Dependency license validation
+        task validateLicenses {
+            group 'license'
+            description 'Checks dependency licenses against an allowlist'
+            dependsOn tasks.downloadLicenses
+            doLast {
+                def allowListedNames = allowList.collect { it.name }
+                tasks.downloadLicenses.dependencyToLicenseJson().dependencies
+                    .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
+                    .each { dep -> logger.error("In project ${proj.name}: Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
+                    .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
+            }
+        }
+        tasks.check.dependsOn tasks.validateLicenses
+
+        // Compound dependency licenses files
+        task generateLicensesFiles {
+            description 'Generates dependency license report files'
+            dependsOn tasks.downloadLicenses, tasks.validateLicenses
+            ext.licensesFile = file("$tasks.downloadLicenses.jsonDestination/LICENSES.txt")
+            ext.noticeFile = file("$tasks.downloadLicenses.jsonDestination/NOTICE.txt")
+            outputs.file(ext.licensesFile)
+            outputs.file(ext.noticeFile)
+            doLast {
+                licensesFile.createNewFile()
+                licensesFile.text = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
+                tasks.downloadLicenses.licenseToDependencyJson().licences
+                    .findAll { lic -> allowList.any { lic.name == it.name } }
+                    .sort { it.name }.each {
+                    licensesFile << '\n\n'
+                    licensesFile << "------------------------------------------------------------------------------\n"
+                    licensesFile << "$it.name\n"
+                    it.dependencies.sort { it }.each { licensesFile << "  $it\n" }
+                    licensesFile << "------------------------------------------------------------------------------\n"
+                    licensesFile << '\n'
+                    licensesFile << rootProject.file("$publicDir/etc/licenses/text/$it.name").text
+                }
+                noticeFile.createNewFile()
+                noticeFile.text = rootProject.file("$publicDir/etc/licenses/headers/NOTICE-header.txt").text
+                noticeFile << '\n\n'
+                noticeFile << "Third-party licenses\n"
+                noticeFile << "--------------------\n"
+                tasks.downloadLicenses.licenseToDependencyJson().licences.sort { it.name }.each {
+                    noticeFile << '\n'
+                    noticeFile << "$it.name\n"
+                    it.dependencies.sort { it }.each { noticeFile << "  $it\n" }
+                }
+            }
+        }
+        tasks.check.dependsOn tasks.generateLicensesFiles
     }
 }
