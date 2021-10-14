@@ -200,7 +200,7 @@ If we want to export `my-in-memory-graph` but additionally add the `myproperty` 
 .Export the `my-in-memory-graph` from GDS with the `myproperty` from `my-db-graph` into a directory `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.export('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
 ----
 
 [NOTE]
@@ -214,5 +214,5 @@ So we could for instance define a default value for our `myproperty`.
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a directory called `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.export('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----
