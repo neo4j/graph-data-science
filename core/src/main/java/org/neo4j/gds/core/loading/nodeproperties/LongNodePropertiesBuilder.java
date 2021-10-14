@@ -100,6 +100,11 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     @Override
     public NodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
+
+        if (propertiesByNeoIds.capacity() == 0) {
+            return new LongStoreNodeProperties(propertiesByNeoIds, size, OptionalLong.empty());
+        }
+
         var propertiesByMappedIdsBuilder = HugeSparseLongArray.growingBuilder(
             defaultValue,
             allocationTracker::add
