@@ -31,6 +31,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -190,7 +191,7 @@ class ModularityOptimizationTest {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
 
         ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder()
-            .username(AuthSubject.ANONYMOUS.username())
+            .username(Neo4jProxy.username(AuthSubject.ANONYMOUS))
             .graphName("")
             .build();
         MemoryTree memoryTree = new ModularityOptimizationFactory<>()

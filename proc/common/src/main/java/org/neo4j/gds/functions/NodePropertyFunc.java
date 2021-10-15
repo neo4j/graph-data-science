@@ -22,6 +22,7 @@ package org.neo4j.gds.functions;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -60,7 +61,7 @@ public class NodePropertyFunc {
         Objects.requireNonNull(propertyKey);
         Objects.requireNonNull(nodeLabel);
 
-        String username = transaction.subjectOrAnonymous().username();
+        String username = Neo4jProxy.username(transaction.subjectOrAnonymous());
         GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username, api.databaseId()), graphName).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
 

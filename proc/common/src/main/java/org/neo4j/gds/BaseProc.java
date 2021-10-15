@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
@@ -109,9 +110,11 @@ public abstract class BaseProc {
     }
 
     protected String username() {
-        return transaction != null
-            ? transaction.subjectOrAnonymous().username()
-            : AuthSubject.ANONYMOUS.username();
+        return Neo4jProxy.username(
+            transaction != null
+                ? transaction.subjectOrAnonymous()
+                : AuthSubject.ANONYMOUS
+        );
     }
 
     protected NamedDatabaseId databaseId() {

@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
@@ -101,7 +102,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     extends GraphCreateConfigSupport
 {
 
-    String TEST_USERNAME = AuthSubject.ANONYMOUS.username();
+    String TEST_USERNAME = Neo4jProxy.username(AuthSubject.ANONYMOUS);
 
     @AfterEach
     default void removeAllLoadedGraphs() {
