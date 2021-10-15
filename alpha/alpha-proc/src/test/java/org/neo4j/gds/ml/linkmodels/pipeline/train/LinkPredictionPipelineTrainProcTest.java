@@ -262,29 +262,26 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0, maxEpochs: 1000, minEpochs: 1000}] )");
 
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter, concurrency: 4 }" +
             ")";
 
-        Map<String, Object> firstModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
+        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
+        double[] weights1 = weights();
+        double bias1 = bias();
 
         runQuery("CALL gds.beta.model.drop('trainedModel')");
 
-        Map<String, Object> secondModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
+        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
+        double[] weights2 = weights();
+        double bias2 = bias();
 
-        assertThat(firstModelInfo).usingRecursiveComparison().isEqualTo(secondModelInfo);
+        assertThat(weights1).containsExactly(weights2);
+        assertThat(bias1).isEqualTo(bias2);
     }
 
     @Test
@@ -298,23 +295,15 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter, concurrency: 4 }" +
             ")";
 
-        Map<String, Object> firstModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
+        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
         var weights1 = weights();
 
         runQuery("CALL gds.beta.model.drop('trainedModel')");
 
-        Map<String, Object> secondModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", "weighted_graph", "relFilter", List.of("*")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
+        runQuery(trainQuery, Map.of("graphName", "weighted_graph", "relFilter", List.of("*")));
 
         var weights2 = weights();
         assertThat(weights1).doesNotContain(weights2);
@@ -325,5 +314,12 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
         LinkLogisticRegressionData data = (LinkLogisticRegressionData) model.data();
         return data.weights().data().data();
+    }
+
+    private double bias() {
+        Stream<Model<?, ?, ?>> allModels = ModelCatalog.getAllModels();
+        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
+        LinkLogisticRegressionData data = (LinkLogisticRegressionData) model.data();
+        return data.bias().get().data().value();
     }
 }
