@@ -156,13 +156,12 @@ public class TrainingPipeline implements Mappable {
         this.nodePropertySteps.forEach(nodePropertyStep -> {
             var newMutatePropertyName = step.config.get(MUTATE_PROPERTY_KEY);
             var existingMutatePropertyName = nodePropertyStep.config.get(MUTATE_PROPERTY_KEY);
-            var existingProcedureName = nodePropertyStep.procMethod.getName();
             if (newMutatePropertyName.equals(existingMutatePropertyName)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The value of `%s` is expected to be unique, but %s was already specified in the %s procedure.",
                     MUTATE_PROPERTY_KEY,
                     newMutatePropertyName,
-                    existingProcedureName
+                    nodePropertyStep.procMethod.getName()
                 ));
             }
         });
