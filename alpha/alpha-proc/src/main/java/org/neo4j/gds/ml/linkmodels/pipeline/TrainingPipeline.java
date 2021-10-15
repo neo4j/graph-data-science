@@ -171,10 +171,10 @@ public class TrainingPipeline implements Mappable {
     }
 
     public Optional<String> relationshipWeightProperty() {
-        var relationshipWeightPropertySet = tasksByRelationshipProperty().keySet();
+        var relationshipWeightPropertySet = tasksByRelationshipProperty().entrySet();
         return relationshipWeightPropertySet.isEmpty()
             ? Optional.empty()
-            : Optional.of(relationshipWeightPropertySet.iterator().next());
+            : Optional.of(relationshipWeightPropertySet.iterator().next().getKey());
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

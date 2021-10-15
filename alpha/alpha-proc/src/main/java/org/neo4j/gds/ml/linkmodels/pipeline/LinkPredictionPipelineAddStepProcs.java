@@ -94,14 +94,14 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         Map<String, Object> procedureConfig
     ) {
         if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;
-        var tasksByRelationshipProperty = pipeline.tasksByRelationshipProperty();
-        if (tasksByRelationshipProperty.isEmpty()) return;
+        var maybeRelationshipProperty = pipeline.relationshipWeightProperty();
+        if (maybeRelationshipProperty.isEmpty()) return;
+        var relationshipProperty = maybeRelationshipProperty.get();
         var property = (String) procedureConfig.get(RELATIONSHIP_WEIGHT_PROPERTY);
-        // not adding a new relationship property, so ok
-        if (tasksByRelationshipProperty.containsKey(property)) return;
+        if (relationshipProperty.equals(property)) return;
 
-        String relationshipProperty = tasksByRelationshipProperty.keySet().iterator().next();
-        String tasks = tasksByRelationshipProperty.get(relationshipProperty)
+        String tasks = pipeline.tasksByRelationshipProperty()
+            .get(relationshipProperty)
             .stream()
             .map(s -> "`" + s + "`")
             .collect(Collectors.joining(", "));
