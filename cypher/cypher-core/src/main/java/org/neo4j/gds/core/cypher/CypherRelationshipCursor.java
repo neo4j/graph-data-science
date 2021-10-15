@@ -24,6 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.RelationshipCursor;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface CypherRelationshipCursor extends RelationshipCursor {
     long id();
     RelationshipType relationshipType();
