@@ -208,7 +208,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
             assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
                 "Dijkstra",
-                "WriteRelationshipStream"
+                "ShortestPathDijkstraWriteProc :: WriteRelationshipStream"
             );
         });
     }

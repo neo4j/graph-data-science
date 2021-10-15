@@ -19,6 +19,14 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+
 public interface RelationshipStreamExporter {
+
     long write(String relationshipType, String... propertyKeys);
+
+    static Task baseTask(String operationName) {
+        return Tasks.leaf(operationName + " :: WriteRelationshipStream");
+    }
 }

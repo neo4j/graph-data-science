@@ -31,7 +31,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -230,9 +229,13 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var rand = new Random();
 
-        var task = Tasks.leaf("WriteRelationshipStream", 0);
         var log = new TestLog();
-        var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(
+            RelationshipStreamExporter.baseTask("OpName"),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         var relationshipStream = IntStream
             .range(0, relationshipCount)
@@ -244,23 +247,21 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .withProgressTracker(progressTracker)
             .build();
 
-        progressTracker.beginSubTask();
         var relationshipsWritten = exporter.write("FOOBAR");
-        progressTracker.endSubTask();
 
         assertEquals(relationshipCount, relationshipsWritten);
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "WriteRelationshipStream :: Start",
-                "WriteRelationshipStream has written 25 relationships",
-                "WriteRelationshipStream has written 50 relationships",
-                "WriteRelationshipStream has written 75 relationships",
-                "WriteRelationshipStream has written 100 relationships",
-                "WriteRelationshipStream has written 105 relationships",
-                "WriteRelationshipStream 100%",
-                "WriteRelationshipStream :: Finished"
+                "OpName :: WriteRelationshipStream :: Start",
+                "OpName :: WriteRelationshipStream has written 25 relationships",
+                "OpName :: WriteRelationshipStream has written 50 relationships",
+                "OpName :: WriteRelationshipStream has written 75 relationships",
+                "OpName :: WriteRelationshipStream has written 100 relationships",
+                "OpName :: WriteRelationshipStream has written 105 relationships",
+                "OpName :: WriteRelationshipStream 100%",
+                "OpName :: WriteRelationshipStream :: Finished"
             );
     }
 

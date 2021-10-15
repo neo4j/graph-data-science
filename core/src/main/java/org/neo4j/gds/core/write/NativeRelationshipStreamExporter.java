@@ -93,52 +93,58 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
 
     @Override
     public long write(String relationshipType, String... propertyKeys) {
-        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        var propertyTokens = Arrays.stream(propertyKeys).mapToInt(this::getOrCreatePropertyToken).toArray();
-
-        var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
-        var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
-        for (int i = 0; i < QUEUE_CAPACITY; i++) {
-            bufferPool.add(new Buffer(batchSize));
-        }
-
-        var writer = new Writer(
-            tx,
-            progressTracker,
-            toOriginalId,
-            writeQueue,
-            bufferPool,
-            relationshipToken,
-            propertyTokens,
-            terminationFlag
-        );
-        var consumer = Pools.DEFAULT.submit(writer);
-
-        var bufferRef = new AtomicReference<>(bufferPool.poll());
-
-        relationships.forEach(relationship -> {
-            var buffer = bufferRef.get();
-            buffer.add(relationship);
-            if (buffer.isFull()) {
-                try {
-                    writeQueue.put(buffer);
-                    bufferRef.set(bufferPool.take());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        progressTracker.beginSubTask();
 
         try {
-            writeQueue.put(bufferRef.get());
-            // Add an empty buffer to signal end of writing
-            writeQueue.put(new Buffer(0));
-            consumer.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+            var relationshipToken = getOrCreateRelationshipToken(relationshipType);
+            var propertyTokens = Arrays.stream(propertyKeys).mapToInt(this::getOrCreatePropertyToken).toArray();
 
-        return writer.written;
+            var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+            var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+            for (int i = 0; i < QUEUE_CAPACITY; i++) {
+                bufferPool.add(new Buffer(batchSize));
+            }
+
+            var writer = new Writer(
+                tx,
+                progressTracker,
+                toOriginalId,
+                writeQueue,
+                bufferPool,
+                relationshipToken,
+                propertyTokens,
+                terminationFlag
+            );
+            var consumer = Pools.DEFAULT.submit(writer);
+
+            var bufferRef = new AtomicReference<>(bufferPool.poll());
+
+            relationships.forEach(relationship -> {
+                var buffer = bufferRef.get();
+                buffer.add(relationship);
+                if (buffer.isFull()) {
+                    try {
+                        writeQueue.put(buffer);
+                        bufferRef.set(bufferPool.take());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+            try {
+                writeQueue.put(bufferRef.get());
+                // Add an empty buffer to signal end of writing
+                writeQueue.put(new Buffer(0));
+                consumer.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+
+            return writer.written;
+        } finally {
+            progressTracker.endSubTask();
+        }
     }
 
     static class Writer extends StatementApi implements Runnable {

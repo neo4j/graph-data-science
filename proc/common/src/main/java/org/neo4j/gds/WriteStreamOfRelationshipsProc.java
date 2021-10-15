@@ -27,7 +27,6 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -75,15 +74,21 @@ public abstract class WriteStreamOfRelationshipsProc<
 
             Graph graph = computationResult.graph();
 
-            var progressTracker = createProgressTracker(graph, computationResult);
-            var exporter = createRelationshipStreamExporter(graph, progressTracker, computationResult);
+            var progressTracker = new TaskProgressTracker(
+                RelationshipStreamExporter.baseTask(algoName()),
+                log,
+                computationResult.config().writeConcurrency(),
+                taskRegistryFactory
+            );
 
             var relationshipsWritten = 0L;
             try {
-                progressTracker.beginSubTask();
-                relationshipsWritten = exporter.write(config.writeRelationshipType(), config.writeProperty());
+                relationshipsWritten = createRelationshipStreamExporter(
+                    graph,
+                    progressTracker,
+                    computationResult
+                ).write(config.writeRelationshipType(), config.writeProperty());
             } finally {
-                progressTracker.endSubTask();
                 progressTracker.release();
             }
 
@@ -91,15 +96,7 @@ public abstract class WriteStreamOfRelationshipsProc<
         }
     }
 
-    ProgressTracker createProgressTracker(
-        Graph graph,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        var task = Tasks.leaf(algoName() + " :: WriteRelationshipStream", graph.nodeCount());
-        return new TaskProgressTracker(task, log, computationResult.config().writeConcurrency(), taskRegistryFactory);
-    }
-
-    RelationshipStreamExporter createRelationshipStreamExporter(
+    private RelationshipStreamExporter createRelationshipStreamExporter(
         Graph graph,
         ProgressTracker progressTracker,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
