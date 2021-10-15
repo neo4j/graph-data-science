@@ -27,9 +27,6 @@ Some known limitations are listed below:
 ** Restarting the DBMS will remove the database instead
 * Writes
 ** All queries that attempt to write things, such as nodes, properties or labels, will fail
-* Referencing relationships
-** Referencing variables bound to a relationship is not supported, this includes returning relationships
-** It is however possible to use relationship as traversal, i.e. `MATCH (n)-[:KNOWS]->(m)` will work as expected
 
 
 [[create-cypher-db-syntax]]
