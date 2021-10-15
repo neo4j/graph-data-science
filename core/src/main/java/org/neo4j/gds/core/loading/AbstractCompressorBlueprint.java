@@ -24,36 +24,41 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.compress.ImmutableAdjacencyListsWithProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
+import java.util.function.LongSupplier;
+import java.util.stream.Stream;
 
 abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implements AdjacencyCompressorBlueprint {
 
+    final LongSupplier nodeCountSupplier;
     final CsrListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder;
     final CsrListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders;
-    final HugeIntArray adjacencyDegrees;
-    final HugeLongArray adjacencyOffsets;
-    final HugeLongArray[] propertyOffsets;
     final boolean noAggregation;
     final Aggregation[] aggregations;
+    final AllocationTracker allocationTracker;
+
+    HugeIntArray adjacencyDegrees;
+    HugeLongArray adjacencyOffsets;
+    HugeLongArray[] propertyOffsets;
 
     AbstractCompressorBlueprint(
+        LongSupplier nodeCountSupplier,
         CsrListBuilder<TARGET_PAGE, ? extends AdjacencyList> adjacencyBuilder,
         CsrListBuilder<PROPERTY_PAGE, ? extends AdjacencyProperties>[] propertyBuilders,
-        HugeIntArray adjacencyDegrees,
-        HugeLongArray adjacencyOffsets,
-        HugeLongArray[] propertyOffsets,
         boolean noAggregation,
-        Aggregation[] aggregations
+        Aggregation[] aggregations,
+        AllocationTracker allocationTracker
     ) {
         this.adjacencyBuilder = adjacencyBuilder;
         this.propertyBuilders = propertyBuilders;
-        this.adjacencyDegrees = adjacencyDegrees;
-        this.adjacencyOffsets = adjacencyOffsets;
-        this.propertyOffsets = propertyOffsets;
+        this.nodeCountSupplier = nodeCountSupplier;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -64,6 +69,17 @@ abstract class AbstractCompressorBlueprint<TARGET_PAGE, PROPERTY_PAGE> implement
                 propertyBuilder.flush();
             }
         }
+    }
+
+    @Override
+    public void prepareFlushTasks() {
+        var nodeCount = this.nodeCountSupplier.getAsLong();
+        this.adjacencyDegrees = HugeIntArray.newArray(nodeCount, this.allocationTracker);
+        this.adjacencyOffsets = HugeLongArray.newArray(nodeCount, this.allocationTracker);
+        this.propertyOffsets = Stream
+            .generate(() -> HugeLongArray.newArray(nodeCount, this.allocationTracker))
+            .limit(propertyBuilders.length)
+            .toArray(HugeLongArray[]::new);
     }
 
     @Override

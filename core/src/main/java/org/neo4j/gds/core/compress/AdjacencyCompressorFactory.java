@@ -26,10 +26,12 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.CsrListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
+import java.util.function.LongSupplier;
+
 public interface AdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> {
 
     AdjacencyCompressorBlueprint create(
-        long nodeCount,
+        LongSupplier nodeCountSupplier,
         CsrListBuilderFactory<TARGET_PAGE, ? extends AdjacencyList, PROPERTY_PAGE, ? extends AdjacencyProperties> csrListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,

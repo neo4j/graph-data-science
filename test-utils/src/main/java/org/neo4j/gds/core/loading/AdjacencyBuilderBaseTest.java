@@ -40,7 +40,7 @@ public abstract class AdjacencyBuilderBaseTest {
 
     protected void testAdjacencyList(AdjacencyFactory adjacencyFactory) {
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
-            6,
+            () -> 6,
             adjacencyFactory,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             new Aggregation[]{Aggregation.NONE},

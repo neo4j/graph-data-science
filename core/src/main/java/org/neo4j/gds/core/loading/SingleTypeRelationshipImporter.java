@@ -101,6 +101,10 @@ public final class SingleTypeRelationshipImporter {
                 this.imports = imports;
             }
 
+            public void prepareFlushTasks() {
+                importer.prepareFlushTasks();
+            }
+
             public Stream<Runnable> flushTasks() {
                 return importer.flushTasks().stream();
             }

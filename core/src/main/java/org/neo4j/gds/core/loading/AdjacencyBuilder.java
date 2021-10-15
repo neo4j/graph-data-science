@@ -26,7 +26,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -192,18 +191,30 @@ public final class AdjacencyBuilder {
         }
     }
 
+    void prepareFlushTasks() {
+        this.globalBuilder.prepareFlushTasks();
+    }
+
     Collection<Runnable> flushTasks() {
-        Runnable[] runnables = new Runnable[localBuilders.length];
-        Arrays.setAll(runnables, index -> () -> {
-            long baseId = ((long) index) << pageShift;
-            ThreadLocalRelationshipsBuilder builder = localBuilders[index];
+        var tasks = new ArrayList<Runnable>(localBuilders.length + 1);
+        for (int i = 0; i < localBuilders.length; i++) {
+            int index = i;
+            tasks.add(() -> this.flush(index));
+        }
+        tasks.add(this.globalBuilder::flush);
+        return tasks;
+    }
+
+    private void flush(int index) {
+        long baseId = ((long) index) << pageShift;
+        try (var compressor = localBuilders[index].intoCompressor()) {
             CompressedLongArray[] allTargets = compressedAdjacencyLists[index];
             LongArrayBuffer buffer = buffers[index];
             long importedRelationships = 0L;
             for (int localId = 0; localId < allTargets.length; ++localId) {
                 CompressedLongArray compressedAdjacencyList = allTargets[localId];
                 if (compressedAdjacencyList != null) {
-                    importedRelationships += builder.applyVariableDeltaEncoding(
+                    importedRelationships += compressor.applyVariableDeltaEncoding(
                         compressedAdjacencyList,
                         buffer,
                         baseId + localId
@@ -212,13 +223,8 @@ public final class AdjacencyBuilder {
                     allTargets[localId] = null;
                 }
             }
-            builder.release();
             relationshipCounter.add(importedRelationships);
-        });
-        var tasks = new ArrayList<>(Arrays.asList(runnables));
-        // Final task to make sure that all property builders are flushed as well.
-        tasks.add(ExceptionUtil.unchecked(this.globalBuilder::flush));
-        return tasks;
+        }
     }
 
     int[] getPropertyKeyIds() {

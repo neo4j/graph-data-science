@@ -19,25 +19,26 @@
  */
 package org.neo4j.gds.core.compress;
 
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.TransientCompressedList;
 import org.neo4j.gds.core.huge.TransientUncompressedList;
-import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.DeltaVarLongCompressor;
 import org.neo4j.gds.core.loading.RawCompressor;
 import org.neo4j.gds.core.loading.TransientCompressedCsrListBuilderFactory;
 import org.neo4j.gds.core.loading.TransientUncompressedCsrListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
 public interface AdjacencyFactory {
 
     AdjacencyCompressorBlueprint create(
-        long nodeCount,
+        LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation,
@@ -45,13 +46,13 @@ public interface AdjacencyFactory {
     );
 
     default AdjacencyCompressorBlueprint create(
-        long nodeCount,
+        LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         AllocationTracker allocationTracker
     ) {
         return create(
-            nodeCount,
+            nodeCountSupplier,
             propertyMappings,
             aggregations,
             Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),

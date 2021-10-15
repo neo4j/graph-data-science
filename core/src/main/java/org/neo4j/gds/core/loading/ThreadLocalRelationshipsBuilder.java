@@ -19,42 +19,34 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.compress.LongArrayBuffer;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.core.compress.AdjacencyCompressorBlueprint;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 final class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final AdjacencyCompressor adjacencyCompressor;
+    private final AdjacencyCompressorBlueprint adjacencyCompressor;
 
-    ThreadLocalRelationshipsBuilder(AdjacencyCompressor adjacencyCompressor) {
+    ThreadLocalRelationshipsBuilder(AdjacencyCompressorBlueprint compressorBlueprint) {
         this.lock = new ReentrantLock();
-        this.adjacencyCompressor = adjacencyCompressor;
+        this.adjacencyCompressor = compressorBlueprint;
     }
 
-    final void lock() {
+    void lock() {
         lock.lock();
     }
 
-    final void unlock() {
+    void unlock() {
         lock.unlock();
     }
 
-    final boolean isLockedByCurrentThread() {
+    boolean isLockedByCurrentThread() {
         return lock.isHeldByCurrentThread();
     }
 
-    void release() {
-        adjacencyCompressor.close();
-    }
-
-    int applyVariableDeltaEncoding(
-        CompressedLongArray array,
-        LongArrayBuffer buffer,
-        long nodeId
-    ) {
-        return adjacencyCompressor.compress(nodeId, array, buffer);
+    ThreadLocalRelationshipsCompressor intoCompressor() {
+        var compressor = this.adjacencyCompressor.createCompressor();
+        return new ThreadLocalRelationshipsCompressor(compressor);
     }
 }

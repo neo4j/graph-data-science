@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.function.LongSupplier;
 
 public final class RawCompressor implements AdjacencyCompressor {
 
@@ -43,7 +43,7 @@ public final class RawCompressor implements AdjacencyCompressor {
 
         @Override
         public AdjacencyCompressorBlueprint create(
-            long nodeCount,
+            LongSupplier nodeCountSupplier,
             CsrListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> csrListBuilderFactory,
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
@@ -55,16 +55,12 @@ public final class RawCompressor implements AdjacencyCompressor {
             Arrays.setAll(propertyBuilders, i -> csrListBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
+                nodeCountSupplier,
                 csrListBuilderFactory.newAdjacencyListBuilder(),
                 propertyBuilders,
-                HugeIntArray.newArray(nodeCount, allocationTracker),
-                HugeLongArray.newArray(nodeCount, allocationTracker),
-                Stream
-                    .generate(() -> HugeLongArray.newArray(nodeCount, allocationTracker))
-                    .limit(propertyBuilders.length)
-                    .toArray(HugeLongArray[]::new),
                 noAggregation,
-                aggregations
+                aggregations,
+                allocationTracker
             );
         }
     }
@@ -72,22 +68,20 @@ public final class RawCompressor implements AdjacencyCompressor {
     private static final class Blueprint extends AbstractCompressorBlueprint<long[], long[]> {
 
         Blueprint(
+            LongSupplier nodeCountSupplier,
             CsrListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
             CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
-            HugeIntArray adjacencyDegrees,
-            HugeLongArray adjacencyOffsets,
-            HugeLongArray[] propertyOffsets,
             boolean noAggregation,
-            Aggregation[] aggregations
+            Aggregation[] aggregations,
+            AllocationTracker allocationTracker
         ) {
             super(
+                nodeCountSupplier,
                 adjacencyBuilder,
                 propertyBuilders,
-                adjacencyDegrees,
-                adjacencyOffsets,
-                propertyOffsets,
                 noAggregation,
-                aggregations
+                aggregations,
+                allocationTracker
             );
         }
 

@@ -193,6 +193,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     @Override
     LoadResult result() {
+        loaderContext.importerBuildersByType
+            .values()
+            .forEach(SingleTypeRelationshipImporter.Builder.WithImporter::prepareFlushTasks);
+
         List<Runnable> flushTasks = loaderContext.importerBuildersByType
             .values()
             .stream()
@@ -268,7 +272,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .toArray(Aggregation[]::new);
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
-                nodeMapping.nodeCount(),
+                nodeMapping::nodeCount,
                 AdjacencyFactory.configured(),
                 projection,
                 aggregationsWithDefault,

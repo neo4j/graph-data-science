@@ -31,6 +31,8 @@ public final class InternalImporter {
     public interface CreateScanner {
         RecordScanner create(int index);
 
+        void prepareFlushTasks();
+
         Collection<Runnable> flushTasks();
     }
 
@@ -56,6 +58,7 @@ public final class InternalImporter {
 
         long scannerStart = System.nanoTime();
         ParallelUtil.run(tasks, pool);
+        createScanner.prepareFlushTasks();
         ParallelUtil.run(createScanner.flushTasks(), pool);
         long took = System.nanoTime() - scannerStart;
         long importedRecords = 0L;
@@ -100,6 +103,10 @@ public final class InternalImporter {
         @Override
         public RecordScanner create(final int index) {
             return this;
+        }
+
+        @Override
+        public void prepareFlushTasks() {
         }
 
         @Override

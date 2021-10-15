@@ -28,6 +28,7 @@ import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
+import java.util.function.LongSupplier;
 
 public final class AdjacencyListWithPropertiesBuilder {
 
@@ -39,7 +40,7 @@ public final class AdjacencyListWithPropertiesBuilder {
     private final double[] defaultValues;
 
     public static AdjacencyListWithPropertiesBuilder create(
-        long nodeCount,
+        LongSupplier nodeCountSupplier,
         AdjacencyFactory adjacencyFactory,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
@@ -50,7 +51,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         double[] defaultValues = defaultValues(projection);
 
         return create(
-            nodeCount,
+            nodeCountSupplier,
             adjacencyFactory,
             projection,
             aggregations,
@@ -61,7 +62,7 @@ public final class AdjacencyListWithPropertiesBuilder {
     }
 
     public static AdjacencyListWithPropertiesBuilder create(
-        long nodeCount,
+        LongSupplier nodeCountSupplier,
         AdjacencyFactory adjacencyFactory,
         RelationshipProjection projection,
         Aggregation[] aggregations,
@@ -70,7 +71,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         AllocationTracker allocationTracker
     ) {
         var adjacencyCompressor = adjacencyFactory.create(
-            nodeCount,
+            nodeCountSupplier,
             projection.properties(),
             aggregations,
             allocationTracker
@@ -133,7 +134,11 @@ public final class AdjacencyListWithPropertiesBuilder {
     }
 
     ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-        return new ThreadLocalRelationshipsBuilder(adjacencyCompressor.createCompressor());
+        return new ThreadLocalRelationshipsBuilder(adjacencyCompressor);
+    }
+
+    void prepareFlushTasks() {
+        this.adjacencyCompressor.prepareFlushTasks();
     }
 
     public AdjacencyListsWithProperties build() {

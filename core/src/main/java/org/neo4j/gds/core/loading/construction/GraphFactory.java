@@ -273,12 +273,15 @@ public final class GraphFactory {
         var importSizing = ImportSizing.of(concurrency.orElse(1), nodes.rootNodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
-        int bufferSize = (int) Math.min(nodes.rootNodeCount(), RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
+        int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
+        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+            bufferSize = (int) nodes.rootNodeCount();
+        }
 
         var relationshipCounter = new LongAdder();
 
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
-            nodes.rootNodeCount(),
+            nodes::rootNodeCount,
             AdjacencyFactory.configured(),
             projection,
             aggregations,

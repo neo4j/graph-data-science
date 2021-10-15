@@ -22,6 +22,11 @@ package org.neo4j.gds.core.compress;
 public interface AdjacencyCompressorBlueprint {
 
     /**
+     * Prepares the compressor for flushing, for example by initializing data structures as they are needed.
+     */
+    void prepareFlushTasks();
+
+    /**
      * @return a copy of this blueprint that can be used concurrently with other copies to compress data.
      */
     AdjacencyCompressor createCompressor();

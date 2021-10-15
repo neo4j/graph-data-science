@@ -86,21 +86,26 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         @Override
         public RecordScanner create(final int index) {
             return new RelationshipsScanner(
-                    tx,
-                    terminationFlag,
-                    progressTracker,
-                    idMap,
-                    scanner,
-                    index,
-                    importerBuilders
+                tx,
+                terminationFlag,
+                progressTracker,
+                idMap,
+                scanner,
+                index,
+                importerBuilders
             );
+        }
+
+        @Override
+        public void prepareFlushTasks() {
+            importerBuilders.forEach(SingleTypeRelationshipImporter.Builder.WithImporter::prepareFlushTasks);
         }
 
         @Override
         public Collection<Runnable> flushTasks() {
             return importerBuilders.stream()
-                    .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
-                    .collect(Collectors.toList());
+                .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
+                .collect(Collectors.toList());
         }
     }
 

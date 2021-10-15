@@ -148,6 +148,7 @@ public class RelationshipsBuilder {
     public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
+        importerBuilder.prepareFlushTasks();
         var flushTasks = importerBuilder.flushTasks().collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);

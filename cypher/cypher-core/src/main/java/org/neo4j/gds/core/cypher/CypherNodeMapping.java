@@ -44,7 +44,7 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
 
     @Override
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
-        additionalNodeLabels.putIfAbsent(nodeLabel, new BitSet(nodeCount()));
+        additionalNodeLabels.computeIfAbsent(nodeLabel, ignore -> new BitSet(nodeCount()));
         additionalNodeLabels.get(nodeLabel).set(nodeId);
     }
 

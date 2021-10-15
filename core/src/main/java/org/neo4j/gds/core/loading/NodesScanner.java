@@ -101,6 +101,10 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         }
 
         @Override
+        public void prepareFlushTasks() {
+        }
+
+        @Override
         public Collection<Runnable> flushTasks() {
             return Collections.emptyList();
         }
