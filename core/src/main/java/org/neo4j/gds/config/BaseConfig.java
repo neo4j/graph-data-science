@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.Collection;
@@ -39,7 +40,7 @@ public interface BaseConfig {
     @Configuration.Parameter
     @Value.Default
     default String username() {
-        return AuthSubject.ANONYMOUS.username();
+        return Neo4jProxy.username(AuthSubject.ANONYMOUS);
     }
 
     @Value.Default

@@ -37,6 +37,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -96,7 +97,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     ) {
         var config = createConfig.isEmpty()
             ? ImmutableGraphCreateFromGdlConfig.builder()
-            .username(userName.orElse(AuthSubject.ANONYMOUS.username()))
+            .username(userName.orElse(Neo4jProxy.username(AuthSubject.ANONYMOUS)))
             .graphName(graphName.orElse("graph"))
             .gdlGraph(gdlGraph.orElse(""))
             .build()

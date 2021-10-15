@@ -92,7 +92,7 @@ public final class TransactionContext {
      * @return The username associated with the current {@link SecurityContext}.
      */
     public String username() {
-        return securityContext.subject().username();
+        return Neo4jProxy.username(securityContext.subject());
     }
 
     /**

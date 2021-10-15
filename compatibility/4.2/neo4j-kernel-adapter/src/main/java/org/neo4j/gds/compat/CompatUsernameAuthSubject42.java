@@ -36,4 +36,9 @@ final class CompatUsernameAuthSubject42 extends CompatUsernameAuthSubject {
     public void logout() {
         this.authSubject.logout();
     }
+
+    @Override
+    public String username() {
+        return username;
+    }
 }

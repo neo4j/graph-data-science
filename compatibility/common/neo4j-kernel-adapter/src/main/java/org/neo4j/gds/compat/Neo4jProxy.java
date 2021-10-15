@@ -130,6 +130,10 @@ public final class Neo4jProxy {
         return IMPL.newRestrictedAccessMode(original, restricting);
     }
 
+    public static String username(AuthSubject subject) {
+        return IMPL.username(subject);
+    }
+
     // Maybe we should move this to a test-only proxy?
     @TestOnly
     public static SecurityContext securityContext(

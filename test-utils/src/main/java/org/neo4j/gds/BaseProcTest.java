@@ -23,6 +23,7 @@ import org.assertj.core.api.HamcrestCondition;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Settings;
@@ -95,7 +96,7 @@ public class BaseProcTest extends BaseTest {
     }
 
     protected String getUsername() {
-        return AuthSubject.ANONYMOUS.username();
+        return Neo4jProxy.username(AuthSubject.ANONYMOUS);
     }
 
     protected void assertError(

@@ -27,4 +27,9 @@ final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
     CompatUsernameAuthSubjectImpl(String username, AuthSubject authSubject) {
         super(username, authSubject);
     }
+
+    @Override
+    public String username() {
+        return username;
+    }
 }

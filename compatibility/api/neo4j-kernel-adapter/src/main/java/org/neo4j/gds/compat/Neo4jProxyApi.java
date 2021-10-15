@@ -95,6 +95,8 @@ public interface Neo4jProxyApi {
 
     AccessMode newRestrictedAccessMode(AccessMode original, AccessMode.Static restricting);
 
+    String username(AuthSubject subject);
+
     SecurityContext securityContext(
         String username,
         AuthSubject authSubject,

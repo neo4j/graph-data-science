@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -75,7 +76,7 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
 
     @Override
     public TaskRegistryFactory apply(Context context) throws ProcedureException {
-        var username = context.securityContext().subject().username();
+        var username = Neo4jProxy.username(context.securityContext().subject());
         return new LocalTaskRegistryFactory(username, this);
     }
 

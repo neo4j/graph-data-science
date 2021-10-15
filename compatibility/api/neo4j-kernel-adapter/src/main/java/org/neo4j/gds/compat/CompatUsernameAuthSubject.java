@@ -43,8 +43,11 @@ public abstract class CompatUsernameAuthSubject implements AuthSubject {
     }
 
     @Override
+    public String executingUser() {
+        return authSubject.executingUser();
+    }
+
     public String username() {
         return username;
     }
-
 }

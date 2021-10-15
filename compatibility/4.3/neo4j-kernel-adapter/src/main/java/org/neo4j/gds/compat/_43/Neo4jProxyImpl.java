@@ -154,6 +154,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public String username(AuthSubject subject) {
+        return subject.username();
+    }
+
+    @Override
     public SecurityContext securityContext(
         String username,
         AuthSubject authSubject,
