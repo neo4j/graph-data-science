@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
@@ -62,7 +63,9 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
                 () -> List.of(Tasks.leaf("step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
-            Tasks.leaf("predict links", graph.nodeCount())
+            config.isApproximateStrategy()
+                ? Tasks.task("approximate link prediction", KnnFactory.knnTaskTree(graph, config.approximateConfig()))
+                : Tasks.leaf("exhaustive link prediction", graph.nodeCount())
         );
     }
 
@@ -104,7 +107,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
                 relationshipTypes,
                 graphStore,
                 configuration.approximateConfig(),
-                ProgressTracker.NULL_TRACKER
+                progressTracker
             );
         } else {
             return new ExhaustiveLinkPrediction(

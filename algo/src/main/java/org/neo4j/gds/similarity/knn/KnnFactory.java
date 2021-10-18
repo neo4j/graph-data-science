@@ -41,9 +41,11 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<Knn, CONFIG> {
 
+    private static final String KNN_BASE_TASK_NAME = "Knn";
+
     @Override
     protected String taskName() {
-        return "Knn";
+        return KNN_BASE_TASK_NAME;
     }
 
     @Override
@@ -104,8 +106,12 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        return knnTaskTree(graph, config);
+    }
+
+    public static Task knnTaskTree(Graph graph, KnnBaseConfig config) {
         return Tasks.task(
-            taskName(),
+            KNN_BASE_TASK_NAME,
             Tasks.leaf("Initialize random neighbors", graph.nodeCount()),
             Tasks.iterativeDynamic(
                 "Iteration",

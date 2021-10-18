@@ -63,14 +63,14 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
 
     @Override
     public LinkPredictionResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("Link Prediction Pipeline");
         pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
         assertRunning();
 
         var result = predict();
 
         pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Link Prediction Pipeline");
 
         return result;
     }

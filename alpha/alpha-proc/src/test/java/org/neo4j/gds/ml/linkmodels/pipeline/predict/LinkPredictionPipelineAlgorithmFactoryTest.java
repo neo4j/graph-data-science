@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -47,9 +50,11 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardF
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
@@ -105,6 +110,73 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
         "(m)-[:IGNORED]->(b), " +
         "(m)-[:IGNORED]->(c) ";
 
+    public static Stream<Arguments> configTaskTreeMappings() {
+        return Stream.of(
+            Arguments.of(
+                Map.of(
+                    "modelName", "outputModel",
+                    "topN", 6,
+                    "mutateRelationshipType", "PREDICTED"
+                ),
+                List.of(
+                    "Link Prediction Pipeline :: exhaustive link prediction :: Start",
+                    "Link Prediction Pipeline :: exhaustive link prediction 100%",
+                    "Link Prediction Pipeline :: exhaustive link prediction :: Finished"
+                )
+            ),
+            Arguments.of(
+                Map.of(
+                    "modelName", "outputModel",
+                    "sampleRate", 0.4,
+                    "mutateRelationshipType", "PREDICTED",
+                    "randomJoins", 0,
+                    "maxIterations", 1
+                ),
+                List.of(
+                    "Link Prediction Pipeline :: approximate link prediction :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors 6%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors 100%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 6%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 13%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 20%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 26%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 100%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 6%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 13%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 20%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 26%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 33%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 40%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 46%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 53%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 60%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 66%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 73%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 80%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 86%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 93%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 100%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Reverse old and new neighbors 1 of 1 :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 :: Start",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 6%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 100%",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Finished"
+                )
+            )
+
+        );
+    }
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class);
@@ -121,8 +193,14 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
     }
 
-    @Test
-    void progressTracking() {
+    @AfterEach
+    void tearDown(){
+        ModelCatalog.removeAllLoadedModels();
+    }
+
+    @ParameterizedTest
+    @MethodSource("configTaskTreeMappings")
+    void progressTracking(Map<String,Object> predictParameters,List<String> expectedPredictLogEntries ) {
         ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             String trainModelName = "outputModel";
             var trainConfig = LinkPredictionTrainConfig.builder()
@@ -163,11 +241,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                 Optional.of(GRAPH_NAME),
                 Optional.empty(),
                 "",
-                CypherMapWrapper.create(Map.of(
-                    "modelName", trainModelName,
-                    "topN", 6,
-                    "mutateRelationshipType", "PREDICTED"
-                ))
+                CypherMapWrapper.create(predictParameters)
             );
 
             var factory = new LinkPredictionPipelineAlgorithmFactory<LinkPredictionPipelineMutateConfig>(
@@ -193,23 +267,29 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
 
             predictAlgo.compute();
 
+            var expectedMessages = new ArrayList<String>();
+            expectedMessages.addAll(List.of(
+                "Link Prediction Pipeline :: Start",
+                "Link Prediction Pipeline :: execute node property steps :: Start",
+                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Start",
+                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 100%",
+                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Finished",
+                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Start",
+                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 100%",
+                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Finished",
+                "Link Prediction Pipeline :: execute node property steps :: Finished"
+            ));
+            expectedMessages.addAll(expectedPredictLogEntries);
+            expectedMessages.add("Link Prediction Pipeline :: Finished");
+
+
             assertThat(log.getMessages(INFO))
                 .extracting(removingThreadId())
-                .containsExactly(
-                    "Link Prediction Pipeline :: Start",
-                    "Link Prediction Pipeline :: execute node property steps :: Start",
-                    "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Start",
-                    "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 100%",
-                    "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Finished",
-                    "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Start",
-                    "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 100%",
-                    "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Finished",
-                    "Link Prediction Pipeline :: execute node property steps :: Finished",
-                    "Link Prediction Pipeline :: predict links :: Start",
-                    "Link Prediction Pipeline :: predict links 100%",
-                    "Link Prediction Pipeline :: predict links :: Finished",
-                    "Link Prediction Pipeline :: Finished"
-                );
+                .filteredOn(msg -> {
+                    final var matchEntriesContainingTiming = ".*\\d+\\s*ms";
+                    return !msg.matches(matchEntriesContainingTiming);
+                })
+                .containsExactly(expectedMessages.toArray(String[]::new));
         });
     }
 }
