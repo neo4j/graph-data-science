@@ -47,9 +47,9 @@ import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.ImportSizing;
+import org.neo4j.gds.core.loading.InternalBitIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
-import org.neo4j.gds.core.loading.InternalSequentialBitIdMappingBuilder;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipImporter;
@@ -110,8 +110,8 @@ public final class GraphFactory {
 
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
         if (useBitIdMap && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1);
-            nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
+            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1);
+            nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
             long capacity = maxOriginalIdKnown

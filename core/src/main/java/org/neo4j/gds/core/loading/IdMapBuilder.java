@@ -48,21 +48,6 @@ public final class IdMapBuilder {
         );
     }
 
-    public static BitIdMap build(
-        InternalSequentialBitIdMappingBuilder idMapBuilder,
-        LabelInformation.Builder labelInformationBuilder,
-        AllocationTracker allocationTracker
-    ) {
-        var idMap = idMapBuilder.build();
-        var labelInformation = labelInformationBuilder.build(idMap.idCount(), idMap::toMappedNodeId);
-
-        return new BitIdMap(
-            idMap,
-            labelInformation,
-            allocationTracker
-        );
-    }
-
     public static IdMap build(
         InternalHugeIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,

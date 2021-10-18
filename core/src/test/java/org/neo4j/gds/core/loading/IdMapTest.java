@@ -109,15 +109,7 @@ class IdMapTest {
         var bitIdMappingBuilder = InternalBitIdMappingBuilder.of(length);
         var bitIdMap = IdMapBuilder.build(bitIdMappingBuilder, emptyLabelInformationBuilder, AllocationTracker.empty());
 
-        var sequentialBitIdMappingBuilder = InternalSequentialBitIdMappingBuilder.of(length);
-        var sequentialBitIdMap = IdMapBuilder.build(
-            sequentialBitIdMappingBuilder,
-            emptyLabelInformationBuilder,
-            AllocationTracker.empty()
-        );
-
         assertThat(hugeIdMap.highestNeoId()).isEqualTo(highestNeoId);
         assertThat(bitIdMap.highestNeoId()).isEqualTo(highestNeoId);
-        assertThat(sequentialBitIdMap.highestNeoId()).isEqualTo(highestNeoId);
     }
 }

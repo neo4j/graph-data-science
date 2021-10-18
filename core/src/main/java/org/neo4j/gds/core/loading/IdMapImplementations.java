@@ -28,14 +28,14 @@ public final class IdMapImplementations {
         return GdsEdition.instance().isOnEnterpriseEdition() && GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled();
     }
 
-    public static NodeMappingBuilder<InternalSequentialBitIdMappingBuilder> sequentialBitIdMapBuilder() {
+    public static NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
         return
             (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker) ->
                 IdMapBuilder.build(idMapBuilder, labelInformationBuilder, allocationTracker);
     }
 
-    public static NodeMappingBuilder.Capturing sequentialBitIdMapBuilder(InternalSequentialBitIdMappingBuilder idMapBuilder) {
-        return sequentialBitIdMapBuilder().capture(idMapBuilder);
+    public static NodeMappingBuilder.Capturing bitIdMapBuilder(InternalBitIdMappingBuilder idMapBuilder) {
+        return bitIdMapBuilder().capture(idMapBuilder);
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
