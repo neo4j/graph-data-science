@@ -88,14 +88,18 @@ class UnionNodePropertiesTest {
     void shouldCalculateMaximumLongValue() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(1337L), DefaultValue.of(42L));
 
-        Assertions.assertThat(unionNodeProperties.getMaxLongPropertyValue()).isEqualTo(OptionalLong.of(1337));
+        assertThat(unionNodeProperties.getMaxLongPropertyValue())
+            .isPresent()
+            .hasValue(1337L);
     }
 
     @Test
     void shouldCalculateMaximumDoubleValue() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(1337.0), DefaultValue.of(42.0));
 
-        Assertions.assertThat(unionNodeProperties.getMaxDoublePropertyValue()).isEqualTo(OptionalDouble.of(1337.0));
+        assertThat(unionNodeProperties.getMaxDoublePropertyValue())
+            .isPresent()
+            .hasValue(1337.0);
     }
 
     @Test
