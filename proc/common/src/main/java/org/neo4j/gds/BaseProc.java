@@ -52,7 +52,6 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -110,11 +109,10 @@ public abstract class BaseProc {
     }
 
     protected String username() {
-        return Neo4jProxy.username(
-            transaction != null
-                ? transaction.subjectOrAnonymous()
-                : AuthSubject.ANONYMOUS
-        );
+        if (transaction == null) {
+            return "";
+        }
+        return Neo4jProxy.username(transaction.subjectOrAnonymous());
     }
 
     protected NamedDatabaseId databaseId() {
