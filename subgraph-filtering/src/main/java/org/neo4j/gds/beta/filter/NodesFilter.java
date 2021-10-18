@@ -117,9 +117,6 @@ final class NodesFilter {
             // use that original id to retrieve the internal id from
             // the original node mapping.
             internalIdFunction = (id) -> inputNodes.toMappedNodeId(originalIdFunction.applyAsLong(id));
-            // We signal the nodes builder to use the block-based
-            // BitIdMap builder.
-            nodesBuilderBuilder.hasDisjointPartitions(true);
             // Create partitions that are aligned to the blocks that
             // original ids belong to. We must guarantee, that no two
             // partitions contain ids that belong to the same block.

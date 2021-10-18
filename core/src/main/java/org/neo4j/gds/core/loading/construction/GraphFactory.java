@@ -94,14 +94,12 @@ public final class GraphFactory {
         long maxOriginalId,
         Optional<Long> nodeCount,
         Optional<NodeSchema> nodeSchema,
-        Optional<Boolean> hasDisjointPartitions,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
         AllocationTracker allocationTracker
     ) {
         boolean useBitIdMap = IdMapImplementations.useBitIdMap();
-        boolean disjointPartitions = hasDisjointPartitions.orElse(false);
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
             .or(() -> hasLabelInformation).orElse(false);
@@ -111,18 +109,15 @@ public final class GraphFactory {
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
 
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
-        if (useBitIdMap && disjointPartitions && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
-            nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
-            internalIdMappingBuilder = idMappingBuilder;
-        } else if (useBitIdMap && !labelInformation && maxOriginalIdKnown) {
+        if (useBitIdMap && maxOriginalIdKnown) {
             var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
             long capacity = maxOriginalIdKnown
                 ? maxOriginalId + 1
-                : nodeCount.orElseThrow(() -> new IllegalArgumentException("Either `maxOriginalId` or `nodeCount` must be set"));
+                : nodeCount.orElseThrow(() -> new IllegalArgumentException(
+                    "Either `maxOriginalId` or `nodeCount` must be set"));
             var idMappingBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
             nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
