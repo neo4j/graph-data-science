@@ -32,7 +32,6 @@ import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
@@ -336,12 +335,6 @@ final class NodesFilter {
                 }
                 progressTracker.logProgress();
             });
-            if (IdMapImplementations.useBitIdMap()) {
-                // When using BitIdMap we need to make sure that all the nodes in the partition are written at once.
-                // Partitions passed into this task are block aligned, but the nodes are then filtered according to the
-                // nodes filter. This might lead to the situation where the content in the batch buffer spans partial blocks.
-                nodesBuilder.flush();
-            }
         }
     }
 
