@@ -28,10 +28,11 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.util.List;
 
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCounts;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasSingleLongParameter;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeAtIndex;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
@@ -123,10 +124,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     }
 
     private boolean validateGrowingBuilderMethod(ExecutableElement e, TypeMirror elementType) {
-        return doesNotThrow(e, messager)
-               && isStatic(e, messager)
-               && hasParameterCount(e, 2, messager)
-               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
+        var validation = doesNotThrow(e, messager)
+                && isStatic(e, messager)
+                && hasParameterCounts(e, List.of(2, 3), messager)
+                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+                && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
+        if (e.getParameters().size() == 3) {
+            validation = validation && hasTypeKindAtIndex(e, 2, TypeKind.INT, messager);
+        }
+        return validation;
     }
 }

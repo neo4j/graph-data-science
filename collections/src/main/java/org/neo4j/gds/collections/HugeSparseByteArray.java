@@ -31,7 +31,11 @@ public interface HugeSparseByteArray {
     boolean contains(long index);
 
     static Builder growingBuilder(byte defaultValue, LongConsumer trackAllocation) {
-        return new HugeSparseByteArraySon.GrowingBuilder(defaultValue, trackAllocation);
+        return growingBuilder(defaultValue, trackAllocation, 0);
+    }
+
+    static Builder growingBuilder(byte defaultValue, LongConsumer trackAllocation, int initialCapacity) {
+        return new HugeSparseByteArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
     }
 
     interface Builder {

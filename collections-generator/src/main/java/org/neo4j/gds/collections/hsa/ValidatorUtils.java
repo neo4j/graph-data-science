@@ -28,6 +28,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.util.Collection;
 import java.util.List;
 
 final class ValidatorUtils {
@@ -91,6 +92,18 @@ final class ValidatorUtils {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "method has wrong number of parameters, expected " + expectedCount,
+                e
+            );
+            return false;
+        }
+        return true;
+    }
+
+    static boolean hasParameterCounts(ExecutableElement e, Collection<Integer> expectedCounts, Messager messager) {
+        if (!expectedCounts.contains(e.getParameters().size())) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "method has wrong number of parameters, expected one of " + expectedCounts,
                 e
             );
             return false;
