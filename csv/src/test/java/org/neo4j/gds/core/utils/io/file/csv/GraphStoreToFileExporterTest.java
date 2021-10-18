@@ -316,16 +316,14 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                     CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
                     CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                     CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
-                    CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
-                    CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+                    CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
                 ),
                 List.of(
                     graphStore.databaseId().databaseId().uuid().toString(),
                     graphStore.databaseId().name(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(3L),
-                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 3L, RelationshipType.of("REL1"), 3L)),
-                    Boolean.toString(false)
+                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 3L, RelationshipType.of("REL1"), 3L))
                 )
             )
         );
@@ -453,16 +451,14 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                         CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
                         CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                         CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
-                        CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
-                        CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+                        CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
                     ),
                     List.of(
                         graphStore.databaseId().databaseId().uuid().toString(),
                         graphStore.databaseId().name(),
                         Long.toString(graphStore.nodeCount()),
                         Long.toString(1L),
-                        CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.ALL_RELATIONSHIPS, 0L)),
-                        Boolean.toString(bitIdMap)
+                        CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.ALL_RELATIONSHIPS, 0L))
                     )
                 )
             );

@@ -31,5 +31,4 @@ public interface GraphInfo {
     long nodeCount();
     long maxOriginalId();
     Map<RelationshipType, Long> relationshipTypeCounts();
-    boolean bitIdMap();
 }

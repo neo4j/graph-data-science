@@ -65,7 +65,6 @@ public class GraphInfoLoader {
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
                 .relationshipTypeCounts(line.relTypeCounts)
-                .bitIdMap(line.bitIdMap)
                 .build();
 
         } catch (IOException e) {
@@ -88,9 +87,6 @@ public class GraphInfoLoader {
 
         @JsonDeserialize(using = RelationshipTypesDeserializer.class)
         Map<RelationshipType, Long> relTypeCounts = Map.of();
-
-        @JsonProperty
-        boolean bitIdMap;
     }
 
     static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {

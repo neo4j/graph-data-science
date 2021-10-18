@@ -37,7 +37,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
-        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, relationshipTypeCounts, false));
+        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, relationshipTypeCounts));
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -50,8 +50,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                     namedDatabaseId.name(),
                     Long.toString(1337L),
                     Long.toString(19L),
-                    CsvMapUtil.relationshipCountsToString(relationshipTypeCounts),
-                    Boolean.toString(false)
+                    CsvMapUtil.relationshipCountsToString(relationshipTypeCounts)
                 )
             )
         );
@@ -64,8 +63,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
             CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
-            CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
-            CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+            CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
         );
     }
 }
