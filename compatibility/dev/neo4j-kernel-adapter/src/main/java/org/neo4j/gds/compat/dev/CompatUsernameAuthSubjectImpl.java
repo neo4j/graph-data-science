@@ -30,6 +30,6 @@ final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
 
     @Override
     public String executingUser() {
-        return authSubject.executingUser();
+        return username;
     }
 }
