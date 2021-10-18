@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -95,6 +95,9 @@ public abstract class BaseProc {
     @Context
     public TaskRegistryFactory taskRegistryFactory;
 
+    @Context
+    public Username username = Username.EMPTY_USERNAME;
+
     protected BaseProc() {
         if (GdsEdition.instance().isInvalidLicense()) {
             throw new RuntimeException(GdsEdition.instance().errorMessage().get());
@@ -109,10 +112,7 @@ public abstract class BaseProc {
     }
 
     protected String username() {
-        if (transaction == null) {
-            return "";
-        }
-        return Neo4jProxy.username(transaction.subjectOrAnonymous());
+        return username.username();
     }
 
     protected NamedDatabaseId databaseId() {

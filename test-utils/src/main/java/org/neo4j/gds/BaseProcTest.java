@@ -22,16 +22,15 @@ package org.neo4j.gds;
 import org.assertj.core.api.HamcrestCondition;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -45,12 +44,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
 
@@ -96,7 +95,7 @@ public class BaseProcTest extends BaseTest {
     }
 
     protected String getUsername() {
-        return Neo4jProxy.username(AuthSubject.ANONYMOUS);
+        return Username.EMPTY_USERNAME.username();
     }
 
     protected void assertError(

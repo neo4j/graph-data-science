@@ -37,9 +37,9 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdsAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -49,7 +49,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportExtension;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
@@ -97,7 +96,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     ) {
         var config = createConfig.isEmpty()
             ? ImmutableGraphCreateFromGdlConfig.builder()
-            .username(userName.orElse(Neo4jProxy.username(AuthSubject.ANONYMOUS)))
+            .username(userName.orElse(Username.EMPTY_USERNAME.username()))
             .graphName(graphName.orElse("graph"))
             .gdlGraph(gdlGraph.orElse(""))
             .build()

@@ -22,7 +22,7 @@ package org.neo4j.gds.functions;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -37,8 +37,8 @@ import org.neo4j.values.storable.FloatArray;
 import java.util.Objects;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringJoining.join;
 
 public class NodePropertyFunc {
@@ -47,6 +47,9 @@ public class NodePropertyFunc {
 
     @Context
     public KernelTransaction transaction;
+
+    @Context
+    public Username username = Username.EMPTY_USERNAME;
 
     @UserFunction("gds.util.nodeProperty")
     @Description("Returns a node property value from a named in-memory graph.")
@@ -61,8 +64,7 @@ public class NodePropertyFunc {
         Objects.requireNonNull(propertyKey);
         Objects.requireNonNull(nodeLabel);
 
-        String username = Neo4jProxy.username(transaction.subjectOrAnonymous());
-        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username, api.databaseId()), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username.username(), api.databaseId()), graphName).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
 
         if (projectAll) {
