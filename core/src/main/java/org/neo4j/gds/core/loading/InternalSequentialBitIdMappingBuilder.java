@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -34,7 +33,7 @@ public final class InternalSequentialBitIdMappingBuilder implements InternalIdMa
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static InternalSequentialBitIdMappingBuilder of(long length, AllocationTracker allocationTracker) {
+    public static InternalSequentialBitIdMappingBuilder of(long length) {
         var builder = SparseLongArray.sequentialBuilder(length);
         return new InternalSequentialBitIdMappingBuilder(builder, length);
     }

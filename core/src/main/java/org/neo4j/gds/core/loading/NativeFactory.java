@@ -195,16 +195,16 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         var scanningNodesImporter = IdMapImplementations.useBitIdMap()
             ? new ScanningNodesImporter<>(
-                graphCreateConfig,
-                loadingContext,
-                dimensions,
-                progressTracker,
-                loadingContext.log(),
-                concurrency,
-                properties,
-                bitIdMappingBuilderFactory(),
-                IdMapImplementations.bitIdMapBuilder()
-            ) : new ScanningNodesImporter<>(
+            graphCreateConfig,
+            loadingContext,
+            dimensions,
+            progressTracker,
+            loadingContext.log(),
+            concurrency,
+            properties,
+            sequentialBitIdMappingBuilderFactory(),
+            IdMapImplementations.sequentialBitIdMapBuilder()
+        ) : new ScanningNodesImporter<>(
                 graphCreateConfig,
                 loadingContext,
                 dimensions,
@@ -225,8 +225,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     }
 
     @NotNull
-    private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> bitIdMappingBuilderFactory() {
-        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestPossibleNodeCount());
+    private InternalIdMappingBuilderFactory<InternalSequentialBitIdMappingBuilder, InternalSequentialBitIdMappingBuilder.BulkAdder> sequentialBitIdMappingBuilderFactory() {
+        return dimensions -> InternalSequentialBitIdMappingBuilder.of(dimensions.highestPossibleNodeCount());
     }
 
     @NotNull

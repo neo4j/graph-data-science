@@ -110,7 +110,7 @@ public final class GraphFactory {
 
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
         if (useBitIdMap && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, allocationTracker);
+            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1);
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
