@@ -34,7 +34,7 @@ public interface HugeSparseFloatArray {
         return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, trackAllocation, 0);
     }
 
-    static Builder growingBuilder(float defaultValue, LongConsumer trackAllocation, int initialCapacity) {
+    static Builder growingBuilder(float defaultValue, LongConsumer trackAllocation, long initialCapacity) {
         return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
     }
 

@@ -34,7 +34,7 @@ public interface HugeSparseShortArrayArray {
         return growingBuilder(defaultValue, trackAllocation, 0);
     }
 
-    static Builder growingBuilder(short[] defaultValue, LongConsumer trackAllocation, int initialCapacity) {
+    static Builder growingBuilder(short[] defaultValue, LongConsumer trackAllocation, long initialCapacity) {
         return new HugeSparseShortArrayArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
     }
 

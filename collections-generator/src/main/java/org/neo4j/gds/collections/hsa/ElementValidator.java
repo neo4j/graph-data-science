@@ -130,7 +130,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
                 && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
         if (e.getParameters().size() == 3) {
-            validation = validation && hasTypeKindAtIndex(e, 2, TypeKind.INT, messager);
+            validation = validation && hasTypeKindAtIndex(e, 2, TypeKind.LONG, messager);
         }
         return validation;
     }
