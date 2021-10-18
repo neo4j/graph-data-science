@@ -42,11 +42,6 @@ public abstract class CompatUsernameAuthSubject implements AuthSubject {
         return this.username.equals(username);
     }
 
-    @Override
-    public String executingUser() {
-        return authSubject.executingUser();
-    }
-
     public String username() {
         return username;
     }
