@@ -45,7 +45,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
  *
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
- * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link HugeSparseLongArray} for a different implementation that can profit from sparse data).</li>
+ * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link org.neo4j.gds.collections.HugeSparseIntArray} for a different implementation that can profit from sparse data).</li>
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code int[]} does ({@code 0}).</li>
  * </ul>
  *
