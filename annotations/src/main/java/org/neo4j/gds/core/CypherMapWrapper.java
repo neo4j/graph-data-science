@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import static org.neo4j.gds.core.MissingParameterExceptions.missingValueMessage;
+
 /**
  * Wrapper around configuration options map
  */
@@ -215,7 +217,7 @@ public final class CypherMapWrapper {
 
     public static <T> T failOnNull(String key, T value) {
         if (value == null) {
-            throw missingValueFor(key, Collections.emptySet());
+            throw MissingParameterExceptions.missingValueFor(key, Collections.emptySet());
         }
         return value;
     }
@@ -307,40 +309,7 @@ public final class CypherMapWrapper {
     }
 
     private IllegalArgumentException missingValueFor(String key) {
-        return missingValueFor(key, config.keySet());
-    }
-
-    private static IllegalArgumentException missingValueFor(String key, Collection<String> candidates) {
-        return new IllegalArgumentException(missingValueForMessage(key, candidates));
-    }
-
-    private static String missingValueForMessage(String key, Collection<String> candidates) {
-        List<String> suggestions = StringSimilarity.similarStringsIgnoreCase(key, candidates);
-        return missingValueMessage(key, suggestions);
-    }
-
-    private static String missingValueMessage(String key, List<String> suggestions) {
-        if (suggestions.isEmpty()) {
-            return String.format(
-                Locale.US,
-                "No value specified for the mandatory configuration parameter `%s`",
-                key
-            );
-        }
-        if (suggestions.size() == 1) {
-            return String.format(
-                Locale.ENGLISH,
-                "No value specified for the mandatory configuration parameter `%s` (a similar parameter exists: [%s])",
-                key,
-                suggestions.get(0)
-            );
-        }
-        return String.format(
-            Locale.ENGLISH,
-            "No value specified for the mandatory configuration parameter `%s` (similar parameters exist: [%s])",
-            key,
-            String.join(", ", suggestions)
-        );
+        return MissingParameterExceptions.missingValueFor(key, config.keySet());
     }
 
     public enum PairResult {
