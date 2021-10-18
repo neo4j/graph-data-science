@@ -63,10 +63,6 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     public FloatArrayNodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
-        if (propertiesByNeoIds.capacity() == 0) {
-            return new FloatArrayStoreNodeProperties(propertiesByNeoIds, size);
-        }
-
         var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.growingBuilder(
             defaultValue.floatArrayValue(),
             allocationTracker::add

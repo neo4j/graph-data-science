@@ -93,10 +93,6 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     public DoubleNodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
-        if (propertiesByNeoIds.capacity() == 0) {
-            return new DoubleStoreNodeProperties(propertiesByNeoIds, size, OptionalDouble.empty());
-        }
-
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.growingBuilder(
             defaultValue.doubleValue(),
             allocationTracker::add
