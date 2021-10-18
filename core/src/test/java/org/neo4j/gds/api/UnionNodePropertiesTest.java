@@ -35,6 +35,8 @@ import org.neo4j.values.storable.Values;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalLong;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -83,9 +85,23 @@ class UnionNodePropertiesTest {
     }
 
     @Test
+    void shouldCalculateMaximumLongValue() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(1337L), DefaultValue.of(42L));
+
+        Assertions.assertThat(unionNodeProperties.getMaxLongPropertyValue()).isEqualTo(OptionalLong.of(1337));
+    }
+
+    @Test
+    void shouldCalculateMaximumDoubleValue() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(1337.0), DefaultValue.of(42.0));
+
+        Assertions.assertThat(unionNodeProperties.getMaxDoublePropertyValue()).isEqualTo(OptionalDouble.of(1337.0));
+    }
+
+    @Test
     void shouldThrowConversionException() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(
-            new double[]{1.337D}),
+        var unionNodeProperties = initializeUnionNodeProperties(
+            Values.of(new double[]{1.337D}),
             DefaultValue.of(new double[]{})
         );
 

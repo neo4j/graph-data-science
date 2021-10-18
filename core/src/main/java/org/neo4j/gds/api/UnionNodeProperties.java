@@ -198,11 +198,15 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public OptionalLong getMaxLongPropertyValue() {
-        return OptionalLong.empty();
+        return labelToNodePropertiesMap.values().stream()
+            .flatMapToLong(properties -> properties.getMaxLongPropertyValue().stream())
+            .max();
     }
 
     @Override
     public OptionalDouble getMaxDoublePropertyValue() {
-        return OptionalDouble.empty();
+        return labelToNodePropertiesMap.values().stream()
+            .flatMapToDouble(properties -> properties.getMaxDoublePropertyValue().stream())
+            .max();
     }
 }
