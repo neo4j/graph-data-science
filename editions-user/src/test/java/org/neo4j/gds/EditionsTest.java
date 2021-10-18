@@ -39,14 +39,14 @@ public class EditionsTest {
         var newThingFactory = ServiceLoader.load(NewThingFactory.class)
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load " + NewThingFactory.class + " implementation"));
-        System.out.println("first: " + newThingFactory.createEditionStuff().name());
+        System.out.println("first: " + newThingFactory.createEditionStuff().label());
     }
 
     @Test
     void findAll() {
         ServiceLoader.load(NewThingFactory.class).stream()
             .map(factory -> factory.get().createEditionStuff())
-            .forEach(edition -> System.out.printf("---%nname: %s%nerrors: %s%n---%n", edition.name(), edition.errorMessage()));
+            .forEach(edition -> System.out.printf("---%nname: %s%nerrors: %s%n---%n", edition.label(), edition.errorMessage()));
     }
 
 }

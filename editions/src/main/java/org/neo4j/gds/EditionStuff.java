@@ -22,6 +22,6 @@ package org.neo4j.gds;
 import java.util.Optional;
 
 public interface EditionStuff {
-    String name();
+    String label();
     Optional<String> errorMessage();
 }

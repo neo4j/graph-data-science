@@ -34,7 +34,7 @@ public class OpenGdsNewThingFactory implements NewThingFactory {
     static class OpenGdsNewThing implements EditionStuff {
 
         @Override
-        public String name() {
+        public String label() {
             return "OpenGDS";
         }
 
