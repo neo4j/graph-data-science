@@ -127,7 +127,7 @@ class UnionNodePropertiesTest {
         HugeLongArray graphIds = HugeLongArray.newArray(1, AllocationTracker.empty());
         graphIds.setAll(i -> i);
 
-        HugeSparseLongArray.Builder builder = HugeSparseLongArray.growingBuilder(1, AllocationTracker.empty()::add);
+        HugeSparseLongArray.Builder builder = HugeSparseLongArray.builder(1, AllocationTracker.empty()::add);
         builder.set(0, 0);
 
         HashMap<NodeLabel, BitSet> bitSets = new HashMap<>();

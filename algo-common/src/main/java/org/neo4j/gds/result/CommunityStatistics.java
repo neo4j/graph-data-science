@@ -47,7 +47,7 @@ public final class CommunityStatistics {
         int concurrency,
         AllocationTracker allocationTracker
     ) {
-        var componentSizeBuilder = HugeSparseLongArray.growingBuilder(EMPTY_COMMUNITY, allocationTracker::add);
+        var componentSizeBuilder = HugeSparseLongArray.builder(EMPTY_COMMUNITY, allocationTracker::add);
 
         if (concurrency == 1) {
             // For one thread, we can just iterate through the node space

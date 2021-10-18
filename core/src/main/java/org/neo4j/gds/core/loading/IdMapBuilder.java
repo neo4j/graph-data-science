@@ -135,12 +135,12 @@ public final class IdMapBuilder {
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
         AllocationTracker allocationTracker
     ) {
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.growingBuilder(
+        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.builder(
             NodeMapping.NOT_FOUND,
-            allocationTracker::add,
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
-            highestNodeId + 1
+            highestNodeId + 1,
+            allocationTracker::add
             );
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();
