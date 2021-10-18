@@ -144,7 +144,9 @@ public class HugeSparseArrayStep implements BasicAnnotationProcessor.Step {
         } catch (IOException e) {
             messager.printMessage(Diagnostic.Kind.ERROR, "Unable to determine source path");
         } finally {
-            tmpFile.delete();
+            if (tmpFile != null) {
+                tmpFile.delete();
+            }
         }
 
         return null;
