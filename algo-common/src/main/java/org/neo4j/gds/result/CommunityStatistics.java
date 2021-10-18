@@ -24,12 +24,12 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.HdrHistogram.Histogram;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.ProcedureConstants;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
@@ -47,7 +47,7 @@ public final class CommunityStatistics {
         int concurrency,
         AllocationTracker allocationTracker
     ) {
-        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(EMPTY_COMMUNITY, allocationTracker);
+        var componentSizeBuilder = HugeSparseLongArray.growingBuilder(EMPTY_COMMUNITY, allocationTracker::add);
 
         if (concurrency == 1) {
             // For one thread, we can just iterate through the node space
@@ -105,7 +105,7 @@ public final class CommunityStatistics {
         ExecutorService executorService,
         int concurrency
     ) {
-        var capacity = communitySizes.getCapacity();
+        var capacity = communitySizes.capacity();
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -151,7 +151,7 @@ public final class CommunityStatistics {
 
         if (concurrency == 1) {
             histogram = new Histogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-            var capacity = communitySizes.getCapacity();
+            var capacity = communitySizes.capacity();
 
             for (long communityId = 0; communityId < capacity; communityId++) {
                 long communitySize = communitySizes.get(communityId);
@@ -161,7 +161,7 @@ public final class CommunityStatistics {
                 }
             }
         } else {
-            var capacity = communitySizes.getCapacity();
+            var capacity = communitySizes.capacity();
 
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
@@ -203,7 +203,7 @@ public final class CommunityStatistics {
 
     private static class AddTask implements Runnable {
 
-        private final HugeSparseLongArray.GrowingBuilder builder;
+        private final HugeSparseLongArray.Builder builder;
 
         private final LongUnaryOperator communityFunction;
 
@@ -216,7 +216,7 @@ public final class CommunityStatistics {
         private final LongLongMap buffer;
 
         AddTask(
-            HugeSparseLongArray.GrowingBuilder builder,
+            HugeSparseLongArray.Builder builder,
             LongUnaryOperator communityFunction,
             long startId,
             long length

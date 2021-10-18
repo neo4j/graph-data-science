@@ -18,6 +18,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':core')
     implementation project(':string-formatting')
+    implementation project(':collections')
 
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 

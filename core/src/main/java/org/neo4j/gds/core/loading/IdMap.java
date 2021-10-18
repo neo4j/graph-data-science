@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class IdMap implements NodeMapping {
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
-            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
+            (dimensions, concurrency) -> HugeSparseLongArrayUtil.memoryEstimation(
                 dimensions.highestPossibleNodeCount(),
                 dimensions.nodeCount()
             )
@@ -193,7 +193,7 @@ public class IdMap implements NodeMapping {
 
         HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
             newNodeCount,
-            nodeToGraphIds.getCapacity(),
+            nodeToGraphIds.capacity(),
             concurrency,
             IdMapBuilder.add(newGraphIds),
             allocationTracker

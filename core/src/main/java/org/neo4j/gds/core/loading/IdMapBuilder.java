@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -27,7 +29,6 @@ import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 
 import java.util.function.Function;
 
@@ -134,12 +135,13 @@ public final class IdMapBuilder {
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
         AllocationTracker allocationTracker
     ) {
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.builder(
+        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.growingBuilder(
+            NodeMapping.NOT_FOUND,
+            allocationTracker::add,
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
-            highestNodeId + 1,
-            allocationTracker
-        );
+            highestNodeId + 1
+            );
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();
     }

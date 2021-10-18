@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.PrivateLookup;
+import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.collections.HugeSparseLongArray;
+import org.neo4j.gds.core.loading.HugeSparseLongArrayUtil;
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -48,7 +51,7 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldSetAndGet() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(10, AllocationTracker.empty()::add);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
@@ -57,7 +60,7 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldSetIfAbsent() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(10, AllocationTracker.empty()::add);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         assertTrue(array.setIfAbsent(index, value));
@@ -66,9 +69,7 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldAddAndGet() {
-        HugeSparseLongArray.GrowingBuilder array = HugeSparseLongArray.GrowingBuilder.create(0L,
-            AllocationTracker.empty()
-        );
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(0L, AllocationTracker.empty()::add);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.addTo(index, value);
@@ -77,7 +78,7 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldSetValuesInPageSizedChunks() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(10, AllocationTracker.empty()::add);
         // larger than the desired size, but still within a single page
         array.set(integer(11, PS - 1), 1337);
         // doesn't fail - good
@@ -85,7 +86,9 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldAddValuesInPageSizedChunks() {
-        HugeSparseLongArray.GrowingBuilder array = HugeSparseLongArray.GrowingBuilder.create(AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND,
+            AllocationTracker.empty()::add
+        );
         // larger than the desired size, but still within a single page
         array.addTo(integer(11, PS - 1), 1337);
         // doesn't fail - good
@@ -94,7 +97,7 @@ final class HugeSparseLongArrayTest {
     // capacity check is only an assert
     @Test
     void shouldUseCapacityInPageSizedChunks() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, AllocationTracker.empty()::add, 10);
         // larger than the desired size, but still within a single page
         try {
             array.set(integer(PS, 2 * PS - 1), 1337);
@@ -105,7 +108,7 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldHaveContains() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, AllocationTracker.empty()::add, 10);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
@@ -122,9 +125,7 @@ final class HugeSparseLongArrayTest {
     @ParameterizedTest
     @ValueSource(longs = {-1, Long.MIN_VALUE})
     void shouldReturnDefaultValueForMissingValues(long defaultValue) {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, defaultValue,
-            AllocationTracker.empty()
-        );
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(defaultValue, AllocationTracker.empty()::add, 10);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
@@ -141,21 +142,21 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldReturnNegativeOneForOutOfRangeValues() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, AllocationTracker.empty()::add, 10);
         array.set(integer(2, 8), integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
     void shouldReturnNegativeOneForUnsetPages() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(PS + 10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, AllocationTracker.empty()::add, PS + 10);
         array.set(5000, integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
     void shouldNotFailOnGetsThatAreoutOfBounds() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(10, AllocationTracker.empty());
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, AllocationTracker.empty()::add, 10);
         array.set(integer(2, 8), integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100_000_000, 200_000_000)));
         // doesn't fail - good
@@ -164,7 +165,7 @@ final class HugeSparseLongArrayTest {
     @Test
     void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
         AllocationTracker allocationTracker = AllocationTracker.create();
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, allocationTracker);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, allocationTracker::add, 2L * PS);
 
         final AtomicReferenceArray<long[]> pages = getPages(array);
         for (int i = 0; i < pages.length(); i++) {
@@ -180,7 +181,7 @@ final class HugeSparseLongArrayTest {
     @Test
     void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
         AllocationTracker allocationTracker = AllocationTracker.create();
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.builder(2 * PS, allocationTracker);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.growingBuilder(NodeMapping.NOT_FOUND, allocationTracker::add, 2L * PS);
 
         int index = integer(PS, 2 * PS - 1);
         int value = integer(42, 1337);
@@ -202,7 +203,7 @@ final class HugeSparseLongArrayTest {
     @Test
     void shouldComputeMemoryEstimationForBestCase() {
         long size = integer(Integer.MAX_VALUE);
-        final MemoryRange memoryRange = HugeSparseLongArray.memoryEstimation(size, size);
+        final MemoryRange memoryRange = HugeSparseLongArrayUtil.memoryEstimation(size, size);
         assertEquals(memoryRange.min, memoryRange.max);
     }
 
@@ -210,17 +211,17 @@ final class HugeSparseLongArrayTest {
     void shouldComputeMemoryEstimationForWorstCase() {
         long size = integer(Integer.MAX_VALUE);
         long highestId = between(size + 4096L, size * 4096L).Long();
-        final MemoryRange memoryRange = HugeSparseLongArray.memoryEstimation(highestId, size);
+        final MemoryRange memoryRange = HugeSparseLongArrayUtil.memoryEstimation(highestId, size);
         assertTrue(memoryRange.min < memoryRange.max);
     }
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(48L), HugeSparseLongArray.memoryEstimation(0L, 0L));
-        assertEquals(MemoryRange.of(32840L), HugeSparseLongArray.memoryEstimation(100L, 100L));
-        assertEquals(MemoryRange.of(97_689_088L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 1L));
-        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
-        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
+        assertEquals(MemoryRange.of(48L), HugeSparseLongArrayUtil.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32840L), HugeSparseLongArrayUtil.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_088L), HugeSparseLongArrayUtil.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), HugeSparseLongArrayUtil.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), HugeSparseLongArrayUtil.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @Test
@@ -265,7 +266,7 @@ final class HugeSparseLongArrayTest {
         long min = classSize + pagesSize + minRequirements;
         long max = classSize + pagesSize + maxRequirements;
 
-        assertEquals(MemoryRange.of(min, max), HugeSparseLongArray.memoryEstimation(size, maxEntries));
+        assertEquals(MemoryRange.of(min, max), HugeSparseLongArrayUtil.memoryEstimation(size, maxEntries));
     }
 
     @SuppressWarnings("unchecked")

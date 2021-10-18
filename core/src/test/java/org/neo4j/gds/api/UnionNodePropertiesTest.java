@@ -22,12 +22,12 @@ package org.neo4j.gds.api;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.loading.BitIdMap;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.paged.SparseLongArray;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -127,7 +127,7 @@ class UnionNodePropertiesTest {
         HugeLongArray graphIds = HugeLongArray.newArray(1, AllocationTracker.empty());
         graphIds.setAll(i -> i);
 
-        HugeSparseLongArray.Builder builder = HugeSparseLongArray.builder(1, AllocationTracker.empty());
+        HugeSparseLongArray.Builder builder = HugeSparseLongArray.growingBuilder(1, AllocationTracker.empty()::add);
         builder.set(0, 0);
 
         HashMap<NodeLabel, BitSet> bitSets = new HashMap<>();
