@@ -1,0 +1,11 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Editions User'
+
+dependencies {
+    implementation project(':editions')
+    implementation project(':open-edition')
+    implementation project(':commercial-edition')
+
+    testImplementation project(':test-utils')
+}
