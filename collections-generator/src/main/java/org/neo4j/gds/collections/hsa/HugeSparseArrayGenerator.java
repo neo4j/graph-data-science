@@ -439,8 +439,8 @@ final class HugeSparseArrayGenerator {
         ) {
             return MethodSpec.constructorBuilder()
                 .addParameter(valueType, defaultValue.name)
-                .addParameter(LongConsumer.class, "trackAllocation")
                 .addParameter(long.class, "initialCapacity")
+                .addParameter(LongConsumer.class, "trackAllocation")
                 .addStatement("this.$N = new $T(pageIndex($N))", pages, pages.type, initialCapacity)
                 .addStatement("this.$N = $N", defaultValue, defaultValue)
                 .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)

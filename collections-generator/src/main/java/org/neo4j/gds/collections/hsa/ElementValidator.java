@@ -90,7 +90,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateGetMethod(e, elementType);
             case "contains":
                 return validateContainsMethod(e);
-            case "growingBuilder":
+            case "builder":
                 switch (e.getParameters().size()) {
                     case 2:
                         return validateGrowingBuilderMethod(e, elementType);

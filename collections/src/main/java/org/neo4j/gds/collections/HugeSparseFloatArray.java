@@ -30,12 +30,12 @@ public interface HugeSparseFloatArray {
 
     boolean contains(long index);
 
-    static Builder growingBuilder(float defaultValue, LongConsumer trackAllocation) {
-        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, trackAllocation, 0);
+    static Builder builder(float defaultValue, LongConsumer trackAllocation) {
+        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, 0, trackAllocation);
     }
 
-    static Builder growingBuilder(float defaultValue, LongConsumer trackAllocation, long initialCapacity) {
-        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
+    static Builder builder(float defaultValue, long initialCapacity, LongConsumer trackAllocation) {
+        return new HugeSparseFloatArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {
