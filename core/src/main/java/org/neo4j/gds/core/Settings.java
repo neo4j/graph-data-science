@@ -25,7 +25,6 @@ import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
-import org.neo4j.gds.compat.EnterpriseLicensingSettings;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.config.Setting;
 
@@ -43,10 +42,6 @@ public final class Settings {
 
     public static String defaultDatabaseName() {
         return GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
-    }
-
-    public static Setting<String> enterpriseLicenseFile() {
-        return EnterpriseLicensingSettings.enterpriseLicenseFile;
     }
 
     public static Setting<Boolean> boltEnabled() {
