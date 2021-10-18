@@ -19,34 +19,54 @@
  */
 package org.neo4j.gds;
 
+import com.neo4j.gds.licensing.LicensingExtension;
 import org.junit.jupiter.api.Test;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.util.ServiceLoader;
 
-public class EditionsTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-    /*
-    static {
-        ServiceLoader<String> load = ServiceLoader.load(GdsEditionFactory.class);
-        String s = load.findFirst().get();
-        /*
-        opengds         dependsOn { open-gds-string-provider }
-        commercial      dependsOn { commercial-gds-string-provider }
-    }
-     */
+class EditionsTest {
+
     @Test
-    void findFirst() {
+    void firstLoadedIsOpenGds() {
         var newThingFactory = ServiceLoader.load(NewThingFactory.class)
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load " + NewThingFactory.class + " implementation"));
-        System.out.println("first: " + newThingFactory.createEditionStuff().label());
+        var editionStuff = newThingFactory.createEditionStuff();
+        assertThat(editionStuff.label()).isEqualTo("OpenGDS");
+        assertThat(editionStuff.errorMessage()).isEmpty();
     }
 
     @Test
-    void findAll() {
+    void withoutLicenseKeyCheckingCommercialStuffFailsLoudly() {
         ServiceLoader.load(NewThingFactory.class).stream()
             .map(factory -> factory.get().createEditionStuff())
-            .forEach(edition -> System.out.printf("---%nname: %s%nerrors: %s%n---%n", edition.label(), edition.errorMessage()));
+            .forEach(edition -> {
+                assertThatThrownBy(edition::label).hasMessageContaining("Ring the alarm!");
+                assertThatThrownBy(edition::errorMessage).hasMessageContaining("Ring the alarm!");
+            });
+    }
+
+    @Test
+    void withLicenseKeyCheckingCommercialStuffDoesntFail() {
+        var dbms = new TestDatabaseManagementServiceBuilder()
+            .impermanent()
+            .noOpSystemGraphInitializer()
+            .removeExtensions(extension -> extension instanceof LicensingExtension)
+            .addExtension(new LicensingExtension())
+            .build();
+        dbms.shutdown();
+
+        ServiceLoader.load(NewThingFactory.class).stream()
+            .map(factory -> factory.get().createEditionStuff())
+            .forEach(edition -> {
+                assertThatNoException().isThrownBy(edition::label);
+                assertThatNoException().isThrownBy(edition::errorMessage);
+            });
     }
 
 }
