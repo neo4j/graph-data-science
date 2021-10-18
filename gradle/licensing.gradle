@@ -127,7 +127,6 @@ allprojects { proj ->
                 [(actual): alternatives]
             }
         }
-        tasks.downloadLicenses.outputs.upToDateWhen { false }
 
         tasks.downloadLicenses.ext.licenseToDependencyJson = { ->
             def jsonDir = tasks.downloadLicenses.jsonDestination
