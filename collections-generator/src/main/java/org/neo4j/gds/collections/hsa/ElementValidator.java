@@ -32,7 +32,7 @@ import java.util.List;
 
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
-import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCounts;
+import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasParameterCount;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasSingleLongParameter;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeAtIndex;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasTypeKindAtIndex;
@@ -91,7 +91,18 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
             case "contains":
                 return validateContainsMethod(e);
             case "growingBuilder":
-                return validateGrowingBuilderMethod(e, elementType);
+                switch (e.getParameters().size()) {
+                    case 2:
+                        return validateGrowingBuilderMethod(e, elementType);
+                    case 3:
+                        return validateGrowingBuilderWithInitialCapacityMethod(e, elementType);
+                    default:
+                        messager.printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "method has wrong number of parameters, expected one of " + List.of(2, 3),
+                            e
+                        );
+                }
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
@@ -124,14 +135,19 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     }
 
     private boolean validateGrowingBuilderMethod(ExecutableElement e, TypeMirror elementType) {
-        var validation = doesNotThrow(e, messager)
-                && isStatic(e, messager)
-                && hasParameterCounts(e, List.of(2, 3), messager)
-                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-                && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
-        if (e.getParameters().size() == 3) {
-            validation = validation && hasTypeKindAtIndex(e, 2, TypeKind.LONG, messager);
-        }
-        return validation;
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 2, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
+    }
+
+    private boolean validateGrowingBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 3, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager)
+               && hasTypeKindAtIndex(e, 2, TypeKind.LONG, messager);
     }
 }
