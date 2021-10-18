@@ -20,7 +20,6 @@
 package org.neo4j.gds.api;
 
 import com.carrotsearch.hppc.BitSet;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.BitIdMap;
@@ -35,9 +34,8 @@ import org.neo4j.values.storable.Values;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalLong;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UnionNodePropertiesTest {
@@ -45,13 +43,13 @@ class UnionNodePropertiesTest {
     @Test
     void shouldReturnDoubleCorrectly() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(42.0D), DefaultValue.of(0.0D));
-        Assertions.assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
+        assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
     }
 
     @Test
     void shouldReturnLongCorrectly() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L), DefaultValue.of(0.0D));
-        Assertions.assertThat(unionNodeProperties.longValue(0)).isEqualTo(42L);
+        assertThat(unionNodeProperties.longValue(0)).isEqualTo(42L);
     }
 
     @Test
@@ -61,7 +59,7 @@ class UnionNodePropertiesTest {
             DefaultValue.of(new float[]{})
         );
 
-        Assertions.assertThat(unionNodeProperties.floatArrayValue(0)).isEqualTo(new float[]{4.2f});
+        assertThat(unionNodeProperties.floatArrayValue(0)).isEqualTo(new float[]{4.2f});
     }
 
     @Test
@@ -71,7 +69,7 @@ class UnionNodePropertiesTest {
             DefaultValue.of(new double[]{})
         );
 
-        Assertions.assertThat(unionNodeProperties.doubleArrayValue(0)).isEqualTo(new double[]{4.2});
+        assertThat(unionNodeProperties.doubleArrayValue(0)).isEqualTo(new double[]{4.2});
     }
 
     @Test
@@ -81,7 +79,7 @@ class UnionNodePropertiesTest {
             DefaultValue.of(new long[]{})
         );
 
-        Assertions.assertThat(unionNodeProperties.longArrayValue(0)).isEqualTo(new long[]{42L});
+        assertThat(unionNodeProperties.longArrayValue(0)).isEqualTo(new long[]{42L});
     }
 
     @Test
