@@ -92,8 +92,8 @@ final class GenerateRandomNeighbors implements Runnable {
             assert neighbors.size() > 0; // because K > 0 and N > 1
             assert neighbors.size() <= k;
 
-            progressTracker.logProgress();
             this.neighbors.set(nodeId, neighbors);
         });
+        progressTracker.logProgress();
     }
 }

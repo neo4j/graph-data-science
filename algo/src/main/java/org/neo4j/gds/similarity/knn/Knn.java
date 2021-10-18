@@ -369,8 +369,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
                 // this isn't in the paper
                 randomJoins(rng, computer, n, k, allNeighbors, nodeId, this.randomJoins);
-                progressTracker.logProgress();
             }
+            progressTracker.logProgress();
         }
 
         private void joinOldNeighbors(

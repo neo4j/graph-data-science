@@ -117,7 +117,7 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
                 assert neighborNode >= 0;
                 newNeighbors.add(neighborNode);
             }
-            progressTracker.logProgress();
         }
+        progressTracker.logProgress();
     }
 }
