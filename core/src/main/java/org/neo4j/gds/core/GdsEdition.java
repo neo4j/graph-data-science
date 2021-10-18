@@ -53,6 +53,19 @@ public final class GdsEdition {
         this.errorMessage = Optional.empty();
     }
 
+    public String name() {
+        if (instance().isInvalidLicense()) {
+            return "Enterprise (invalid license)";
+        }
+        if (instance().isOnEnterpriseEdition()) {
+            return "Enterprise";
+        }
+        if (instance().isOnCommunityEdition()) {
+            return "Community";
+        }
+        return "Community";
+    }
+
     public boolean isOnEnterpriseEdition() {
         return get() == State.ENTERPRISE;
     }

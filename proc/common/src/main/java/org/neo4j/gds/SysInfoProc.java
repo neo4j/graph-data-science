@@ -60,7 +60,7 @@ public class SysInfoProc {
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
         var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
-        return debugValues(properties, Runtime.getRuntime(), GdsEdition.instance(), config);
+        return debugValues(properties, Runtime.getRuntime(), config);
     }
 
     @SuppressWarnings("unused")
@@ -78,15 +78,10 @@ public class SysInfoProc {
         }
     }
 
-    private static Stream<DebugValue> debugValues(
-        BuildInfoProperties buildInfo,
-        Runtime runtime,
-        GdsEdition gdsEdition,
-        Config config
-    ) {
+    private static Stream<DebugValue> debugValues(BuildInfoProperties buildInfo, Runtime runtime, Config config) {
         var values = Stream.<DebugValue>builder();
         values.add(value("gdsVersion", buildInfo.gdsVersion()));
-        editionInfo(gdsEdition, values);
+        editionInfo(values);
         values.add(value("neo4jVersion", Version.getNeo4jVersion()));
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
         features(values);
@@ -100,22 +95,10 @@ public class SysInfoProc {
         return values.build();
     }
 
-    private static void editionInfo(GdsEdition edition, Stream.Builder<DebugValue> builder) {
-        builder.add(value("gdsEdition", editionString(edition)));
+    private static void editionInfo(Stream.Builder<DebugValue> builder) {
+        var edition = GdsEdition.instance();
+        builder.add(value("gdsEdition", edition.name()));
         edition.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
-    }
-
-    private static String editionString(GdsEdition edition) {
-        if (edition.isInvalidLicense()) {
-            return "Enterprise (invalid license)";
-        }
-        if (edition.isOnEnterpriseEdition()) {
-            return "Enterprise";
-        }
-        if (edition.isOnCommunityEdition()) {
-            return "Community";
-        }
-        return "Unknown";
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {
