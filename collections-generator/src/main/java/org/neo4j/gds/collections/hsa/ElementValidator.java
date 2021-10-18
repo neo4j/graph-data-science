@@ -147,7 +147,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && isStatic(e, messager)
                && hasParameterCount(e, 3, messager)
                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-               && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager)
-               && hasTypeKindAtIndex(e, 2, TypeKind.LONG, messager);
+               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager)
+               && hasTypeAtIndex(typeUtils, e, 2, longConsumerType, messager);
     }
 }

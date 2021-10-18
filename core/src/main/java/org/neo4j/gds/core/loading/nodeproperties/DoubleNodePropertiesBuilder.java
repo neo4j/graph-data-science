@@ -67,7 +67,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.concurrency = concurrency;
         this.allocationTracker = allocationTracker;
         this.maxValue = Double.NEGATIVE_INFINITY;
-        this.builder = HugeSparseDoubleArray.growingBuilder(
+        this.builder = HugeSparseDoubleArray.builder(
             defaultValue.doubleValue(),
             allocationTracker::add
         );
@@ -93,7 +93,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     public DoubleNodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.growingBuilder(
+        var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
             defaultValue.doubleValue(),
             allocationTracker::add
         );

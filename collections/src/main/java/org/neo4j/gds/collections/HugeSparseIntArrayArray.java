@@ -35,7 +35,7 @@ public interface HugeSparseIntArrayArray {
     }
 
     static Builder builder(int[] defaultValue, long initialCapacity, LongConsumer trackAllocation) {
-        return new HugeSparseIntArrayArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
+        return new HugeSparseIntArrayArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {

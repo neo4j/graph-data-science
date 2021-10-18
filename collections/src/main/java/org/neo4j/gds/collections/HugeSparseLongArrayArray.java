@@ -39,7 +39,7 @@ public interface HugeSparseLongArrayArray {
         long initialCapacity,
         LongConsumer trackAllocation
     ) {
-        return new HugeSparseLongArrayArraySon.GrowingBuilder(defaultValue, trackAllocation, initialCapacity);
+        return new HugeSparseLongArrayArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {
