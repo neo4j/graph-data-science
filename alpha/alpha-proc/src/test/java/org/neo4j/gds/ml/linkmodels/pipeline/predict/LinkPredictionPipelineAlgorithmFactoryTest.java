@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -48,6 +49,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
@@ -157,12 +159,16 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
             var trainedModel = trainAlgo.compute();
             ModelCatalog.set(trainedModel);
 
-            var predictConfig = ImmutableLinkPredictionPipelineMutateConfig.builder()
-                .graphName(GRAPH_NAME)
-                .modelName(trainModelName)
-                .topN(6)
-                .mutateRelationshipType("PREDICTED")
-                .build();
+            var predictConfig = new LinkPredictionPipelineMutateConfigImpl(
+                Optional.of(GRAPH_NAME),
+                Optional.empty(),
+                "",
+                CypherMapWrapper.create(Map.of(
+                    "modelName", trainModelName,
+                    "topN", 6,
+                    "mutateRelationshipType", "PREDICTED"
+                ))
+            );
 
             var factory = new LinkPredictionPipelineAlgorithmFactory<LinkPredictionPipelineMutateConfig>(
                 caller,

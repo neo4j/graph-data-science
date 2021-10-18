@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LinkPredictionPipelineBaseConfigTest {
 
@@ -71,7 +72,7 @@ class LinkPredictionPipelineBaseConfigTest {
                     "randomJoins", 10,
                     "maxIterations", 102
                 ),
-                "Configuration parameters ['maxIterations', 'randomJoins', 'topK'] " +
+                "Configuration parameters ['deltaThreshold', 'maxIterations', 'randomJoins', 'topK'] " +
                 "may only be set if parameter 'sampleRate' is less than 1."
             )
         );
@@ -101,5 +102,62 @@ class LinkPredictionPipelineBaseConfigTest {
         ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(expectedMessage);
+    }
+
+    @Test
+    void failOnDeriveKnnConfig() {
+        var exhaustiveConfig = new LinkPredictionPipelineBaseConfigImpl(
+            Optional.of("g"),
+            Optional.empty(),
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "sampleRate", 1,
+                    "topN", 42
+                )
+            )
+        );
+
+        assertThatThrownBy(exhaustiveConfig::approximateConfig)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Cannot derive approximateConfig when 'sampleRate' is 1.");
+    }
+
+    @Test
+    void deriveKnnConfig() {
+        var approximateConfig = new LinkPredictionPipelineBaseConfigImpl(
+            Optional.of("g"),
+            Optional.empty(),
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "sampleRate", 0.4,
+                    "maxIterations", 42,
+                    "concurrency", 2
+                )
+            )
+        ).approximateConfig();
+        assertThat(approximateConfig.maxIterations()).isEqualTo(42);
+        assertThat(approximateConfig.sampleRate()).isEqualTo(0.4);
+        assertThat(approximateConfig.topK()).isEqualTo(10);
+        assertThat(approximateConfig.concurrency()).isEqualTo(2);
+        assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);
+
+    }
+
+    @Test
+    void failOnMissingTopN() {
+        assertThatThrownBy(() -> new LinkPredictionPipelineBaseConfigImpl(
+            Optional.of("g"),
+            Optional.empty(),
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "sampleRate", 1
+                )
+            )
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No value specified for the mandatory configuration parameter `topN`");
     }
 }

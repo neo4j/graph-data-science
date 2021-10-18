@@ -95,9 +95,17 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
         );
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
-        // If we get sample rate, we should use ApproximateLinkPrediction, otherwise ExhaustiveLinkPrediction
-        if (configuration.sampleRate()<1) {
-            return null;
+
+        if (configuration.isApproximateStrategy()) {
+            return new ApproximateLinkPrediction(
+                model.data(),
+                pipelineExecutor,
+                nodeLabels,
+                relationshipTypes,
+                graphStore,
+                configuration.approximateConfig(),
+                ProgressTracker.NULL_TRACKER
+            );
         } else {
             return new ExhaustiveLinkPrediction(
                 model.data(),
@@ -107,7 +115,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
                 graphStore,
                 configuration.concurrency(),
                 configuration.topN().orElseThrow(),
-                configuration.threshold().orElseThrow(),
+                configuration.thresholdOrDefault(),
                 progressTracker
             );
         }

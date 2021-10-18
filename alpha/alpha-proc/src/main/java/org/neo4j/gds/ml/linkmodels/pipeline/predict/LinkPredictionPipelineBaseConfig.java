@@ -21,22 +21,26 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.core.MissingParameterExceptions;
+import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig, ModelConfig {
+
+    double DEFAULT_THRESHOLD = 0.0;
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
@@ -67,7 +71,7 @@ public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, Single
 
     @Value.Check
     default void validateParameterCombinations() {
-        if (sampleRate() < 1) {
+        if (isApproximateStrategy()) {
             Map<String, Boolean> exhaustiveStrategyParameters = Map.of(
                 "topN", topN().isPresent(),
                 "threshold", threshold().isPresent()
@@ -80,6 +84,8 @@ public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, Single
                 "maxIterations", maxIterations().isPresent(),
                 "randomJoins", randomJoins().isPresent());
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
+
+            topN().orElseThrow(()-> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
         }
     }
 
@@ -98,5 +104,38 @@ public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, Single
                 StringJoining.join(definedIllegalParameters), errorMsg
             ));
         }
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default KnnBaseConfig approximateConfig() {
+        if (!isApproximateStrategy()) {
+            throw new IllegalStateException(formatWithLocale(
+                "Cannot derive approximateConfig when 'sampleRate' is 1.")
+            );
+        }
+        var knnBuilder = ImmutableKnnBaseConfig.builder()
+            .sampleRate(sampleRate())
+            .nodeWeightProperty("NotUsedInLP")
+            .concurrency(concurrency());
+        topK().ifPresent(knnBuilder::topK);
+        deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
+        maxIterations().ifPresent(knnBuilder::maxIterations);
+        randomJoins().ifPresent(knnBuilder::randomJoins);
+
+
+        return knnBuilder.build();
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default double thresholdOrDefault() {
+        return threshold().orElse(DEFAULT_THRESHOLD);
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default boolean isApproximateStrategy() {
+        return sampleRate() < 1;
     }
 }
