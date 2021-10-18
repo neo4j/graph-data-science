@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.core;
 
-public class Username {
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 
-    public static final Username EMPTY_USERNAME = new Username("");
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private final String username;
+class UsernameTest {
 
-    Username(String username) {
-        this.username = username;
-    }
-
-    public String username() {
-        return username;
+    @Test
+    void emptyUsernameShouldAgreeWithAnonymousAuthSubject() {
+        assertThat(Username.EMPTY_USERNAME.username()).isEqualTo(Neo4jProxy.username(AuthSubject.ANONYMOUS));
     }
 }
