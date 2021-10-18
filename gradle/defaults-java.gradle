@@ -66,7 +66,7 @@ allprojects {
             options.forkOptions.jvmArgs += '--illegal-access=permit'
             options.compilerArgs += [
                     '-parameters',
-                    '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs',
+                    '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs,-rawtypes,-removal',
                     '-Xmaxerrs', '1337'
             ]
         }
