@@ -75,7 +75,7 @@ public abstract class WriteStreamOfRelationshipsProc<
             Graph graph = computationResult.graph();
 
             var progressTracker = new TaskProgressTracker(
-                RelationshipStreamExporter.baseTask(algoName()),
+                RelationshipStreamExporter.baseTask(procName()),
                 log,
                 computationResult.config().writeConcurrency(),
                 taskRegistryFactory

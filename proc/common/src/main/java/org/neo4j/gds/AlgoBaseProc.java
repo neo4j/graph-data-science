@@ -65,7 +65,7 @@ public abstract class AlgoBaseProc<
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
-    public String algoName() {
+    protected String procName() {
         return this.getClass().getSimpleName();
     }
 
@@ -246,7 +246,7 @@ public abstract class AlgoBaseProc<
             }
         );
 
-        log.info(algoName() + ": overall memory usage %s", allocationTracker.getUsageString());
+        log.info(procName() + ": overall memory usage %s", allocationTracker.getUsageString());
 
         return builder
             .graph(graph)

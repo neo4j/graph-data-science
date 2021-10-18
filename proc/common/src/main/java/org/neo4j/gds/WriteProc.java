@@ -98,7 +98,7 @@ public abstract class WriteProc<
         int writeConcurrency
     ) {
         return new TaskProgressTracker(
-            NodePropertyExporter.baseTask(algoName(), taskVolume),
+            NodePropertyExporter.baseTask(procName(), taskVolume),
             log,
             writeConcurrency,
             taskRegistryFactory

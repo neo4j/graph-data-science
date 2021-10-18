@@ -87,7 +87,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
             builder.result(algo.compute());
         }
 
-        log.info(algoName() + ": overall memory usage %s", allocationTracker.getUsageString());
+        log.info(procName() + ": overall memory usage %s", allocationTracker.getUsageString());
 
         algo.release();
 
