@@ -95,19 +95,22 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
         );
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
-        // TODO we need to decide which LinkPrediction to use based on parameters
         // If we get sample rate, we should use ApproximateLinkPrediction, otherwise ExhaustiveLinkPrediction
-        return new ExhaustiveLinkPrediction(
-            model.data(),
-            pipelineExecutor,
-            nodeLabels,
-            relationshipTypes,
-            graphStore,
-            configuration.concurrency(),
-            configuration.topN(),
-            configuration.threshold(),
-            progressTracker
-        );
+        if (configuration.sampleRate()<1) {
+            return null;
+        } else {
+            return new ExhaustiveLinkPrediction(
+                model.data(),
+                pipelineExecutor,
+                nodeLabels,
+                relationshipTypes,
+                graphStore,
+                configuration.concurrency(),
+                configuration.topN().orElseThrow(),
+                configuration.threshold().orElseThrow(),
+                progressTracker
+            );
+        }
     }
 
     @Override

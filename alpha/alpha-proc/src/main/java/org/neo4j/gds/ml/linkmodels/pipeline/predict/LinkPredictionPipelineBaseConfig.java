@@ -24,18 +24,79 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.utils.StringJoining;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, ModelConfig {
-
-    @Configuration.IntegerRange(min = 1)
-    int topN();
+public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig, ModelConfig {
 
     @Value.Default
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
+    default double sampleRate() {
+        return 1;
+    }
+
+    //Exhaustive strategy fields
+    @Configuration.IntegerRange(min = 1)
+    Optional<Integer> topN();
+
     @Configuration.DoubleRange(min = 0, max = 1)
-    default double threshold() {
-        return 0.0;
+    Optional<Double> threshold();
+
+    //Approximate strategy fields
+    @Configuration.IntegerRange(min = 1)
+    Optional<Integer> topK();
+
+    @Configuration.DoubleRange(min = 0, max = 1)
+    Optional<Double> deltaThreshold();
+
+    //We don't extend IterationsConfig because it is strategy-specific in this class
+    @Configuration.IntegerRange(min = 1)
+    Optional<Integer> maxIterations();
+
+    @Configuration.IntegerRange(min = 0)
+    Optional<Integer> randomJoins();
+
+    @Value.Check
+    default void validateParameterCombinations() {
+        if (sampleRate() < 1) {
+            Map<String, Boolean> exhaustiveStrategyParameters = Map.of(
+                "topN", topN().isPresent(),
+                "threshold", threshold().isPresent()
+            );
+            validateStrategySpecificParameters(exhaustiveStrategyParameters, "equal to 1");
+        } else {
+            Map<String, Boolean> approximateStrategyParameters = Map.of(
+                "topK",topK().isPresent(),
+                "deltaThreshold", deltaThreshold().isPresent(),
+                "maxIterations", maxIterations().isPresent(),
+                "randomJoins", randomJoins().isPresent());
+            validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
+        }
+    }
+
+    @Configuration.Ignore
+    default void validateStrategySpecificParameters(Map<String, Boolean> forbiddenParameters, String errorMsg) {
+        var definedIllegalParameters = forbiddenParameters
+            .entrySet()
+            .stream()
+            .filter(Map.Entry::getValue)
+            .map(
+                Map.Entry::getKey)
+            .collect(Collectors.toList());
+        if (!definedIllegalParameters.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Configuration parameters %s may only be set if parameter 'sampleRate' is %s.",
+                StringJoining.join(definedIllegalParameters), errorMsg
+            ));
+        }
     }
 }
