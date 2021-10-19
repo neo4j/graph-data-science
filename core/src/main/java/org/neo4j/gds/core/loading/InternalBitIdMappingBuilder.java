@@ -28,17 +28,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class InternalBitIdMappingBuilder implements InternalIdMappingBuilder<InternalBitIdMappingBuilder.BulkAdder> {
 
-    private final SparseLongArray.SequentialBuilder builder;
+    private final SparseLongArray.Builder builder;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
     public static InternalBitIdMappingBuilder of(long length) {
-        var builder = SparseLongArray.sequentialBuilder(length);
+        var builder = SparseLongArray.builder(length);
         return new InternalBitIdMappingBuilder(builder, length);
     }
 
-    private InternalBitIdMappingBuilder(SparseLongArray.SequentialBuilder builder, final long length) {
+    private InternalBitIdMappingBuilder(SparseLongArray.Builder builder, final long length) {
         this.builder = builder;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -78,10 +78,10 @@ public final class InternalBitIdMappingBuilder implements InternalIdMappingBuild
     }
 
     public static final class BulkAdder implements IdMappingAllocator {
-        private final SparseLongArray.SequentialBuilder builder;
+        private final SparseLongArray.Builder builder;
         private int allocationSize;
 
-        private BulkAdder(SparseLongArray.SequentialBuilder builder) {
+        private BulkAdder(SparseLongArray.Builder builder) {
             this.builder = builder;
         }
 

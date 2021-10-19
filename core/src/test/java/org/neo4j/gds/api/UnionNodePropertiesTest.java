@@ -120,7 +120,7 @@ class UnionNodePropertiesTest {
 
         doubleNodePropertiesBuilder.set(0, propertyValue);
 
-        var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(1);
+        var sparseLongArrayBuilder = SparseLongArray.builder(1);
         sparseLongArrayBuilder.set(0);
         var sparseLongArray = sparseLongArrayBuilder.build();
 

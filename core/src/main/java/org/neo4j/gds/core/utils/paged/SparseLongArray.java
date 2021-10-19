@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import com.carrotsearch.hppc.sorting.IndirectSort;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.ArrayLayout;
-import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -77,10 +73,6 @@ public final class SparseLongArray {
         return new Builder(capacity);
     }
 
-    public static SequentialBuilder sequentialBuilder(long capacity) {
-        return new SequentialBuilder(capacity);
-    }
-
     public static FromExistingBuilder fromExistingBuilder(long[] array) {
         return new FromExistingBuilder(array);
     }
@@ -101,7 +93,7 @@ public final class SparseLongArray {
         });
     }
 
-    SparseLongArray(
+    private SparseLongArray(
         long idCount,
         long highestNeoId,
         long[] array,
@@ -211,112 +203,13 @@ public final class SparseLongArray {
         return originalId & BLOCK_MASK;
     }
 
-    @TestOnly
-    MethodHandles.Lookup lookup() {
-        return MethodHandles.lookup();
-    }
-
     public static class Builder {
-
-        private final long capacity;
-        private final long[] array;
-        private final long[] blockOffsets;
-
-        Builder(long capacity) {
-            this.capacity = capacity;
-            var size = (int) BitUtil.ceilDiv(capacity, BLOCK_SIZE);
-            this.array = new long[size];
-            this.blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
-            // The blocks are initialized with Long.MAX_VALUE to identify
-            // which blocks have been written and move unwritten ones to
-            // the end during sorting.
-            Arrays.fill(blockOffsets, Long.MAX_VALUE);
-        }
-
-        @TestOnly
-        public void set(long allocationIndex, long... originalIds) {
-            set(allocationIndex, originalIds, 0, originalIds.length);
-        }
-
-        public void set(long allocationIndex, long[] originalIds, int offset, int length) {
-            var array = this;
-            var prevBlock = -1;
-            var prevCount = 0;
-
-            // TODO: Can we find something better than checking at every value?
-            for (int i = 0; i < length; i++) {
-                var originalId = originalIds[i + offset];
-                var block = (int) (originalId >>> 12); // BLOCK_SIZE * Long.SIZE
-                if (block != prevBlock) {
-                    if (prevBlock != -1) {
-                        assert array.blockOffsets[prevBlock] == Long.MAX_VALUE;
-                        array.blockOffsets[prevBlock] = prevCount + allocationIndex;
-                    }
-                    prevBlock = block;
-                    prevCount = i;
-                }
-                array.set(originalId);
-            }
-            assert array.blockOffsets[prevBlock] == Long.MAX_VALUE;
-            array.blockOffsets[prevBlock] = prevCount + allocationIndex;
-        }
-
-        public SparseLongArray build() {
-            return computeCounts();
-        }
-
-        private void set(long originalId) {
-            var page = pageId(originalId);
-            var indexInPage = indexInPage(originalId);
-            var mask = 1L << indexInPage;
-            array[page] |= mask;
-        }
-
-        private SparseLongArray computeCounts() {
-            long[] array = this.array;
-            int size = array.length;
-
-            var blockOffsets = this.blockOffsets;
-            var blockMapping = IndirectSort.mergesort(
-                0,
-                blockOffsets.length,
-                new AscendingLongComparator(blockOffsets)
-            );
-            var sortedBlockOffsets = new long[blockOffsets.length];
-            Arrays.setAll(sortedBlockOffsets, i -> blockOffsets[blockMapping[i]]);
-
-            int lastSortedBlockOffset = sortedBlockOffsets.length - 1;
-            long idCount = 0;
-            while (lastSortedBlockOffset > 0) {
-                var lastCount = sortedBlockOffsets[lastSortedBlockOffset];
-                if (lastCount != Long.MAX_VALUE) {
-                    idCount = lastCount;
-                    break;
-                }
-                --lastSortedBlockOffset;
-            }
-
-            var lastSortedBlock = blockMapping[lastSortedBlockOffset];
-            // Count the remaining ids in the last block.
-            var lastBlockBegin = lastSortedBlock << BLOCK_SHIFT;
-            var lastBlockEnd = Math.min(size, lastBlockBegin + BLOCK_SIZE);
-            for (int page = lastBlockBegin; page < lastBlockEnd; page++) {
-                idCount += Long.bitCount(array[page]);
-            }
-
-            var highestNeoId = capacity - 1;
-            var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
-            return new SparseLongArray(idCount, highestNeoId, array, blockOffsets, layouts.layout(), layouts.secondary());
-        }
-    }
-
-    public static class SequentialBuilder {
 
         private final long capacity;
         private final AutoCloseableThreadLocal<ThreadLocalBuilder> localBuilders;
         private final SparseLongArrayCombiner combiner;
 
-        SequentialBuilder(long capacity) {
+        Builder(long capacity) {
             this.capacity = capacity;
             this.combiner = new SparseLongArrayCombiner(capacity);
             this.localBuilders = new AutoCloseableThreadLocal<>(
@@ -422,7 +315,7 @@ public final class SparseLongArray {
         }
     }
 
-    public static class FromExistingBuilder extends SequentialBuilder {
+    public static class FromExistingBuilder extends Builder {
 
         private final long[] array;
 
