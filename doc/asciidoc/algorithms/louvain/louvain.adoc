@@ -320,10 +320,10 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
 .Results
-[opts="header", cols="1,1,1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 14                | 5321     | 563904   | "[5321 Bytes \... 550 KiB]"
+| 6         | 14                | 5321     | 563888   | "[5321 Bytes \... 550 KiB]"
 |===
 --
 
