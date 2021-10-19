@@ -68,6 +68,12 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     }
 
     @Value.Default
+    @Configuration.Ignore
+    default int minBatchSize() {
+        return 1_000;
+    }
+
+    @Value.Default
     @Configuration.IntegerRange(min = 0)
     default int randomJoins() {
         return 10;
