@@ -20,6 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.utils.CheckedRunnable;
 import org.neo4j.graphdb.Result;
@@ -91,6 +92,7 @@ class UsernameExtensionTest {
         assertThat(runCapturingStdOut(runnable)).contains(" Loaded compatibility layer:");
     }
 
+    @SuppressForbidden(reason = "System.out is used")
     private <E extends Exception> String runCapturingStdOut(CheckedRunnable<E> runnable) throws E {
         var stdout = new ByteArrayOutputStream(8192);
         var originalOut = System.out;
