@@ -21,7 +21,6 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -48,17 +47,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
     protected @Nullable Map<String, Object> communityHistogramOrNull() {
-        return maybeCommunityHistogram.map(histogram -> MapUtil.map(
-            "min", histogram.getMinValue(),
-            "mean", histogram.getMean(),
-            "max", histogram.getMaxValue(),
-            "p50", histogram.getValueAtPercentile(50),
-            "p75", histogram.getValueAtPercentile(75),
-            "p90", histogram.getValueAtPercentile(90),
-            "p95", histogram.getValueAtPercentile(95),
-            "p99", histogram.getValueAtPercentile(99),
-            "p999", histogram.getValueAtPercentile(99.9)
-        )).orElse(null);
+        return maybeCommunityHistogram.map(HistogramUtils::communitySummary).orElse(null);
     }
 
     private LongUnaryOperator communityFunction = null;

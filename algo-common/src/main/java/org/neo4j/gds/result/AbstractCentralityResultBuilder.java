@@ -21,7 +21,6 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.scaling.ScalarScaler;
@@ -100,17 +99,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     }
 
     private Map<String, Object> centralityHistogramResult(Optional<DoubleHistogram> maybeHistogram) {
-        return maybeHistogram.map(histogram -> MapUtil.map(
-            "min", histogram.getMinValue(),
-            "mean", histogram.getMean(),
-            "max", histogram.getMaxValue(),
-            "p50", histogram.getValueAtPercentile(50),
-            "p75", histogram.getValueAtPercentile(75),
-            "p90", histogram.getValueAtPercentile(90),
-            "p95", histogram.getValueAtPercentile(95),
-            "p99", histogram.getValueAtPercentile(99),
-            "p999", histogram.getValueAtPercentile(99.9)
-        )).orElse(histogramError);
+        return maybeHistogram.map(HistogramUtils::centralitySummary).orElse(histogramError);
     }
 
     private void logScalerHistogramError() {

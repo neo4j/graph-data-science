@@ -22,11 +22,11 @@ package org.neo4j.gds.similarity;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Collections;
@@ -94,23 +94,7 @@ public final class SimilarityProc {
 
         public Map<String, Object> distribution() {
             if (maybeHistogram.isPresent()) {
-                DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                return MapUtil.map(
-                    "min", definitelyHistogram.getMinValue(),
-                    "max", definitelyHistogram.getMaxValue(),
-                    "mean", definitelyHistogram.getMean(),
-                    "stdDev", definitelyHistogram.getStdDeviation(),
-                    "p1", definitelyHistogram.getValueAtPercentile(1),
-                    "p5", definitelyHistogram.getValueAtPercentile(5),
-                    "p10", definitelyHistogram.getValueAtPercentile(10),
-                    "p25", definitelyHistogram.getValueAtPercentile(25),
-                    "p50", definitelyHistogram.getValueAtPercentile(50),
-                    "p75", definitelyHistogram.getValueAtPercentile(75),
-                    "p90", definitelyHistogram.getValueAtPercentile(90),
-                    "p95", definitelyHistogram.getValueAtPercentile(95),
-                    "p99", definitelyHistogram.getValueAtPercentile(99),
-                    "p100", definitelyHistogram.getValueAtPercentile(100)
-                );
+                return HistogramUtils.similaritySummary(maybeHistogram.get());
             }
             return Collections.emptyMap();
         }
