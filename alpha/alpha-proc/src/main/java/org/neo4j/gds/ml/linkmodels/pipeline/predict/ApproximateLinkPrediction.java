@@ -33,7 +33,6 @@ import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
@@ -41,48 +40,10 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
-
-    public ApproximateLinkPrediction(
-        LinkLogisticRegressionData modelData,
-        PipelineExecutor pipelineExecutor,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes,
-        GraphStore graphStore,
-        int concurrency,
-        Optional<Long> randomSeed,
-        int topK,
-        double deltaThreshold,
-        int maxIterations,
-        int randomJoins,
-        double sampleRate,
-        ProgressTracker progressTracker
-    ) {
-        this(
-            modelData,
-            pipelineExecutor,
-            nodeLabels,
-            relationshipTypes,
-            graphStore,
-            ImmutableKnnBaseConfig
-                .builder()
-                // FIXME wait for API decision
-                .nodeWeightProperty("DUMMY")
-                .concurrency(concurrency)
-                .randomSeed(randomSeed)
-                .topK(topK)
-                .randomJoins(randomJoins)
-                .deltaThreshold(deltaThreshold)
-                .maxIterations(maxIterations)
-                .sampleRate(sampleRate)
-                .build(),
-            progressTracker
-        );
-    }
 
     public ApproximateLinkPrediction(
         LinkLogisticRegressionData modelData,
