@@ -229,7 +229,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         } catch (KernelException e) {
             // should not happen, we check for the index existence and applicability
             // before reading it
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
         }
 
         return Arrays
@@ -250,7 +250,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 } catch (KernelException e) {
                     // should not happen, we check for the index existence and applicability
                     // before reading it
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
                 }
 
                 return new PartitionedStoreScan(partitionedScan);
@@ -398,7 +398,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         } catch (KernelException e) {
             // should not happen, we check for the index existence and applicability
             // before reading it
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
         }
     }
 
