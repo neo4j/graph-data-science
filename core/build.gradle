@@ -23,6 +23,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
+    implementation project(':collections')
 
     api(
             project(':neo4j-kernel-adapter'),

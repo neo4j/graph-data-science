@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ComponentSizeConfig;
@@ -30,7 +29,8 @@ import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
