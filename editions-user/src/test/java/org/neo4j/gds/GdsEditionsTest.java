@@ -32,23 +32,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class GdsEditionsTest {
 
     @Test
-    void firstLoadedIsOpenGds() {
-        var newThingFactory = ServiceLoader.load(GdsEditionFactory.class)
+    void canLoadOpenGdsEditionFactory() {
+        var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(factory -> !factory.handlesLicensing())
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
-        var editionStuff = newThingFactory.create();
-        assertThat(editionStuff.label()).isEqualTo("OpenGDS");
-        assertThat(editionStuff.errorMessage()).isEmpty();
+        var edition = editionFactory.create();
+        assertThat(edition.label()).isEqualTo("OpenGDS");
+        assertThat(edition.errorMessage()).isEmpty();
     }
 
     @Test
     void withoutLicenseKeyCheckingCommercialEditionFailsLoudly() {
-        ServiceLoader.load(GdsEditionFactory.class).stream()
-            .map(factory -> factory.get().create())
-            .forEach(edition -> {
-                assertThatThrownBy(edition::label).hasMessageContaining("Ring the alarm!");
-                assertThatThrownBy(edition::errorMessage).hasMessageContaining("Ring the alarm!");
-            });
+        var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(GdsEditionFactory::handlesLicensing)
+            .findFirst()
+            .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
+        assertThatThrownBy(editionFactory::create).hasMessage("GdsEdition state is not initialized!");
     }
 
     @Test
@@ -61,12 +65,12 @@ class GdsEditionsTest {
             .build();
         dbms.shutdown();
 
-        ServiceLoader.load(GdsEditionFactory.class).stream()
-            .map(factory -> factory.get().create())
-            .forEach(edition -> {
-                assertThatNoException().isThrownBy(edition::label);
-                assertThatNoException().isThrownBy(edition::errorMessage);
-            });
+        var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(GdsEditionFactory::handlesLicensing)
+            .findFirst()
+            .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
+        assertThatNoException().isThrownBy(editionFactory::create);
     }
-
 }

@@ -26,4 +26,8 @@ public interface GdsEditionFactory {
 
     GdsEdition create();
 
+    default boolean handlesLicensing() {
+        return false;
+    }
+
 }
