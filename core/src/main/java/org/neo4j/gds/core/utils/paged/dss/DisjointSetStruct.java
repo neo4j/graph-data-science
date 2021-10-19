@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged.dss;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 
 /**
@@ -47,13 +48,13 @@ public interface DisjointSetStruct {
 
     /**
      * Check if p and q belong to the same set.
+     * use only in tests.
      *
-     * @deprecated use only in tests
      * @param p a set item
      * @param q a set item
      * @return true if both items belong to the same set, false otherwise
      */
-    @Deprecated
+    @TestOnly
     boolean sameSet(long p, long q);
 
     /**
