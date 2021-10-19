@@ -28,6 +28,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.util.List;
 
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.doesNotThrow;
 import static org.neo4j.gds.collections.hsa.ValidatorUtils.hasNoParameters;
@@ -89,8 +90,19 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateGetMethod(e, elementType);
             case "contains":
                 return validateContainsMethod(e);
-            case "growingBuilder":
-                return validateGrowingBuilderMethod(e, elementType);
+            case "builder":
+                switch (e.getParameters().size()) {
+                    case 2:
+                        return validateGrowingBuilderMethod(e, elementType);
+                    case 3:
+                        return validateGrowingBuilderWithInitialCapacityMethod(e, elementType);
+                    default:
+                        messager.printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "method has wrong number of parameters, expected one of " + List.of(2, 3),
+                            e
+                        );
+                }
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
@@ -128,5 +140,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && hasParameterCount(e, 2, messager)
                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
                && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
+    }
+
+    private boolean validateGrowingBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
+        return doesNotThrow(e, messager)
+               && isStatic(e, messager)
+               && hasParameterCount(e, 3, messager)
+               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager)
+               && hasTypeAtIndex(typeUtils, e, 2, longConsumerType, messager);
     }
 }

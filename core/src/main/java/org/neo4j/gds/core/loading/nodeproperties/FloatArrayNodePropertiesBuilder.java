@@ -42,7 +42,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         defaultValue.floatArrayValue();
 
         this.defaultValue = defaultValue;
-        this.builder = HugeSparseFloatArrayArray.growingBuilder(defaultValue.floatArrayValue(), allocationTracker::add);
+        this.builder = HugeSparseFloatArrayArray.builder(defaultValue.floatArrayValue(), allocationTracker::add);
     }
 
     public void set(long neoNodeId, float[] value) {
@@ -63,7 +63,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     public FloatArrayNodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.growingBuilder(
+        var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(
             defaultValue.floatArrayValue(),
             allocationTracker::add
         );

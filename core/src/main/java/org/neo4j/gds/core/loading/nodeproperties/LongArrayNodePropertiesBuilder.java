@@ -39,7 +39,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.defaultValue = defaultValue;
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
-        this.builder = HugeSparseLongArrayArray.growingBuilder(defaultValue.longArrayValue(), allocationTracker::add);
+        this.builder = HugeSparseLongArrayArray.builder(defaultValue.longArrayValue(), allocationTracker::add);
     }
 
     public void set(long neoNodeId, long[] value) {
@@ -64,7 +64,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     public LongArrayNodeProperties build(long size, NodeMapping nodeMapping) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.growingBuilder(
+        var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
             defaultValue.longArrayValue(),
             allocationTracker::add
         );

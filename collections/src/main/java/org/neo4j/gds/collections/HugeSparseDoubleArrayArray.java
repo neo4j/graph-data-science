@@ -30,8 +30,16 @@ public interface HugeSparseDoubleArrayArray {
 
     boolean contains(long index);
 
-    static Builder growingBuilder(double[] defaultValue, LongConsumer trackAllocation) {
-        return new HugeSparseDoubleArrayArraySon.GrowingBuilder(defaultValue, trackAllocation);
+    static Builder builder(double[] defaultValue, LongConsumer trackAllocation) {
+        return builder(defaultValue, 0, trackAllocation);
+    }
+
+    static Builder builder(
+        double[] defaultValue,
+        long initialCapacity,
+        LongConsumer trackAllocation
+    ) {
+        return new HugeSparseDoubleArrayArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {

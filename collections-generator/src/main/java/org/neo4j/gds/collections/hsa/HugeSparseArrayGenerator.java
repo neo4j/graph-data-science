@@ -25,6 +25,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -355,6 +356,7 @@ final class HugeSparseArrayGenerator {
             var defaultValue = defaultValueField(valueType);
             var pages = pagesField(valueType);
             var trackAllocation = trackAllocationField();
+            var initialCapacitySpec = initialCapacitySpec();
 
             builder.addField(arrayHandle);
             builder.addField(pageLock);
@@ -362,7 +364,7 @@ final class HugeSparseArrayGenerator {
             builder.addField(pages);
             builder.addField(trackAllocation);
 
-            builder.addMethod(constructor(valueType, pages, pageLock, defaultValue, trackAllocation));
+            builder.addMethod(constructor(valueType, pages, pageLock, defaultValue, trackAllocation, initialCapacitySpec));
 
             // public methods
             builder.addMethod(setMethod(valueType, pageIndex, indexInPage, arrayHandle));
@@ -421,17 +423,25 @@ final class HugeSparseArrayGenerator {
                 .build();
         }
 
+        private static ParameterSpec initialCapacitySpec() {
+            return ParameterSpec
+                .builder(long.class, "initialCapacity")
+                .build();
+        }
+
         private static MethodSpec constructor(
             TypeName valueType,
             FieldSpec pages,
             FieldSpec pageLock,
             FieldSpec defaultValue,
-            FieldSpec trackAllocation
+            FieldSpec trackAllocation,
+            ParameterSpec initialCapacity
         ) {
             return MethodSpec.constructorBuilder()
                 .addParameter(valueType, defaultValue.name)
+                .addParameter(long.class, "initialCapacity")
                 .addParameter(LongConsumer.class, "trackAllocation")
-                .addStatement("this.$N = new $T(0)", pages, pages.type)
+                .addStatement("this.$N = new $T(pageIndex($N))", pages, pages.type, initialCapacity)
                 .addStatement("this.$N = $N", defaultValue, defaultValue)
                 .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)
                 .addStatement("this.$N = trackAllocation", trackAllocation)
