@@ -35,7 +35,6 @@ public final class HugeSparseLongArrayUtil {
 
     /**
      * @param maxId highest id that we need to represent
-     *             (equals size in {@link org.neo4j.gds.collections.HugeSparseLongArray.Builder#builder(long, AllocationTracker)})
      * @param maxEntries number of identifiers we need to store
      */
     public static MemoryRange memoryEstimation(long maxId, long maxEntries) {
