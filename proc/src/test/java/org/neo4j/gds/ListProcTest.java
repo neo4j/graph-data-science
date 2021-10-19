@@ -49,6 +49,8 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.allShortestPaths.stream",
         "gds.alpha.bfs.stream",
 
+        "gds.alpha.collapsePath.mutate",
+
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
         "gds.alpha.closeness.harmonic.write",
@@ -59,8 +61,56 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.maxkcut.stream",
         "gds.alpha.maxkcut.stream.estimate",
         "gds.alpha.dfs.stream",
+
+        "gds.alpha.hits.mutate",
+        "gds.alpha.hits.mutate.estimate",
+        "gds.alpha.hits.stats",
+        "gds.alpha.hits.stats.estimate",
+        "gds.alpha.hits.stream",
+        "gds.alpha.hits.stream.estimate",
+        "gds.alpha.hits.write",
+        "gds.alpha.hits.write.estimate",
+
+        "gds.alpha.ml.linkPrediction.predict.mutate",
+        "gds.alpha.ml.linkPrediction.predict.mutate.estimate",
+        "gds.alpha.ml.linkPrediction.predict.stream",
+        "gds.alpha.ml.linkPrediction.predict.stream.estimate",
+        "gds.alpha.ml.linkPrediction.predict.write",
+        "gds.alpha.ml.linkPrediction.predict.write.estimate",
+        "gds.alpha.ml.linkPrediction.train",
+        "gds.alpha.ml.linkPrediction.train.estimate",
+
+        "gds.alpha.ml.nodeClassification.predict.mutate",
+        "gds.alpha.ml.nodeClassification.predict.mutate.estimate",
+        "gds.alpha.ml.nodeClassification.predict.stream",
+        "gds.alpha.ml.nodeClassification.predict.stream.estimate",
+        "gds.alpha.ml.nodeClassification.predict.write",
+        "gds.alpha.ml.nodeClassification.predict.write.estimate",
+
+        "gds.alpha.ml.pipeline.linkPrediction.addFeature",
+        "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty",
+        "gds.alpha.ml.pipeline.linkPrediction.configureParams",
+        "gds.alpha.ml.pipeline.linkPrediction.configureSplit",
+        "gds.alpha.ml.pipeline.linkPrediction.create",
+        "gds.alpha.ml.pipeline.linkPrediction.predict.mutate",
+        "gds.alpha.ml.pipeline.linkPrediction.train",
+
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
+
+        "gds.alpha.scaleProperties.mutate",
+        "gds.alpha.scaleProperties.stream",
+
+        "gds.alpha.sllpa.mutate",
+        "gds.alpha.sllpa.mutate.estimate",
+        "gds.alpha.sllpa.stats",
+        "gds.alpha.sllpa.stats.estimate",
+        "gds.alpha.sllpa.stream",
+        "gds.alpha.sllpa.stream.estimate",
+        "gds.alpha.sllpa.write",
+        "gds.alpha.sllpa.write.estimate",
+        "gds.alpha.systemMonitor",
+
         "gds.alpha.shortestPath.deltaStepping.write",
         "gds.alpha.shortestPath.deltaStepping.stream",
         "gds.alpha.randomWalk.stream",
@@ -90,15 +140,24 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.influenceMaximization.greedy.stream",
         "gds.alpha.influenceMaximization.celf.stream",
 
+        "gds.articleRank.mutate",
+        "gds.articleRank.mutate.estimate",
+        "gds.articleRank.stats",
+        "gds.articleRank.stats.estimate",
+        "gds.articleRank.stream",
+        "gds.articleRank.stream.estimate",
+        "gds.articleRank.write",
+        "gds.articleRank.write.estimate",
+
+        "gds.beta.graph.export.csv",
+        "gds.beta.graph.export.csv.estimate",
+
         "gds.beta.node2vec.mutate",
         "gds.beta.node2vec.mutate.estimate",
         "gds.beta.node2vec.stream",
         "gds.beta.node2vec.stream.estimate",
         "gds.beta.node2vec.write",
         "gds.beta.node2vec.write.estimate",
-
-        "gds.allShortestPaths.dijkstra.stream",
-        "gds.allShortestPaths.dijkstra.stream.estimate",
 
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",
@@ -143,11 +202,12 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
 
-        "gds.shortestPath.dijkstra.stream",
-        "gds.shortestPath.dijkstra.stream.estimate",
-
-        "gds.shortestPath.yens.stream",
-        "gds.shortestPath.yens.stream.estimate",
+        "gds.allShortestPaths.dijkstra.stream",
+        "gds.allShortestPaths.dijkstra.stream.estimate",
+        "gds.allShortestPaths.dijkstra.mutate",
+        "gds.allShortestPaths.dijkstra.mutate.estimate",
+        "gds.allShortestPaths.dijkstra.write",
+        "gds.allShortestPaths.dijkstra.write.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
@@ -157,6 +217,28 @@ class ListProcTest extends BaseProcTest {
         "gds.betweenness.stream.estimate",
         "gds.betweenness.write",
         "gds.betweenness.write.estimate",
+
+        "gds.debug.sysInfo",
+
+        "gds.degree.mutate",
+        "gds.degree.mutate.estimate",
+        "gds.degree.stats",
+        "gds.degree.stats.estimate",
+        "gds.degree.stream",
+        "gds.degree.stream.estimate",
+        "gds.degree.write",
+        "gds.degree.write.estimate",
+
+        "gds.eigenvector.mutate",
+        "gds.eigenvector.mutate.estimate",
+        "gds.eigenvector.stats",
+        "gds.eigenvector.stats.estimate",
+        "gds.eigenvector.stream",
+        "gds.eigenvector.stream.estimate",
+        "gds.eigenvector.write",
+        "gds.eigenvector.write.estimate",
+
+        "gds.graph.export",
 
         "gds.fastRP.mutate",
         "gds.fastRP.mutate.estimate",
@@ -180,6 +262,7 @@ class ListProcTest extends BaseProcTest {
         "gds.graph.streamRelationshipProperties",
         "gds.graph.streamRelationshipProperty",
         "gds.graph.writeNodeProperties",
+        "gds.graph.writeRelationship",
 
         "gds.labelPropagation.mutate",
         "gds.labelPropagation.mutate.estimate",
@@ -216,6 +299,29 @@ class ListProcTest extends BaseProcTest {
         "gds.pageRank.stream.estimate",
         "gds.pageRank.write",
         "gds.pageRank.write.estimate",
+
+        "gds.shortestPath.astar.mutate",
+        "gds.shortestPath.astar.mutate.estimate",
+        "gds.shortestPath.astar.stream",
+        "gds.shortestPath.astar.stream.estimate",
+        "gds.shortestPath.astar.write",
+        "gds.shortestPath.astar.write.estimate",
+
+        "gds.shortestPath.dijkstra.stream",
+        "gds.shortestPath.dijkstra.stream.estimate",
+        "gds.shortestPath.dijkstra.mutate",
+        "gds.shortestPath.dijkstra.mutate.estimate",
+        "gds.shortestPath.dijkstra.write",
+        "gds.shortestPath.dijkstra.write.estimate",
+
+        "gds.shortestPath.yens.stream",
+        "gds.shortestPath.yens.stream.estimate",
+        "gds.shortestPath.yens.mutate",
+        "gds.shortestPath.yens.mutate.estimate",
+        "gds.shortestPath.yens.write",
+        "gds.shortestPath.yens.write.estimate",
+
+        "gds.graph.removeNodeProperties",
 
         "gds.wcc.mutate",
         "gds.wcc.mutate.estimate",
@@ -296,7 +402,7 @@ class ListProcTest extends BaseProcTest {
     void setUp() throws Exception {
        registerProcedures(ProcAndFunctionScanner.procedures());
        registerFunctions(ProcAndFunctionScanner.functions());
-       registerAggregationFunctions(ProcAndFunctionScanner.aggregationFunctions());
+//       registerAggregationFunctions(ProcAndFunctionScanner.aggregationFunctions());
     }
 
     @Test
