@@ -23,15 +23,13 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
+public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, SingleThreadedRandomSeedConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2, max = Byte.MAX_VALUE)
@@ -49,17 +47,5 @@ public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightC
     @Configuration.IntegerRange(min = 0)
     default int vnsMaxNeighborhoodOrder() {
         return 0;
-    }
-
-    @Value.Check
-    default void validate() {
-        randomSeed().ifPresent(unused -> {
-            if (concurrency() > 1) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Configuration parameter 'randomSeed' may only be set if parameter 'concurrency' is equal to 1, but got %d.",
-                    concurrency()
-                ));
-            }
-        });
     }
 }

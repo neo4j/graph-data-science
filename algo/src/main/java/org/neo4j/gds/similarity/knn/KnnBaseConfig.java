@@ -25,14 +25,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig, RandomSeedConfig {
+public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig, SingleThreadedRandomSeedConfig {
 
     @Override
     @Configuration.ConvertWith("org.neo4j.gds.config.NodeWeightConfig#validatePropertyName")
@@ -87,17 +85,5 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     default int boundedK(long nodeCount) {
         // (int) is safe because value is at most `topK`, which is an int
         return Math.max(0, (int) Math.min(this.topK(), nodeCount - 1));
-    }
-
-    @Value.Check
-    default void validate() {
-        randomSeed().ifPresent(unused -> {
-            if (concurrency() > 1) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Configuration parameter 'randomSeed' may only be set if parameter 'concurrency' is equal to 1, but got %d.",
-                    concurrency()
-                ));
-            }
-        });
     }
 }

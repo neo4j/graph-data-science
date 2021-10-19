@@ -84,9 +84,6 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     static class Result implements LinkPredictionResult {
         private final Stream<SimilarityResult> predictions;
 
-        // reverse entries
-        // existing relationships
-
         Result(Stream<SimilarityResult> predictions) {this.predictions = predictions;}
 
         @Override
