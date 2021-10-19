@@ -180,7 +180,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.9818363089715674),
             PredictedLink.of(1, 0, 0.8765329524347759),
-            PredictedLink.of(2, 1, 0.0953494648991095),
+            PredictedLink.of(2, 0, 0.011096137997457569),
             PredictedLink.of(3, 0, 0.11920292202211766),
             PredictedLink.of(4, 0, 0.9818363089715674)
             );
@@ -202,7 +202,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                     List.of(RelationshipType.of("T")),
                     graphStore,
                     ImmutableKnnBaseConfig.builder()
-                        .randomSeed(42L)
+                        .randomSeed(1337L)
                         .concurrency(1)
                         .randomJoins(10)
                         .maxIterations(10)
