@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
 
     @Procedure(name = "gds.alpha.collapsePath.mutate", mode = READ)
-    @Description("")
+    @Description("Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

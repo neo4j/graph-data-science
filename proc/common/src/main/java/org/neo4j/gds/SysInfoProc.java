@@ -32,6 +32,7 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.io.os.OsBeanUtil;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
 
 import java.io.IOException;
@@ -55,6 +56,7 @@ public class SysInfoProc {
     public GraphDatabaseService db;
 
     @Procedure("gds.debug.sysInfo")
+    @Description("Returns details about the status of the system")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
         var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
