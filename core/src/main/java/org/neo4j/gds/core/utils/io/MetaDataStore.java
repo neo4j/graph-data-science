@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.utils.io.file.GraphInfo;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
 
@@ -45,8 +44,7 @@ public interface MetaDataStore {
             graphStore.databaseId(),
             graphStore.nodeCount(),
             graphStore.nodes().highestNeoId(),
-            relTypeCounts,
-            IdMapImplementations.useBitIdMap()
+            relTypeCounts
         );
         NodeSchema nodeSchema = graphStore.schema().nodeSchema();
         RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();

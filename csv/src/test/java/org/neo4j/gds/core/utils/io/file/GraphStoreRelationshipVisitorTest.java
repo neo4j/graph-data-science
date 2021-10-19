@@ -28,7 +28,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -134,8 +133,6 @@ class GraphStoreRelationshipVisitorTest {
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)
             .allocationTracker(AllocationTracker.empty())
-            .useBitIdMap(false)
-            .progressTracker(ProgressTracker.NULL_TRACKER)
             .build()
             .getUnion();
     }

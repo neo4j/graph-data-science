@@ -37,10 +37,6 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.beta.filter.GraphStoreFilter;
-import org.neo4j.gds.beta.filter.expression.SemanticErrors;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -57,7 +53,6 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.NumberType;
-import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,7 +115,6 @@ public final class CsvGraphStoreImporter {
         this.progressTracker = createProgressTracker(fileInput);
         progressTracker.beginSubTask();
         try {
-            graphStoreBuilder.progressTracker(progressTracker);
             graphStoreBuilder.allocationTracker(allocationTracker);
             importGraph(fileInput, allocationTracker);
             return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
@@ -132,7 +126,6 @@ public final class CsvGraphStoreImporter {
     private ProgressTracker createProgressTracker(FileInput fileInput) {
         var graphInfo = fileInput.graphInfo();
         var nodeCount = graphInfo.nodeCount();
-        var bitIdMap = graphInfo.bitIdMap();
 
         var importTasks = new ArrayList<Task>();
         importTasks.add(Tasks.leaf("Import nodes", nodeCount));
@@ -141,13 +134,6 @@ public final class CsvGraphStoreImporter {
             ? Task.UNKNOWN_VOLUME
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
         importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
-
-        var nodePropertyCount = fileInput.nodeSchema().properties().values().stream().mapToLong(map -> map.keySet().size()).sum();
-        var numRelationshipTypes = fileInput.relationshipSchema().availableTypes().size();
-
-        if (bitIdMap) {
-            importTasks.add(GraphStoreFilter.progressTask(nodeCount, nodePropertyCount, numRelationshipTypes));
-        }
 
         var task = Tasks.task(
             "Csv import",
@@ -170,7 +156,6 @@ public final class CsvGraphStoreImporter {
         NodeSchema nodeSchema = fileInput.nodeSchema();
 
         GraphInfo graphInfo = fileInput.graphInfo();
-        graphStoreBuilder.useBitIdMap(graphInfo.bitIdMap());
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
@@ -348,11 +333,9 @@ public final class CsvGraphStoreImporter {
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
-        boolean useBitIdMap,
-        ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
-        var graphStore = CSRGraphStore.of(
+        return CSRGraphStore.of(
             databaseId,
             nodes,
             nodePropertyStores,
@@ -361,33 +344,6 @@ public final class CsvGraphStoreImporter {
             concurrency,
             allocationTracker
         );
-        if (useBitIdMap) {
-            // When the originally persisted graph was using a BitIdMap
-            // we at first load an ordinary IdMap and transform it to a
-            // BitIdMap afterwards. As the Graph filtering code path does
-            // exactly that we call filtering with a true expression for
-            // nodes and relationships.
-            var config = ImmutableGraphCreateFromGraphConfig.builder()
-                .concurrency(concurrency)
-                .nodeFilter("*")
-                .relationshipFilter("*")
-                .graphName("new")
-                .fromGraphName("old")
-                .originalConfig(GraphCreateFromStoreConfig.emptyWithName("user", "old"))
-                .build();
-            try {
-                return GraphStoreFilter.filter(
-                    graphStore,
-                    config,
-                    Pools.DEFAULT,
-                    allocationTracker,
-                    progressTracker
-                );
-            } catch (ParseException | SemanticErrors e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return graphStore;
     }
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {

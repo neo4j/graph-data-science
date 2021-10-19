@@ -43,6 +43,33 @@ class GraphInfoLoaderTest {
         var databaseId = DatabaseIdFactory.from("my-database", uuid);
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo).isNotNull();
+        assertThat(graphInfo.namedDatabaseId()).isEqualTo(databaseId);
+        assertThat(graphInfo.namedDatabaseId().name()).isEqualTo("my-database");
+
+        assertThat(graphInfo.nodeCount()).isEqualTo(19L);
+        assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);
+
+        assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
+            Map.of(RelationshipType.of("REL"), 42L)
+        );
+    }
+
+    @Test
+    void shouldLoadDeprecatedGraphInfo(@TempDir Path exportDir) throws IOException {
+        var uuid = UUID.randomUUID();
+
+        var databaseId = DatabaseIdFactory.from("my-database", uuid);
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
             String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "bitIdMap"),
             String.join(", ", uuid.toString(), "my-database", "19", "1337", "REL;42", "true")
         );
@@ -61,8 +88,6 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
             Map.of(RelationshipType.of("REL"), 42L)
         );
-
-        assertThat(graphInfo.bitIdMap()).isTrue();
     }
 
     /**
@@ -74,8 +99,8 @@ class GraphInfoLoaderTest {
 
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "bitIdMap"),
-            String.join(", ", uuid.toString(), "my-database", "19", "1337", "true")
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -83,8 +108,6 @@ class GraphInfoLoaderTest {
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo.relationshipTypeCounts()).isEmpty();
-
-        assertThat(graphInfo.bitIdMap()).isTrue();
     }
 
 }
