@@ -29,22 +29,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class EditionsTest {
+class GdsEditionsTest {
 
     @Test
     void firstLoadedIsOpenGds() {
-        var newThingFactory = ServiceLoader.load(NewThingFactory.class)
+        var newThingFactory = ServiceLoader.load(GdsEditionFactory.class)
             .findFirst()
-            .orElseThrow(() -> new LinkageError("Could not load " + NewThingFactory.class + " implementation"));
-        var editionStuff = newThingFactory.createEditionStuff();
+            .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
+        var editionStuff = newThingFactory.create();
         assertThat(editionStuff.label()).isEqualTo("OpenGDS");
         assertThat(editionStuff.errorMessage()).isEmpty();
     }
 
     @Test
-    void withoutLicenseKeyCheckingCommercialStuffFailsLoudly() {
-        ServiceLoader.load(NewThingFactory.class).stream()
-            .map(factory -> factory.get().createEditionStuff())
+    void withoutLicenseKeyCheckingCommercialEditionFailsLoudly() {
+        ServiceLoader.load(GdsEditionFactory.class).stream()
+            .map(factory -> factory.get().create())
             .forEach(edition -> {
                 assertThatThrownBy(edition::label).hasMessageContaining("Ring the alarm!");
                 assertThatThrownBy(edition::errorMessage).hasMessageContaining("Ring the alarm!");
@@ -52,7 +52,7 @@ class EditionsTest {
     }
 
     @Test
-    void withLicenseKeyCheckingCommercialStuffDoesntFail() {
+    void withLicenseKeyCheckingCommercialEditionDoesntFail() {
         var dbms = new TestDatabaseManagementServiceBuilder()
             .impermanent()
             .noOpSystemGraphInitializer()
@@ -61,8 +61,8 @@ class EditionsTest {
             .build();
         dbms.shutdown();
 
-        ServiceLoader.load(NewThingFactory.class).stream()
-            .map(factory -> factory.get().createEditionStuff())
+        ServiceLoader.load(GdsEditionFactory.class).stream()
+            .map(factory -> factory.get().create())
             .forEach(edition -> {
                 assertThatNoException().isThrownBy(edition::label);
                 assertThatNoException().isThrownBy(edition::errorMessage);

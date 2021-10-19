@@ -19,9 +19,28 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.annotations.service.ServiceProvider;
+
 import java.util.Optional;
 
-public interface EditionStuff {
-    String label();
-    Optional<String> errorMessage();
+@ServiceProvider
+public class OpenGdsEditionFactory implements GdsEditionFactory {
+
+    @Override
+    public GdsEdition create() {
+        return new OpenGdsEdition();
+    }
+
+    static class OpenGdsEdition implements GdsEdition {
+
+        @Override
+        public String label() {
+            return "OpenGDS";
+        }
+
+        @Override
+        public Optional<String> errorMessage() {
+            return Optional.empty();
+        }
+    }
 }

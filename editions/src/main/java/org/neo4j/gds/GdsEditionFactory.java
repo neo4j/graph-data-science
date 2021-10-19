@@ -22,8 +22,8 @@ package org.neo4j.gds;
 import org.neo4j.annotations.service.Service;
 
 @Service
-public interface NewThingFactory {
+public interface GdsEditionFactory {
 
-    EditionStuff createEditionStuff();
+    GdsEdition create();
 
 }
