@@ -52,6 +52,14 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
         queue.offer(node1, node2, probability);
     }
 
+    public int size() {
+        return queue.size();
+    }
+
+    public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
+        queue.foreach(consumer);
+    }
+
     @Override
     public Stream<PredictedLink> stream() {
         Iterable<PredictedLink> iterable = () -> new Iterator<>() {
