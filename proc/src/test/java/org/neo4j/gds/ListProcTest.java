@@ -382,6 +382,8 @@ class ListProcTest extends BaseProcTest {
 
     );
 
+    private static final List<String> AGGREGATION_FUNCTIONS = List.of("gds.alpha.similarity.asVector");
+
     private static final List<String> PAGE_RANK = asList(
         "gds.pageRank.mutate",
         "gds.pageRank.mutate.estimate",
@@ -394,7 +396,8 @@ class ListProcTest extends BaseProcTest {
     );
 
     private static final List<String> ALL = Stream
-        .concat(PROCEDURES.stream(), FUNCTIONS.stream())
+        .of(PROCEDURES.stream(), FUNCTIONS.stream(), AGGREGATION_FUNCTIONS.stream())
+        .flatMap(Function.identity())
         .sorted()
         .collect(Collectors.toList());
 
@@ -402,7 +405,7 @@ class ListProcTest extends BaseProcTest {
     void setUp() throws Exception {
        registerProcedures(ProcAndFunctionScanner.procedures());
        registerFunctions(ProcAndFunctionScanner.functions());
-//       registerAggregationFunctions(ProcAndFunctionScanner.aggregationFunctions());
+       registerAggregationFunctions(ProcAndFunctionScanner.aggregationFunctions());
     }
 
     @Test

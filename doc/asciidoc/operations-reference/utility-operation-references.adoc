@@ -18,6 +18,7 @@
 | `_gds.util.isFinite_`
 | `_gds.util.isInfinite_`
 | <<utility-functions-catalog, Accessing a node property in a named graph>> | `_gds.util.nodeProperty_`
+| <<algorithms-similarity-pearson-function-sample, Builds a vector of maps containing items and weights>> | `gds.alpha.similarity.asVector`
 | <<alpha-algorithms-one-hot-encoding>> | `_gds.alpha.ml.oneHotEncoding_`
 | Status of the system                                                      | `gds.debug.sysInfo`
 | <<create-cypher-db, Create an impermanent database backed by a named in-memory graph>> | `gds.alpha.create.cypherdb`
