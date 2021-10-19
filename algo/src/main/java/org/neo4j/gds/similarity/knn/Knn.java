@@ -545,7 +545,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     private static final class EmptyResult extends Result {
 
         @Override
-        public HugeObjectArray<NeighborList> neighborList() {
+        HugeObjectArray<NeighborList> neighborList() {
             return HugeObjectArray.of();
         }
 
