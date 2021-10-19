@@ -110,7 +110,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.progressTracker.beginSubTask();
             for (; iteration < maxIterations; iteration++) {
                 int currentIteration = iteration;
-                try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration, took))) {
+                try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration + 1, took))) {
                     updateCount = this.iteration(neighbors);
                 }
                 if (updateCount <= updateThreshold) {

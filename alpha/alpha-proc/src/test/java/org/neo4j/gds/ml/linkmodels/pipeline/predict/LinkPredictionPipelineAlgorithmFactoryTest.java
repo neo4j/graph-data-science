@@ -59,6 +59,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 
 class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
@@ -139,6 +140,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors 6%",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors 100%",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Initialize random neighbors :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: KNN-G Graph init took `some time`",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Start",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 :: Start",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Split old and new neighbors 1 of 1 6%",
@@ -168,8 +170,10 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 6%",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 100%",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Join neighbors 1 of 1 :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: KNN-G Graph iteration 1 took `some time`",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Iteration :: Finished",
                     "Link Prediction Pipeline :: approximate link prediction :: Knn :: Finished",
+                    "Link Prediction Pipeline :: approximate link prediction :: KNN-G Graph execution took `some time`",
                     "Link Prediction Pipeline :: approximate link prediction :: Finished"
                 )
             )
@@ -282,13 +286,9 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
             expectedMessages.addAll(expectedPredictLogEntries);
             expectedMessages.add("Link Prediction Pipeline :: Finished");
 
-
             assertThat(log.getMessages(INFO))
                 .extracting(removingThreadId())
-                .filteredOn(msg -> {
-                    final var matchEntriesContainingTiming = ".*\\d+\\s*ms";
-                    return !msg.matches(matchEntriesContainingTiming);
-                })
+                .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
         });
     }

@@ -31,4 +31,9 @@ public final class Extractors {
         return message -> message
             .substring(message.indexOf("] ") + 2);
     }
+
+    @NotNull
+    public static ThrowingExtractor<String, String, RuntimeException> replaceTimings() {
+        return message -> message.replaceAll("(\\d+\\s*)(ms|s|min)", "`some time`");
+    }
 }
