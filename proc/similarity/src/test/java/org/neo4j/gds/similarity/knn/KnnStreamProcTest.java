@@ -21,15 +21,14 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
@@ -52,23 +51,15 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     @Test
     void shouldStreamResults() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
-            .algo("gds.beta.knn")
-            .streamMode()
-            .addParameter("sudo", true)
-            .addParameter("nodeWeightProperty", "knn")
-            .addParameter("topK", 1)
-            .yields();
+        String query = "CALL gds.beta.knn.stream($graph, {nodeWeightProperty: 'knn', topK: 1})" +
+                       " YIELD node1, node2, similarity" +
+                       " RETURN node1, node2, similarity" +
+                       " ORDER BY node1";
 
-        Collection<SimilarityResult> result = new HashSet<>();
-        runQueryWithRowConsumer(query, row -> {
-            long node1 = row.getNumber("node1").longValue();
-            long node2 = row.getNumber("node2").longValue();
-            double similarity = row.getNumber("similarity").doubleValue();
-            result.add(new SimilarityResult(node1, node2, similarity));
-        });
-
-        assertEquals(EXPECTED, result);
+        assertCypherResult(query, Map.of("graph", GRAPH_NAME), List.of(
+            Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
+            Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
+            Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)
+        ));
     }
 }
