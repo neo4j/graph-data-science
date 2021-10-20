@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.paged.PageUtil;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;

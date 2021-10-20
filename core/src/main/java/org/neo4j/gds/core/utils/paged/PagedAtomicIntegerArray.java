@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;

@@ -20,7 +20,6 @@
 package org.neo4j.gds.collections;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.PageUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 public final class HugeSparseArrays {

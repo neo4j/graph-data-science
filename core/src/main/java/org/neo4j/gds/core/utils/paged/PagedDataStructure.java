@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.PageUtil;
+
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;

@@ -35,4 +35,9 @@ dependencies {
         [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
         [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
     )
+
+    testImplementation platform(dep.junit5bom)
+    testImplementation dep.junit5jupiter
+    testImplementation dep.junit5migration
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
 }

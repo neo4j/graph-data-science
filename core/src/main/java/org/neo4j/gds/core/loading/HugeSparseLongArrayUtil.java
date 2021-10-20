@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.collections.HugeSparseLongArray;
+import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.PageUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 public final class HugeSparseLongArrayUtil {

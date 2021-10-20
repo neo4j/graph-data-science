@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.PageUtil;
+import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
