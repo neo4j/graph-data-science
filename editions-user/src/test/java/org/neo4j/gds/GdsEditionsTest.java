@@ -23,6 +23,7 @@ import com.neo4j.gds.licensing.LicensingExtension;
 import org.junit.jupiter.api.Test;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
+import java.util.Comparator;
 import java.util.ServiceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ class GdsEditionsTest {
         var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
             .stream()
             .map(ServiceLoader.Provider::get)
-            .filter(factory -> !factory.handlesLicensing())
+            .filter(factory -> factory.priority() == 1)
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
         var edition = editionFactory.create();
@@ -45,12 +46,30 @@ class GdsEditionsTest {
     }
 
     @Test
+    void shouldSelectProviderBasedOnSorting() {
+        var openGdsEditionFactory = ServiceLoader.load(GdsEditionFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .max(Comparator.comparing(GdsEditionFactory::priority))
+            .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
+        var openGdsEdition = openGdsEditionFactory.create();
+        assertThat(openGdsEdition.label()).isEqualTo("OpenGDS");
+        assertThat(openGdsEdition.errorMessage()).isEmpty();
+
+        var neo4jGdsEditionFactory = ServiceLoader.load(GdsEditionFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .min(Comparator.comparing(GdsEditionFactory::priority))
+            .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
+        assertThatThrownBy(neo4jGdsEditionFactory::create).hasMessage("GdsEdition state is not initialized!");
+    }
+
+    @Test
     void withoutLicenseKeyCheckingCommercialEditionFailsLoudly() {
         var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
             .stream()
             .map(ServiceLoader.Provider::get)
-            .filter(GdsEditionFactory::handlesLicensing)
-            .findFirst()
+            .min(Comparator.comparing(GdsEditionFactory::priority))
             .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
         assertThatThrownBy(editionFactory::create).hasMessage("GdsEdition state is not initialized!");
     }
@@ -68,8 +87,7 @@ class GdsEditionsTest {
         var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
             .stream()
             .map(ServiceLoader.Provider::get)
-            .filter(GdsEditionFactory::handlesLicensing)
-            .findFirst()
+            .min(Comparator.comparing(GdsEditionFactory::priority))
             .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
         assertThatNoException().isThrownBy(editionFactory::create);
     }
