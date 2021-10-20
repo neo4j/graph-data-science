@@ -3,7 +3,6 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Collections Memory Estimation'
 
 dependencies {
-    implementation project(':core')
     implementation project(':memory-usage')
     implementation project(':collections')
 

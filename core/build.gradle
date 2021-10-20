@@ -24,6 +24,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':string-formatting')
     implementation project(':collections')
+    implementation project(':collections-memory-estimation')
 
     api(
             project(':neo4j-kernel-adapter'),

@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.collections.HugeSparseArrays;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -48,7 +49,7 @@ public class IdMap implements NodeMapping {
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
-            (dimensions, concurrency) -> HugeSparseLongArrayUtil.memoryEstimation(
+            (dimensions, concurrency) -> HugeSparseArrays.estimateLong(
                 dimensions.highestPossibleNodeCount(),
                 dimensions.nodeCount()
             )

@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.core.loading.HugeSparseLongArrayUtil;
+import org.neo4j.gds.collections.HugeSparseArrays;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -46,7 +46,7 @@ public final class NodePropertiesFromStoreBuilder {
         .builder(NodePropertiesFromStoreBuilder.class)
         .rangePerGraphDimension(
             "property values",
-            (dimensions, concurrency) -> HugeSparseLongArrayUtil.memoryEstimation(
+            (dimensions, concurrency) -> HugeSparseArrays.estimateLong(
                 dimensions.nodeCount(),
                 dimensions.nodeCount()
             )
