@@ -46,6 +46,8 @@ import static java.util.Map.entry;
 
 final class HugeSparseArrayGenerator {
 
+    private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
+
     private HugeSparseArrayGenerator() {}
 
     static TypeSpec generate(HugeSparseArrayValidation.Spec spec) {
@@ -80,19 +82,13 @@ final class HugeSparseArrayGenerator {
         builder.addField(pages);
         builder.addField(defaultValue);
 
-        // static methods
-        var pageIndex = pageIndexMethod(pageShift);
-        var indexInPage = indexInPageMethod(pageMask);
-        builder.addMethod(pageIndex);
-        builder.addMethod(indexInPage);
-
         // constructor
         builder.addMethod(constructor(valueType));
 
         // instance methods
         builder.addMethod(capacityMethod(capacity));
-        builder.addMethod(getMethod(valueType, pages, pageIndex, indexInPage, defaultValue));
-        builder.addMethod(containsMethod(valueType, pages, pageIndex, indexInPage, defaultValue));
+        builder.addMethod(getMethod(valueType, pages, pageShift, pageMask, defaultValue));
+        builder.addMethod(containsMethod(valueType, pages, pageShift, pageMask, defaultValue));
 
         // GrowingBuilder
         builder.addType(GrowingBuilderGenerator.growingBuilder(
@@ -102,8 +98,7 @@ final class HugeSparseArrayGenerator {
             valueType,
             pageSize,
             pageShift,
-            pageIndex,
-            indexInPage,
+            pageMask,
             pageSizeInBytes
         ));
 
@@ -178,24 +173,6 @@ final class HugeSparseArrayGenerator {
             .build();
     }
 
-    private static MethodSpec pageIndexMethod(FieldSpec pageShift) {
-        return MethodSpec.methodBuilder("pageIndex")
-            .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .addParameter(TypeName.LONG, "index")
-            .returns(TypeName.INT)
-            .addStatement("return (int) (index >>> $N)", pageShift)
-            .build();
-    }
-
-    private static MethodSpec indexInPageMethod(FieldSpec pageMask) {
-        return MethodSpec.methodBuilder("indexInPage")
-            .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .addParameter(TypeName.LONG, "index")
-            .returns(TypeName.INT)
-            .addStatement("return (int) (index & $N)", pageMask)
-            .build();
-    }
-
     private static MethodSpec capacityMethod(FieldSpec capacityField) {
         return MethodSpec.methodBuilder("capacity")
             .addAnnotation(Override.class)
@@ -208,8 +185,8 @@ final class HugeSparseArrayGenerator {
     private static MethodSpec getMethod(
         TypeName valueType,
         FieldSpec pages,
-        MethodSpec pageIndex,
-        MethodSpec indexInPage,
+        FieldSpec pageShift,
+        FieldSpec pageMask,
         FieldSpec defaultValue
     ) {
         var returnStatementBuilder = CodeBlock.builder();
@@ -230,8 +207,8 @@ final class HugeSparseArrayGenerator {
             .addParameter(TypeName.LONG, "index")
             .returns(valueType)
             .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $N(index)", pageIndex)
-                .addStatement("int indexInPage = $N(index)", indexInPage)
+                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+                .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                 .beginControlFlow("if (pageIndex < $N.length)", pages)
                 .addStatement("$T[] page = $N[pageIndex]", valueType, pages)
                 .beginControlFlow("if (page != null)")
@@ -311,8 +288,8 @@ final class HugeSparseArrayGenerator {
     private static MethodSpec containsMethod(
         TypeName valueType,
         FieldSpec pages,
-        MethodSpec pageIndex,
-        MethodSpec indexInPage,
+        FieldSpec pageShift,
+        FieldSpec pageMask,
         FieldSpec defaultValue
     ) {
         return MethodSpec.methodBuilder("contains")
@@ -321,11 +298,11 @@ final class HugeSparseArrayGenerator {
             .addParameter(TypeName.LONG, "index")
             .returns(TypeName.BOOLEAN)
             .addCode(CodeBlock.builder()
-                .addStatement("int pageIndex = $N(index)", pageIndex)
+                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
                 .beginControlFlow("if (pageIndex < $N.length)", pages)
                 .addStatement("$T[] page = $N[pageIndex]", valueType, pages)
                 .beginControlFlow("if (page != null)")
-                .addStatement("int indexInPage = $N(index)", indexInPage)
+                .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                 .addStatement("return " + isNotEqual(valueType, "$1L", "$2N", "page[indexInPage]", defaultValue))
                 .endControlFlow()
                 .endControlFlow()
@@ -343,8 +320,7 @@ final class HugeSparseArrayGenerator {
             TypeName valueType,
             FieldSpec pageSize,
             FieldSpec pageShift,
-            MethodSpec pageIndex,
-            MethodSpec indexInPage,
+            FieldSpec pageMask,
             FieldSpec pageSizeInBytes
         ) {
             var builder = TypeSpec.classBuilder("GrowingBuilder")
@@ -364,15 +340,23 @@ final class HugeSparseArrayGenerator {
             builder.addField(pages);
             builder.addField(trackAllocation);
 
-            builder.addMethod(constructor(valueType, pages, pageLock, defaultValue, trackAllocation, initialCapacitySpec));
+            builder.addMethod(constructor(
+                valueType,
+                pages,
+                pageShift,
+                pageLock,
+                defaultValue,
+                trackAllocation,
+                initialCapacitySpec
+            ));
 
             // public methods
-            builder.addMethod(setMethod(valueType, pageIndex, indexInPage, arrayHandle));
+            builder.addMethod(setMethod(valueType, pageShift, pageMask, arrayHandle));
             builder.addMethod(buildMethod(valueType, elementType, pages, pageShift, defaultValue, className));
 
             if (valueType.isPrimitive()) {
-                builder.addMethod(setIfAbsentMethod(valueType, pageIndex, indexInPage, arrayHandle, defaultValue));
-                builder.addMethod(addToMethod(valueType, pageIndex, indexInPage, arrayHandle));
+                builder.addMethod(setIfAbsentMethod(valueType, pageShift, pageMask, arrayHandle, defaultValue));
+                builder.addMethod(addToMethod(valueType, pageShift, pageMask, arrayHandle));
             }
 
             // helper methods
@@ -432,6 +416,7 @@ final class HugeSparseArrayGenerator {
         private static MethodSpec constructor(
             TypeName valueType,
             FieldSpec pages,
+            FieldSpec pageShift,
             FieldSpec pageLock,
             FieldSpec defaultValue,
             FieldSpec trackAllocation,
@@ -441,7 +426,8 @@ final class HugeSparseArrayGenerator {
                 .addParameter(valueType, defaultValue.name)
                 .addParameter(long.class, "initialCapacity")
                 .addParameter(LongConsumer.class, "trackAllocation")
-                .addStatement("this.$N = new $T(pageIndex($N))", pages, pages.type, initialCapacity)
+                .addStatement("int pageCount = $T.pageIndex($N, $N)", PAGE_UTIL, initialCapacity, pageShift)
+                .addStatement("this.$N = new $T(pageCount)", pages, pages.type)
                 .addStatement("this.$N = $N", defaultValue, defaultValue)
                 .addStatement("this.$N = new $T(true)", pageLock, pageLock.type)
                 .addStatement("this.$N = trackAllocation", trackAllocation)
@@ -450,8 +436,8 @@ final class HugeSparseArrayGenerator {
 
         private static MethodSpec setMethod(
             TypeName valueType,
-            MethodSpec pageIndex,
-            MethodSpec indexInPage,
+            FieldSpec pageShift,
+            FieldSpec pageMask,
             FieldSpec arrayHandle
         ) {
             return MethodSpec.methodBuilder("set")
@@ -461,8 +447,8 @@ final class HugeSparseArrayGenerator {
                 .addParameter(TypeName.LONG, "index")
                 .addParameter(valueType, "value")
                 .addCode(CodeBlock.builder()
-                    .addStatement("int pageIndex = $N(index)", pageIndex)
-                    .addStatement("int indexInPage = $N(index)", indexInPage)
+                    .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+                    .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                     .addStatement("$N.setVolatile(getPage(pageIndex), indexInPage, value)", arrayHandle)
                     .build()
                 )
@@ -471,8 +457,8 @@ final class HugeSparseArrayGenerator {
 
         private static MethodSpec setIfAbsentMethod(
             TypeName valueType,
-            MethodSpec pageIndex,
-            MethodSpec indexInPage,
+            FieldSpec pageShift,
+            FieldSpec pageMask,
             FieldSpec arrayHandle,
             FieldSpec defaultValue
         ) {
@@ -482,8 +468,8 @@ final class HugeSparseArrayGenerator {
                 .returns(TypeName.BOOLEAN)
                 .addParameter(TypeName.LONG, "index")
                 .addParameter(valueType, "value")
-                .addStatement("int pageIndex = $N(index)", pageIndex)
-                .addStatement("int indexInPage = $N(index)", indexInPage)
+                .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+                .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                 .addStatement(
                     "$T storedValue = ($T) $N.compareAndExchange(getPage(pageIndex), indexInPage, $N, value)",
                     valueType,
@@ -497,8 +483,8 @@ final class HugeSparseArrayGenerator {
 
         private static MethodSpec addToMethod(
             TypeName valueType,
-            MethodSpec pageIndex,
-            MethodSpec indexInPage,
+            FieldSpec pageShift,
+            FieldSpec pageMask,
             FieldSpec arrayHandle
         ) {
             return MethodSpec.methodBuilder("addTo")
@@ -508,8 +494,8 @@ final class HugeSparseArrayGenerator {
                 .addParameter(TypeName.LONG, "index")
                 .addParameter(valueType, "value")
                 .addCode(CodeBlock.builder()
-                    .addStatement("int pageIndex = $N(index)", pageIndex)
-                    .addStatement("int indexInPage = $N(index)", indexInPage)
+                    .addStatement("int pageIndex = $T.pageIndex(index, $N)", PAGE_UTIL, pageShift)
+                    .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
                     .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
                     .addStatement(
                         "$T expectedCurrentValue = ($T) $N.getVolatile(page, indexInPage)",
