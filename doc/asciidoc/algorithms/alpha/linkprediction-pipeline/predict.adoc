@@ -57,7 +57,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | mutateProperty                                                | String            | 'probability'     | yes      | The relationship property in the GDS graph to which the result is written.
 |===
 
-include::specific-configuration.adoc[]
+include::specific-predict-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -99,7 +99,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | <<common-configuration-concurrency,concurrency>>              | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
 |===
 
-include::specific-configuration.adoc[]
+include::specific-predict-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
