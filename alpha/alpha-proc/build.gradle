@@ -21,6 +21,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':core')
+    implementation project(':memory-usage')
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-centrality')

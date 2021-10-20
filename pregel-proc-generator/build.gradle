@@ -13,6 +13,7 @@ dependencies {
     implementation  project(':annotations')
     implementation  project(':algo-common')
     implementation  project(':core')
+    implementation project(':memory-usage')
     implementation  project(':proc-common')
     implementation  project(':pregel')
     implementation  project(':proc-pregel')

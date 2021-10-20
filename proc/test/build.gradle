@@ -11,6 +11,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':core')
+    implementation project(':memory-usage')
     implementation project(':pregel')
     implementation project(':string-formatting')
 

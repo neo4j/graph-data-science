@@ -27,6 +27,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
 
+    testImplementation project(':memory-usage')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
 }
