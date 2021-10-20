@@ -21,10 +21,10 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

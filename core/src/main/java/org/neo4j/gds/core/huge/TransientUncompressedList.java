@@ -32,12 +32,12 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.core.utils.ArrayUtil;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;

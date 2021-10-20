@@ -21,8 +21,8 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.Containers;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;

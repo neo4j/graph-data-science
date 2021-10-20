@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils;
 
+import org.neo4j.gds.mem.BitUtil;
+
 import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

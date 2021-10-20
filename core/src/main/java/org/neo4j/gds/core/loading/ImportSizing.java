@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.utils.BitUtil;
+import org.neo4j.gds.mem.BitUtil;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

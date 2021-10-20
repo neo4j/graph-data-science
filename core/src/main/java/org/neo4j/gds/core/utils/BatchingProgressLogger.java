@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;

@@ -39,7 +39,7 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
 public final class TransientCompressedList implements AdjacencyList {
 

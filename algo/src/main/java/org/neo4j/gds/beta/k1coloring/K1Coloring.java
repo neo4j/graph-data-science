@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
 /**
  * <p>

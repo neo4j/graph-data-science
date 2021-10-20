@@ -22,10 +22,10 @@ package org.neo4j.gds.core.utils.partition;
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.mem.BitUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;

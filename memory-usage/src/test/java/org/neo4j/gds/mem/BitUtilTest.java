@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds.mem;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.core.utils.BitUtil.align;
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.gds.core.utils.BitUtil.isPowerOfTwo;
-import static org.neo4j.gds.core.utils.BitUtil.nearbyPowerOfTwo;
-import static org.neo4j.gds.core.utils.BitUtil.nextHighestPowerOfTwo;
-import static org.neo4j.gds.core.utils.BitUtil.previousPowerOfTwo;
+import static org.neo4j.gds.mem.BitUtil.align;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
+import static org.neo4j.gds.mem.BitUtil.isPowerOfTwo;
+import static org.neo4j.gds.mem.BitUtil.nearbyPowerOfTwo;
+import static org.neo4j.gds.mem.BitUtil.nextHighestPowerOfTwo;
+import static org.neo4j.gds.mem.BitUtil.previousPowerOfTwo;
 
 final class BitUtilTest {
 

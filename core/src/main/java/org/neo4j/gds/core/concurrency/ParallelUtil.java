@@ -24,10 +24,10 @@ import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.HugeParallelGraphImporter;
 import org.neo4j.gds.core.utils.BiLongConsumer;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.LazyMappingCollection;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;

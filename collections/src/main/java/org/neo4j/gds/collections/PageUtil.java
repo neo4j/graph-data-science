@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.collections;
 
-import org.neo4j.gds.core.utils.BitUtil;
+import org.neo4j.gds.mem.BitUtil;
 
 public final class PageUtil {
 

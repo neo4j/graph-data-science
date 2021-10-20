@@ -22,8 +22,8 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.mem.BitUtil;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;

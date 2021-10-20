@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 
 public class PositiveSampleProducer {
 
