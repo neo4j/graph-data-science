@@ -569,19 +569,16 @@ CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-numberOfPosts-model',
   topN: 5,
   threshold: 0.45
-}) YIELD node1, node2, probability
-MATCH (n), (m)
-WHERE id(n) = node1 AND id(m) = node2
-RETURN
-  n.name AS name1,
-  m.name AS name2,
-  probability
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
+ ORDER BY probability DESC, person1
 ----
 
 .Results
 [opts="header"]
 |===
-| name1   | name2     | probability
+| person1 | person2   | probability
 | "Karin" | "Greg"    | 0.4991363247445545
 | "Karin" | "Mark"    | 0.49896977670628373
 | "Mark"  | "Greg"    | 0.49869219716877955

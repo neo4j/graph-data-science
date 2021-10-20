@@ -34,6 +34,11 @@ import java.util.List;
 class LinkPredictionDocTest extends DocTestBase {
 
     @Override
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
     protected List<Class<?>> procedures() {
         return List.of(
             LinkPredictionTrainProc.class,
