@@ -271,17 +271,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
-        double[] weights1 = weights();
-        double bias1 = bias();
+        var data1 = modelData();
 
         runQuery("CALL gds.beta.model.drop('trainedModel')");
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
-        double[] weights2 = weights();
-        double bias2 = bias();
 
-        assertThat(weights1).containsExactly(weights2);
-        assertThat(bias1).isEqualTo(bias2);
+        assertThat(data1).usingRecursiveComparison().isEqualTo(modelData());
     }
 
     @Test
@@ -299,27 +295,18 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
-        var weights1 = weights();
+        var data1 = modelData();
 
         runQuery("CALL gds.beta.model.drop('trainedModel')");
 
         runQuery(trainQuery, Map.of("graphName", "weighted_graph", "relFilter", List.of("*")));
 
-        var weights2 = weights();
-        assertThat(weights1).doesNotContain(weights2);
+        assertThat(data1).usingRecursiveComparison().isNotEqualTo(modelData());
     }
 
-    private double[] weights() {
+    private LinkLogisticRegressionData modelData() {
         Stream<Model<?, ?, ?>> allModels = ModelCatalog.getAllModels();
         Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
-        LinkLogisticRegressionData data = (LinkLogisticRegressionData) model.data();
-        return data.weights().data().data();
-    }
-
-    private double bias() {
-        Stream<Model<?, ?, ?>> allModels = ModelCatalog.getAllModels();
-        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
-        LinkLogisticRegressionData data = (LinkLogisticRegressionData) model.data();
-        return data.bias().get().data().value();
+        return (LinkLogisticRegressionData) model.data();
     }
 }
