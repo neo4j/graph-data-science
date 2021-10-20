@@ -137,7 +137,7 @@ public final class MemoryUsage {
                             .getMethod("getValue")
                             .invoke(vmOption)
                             .toString());
-                        objectAlignment = nextHighestPowerOfTwo(objectAlignment);
+                        objectAlignment = BitUtil.nextHighestPowerOfTwo(objectAlignment);
                     } catch (ReflectiveOperationException | RuntimeException ignored) {
                     }
                 }
@@ -255,7 +255,7 @@ public final class MemoryUsage {
         if (length == newElements) {
             length++;
         }
-        length = Math.max(HashContainers.MIN_HASH_ARRAY_LENGTH, nextHighestPowerOfTwo(length));
+        length = Math.max(HashContainers.MIN_HASH_ARRAY_LENGTH, BitUtil.nextHighestPowerOfTwo(length));
 
         return length + 1;
     }
@@ -336,35 +336,6 @@ public final class MemoryUsage {
         // we can never arrive here, longs are not large enough to
         // represent > 16384 yobibytes
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * returns the next highest power of two, or the current value if it's already a power of two or zero
-     */
-    private static int nextHighestPowerOfTwo(int v) {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        v++;
-        return v;
-    }
-
-    /**
-     * returns the next highest power of two, or the current value if it's already a power of two or zero
-     */
-    private static long nextHighestPowerOfTwo(long v) {
-        v--;
-        v |= v >> 1L;
-        v |= v >> 2L;
-        v |= v >> 4L;
-        v |= v >> 8L;
-        v |= v >> 16L;
-        v |= v >> 32L;
-        v++;
-        return v;
     }
 
     private static final class NullOutputStream extends OutputStream {
