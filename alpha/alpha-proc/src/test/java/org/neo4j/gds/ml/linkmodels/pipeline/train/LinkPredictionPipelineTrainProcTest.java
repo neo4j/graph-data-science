@@ -267,7 +267,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter, concurrency: 4 }" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
@@ -295,7 +295,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter, concurrency: 4 }" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
