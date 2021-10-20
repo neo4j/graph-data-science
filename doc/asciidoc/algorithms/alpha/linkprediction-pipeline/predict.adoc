@@ -57,13 +57,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | mutateProperty                                                | String            | 'probability'     | yes      | The relationship property in the GDS graph to which the result is written.
 |===
 
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name      | Type    | Default | Optional | Description
-| topN      | Integer | n/a     | no       | Limit on predicted relationships to output.
-| threshold | Float   | 0.0     | yes      | Minimum predicted probability on relationships to output.
-|===
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -77,14 +71,94 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 | configuration        | Map     | Configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-stream]
+======
+.Run Link Prediction in strean mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  node1: Integer,
+  node2: Integer,
+  probability: Float
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,2m,1,5"]
+|===
+| Name                                                          | Type              | Default           | Optional | Description
+| modelName                                                     | String            | n/a               | no       | The name of a Link Prediction model in the model catalog.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']             | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']             | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
+|===
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name        | Type    | Description
+| node1       | Integer | Node ID of the first node.
+| node2       | Integer | Node ID of the second node.
+| probability | Float   | Predicted probability of a link between the nodes.
+|===
+======
 ====
 
+[[algorithms-link-prediction-pipelines-predict-examples]]
 === Example
 
 In this example we will show how to use a trained model to predict new relationships in your in-memory graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-linkprediction-pipeline-examples-train-query, train example>> which we gave the name `lp-pipeline-model`.
 The algorithm excludes predictions for existing relationships in the graph.
+
+[[algorithms-link-prediction-pipelines-predict-examples-stream]]
+==== Stream
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream('myGraph', {
+  modelName: 'lp-pipeline-model',
+  topN: 5,
+  threshold: 0.45
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
+ ORDER BY probability DESC, person1
+----
+
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+
+.Results
+[opts="header"]
+|===
+| person1   | person2   | probability
+| "Alice"   | "Chris"   | 0.5422350772807373
+| "Chris"   | "Mark"    | 0.5364414066546659
+| "Alice"   | "Mark"    | 0.5130009448848327
+| "Alice"   | "Karin"   | 0.5123040606165334
+| "Alice"   | "Greg"    | 0.51204718863418
+|===
+
+We can see, that our model predicts the most likely link is between Alice and Chris.
+--
+
+
+[[algorithms-link-prediction-pipelines-predict-examples-mutate]]
+==== Mutate
+
+In this example we will show how to write the predictions to your in-memory graph.
+We will use the model which we trained in the <<algorithms-ml-linkprediction-pipelines-train, train example>> which we gave the name `lp-pipeline-mode`.
 
 
 [role=query-example, group=lp]
@@ -105,37 +179,4 @@ CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
 | relationshipsWritten
 | 10
 |===
---
-
-We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
-Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
-
-In the following, we will inspect the predicted relationships:
-
-[role=query-example, group=lp]
---
-.Stream the predicted relationships:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamRelationshipProperty('myGraph', 'probability', ['KNOWS_PREDICTED'])
-YIELD
-  sourceNodeId, targetNodeId, propertyValue
-WHERE sourceNodeId < targetNodeId
-RETURN
-  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, propertyValue AS probability
-ORDER BY source ASC, target ASC
-----
-
-.Results
-[opts="header"]
-|===
-| source  | target      | probability
-| "Alice"   | "Chris"   | 0.5422350772807373
-| "Alice"   | "Greg"    | 0.51204718863418
-| "Alice"   | "Karin"   | 0.5123040606165334
-| "Alice"   | "Mark"    | 0.5130009448848327
-| "Chris"   | "Mark"    | 0.5364414066546659
-|===
-
-We can see, that our model predicts the most likely link is between Alice and Chris.
 --

@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParam
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineStreamProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
 
 import java.util.List;
@@ -43,6 +44,7 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
         return List.of(
             LinkPredictionPipelineCreateProc.class,
             LinkPredictionPipelineMutateProc.class,
+            LinkPredictionPipelineStreamProc.class,
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineAddStepProcs.class,
             LinkPredictionPipelineConfigureSplitProc.class,

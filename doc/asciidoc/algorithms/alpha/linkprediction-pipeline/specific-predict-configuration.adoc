@@ -1,0 +1,7 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name      | Type    | Default | Optional | Description
+| topN      | Integer | n/a     | no       | Limit on predicted relationships to output.
+| threshold | Float   | 0.0     | yes      | Minimum predicted probability on relationships to output.
+|===
