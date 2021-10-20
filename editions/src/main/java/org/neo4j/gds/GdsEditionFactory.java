@@ -20,6 +20,8 @@
 package org.neo4j.gds;
 
 import org.neo4j.annotations.service.Service;
+import org.neo4j.configuration.Config;
+
 
 @Service
 public interface GdsEditionFactory {
@@ -29,5 +31,7 @@ public interface GdsEditionFactory {
     default int priority() {
         return 1;
     }
+
+    void init(Config config);
 
 }

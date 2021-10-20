@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Config;
 
 import java.util.Optional;
 
@@ -30,6 +31,9 @@ public class OpenGdsEditionFactory implements GdsEditionFactory {
     public GdsEdition create() {
         return new OpenGdsEdition();
     }
+
+    @Override
+    public void init(Config config) {}
 
     static class OpenGdsEdition implements GdsEdition {
 
