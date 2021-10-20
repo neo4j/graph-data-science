@@ -103,6 +103,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                             e
                         );
                 }
+                break;
             default:
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
         }
