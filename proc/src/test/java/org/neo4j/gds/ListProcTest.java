@@ -93,6 +93,7 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.ml.pipeline.linkPrediction.configureSplit",
         "gds.alpha.ml.pipeline.linkPrediction.create",
         "gds.alpha.ml.pipeline.linkPrediction.predict.mutate",
+        "gds.alpha.ml.pipeline.linkPrediction.predict.stream",
         "gds.alpha.ml.pipeline.linkPrediction.train",
 
         "gds.alpha.scc.write",
