@@ -21,30 +21,59 @@ package org.neo4j.gds.collections;
 
 import java.util.function.LongConsumer;
 
+/**
+ * A long-indexable version of an array of primitive float arrays ({@code
+ * float[][]}) that can contain more than 2bn. elements.
+ * <p>
+ * It is implemented by paging of smaller arrays where each array, a so-called
+ * page, can store up to 4096 elements. Using small pages can lead to fewer
+ * array allocations if the value distribution is sparse. For indices for which
+ * no value has been inserted, a user-defined default value is returned.
+ * <p>
+ * The array is immutable and needs to be constructed using a thread-safe,
+ * growing builder.
+ */
 @HugeSparseArray(valueType = float[].class)
 public interface HugeSparseFloatArrayArray {
 
+    /**
+     * @return the maximum number of values stored in the array
+     */
     long capacity();
 
+    /**
+     * @return the float[] value at the given index
+     */
     float[] get(long index);
 
+    /**
+     * @return true, iff the value at the given index is not the default value
+     */
     boolean contains(long index);
 
+    /**
+     * @return a thread-safe array builder that grows dynamically on inserts
+     */
     static Builder builder(float[] defaultValue, LongConsumer trackAllocation) {
         return builder(defaultValue, 0, trackAllocation);
     }
 
-    static Builder builder(
-        float[] defaultValue,
-        long initialCapacity,
-        LongConsumer trackAllocation
-    ) {
+    /**
+     * @return a thread-safe array builder that grows dynamically on inserts
+     */
+    static Builder builder(float[] defaultValue, long initialCapacity, LongConsumer trackAllocation) {
         return new HugeSparseFloatArrayArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {
+        /**
+         * Sets the value at the given index.
+         */
         void set(long index, float[] value);
 
+        /**
+         * @return an immutable array
+         */
         HugeSparseFloatArrayArray build();
     }
 }
