@@ -26,6 +26,7 @@ dependencies {
     // We depend on the proc artifact of the GDS library
     compileOnly "org.neo4j.gds:proc:$gdsVersion"
     compileOnly "org.neo4j.gds:core:$gdsVersion"
+    compileOnly "org.neo4j.gds:memory-usage:$gdsVersion"
     compileOnly "org.neo4j.gds:annotations:$gdsVersion"
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
 
