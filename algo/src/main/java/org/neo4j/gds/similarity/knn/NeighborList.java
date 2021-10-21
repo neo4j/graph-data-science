@@ -82,7 +82,7 @@ class NeighborList {
     private static final int INSERTED = 1;
 
     // maximum number of elements, aka the top K
-    private final int bound;
+    private final int elementCapacity;
     // currently stored number of elements
     private int elementCount = 0;
     // we actually store tuples of (double, long), but the lack of inline classes forces us to
@@ -95,7 +95,7 @@ class NeighborList {
             throw new IllegalArgumentException("Bound cannot be smaller than or equal to 0");
         }
 
-        this.bound = bound;
+        this.elementCapacity = bound;
         this.elements = new long[bound * 2];
     }
 
@@ -132,7 +132,7 @@ class NeighborList {
             int lastValueIndex = (elementCount - 1) * 2;
             var lowestPriority = Double.longBitsToDouble(elements[lastValueIndex]);
 
-            if (priority < lowestPriority && elementCount == bound) {
+            if (priority < lowestPriority && elementCount == elementCapacity) {
                 return NOT_INSERTED;
             }
 
@@ -154,8 +154,8 @@ class NeighborList {
                 }
             }
 
-            if (upperBoundExclusive == allocatedElementsCount && lowestPriority == priority) {
-                // TODO: Perturbation
+            if (upperBoundExclusive == elementCapacity * 2 && lowestPriority == priority) {
+                // TODO: Perturbation (maybe replace last element)
                 return NOT_INSERTED;
             }
 
@@ -171,10 +171,11 @@ class NeighborList {
             if (lowerBoundInclusive == upperBoundExclusive) {
                 insertPosition = lowerBoundInclusive;
             } else {
+                // TODO: comment why this random is useful
                 insertPosition = random.nextInt(lowerBoundInclusive / 2, upperBoundExclusive / 2) * 2;
             }
 
-            if (insertPosition != lastValueIndex || elementCount != bound) {
+            if (insertPosition != lastValueIndex || elementCount != elementCapacity) {
                 System.arraycopy(
                     elements,
                     insertPosition,
@@ -185,7 +186,7 @@ class NeighborList {
             }
         }
 
-        if (elementCount != bound) {
+        if (elementCount != elementCapacity) {
             elementCount++;
         }
 
