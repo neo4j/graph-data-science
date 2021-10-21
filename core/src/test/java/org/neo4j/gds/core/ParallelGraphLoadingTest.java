@@ -130,7 +130,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         @BeforeEach
         void setUp() {
             clearDb();
-            buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
+            buildGraph(PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Long.BYTES) << 1);
             sparseGraph = load(db, l -> l.addNodeLabel("Label2"));
 
         }

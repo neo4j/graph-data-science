@@ -23,12 +23,12 @@ import org.neo4j.gds.mem.BitUtil;
 
 public final class PageUtil {
 
-    // 32 KB page size
-    private static final int PAGE_SIZE_IN_BYTES = 1 << 15;
+    public static final int PAGE_SIZE_4KB = 1 << 12;
+    public static final int PAGE_SIZE_32KB = 1 << 15;
 
-    public static int pageSizeFor(int sizeOfElement) {
+    public static int pageSizeFor(int pageSizeInBytes, int sizeOfElement) {
         assert BitUtil.isPowerOfTwo(sizeOfElement);
-        return PAGE_SIZE_IN_BYTES >> Integer.numberOfTrailingZeros(sizeOfElement);
+        return pageSizeInBytes >> Integer.numberOfTrailingZeros(sizeOfElement);
     }
 
     public static int numPagesFor(long capacity, int pageSize) {

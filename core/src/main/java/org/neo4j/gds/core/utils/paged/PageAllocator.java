@@ -64,7 +64,7 @@ public abstract class PageAllocator<T> {
         assert componentType != null && componentType.isPrimitive();
 
         long bytesPerElement = MemoryUsage.sizeOfInstance(componentType);
-        int pageSize = PageUtil.pageSizeFor((int) bytesPerElement);
+        int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, (int) bytesPerElement);
 
         long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
 

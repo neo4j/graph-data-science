@@ -29,7 +29,7 @@ public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubl
     private static final PageAllocator.Factory<AtomicDoubleArray> ALLOCATOR_FACTORY;
 
     static {
-        int pageSize = PageUtil.pageSizeFor(Double.BYTES);
+        int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Double.BYTES);
         long pageUsage = MemoryUsage.sizeOfInstance(AtomicDoubleArray.class) + MemoryUsage.sizeOfIntArray(pageSize);
 
         ALLOCATOR_FACTORY = PageAllocator.of(

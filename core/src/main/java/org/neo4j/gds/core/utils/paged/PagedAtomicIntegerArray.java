@@ -32,7 +32,7 @@ public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicInte
     private static final PageAllocator.Factory<AtomicIntegerArray> ALLOCATOR_FACTORY;
 
     static {
-        int pageSize = PageUtil.pageSizeFor(Integer.BYTES);
+        int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Integer.BYTES);
         long pageUsage = sizeOfInstance(AtomicIntegerArray.class) + sizeOfIntArray(pageSize);
 
         ALLOCATOR_FACTORY = PageAllocator.of(

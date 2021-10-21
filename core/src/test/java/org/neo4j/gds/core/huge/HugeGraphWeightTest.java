@@ -43,7 +43,7 @@ final class HugeGraphWeightTest extends BaseTest {
 
     @Test
     void shouldLoadCorrectWeights() {
-        int nodeCount = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF) * 2;
+        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF) * 2;
         mkDb(nodeCount, 2);
 
         Graph graph = loadGraph(db);
@@ -66,7 +66,7 @@ final class HugeGraphWeightTest extends BaseTest {
     @Test
     @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     void shouldLoadMoreWeights() {
-        int nodeCount = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
+        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF);
         mkDb(nodeCount, 4);
         loadGraph(db);
     }
@@ -78,7 +78,7 @@ final class HugeGraphWeightTest extends BaseTest {
             for (int i = 0; i < nodes; i++) {
                 nodeIds[i] = tx.createNode().getId();
             }
-            int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
+            int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF);
             for (int i = 0; i < nodes; i += pageSize) {
                 int max = Math.min(pageSize, nodes - i);
                 for (int j = 0; j < max; j++) {
