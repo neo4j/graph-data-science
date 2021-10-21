@@ -149,17 +149,18 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
             var expectedLinks = List.of(
                 PredictedLink.of(0, 4, 0.49750002083312506),
-                PredictedLink.of(4, 0, 0.49750002083312506),
                 PredictedLink.of(0, 3, 0.0024726231566347774),
-                PredictedLink.of(3, 0, 0.0024726231566347774),
-                PredictedLink.of(1, 0, 0.11506673204554983),
                 PredictedLink.of(0, 1, 0.11506673204554983),
+                PredictedLink.of(1, 0, 0.11506673204554983),
                 PredictedLink.of(1, 4, 0.11815697780926958),
-                PredictedLink.of(4, 1, 0.11815697780926958),
-                PredictedLink.of(2, 1, 0.0953494648991095),
                 PredictedLink.of(1, 2, 0.0953494648991095),
+                PredictedLink.of(2, 1, 0.0953494648991095),
                 PredictedLink.of(2, 3, 2.810228605019867E-9),
-                PredictedLink.of(3, 2, 2.810228605019867E-9)
+                PredictedLink.of(2, 0, 2.0547103309367397E-4),
+                PredictedLink.of(3, 0, 0.0024726231566347774),
+                PredictedLink.of(3, 2, 2.810228605019867E-9),
+                PredictedLink.of(4, 0, 0.49750002083312506),
+                PredictedLink.of(4, 1, 0.11815697780926958)
             );
 
             var graph = graphStore.getUnion();
@@ -192,7 +193,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             PredictedLink.of(2, 0, 0.011096137997457569),
             PredictedLink.of(3, 0, 0.11920292202211766),
             PredictedLink.of(4, 0, 0.9818363089715674)
-            );
+        );
 
         for (int i = 0; i < 2; i++) {
             TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
@@ -230,5 +231,59 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 assertThat(predictedLinks).containsAll(expectedLinks);
             });
         }
+    }
+
+    @Test
+    void shouldNotPredictExistingLinks() {
+        int topK = 50;
+        var pipeline = new TrainingPipeline();
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            new Weights<>(
+                new Matrix(
+                    WEIGHTS,
+                    1,
+                    WEIGHTS.length
+                )),
+            Weights.ofScalar(0)
+        );
+
+        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+            var pipelineExecutor = new PipelineExecutor(
+                pipeline,
+                caller,
+                db.databaseId(),
+                getUsername(),
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+            var linkPrediction = new ApproximateLinkPrediction(
+                modelData,
+                pipelineExecutor,
+                List.of(NodeLabel.of("N")),
+                List.of(RelationshipType.of("T")),
+                graphStore,
+                ImmutableKnnBaseConfig.builder()
+                    .randomSeed(42L)
+                    .concurrency(1)
+                    .randomJoins(10)
+                    .maxIterations(10)
+                    .sampleRate(0.9)
+                    .deltaThreshold(0)
+                    .topK(topK)
+                    .nodeWeightProperty("DUMMY")
+                    .build(),
+                ProgressTracker.NULL_TRACKER
+            );
+            var predictionResult = linkPrediction.compute();
+            var graph = graphStore.getGraph(RelationshipType.of("T"));
+
+            predictionResult.stream().forEach(predictedLink -> {
+                assertThat(graph.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
+                assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
+                assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
+            });
+        });
     }
 }

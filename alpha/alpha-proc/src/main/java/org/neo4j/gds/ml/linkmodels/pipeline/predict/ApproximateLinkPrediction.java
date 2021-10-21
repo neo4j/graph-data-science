@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
@@ -83,19 +82,14 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             )
         ).compute();
 
-        // Knn can always contain existing relationships. As predictions over existing relationships give false quality metrics we need to exclude them
-        Stream<SimilarityResult> predictions = knnResult
-            .streamSimilarityResult()
-            .filter(i -> !graph.exists(i.sourceNodeId(), i.targetNodeId()));
-
-        return new Result(predictions, knnResult.nodePairsConsidered(), knnResult.ranIterations(), knnResult.didConverge());
+        return new Result(knnResult, knnResult.nodePairsConsidered(), knnResult.ranIterations(), knnResult.didConverge());
     }
 
     static class Result implements LinkPredictionResult {
-        private final Stream<SimilarityResult> predictions;
+        private final Knn.Result predictions;
         private final Map<String, Object> samplingStats;
 
-        Result(Stream<SimilarityResult> predictions, long linksConsidered, long ranIterations, boolean didConverge) {
+        Result(Knn.Result predictions, long linksConsidered, long ranIterations, boolean didConverge) {
             this.predictions = predictions;
             this.samplingStats = Map.of(
                 "strategy", "approximate",
@@ -107,12 +101,16 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
         @Override
         public Stream<PredictedLink> stream() {
-            return predictions.map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
+            return predictions
+                .streamSimilarityResult()
+                .map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
         }
 
         @Override
         public Stream<Relationship> relationshipStream() {
-            return predictions.map(i -> ImmutableRelationship.of(
+            return predictions
+                .streamSimilarityResult()
+                .map(i -> ImmutableRelationship.of(
                 i.node1,
                 i.node2,
                 new Value[]{Values.doubleValue(i.similarity)}
