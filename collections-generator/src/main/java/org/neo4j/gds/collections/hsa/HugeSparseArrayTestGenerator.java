@@ -28,7 +28,12 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Modifier;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Map.entry;
 
@@ -59,6 +64,7 @@ final class HugeSparseArrayTestGenerator {
         builder.addMethod(addShouldReturnDefaultValue(valueType, elementType));
         builder.addMethod(addShouldHaveSaneCapacity(valueType, elementType));
         builder.addMethod(addShouldReportContainsCorrectly(valueType, elementType));
+        builder.addMethod(shouldSetParallel(valueType, elementType));
 
         return builder.build();
     }
@@ -131,6 +137,36 @@ final class HugeSparseArrayTestGenerator {
             return "new float[] { " + randomValue(TypeName.FLOAT) + " }";
         } else if (valueType.equals(ArrayTypeName.of(TypeName.DOUBLE))) {
             return "new double[] { " + randomValue(TypeName.DOUBLE) + " }";
+        } else {
+            throw new IllegalArgumentException("Illegal type");
+        }
+    }
+
+    private static String variableValue(TypeName valueType, String variable) {
+        if (valueType == TypeName.BYTE) {
+            return "(byte) " + variable;
+        } else if (valueType == TypeName.SHORT) {
+            return "(short) " + variable;
+        } else if (valueType == TypeName.INT) {
+            return "(int) " + variable;
+        } else if (valueType == TypeName.LONG) {
+            return "(long) " + variable;
+        } else if (valueType == TypeName.FLOAT) {
+            return "(float) " + variable;
+        } else if (valueType == TypeName.DOUBLE) {
+            return "(double) " + variable;
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.BYTE))) {
+            return "new byte[] { " + variableValue(TypeName.BYTE, variable) + " }";
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.SHORT))) {
+            return "new short[] { " + variableValue(TypeName.SHORT, variable) + " }";
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.INT))) {
+            return "new int[] { " + variableValue(TypeName.INT, variable) + " }";
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.LONG))) {
+            return "new long[] { " + variableValue(TypeName.LONG, variable) + " }";
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.FLOAT))) {
+            return "new float[] { " + variableValue(TypeName.FLOAT, variable) + " }";
+        } else if (valueType.equals(ArrayTypeName.of(TypeName.DOUBLE))) {
+            return "new double[] { " + variableValue(TypeName.DOUBLE, variable) + " }";
         } else {
             throw new IllegalArgumentException("Illegal type");
         }
@@ -298,6 +334,54 @@ final class HugeSparseArrayTestGenerator {
                 .addStatement("var array = builder.build()")
                 .addStatement("$T.assertThat(array.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
                 .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldSetParallel(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldSetParallel")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addException(ExecutionException.class)
+            .addException(InterruptedException.class)
+            .addCode(CodeBlock.builder()
+                .addStatement(
+                    "var builder = $T.builder($L, (__) -> {})",
+                    elementType,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .addStatement("var coreCount = $T.getRuntime().availableProcessors()", Runtime.class)
+                .addStatement("var executor = $T.newFixedThreadPool(coreCount)", Executors.class)
+                .addStatement("var threadCount = 10")
+                .addStatement("var nodeCount = new $T(0)", AtomicLong.class)
+                .addStatement("var batchSize = 10_000")
+                .addStatement(
+                    "var runnables = $T.range(0, threadCount)\n" +
+                    ".mapToObj(threadId -> ($T) () -> {\n" +
+                    "   var start = nodeCount.getAndAdd(batchSize);\n" +
+                    "   var end = start + batchSize;\n" +
+                    "   for (long idx = start; idx < end; idx++) {\n" +
+                    "       builder.set(idx, $L);\n" +
+                    "   }\n" +
+                    "}).collect($T.toList());",
+                    IntStream.class,
+                    Runnable.class,
+                    variableValue(valueType, "threadId"),
+                    Collectors.class
+                )
+                .addStatement(
+                    "var futures = runnables.stream().map(executor::submit).collect($T.toList())",
+                    Collectors.class
+                )
+                .beginControlFlow("for (var future : futures)")
+                .addStatement("future.get()")
+                .endControlFlow()
+                .addStatement("var array = builder.build()")
+                .addStatement("long sum = 0")
+                .beginControlFlow("for (long idx = 0; idx < batchSize * threadCount; idx++)")
+                .addStatement(valueType.isPrimitive() ? "sum += array.get(idx)" : "sum += array.get(idx)[0]")
+                .endControlFlow()
+                .addStatement("$T.assertThat(450_000).isEqualTo(sum)", ASSERTJ_ASSERTIONS)
                 .build())
             .build();
     }
