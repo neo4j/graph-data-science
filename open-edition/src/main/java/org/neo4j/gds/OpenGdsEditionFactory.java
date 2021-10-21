@@ -27,9 +27,11 @@ import java.util.Optional;
 @ServiceProvider
 public class OpenGdsEditionFactory implements GdsEditionFactory {
 
+    private static final GdsEdition INSTANCE = new OpenGdsEdition();
+
     @Override
     public GdsEdition create() {
-        return new OpenGdsEdition();
+        return INSTANCE;
     }
 
     @Override

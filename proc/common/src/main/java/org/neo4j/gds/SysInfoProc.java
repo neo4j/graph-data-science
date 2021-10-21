@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.apache.commons.text.WordUtils;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -55,6 +54,9 @@ public class SysInfoProc {
     @Context
     public GraphDatabaseService db;
 
+    @Context
+    public GdsEdition gdsEdition;
+
     @Procedure("gds.debug.sysInfo")
     @Description("Returns details about the status of the system")
     public Stream<DebugValue> version() throws IOException {
@@ -78,7 +80,7 @@ public class SysInfoProc {
         }
     }
 
-    private static Stream<DebugValue> debugValues(BuildInfoProperties buildInfo, Runtime runtime, Config config) {
+    private Stream<DebugValue> debugValues(BuildInfoProperties buildInfo, Runtime runtime, Config config) {
         var values = Stream.<DebugValue>builder();
         values.add(value("gdsVersion", buildInfo.gdsVersion()));
         editionInfo(values);
@@ -95,10 +97,9 @@ public class SysInfoProc {
         return values.build();
     }
 
-    private static void editionInfo(Stream.Builder<DebugValue> builder) {
-        var edition = GdsEdition.instance();
-        builder.add(value("gdsEdition", edition.name()));
-        edition.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
+    private void editionInfo(Stream.Builder<DebugValue> builder) {
+        builder.add(value("gdsEdition", gdsEdition.label()));
+        gdsEdition.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {

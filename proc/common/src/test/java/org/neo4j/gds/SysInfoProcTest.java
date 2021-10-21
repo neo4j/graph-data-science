@@ -56,7 +56,9 @@ class SysInfoProcTest extends BaseProcTest {
                 Settings.transactionStateAllocation(),
                 GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
             )
-            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L);
+            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L)
+            .removeExtensions(extension -> extension instanceof GdsEditionExtension)
+            .addExtension(new GdsEditionExtension());
     }
 
     @Test
@@ -66,9 +68,7 @@ class SysInfoProcTest extends BaseProcTest {
         ));
         var buildInfoProperties = BuildInfoProperties.get();
         var isNotNull = new Condition<>(Objects::nonNull, "is not null");
-        var community = new Condition<>("Community"::equals, "Community");
-        var enterprise = new Condition<>("Enterprise"::equals, "Enterprise");
-        var invalidLicense = new Condition<>("Enterprise (invalid license)"::equals, "Enterprise (invalid license)");
+        var openGds = new Condition<>("OpenGDS"::equals, "OpenGDS");
         var isTrue = new Condition<>(Boolean.TRUE::equals, "true");
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
@@ -85,7 +85,7 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildJavaVersion", buildInfoProperties.buildJavaVersion())
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
-            .hasEntrySatisfying("gdsEdition", anyOf(enterprise, community, invalidLicense))
+            .hasEntrySatisfying("gdsEdition", openGds)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
             .hasEntrySatisfying("availableHeapInBytes", isInteger)
