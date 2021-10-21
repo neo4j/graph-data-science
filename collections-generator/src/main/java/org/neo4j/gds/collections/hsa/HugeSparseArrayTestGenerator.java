@@ -143,7 +143,7 @@ final class HugeSparseArrayTestGenerator {
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     DEFAULT_VALUES.get(valueType)
                 )
@@ -163,7 +163,7 @@ final class HugeSparseArrayTestGenerator {
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     DEFAULT_VALUES.get(valueType)
                 )
@@ -184,7 +184,7 @@ final class HugeSparseArrayTestGenerator {
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     defaultValue
                 )
@@ -212,7 +212,7 @@ final class HugeSparseArrayTestGenerator {
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     ZERO_VALUES.get(valueType)
                 )
@@ -237,7 +237,7 @@ final class HugeSparseArrayTestGenerator {
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     DEFAULT_VALUES.get(valueType)
                 )
@@ -267,7 +267,7 @@ final class HugeSparseArrayTestGenerator {
             .returns(TypeName.VOID)
             .addCode(CodeBlock.builder()
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     DEFAULT_VALUES.get(valueType)
                 )
@@ -288,7 +288,7 @@ final class HugeSparseArrayTestGenerator {
             .addCode(CodeBlock.builder()
                 .addStatement("var random = $T.current()", ThreadLocalRandom.class)
                 .addStatement(
-                    "var builder = $T.growingBuilder($L, (__) -> {})",
+                    "var builder = $T.builder($L, (__) -> {})",
                     elementType,
                     DEFAULT_VALUES.get(valueType)
                 )
