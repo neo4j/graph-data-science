@@ -28,9 +28,11 @@ import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UniformSamplerTest {
 
@@ -107,5 +109,13 @@ class UniformSamplerTest {
         var sample = sampler.sample(input, 3,2).toArray();
 
         assertThat(sample).containsExactly(1, 1);
+    }
+
+    @Test
+    void failWithIncorrectSizeEstimate() {
+        assertThatThrownBy(
+            () -> new UniformSampler(19L).sample(LongStream.of(1, 1, 1), 6, 5)
+        )
+            .isInstanceOf(NoSuchElementException.class);
     }
 }

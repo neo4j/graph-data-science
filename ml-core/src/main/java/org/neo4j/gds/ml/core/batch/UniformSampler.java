@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.batch;
 import org.neo4j.gds.api.RelationshipCursor;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -33,10 +33,14 @@ import java.util.stream.Stream;
  */
 public class UniformSampler {
 
-    private final Random random;
+    private final SplittableRandom random;
 
     public UniformSampler(long randomSeed) {
-        this.random = new Random(randomSeed);
+        this.random = new SplittableRandom(randomSeed);
+    }
+
+    public UniformSampler(SplittableRandom random) {
+        this.random = random;
     }
 
     public LongStream sample(Stream<RelationshipCursor> relationshipCursorStream, long inputSize, int numberOfSamples) {
@@ -47,12 +51,12 @@ public class UniformSampler {
         );
     }
 
-    public LongStream sample(LongStream input, long inputSize, int numberOfSamples) {
+    public LongStream sample(LongStream input, long lowerBoundInputLength, int numberOfSamples) {
         if (numberOfSamples == 0) {
             return LongStream.empty();
         }
 
-        if (numberOfSamples >= inputSize) {
+        if (numberOfSamples >= lowerBoundInputLength) {
             return input;
         }
 
