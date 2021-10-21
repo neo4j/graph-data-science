@@ -98,9 +98,12 @@ public abstract class BaseProc {
     @Context
     public Username username = Username.EMPTY_USERNAME;
 
+    @Context
+    public LicenseState licenseState;
+
     protected BaseProc() {
-        if (GdsEdition.instance().isInvalidLicense()) {
-            throw new RuntimeException(GdsEdition.instance().errorMessage().get());
+        if (!licenseState.isValid()) {
+            throw new RuntimeException(licenseState.errorMessage().get());
         }
         if (allocationTracker == null) {
             allocationTracker = AllocationTracker.empty();

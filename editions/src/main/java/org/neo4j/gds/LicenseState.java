@@ -25,4 +25,5 @@ public interface LicenseState {
 
     String name();
     Optional<String> errorMessage();
+    boolean isValid();
 }

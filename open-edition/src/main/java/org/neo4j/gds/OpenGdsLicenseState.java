@@ -31,4 +31,9 @@ public final class OpenGdsLicenseState implements LicenseState {
     public Optional<String> errorMessage() {
         return Optional.empty();
     }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 }
