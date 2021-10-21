@@ -67,4 +67,9 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
 
         return config;
     }
+
+    static NodeLogisticRegressionTrainConfig defaultConfig(List<String> featureProperties, String targetProperty) {
+        return NodeLogisticRegressionTrainConfig
+            .of(featureProperties, targetProperty, Map.of("penalty", 0.0));
+    }
 }
