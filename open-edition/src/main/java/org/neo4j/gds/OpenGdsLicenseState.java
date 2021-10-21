@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import java.util.Optional;
 
-public class OpenGdsLicenseState implements LicenseState {
+public final class OpenGdsLicenseState implements LicenseState {
     @Override
     public String name() {
         return "OpenGDS";
