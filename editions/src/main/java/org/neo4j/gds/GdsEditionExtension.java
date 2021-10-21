@@ -35,7 +35,7 @@ import java.util.ServiceLoader;
 class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependencies> {
 
     GdsEditionExtension() {
-        super(ExtensionType.GLOBAL, "gds.edition");
+        super(ExtensionType.DATABASE, "gds.edition");
     }
 
     @Override
