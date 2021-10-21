@@ -55,18 +55,207 @@ final class HugeSparseArrayTestGenerator {
             .addModifiers(Modifier.FINAL)
             .addOriginatingElement(spec.element());
 
-        builder.addMethod(addShouldSetAndGet(valueType, elementType));
+        builder.addMethod(shouldSetAndGet(valueType, elementType));
         if (valueType.isPrimitive()) {
-            builder.addMethod(addShouldOnlySetIfAbsent(valueType, elementType));
-            builder.addMethod(addShouldAddToAndGet(valueType, elementType));
-            builder.addMethod(addShouldAddToAndGetWithDefaultZero(valueType, elementType));
+            builder.addMethod(shouldOnlySetIfAbsent(valueType, elementType));
+            builder.addMethod(shouldAddToAndGet(valueType, elementType));
+            builder.addMethod(shouldAddToAndGetWithDefaultZero(valueType, elementType));
         }
-        builder.addMethod(addShouldReturnDefaultValue(valueType, elementType));
-        builder.addMethod(addShouldHaveSaneCapacity(valueType, elementType));
-        builder.addMethod(addShouldReportContainsCorrectly(valueType, elementType));
+        builder.addMethod(shouldReturnDefaultValue(valueType, elementType));
+        builder.addMethod(shouldHaveSaneCapacity(valueType, elementType));
+        builder.addMethod(shouldReportContainsCorrectly(valueType, elementType));
         builder.addMethod(shouldSetParallel(valueType, elementType));
 
         return builder.build();
+    }
+
+    private static CodeBlock newBuilder(TypeName elementType, String defaultValue) {
+        return CodeBlock.builder()
+            .addStatement(
+                "var builder = $T.builder($L, (__) -> {})",
+                elementType,
+                defaultValue
+            )
+            .build();
+    }
+
+    private static MethodSpec shouldSetAndGet(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldSetAndGet")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, randomValue(valueType))
+                .addStatement("builder.set(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement("$T.assertThat(array.get(index)).isEqualTo(value)", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
+    }
+
+
+    private static MethodSpec shouldOnlySetIfAbsent(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldOnlySetIfAbsent")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isFalse()", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldAddToAndGet(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldAddToAndGet")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement(
+                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
+                    ASSERTJ_ASSERTIONS,
+                    valueType,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldAddToAndGetWithDefaultZero(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldAddToAndGetWithDefaultZero")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .add(newBuilder(elementType, ZERO_VALUES.get(valueType)))
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("builder.addTo(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement(
+                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L))",
+                    ASSERTJ_ASSERTIONS,
+                    valueType,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldReturnDefaultValue(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldReturnDefaultValue")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("// > PAGE_SIZE")
+                .addStatement("var index = 224242")
+                .addStatement("builder.set(index, $N)", NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("var array = builder.build()")
+                .beginControlFlow("for (long i = 0; i < index; i++)")
+                .addStatement(
+                    "$T.assertThat(array.get(i)).isEqualTo($N)",
+                    ASSERTJ_ASSERTIONS,
+                    DEFAULT_VALUES.get(valueType)
+                )
+                .endControlFlow()
+                .addStatement(
+                    "$T.assertThat(array.get(index)).isEqualTo($N)",
+                    ASSERTJ_ASSERTIONS,
+                    NON_DEFAULT_VALUES.get(valueType)
+                )
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldHaveSaneCapacity(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldHaveSaneCapacity")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("// > PAGE_SIZE")
+                .addStatement("var index = 224242")
+                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.set(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldReportContainsCorrectly(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldReportContainsCorrectly")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addCode(CodeBlock.builder()
+                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("long index = $L", randomIndex())
+                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
+                .addStatement("builder.set(index, value)")
+                .addStatement("var array = builder.build()")
+                .addStatement("$T.assertThat(array.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
+                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
+    }
+
+    private static MethodSpec shouldSetParallel(TypeName valueType, TypeName elementType) {
+        return MethodSpec.methodBuilder("shouldSetParallel")
+            .addAnnotation(TEST_ANNOTATION)
+            .returns(TypeName.VOID)
+            .addException(ExecutionException.class)
+            .addException(InterruptedException.class)
+            .addCode(CodeBlock.builder()
+                .add(newBuilder(elementType, DEFAULT_VALUES.get(valueType)))
+                .addStatement("var cores = $T.getRuntime().availableProcessors()", Runtime.class)
+                .addStatement("var executor = $T.newFixedThreadPool(cores)", Executors.class)
+                .addStatement("var batches = 10")
+                .addStatement("var batchSize = 10_000")
+                .addStatement("var processed = new $T(0)", AtomicLong.class)
+                .addStatement(
+                    "var tasks = $T.range(0, batches)\n" +
+                    ".mapToObj(threadId -> ($T) () -> {\n" +
+                    "   var start = processed.getAndAdd(batchSize);\n" +
+                    "   var end = start + batchSize;\n" +
+                    "   for (long idx = start; idx < end; idx++) {\n" +
+                    "       builder.set(idx, $L);\n" +
+                    "   }\n" +
+                    "}).collect($T.toList());",
+                    IntStream.class,
+                    Runnable.class,
+                    variableValue(valueType, "threadId"),
+                    Collectors.class
+                )
+                .addStatement(
+                    "var futures = tasks.stream().map(executor::submit).collect($T.toList())",
+                    Collectors.class
+                )
+                .beginControlFlow("for (var future : futures)")
+                .addStatement("future.get()")
+                .endControlFlow()
+                .addStatement("var array = builder.build()")
+                .addStatement("long sum = 0")
+                .beginControlFlow("for (long idx = 0; idx < batchSize * batches; idx++)")
+                .addStatement(valueType.isPrimitive() ? "sum += array.get(idx)" : "sum += array.get(idx)[0]")
+                .endControlFlow()
+                .addStatement("$T.assertThat(sum).isEqualTo(450_000)", ASSERTJ_ASSERTIONS)
+                .build())
+            .build();
     }
 
     private static final Map<TypeName, String> ZERO_VALUES = Map.of(
@@ -85,12 +274,12 @@ final class HugeSparseArrayTestGenerator {
         entry(TypeName.LONG, "42L"),
         entry(TypeName.FLOAT, "42.1337F"),
         entry(TypeName.DOUBLE, "42.1337D"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "new byte[] { 1, 3, 3, 7 }"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "new short[] { 1, 3, 3, 7 }"),
-        entry(ArrayTypeName.of(TypeName.INT), "new int[] { 1, 3, 3, 7 }"),
-        entry(ArrayTypeName.of(TypeName.LONG), "new long[] { 1, 3, 3, 7 }"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "new float[] { 1.1F, 3.3F, 3.3F, 7.7F }"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "new double[] { 1.1D, 3.3D, 3.3D, 7.7D }")
+        entry(ArrayTypeName.of(TypeName.BYTE), "new byte[] { 4, 2 }"),
+        entry(ArrayTypeName.of(TypeName.SHORT), "new short[] { 4, 2 }"),
+        entry(ArrayTypeName.of(TypeName.INT), "new int[] { 4, 2 }"),
+        entry(ArrayTypeName.of(TypeName.LONG), "new long[] { 4, 2 }"),
+        entry(ArrayTypeName.of(TypeName.FLOAT), "new float[] { 4.4F, 2.2F }"),
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "new double[] { 4.4D, 2.2D }")
     );
 
     private static final Map<TypeName, String> NON_DEFAULT_VALUES = Map.ofEntries(
@@ -100,12 +289,12 @@ final class HugeSparseArrayTestGenerator {
         entry(TypeName.LONG, "1337L"),
         entry(TypeName.FLOAT, "1337.42F"),
         entry(TypeName.DOUBLE, "1337.42D"),
-        entry(ArrayTypeName.of(TypeName.BYTE), "new byte[] { 4, 2 }"),
-        entry(ArrayTypeName.of(TypeName.SHORT), "new short[] { 4, 2 }"),
-        entry(ArrayTypeName.of(TypeName.INT), "new int[] { 4, 2 }"),
-        entry(ArrayTypeName.of(TypeName.LONG), "new long[] { 4, 2 }"),
-        entry(ArrayTypeName.of(TypeName.FLOAT), "new float[] { 4.4F, 2.2F }"),
-        entry(ArrayTypeName.of(TypeName.DOUBLE), "new double[] { 4.4D, 2.2D }")
+        entry(ArrayTypeName.of(TypeName.BYTE), "new byte[] { 1, 3, 3, 7 }"),
+        entry(ArrayTypeName.of(TypeName.SHORT), "new short[] { 1, 3, 3, 7 }"),
+        entry(ArrayTypeName.of(TypeName.INT), "new int[] { 1, 3, 3, 7 }"),
+        entry(ArrayTypeName.of(TypeName.LONG), "new long[] { 1, 3, 3, 7 }"),
+        entry(ArrayTypeName.of(TypeName.FLOAT), "new float[] { 1.1F, 3.3F, 3.3F, 7.7F }"),
+        entry(ArrayTypeName.of(TypeName.DOUBLE), "new double[] { 1.1D, 3.3D, 3.3D, 7.7D }")
     );
 
     private static String randomIndex() {
@@ -170,219 +359,5 @@ final class HugeSparseArrayTestGenerator {
         } else {
             throw new IllegalArgumentException("Illegal type");
         }
-    }
-
-    private static MethodSpec addShouldSetAndGet(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldSetAndGet")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("long index = $L", randomIndex())
-                .addStatement("$T value = $L", valueType, randomValue(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.get(index)).isEqualTo(value)", ASSERTJ_ASSERTIONS)
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldOnlySetIfAbsent(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldOnlySetIfAbsent")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("long index = $L", randomIndex())
-                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isTrue()", ASSERTJ_ASSERTIONS)
-                .addStatement("$T.assertThat(builder.setIfAbsent(index, value)).isFalse()", ASSERTJ_ASSERTIONS)
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldAddToAndGet(TypeName valueType, TypeName elementType) {
-        var defaultValue = DEFAULT_VALUES.get(valueType);
-
-        return MethodSpec.methodBuilder("shouldAddToAndGet")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    defaultValue
-                )
-                .addStatement("long index = $L", randomIndex())
-                .addStatement("$T value = $L", valueType, defaultValue)
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement(
-                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L + $3L))",
-                    ASSERTJ_ASSERTIONS,
-                    valueType,
-                    defaultValue
-                )
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldAddToAndGetWithDefaultZero(TypeName valueType, TypeName elementType) {
-        var defaultValue = DEFAULT_VALUES.get(valueType);
-
-        return MethodSpec.methodBuilder("shouldAddToAndGetWithDefaultZero")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    ZERO_VALUES.get(valueType)
-                )
-                .addStatement("long index = $L", randomIndex())
-                .addStatement("$T value = $L", valueType, defaultValue)
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("builder.addTo(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement(
-                    "$1T.assertThat(array.get(index)).isEqualTo(($2T) ($3L + $3L))",
-                    ASSERTJ_ASSERTIONS,
-                    valueType,
-                    defaultValue
-                )
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldReturnDefaultValue(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldReturnDefaultValue")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("// > PAGE_SIZE")
-                .addStatement("var index = 224242")
-                .addStatement("builder.set(index, $N)", NON_DEFAULT_VALUES.get(valueType))
-                .addStatement("var array = builder.build()")
-                .beginControlFlow("for (long i = 0; i < index; i++)")
-                .addStatement(
-                    "$T.assertThat(array.get(i)).isEqualTo($N)",
-                    ASSERTJ_ASSERTIONS,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .endControlFlow()
-                .addStatement(
-                    "$T.assertThat(array.get(index)).isEqualTo($N)",
-                    ASSERTJ_ASSERTIONS,
-                    NON_DEFAULT_VALUES.get(valueType)
-                )
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldHaveSaneCapacity(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldHaveSaneCapacity")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("// > PAGE_SIZE")
-                .addStatement("var index = 224242")
-                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.capacity()).isGreaterThanOrEqualTo(index)", ASSERTJ_ASSERTIONS)
-                .build())
-            .build();
-    }
-
-    private static MethodSpec addShouldReportContainsCorrectly(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldReportContainsCorrectly")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addCode(CodeBlock.builder()
-                .addStatement("var random = $T.current()", ThreadLocalRandom.class)
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("long index = $L", randomIndex())
-                .addStatement("$T value = $L", valueType, NON_DEFAULT_VALUES.get(valueType))
-                .addStatement("builder.set(index, value)")
-                .addStatement("var array = builder.build()")
-                .addStatement("$T.assertThat(array.contains(index)).isTrue()", ASSERTJ_ASSERTIONS)
-                .addStatement("$T.assertThat(array.contains(index + 1)).isFalse()", ASSERTJ_ASSERTIONS)
-                .build())
-            .build();
-    }
-
-    private static MethodSpec shouldSetParallel(TypeName valueType, TypeName elementType) {
-        return MethodSpec.methodBuilder("shouldSetParallel")
-            .addAnnotation(TEST_ANNOTATION)
-            .returns(TypeName.VOID)
-            .addException(ExecutionException.class)
-            .addException(InterruptedException.class)
-            .addCode(CodeBlock.builder()
-                .addStatement(
-                    "var builder = $T.builder($L, (__) -> {})",
-                    elementType,
-                    DEFAULT_VALUES.get(valueType)
-                )
-                .addStatement("var coreCount = $T.getRuntime().availableProcessors()", Runtime.class)
-                .addStatement("var executor = $T.newFixedThreadPool(coreCount)", Executors.class)
-                .addStatement("var threadCount = 10")
-                .addStatement("var nodeCount = new $T(0)", AtomicLong.class)
-                .addStatement("var batchSize = 10_000")
-                .addStatement(
-                    "var runnables = $T.range(0, threadCount)\n" +
-                    ".mapToObj(threadId -> ($T) () -> {\n" +
-                    "   var start = nodeCount.getAndAdd(batchSize);\n" +
-                    "   var end = start + batchSize;\n" +
-                    "   for (long idx = start; idx < end; idx++) {\n" +
-                    "       builder.set(idx, $L);\n" +
-                    "   }\n" +
-                    "}).collect($T.toList());",
-                    IntStream.class,
-                    Runnable.class,
-                    variableValue(valueType, "threadId"),
-                    Collectors.class
-                )
-                .addStatement(
-                    "var futures = runnables.stream().map(executor::submit).collect($T.toList())",
-                    Collectors.class
-                )
-                .beginControlFlow("for (var future : futures)")
-                .addStatement("future.get()")
-                .endControlFlow()
-                .addStatement("var array = builder.build()")
-                .addStatement("long sum = 0")
-                .beginControlFlow("for (long idx = 0; idx < batchSize * threadCount; idx++)")
-                .addStatement(valueType.isPrimitive() ? "sum += array.get(idx)" : "sum += array.get(idx)[0]")
-                .endControlFlow()
-                .addStatement("$T.assertThat(450_000).isEqualTo(sum)", ASSERTJ_ASSERTIONS)
-                .build())
-            .build();
     }
 }
