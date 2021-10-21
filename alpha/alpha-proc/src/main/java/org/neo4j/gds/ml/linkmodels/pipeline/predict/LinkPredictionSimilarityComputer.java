@@ -56,6 +56,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return graph.exists(firstNodeId, secondNodeId);
     }
 
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return graph.nodeCount() - 1 - graph.degree(node);
+    }
+
     public LinkPredictionSimilarityComputer concurrentCopy() {
         return new LinkPredictionSimilarityComputer(linkFeatureExtractor, predictor, graph.concurrentCopy());
     }

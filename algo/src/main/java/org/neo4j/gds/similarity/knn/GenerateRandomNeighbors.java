@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.batch.UniformSampler;
 
 import java.util.SplittableRandom;
+import java.util.stream.LongStream;
 
 /**
  * Initial step in KNN calculation.
@@ -33,9 +34,9 @@ final class GenerateRandomNeighbors implements Runnable {
     private final SplittableRandom random;
     private final SimilarityComputer computer;
     private final HugeObjectArray<NeighborList> neighbors;
-    private final long n;
+    private final long nodeCount;
     private final int k;
-    private final int k2;
+    private final int boundedK;
     private final ProgressTracker progressTracker;
     private final Partition partition;
     private long neighborsFound;
@@ -44,18 +45,18 @@ final class GenerateRandomNeighbors implements Runnable {
         SplittableRandom random,
         SimilarityComputer computer,
         HugeObjectArray<NeighborList> neighbors,
-        long n,
+        long nodeCount,
         int k,
-        int k2,
+        int boundedK,
         Partition partition,
         ProgressTracker progressTracker
     ) {
         this.random = random;
         this.computer = computer;
         this.neighbors = neighbors;
-        this.n = n;
+        this.nodeCount = nodeCount;
         this.k = k;
-        this.k2 = k2;
+        this.boundedK = boundedK;
         this.progressTracker = progressTracker;
         this.partition = partition;
         this.neighborsFound = 0;
@@ -65,33 +66,27 @@ final class GenerateRandomNeighbors implements Runnable {
     public void run() {
         var rng = random.split();
         var computer = this.computer;
-        var n = this.n;
+        var nodeCount = this.nodeCount;
         var k = this.k;
-        var k2 = this.k2;
-        var chosen = new LongHashSet(k2);
+        var boundedK = this.boundedK;
+
+        var uniformSampler = new UniformSampler(rng);
 
         partition.consume(nodeId -> {
-            chosen.clear();
+            var validCandidates = LongStream
+                .range(0, nodeCount)
+                .filter(otherNode -> !computer.excludeNodePair(nodeId, otherNode));
 
-            for (int i = 0; i < k2; i++) {
-                var randomNode = rng.nextLong(n - 1);
-                if (randomNode >= nodeId) {
-                    ++randomNode;
-                }
-                assert nodeId != randomNode;
-                chosen.add(randomNode);
-            }
-            assert chosen.size() <= k2;
+            var chosen = uniformSampler.sample(
+                validCandidates,
+                computer.lowerBoundOfPotentialNeighbours(nodeId),
+                boundedK
+            );
 
             var neighbors = new NeighborList(k);
-            for (var chosenCursor : chosen) {
-                var neighborNode = chosenCursor.value;
-                assert nodeId != neighborNode;
-                var similarity = computer.safeSimilarity(nodeId, neighborNode);
-                neighbors.add(neighborNode, similarity, rng);
-            }
+            chosen.forEach(candidate -> neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng));
 
-            assert neighbors.size() > 0; // because K > 0 and N > 1
+            assert neighbors.size() == Math.min(nodeCount - 1, boundedK); // because K > 0 and N > 1
             assert neighbors.size() <= k;
 
             this.neighbors.set(nodeId, neighbors);

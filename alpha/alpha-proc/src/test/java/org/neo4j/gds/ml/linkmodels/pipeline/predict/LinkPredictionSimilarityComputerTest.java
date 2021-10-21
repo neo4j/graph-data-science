@@ -103,4 +103,29 @@ class LinkPredictionSimilarityComputerTest {
         assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
         assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
     }
+
+    @Test
+    void neighbourEstimates() {
+        var linkFeatureSteps = List.<LinkFeatureStep>of();
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
+        var modelData = ImmutableLinkLogisticRegressionData.of(
+            Weights.ofMatrix(1, 2),
+            Weights.ofScalar(0)
+        );
+        var lpSimComputer = new LinkPredictionSimilarityComputer(
+            linkFeatureExtractor,
+            new LinkLogisticRegressionPredictor(modelData),
+            graph
+        );
+
+        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
+            .isLessThanOrEqualTo(1)
+            .isGreaterThanOrEqualTo(0);
+        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("b")))
+            .isLessThanOrEqualTo(2)
+            .isGreaterThanOrEqualTo(0);
+        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("c")))
+            .isLessThanOrEqualTo(1)
+            .isGreaterThanOrEqualTo(0);
+    }
 }

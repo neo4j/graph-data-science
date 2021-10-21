@@ -39,8 +39,10 @@ public interface SimilarityComputer {
     double similarity(long firstNodeId, long secondNodeId);
 
     default boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return false;
+        return firstNodeId == secondNodeId;
     }
+
+    long lowerBoundOfPotentialNeighbours(long node);
 
     default SimilarityComputer concurrentCopy() {
         return this;
@@ -112,6 +114,11 @@ final class DoublePropertySimilarityComputer implements SimilarityComputer {
         var right = nodeProperties.doubleValue(secondNodeId);
         return 1.0 / (1.0 + Math.abs(left - right));
     }
+
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return nodeProperties.size();
+    }
 }
 
 final class LongPropertySimilarityComputer implements SimilarityComputer {
@@ -134,6 +141,11 @@ final class LongPropertySimilarityComputer implements SimilarityComputer {
         }
         return 1.0 / (1.0 + abs);
     }
+
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return nodeProperties.size() - 1;
+    }
 }
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -153,6 +165,11 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
     }
+
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return nodeProperties.size() - 1;
+    }
 }
 
 final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer {
@@ -171,6 +188,11 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
         var right = nodeProperties.doubleArrayValue(secondNodeId);
         int len = Math.min(left.length, right.length);
         return Math.max(Intersections.cosine(left, right, len), 0);
+    }
+
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return nodeProperties.size() - 1;
     }
 }
 
@@ -193,5 +215,10 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
         long sameElements = Intersections.intersection3(left, right);
         long differentElements = left.length - sameElements;
         return 1.0 / (1.0 + differentElements);
+    }
+
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        return nodeProperties.size() - 1;
     }
 }

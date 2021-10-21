@@ -349,6 +349,7 @@ class KnnTest {
             var config = ImmutableKnnBaseConfig.builder()
                 .nodeWeightProperty("knn")
                 .deltaThreshold(0)
+                .topK(1)
                 .maxIterations(1)
                 .build();
             var knnContext = KnnContext.empty();

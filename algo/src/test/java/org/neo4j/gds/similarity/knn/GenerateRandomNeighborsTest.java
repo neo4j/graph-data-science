@@ -23,12 +23,12 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
+import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Comparator;
 import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 
@@ -49,10 +49,23 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             AllocationTracker.empty()
         );
 
+        var nodeProperties = new LongNodeProperties() {
+            @Override
+            public long longValue(long nodeId) {
+                return nodeId;
+            }
+
+            @Override
+            public long size() {
+                return nodeCount;
+            }
+        };
+
+        var similarityComputer = SimilarityComputer.ofProperty(nodeProperties, "myProperty");
+
         var generateRandomNeighbors = new GenerateRandomNeighbors(
             new SplittableRandom(),
-            // implicitly sort by neighbor from max to min
-            (nodeId, neighborId) -> (double) neighborId,
+            similarityComputer,
             allNeighbors,
             nodeCount,
             k,
@@ -68,10 +81,9 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             var neighbors = allNeighbors.get(nodeId);
             assertThat(neighbors.elements().toArray())
                 .doesNotContain(nodeId)
-                .hasSizeLessThanOrEqualTo(k)
+                .hasSize(Math.min(k, nodeCount - 1))
                 .containsAnyOf(possibleNeighbors)
-                .doesNotHaveDuplicates()
-                .isSortedAccordingTo(Comparator.<Long>naturalOrder().reversed());
+                .doesNotHaveDuplicates();
         }
     }
 }
