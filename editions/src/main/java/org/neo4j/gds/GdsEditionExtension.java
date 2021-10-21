@@ -43,15 +43,15 @@ class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependenc
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                var editionFactory = ServiceLoader.load(GdsEditionFactory.class)
+                var serviceBuilder = ServiceLoader.load(LicensingServiceBuilder.class)
                     .stream()
                     .map(ServiceLoader.Provider::get)
-                    .min(Comparator.comparing(GdsEditionFactory::priority))
-                    .orElseThrow(() -> new LinkageError("Could not load " + GdsEditionFactory.class + " implementation"));
-                editionFactory.init(dependencies.config());
+                    .min(Comparator.comparing(LicensingServiceBuilder::priority))
+                    .orElseThrow(() -> new LinkageError("Could not load " + LicensingServiceBuilder.class + " implementation"));
+                var service = serviceBuilder.build(dependencies.config());
 
                 var registry = dependencies.globalProceduresRegistry();
-                registry.registerComponent(GdsEdition.class, (context) -> editionFactory.create(), true);
+                registry.registerComponent(LicenseState.class, (context) -> service.get(), true);
             }
 
             @Override

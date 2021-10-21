@@ -19,34 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Config;
+public interface LicensingService {
 
-import java.util.Optional;
-
-@ServiceProvider
-public class OpenGdsEditionFactory implements GdsEditionFactory {
-
-    private static final GdsEdition INSTANCE = new OpenGdsEdition();
-
-    @Override
-    public GdsEdition create() {
-        return INSTANCE;
-    }
-
-    @Override
-    public void init(Config config) {}
-
-    static class OpenGdsEdition implements GdsEdition {
-
-        @Override
-        public String label() {
-            return "OpenGDS";
-        }
-
-        @Override
-        public Optional<String> errorMessage() {
-            return Optional.empty();
-        }
-    }
+    LicenseState get();
 }

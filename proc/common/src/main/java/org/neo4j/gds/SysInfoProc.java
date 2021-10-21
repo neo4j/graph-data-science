@@ -55,7 +55,7 @@ public class SysInfoProc {
     public GraphDatabaseService db;
 
     @Context
-    public GdsEdition gdsEdition;
+    public LicenseState licenseState;
 
     @Procedure("gds.debug.sysInfo")
     @Description("Returns details about the status of the system")
@@ -98,8 +98,8 @@ public class SysInfoProc {
     }
 
     private void editionInfo(Stream.Builder<DebugValue> builder) {
-        builder.add(value("gdsEdition", gdsEdition.label()));
-        gdsEdition.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
+        builder.add(value("gdsEdition", licenseState.name()));
+        licenseState.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {

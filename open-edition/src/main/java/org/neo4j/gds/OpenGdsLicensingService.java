@@ -19,19 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.annotations.service.Service;
-import org.neo4j.configuration.Config;
+class OpenGdsLicensingService implements LicensingService {
 
+    private static final LicenseState state = new OpenGdsLicenseState();
 
-@Service
-public interface GdsEditionFactory {
-
-    GdsEdition create();
-
-    default int priority() {
-        return 1;
+    @Override
+    public LicenseState get() {
+        return state;
     }
-
-    void init(Config config);
-
 }
