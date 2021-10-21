@@ -21,8 +21,12 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -60,6 +64,30 @@ class NeighborListTest {
 
         long[] actual = queue.elements().toArray();
         assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    void insertEverything() {
+        var nodeCount = 42;
+        var elements = LongStream.range(0, nodeCount).boxed().collect(Collectors.toList());
+        var rng = new SplittableRandom(1337L);
+
+        var queue = new NeighborList(nodeCount);
+
+        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 2)), rng));
+
+        assertThat(queue.elements()).containsExactlyInAnyOrderElementsOf(elements);
+    }
+
+    @Test
+    void insertEveryThingTake2() {
+        List<Long> elements = List.of(0L, 2L);
+        var queue = new NeighborList(2);
+        var rng = new SplittableRandom(1337L);
+
+        elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 1)), rng));
+
+        assertThat(queue.elements()).containsExactlyInAnyOrderElementsOf(elements);
     }
 
 }
