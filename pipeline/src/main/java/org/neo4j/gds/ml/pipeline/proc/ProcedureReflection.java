@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.proc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ProcedureAndFunctionScanner;
 import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -44,18 +45,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public final class ProcedureReflection {
 
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.gds"
-    );
-
     private final List<Method> procedureMethods;
     public static final ProcedureReflection INSTANCE = new ProcedureReflection();
 
     private ProcedureReflection() {
-        this.procedureMethods = PACKAGES_TO_SCAN.stream()
-            .map(this::createReflections)
-            .map(r -> r.getMethodsAnnotatedWith(Procedure.class))
-            .flatMap(Collection::stream)
+        this.procedureMethods = ProcedureAndFunctionScanner
+            .streamMethodsContainingAnnotation(Procedure.class)
             .collect(Collectors.toList());
     }
 
@@ -78,15 +73,15 @@ public final class ProcedureReflection {
 
     private List<Method> findProcedureMethodsByName(String shortName) {
         return procedureMethods
-                .stream()
-                .filter(method -> {
-                    if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) {
-                        return false;
-                    }
+            .stream()
+            .filter(method -> {
+                if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) {
+                    return false;
+                }
 
-                    return validShortName(procedureName(method), shortName);
-                })
-                .collect(Collectors.toList());
+                return validShortName(procedureName(method), shortName);
+            })
+            .collect(Collectors.toList());
     }
 
     private static boolean validShortName(String fullName, String shortName) {
@@ -103,15 +98,7 @@ public final class ProcedureReflection {
 
     private AlgoBaseProc<?, ?, ?> createProcedure(BaseProc caller, Method method) {
         Class<AlgoBaseProc<?, ?, ?>> procClass = (Class<AlgoBaseProc<?, ?, ?>>) method.getDeclaringClass();
-        return ProcedureRunner.instantiateProcedure(
-            caller.api,
-            procClass,
-            caller.callContext,
-            caller.log,
-            caller.taskRegistryFactory,
-            caller.allocationTracker,
-            caller.procedureTransaction
-        );
+        return ProcedureRunner.instantiateProcedure(caller, procClass);
     }
 
     public Optional<AlgoBaseConfig> createAlgoConfig(BaseProc caller, Method procMethod, CypherMapWrapper config) {
@@ -137,12 +124,5 @@ public final class ProcedureReflection {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Reflections createReflections(String pkg) {
-        return new Reflections(
-            pkg,
-            new MethodAnnotationsScanner()
-        );
     }
 }

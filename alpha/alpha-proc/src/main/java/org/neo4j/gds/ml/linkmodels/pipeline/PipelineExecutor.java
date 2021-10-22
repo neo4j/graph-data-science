@@ -28,8 +28,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
