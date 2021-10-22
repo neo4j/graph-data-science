@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
@@ -25,6 +25,8 @@ import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
+import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.ThrowingFunction;
@@ -92,6 +94,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.database.DatabaseIdRepository;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -140,6 +144,18 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public String validateExternalDatabaseName(String databaseName) {
+        var normalizedName = new NormalizedDatabaseName(databaseName);
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+        return normalizedName.name();
+    }
+
+    @Override
+    public void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId) {
+        databaseIdRepository.cache(namedDatabaseId);
+    }
+
+    @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
         return new CompatAccessModeImpl(customAccessMode);
     }
@@ -150,6 +166,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         AccessMode.Static restricting
     ) {
         return new RestrictedAccessMode(original, restricting);
+    }
+
+    @Override
+    public String username(AuthSubject subject) {
+        return subject.username();
     }
 
     @Override

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
 import org.neo4j.common.EntityType;
 import org.neo4j.internal.kernel.api.InternalIndexState;

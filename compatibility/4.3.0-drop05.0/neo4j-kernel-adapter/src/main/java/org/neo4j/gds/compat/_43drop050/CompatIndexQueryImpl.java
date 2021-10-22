@@ -17,27 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.kernel.impl.factory.DbmsInfo;
+import org.neo4j.gds.compat.CompatIndexQuery;
+import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 
-import java.nio.file.Path;
+final class CompatIndexQueryImpl implements CompatIndexQuery {
+    final PropertyIndexQuery indexQuery;
 
-final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
-
-    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
-        super(dbms);
-    }
-
-    @Override
-    public Path dbHome(Path workingDir) {
-        return api.databaseLayout().getNeo4jLayout().homeDirectory();
-    }
-
-    @Override
-    public DbmsInfo dbmsInfo() {
-        return api.dbmsInfo();
+    CompatIndexQueryImpl(PropertyIndexQuery indexQuery) {
+        this.indexQuery = indexQuery;
     }
 }

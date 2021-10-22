@@ -7,7 +7,7 @@ ext {
         '4.3.4plus'     : properties.getOrDefault('neo4jVersion434', '4.3.6'),
         '4.3.0-drop04.3': properties.getOrDefault('neo4jVersion43drop4', '4.3.0-drop04.3'),
         '4.3.0-drop04.4': properties.getOrDefault('neo4jVersion43drop4', '4.3.0-drop04.4'),
-        '4.3.0-drop04.5': properties.getOrDefault('neo4jVersion43drop4', '4.3.0-drop04.5'),
+        '4.3.0-drop05.0': properties.getOrDefault('neo4jVersion43drop5', '4.3.0-drop05.0'),
         'dev'           : properties.getOrDefault('neo4jVersionDev', '4.4.0-dev'),
     ]
 

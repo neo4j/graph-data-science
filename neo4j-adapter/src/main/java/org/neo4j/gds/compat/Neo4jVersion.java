@@ -31,7 +31,7 @@ public enum Neo4jVersion {
     V_4_3,
     V_4_3_drop43,
     V_4_3_drop44,
-    V_4_3_drop45,
+    V_4_3_drop50,
     V_Dev;
 
     @Override
@@ -47,8 +47,8 @@ public enum Neo4jVersion {
                 return "4.3.0-drop04.3";
             case V_4_3_drop44:
                 return "4.3.0-drop04.4";
-            case V_4_3_drop45:
-                return "4.3.0-drop04.5";
+            case V_4_3_drop50:
+                return "4.3.0-drop05.0";
             case V_Dev:
                 return "dev";
             default:
@@ -89,8 +89,9 @@ public enum Neo4jVersion {
             case "4.3.0-drop04.3":
                 return Neo4jVersion.V_4_3_drop43;
             case "4.3.0-drop04.4":
-            case "4.3.0-drop04.5":
                 return Neo4jVersion.V_4_3_drop44;
+            case "4.3.0-drop05.0":
+                return Neo4jVersion.V_4_3_drop50;
             default:
                 break;
         }

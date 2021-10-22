@@ -17,23 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.gds.compat.Neo4jProxyFactory;
-import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 
-@ServiceProvider
-public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
+import java.nio.file.Path;
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_4_3_drop45;
+final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
+
+    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
+        super(dbms);
     }
 
     @Override
-    public Neo4jProxyApi load() {
-        return new Neo4jProxyImpl();
+    public Path dbHome(Path workingDir) {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    }
+
+    @Override
+    public DbmsInfo dbmsInfo() {
+        return api.dbmsInfo();
     }
 }

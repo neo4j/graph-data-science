@@ -17,28 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
-import org.neo4j.gds.compat.CompatAccessMode;
-import org.neo4j.gds.compat.CustomAccessMode;
-import org.neo4j.internal.kernel.api.RelTypeSupplier;
-import org.neo4j.internal.kernel.api.TokenSet;
+import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.Scan;
+import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.function.Supplier;
+public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
+    private final Scan<C> scan;
+    private final int batchSize;
 
-public final class CompatAccessModeImpl extends CompatAccessMode {
-
-    CompatAccessModeImpl(CustomAccessMode custom) {
-        super(custom);
+    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
+        this.scan = scan;
+        this.batchSize = batchSize;
     }
 
     @Override
-    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
-        return custom.allowsReadNodeProperty(propertyKey);
-    }
-
-    @Override
-    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
-        return custom.allowsReadRelationshipProperty(propertyKey);
+    public boolean scanBatch(C cursor, KernelTransaction ktx) {
+        return scan.reserveBatch(cursor, batchSize);
     }
 }

@@ -36,7 +36,7 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
             Neo4jVersion.V_4_2,
             Neo4jVersion.V_4_3_drop43,
             Neo4jVersion.V_4_3_drop44,
-            Neo4jVersion.V_4_3_drop45
+            Neo4jVersion.V_4_3_drop50
         );
         return incompatibleVersions.contains(version);
     }

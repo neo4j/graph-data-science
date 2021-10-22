@@ -17,31 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
-import org.neo4j.gds.compat.AllocationTrackerAdapter;
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.gds.compat.CompatAccessMode;
+import org.neo4j.gds.compat.CustomAccessMode;
+import org.neo4j.internal.kernel.api.RelTypeSupplier;
+import org.neo4j.internal.kernel.api.TokenSet;
 
-final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
+import java.util.function.Supplier;
 
-    private final MemoryTracker memoryTracker;
+public final class CompatAccessModeImpl extends CompatAccessMode {
 
-    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
+    CompatAccessModeImpl(CustomAccessMode custom) {
+        super(custom);
     }
 
     @Override
-    public void add(long bytes) {
-        memoryTracker.allocateHeap(bytes);
+    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
+        return custom.allowsReadNodeProperty(propertyKey);
     }
 
     @Override
-    public void remove(long bytes) {
-        memoryTracker.releaseHeap(bytes);
-    }
-
-    @Override
-    public long trackedBytes() {
-        return memoryTracker.estimatedHeapMemory();
+    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
+        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }

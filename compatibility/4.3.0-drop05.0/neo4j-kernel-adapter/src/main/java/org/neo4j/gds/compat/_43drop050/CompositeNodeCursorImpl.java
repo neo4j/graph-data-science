@@ -17,24 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43drop045;
+package org.neo4j.gds.compat._43drop050;
 
-import org.neo4j.gds.compat.StoreScan;
-import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.gds.compat.CompositeNodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
-    private final Scan<C> scan;
-    private final int batchSize;
+import java.util.List;
 
-    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
-        this.scan = scan;
-        this.batchSize = batchSize;
-    }
+public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
-    @Override
-    public boolean scanBatch(C cursor, KernelTransaction ktx) {
-        return scan.reserveBatch(cursor, batchSize);
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
     }
 }
