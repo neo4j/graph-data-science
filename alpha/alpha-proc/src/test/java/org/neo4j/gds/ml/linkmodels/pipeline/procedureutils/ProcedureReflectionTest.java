@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 
@@ -58,7 +58,7 @@ public class ProcedureReflectionTest extends BaseProcTest {
 
     @Test
     void failOnInvalidConfig() {
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod("pageRank");
             assertThatThrownBy(() -> ProcedureReflection.INSTANCE.createAlgoConfig(
                 caller,

@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -136,7 +136,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
                 graphStore,
                 trainConfig,
@@ -196,7 +196,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var linkPredictionTrain = new LinkPredictionTrain(
                 graphStore,
                 config,

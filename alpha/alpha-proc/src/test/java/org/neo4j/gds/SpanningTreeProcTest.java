@@ -210,7 +210,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void shouldTrackProgress() {
-        ProcedureRunner.applyOnProcedure(db, SpanningTreeProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, SpanningTreeProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

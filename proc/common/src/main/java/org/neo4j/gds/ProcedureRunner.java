@@ -20,18 +20,26 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
 
 import java.util.function.Consumer;
 
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
+public final class ProcedureRunner {
 
-public class ProcedureRunner {
+    private ProcedureRunner() {}
 
-    public static <P extends BaseProc> void applyOnProcedure(GraphDatabaseAPI graphDb, Class<P> procClass, Consumer<P> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb)) {
+    public static <P extends BaseProc> P applyOnProcedure(
+        GraphDatabaseAPI graphDb,
+        Class<P> procClass,
+        ProcedureCallContext procedureCallContext,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory,
+        Consumer<P> func
+    ) {
+        return GraphDatabaseApiProxy.applyInTransaction(graphDb, tx -> {
             P proc;
             try {
                 proc = procClass.getDeclaredConstructor().newInstance();
@@ -39,14 +47,15 @@ public class ProcedureRunner {
                 throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
             }
 
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
+            proc.procedureTransaction = tx;
+            proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
             proc.api = graphDb;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
+            proc.callContext = procedureCallContext;
+            proc.log = log;
+            proc.taskRegistryFactory = taskRegistryFactory;
 
             func.accept(proc);
-        }
+            return proc;
+        });
     }
 }

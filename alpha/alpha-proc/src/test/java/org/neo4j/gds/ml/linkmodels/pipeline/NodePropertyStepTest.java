@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -66,7 +66,7 @@ class NodePropertyStepTest extends BaseProcTest {
     @Test
     void testInvokeProc() {
         var step = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "foo"));
-        ProcedureRunner.applyOnProcedure(db, LouvainStreamProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainStreamProc.class, proc -> {
             step.execute(proc, "g", List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS));
         });
         String streamQuery = "CALL gds.graph.streamNodeProperties('g', ['foo'])";

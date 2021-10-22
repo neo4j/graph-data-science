@@ -154,33 +154,37 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> func) {
-        ProcedureRunner.applyOnProcedure(graphDb(), getProcedureClazz(), proc -> {
-            if (proc instanceof NodePropertiesWriter) {
-                ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
-                    TransactionContext.of(
-                        proc.api,
-                        proc.procedureTransaction
-                    ));
-            }
+        TestProcedureRunner.applyOnProcedure(
+            graphDb(),
+            getProcedureClazz(),
+            proc -> {
+                if (proc instanceof NodePropertiesWriter) {
+                    ((NodePropertiesWriter<?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                        TransactionContext.of(
+                            proc.api,
+                            proc.procedureTransaction
+                        ));
+                }
 
-            if (proc instanceof WriteRelationshipsProc) {
-                ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new NativeRelationshipExporter.Builder(
-                    TransactionContext.of(
-                        proc.api,
-                        proc.procedureTransaction
-                    ));
-            }
+                if (proc instanceof WriteRelationshipsProc) {
+                    ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new NativeRelationshipExporter.Builder(
+                        TransactionContext.of(
+                            proc.api,
+                            proc.procedureTransaction
+                        ));
+                }
 
-            if (proc instanceof StreamOfRelationshipsWriter) {
-                ((StreamOfRelationshipsWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporter.Builder(
-                    TransactionContext.of(
-                        proc.api,
-                        proc.procedureTransaction
-                    ));
-            }
+                if (proc instanceof StreamOfRelationshipsWriter) {
+                    ((StreamOfRelationshipsWriter<?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporter.Builder(
+                        TransactionContext.of(
+                            proc.api,
+                            proc.procedureTransaction
+                        ));
+                }
 
-            func.accept(proc);
-        });
+                func.accept(proc);
+            }
+        );
     }
 
     @Test
