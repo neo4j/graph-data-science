@@ -25,6 +25,8 @@ import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
+import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.ThrowingFunction;
@@ -137,6 +139,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return new CompatGraphDatabaseAPIImpl(dbms);
+    }
+
+    @Override
+    public String validateExternalDatabaseName(String databaseName) {
+        var normalizedName = new NormalizedDatabaseName(databaseName);
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+        return normalizedName.name();
     }
 
     @Override

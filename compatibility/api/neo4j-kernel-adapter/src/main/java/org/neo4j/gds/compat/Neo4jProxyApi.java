@@ -91,6 +91,8 @@ public interface Neo4jProxyApi {
 
     GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms);
 
+    String validateExternalDatabaseName(String databaseName);
+
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
     AccessMode newRestrictedAccessMode(AccessMode original, AccessMode.Static restricting);

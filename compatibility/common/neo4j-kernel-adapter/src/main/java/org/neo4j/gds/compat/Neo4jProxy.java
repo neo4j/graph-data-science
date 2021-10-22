@@ -119,6 +119,10 @@ public final class Neo4jProxy {
         return IMPL.newDb(dbms);
     }
 
+    public static String validateExternalDatabaseName(String databaseName) {
+        return IMPL.validateExternalDatabaseName(databaseName);
+    }
+
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }

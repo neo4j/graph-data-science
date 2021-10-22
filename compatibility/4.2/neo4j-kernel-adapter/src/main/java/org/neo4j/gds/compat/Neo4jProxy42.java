@@ -24,6 +24,8 @@ import org.eclipse.collections.api.factory.Sets;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
+import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.graphdb.config.Setting;
@@ -120,6 +122,13 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return new CompatGraphDatabaseAPI42(dbms);
+    }
+
+    @Override
+    public String validateExternalDatabaseName(String databaseName) {
+        var normalizedName = new NormalizedDatabaseName(databaseName);
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+        return normalizedName.name();
     }
 
     @Override

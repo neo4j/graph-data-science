@@ -20,10 +20,9 @@
 package org.neo4j.gds.core.utils.io.db;
 
 import org.immutables.value.Value;
-import org.neo4j.configuration.helpers.DatabaseNameValidator;
-import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
 
@@ -53,14 +52,13 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Value.Check
     default void validate() {
-        DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
+        Neo4jProxy.validateExternalDatabaseName(dbName());
     }
 
     static GraphStoreToDatabaseExporterConfig of(String username, CypherMapWrapper config) {
         var normalizedConfig = config.getString(DB_NAME_KEY).map(dbName -> {
-            var databaseName = new NormalizedDatabaseName(dbName);
-            DatabaseNameValidator.validateInternalDatabaseName(databaseName);
-            return config.withString(DB_NAME_KEY, databaseName.name());
+            var databaseName = Neo4jProxy.validateExternalDatabaseName(dbName);
+            return config.withString(DB_NAME_KEY, databaseName);
         }).orElse(config);
         return new GraphStoreToDatabaseExporterConfigImpl(username, normalizedConfig);
     }
