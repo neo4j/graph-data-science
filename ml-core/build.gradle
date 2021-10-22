@@ -40,4 +40,5 @@ dependencies {
     testImplementation project(':ml-test-utils')
 
     testImplementation group: 'com.google.protobuf', name: 'protobuf-java', version: ver.'protobuf'
+    testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
 }
