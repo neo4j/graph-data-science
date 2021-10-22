@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -34,13 +35,14 @@ public final class TestProcedureRunner {
         Class<P> procClass,
         Consumer<P> func
     ) {
-        ProcedureRunner.applyOnProcedure(
+        GraphDatabaseApiProxy.runInTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
             graphDb,
             procClass,
             ProcedureCallContext.EMPTY,
             new TestLog(),
             EmptyTaskRegistryFactory.INSTANCE,
+            tx,
             func
-        );
+        ));
     }
 }

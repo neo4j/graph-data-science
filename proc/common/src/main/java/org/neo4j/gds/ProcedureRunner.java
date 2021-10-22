@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -31,31 +32,42 @@ public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
+    public static <P extends BaseProc> P instantiateProcedure(
+        GraphDatabaseAPI graphDb,
+        Class<P> procClass,
+        ProcedureCallContext procedureCallContext,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory,
+        Transaction tx
+    ) {
+        P proc;
+        try {
+            proc = procClass.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
+        }
+
+        proc.procedureTransaction = tx;
+        proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
+        proc.api = graphDb;
+        proc.callContext = procedureCallContext;
+        proc.log = log;
+        proc.taskRegistryFactory = taskRegistryFactory;
+
+        return proc;
+    }
+
     public static <P extends BaseProc> P applyOnProcedure(
         GraphDatabaseAPI graphDb,
         Class<P> procClass,
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
+        Transaction tx,
         Consumer<P> func
     ) {
-        return GraphDatabaseApiProxy.applyInTransaction(graphDb, tx -> {
-            P proc;
-            try {
-                proc = procClass.getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
-            }
-
-            proc.procedureTransaction = tx;
-            proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
-            proc.api = graphDb;
-            proc.callContext = procedureCallContext;
-            proc.log = log;
-            proc.taskRegistryFactory = taskRegistryFactory;
-
-            func.accept(proc);
-            return proc;
-        });
+        var proc = instantiateProcedure(graphDb, procClass, procedureCallContext, log, taskRegistryFactory, tx);
+        func.accept(proc);
+        return proc;
     }
 }
