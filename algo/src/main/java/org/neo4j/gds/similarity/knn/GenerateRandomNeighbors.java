@@ -22,10 +22,9 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.UniformSampler;
+import org.neo4j.gds.ml.core.batch.UniformSamplerWithRetries;
 
 import java.util.SplittableRandom;
-import java.util.stream.LongStream;
 
 /**
  * Initial step in KNN calculation.
@@ -70,26 +69,23 @@ final class GenerateRandomNeighbors implements Runnable {
         var k = this.k;
         var boundedK = this.boundedK;
 
-        var uniformSampler = new UniformSampler(rng);
+        var uniformSampler = new UniformSamplerWithRetries(rng);
 
         partition.consume(nodeId -> {
-            var validCandidates = LongStream
-                .range(0, nodeCount)
-                .filter(otherNode -> !computer.excludeNodePair(nodeId, otherNode));
-
             var chosen = uniformSampler.sample(
-                validCandidates,
+                0,
+                nodeCount,
                 computer.lowerBoundOfPotentialNeighbours(nodeId),
-                boundedK
+                boundedK,
+                l -> computer.excludeNodePair(nodeId, l)
             );
 
             var neighbors = new NeighborList(k);
-            chosen.forEach(candidate -> neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng));
+            for (long candidate : chosen) {
+                neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng);
+            };
 
-            assert neighbors.size() >= Math.min(
-                computer.lowerBoundOfPotentialNeighbours(nodeId),
-                boundedK
-            );
+            assert neighbors.size() >= Math.min(computer.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
             assert neighbors.size() <= k;
 
             this.neighbors.set(nodeId, neighbors);
