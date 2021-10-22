@@ -46,7 +46,7 @@ class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependenc
                 var serviceBuilder = ServiceLoader.load(LicensingServiceBuilder.class)
                     .stream()
                     .map(ServiceLoader.Provider::get)
-                    .min(Comparator.comparing(LicensingServiceBuilder::priority))
+                    .max(Comparator.comparing(LicensingServiceBuilder::priority))
                     .orElseThrow(() -> new LinkageError("Could not load " + LicensingServiceBuilder.class + " implementation"));
                 var service = serviceBuilder.build(dependencies.config());
 

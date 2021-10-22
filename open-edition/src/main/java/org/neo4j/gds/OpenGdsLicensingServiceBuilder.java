@@ -29,4 +29,9 @@ public class OpenGdsLicensingServiceBuilder implements LicensingServiceBuilder {
     public LicensingService build(Config config) {
         return new OpenGdsLicensingService();
     }
+
+    @Override
+    public int priority() {
+        return 0;
+    }
 }

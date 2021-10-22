@@ -27,7 +27,5 @@ public interface LicensingServiceBuilder {
 
     LicensingService build(Config config);
 
-    default int priority() {
-        return 1;
-    }
+    int priority();
 }
