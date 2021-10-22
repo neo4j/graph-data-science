@@ -47,6 +47,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     private final Messager messager;
     private final BuilderValidator validator;
     private final TypeMirror longConsumerType;
+    private final TypeMirror drainingIteratorType;
 
     private TypeElement builderType;
 
@@ -54,12 +55,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         Types typeUtils,
         TypeMirror rootType,
         TypeMirror longConsumerType,
+        TypeMirror drainingIteratorType,
         boolean isArrayType,
         Messager messager
     ) {
         super(false);
         this.typeUtils = typeUtils;
         this.longConsumerType = longConsumerType;
+        this.drainingIteratorType = drainingIteratorType;
         this.messager = messager;
         this.validator = new BuilderValidator(rootType, isArrayType, messager);
     }
@@ -91,7 +94,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
             case "contains":
                 return validateContainsMethod(e);
             case "drainingIterator":
-                return validateDrainingIterator(e);
+                return validateDrainingIterator(e, elementType);
             case "builder":
                 switch (e.getParameters().size()) {
                     case 2:
@@ -137,9 +140,13 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && isAbstract(e, messager);
     }
 
-    private boolean validateDrainingIterator(ExecutableElement e) {
+    private boolean validateDrainingIterator(ExecutableElement e, TypeMirror elementType) {
+        var element = (TypeElement) typeUtils.asElement(drainingIteratorType);
+        var arrayType = typeUtils.getArrayType(elementType);
+        var expectedReturnType = typeUtils.getDeclaredType(element, arrayType);
+
         return hasNoParameters(e, messager)
-               && mustReturn(e, TypeKind.DECLARED, messager)
+               && mustReturn(e, expectedReturnType, messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);

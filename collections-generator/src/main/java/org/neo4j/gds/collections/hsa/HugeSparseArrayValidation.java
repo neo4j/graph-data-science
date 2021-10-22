@@ -61,11 +61,13 @@ final class HugeSparseArrayValidation {
 
         var pageShift = (int) getAnnotationValue(annotationMirror, "pageShift").getValue();
         var longConsumerType = elementUtils.getTypeElement(LongConsumer.class.getName()).asType();
+        var drainingIteratorType = elementUtils.getTypeElement("org.neo4j.gds.collections.DrainingIterator").asType();
 
         var elementValidator = new ElementValidator(
             typeUtils,
             element.asType(),
             longConsumerType,
+            drainingIteratorType,
             isArrayType,
             this.messager
         );
