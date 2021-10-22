@@ -112,13 +112,18 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
-            var batch = propertiesByNeoIds.drainingBatch();
+            var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {
-                batch.consume((neoId, value) -> {
-                    var mappedId = nodeMapping.toMappedNodeId(neoId);
-                    propertiesByMappedIdsBuilder.set(mappedId, value);
-                });
+                var page = batch.page;
+                var offset = batch.offset;
+
+                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
+                    var value = page[pageIndex];
+                    if (value != defaultValue) {
+                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                    }
+                }
             }
         }).collect(Collectors.toList());
 

@@ -33,7 +33,7 @@ import java.util.function.LongConsumer;
  * The array is immutable and needs to be constructed using a thread-safe,
  * growing builder.
  */
-//@HugeSparseArray(valueType = double.class)
+@HugeSparseArray(valueType = double.class)
 public interface HugeSparseDoubleArray {
 
     /**
@@ -51,8 +51,7 @@ public interface HugeSparseDoubleArray {
      */
     boolean contains(long index);
 
-    HugeSparseDoubleArrayFoo.DrainingIterator drainingIterator();
-    HugeSparseDoubleArrayFoo.DrainingBatch drainingBatch();
+    DrainingIterator<double[]> drainingIterator();
 
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
@@ -69,7 +68,7 @@ public interface HugeSparseDoubleArray {
         long initialCapacity,
         LongConsumer trackAllocation
     ) {
-        return new HugeSparseDoubleArrayFoo.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
+        return new HugeSparseDoubleArraySon.GrowingBuilder(defaultValue, initialCapacity, trackAllocation);
     }
 
     interface Builder {

@@ -51,6 +51,8 @@ public interface HugeSparseDoubleArrayArray {
      */
     boolean contains(long index);
 
+    DrainingIterator<double[][]> drainingIterator();
+
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */

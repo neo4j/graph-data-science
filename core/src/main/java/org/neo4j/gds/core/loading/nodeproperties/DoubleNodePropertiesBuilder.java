@@ -59,7 +59,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     private final HugeSparseDoubleArray.Builder builder;
-    private final DefaultValue defaultValue;
+    private final double defaultValue;
     private final int concurrency;
     private final AllocationTracker allocationTracker;
 
@@ -68,12 +68,12 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         AllocationTracker allocationTracker,
         int concurrency
     ) {
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue.doubleValue();
         this.concurrency = concurrency;
         this.allocationTracker = allocationTracker;
         this.maxValue = Double.NEGATIVE_INFINITY;
         this.builder = HugeSparseDoubleArray.builder(
-            defaultValue.doubleValue(),
+            this.defaultValue,
             allocationTracker::add
         );
     }
@@ -99,20 +99,25 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
-            defaultValue.doubleValue(),
+            defaultValue,
             allocationTracker::add
         );
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
         var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
-            var batch = propertiesByNeoIds.drainingBatch();
+            var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {
-                batch.consume((neoId, value) -> {
-                    var mappedId = nodeMapping.toMappedNodeId(neoId);
-                    propertiesByMappedIdsBuilder.set(mappedId, value);
-                });
+                var page = batch.page;
+                var offset = batch.offset;
+
+                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
+                    var value = page[pageIndex];
+                    if (Double.compare(value, defaultValue) != 0) {
+                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                    }
+                }
             }
         }).collect(Collectors.toList());
 

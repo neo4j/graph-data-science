@@ -90,6 +90,8 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateGetMethod(e, elementType);
             case "contains":
                 return validateContainsMethod(e);
+            case "drainingIterator":
+                return validateDrainingIterator(e);
             case "builder":
                 switch (e.getParameters().size()) {
                     case 2:
@@ -130,6 +132,14 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
     private boolean validateContainsMethod(ExecutableElement e) {
         return mustReturn(e, TypeKind.BOOLEAN, messager)
                && hasSingleLongParameter(e, messager)
+               && doesNotThrow(e, messager)
+               && isNotGeneric(e, messager)
+               && isAbstract(e, messager);
+    }
+
+    private boolean validateDrainingIterator(ExecutableElement e) {
+        return hasNoParameters(e, messager)
+               && mustReturn(e, TypeKind.DECLARED, messager)
                && doesNotThrow(e, messager)
                && isNotGeneric(e, messager)
                && isAbstract(e, messager);

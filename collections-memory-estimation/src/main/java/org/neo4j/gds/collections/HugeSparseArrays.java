@@ -248,13 +248,13 @@ public final class HugeSparseArrays {
                 return new CollectionAndElementSize(HugeSparseIntArraySon.class, Integer.BYTES);
             }
             if (valueClazz.isAssignableFrom(long.class)) {
-                return new CollectionAndElementSize(HugeSparseLongArrayFoo.class, Long.BYTES);
+                return new CollectionAndElementSize(HugeSparseLongArraySon.class, Long.BYTES);
             }
             if (valueClazz.isAssignableFrom(float.class)) {
                 return new CollectionAndElementSize(HugeSparseFloatArraySon.class, Float.BYTES);
             }
             if (valueClazz.isAssignableFrom(double.class)) {
-                return new CollectionAndElementSize(HugeSparseDoubleArrayFoo.class, Double.BYTES);
+                return new CollectionAndElementSize(HugeSparseDoubleArraySon.class, Double.BYTES);
             }
             throw new IllegalArgumentException("Unsupported primitive value class: " + valueClazz);
         }

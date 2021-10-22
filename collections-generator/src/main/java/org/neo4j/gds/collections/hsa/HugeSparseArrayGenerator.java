@@ -35,18 +35,21 @@ import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongConsumer;
+import java.util.stream.Stream;
 
 import static java.util.Map.entry;
 
 final class HugeSparseArrayGenerator {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
+    private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
     private HugeSparseArrayGenerator() {}
 
@@ -89,6 +92,7 @@ final class HugeSparseArrayGenerator {
         builder.addMethod(capacityMethod(capacity));
         builder.addMethod(getMethod(valueType, pages, pageShift, pageMask, defaultValue));
         builder.addMethod(containsMethod(valueType, pages, pageShift, pageMask, defaultValue));
+        builder.addMethod(drainingIteratorMethod(valueType, pages, pageSize));
 
         // GrowingBuilder
         builder.addType(GrowingBuilderGenerator.growingBuilder(
@@ -308,6 +312,19 @@ final class HugeSparseArrayGenerator {
                 .endControlFlow()
                 .addStatement("return false")
                 .build())
+            .build();
+    }
+
+    private static MethodSpec drainingIteratorMethod(
+        TypeName valueType,
+        FieldSpec pages,
+        FieldSpec pageSize
+    ) {
+        return MethodSpec.methodBuilder("drainingIterator")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(ParameterizedTypeName.get(DRAINING_ITERATOR, ArrayTypeName.of(valueType)))
+            .addStatement("return new $T<>($N, $N)", DRAINING_ITERATOR, pages, pageSize)
             .build();
     }
 

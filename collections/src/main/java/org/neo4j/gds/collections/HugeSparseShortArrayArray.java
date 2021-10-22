@@ -51,6 +51,8 @@ public interface HugeSparseShortArrayArray {
      */
     boolean contains(long index);
 
+    DrainingIterator<short[][]> drainingIterator();
+
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */

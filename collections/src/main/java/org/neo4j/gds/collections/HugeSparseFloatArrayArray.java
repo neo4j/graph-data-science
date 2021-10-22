@@ -51,6 +51,8 @@ public interface HugeSparseFloatArrayArray {
      */
     boolean contains(long index);
 
+    DrainingIterator<float[][]> drainingIterator();
+
     /**
      * @return a thread-safe array builder that grows dynamically on inserts
      */
