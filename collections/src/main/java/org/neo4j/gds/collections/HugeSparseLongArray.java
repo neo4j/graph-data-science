@@ -51,6 +51,11 @@ public interface HugeSparseLongArray {
      */
     boolean contains(long index);
 
+    /**
+     * Returns an iterator that consumes the underlying pages of this array.
+     * Once the iterator has been consumed, the array is empty and will return
+     * the default value for each index.
+     */
     DrainingIterator<long[]> drainingIterator();
 
     /**
