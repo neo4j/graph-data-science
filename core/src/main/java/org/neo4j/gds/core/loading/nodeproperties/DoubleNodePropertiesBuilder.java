@@ -23,6 +23,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
@@ -31,6 +32,7 @@ import org.neo4j.values.storable.Value;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.OptionalDouble;
+import java.util.OptionalLong;
 
 public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
@@ -98,19 +100,17 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             allocationTracker::add
         );
 
-        ParallelUtil.parallelForEachNode(
-            nodeMapping.nodeCount(),
-            concurrency,
-            mappedId -> {
-                var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                if (propertiesByNeoIds.contains(neoId)) {
-                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
-                }
-            }
-        );
+        var drainingIterator = propertiesByNeoIds.drainingIterator();
+        var reuseBatch = propertiesByNeoIds.drainingBatch();
+
+        while (drainingIterator.next(reuseBatch)) {
+            reuseBatch.consume((neoId, value) -> {
+                var mappedId = nodeMapping.toMappedNodeId(neoId);
+                propertiesByMappedIdsBuilder.set(mappedId, value);
+            });
+        }
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
-
 
         var maybeMaxValue = size > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
