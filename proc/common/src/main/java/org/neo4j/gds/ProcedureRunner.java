@@ -33,7 +33,7 @@ public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
-    public static <P extends BaseProc> P instantiateProcedure(P caller, Class<P> procedureClass) {
+    public static <P extends BaseProc> P instantiateProcedure(BaseProc caller, Class<P> procedureClass) {
         return ProcedureRunner.instantiateProcedure(
             caller.api,
             procedureClass,
