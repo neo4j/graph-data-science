@@ -98,9 +98,9 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
             case "builder":
                 switch (e.getParameters().size()) {
                     case 2:
-                        return validateGrowingBuilderMethod(e, elementType);
+                        return validateBuilderMethod(e, elementType);
                     case 3:
-                        return validateGrowingBuilderWithInitialCapacityMethod(e, elementType);
+                        return validateBuilderWithInitialCapacityMethod(e, elementType);
                     default:
                         messager.printMessage(
                             Diagnostic.Kind.ERROR,
@@ -152,7 +152,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && isAbstract(e, messager);
     }
 
-    private boolean validateGrowingBuilderMethod(ExecutableElement e, TypeMirror elementType) {
+    private boolean validateBuilderMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
                && isStatic(e, messager)
                && hasParameterCount(e, 2, messager)
@@ -160,7 +160,7 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && hasTypeAtIndex(typeUtils, e, 1, longConsumerType, messager);
     }
 
-    private boolean validateGrowingBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
+    private boolean validateBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
                && isStatic(e, messager)
                && hasParameterCount(e, 3, messager)
