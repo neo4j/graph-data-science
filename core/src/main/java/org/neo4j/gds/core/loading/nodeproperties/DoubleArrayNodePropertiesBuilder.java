@@ -24,14 +24,19 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeSparseDoubleArrayArray.Builder builder;
-    private final DefaultValue defaultValue;
+    private final double[] defaultValue;
     private final AllocationTracker allocationTracker;
     private final int concurrency;
 
@@ -42,9 +47,9 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     ) {
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue.doubleArrayValue();
         this.builder = HugeSparseDoubleArrayArray.builder(
-            defaultValue.doubleArrayValue(),
+            this.defaultValue,
             allocationTracker::add
         );
     }
@@ -68,20 +73,29 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(
-            defaultValue.doubleArrayValue(),
+            defaultValue,
             allocationTracker::add
         );
 
-        ParallelUtil.parallelForEachNode(
-            nodeMapping.nodeCount(),
-            concurrency,
-            mappedId -> {
-                var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                if (propertiesByNeoIds.contains(neoId)) {
-                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+        var drainingIterator = propertiesByNeoIds.drainingIterator();
+
+        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+            var batch = drainingIterator.drainingBatch();
+
+            while (drainingIterator.next(batch)) {
+                var page = batch.page;
+                var offset = batch.offset;
+
+                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
+                    var value = page[pageIndex];
+                    if (value != null && !Arrays.equals(value, defaultValue)) {
+                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                    }
                 }
             }
-        );
+        }).collect(Collectors.toList());
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 

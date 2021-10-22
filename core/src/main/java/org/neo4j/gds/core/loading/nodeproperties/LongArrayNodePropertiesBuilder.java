@@ -24,22 +24,27 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeSparseLongArrayArray.Builder builder;
-    private final DefaultValue defaultValue;
+    private final long[] defaultValue;
     private final AllocationTracker allocationTracker;
     private final int concurrency;
 
     public LongArrayNodePropertiesBuilder(DefaultValue defaultValue, AllocationTracker allocationTracker, int concurrency) {
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue.longArrayValue();
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
-        this.builder = HugeSparseLongArrayArray.builder(defaultValue.longArrayValue(), allocationTracker::add);
+        this.builder = HugeSparseLongArrayArray.builder(this.defaultValue, allocationTracker::add);
     }
 
     public void set(long neoNodeId, long[] value) {
@@ -65,20 +70,29 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
-            defaultValue.longArrayValue(),
+            defaultValue,
             allocationTracker::add
         );
 
-        ParallelUtil.parallelForEachNode(
-            nodeMapping.nodeCount(),
-            concurrency,
-            mappedId -> {
-                var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                if (propertiesByNeoIds.contains(neoId)) {
-                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+        var drainingIterator = propertiesByNeoIds.drainingIterator();
+
+        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+            var batch = drainingIterator.drainingBatch();
+
+            while (drainingIterator.next(batch)) {
+                var page = batch.page;
+                var offset = batch.offset;
+
+                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
+                    var value = page[pageIndex];
+                    if (value != null && !Arrays.equals(value, defaultValue)) {
+                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                    }
                 }
             }
-        );
+        }).collect(Collectors.toList());
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 

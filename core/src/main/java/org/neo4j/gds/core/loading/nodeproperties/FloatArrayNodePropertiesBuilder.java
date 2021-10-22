@@ -24,25 +24,27 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeSparseFloatArrayArray.Builder builder;
-    private final DefaultValue defaultValue;
+    private final float[] defaultValue;
     private final AllocationTracker allocationTracker;
     private final int concurrency;
 
     public FloatArrayNodePropertiesBuilder(DefaultValue defaultValue, AllocationTracker allocationTracker, int concurrency) {
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
-        // validate defaultValue is a float array
-        defaultValue.floatArrayValue();
-
-        this.defaultValue = defaultValue;
-        this.builder = HugeSparseFloatArrayArray.builder(defaultValue.floatArrayValue(), allocationTracker::add);
+        this.defaultValue = defaultValue.floatArrayValue();
+        this.builder = HugeSparseFloatArrayArray.builder(this.defaultValue, allocationTracker::add);
     }
 
     public void set(long neoNodeId, float[] value) {
@@ -64,21 +66,29 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(
-            defaultValue.floatArrayValue(),
+            defaultValue,
             allocationTracker::add
         );
 
-        ParallelUtil.parallelForEachNode(
-            nodeMapping.nodeCount(),
-            concurrency,
-            mappedId -> {
-                var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                if (propertiesByNeoIds.contains(neoId)) {
-                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
+        var drainingIterator = propertiesByNeoIds.drainingIterator();
+
+        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+            var batch = drainingIterator.drainingBatch();
+
+            while (drainingIterator.next(batch)) {
+                var page = batch.page;
+                var offset = batch.offset;
+
+                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
+                    var value = page[pageIndex];
+                    if (value != null && !Arrays.equals(value, defaultValue)) {
+                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                    }
                 }
             }
-        );
+        }).collect(Collectors.toList());
 
+        ParallelUtil.run(tasks, Pools.DEFAULT);
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
         return new FloatArrayStoreNodeProperties(propertyValues, size);
