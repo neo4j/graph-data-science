@@ -46,7 +46,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class PipelineExecutor {
     public static final String SPLIT_ERROR_TEMPLATE = "%s graph contains no relationships. Consider increasing the `%s` or provide a larger graph";
 
-    private final TrainingPipeline pipeline;
+    private final LinkPredictionPipelineBuilder pipeline;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
@@ -54,7 +54,7 @@ public class PipelineExecutor {
     private final ProgressTracker progressTracker;
 
     public PipelineExecutor(
-        TrainingPipeline pipeline,
+        LinkPredictionPipelineBuilder pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
         String userName,

@@ -34,57 +34,57 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TrainingPipelineTest {
+class LinkPredictionPipelineBuilderTest {
 
     @Test
     void canCreateEmptyPipeline() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
 
         assertThat(pipeline)
-            .returns(List.of(), TrainingPipeline::featureSteps)
-            .returns(List.of(), TrainingPipeline::nodePropertySteps)
-            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, TrainingPipeline::splitConfig)
+            .returns(List.of(), LinkPredictionPipelineBuilder::featureSteps)
+            .returns(List.of(), LinkPredictionPipelineBuilder::nodePropertySteps)
+            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipelineBuilder::splitConfig)
             .returns(
                 List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap()),
-                TrainingPipeline::parameterSpace
+                LinkPredictionPipelineBuilder::parameterSpace
             );
     }
 
     @Test
     void canAddFeatureSteps() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
         pipeline.addFeatureStep(hadamardFeatureStep);
 
         assertThat(pipeline)
-            .returns(List.of(hadamardFeatureStep), TrainingPipeline::featureSteps);
+            .returns(List.of(hadamardFeatureStep), LinkPredictionPipelineBuilder::featureSteps);
 
         var cosineFeatureStep = new CosineFeatureStep(List.of("b", "c"));
         pipeline.addFeatureStep(cosineFeatureStep);
 
         assertThat(pipeline)
-            .returns(List.of(hadamardFeatureStep, cosineFeatureStep), TrainingPipeline::featureSteps);
+            .returns(List.of(hadamardFeatureStep, cosineFeatureStep), LinkPredictionPipelineBuilder::featureSteps);
     }
 
     @Test
     void canAddNodePropertySteps() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
         pipeline.addNodePropertyStep(pageRankPropertyStep);
 
         assertThat(pipeline)
-            .returns(List.of(pageRankPropertyStep), TrainingPipeline::nodePropertySteps);
+            .returns(List.of(pageRankPropertyStep), LinkPredictionPipelineBuilder::nodePropertySteps);
 
         var degreeNodePropertyStep = NodePropertyStep.of("degree", Map.of("mutateProperty", "degree"));
         pipeline.addNodePropertyStep(degreeNodePropertyStep);
 
         assertThat(pipeline)
-            .returns(List.of(pageRankPropertyStep, degreeNodePropertyStep), TrainingPipeline::nodePropertySteps);
+            .returns(List.of(pageRankPropertyStep, degreeNodePropertyStep), LinkPredictionPipelineBuilder::nodePropertySteps);
     }
 
     @Test
     void canSetParameterSpace() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         pipeline.setParameterSpace(List.of(
             Map.of("penalty", 19)
         ));
@@ -96,7 +96,7 @@ class TrainingPipelineTest {
 
     @Test
     void overridesTheParameterSpace() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         pipeline.setParameterSpace(List.of(
             Map.of("penalty", 19)
         ));
@@ -115,17 +115,17 @@ class TrainingPipelineTest {
 
     @Test
     void canSetSplitConfig() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
-            .returns(splitConfig, TrainingPipeline::splitConfig);
+            .returns(splitConfig, LinkPredictionPipelineBuilder::splitConfig);
     }
 
     @Test
     void overridesTheSplitConfig() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipelineBuilder();
         var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
@@ -133,7 +133,7 @@ class TrainingPipelineTest {
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
-            .returns(splitConfigOverride, TrainingPipeline::splitConfig);
+            .returns(splitConfigOverride, LinkPredictionPipelineBuilder::splitConfig);
     }
 
     @Nested
@@ -141,7 +141,7 @@ class TrainingPipelineTest {
 
         @Test
         void returnsCorrectDefaultsMap() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             assertThat(pipeline.toMap())
                 .containsOnlyKeys("featurePipeline", "splitConfig", "parameterSpace")
                 .satisfies(pipelineMap -> {
@@ -164,7 +164,7 @@ class TrainingPipelineTest {
 
         @Test
         void returnsCorrectMapWithFullConfiguration() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
@@ -205,7 +205,7 @@ class TrainingPipelineTest {
 
         @Test
         void deepCopiesFeatureSteps() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
             pipeline.addFeatureStep(hadamardFeatureStep);
 
@@ -224,7 +224,7 @@ class TrainingPipelineTest {
 
         @Test
         void deepCopiesNodePropertySteps() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             var pageRankPropertyStep = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr"));
             pipeline.addNodePropertyStep(pageRankPropertyStep);
 
@@ -243,7 +243,7 @@ class TrainingPipelineTest {
 
         @Test
         void deepCopiesParameterSpace() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             pipeline.setParameterSpace(List.of(
                 Map.of("penalty", 1000000),
                 Map.of("penalty", 1)
@@ -265,7 +265,7 @@ class TrainingPipelineTest {
 
         @Test
         void doesntDeepCopySplitConfig() {
-            var pipeline = new TrainingPipeline();
+            var pipeline = new LinkPredictionPipelineBuilder();
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 

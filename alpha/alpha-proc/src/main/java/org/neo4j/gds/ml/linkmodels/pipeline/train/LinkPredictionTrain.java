@@ -34,9 +34,9 @@ import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineBuilder;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
@@ -67,13 +67,13 @@ public class LinkPredictionTrain
     private final GraphStore graphStore;
     private final LinkPredictionTrainConfig trainConfig;
     private final PipelineExecutor pipelineExecutor;
-    private final TrainingPipeline pipeline;
+    private final LinkPredictionPipelineBuilder pipeline;
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
         GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
-        TrainingPipeline pipeline,
+        LinkPredictionPipelineBuilder pipeline,
         PipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker
     ) {

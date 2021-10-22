@@ -33,7 +33,7 @@ public class PipelineInfoResult {
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, TrainingPipeline info) {
+    PipelineInfoResult(String pipelineName, LinkPredictionPipelineBuilder info) {
         this.name = pipelineName;
         this.nodePropertySteps = info
             .nodePropertySteps()
