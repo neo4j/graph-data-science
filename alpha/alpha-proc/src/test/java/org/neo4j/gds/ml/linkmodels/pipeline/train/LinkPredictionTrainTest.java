@@ -37,7 +37,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineBuilder;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
@@ -119,7 +119,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .trainFraction(0.5)
             .testFraction(0.5)
             .build();
-        LinkPredictionPipelineBuilder pipeline = new LinkPredictionPipelineBuilder();
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
         pipeline.setParameterSpace(List.of(
@@ -182,7 +182,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
             .testFraction(0.5)
             .build();
 
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
         pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));

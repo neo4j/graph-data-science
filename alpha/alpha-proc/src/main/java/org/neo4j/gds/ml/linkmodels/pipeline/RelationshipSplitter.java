@@ -38,13 +38,13 @@ public class RelationshipSplitter {
     private static final String SPLIT_ERROR_TEMPLATE = "%s graph contains no relationships. Consider increasing the `%s` or provide a larger graph";
 
     private final String graphName;
-    private final LinkPredictionPipelineBuilder pipeline;
+    private final LinkPredictionPipeline pipeline;
     private final BaseProc caller;
     private final ProgressTracker progressTracker;
 
     RelationshipSplitter(
         String graphName,
-        LinkPredictionPipelineBuilder pipeline,
+        LinkPredictionPipeline pipeline,
         BaseProc caller,
         ProgressTracker progressTracker
     ) {

@@ -41,7 +41,7 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtra
 
 public class PipelineExecutor {
 
-    private final LinkPredictionPipelineBuilder pipeline;
+    private final LinkPredictionPipeline pipeline;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
@@ -50,7 +50,7 @@ public class PipelineExecutor {
     private final ProgressTracker progressTracker;
 
     public PipelineExecutor(
-        LinkPredictionPipelineBuilder pipeline,
+        LinkPredictionPipeline pipeline,
         BaseProc caller,
         NamedDatabaseId databaseId,
         String userName,

@@ -40,7 +40,7 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineBuilder;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
@@ -92,7 +92,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -156,7 +156,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"1, 0.3", "3, 0.05", "4, 0.002", "6, 0.00000000001", "6, 0.0"})
     void shouldPredictWithThreshold(int expectedPredictions, double threshold) {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -199,7 +199,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
     @Test
     void shouldPredictWithPipelineContainingNodePropertySteps() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 
@@ -254,7 +254,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
     @Test
     void shouldPredictTwice() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 

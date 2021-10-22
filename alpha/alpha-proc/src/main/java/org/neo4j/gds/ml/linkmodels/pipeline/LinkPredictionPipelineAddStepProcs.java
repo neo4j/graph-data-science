@@ -92,7 +92,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
 
     // check if adding would result in more than one relationshipWeightProperty
     private void validateRelationshipProperty(
-        LinkPredictionPipelineBuilder pipeline,
+        LinkPredictionPipeline pipeline,
         Map<String, Object> procedureConfig
     ) {
         if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;

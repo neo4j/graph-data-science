@@ -96,7 +96,7 @@ class PipelineExecutorTest extends BaseProcTest {
     // add several linkFeatureSteps + assert that linkFeatures computed correct
     @Test
     void singleLinkFeatureStep() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
@@ -123,7 +123,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void dependentNodePropertySteps() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
 
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addNodePropertyStep(NodePropertyStep.of("scaleProperties", Map.of(
@@ -144,7 +144,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void multipleLinkFeatureStep() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
         pipeline.addFeatureStep(new CosineFeatureStep(List.of("noise", "z")));
 
@@ -183,7 +183,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void testProcedureAndLinkFeatures() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addNodePropertyStep(NodePropertyStep.of(
             "pageRank",
             Map.of("mutateProperty", "pageRank")
@@ -226,7 +226,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
     @Test
     void validateLinkFeatureSteps() {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
@@ -268,7 +268,7 @@ class PipelineExecutorTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("invalidSplits")
     void failOnEmptySplitGraph(LinkPredictionSplitConfig splitConfig, String expectedError) {
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.setSplitConfig(splitConfig);
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
@@ -308,7 +308,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
         var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
 
-        var pipeline = new LinkPredictionPipelineBuilder();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {

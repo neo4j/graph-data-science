@@ -31,7 +31,7 @@ public final class PipelineUtils {
 
     private PipelineUtils() {}
 
-    public static LinkPredictionPipelineBuilder getPipelineModelInfo(String pipelineName, String username) {
+    public static LinkPredictionPipeline getPipelineModelInfo(String pipelineName, String username) {
        var model = ModelCatalog.getUntyped(username, pipelineName);
 
         assert model != null;
@@ -43,9 +43,9 @@ public final class PipelineUtils {
                 model.algoType()
             ));
         }
-        assert model.customInfo() instanceof LinkPredictionPipelineBuilder;
+        assert model.customInfo() instanceof LinkPredictionPipeline;
 
-        return (LinkPredictionPipelineBuilder) model.customInfo();
+        return (LinkPredictionPipeline) model.customInfo();
     }
 
     public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getLinkPredictionPipeline(

@@ -53,7 +53,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
             GraphSchema.empty(),
             new Object(),
             PipelineDummyTrainConfig.of(username()),
-            new LinkPredictionPipelineBuilder()
+            new LinkPredictionPipeline()
         );
 
         ModelCatalog.set(model);

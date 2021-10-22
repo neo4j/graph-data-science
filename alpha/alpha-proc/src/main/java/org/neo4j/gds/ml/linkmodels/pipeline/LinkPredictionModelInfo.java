@@ -35,7 +35,7 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
 
     Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics();
 
-    LinkPredictionPipelineBuilder trainingPipeline();
+    LinkPredictionPipeline trainingPipeline();
 
     @Override
     default Map<String, Object> toMap() {
@@ -52,7 +52,7 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
     static LinkPredictionModelInfo of(
         LinkLogisticRegressionTrainConfig bestParameters,
         Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics,
-        LinkPredictionPipelineBuilder trainingPipeline
+        LinkPredictionPipeline trainingPipeline
     ) {
         return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, trainingPipeline);
     }

@@ -37,20 +37,20 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionPipelineBuilder extends PipelineBuilder<LinkFeatureStep> {
+public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     private LinkPredictionSplitConfig splitConfig;
     // List of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
     // currently only storing the parameters as Map to avoid default concurrency issue
     // TODO resolve default/user-defined concurrency issue and store actual config objects
     private @NotNull List<Map<String, Object>> parameterSpace;
 
-    public LinkPredictionPipelineBuilder() {
+    public LinkPredictionPipeline() {
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
         this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap());
     }
 
-    public LinkPredictionPipelineBuilder copy() {
-        var copied = new LinkPredictionPipelineBuilder();
+    public LinkPredictionPipeline copy() {
+        var copied = new LinkPredictionPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
         copied.setParameterSpace(new ArrayList<>(parameterSpace));
