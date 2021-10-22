@@ -248,7 +248,7 @@ public final class HugeSparseArrays {
                 return new CollectionAndElementSize(HugeSparseIntArraySon.class, Integer.BYTES);
             }
             if (valueClazz.isAssignableFrom(long.class)) {
-                return new CollectionAndElementSize(HugeSparseLongArraySon.class, Long.BYTES);
+                return new CollectionAndElementSize(HugeSparseLongArrayFoo.class, Long.BYTES);
             }
             if (valueClazz.isAssignableFrom(float.class)) {
                 return new CollectionAndElementSize(HugeSparseFloatArraySon.class, Float.BYTES);

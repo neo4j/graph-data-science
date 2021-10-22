@@ -24,7 +24,6 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArray;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
@@ -106,16 +105,15 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             allocationTracker::add
         );
 
-        ParallelUtil.parallelForEachNode(
-            nodeMapping.nodeCount(),
-            concurrency,
-            mappedId -> {
-                var neoId = nodeMapping.toOriginalNodeId(mappedId);
-                if (propertiesByNeoIds.contains(neoId)) {
-                    propertiesByMappedIdsBuilder.set(mappedId, propertiesByNeoIds.get(neoId));
-                }
-            }
-        );
+        var drainingIterator = propertiesByNeoIds.drainingIterator();
+        var reuseBatch = propertiesByNeoIds.drainingBatch();
+
+        while (drainingIterator.next(reuseBatch)) {
+            reuseBatch.consume((neoId, value) -> {
+                var mappedId = nodeMapping.toMappedNodeId(neoId);
+                propertiesByMappedIdsBuilder.set(mappedId, value);
+            });
+        }
 
         HugeSparseLongArray propertyValues = propertiesByMappedIdsBuilder.build();
 
