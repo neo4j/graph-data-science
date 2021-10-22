@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -168,7 +169,7 @@ public class PipelineExecutor {
 
     public void removeNodeProperties(GraphStore graphstore, Collection<NodeLabel> nodeLabels) {
         pipeline.nodePropertySteps().forEach(step -> {
-            var intermediateProperty = step.config.get(MUTATE_PROPERTY_KEY);
+            var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
             if (intermediateProperty instanceof String) {
                 nodeLabels.forEach(label -> graphstore.removeNodeProperty(label, ((String) intermediateProperty)));
             }

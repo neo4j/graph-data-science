@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
+import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -32,10 +32,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodePropertyStep implements Model.Mappable {
-    public final Method procMethod;
-    public final String procName;
-    public final Map<String, Object> config;
+public final class NodePropertyStep implements Model.Mappable {
+    private final String procName;
+    private final Method procMethod;
+    private final Map<String, Object> config;
+
+    public static NodePropertyStep of(String procName,  Map<String, Object> config) {
+        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(procName);
+
+        return new NodePropertyStep(procName, procedureMethod, config);
+    }
 
     private NodePropertyStep(String procName, Method procMethod, Map<String, Object> config) {
         this.procName = procName;
@@ -43,10 +49,16 @@ public class NodePropertyStep implements Model.Mappable {
         this.config = config;
     }
 
-    public static NodePropertyStep of(String procName,  Map<String, Object> config) {
-        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(procName);
+    public Map<String, Object> config() {
+        return this.config;
+    }
 
-        return new NodePropertyStep(procName, procedureMethod, config);
+    public String procName() {
+        return this.procName;
+    }
+
+    public Method procMethod() {
+        return this.procMethod;
     }
 
     public void execute(BaseProc caller, String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relTypes) {

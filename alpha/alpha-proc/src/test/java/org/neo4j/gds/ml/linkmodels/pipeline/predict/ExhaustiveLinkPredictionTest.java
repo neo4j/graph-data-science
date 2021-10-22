@@ -40,11 +40,11 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.List;
 import java.util.Map;

@@ -32,7 +32,17 @@ dependencies {
 
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
-    api project(':alpha-algo')
+    implementation project(':algo-common')
+    implementation project(':annotations')
+    implementation project(':core')
+    implementation project(':proc-common')
+    implementation project(':string-formatting')
+
+    neodeps.each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     testImplementation project(':test-utils')
 }

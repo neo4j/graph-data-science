@@ -44,11 +44,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainFactory;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.ArrayList;
 import java.util.List;

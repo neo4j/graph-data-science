@@ -22,10 +22,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,12 +35,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TrainingPipeline implements Mappable {
-    private final List<NodePropertyStep> nodePropertySteps;
-    private final List<LinkFeatureStep> featureSteps;
+public class TrainingPipeline extends PipelineBuilder<LinkFeatureStep> {
     private LinkPredictionSplitConfig splitConfig;
     // List of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
     // currently only storing the parameters as Map to avoid default concurrency issue
@@ -49,8 +45,6 @@ public class TrainingPipeline implements Mappable {
     private @NotNull List<Map<String, Object>> parameterSpace;
 
     public TrainingPipeline() {
-        this.nodePropertySteps = new ArrayList<>();
-        this.featureSteps = new ArrayList<>();
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
         this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap());
     }
@@ -65,36 +59,11 @@ public class TrainingPipeline implements Mappable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
+    protected Map<String, Object> additionalEntries() {
         return Map.of(
-            "featurePipeline", Map.of(
-                "nodePropertySteps", Mappable.toMap(nodePropertySteps),
-                "featureSteps", Mappable.toMap(featureSteps)
-            ),
             "splitConfig", splitConfig.toMap(),
             "parameterSpace", parameterSpace
         );
-    }
-
-    public List<NodePropertyStep> nodePropertySteps() {
-        return nodePropertySteps;
-    }
-
-    public void addNodePropertyStep(NodePropertyStep step) {
-        validateUniqueMutateProperty(step);
-        this.nodePropertySteps.add(step);
-    }
-
-    public List<LinkFeatureStep> featureSteps() {
-        return featureSteps;
-    }
-
-    void addFeatureStep(String name, Map<String, Object> config) {
-        this.addFeatureStep(LinkFeatureStepFactory.create(name, config));
-    }
-
-    public void addFeatureStep(LinkFeatureStep step) {
-        featureSteps.add(step);
     }
 
     public LinkPredictionSplitConfig splitConfig() {
@@ -158,13 +127,13 @@ public class TrainingPipeline implements Mappable {
     public Map<String, List<String>> tasksByRelationshipProperty() {
         Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
         nodePropertySteps().forEach(existingStep -> {
-            if (existingStep.config.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
-                var existingProperty = (String) existingStep.config.get(RELATIONSHIP_WEIGHT_PROPERTY);
+            if (existingStep.config().containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
+                var existingProperty = (String) existingStep.config().get(RELATIONSHIP_WEIGHT_PROPERTY);
                 var tasks = tasksByRelationshipProperty.computeIfAbsent(
                     existingProperty,
                     key -> new ArrayList<>()
                 );
-                tasks.add(existingStep.procName);
+                tasks.add(existingStep.procName());
             }
         });
         return tasksByRelationshipProperty;
@@ -175,20 +144,5 @@ public class TrainingPipeline implements Mappable {
         return relationshipWeightPropertySet.isEmpty()
             ? Optional.empty()
             : Optional.of(relationshipWeightPropertySet.iterator().next().getKey());
-    }
-
-    private void validateUniqueMutateProperty(NodePropertyStep step) {
-        this.nodePropertySteps.forEach(nodePropertyStep -> {
-            var newMutatePropertyName = step.config.get(MUTATE_PROPERTY_KEY);
-            var existingMutatePropertyName = nodePropertyStep.config.get(MUTATE_PROPERTY_KEY);
-            if (newMutatePropertyName.equals(existingMutatePropertyName)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The value of `%s` is expected to be unique, but %s was already specified in the %s procedure.",
-                    MUTATE_PROPERTY_KEY,
-                    newMutatePropertyName,
-                    nodePropertyStep.procMethod.getName()
-                ));
-            }
-        });
     }
 }
