@@ -99,7 +99,7 @@ public abstract class BaseProc {
     public Username username = Username.EMPTY_USERNAME;
 
     @Context
-    public LicenseState licenseState;
+    public LicenseState licenseState = new OpenGdsLicenseState();
 
     protected BaseProc() {
         if (!licenseState.isValid()) {
