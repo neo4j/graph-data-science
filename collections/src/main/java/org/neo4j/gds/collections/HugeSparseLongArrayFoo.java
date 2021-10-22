@@ -242,7 +242,7 @@ public final class HugeSparseLongArrayFoo implements HugeSparseLongArray {
             this.defaultValue = defaultValue;
         }
 
-        public void reset(long[] page, long offset) {
+        private void reset(long[] page, long offset) {
             this.page = page;
             this.offset = offset;
         }
