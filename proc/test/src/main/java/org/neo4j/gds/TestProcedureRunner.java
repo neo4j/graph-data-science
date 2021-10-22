@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -41,6 +42,7 @@ public final class TestProcedureRunner {
             ProcedureCallContext.EMPTY,
             new TestLog(),
             EmptyTaskRegistryFactory.INSTANCE,
+            AllocationTracker.empty(),
             tx,
             func
         ));

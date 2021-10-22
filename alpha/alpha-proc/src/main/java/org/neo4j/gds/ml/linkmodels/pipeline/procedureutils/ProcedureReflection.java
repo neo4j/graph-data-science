@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Procedure;
@@ -51,7 +52,7 @@ public final class ProcedureReflection {
     public static final ProcedureReflection INSTANCE = new ProcedureReflection();
 
     private ProcedureReflection() {
-        procedureMethods = PACKAGES_TO_SCAN.stream()
+        this.procedureMethods = PACKAGES_TO_SCAN.stream()
             .map(this::createReflections)
             .map(r -> r.getMethodsAnnotatedWith(Procedure.class))
             .flatMap(Collection::stream)
@@ -59,7 +60,7 @@ public final class ProcedureReflection {
     }
 
     public Method findProcedureMethod(String procName) {
-        List<Method> foundMethods = filterAlgoBaseMethods(procName);
+        List<Method> foundMethods = findProcedureMethodsByName(procName);
         if (foundMethods.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("Invalid procedure name `%s` for pipelining.", procName));
         }
@@ -75,7 +76,7 @@ public final class ProcedureReflection {
         return foundMethods.get(0);
     }
 
-    private List<Method> filterAlgoBaseMethods(String shortName) {
+    private List<Method> findProcedureMethodsByName(String shortName) {
         return procedureMethods
                 .stream()
                 .filter(method -> {
@@ -101,20 +102,16 @@ public final class ProcedureReflection {
     }
 
     private AlgoBaseProc<?, ?, ?> createProcedure(BaseProc caller, Method method) {
-        AlgoBaseProc<?, ?, ?> proc;
-        try {
-            proc = (AlgoBaseProc<?, ?, ?>) method.getDeclaringClass().getConstructor().newInstance();
-            proc.api = caller.api;
-            proc.callContext = caller.callContext;
-            proc.log = caller.log;
-            proc.procedureTransaction = caller.procedureTransaction;
-            proc.allocationTracker = caller.allocationTracker;
-            proc.transaction = caller.transaction;
-            proc.taskRegistryFactory = caller.taskRegistryFactory;
-        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return proc;
+        Class<AlgoBaseProc<?, ?, ?>> procClass = (Class<AlgoBaseProc<?, ?, ?>>) method.getDeclaringClass();
+        return ProcedureRunner.instantiateProcedure(
+            caller.api,
+            procClass,
+            caller.callContext,
+            caller.log,
+            caller.taskRegistryFactory,
+            caller.allocationTracker,
+            caller.procedureTransaction
+        );
     }
 
     public Optional<AlgoBaseConfig> createAlgoConfig(BaseProc caller, Method procMethod, CypherMapWrapper config) {

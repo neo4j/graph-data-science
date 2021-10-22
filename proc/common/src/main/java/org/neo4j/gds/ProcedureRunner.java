@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -32,12 +33,25 @@ public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
+    public static <P extends BaseProc> P instantiateProcedure(P caller, Class<P> procedureClass) {
+        return ProcedureRunner.instantiateProcedure(
+            caller.api,
+            procedureClass,
+            caller.callContext,
+            caller.log,
+            caller.taskRegistryFactory,
+            caller.allocationTracker,
+            caller.procedureTransaction
+        );
+    }
+
     public static <P extends BaseProc> P instantiateProcedure(
         GraphDatabaseAPI graphDb,
         Class<P> procClass,
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
+        AllocationTracker allocationTracker,
         Transaction tx
     ) {
         P proc;
@@ -52,6 +66,7 @@ public final class ProcedureRunner {
         proc.api = graphDb;
         proc.callContext = procedureCallContext;
         proc.log = log;
+        proc.allocationTracker = allocationTracker;
         proc.taskRegistryFactory = taskRegistryFactory;
 
         return proc;
@@ -63,10 +78,19 @@ public final class ProcedureRunner {
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
+        AllocationTracker allocationTracker,
         Transaction tx,
         Consumer<P> func
     ) {
-        var proc = instantiateProcedure(graphDb, procClass, procedureCallContext, log, taskRegistryFactory, tx);
+        var proc = instantiateProcedure(
+            graphDb,
+            procClass,
+            procedureCallContext,
+            log,
+            taskRegistryFactory,
+            allocationTracker,
+            tx
+        );
         func.accept(proc);
         return proc;
     }
