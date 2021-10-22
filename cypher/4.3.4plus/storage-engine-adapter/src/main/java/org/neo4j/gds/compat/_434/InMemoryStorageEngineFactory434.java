@@ -45,6 +45,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
+import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
@@ -106,6 +107,17 @@ public class InMemoryStorageEngineFactory434 extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_43;
+    }
+
+    @Override
+    public MetadataProvider transactionMetaDataStore(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        PageCacheTracer cacheTracer
+    ) {
+        return metadataProvider();
     }
 
     @Override

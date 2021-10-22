@@ -32,7 +32,6 @@ import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.LogVersionRepository;
-import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
 import org.neo4j.storageengine.api.StoreId;
@@ -94,17 +93,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
         return metadataProvider().logVersionRepository();
-    }
-
-    @Override
-    public MetadataProvider transactionMetaDataStore(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        Config config,
-        PageCache pageCache,
-        PageCacheTracer cacheTracer
-    ) {
-        return metadataProvider();
     }
 
     @Override

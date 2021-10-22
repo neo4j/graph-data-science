@@ -21,7 +21,7 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.helpers.DatabaseReadOnlyChecker;
+import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
@@ -47,6 +47,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
+import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
@@ -127,6 +128,18 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+    }
+
+    @Override
+    public MetadataProvider transactionMetaDataStore(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        PageCacheTracer cacheTracer,
+        DatabaseReadOnlyChecker readOnlyChecker
+    ) {
+        return metadataProvider();
     }
 
     @Override
