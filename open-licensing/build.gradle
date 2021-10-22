@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Open Edition'
+description = 'Neo4j Graph Data Science :: Open Licensing'
 
 dependencies {
     annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
@@ -8,5 +8,5 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'annotations',         version: ver.'neo4j'
     compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.'neo4j'
 
-    implementation project(':editions')
+    implementation project(':licensing')
 }
