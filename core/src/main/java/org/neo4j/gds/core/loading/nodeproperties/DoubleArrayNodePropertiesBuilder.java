@@ -85,16 +85,20 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
                 var offset = batch.offset;
+                var end = Math.min(offset + page.length, nodeMapping.nodeCount()) - offset;
 
-                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
-                    var value = page[pageIndex];
-                    if (value != null && !Arrays.equals(value, defaultValue)) {
-                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                for (int pageIndex = 0; pageIndex < end; pageIndex++) {
+                    var neoId = offset + pageIndex;
+                    var mappedId = nodeMapping.toMappedNodeId(neoId);
+                    if (mappedId != NodeMapping.NOT_FOUND) {
+                        var value = page[pageIndex];
+                        if (value != null && !Arrays.equals(value, defaultValue)) {
+                            propertiesByMappedIdsBuilder.set(mappedId, value);
+                        }
                     }
                 }
             }
         }).collect(Collectors.toList());
-
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var propertyValues = propertiesByMappedIdsBuilder.build();

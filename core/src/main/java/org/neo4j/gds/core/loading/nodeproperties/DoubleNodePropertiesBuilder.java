@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
-import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -33,7 +32,6 @@ import org.neo4j.values.storable.Value;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.OptionalDouble;
-import java.util.OptionalLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -111,11 +109,16 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
                 var offset = batch.offset;
+                var end = Math.min(offset + page.length, nodeMapping.nodeCount()) - offset;
 
-                for (int pageIndex = 0; pageIndex < page.length; pageIndex++) {
-                    var value = page[pageIndex];
-                    if (Double.compare(value, defaultValue) != 0) {
-                        propertiesByMappedIdsBuilder.set(offset + pageIndex, value);
+                for (int pageIndex = 0; pageIndex < end; pageIndex++) {
+                    var neoId = offset + pageIndex;
+                    var mappedId = nodeMapping.toMappedNodeId(neoId);
+                    if (mappedId != NodeMapping.NOT_FOUND) {
+                        var value = page[pageIndex];
+                        if (Double.compare(value, defaultValue) != 0) {
+                            propertiesByMappedIdsBuilder.set(mappedId, value);
+                        }
                     }
                 }
             }

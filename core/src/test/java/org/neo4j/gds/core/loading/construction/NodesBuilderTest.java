@@ -240,8 +240,8 @@ class NodesBuilderTest {
 
             nodeMapping.forEachNode(nodeId -> {
                 long originalNodeId = nodeMapping.toOriginalNodeId(nodeId);
-                assertThat(originalNodeId).isEqualTo(nodeProperties.get("prop1").longValue(nodeId));
-                assertThat(nodeCount - originalNodeId).isEqualTo(nodeProperties.get("prop2").longValue(nodeId));
+                assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(originalNodeId);
+                assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(nodeCount - originalNodeId);
                 return true;
             });
         });

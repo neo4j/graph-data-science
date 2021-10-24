@@ -43,7 +43,7 @@ public final class DrainingIterator<PAGE> {
         while (nextPage == null) {
             nextPageId = globalPageId.getAndIncrement();
 
-            if(nextPageId >= pages.length) {
+            if (nextPageId >= pages.length) {
                 return false;
             }
 

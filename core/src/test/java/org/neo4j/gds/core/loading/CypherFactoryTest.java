@@ -131,7 +131,7 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
-    void testMultipleNodeProperties() {
+    void testMultipleNodeProperties() throws InterruptedException {
         clearDb();
         runQuery(
             "CREATE" +
