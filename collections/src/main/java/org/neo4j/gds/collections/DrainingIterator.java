@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.collections;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class DrainingIterator<PAGE> {
+
+    private final VarHandle arrayHandle;
     private final PAGE[] pages;
     private final int pageSize;
     private final AtomicInteger globalPageId;
@@ -30,6 +34,7 @@ public final class DrainingIterator<PAGE> {
         this.pages = pages;
         this.pageSize = pageSize;
         this.globalPageId = new AtomicInteger(0);
+        this.arrayHandle = MethodHandles.arrayElementVarHandle(pages.getClass());
     }
 
     public DrainingBatch<PAGE> drainingBatch() {
@@ -51,7 +56,7 @@ public final class DrainingIterator<PAGE> {
         }
 
         // drain: clear the reference to the page
-        pages[nextPageId] = null;
+        arrayHandle.setVolatile(pages, nextPageId, null);
 
         reuseBatch.reset(nextPage, (long) nextPageId * pageSize);
 
