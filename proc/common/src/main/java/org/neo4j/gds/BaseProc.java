@@ -99,12 +99,9 @@ public abstract class BaseProc {
     public Username username = Username.EMPTY_USERNAME;
 
     @Context
-    public LicenseState licenseState = new OpenGdsLicenseState();
+    public LicenseState licenseState;
 
     protected BaseProc() {
-        if (!licenseState.isValid()) {
-            throw new RuntimeException(licenseState.errorMessage().get());
-        }
         if (allocationTracker == null) {
             allocationTracker = AllocationTracker.empty();
         }
