@@ -42,6 +42,7 @@ YIELD
   postProcessingMillis: Integer,
   mutateMillis: Integer,
   relationshipsWritten: Integer,
+  linksConsidered: Integer,
   configuration: Map
 ----
 
@@ -71,6 +72,7 @@ include::specific-predict-configuration.adoc[]
 | postProcessingMillis | Integer | Milliseconds for computing the global metrics.
 | mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
 | relationshipsWritten | Integer | Number of relationships created.
+| linksConsidered      | Integer | Number of links considered.
 | configuration        | Map     | Configuration used for running the algorithm.
 |===
 ======

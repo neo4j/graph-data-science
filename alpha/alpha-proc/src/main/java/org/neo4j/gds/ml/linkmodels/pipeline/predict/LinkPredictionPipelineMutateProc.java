@@ -68,7 +68,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
-        return new MutateResult.Builder();
+        return new MutateResult.Builder().withLinksConsidered(computeResult.result().linksConsidered());
     }
 
     @Override
@@ -132,13 +132,15 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
     public static final class MutateResult extends StandardMutateResult {
 
         public final long relationshipsWritten;
+        public final long linksConsidered;
 
         MutateResult(
             long createMillis,
             long computeMillis,
             long mutateMillis,
             long relationshipsWritten,
-            Map<String, Object> configuration
+            Map<String, Object> configuration,
+            long linksConsidered
         ) {
             super(
                 createMillis,
@@ -147,10 +149,14 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
                 mutateMillis,
                 configuration
             );
+
             this.relationshipsWritten = relationshipsWritten;
+            this.linksConsidered = linksConsidered;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
+
+            private long linksConsidered = -1L;
 
             @Override
             public MutateResult build() {
@@ -159,8 +165,14 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
                     computeMillis,
                     mutateMillis,
                     relationshipsWritten,
-                    config.toMap()
+                    config.toMap(),
+                    linksConsidered
                 );
+            }
+
+            Builder withLinksConsidered(long linksConsidered) {
+                this.linksConsidered = linksConsidered;
+                return this;
             }
         }
     }
