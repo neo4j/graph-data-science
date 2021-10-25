@@ -32,15 +32,15 @@ public final class TestProcedureAndFunctionScanner {
     private TestProcedureAndFunctionScanner() {}
 
 
-    public static Class<?>[] procedures() throws Exception {
+    public static Class<?>[] procedures() {
         return classesContainingAnnotation(Procedure.class);
     }
 
-    public static Class<?>[] functions() throws Exception {
+    public static Class<?>[] functions() {
         return classesContainingAnnotation(UserFunction.class);
     }
 
-    public static Class<?>[] aggregationFunctions() throws Exception {
+    public static Class<?>[] aggregationFunctions() {
         return classesContainingAnnotation(UserAggregationFunction.class);
     }
 
