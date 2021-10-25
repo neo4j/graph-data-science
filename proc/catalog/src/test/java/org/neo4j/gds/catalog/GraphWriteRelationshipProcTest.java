@@ -28,13 +28,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
@@ -42,8 +39,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.neo4j.gds.TestProcedureRunner.applyOnProcedure;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -176,23 +173,15 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     void shouldLogProgress() {
         var log = new TestLog();
 
-        try (var transactions = newKernelTransaction(db)) {
-            var proc = new GraphWriteRelationshipProc();
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = log;
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-            proc.licenseState = OpenGdsLicenseState.INSTANCE;
-            proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(
-                proc.api,
-                proc.procedureTransaction
-            ));
-
-            proc.run(TEST_GRAPH_NAME, "NEW_REL1", "newRelProp1", Map.of());
-        }
+        applyOnProcedure(
+            db,
+            GraphWriteRelationshipProc.class,
+            log,
+            proc -> {
+                proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(proc.api, proc.procedureTransaction));
+                proc.run(TEST_GRAPH_NAME, "NEW_REL1", "newRelProp1", Map.of());
+            }
+        );
 
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

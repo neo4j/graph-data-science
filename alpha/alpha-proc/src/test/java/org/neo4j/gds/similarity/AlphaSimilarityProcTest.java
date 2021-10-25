@@ -24,20 +24,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GraphCreateConfigSupport;
-import org.neo4j.gds.OpenGdsLicenseState;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.nil.NullGraph;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
 import org.neo4j.gds.utils.ExceptionUtil;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
@@ -72,22 +69,13 @@ public abstract class AlphaSimilarityProcTest<
 
     abstract Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
 
-    void applyOnProcedure(Consumer<? super AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
+    void applyOnProcedure(Consumer<AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc;
-            try {
-                proc = getProcedureClazz().getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
-            }
-
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-            proc.licenseState = OpenGdsLicenseState.INSTANCE;
-
+            var proc = TestProcedureRunner.instantiateProcedure(
+                db,
+                getProcedureClazz(),
+                transactions.tx()
+            );
             func.accept(proc);
         }
     }
@@ -105,9 +93,8 @@ public abstract class AlphaSimilarityProcTest<
     private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method ->
-                method.getDeclaredAnnotation(Procedure.class) != null && Set
-                    .of("stream", "stats", "write")
-                    .stream()
+                method.getDeclaredAnnotation(Procedure.class) != null &&
+                Stream.of("stream", "stats", "write")
                     .anyMatch(mode -> getProcedureMethodName(method).endsWith(mode))
             );
     }

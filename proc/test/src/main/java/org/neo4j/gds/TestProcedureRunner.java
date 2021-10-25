@@ -22,8 +22,10 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
 
 import java.util.function.Consumer;
 
@@ -36,16 +38,50 @@ public final class TestProcedureRunner {
         Class<P> procClass,
         Consumer<P> func
     ) {
+        applyOnProcedure(graphDb, procClass, new TestLog(), func);
+    }
+
+    public static <P extends BaseProc> void applyOnProcedure(
+        GraphDatabaseAPI graphDb,
+        Class<P> procClass,
+        Log log,
+
+        Consumer<P> func
+    ) {
         GraphDatabaseApiProxy.runInTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
             graphDb,
             procClass,
             ProcedureCallContext.EMPTY,
-            new TestLog(),
+            log,
             EmptyTaskRegistryFactory.INSTANCE,
             AllocationTracker.empty(),
             tx,
             OpenGdsLicenseState.INSTANCE,
             func
         ));
+    }
+
+    public static <P extends BaseProc> P instantiateProcedure(
+        GraphDatabaseAPI graphDb,
+        Class<P> procClass,
+        Transaction tx
+    ) {
+        P proc;
+        try {
+            proc = procClass.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
+        }
+
+        proc.procedureTransaction = tx;
+        proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
+        proc.api = graphDb;
+        proc.callContext = ProcedureCallContext.EMPTY;
+        proc.log = new TestLog();
+        proc.allocationTracker = AllocationTracker.empty();
+        proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
+        proc.licenseState = OpenGdsLicenseState.INSTANCE;
+
+        return proc;
     }
 }

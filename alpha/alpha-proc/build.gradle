@@ -29,7 +29,6 @@ dependencies {
     implementation project(':proc-path-finding')
     implementation project(':proc-pregel')
     implementation project(':string-formatting')
-    implementation project(':licensing')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
@@ -42,7 +41,6 @@ dependencies {
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
     testImplementation project(':test-utils')
-    testImplementation project(':open-licensing')
     testImplementation project(':proc-test')
     testImplementation project(':proc-beta')
     testImplementation project(':proc-embeddings')

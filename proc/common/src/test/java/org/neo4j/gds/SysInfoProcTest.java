@@ -56,9 +56,7 @@ class SysInfoProcTest extends BaseProcTest {
                 Settings.transactionStateAllocation(),
                 GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
             )
-            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L)
-            .removeExtensions(extension -> extension instanceof LicensingServiceExtension)
-            .addExtension(new LicensingServiceExtension());
+            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L);
     }
 
     @Test

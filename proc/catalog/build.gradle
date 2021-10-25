@@ -33,8 +33,6 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
-    testImplementation project(':licensing')
-    testImplementation project(':open-licensing')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':proc')

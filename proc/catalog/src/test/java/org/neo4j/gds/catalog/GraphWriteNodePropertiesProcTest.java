@@ -29,7 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestLog;
@@ -38,11 +37,9 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,8 +48,8 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestProcedureRunner.applyOnProcedure;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -257,23 +254,15 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void shouldLogProgressForIndividualLabels() {
         var log = new TestLog();
 
-        try (var transactions = newKernelTransaction(db)) {
-            var proc = new GraphWriteNodePropertiesProc();
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = log;
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-            proc.licenseState = OpenGdsLicenseState.INSTANCE;
-            proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(
-                proc.api,
-                proc.procedureTransaction
-            ));
-
-            proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
-        }
+        applyOnProcedure(
+            db,
+            GraphWriteNodePropertiesProc.class,
+            log,
+            proc -> {
+                proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(proc.api, proc.procedureTransaction));
+                proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
+            }
+        );
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
