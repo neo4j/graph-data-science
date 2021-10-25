@@ -38,6 +38,7 @@ final class GenerateRandomNeighbors implements Runnable {
     private final int k2;
     private final ProgressTracker progressTracker;
     private final Partition partition;
+    private long neighborsFound;
 
     GenerateRandomNeighbors(
         SplittableRandom random,
@@ -57,6 +58,7 @@ final class GenerateRandomNeighbors implements Runnable {
         this.k2 = k2;
         this.progressTracker = progressTracker;
         this.partition = partition;
+        this.neighborsFound = 0;
     }
 
     @Override
@@ -93,7 +95,12 @@ final class GenerateRandomNeighbors implements Runnable {
             assert neighbors.size() <= k;
 
             this.neighbors.set(nodeId, neighbors);
+            neighborsFound += neighbors.size();
         });
         progressTracker.logProgress();
+    }
+
+    long neighborsFound() {
+        return neighborsFound;
     }
 }

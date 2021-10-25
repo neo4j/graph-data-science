@@ -91,7 +91,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 37, 1", "2, 88, 2"})
+    @CsvSource(value = {"1, 42, 1", "2, 97, 2"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, long ranIterations) {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
