@@ -65,6 +65,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.database.DatabaseIdRepository;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -92,6 +94,8 @@ public interface Neo4jProxyApi {
     GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms);
 
     String validateExternalDatabaseName(String databaseName);
+
+    void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId);
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
 

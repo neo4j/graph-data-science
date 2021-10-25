@@ -66,6 +66,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.database.DatabaseIdRepository;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -121,6 +123,14 @@ public final class Neo4jProxy {
 
     public static String validateExternalDatabaseName(String databaseName) {
         return IMPL.validateExternalDatabaseName(databaseName);
+    }
+
+    @TestOnly
+    public static void cacheDatabaseId(
+        DatabaseIdRepository.Caching databaseIdRepository,
+        NamedDatabaseId namedDatabaseId
+    ) {
+        IMPL.cacheDatabaseId(databaseIdRepository, namedDatabaseId);
     }
 
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {

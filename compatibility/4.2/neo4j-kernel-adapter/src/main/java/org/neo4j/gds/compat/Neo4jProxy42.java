@@ -78,6 +78,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.database.DatabaseIdRepository;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
@@ -129,6 +131,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         var normalizedName = new NormalizedDatabaseName(databaseName);
         DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
         return normalizedName.name();
+    }
+
+    @Override
+    public void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId) {
+        databaseIdRepository.cache(namedDatabaseId);
     }
 
     @Override
