@@ -20,8 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -33,6 +31,7 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
+import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.UnionNodeProperties;
@@ -50,6 +49,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.utils.ExceptionUtil;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
@@ -68,9 +68,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
 public class CSRGraphStore implements GraphStore {
 
@@ -613,7 +613,7 @@ public class CSRGraphStore implements GraphStore {
         );
 
         return filteredNodes.isPresent()
-            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get(), allocationTracker)
             : initialGraph;
     }
 

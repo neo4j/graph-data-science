@@ -24,10 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
@@ -35,6 +31,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.FilteredNodeProperties.OriginalToFilteredNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,7 +63,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testDoubleArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -77,7 +77,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testLongArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
@@ -88,7 +88,7 @@ class OriginalToFilteredNodePropertiesTest {
     void testFloatArray() {
         var filteredNodeProperties = new OriginalToFilteredNodeProperties(
             graph.nodeProperties("floatArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);

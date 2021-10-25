@@ -21,13 +21,14 @@ package org.neo4j.gds.core.huge;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.huge.FilteredNodeProperties.FilteredToOriginalNodeProperties;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.api.CSRGraph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.huge.FilteredNodeProperties.FilteredToOriginalNodeProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,7 +53,7 @@ class FilteredToOriginalNodePropertiesTest {
     void testDoubleArray() {
         var filteredNodeProperties = new FilteredToOriginalNodeProperties(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -66,7 +67,7 @@ class FilteredToOriginalNodePropertiesTest {
     void testLongArray() {
         var filteredNodeProperties = new FilteredToOriginalNodeProperties(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
@@ -77,7 +78,7 @@ class FilteredToOriginalNodePropertiesTest {
     void testFloatArray() {
         var filteredNodeProperties = new FilteredToOriginalNodeProperties(
             graph.nodeProperties("floatArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(graph, graph, AllocationTracker.empty())
         );
 
         assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);

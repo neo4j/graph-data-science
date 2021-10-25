@@ -52,11 +52,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private long relationshipCount;
     private final HugeIntArray degreeCache;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, AllocationTracker allocationTracker) {
         super(originalGraph);
         this.relationshipCount = -1;
         this.filteredIdMap = filteredIdMap;
-        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), AllocationTracker.empty());
+        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
 
         degreeCache.fill(NO_DEGREE);
     }
