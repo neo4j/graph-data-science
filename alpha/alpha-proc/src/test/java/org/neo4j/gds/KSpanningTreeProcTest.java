@@ -144,7 +144,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void shouldTrackProgress() {
-        ProcedureRunner.applyOnProcedure(db, KSpanningTreeProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, KSpanningTreeProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

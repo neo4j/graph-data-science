@@ -28,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
-import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -138,7 +138,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
-        ProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

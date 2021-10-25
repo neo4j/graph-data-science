@@ -111,11 +111,14 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
+    public static KernelTransaction kernelTransaction(Transaction tx) {
+        return ((InternalTransaction) tx).kernelTransaction();
+    }
+
     @TestOnly
     public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        return ImmutableTransactions.of(tx, ktx);
+        return ImmutableTransactions.of(tx, kernelTransaction(tx));
     }
 
     @ValueClass

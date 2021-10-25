@@ -23,7 +23,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.utils.ProcAndFunctionScanner;
+import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
 import org.neo4j.graphdb.Result;
 
 import java.util.List;
@@ -404,9 +404,9 @@ class ListProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-       registerProcedures(ProcAndFunctionScanner.procedures());
-       registerFunctions(ProcAndFunctionScanner.functions());
-       registerAggregationFunctions(ProcAndFunctionScanner.aggregationFunctions());
+       registerProcedures(TestProcedureAndFunctionScanner.procedures());
+       registerFunctions(TestProcedureAndFunctionScanner.functions());
+       registerAggregationFunctions(TestProcedureAndFunctionScanner.aggregationFunctions());
     }
 
     @Test

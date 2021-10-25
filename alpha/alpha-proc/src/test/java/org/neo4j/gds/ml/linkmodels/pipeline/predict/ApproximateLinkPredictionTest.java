@@ -27,8 +27,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -106,7 +106,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
@@ -186,7 +186,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             );
 
         for (int i = 0; i < 2; i++) {
-            ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+            TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
                 var pipelineExecutor = new PipelineExecutor(
                     pipeline,
                     caller,

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
-import org.neo4j.gds.ProcedureRunner;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -144,7 +144,7 @@ class SccProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
-        ProcedureRunner.applyOnProcedure(db, SccProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, SccProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

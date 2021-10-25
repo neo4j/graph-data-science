@@ -209,7 +209,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
-        ProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));

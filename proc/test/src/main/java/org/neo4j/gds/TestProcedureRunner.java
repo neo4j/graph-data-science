@@ -20,33 +20,31 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
+public final class TestProcedureRunner {
 
-public class ProcedureRunner {
+    private TestProcedureRunner() {}
 
-    public static <P extends BaseProc> void applyOnProcedure(GraphDatabaseAPI graphDb, Class<P> procClass, Consumer<P> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb)) {
-            P proc;
-            try {
-                proc = procClass.getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
-            }
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = graphDb;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-
-            func.accept(proc);
-        }
+    public static <P extends BaseProc> void applyOnProcedure(
+        GraphDatabaseAPI graphDb,
+        Class<P> procClass,
+        Consumer<P> func
+    ) {
+        GraphDatabaseApiProxy.runInTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
+            graphDb,
+            procClass,
+            ProcedureCallContext.EMPTY,
+            new TestLog(),
+            EmptyTaskRegistryFactory.INSTANCE,
+            AllocationTracker.empty(),
+            tx,
+            func
+        ));
     }
 }

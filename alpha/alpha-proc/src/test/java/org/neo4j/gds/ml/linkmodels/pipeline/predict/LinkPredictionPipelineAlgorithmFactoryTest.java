@@ -27,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -205,7 +205,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("configTaskTreeMappings")
     void progressTracking(Map<String,Object> predictParameters,List<String> expectedPredictLogEntries ) {
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             String trainModelName = "outputModel";
             var trainConfig = LinkPredictionTrainConfig.builder()
                 .graphName(GRAPH_NAME)

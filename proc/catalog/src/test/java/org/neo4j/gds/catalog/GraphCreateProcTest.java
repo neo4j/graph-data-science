@@ -33,12 +33,12 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -182,7 +182,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void testNativeProgressTracking() {
-        ProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
 
@@ -194,7 +194,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void testCypherProgressTracking() {
-        ProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
+        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
             proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
 
