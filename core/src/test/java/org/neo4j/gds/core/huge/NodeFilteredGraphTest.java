@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
@@ -47,6 +48,9 @@ class NodeFilteredGraphTest {
 
     @Inject
     GraphStore graphStore;
+
+    @Inject
+    IdFunction idFunction;
 
     @Test
     void filteredIdMapThatIncludesAllNodes() {
@@ -75,4 +79,25 @@ class NodeFilteredGraphTest {
         assertThat(graph.relationshipCount()).isEqualTo(1L);
     }
 
+    @Test
+    void filterDegree() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+
+        assertThat(graph.degree(idFunction.of("a"))).isEqualTo(1L);
+    }
+
+    @Test
+    void filterDegreeWithoutParallelRelationships() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+
+        assertThat(graph.degreeWithoutParallelRelationships(idFunction.of("a"))).isEqualTo(1L);
+    }
 }
