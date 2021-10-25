@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -116,7 +118,23 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             // we are writing undirected rels so we get 2x topN
             "relationshipsWritten", 12L,
             "configuration", isA(Map.class),
-            "linksConsidered", 6L
+            "linksConsidered", 6L,
+            "probabilityDistribution", allOf(
+                hasKey("min"),
+                hasKey("max"),
+                hasKey("mean"),
+                hasKey("stdDev"),
+                hasKey("p1"),
+                hasKey("p5"),
+                hasKey("p10"),
+                hasKey("p25"),
+                hasKey("p50"),
+                hasKey("p75"),
+                hasKey("p90"),
+                hasKey("p95"),
+                hasKey("p99"),
+                hasKey("p100")
+            )
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));

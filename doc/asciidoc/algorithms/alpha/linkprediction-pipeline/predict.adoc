@@ -43,6 +43,7 @@ YIELD
   mutateMillis: Integer,
   relationshipsWritten: Integer,
   linksConsidered: Integer,
+  probabilityDistribution: Integer,
   configuration: Map
 ----
 
@@ -66,14 +67,15 @@ include::specific-predict-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type    | Description
-| createMillis         | Integer | Milliseconds for creating the graph.
-| computeMillis        | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis | Integer | Milliseconds for computing the global metrics.
-| mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
-| relationshipsWritten | Integer | Number of relationships created.
-| linksConsidered      | Integer | Number of links considered.
-| configuration        | Map     | Configuration used for running the algorithm.
+| Name                    | Type    | Description
+| createMillis            | Integer | Milliseconds for creating the graph.
+| computeMillis           | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis    | Integer | Milliseconds for computing the global metrics.
+| mutateMillis            | Integer | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten    | Integer | Number of relationships created.
+| linksConsidered         | Integer | Number of links considered.
+| probabilityDistribution | Map     | Description with distribution of predicted probabilities.
+| configuration           | Map     | Configuration used for running the algorithm.
 |===
 ======
 

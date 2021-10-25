@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.HdrHistogram.ConcurrentDoubleHistogram;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
@@ -27,12 +29,14 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -68,7 +72,12 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
-        return new MutateResult.Builder().withLinksConsidered(computeResult.result().linksConsidered());
+        var builder = new MutateResult.Builder().withLinksConsidered(computeResult.result().linksConsidered());
+        if (callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
+            builder.withHistogram();
+        }
+
+        return builder;
     }
 
     @Override
@@ -87,6 +96,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             .allocationTracker(allocationTracker())
             .build();
 
+        var resultWithHistogramBuilder = (MutateResult.Builder) resultBuilder;
         ParallelUtil.parallelStreamConsume(
             computationResult.result().stream(),
             concurrency,
@@ -96,6 +106,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
                     predictedLink.targetId(),
                     predictedLink.probability()
                 );
+                resultWithHistogramBuilder.recordHistogramValue(predictedLink.probability());
             })
         );
 
@@ -133,6 +144,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
         public final long relationshipsWritten;
         public final long linksConsidered;
+        public final Map<String, Object> probabilityDistribution;
 
         MutateResult(
             long createMillis,
@@ -140,7 +152,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             long mutateMillis,
             long relationshipsWritten,
             Map<String, Object> configuration,
-            long linksConsidered
+            long linksConsidered,
+            Map<String, Object> probabilityDistribution
         ) {
             super(
                 createMillis,
@@ -152,11 +165,15 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
             this.relationshipsWritten = relationshipsWritten;
             this.linksConsidered = linksConsidered;
+            this.probabilityDistribution = probabilityDistribution;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
 
             private long linksConsidered = -1L;
+
+            @Nullable
+            private ConcurrentDoubleHistogram histogram = null;
 
             @Override
             public MutateResult build() {
@@ -166,13 +183,31 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
                     mutateMillis,
                     relationshipsWritten,
                     config.toMap(),
-                    linksConsidered
+                    linksConsidered,
+                    histogram == null ? Map.of() : HistogramUtils.similaritySummary(histogram)
                 );
             }
 
             Builder withLinksConsidered(long linksConsidered) {
                 this.linksConsidered = linksConsidered;
                 return this;
+            }
+
+            Builder withHistogram() {
+                if (histogram != null) {
+                    return this;
+                }
+
+                this.histogram = new ConcurrentDoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
+                return this;
+            }
+
+            void recordHistogramValue(double value) {
+                if (histogram == null) {
+                   return;
+                }
+
+                histogram.recordValue(value);
             }
         }
     }
