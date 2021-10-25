@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implemen
         map.putAll(additionalEntries());
         return map;
     }
+
+    public abstract void validate(Graph graph);
 
     protected abstract Map<String, Object> additionalEntries();
 

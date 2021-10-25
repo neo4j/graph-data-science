@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -62,7 +62,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
 
         pipeline.validate();
 
-        var pipelineExecutor = new PipelineExecutor(
+        var pipelineExecutor = new LinkPredictionPipelineExecutor(
             pipeline,
             caller,
             databaseId,

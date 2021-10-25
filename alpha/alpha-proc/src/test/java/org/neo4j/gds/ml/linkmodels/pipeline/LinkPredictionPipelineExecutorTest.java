@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
-class PipelineExecutorTest extends BaseProcTest {
+class LinkPredictionPipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String GRAPH = "CREATE " +
@@ -101,7 +101,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var actual = computePropertiesAndLinkFeatures(
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER)
+                new LinkPredictionPipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER)
             );
 
             var expected = HugeObjectArray.of(
@@ -133,7 +133,7 @@ class PipelineExecutorTest extends BaseProcTest {
         )));
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER).executeNodePropertySteps(
+            new LinkPredictionPipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER).executeNodePropertySteps(
                 NodeLabel.listOf("N"),
                 RELATIONSHIP_TYPE
             );
@@ -155,7 +155,7 @@ class PipelineExecutorTest extends BaseProcTest {
 
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
+            var actual = computePropertiesAndLinkFeatures(new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -198,7 +198,7 @@ class PipelineExecutorTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var actual = computePropertiesAndLinkFeatures(new PipelineExecutor(
+            var actual = computePropertiesAndLinkFeatures(new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -231,7 +231,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var executor = new PipelineExecutor(
+            var executor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -272,7 +272,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(splitConfig);
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var executor = new PipelineExecutor(
+            var executor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -312,7 +312,7 @@ class PipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var executor = new PipelineExecutor(
+            var executor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -333,7 +333,7 @@ class PipelineExecutorTest extends BaseProcTest {
         });
     }
 
-    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(PipelineExecutor pipeline) {
+    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(LinkPredictionPipelineExecutor pipeline) {
         pipeline.executeNodePropertySteps(List.of(NODE_LABEL), RELATIONSHIP_TYPE);
         return pipeline.computeFeatures(List.of(NODE_LABEL), RELATIONSHIP_TYPE, 4);
     }

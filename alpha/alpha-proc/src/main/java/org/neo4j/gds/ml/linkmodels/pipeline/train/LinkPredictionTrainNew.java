@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
@@ -28,6 +27,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
@@ -44,8 +43,8 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,8 +58,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionTrain
-    extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>> {
+public class LinkPredictionTrainNew {
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 
@@ -69,15 +67,16 @@ public class LinkPredictionTrain
     private final LinkPredictionPipelineExecutor pipelineExecutor;
     private final LinkPredictionPipeline pipeline;
     private final AllocationTracker allocationTracker;
+    private final ProgressTracker progressTracker;
 
-    public LinkPredictionTrain(
+    public LinkPredictionTrainNew(
         GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
         LinkPredictionPipeline pipeline,
         LinkPredictionPipelineExecutor pipelineExecutor,
         ProgressTracker progressTracker
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.graphStore = graphStore;
         this.trainConfig = trainConfig;
         this.pipelineExecutor = pipelineExecutor;
@@ -85,48 +84,24 @@ public class LinkPredictionTrain
         this.allocationTracker = AllocationTracker.empty();
     }
 
-    @Override
-    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
+    public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute(HugeObjectArray<double[]> features) {
         progressTracker.beginSubTask();
 
-        List<String> relationshipTypes = trainConfig
-            .internalRelationshipTypes(graphStore)
-            .stream()
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
-        pipelineExecutor.splitRelationships(
-            graphStore,
-            relationshipTypes,
-            trainConfig.nodeLabels(),
-            trainConfig.randomSeed(),
-            pipeline.relationshipWeightProperty()
-        );
-
-        assertRunning();
-
-        pipelineExecutor.executeNodePropertySteps(
-            trainConfig.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(pipeline.splitConfig().featureInputRelationshipType())
-        );
-
-        assertRunning();
-
-        var trainData = extractFeaturesAndTargets(pipeline.splitConfig().trainRelationshipType());
-        var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
+        var trainRelationshipType = pipeline.splitConfig().trainRelationshipType();
+        var targets = extractTargets(features.size(), trainRelationshipType);
+        var featuresAndTargets = ImmutableFeaturesAndTargets.of(features, targets);
+        var trainRelationshipIds = HugeLongArray.newArray(features.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
 
-        var modelSelectResult = modelSelect(trainData, trainRelationshipIds);
+        var modelSelectResult = modelSelect(featuresAndTargets, trainRelationshipIds);
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
-        var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
+        var modelData = trainModel(trainRelationshipIds, featuresAndTargets, bestParameters, progressTracker);
 
         // evaluate the best model on the training and test graphs
-        var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
+        var outerTrainMetrics = computeTrainMetric(featuresAndTargets, modelData, trainRelationshipIds, progressTracker);
         var testMetrics = computeTestMetric(modelData);
-
-        cleanUpGraphStore();
 
         var model = createModel(
             modelSelectResult,
@@ -173,7 +148,7 @@ public class LinkPredictionTrain
         return globalTargets;
     }
 
-    private LinkPredictionTrain.ModelSelectResult modelSelect(
+    private LinkPredictionTrainNew.ModelSelectResult modelSelect(
         FeaturesAndTargets trainData,
         HugeLongArray trainRelationshipIds
     ) {
@@ -184,7 +159,7 @@ public class LinkPredictionTrain
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        pipeline.parameterSpace().forEach(modelParams -> {
+        pipeline.parameterConfigs(trainConfig.concurrency()).forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
@@ -193,10 +168,10 @@ public class LinkPredictionTrain
                 modelParams,
                 pipeline.splitConfig().validationFolds()
             );
-            for (TrainingExamplesSplit relSplit : validationSplits) {
+            for (NodeSplit split : validationSplits) {
                 // train each model candidate on the train sets
-                var trainSet = relSplit.trainSet();
-                var validationSet = relSplit.testSet();
+                var trainSet = split.trainSet();
+                var validationSet = split.testSet();
                 // the below calls intentionally suppress progress logging of individual models
                 var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
 
@@ -225,7 +200,7 @@ public class LinkPredictionTrain
 
         progressTracker.endSubTask("select model");
 
-        return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
+        return LinkPredictionTrainNew.ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
@@ -246,7 +221,7 @@ public class LinkPredictionTrain
     }
 
     private Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> mergeMetrics(
-        LinkPredictionTrain.ModelSelectResult modelSelectResult,
+        LinkPredictionTrainNew.ModelSelectResult modelSelectResult,
         Map<LinkMetric, Double> outerTrainMetrics,
         Map<LinkMetric, Double> testMetrics
     ) {
@@ -263,7 +238,7 @@ public class LinkPredictionTrain
     }
 
 
-    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
+    private List<NodeSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
         var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
         globalTargets.setAll(i -> (long) actualTargets.get(i));
         var splitter = new StratifiedKFoldSplitter(
@@ -290,7 +265,7 @@ public class LinkPredictionTrain
 
         Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats();
 
-        static LinkPredictionTrain.ModelSelectResult of(
+        static LinkPredictionTrainNew.ModelSelectResult of(
             LinkLogisticRegressionTrainConfig bestConfig,
             Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats,
             Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats
@@ -314,8 +289,7 @@ public class LinkPredictionTrain
             trainData.targets(),
             llrConfig,
             progressTracker,
-            terminationFlag,
-            trainConfig.concurrency()
+            terminationFlag
         );
 
         var modelData= llrTrain.compute();
@@ -418,27 +392,5 @@ public class LinkPredictionTrain
                 pipeline.copy()
             )
         );
-    }
-
-    private void cleanUpGraphStore() {
-        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
-        var trainRelTypes = List.of(
-            splitConfig.trainRelationshipType(),
-            splitConfig.testRelationshipType(),
-            splitConfig.featureInputRelationshipType()
-        );
-        trainRelTypes.forEach(relType -> graphStore.deleteRelationships(RelationshipType.of(relType)));
-
-        pipelineExecutor.removeNodeProperties(graphStore, trainConfig.nodeLabelIdentifiers(graphStore));
-    }
-
-    @Override
-    public LinkPredictionTrain me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-
     }
 }

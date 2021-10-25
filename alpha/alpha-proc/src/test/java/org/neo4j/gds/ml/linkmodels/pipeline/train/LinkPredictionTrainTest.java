@@ -38,8 +38,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
@@ -145,7 +145,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 graphStore,
                 trainConfig,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
+                new LinkPredictionPipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
                 ProgressTracker.NULL_TRACKER
             );
 
@@ -207,7 +207,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 graphStore,
                 config,
                 pipeline,
-                new PipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
+                new LinkPredictionPipelineExecutor(pipeline, caller, db.databaseId(), getUsername(), GRAPH_NAME, ProgressTracker.NULL_TRACKER),
                 ProgressTracker.NULL_TRACKER
             );
 

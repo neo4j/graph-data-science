@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -88,7 +88,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
             configuration.username()
         );
         var graphStore = GraphStoreCatalog.get(configuration.username(), databaseId, graphName).graphStore();
-        var pipelineExecutor = new PipelineExecutor(
+        var pipelineExecutor = new LinkPredictionPipelineExecutor(
             model.customInfo().trainingPipeline(),
             caller,
             databaseId,

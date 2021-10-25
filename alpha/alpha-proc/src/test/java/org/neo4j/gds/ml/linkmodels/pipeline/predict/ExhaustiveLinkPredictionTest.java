@@ -41,7 +41,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -106,7 +106,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new PipelineExecutor(
+            var pipelineExecutor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -170,7 +170,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var executor = new PipelineExecutor(
+            var executor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -215,7 +215,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new PipelineExecutor(
+            var pipelineExecutor = new LinkPredictionPipelineExecutor(
                 pipeline,
                 caller,
                 db.databaseId(),
@@ -280,7 +280,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
         for (int i = 0; i < 2; i++) {
             TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-                var pipelineExecutor = new PipelineExecutor(
+                var pipelineExecutor = new LinkPredictionPipelineExecutor(
                     pipeline,
                     caller,
                     db.databaseId(),
