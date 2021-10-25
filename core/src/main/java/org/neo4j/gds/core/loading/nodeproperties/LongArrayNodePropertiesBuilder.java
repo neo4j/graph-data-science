@@ -87,12 +87,14 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
                     var mappedId = nodeMapping.toMappedNodeId(neoId);
-                    if (mappedId != NodeMapping.NOT_FOUND) {
-                        var value = page[pageIndex];
-                        if (value != null && (defaultValue == null || !Arrays.equals(value, defaultValue))) {
-                            propertiesByMappedIdsBuilder.set(mappedId, value);
-                        }
+                    if (mappedId == NodeMapping.NOT_FOUND) {
+                        continue;
                     }
+                    var value = page[pageIndex];
+                    if (value == null || (defaultValue != null && Arrays.equals(value, defaultValue))) {
+                        continue;
+                    }
+                    propertiesByMappedIdsBuilder.set(mappedId, value);
                 }
             }
         }).collect(Collectors.toList());

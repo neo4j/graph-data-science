@@ -114,12 +114,14 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
                     var mappedId = nodeMapping.toMappedNodeId(neoId);
-                    if (mappedId != NodeMapping.NOT_FOUND) {
-                        var value = page[pageIndex];
-                        if (Double.compare(value, defaultValue) != 0) {
-                            propertiesByMappedIdsBuilder.set(mappedId, value);
-                        }
+                    if (mappedId == NodeMapping.NOT_FOUND) {
+                        continue;
                     }
+                    var value = page[pageIndex];
+                    if (Double.compare(value, defaultValue) == 0) {
+                        continue;
+                    }
+                    propertiesByMappedIdsBuilder.set(mappedId, value);
                 }
             }
         }).collect(Collectors.toList());
