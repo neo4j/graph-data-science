@@ -106,13 +106,11 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
     }
 
     @Override
-    public long linksConsidered() {
-        return linksConsidered;
-    }
-
-    @Override
     public Map<String, Object> samplingStats() {
-        return Map.of("strategy", "exhaustive");
+        return Map.of(
+            "strategy", "exhaustive",
+            "linksConsidered", linksConsidered
+        );
     }
 
     public void setLinksConsidered(long linksConsidered) {

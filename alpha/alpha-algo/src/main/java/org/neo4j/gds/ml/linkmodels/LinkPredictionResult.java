@@ -26,12 +26,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface LinkPredictionResult extends RelationshipStreaming {
+
     Stream<PredictedLink> stream();
 
     @Override
     Stream<Relationship> relationshipStream();
-
-    long linksConsidered();
 
     Map<String, Object> samplingStats();
 }

@@ -118,7 +118,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             // we are writing undirected rels so we get 2x topN
             "relationshipsWritten", 12L,
             "configuration", isA(Map.class),
-            "linksConsidered", 6L,
             "probabilityDistribution", allOf(
                 hasKey("min"),
                 hasKey("max"),
@@ -135,7 +134,10 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
                 hasKey("p99"),
                 hasKey("p100")
             ),
-            "samplingStats", Map.of("strategy", "exhaustive")
+            "samplingStats", Map.of(
+                "strategy", "exhaustive",
+                "linksConsidered", 6L
+            )
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));

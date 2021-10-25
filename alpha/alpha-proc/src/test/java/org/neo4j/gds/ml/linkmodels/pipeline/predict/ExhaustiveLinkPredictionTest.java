@@ -127,8 +127,12 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             );
 
             var predictionResult = linkPrediction.compute();
-            assertThat(predictionResult.linksConsidered()).isEqualTo(6L);
-            assertThat(predictionResult.samplingStats()).isEqualTo(Map.of("strategy", "exhaustive"));
+            assertThat(predictionResult.samplingStats()).isEqualTo(
+                Map.of(
+                    "strategy", "exhaustive",
+                    "linksConsidered", 6L
+                )
+            );
 
 
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());

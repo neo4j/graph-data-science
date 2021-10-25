@@ -93,14 +93,13 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
     static class Result implements LinkPredictionResult {
         private final Stream<SimilarityResult> predictions;
-        private final long linksConsidered;
         private final Map<String, Object> samplingStats;
 
         Result(Stream<SimilarityResult> predictions, long linksConsidered, long ranIterations, boolean didConverge) {
             this.predictions = predictions;
-            this.linksConsidered = linksConsidered;
             this.samplingStats = Map.of(
                 "strategy", "approximate",
+                "linksConsidered", linksConsidered,
                 "ranIterations", ranIterations,
                 "didConverge", didConverge
             );
@@ -118,11 +117,6 @@ public class ApproximateLinkPrediction extends LinkPrediction {
                 i.node2,
                 new Value[]{Values.doubleValue(i.similarity)}
             ));
-        }
-
-        @Override
-        public long linksConsidered() {
-            return linksConsidered;
         }
 
         @Override

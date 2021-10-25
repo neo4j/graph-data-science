@@ -134,10 +134,10 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
             var predictionResult = linkPrediction.compute();
-            assertThat(predictionResult.linksConsidered()).isEqualTo(expectedLinksConsidered);
             assertThat(predictionResult.samplingStats()).isEqualTo(
                 Map.of(
                     "strategy", "approximate",
+                    "linksConsidered", expectedLinksConsidered,
                     "ranIterations", ranIterations,
                     "didConverge", true
                 )
