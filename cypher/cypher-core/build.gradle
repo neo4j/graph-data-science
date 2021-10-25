@@ -18,6 +18,7 @@ dependencies {
     }
 
     implementation project(':core')
+    implementation project(':open-licensing')
     implementation project(':string-formatting')
 
     testImplementation project(":test-utils")
