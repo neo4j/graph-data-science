@@ -17,7 +17,6 @@ dependencies {
     }
 
     implementation project(':core')
-    implementation project(':open-licensing')
 
     api project(':storage-engine-adapter')
 

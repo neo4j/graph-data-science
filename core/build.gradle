@@ -21,7 +21,9 @@ dependencies {
     compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
 
     implementation project(':annotations')
+    implementation project(':licensing')
     implementation project(':memory-usage')
+    implementation project(':open-licensing')
     implementation project(':string-formatting')
     implementation project(':collections')
     implementation project(':collections-memory-estimation')
