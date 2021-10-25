@@ -29,6 +29,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestLog;
@@ -265,6 +266,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
             proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
+            proc.licenseState = new OpenGdsLicenseState();
             proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction

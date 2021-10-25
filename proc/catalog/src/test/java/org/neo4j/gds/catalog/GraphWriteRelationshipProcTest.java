@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -184,6 +185,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
             proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
+            proc.licenseState = new OpenGdsLicenseState();
             proc.relationshipExporterBuilder = new NativeRelationshipExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction
