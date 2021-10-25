@@ -20,16 +20,23 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseNotFoundException;
+import org.neo4j.dbms.database.DatabaseContext;
+import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.graphdb.event.DatabaseEventContext;
 import org.neo4j.graphdb.event.DatabaseEventListener;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
     private final DatabaseManagementService dbms;
+    private final DatabaseManager<DatabaseContext> databaseManager;
 
-    InMemoryGraphTrackerLifecycleAdapter(DatabaseManagementService dbms) {
+    InMemoryGraphTrackerLifecycleAdapter(
+        DatabaseManagementService dbms,
+        DatabaseManager<DatabaseContext> databaseManager
+    ) {
         this.dbms = dbms;
+        this.databaseManager = databaseManager;
     }
 
     @Override
@@ -53,8 +60,13 @@ public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter imple
     }
 
     private void databaseIsShuttingDown(String databaseName) {
-        var api = (GraphDatabaseAPI) dbms.database(databaseName);
-        var namedDatabaseId = api.databaseId();
+        var databaseIds = databaseManager.registeredDatabases().keySet();
+        var namedDatabaseId = databaseIds
+            .stream()
+            .filter(id -> id.name().equals(databaseName))
+            .findFirst()
+            .orElseThrow(() -> new DatabaseNotFoundException(databaseName));
+
         GraphStoreCatalog.removeAllLoadedGraphs(namedDatabaseId);
     }
 
