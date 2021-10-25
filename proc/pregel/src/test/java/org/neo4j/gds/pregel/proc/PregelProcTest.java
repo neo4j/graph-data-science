@@ -221,7 +221,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.licenseState = new OpenGdsLicenseState();
+            proc.licenseState = OpenGdsLicenseState.INSTANCE;
             Map<String, Object> config = Map.of(
                 "nodeProjection", "RealNode",
                 "relationshipProjection", "*",
@@ -247,7 +247,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.licenseState = new OpenGdsLicenseState();
+            proc.licenseState = OpenGdsLicenseState.INSTANCE;
             Map<String, Object> config = Map.of(
                 "nodeProjection", "RealNode",
                 "relationshipProjection", "*",
@@ -275,7 +275,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
-            proc.licenseState = new OpenGdsLicenseState();
+            proc.licenseState = OpenGdsLicenseState.INSTANCE;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true

@@ -58,7 +58,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.api = db;
         proc.log = NullLog.getInstance();
-        proc.licenseState = new OpenGdsLicenseState();
+        proc.licenseState = OpenGdsLicenseState.INSTANCE;
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
@@ -76,7 +76,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.api = db;
         proc.log = NullLog.getInstance();
-        proc.licenseState = new OpenGdsLicenseState();
+        proc.licenseState = OpenGdsLicenseState.INSTANCE;
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();

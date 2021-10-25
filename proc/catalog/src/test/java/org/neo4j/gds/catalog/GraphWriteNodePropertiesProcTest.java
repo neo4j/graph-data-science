@@ -266,7 +266,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = log;
             proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-            proc.licenseState = new OpenGdsLicenseState();
+            proc.licenseState = OpenGdsLicenseState.INSTANCE;
             proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(TransactionContext.of(
                 proc.api,
                 proc.procedureTransaction

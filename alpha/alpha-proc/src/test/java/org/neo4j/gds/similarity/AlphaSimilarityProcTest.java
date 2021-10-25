@@ -86,7 +86,7 @@ public abstract class AlphaSimilarityProcTest<
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
             proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-            proc.licenseState = new OpenGdsLicenseState();
+            proc.licenseState = OpenGdsLicenseState.INSTANCE;
 
             func.accept(proc);
         }

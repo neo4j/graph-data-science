@@ -21,10 +21,8 @@ package org.neo4j.gds;
 
 class OpenGdsLicensingService implements LicensingService {
 
-    private static final LicenseState state = new OpenGdsLicenseState();
-
     @Override
     public LicenseState get() {
-        return state;
+        return OpenGdsLicenseState.INSTANCE;
     }
 }
