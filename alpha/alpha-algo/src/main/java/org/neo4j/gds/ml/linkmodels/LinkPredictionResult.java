@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.core.write.RelationshipStreaming;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 public interface LinkPredictionResult extends RelationshipStreaming {
@@ -31,4 +32,6 @@ public interface LinkPredictionResult extends RelationshipStreaming {
     Stream<Relationship> relationshipStream();
 
     long linksConsidered();
+
+    Map<String, Object> samplingStats();
 }

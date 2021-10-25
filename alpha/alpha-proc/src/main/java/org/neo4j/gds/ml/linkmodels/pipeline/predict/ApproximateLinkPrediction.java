@@ -40,6 +40,7 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
@@ -54,9 +55,18 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
-        super(modelData, pipelineExecutor, nodeLabels, relationshipTypes, graphStore, knnConfig.concurrency(), progressTracker);
+        super(
+            modelData,
+            pipelineExecutor,
+            nodeLabels,
+            relationshipTypes,
+            graphStore,
+            knnConfig.concurrency(),
+            progressTracker
+        );
         this.knnConfig = knnConfig;
     }
+
     @Override
     LinkPredictionResult predictLinks(
         Graph graph,
@@ -78,16 +88,22 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             .streamSimilarityResult()
             .filter(i -> !graph.exists(i.sourceNodeId(), i.targetNodeId()));
 
-        return new Result(predictions, knnResult.nodePairsConsidered());
+        return new Result(predictions, knnResult.nodePairsConsidered(), knnResult.ranIterations(), knnResult.didConverge());
     }
 
     static class Result implements LinkPredictionResult {
         private final Stream<SimilarityResult> predictions;
         private final long linksConsidered;
+        private final Map<String, Object> samplingStats;
 
-        Result(Stream<SimilarityResult> predictions, long linksConsidered) {
+        Result(Stream<SimilarityResult> predictions, long linksConsidered, long ranIterations, boolean didConverge) {
             this.predictions = predictions;
             this.linksConsidered = linksConsidered;
+            this.samplingStats = Map.of(
+                "strategy", "approximate",
+                "ranIterations", ranIterations,
+                "didConverge", didConverge
+            );
         }
 
         @Override
@@ -97,12 +113,21 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
         @Override
         public Stream<Relationship> relationshipStream() {
-            return predictions.map(i -> ImmutableRelationship.of(i.node1, i.node2, new Value[]{Values.doubleValue(i.similarity)}));
+            return predictions.map(i -> ImmutableRelationship.of(
+                i.node1,
+                i.node2,
+                new Value[]{Values.doubleValue(i.similarity)}
+            ));
         }
 
         @Override
         public long linksConsidered() {
             return linksConsidered;
+        }
+
+        @Override
+        public Map<String, Object> samplingStats() {
+            return samplingStats;
         }
     }
 }

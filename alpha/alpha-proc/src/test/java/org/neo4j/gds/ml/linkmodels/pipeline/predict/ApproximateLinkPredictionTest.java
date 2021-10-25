@@ -91,8 +91,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 37", "2, 88"})
-    void shouldPredictWithTopK(int topK, long expectedLinksConsidered) {
+    @CsvSource(value = {"1, 37, 1", "2, 88, 2"})
+    void shouldPredictWithTopK(int topK, long expectedLinksConsidered, long ranIterations) {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
@@ -135,6 +135,13 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             );
             var predictionResult = linkPrediction.compute();
             assertThat(predictionResult.linksConsidered()).isEqualTo(expectedLinksConsidered);
+            assertThat(predictionResult.samplingStats()).isEqualTo(
+                Map.of(
+                    "strategy", "approximate",
+                    "ranIterations", ranIterations,
+                    "didConverge", true
+                )
+            );
 
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
 

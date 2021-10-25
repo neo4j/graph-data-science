@@ -28,6 +28,7 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -107,6 +108,11 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
     @Override
     public long linksConsidered() {
         return linksConsidered;
+    }
+
+    @Override
+    public Map<String, Object> samplingStats() {
+        return Map.of("strategy", "exhaustive");
     }
 
     public void setLinksConsidered(long linksConsidered) {

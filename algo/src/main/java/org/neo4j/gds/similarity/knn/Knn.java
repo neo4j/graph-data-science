@@ -524,9 +524,9 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     public abstract static class Result {
         abstract HugeObjectArray<NeighborList> neighborList();
 
-        abstract int ranIterations();
+        public abstract int ranIterations();
 
-        abstract boolean didConverge();
+        public abstract boolean didConverge();
 
         public abstract long nodePairsConsidered();
 
@@ -565,12 +565,12 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         }
 
         @Override
-        int ranIterations() {
+        public int ranIterations() {
             return 0;
         }
 
         @Override
-        boolean didConverge() {
+        public boolean didConverge() {
             return false;
         }
 

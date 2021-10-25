@@ -134,7 +134,8 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
                 hasKey("p95"),
                 hasKey("p99"),
                 hasKey("p100")
-            )
+            ),
+            "samplingStats", Map.of("strategy", "exhaustive")
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));

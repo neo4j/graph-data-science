@@ -72,7 +72,9 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
-        var builder = new MutateResult.Builder().withLinksConsidered(computeResult.result().linksConsidered());
+        var builder = new MutateResult.Builder()
+            .withLinksConsidered(computeResult.result().linksConsidered())
+            .withSamplingStats(computeResult.result().samplingStats());
         if (callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
             builder.withHistogram();
         }
@@ -145,6 +147,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
         public final long relationshipsWritten;
         public final long linksConsidered;
         public final Map<String, Object> probabilityDistribution;
+        public final Map<String, Object> samplingStats;
 
         MutateResult(
             long createMillis,
@@ -153,7 +156,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             long relationshipsWritten,
             Map<String, Object> configuration,
             long linksConsidered,
-            Map<String, Object> probabilityDistribution
+            Map<String, Object> probabilityDistribution,
+            Map<String, Object> samplingStats
         ) {
             super(
                 createMillis,
@@ -166,11 +170,13 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
             this.relationshipsWritten = relationshipsWritten;
             this.linksConsidered = linksConsidered;
             this.probabilityDistribution = probabilityDistribution;
+            this.samplingStats = samplingStats;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
 
             private long linksConsidered = -1L;
+            private Map<String, Object> samplingStats = null;
 
             @Nullable
             private ConcurrentDoubleHistogram histogram = null;
@@ -184,7 +190,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
                     relationshipsWritten,
                     config.toMap(),
                     linksConsidered,
-                    histogram == null ? Map.of() : HistogramUtils.similaritySummary(histogram)
+                    histogram == null ? Map.of() : HistogramUtils.similaritySummary(histogram),
+                    samplingStats
                 );
             }
 
@@ -204,10 +211,15 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
 
             void recordHistogramValue(double value) {
                 if (histogram == null) {
-                   return;
+                    return;
                 }
 
                 histogram.recordValue(value);
+            }
+
+            Builder withSamplingStats(Map<String, Object> samplingStats) {
+                this.samplingStats = samplingStats;
+                return this;
             }
         }
     }
