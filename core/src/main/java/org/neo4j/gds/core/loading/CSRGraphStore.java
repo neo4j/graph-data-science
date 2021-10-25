@@ -621,7 +621,7 @@ public class CSRGraphStore implements GraphStore {
         );
 
         return filteredNodes.isPresent()
-            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get(), allocationTracker)
             : initialGraph;
     }
 
