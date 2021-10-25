@@ -27,6 +27,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
@@ -220,6 +221,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.licenseState = new OpenGdsLicenseState();
             Map<String, Object> config = Map.of(
                 "nodeProjection", "RealNode",
                 "relationshipProjection", "*",
@@ -245,6 +247,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.licenseState = new OpenGdsLicenseState();
             Map<String, Object> config = Map.of(
                 "nodeProjection", "RealNode",
                 "relationshipProjection", "*",
@@ -272,6 +275,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.licenseState = new OpenGdsLicenseState();
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true

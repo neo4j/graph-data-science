@@ -22,6 +22,7 @@ package org.neo4j.gds.labelpropagation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.compat.MapUtil;
@@ -192,7 +193,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Nested
-    class FilteredGraph {
+    class FilteredGraph extends BaseTest {
 
         @Neo4jGraph
         private static final String DB_CYPHER_WITH_OFFSET = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;

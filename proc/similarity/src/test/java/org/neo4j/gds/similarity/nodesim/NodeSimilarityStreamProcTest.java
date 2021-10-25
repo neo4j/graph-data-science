@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
@@ -233,7 +234,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_METHOD)
-    class NonConsecutiveIds {
+    class NonConsecutiveIds extends BaseTest {
 
         @Neo4jGraph
         private static final String DB_CYPHER_NON_CONSECUTIVE =

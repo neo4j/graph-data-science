@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -443,7 +444,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @Nested
-    class FilteredGraph {
+    class FilteredGraph extends BaseTest {
 
         @Neo4jGraph
         static final String DB_CYPHER_WITH_OFFSET = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
