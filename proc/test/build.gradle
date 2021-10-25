@@ -17,7 +17,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':string-formatting')
 
+    api project(':proc-catalog')
     api project(':proc-common')
     api project(':test-utils')
-    api project(':proc-catalog')
 }
