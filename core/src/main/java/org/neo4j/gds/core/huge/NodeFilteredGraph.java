@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
@@ -33,23 +34,37 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends CSRGraphAdapter {
 
+    private static final int NO_DEGREE = -1;
+
     private final NodeMapping filteredIdMap;
     private long relationshipCount;
+    private final HugeIntArray degreeCache;
 
     public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
         super(originalGraph);
         this.relationshipCount = -1;
+        this.filteredIdMap = filteredIdMap;
+        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), AllocationTracker.empty());
+
+        degreeCache.fill(NO_DEGREE);
+    }
+
+    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap, HugeIntArray degreeCache) {
+        super(originalGraph);
+
+        this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
     }
 
@@ -79,7 +94,20 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public int degree(long nodeId) {
-        return super.degree(filteredIdMap.toOriginalNodeId(nodeId));
+        int cachedDegree = degreeCache.get(nodeId);
+        if (cachedDegree != NO_DEGREE) {
+            return cachedDegree;
+        }
+
+        var degree = new MutableInt();
+
+        forEachRelationship(nodeId, (s, t) -> {
+            degree.increment();
+            return true;
+        });
+        degreeCache.set(nodeId, degree.intValue());
+
+        return degree.intValue();
     }
 
     @Override
@@ -189,7 +217,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public CSRGraph concurrentCopy() {
-        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap);
+        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap, degreeCache);
     }
 
     @Override
