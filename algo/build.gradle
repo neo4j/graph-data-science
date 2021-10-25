@@ -24,6 +24,7 @@ dependencies {
     implementation project(':core')
     implementation project(':memory-usage')
     implementation project(':ml-core')
+    implementation project(':open-licensing')
     implementation project(':pregel')
     implementation project(':string-formatting')
 
