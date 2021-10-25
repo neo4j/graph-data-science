@@ -32,9 +32,9 @@ import java.util.Comparator;
 import java.util.ServiceLoader;
 
 @ServiceProvider
-class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependencies> {
+public final class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependencies> {
 
-    GdsEditionExtension() {
+    public GdsEditionExtension() {
         super(ExtensionType.DATABASE, "gds.edition");
     }
 
