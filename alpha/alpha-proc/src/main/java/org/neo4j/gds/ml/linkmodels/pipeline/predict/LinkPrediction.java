@@ -26,7 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 
@@ -36,7 +36,7 @@ import java.util.Optional;
 public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
 
     private final LinkLogisticRegressionData modelData;
-    private final PipelineExecutor pipelineExecutor;
+    private final LinkPredictionPipelineExecutor pipelineExecutor;
     private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relationshipTypes;
     private final GraphStore graphStore;
@@ -44,7 +44,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
 
     LinkPrediction(
         LinkLogisticRegressionData modelData,
-        PipelineExecutor pipelineExecutor,
+        LinkPredictionPipelineExecutor pipelineExecutor,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         GraphStore graphStore,

@@ -63,27 +63,7 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
         );
     }
 
-    public LinkPredictionSplitConfig splitConfig() {
-        return splitConfig;
-    }
-
-    public void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
-        this.splitConfig = splitConfig;
-    }
-
-     public List<LinkLogisticRegressionTrainConfig> parameterSpace() {
-        return parameterSpace;
-    }
-
-    public List<Map<String, Object>> parameterSpaceMaps() {
-        return parameterSpace.stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
-    }
-
-
-    public void setParameterSpace(@NotNull List<LinkLogisticRegressionTrainConfig> parameterList) {
-        this.parameterSpace = parameterList;
-    }
-
+    @Override
     public void validate(Graph graph) {
         Set<String> graphProperties = graph.availableNodeProperties();
 
@@ -96,6 +76,27 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
         if (!invalidProperties.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
         }
+    }
+
+    public LinkPredictionSplitConfig splitConfig() {
+        return splitConfig;
+    }
+
+    public void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
+        this.splitConfig = splitConfig;
+    }
+
+    public List<LinkLogisticRegressionTrainConfig> parameterSpace() {
+        return parameterSpace;
+    }
+
+    public List<Map<String, Object>> parameterSpaceMaps() {
+        return parameterSpace.stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
+    }
+
+
+    public void setParameterSpace(@NotNull List<LinkLogisticRegressionTrainConfig> parameterList) {
+        this.parameterSpace = parameterList;
     }
 
     public void validate() {

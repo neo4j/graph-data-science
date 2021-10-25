@@ -38,18 +38,18 @@ public class RelationshipSplitter {
     private static final String SPLIT_ERROR_TEMPLATE = "%s graph contains no relationships. Consider increasing the `%s` or provide a larger graph";
 
     private final String graphName;
-    private final LinkPredictionPipeline pipeline;
+    private final LinkPredictionSplitConfig splitConfig;
     private final BaseProc caller;
     private final ProgressTracker progressTracker;
 
     RelationshipSplitter(
         String graphName,
-        LinkPredictionPipeline pipeline,
+        LinkPredictionSplitConfig splitConfig,
         BaseProc caller,
         ProgressTracker progressTracker
     ) {
         this.graphName = graphName;
-        this.pipeline = pipeline;
+        this.splitConfig = splitConfig;
         this.caller = caller;
         this.progressTracker = progressTracker;
     }
@@ -63,7 +63,6 @@ public class RelationshipSplitter {
     ) {
         progressTracker.beginSubTask();
 
-        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
         splitConfig.validateAgainstGraphStore(graphStore);
 
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
@@ -86,7 +85,7 @@ public class RelationshipSplitter {
     }
 
     private void validateTestSplit(GraphStore graphStore) {
-        String testRelationshipType = pipeline.splitConfig().testRelationshipType();
+        String testRelationshipType = splitConfig.testRelationshipType();
         if (graphStore.getGraph(RelationshipType.of(testRelationshipType)).relationshipCount() <= 0) {
             throw new IllegalStateException(formatWithLocale(
                 SPLIT_ERROR_TEMPLATE,
@@ -97,8 +96,6 @@ public class RelationshipSplitter {
     }
 
     private void validateTrainSplit(GraphStore graphStore) {
-        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
-
         if (graphStore.getGraph(RelationshipType.of(splitConfig.trainRelationshipType())).relationshipCount() <= 0) {
             throw new IllegalStateException(formatWithLocale(
                 SPLIT_ERROR_TEMPLATE,
