@@ -26,4 +26,6 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':proc-test')
+    testImplementation project(':licensing')
+    testImplementation project(':open-licensing')
 }

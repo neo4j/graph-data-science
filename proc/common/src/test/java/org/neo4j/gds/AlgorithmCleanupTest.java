@@ -76,6 +76,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.api = db;
         proc.log = NullLog.getInstance();
+        proc.licenseState = new OpenGdsLicenseState();
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
