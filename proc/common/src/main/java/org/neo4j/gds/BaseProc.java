@@ -218,6 +218,12 @@ public abstract class BaseProc {
         }
     }
 
+    protected final void checkLicense() {
+        if (!licenseState.isValid()) {
+            throw new RuntimeException(licenseState.errorMessage().get());
+        }
+    }
+
     protected <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
         return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }

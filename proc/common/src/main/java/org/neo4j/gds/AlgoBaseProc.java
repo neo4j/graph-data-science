@@ -191,9 +191,7 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        if (!licenseState.isValid()) {
-            throw new RuntimeException(licenseState.errorMessage().get());
-        }
+        checkLicense();
         return compute(graphNameOrConfig, configuration, true, true);
     }
 
