@@ -19,27 +19,17 @@
  */
 package org.neo4j.gds.utils;
 
+import org.neo4j.gds.ProcedureAndFunctionScanner;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserFunction;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class ProcAndFunctionScanner {
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "com.neo4j.gds",
-        "org.neo4j.gds"
-    );
+public final class TestProcedureAndFunctionScanner {
 
-    private static final List<Reflections> reflections = PACKAGES_TO_SCAN
-        .stream()
-        .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
-        .collect(Collectors.toList());
+    private TestProcedureAndFunctionScanner() {}
 
 
     public static Class<?>[] procedures() throws Exception {
@@ -54,14 +44,10 @@ public class ProcAndFunctionScanner {
         return classesContainingAnnotation(UserAggregationFunction.class);
     }
 
-    private static Class<?>[] classesContainingAnnotation(Class<? extends Annotation> annotation) throws Exception {
-        return reflections.stream().flatMap(reflection ->
-                reflection
-                    .getMethodsAnnotatedWith(annotation)
-                    .stream()
-                    .map(Method::getDeclaringClass)
-                    .filter(declaringClass -> !declaringClass.getPackage().getName().startsWith("org.neo4j.gds.test"))
-            )
+    private static Class<?>[] classesContainingAnnotation(Class<? extends Annotation> annotation) {
+        return ProcedureAndFunctionScanner.streamMethodsContainingAnnotation(annotation)
+            .map(Method::getDeclaringClass)
+            .filter(declaringClass -> !declaringClass.getPackage().getName().startsWith("org.neo4j.gds.test"))
             .distinct()
             .toArray(Class[]::new);
     }

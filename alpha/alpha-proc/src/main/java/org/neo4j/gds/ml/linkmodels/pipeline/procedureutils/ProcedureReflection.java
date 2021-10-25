@@ -21,16 +21,14 @@ package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ProcedureAndFunctionScanner;
 import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Procedure;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,18 +42,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public final class ProcedureReflection {
 
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.gds"
-    );
-
     private final List<Method> procedureMethods;
     public static final ProcedureReflection INSTANCE = new ProcedureReflection();
 
     private ProcedureReflection() {
-        this.procedureMethods = PACKAGES_TO_SCAN.stream()
-            .map(this::createReflections)
-            .map(r -> r.getMethodsAnnotatedWith(Procedure.class))
-            .flatMap(Collection::stream)
+        this.procedureMethods = ProcedureAndFunctionScanner
+            .streamMethodsContainingAnnotation(Procedure.class)
             .collect(Collectors.toList());
     }
 
@@ -129,12 +121,5 @@ public final class ProcedureReflection {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Reflections createReflections(String pkg) {
-        return new Reflections(
-            pkg,
-            new MethodAnnotationsScanner()
-        );
     }
 }

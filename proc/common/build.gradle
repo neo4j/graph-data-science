@@ -22,6 +22,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':string-formatting')
 
+    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
