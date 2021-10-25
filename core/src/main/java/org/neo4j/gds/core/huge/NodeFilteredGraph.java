@@ -22,6 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -32,21 +33,23 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private final NodeMapping filteredIdMap;
-    private AtomicLong relationshipCount;
+    private long relationshipCount;
 
     public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
         super(originalGraph);
+        this.relationshipCount = -1;
         this.filteredIdMap = filteredIdMap;
     }
 
@@ -101,28 +104,22 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public long relationshipCount() {
-        if (relationshipCount == null) {
+        if (relationshipCount == -1) {
             doCount();
         }
-        return relationshipCount.get();
+        return relationshipCount;
     }
 
     private void doCount() {
-        this.relationshipCount = new AtomicLong(0);
-
         var tasks = PartitionUtils.rangePartition(
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             nodeCount(),
-            partition -> (Runnable) () -> {
-                partition.consume(nodeId -> forEachRelationship(nodeId, (src, target) -> {
-                    // we call our filter-safe iterator and count every time
-                    relationshipCount.incrementAndGet();
-                    return true;
-                }));
-            },
+            partition -> new RelationshipCounter(concurrentCopy(), partition),
             Optional.empty()
         );
         ParallelUtil.runWithConcurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY, tasks, Pools.DEFAULT);
+
+        this.relationshipCount = tasks.stream().mapToLong(RelationshipCounter::relationshipCount).sum();
     }
 
     @Override
@@ -240,6 +237,31 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return true;
+    }
+
+    static class RelationshipCounter implements Runnable {
+        private long relationshipCount;
+        private final Graph graph;
+        private final Partition partition;
+
+        RelationshipCounter(Graph graph, Partition partition) {
+            this.partition = partition;
+            this.graph = graph;
+            this.relationshipCount = 0;
+        }
+
+        @Override
+        public void run() {
+            partition.consume(nodeId -> graph.forEachRelationship(nodeId, (src, target) -> {
+                // we call our filter-safe iterator and count every time
+                relationshipCount++;
+                return true;
+            }));
+        }
+
+        long relationshipCount() {
+            return relationshipCount;
+        }
     }
 
     private static class NonDuplicateRelationshipsDegreeCounter implements RelationshipConsumer {
