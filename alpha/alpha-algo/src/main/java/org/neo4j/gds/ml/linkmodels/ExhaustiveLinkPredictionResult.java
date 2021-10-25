@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
@@ -35,42 +33,29 @@ import java.util.stream.StreamSupport;
 
 public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
 
-    private long linksConsidered;
+    private final BoundedLongLongPriorityQueue predictionQueue;
+    private final long linksConsidered;
 
-    static MemoryEstimation memoryEstimation(int topN) {
-        return MemoryEstimations.builder(ExhaustiveLinkPredictionResult.class)
-            .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
-            .build();
-    }
-
-    private final BoundedLongLongPriorityQueue queue;
-
-    public ExhaustiveLinkPredictionResult(int top) {
-        assert top > 0;
-
-        this.queue = BoundedLongLongPriorityQueue.max(top);
-        this.linksConsidered = -1L;
-    }
-
-    public synchronized void add(long node1, long node2, double probability) {
-        queue.offer(node1, node2, probability);
+    public ExhaustiveLinkPredictionResult(BoundedLongLongPriorityQueue bestPredictions, long linksConsidered) {
+        this.predictionQueue = bestPredictions;
+        this.linksConsidered = linksConsidered;
     }
 
     public int size() {
-        return queue.size();
+        return predictionQueue.size();
     }
 
     public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
-        queue.foreach(consumer);
+        predictionQueue.foreach(consumer);
     }
 
     @Override
     public Stream<PredictedLink> stream() {
         Iterable<PredictedLink> iterable = () -> new Iterator<>() {
 
-            final PrimitiveIterator.OfLong elements1Iter = queue.elements1().iterator();
-            final PrimitiveIterator.OfLong elements2Iter = queue.elements2().iterator();
-            final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
+            final PrimitiveIterator.OfLong elements1Iter = predictionQueue.elements1().iterator();
+            final PrimitiveIterator.OfLong elements2Iter = predictionQueue.elements2().iterator();
+            final PrimitiveIterator.OfDouble prioritiesIter = predictionQueue.priorities().iterator();
 
             @Override
             public boolean hasNext() {
@@ -111,9 +96,5 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
             "strategy", "exhaustive",
             "linksConsidered", linksConsidered
         );
-    }
-
-    public void setLinksConsidered(long linksConsidered) {
-        this.linksConsidered = linksConsidered;
     }
 }

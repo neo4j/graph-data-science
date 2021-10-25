@@ -72,18 +72,19 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Exha
     @Override
     public ExhaustiveLinkPredictionResult compute() {
         progressTracker.beginSubTask();
-        var result = new ExhaustiveLinkPredictionResult(topN);
+        var predictQueue = BoundedLongLongPriorityQueue.max(topN);
+
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
                 predictor,
-                result,
+                predictQueue,
                 progressTracker
             ),
             terminationFlag
         );
         progressTracker.endSubTask();
-        return result;
+        return new ExhaustiveLinkPredictionResult(predictQueue, -1);
     }
 
     @Override
@@ -99,18 +100,18 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Exha
     private final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
         private final Graph graph;
         private final LinkLogisticRegressionPredictor predictor;
-        private final ExhaustiveLinkPredictionResult predictedLinks;
+        private final BoundedLongLongPriorityQueue predictionQueue;
         private final ProgressTracker progressTracker;
 
         private LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkLogisticRegressionPredictor predictor,
-            ExhaustiveLinkPredictionResult predictedLinks,
+            BoundedLongLongPriorityQueue queue,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.predictor = predictor;
-            this.predictedLinks = predictedLinks;
+            this.predictionQueue = queue;
             this.progressTracker = progressTracker;
         }
 
@@ -124,7 +125,10 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Exha
                         if (neighbors.contains(targetId)) return;
                         var probability = predictor.predictedProbability(sourceId, targetId);
                         if (probability < threshold) return;
-                        predictedLinks.add(sourceId, targetId, probability);
+
+                        synchronized (predictionQueue) {
+                            predictionQueue.offer(sourceId, targetId, probability);
+                        }
                     }
                 );
             }

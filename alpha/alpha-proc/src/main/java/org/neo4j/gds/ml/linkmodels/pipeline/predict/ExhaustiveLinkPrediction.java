@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
@@ -70,7 +71,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
-        var result = new ExhaustiveLinkPredictionResult(topN);
+        var predictionQueue = BoundedLongLongPriorityQueue.max(topN);
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -78,7 +79,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             partition -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
                 linkPredictionSimilarityComputer,
-                result,
+                predictionQueue,
                 partition,
                 progressTracker
             ),
@@ -87,15 +88,14 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        result.setLinksConsidered(tasks.stream().mapToLong(LinkPredictionScoreByIdsConsumer::linksConsidered).sum());
-
-        return result;
+        long linksConsidered = tasks.stream().mapToLong(LinkPredictionScoreByIdsConsumer::linksConsidered).sum();
+        return new ExhaustiveLinkPredictionResult(predictionQueue, linksConsidered);
     }
 
     final class LinkPredictionScoreByIdsConsumer implements Runnable {
         private final Graph graph;
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
-        private final ExhaustiveLinkPredictionResult predictedLinks;
+        private final BoundedLongLongPriorityQueue predictionQueue;
         private final ProgressTracker progressTracker;
         private final Partition partition;
         private long linksConsidered;
@@ -103,13 +103,13 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
-            ExhaustiveLinkPredictionResult predictedLinks,
+            BoundedLongLongPriorityQueue predictionQueue,
             Partition partition,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
-            this.predictedLinks = predictedLinks;
+            this.predictionQueue = predictionQueue;
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.linksConsidered = 0;
@@ -126,7 +126,10 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                         var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
                         linksConsidered++;
                         if (probability < threshold) return;
-                        predictedLinks.add(sourceId, targetId, probability);
+
+                        synchronized (predictionQueue) {
+                            predictionQueue.offer(sourceId, targetId, probability);
+                        }
                     }
                 );
             });
