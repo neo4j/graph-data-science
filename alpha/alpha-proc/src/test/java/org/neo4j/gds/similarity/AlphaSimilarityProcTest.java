@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GraphCreateConfigSupport;
+import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -85,6 +86,7 @@ public abstract class AlphaSimilarityProcTest<
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
             proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
+            proc.licenseState = new OpenGdsLicenseState();
 
             func.accept(proc);
         }

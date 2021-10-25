@@ -42,6 +42,7 @@ dependencies {
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
     testImplementation project(':test-utils')
+    testImplementation project(':open-licensing')
     testImplementation project(':proc-test')
     testImplementation project(':proc-beta')
     testImplementation project(':proc-embeddings')
