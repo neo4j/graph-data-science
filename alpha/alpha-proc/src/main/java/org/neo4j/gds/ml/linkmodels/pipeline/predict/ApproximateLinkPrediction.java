@@ -78,13 +78,17 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             .streamSimilarityResult()
             .filter(i -> !graph.exists(i.sourceNodeId(), i.targetNodeId()));
 
-        return new Result(predictions);
+        return new Result(predictions, knnResult.nodePairsConsidered());
     }
 
     static class Result implements LinkPredictionResult {
         private final Stream<SimilarityResult> predictions;
+        private final long linksConsidered;
 
-        Result(Stream<SimilarityResult> predictions) {this.predictions = predictions;}
+        Result(Stream<SimilarityResult> predictions, long linksConsidered) {
+            this.predictions = predictions;
+            this.linksConsidered = linksConsidered;
+        }
 
         @Override
         public Stream<PredictedLink> stream() {
@@ -94,6 +98,11 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         @Override
         public Stream<Relationship> relationshipStream() {
             return predictions.map(i -> ImmutableRelationship.of(i.node1, i.node2, new Value[]{Values.doubleValue(i.similarity)}));
+        }
+
+        @Override
+        public long linksConsidered() {
+            return linksConsidered;
         }
     }
 }

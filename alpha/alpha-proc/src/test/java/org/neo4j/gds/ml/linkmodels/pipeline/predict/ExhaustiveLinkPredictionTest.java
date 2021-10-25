@@ -125,7 +125,11 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
                 0D,
                 ProgressTracker.NULL_TRACKER
             );
+
             var predictionResult = linkPrediction.compute();
+            assertThat(predictionResult.linksConsidered()).isEqualTo(6L);
+
+
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
             assertThat(predictedLinks).hasSize(Math.min(topN, 6));
 

@@ -29,4 +29,6 @@ public interface LinkPredictionResult extends RelationshipStreaming {
 
     @Override
     Stream<Relationship> relationshipStream();
+
+    long linksConsidered();
 }

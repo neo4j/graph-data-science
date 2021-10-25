@@ -91,8 +91,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1", "2"})
-    void shouldPredictWithTopK(int topK) {
+    @CsvSource(value = {"1, 37", "2, 88"})
+    void shouldPredictWithTopK(int topK, long expectedLinksConsidered) {
         var pipeline = new TrainingPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
@@ -134,6 +134,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
             var predictionResult = linkPrediction.compute();
+            assertThat(predictionResult.linksConsidered()).isEqualTo(expectedLinksConsidered);
+
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
 
             assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graphStore.nodeCount()));

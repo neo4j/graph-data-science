@@ -24,15 +24,17 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.stream.LongStream;
 
 public class ExhaustiveLinkPrediction extends LinkPrediction {
@@ -69,52 +71,67 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
         var result = new ExhaustiveLinkPredictionResult(topN);
-        var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
-        batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
+
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
                 linkPredictionSimilarityComputer,
                 result,
+                partition,
                 progressTracker
             ),
-            terminationFlag
+            Optional.empty()
         );
+
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        result.setLinksConsidered(tasks.stream().mapToLong(LinkPredictionScoreByIdsConsumer::linksConsidered).sum());
+
         return result;
     }
 
-    final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
+    final class LinkPredictionScoreByIdsConsumer implements Runnable {
         private final Graph graph;
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final ExhaustiveLinkPredictionResult predictedLinks;
         private final ProgressTracker progressTracker;
+        private final Partition partition;
+        private long linksConsidered;
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
             ExhaustiveLinkPredictionResult predictedLinks,
+            Partition partition,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
             this.predictedLinks = predictedLinks;
             this.progressTracker = progressTracker;
+            this.partition = partition;
+            this.linksConsidered = 0;
         }
 
         @Override
-        public void accept(Batch batch) {
-            for (long sourceId : batch.nodeIds()) {
+        public void run() {
+            partition.consume(sourceId -> {
                 var largerNeighbors = largerNeighbors(sourceId);
                 // since graph is undirected, only process pairs where sourceId < targetId
                 var smallestTarget = sourceId + 1;
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (largerNeighbors.contains(targetId)) return;
                         var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
+                        linksConsidered++;
                         if (probability < threshold) return;
                         predictedLinks.add(sourceId, targetId, probability);
                     }
                 );
-            }
+            });
 
-            progressTracker.logProgress(batch.size());
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         private LongHashSet largerNeighbors(long sourceId) {
@@ -126,6 +143,10 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 }
             );
             return neighbors;
+        }
+
+        long linksConsidered() {
+            return linksConsidered;
         }
     }
 }

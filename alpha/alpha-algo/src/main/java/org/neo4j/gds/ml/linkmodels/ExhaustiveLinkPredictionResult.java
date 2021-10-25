@@ -34,6 +34,8 @@ import java.util.stream.StreamSupport;
 
 public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
 
+    private long linksConsidered;
+
     static MemoryEstimation memoryEstimation(int topN) {
         return MemoryEstimations.builder(ExhaustiveLinkPredictionResult.class)
             .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
@@ -46,6 +48,7 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
         assert top > 0;
 
         this.queue = BoundedLongLongPriorityQueue.max(top);
+        this.linksConsidered = -1L;
     }
 
     public synchronized void add(long node1, long node2, double probability) {
@@ -99,5 +102,14 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
             new Value[]{Values.doubleValue(link.probability())}
         ));
         return Stream.concat(natural, reverse);
+    }
+
+    @Override
+    public long linksConsidered() {
+        return linksConsidered;
+    }
+
+    public void setLinksConsidered(long linksConsidered) {
+        this.linksConsidered = linksConsidered;
     }
 }

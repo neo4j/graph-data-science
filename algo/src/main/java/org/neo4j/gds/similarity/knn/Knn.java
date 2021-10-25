@@ -50,6 +50,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     private final KnnContext context;
     private final SplittableRandom random;
     private final SimilarityComputer computer;
+    private long nodePairsConsidered;
 
     public Knn(Graph graph, KnnBaseConfig config, KnnContext context) {
         this(
@@ -122,7 +123,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableResult.of(neighbors, iteration, didConverge);
+            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered);
         }
     }
 
@@ -166,6 +167,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         );
 
         ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, context.executor());
+
+        this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
     }
@@ -241,6 +244,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, executor);
         progressTracker.endSubTask();
 
+        this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();
+
         return neighborsJoiners.stream().mapToLong(joiner -> joiner.updateCount).sum();
     }
 
@@ -294,6 +299,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         private final ProgressTracker progressTracker;
         private long updateCount;
         private final Partition partition;
+        private long nodePairsConsidered;
 
         private JoinNeighbors(
             SplittableRandom random,
@@ -324,6 +330,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             this.partition = partition;
             this.progressTracker = progressTracker;
             this.updateCount = 0;
+            this.nodePairsConsidered = 0;
         }
 
         @Override
@@ -482,7 +489,9 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             }
 
             var similarity = computer.safeSimilarity(base, joiner);
+            nodePairsConsidered++;
             var neighbors = allNeighbors.get(base);
+
             synchronized (neighbors) {
                 var k2 = neighbors.size();
 
@@ -492,6 +501,10 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
                 return neighbors.add(joiner, similarity, splittableRandom);
             }
+        }
+
+        long nodePairsConsidered() {
+            return nodePairsConsidered;
         }
     }
 
@@ -514,6 +527,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         abstract int ranIterations();
 
         abstract boolean didConverge();
+
+        public abstract long nodePairsConsidered();
 
         public LongStream neighborsOf(long nodeId) {
             return neighborList().get(nodeId).elements().map(NeighborList::clearCheckedFlag);
@@ -557,6 +572,11 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         @Override
         boolean didConverge() {
             return false;
+        }
+
+        @Override
+        public long nodePairsConsidered() {
+            return 0;
         }
 
         @Override
