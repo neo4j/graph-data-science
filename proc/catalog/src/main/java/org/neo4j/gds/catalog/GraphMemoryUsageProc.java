@@ -41,6 +41,8 @@ public class GraphMemoryUsageProc extends CatalogProc {
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
+        checkLicense();
+
         graphName = Objects.requireNonNull(StringUtils.trimToNull(graphName), "graphName must not be empty");
         var graphStoreWithConfig = graphStoreFromCatalog(graphName);
         var memoryUsage = GraphMemoryUsage.of(graphStoreWithConfig);

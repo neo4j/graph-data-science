@@ -42,6 +42,8 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
+        checkLicense();
+
         GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
 
         DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());

@@ -47,6 +47,8 @@ public class GraphDropProc extends CatalogProc {
         @Name(value = "dbName", defaultValue = "") String dbName,
         @Name(value = "username", defaultValue = "") String username
     ) {
+        checkLicense();
+
         final List<String> graphNames;
         if (graphName instanceof Collection<?>) {
             Collection<?> names = (Collection<?>) graphName;

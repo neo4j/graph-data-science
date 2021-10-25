@@ -50,6 +50,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
+        checkLicense();
         validateGraphName(graphName);
 
         CreateCypherDbResult result = runWithExceptionLogging(

@@ -39,6 +39,8 @@ public class GraphListProc extends CatalogProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
+        checkLicense();
+
         var graphEntries = isGdsAdmin()
             ? GraphStoreCatalog.getAllGraphStores().map(graphStore -> Map.entry(graphStore.config(), graphStore.graphStore()))
             : GraphStoreCatalog.getGraphStores(username()).entrySet().stream();

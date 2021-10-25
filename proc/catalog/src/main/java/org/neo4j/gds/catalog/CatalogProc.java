@@ -30,6 +30,12 @@ import java.util.Optional;
 
 public abstract class CatalogProc extends BaseProc {
 
+    protected final void checkLicense() {
+        if (!licenseState.isValid()) {
+            throw new RuntimeException(licenseState.errorMessage().get());
+        }
+    }
+
     protected @NotNull String validateGraphName(@Nullable String graphName) {
         return CypherMapWrapper.failOnBlank("graphName", graphName);
     }

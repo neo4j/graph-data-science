@@ -57,6 +57,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(graphName);
 
         // input

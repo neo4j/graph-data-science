@@ -31,6 +31,7 @@ public class GraphExistsFunc extends CatalogProc {
     @UserFunction("gds.graph.exists")
     @Description(DESCRIPTION)
     public boolean existsFunction(@Name(value = "graphName") String graphName) {
+        checkLicense();
         validateGraphName(graphName);
         return GraphStoreCatalog.exists(username(), databaseId(), graphName);
     }

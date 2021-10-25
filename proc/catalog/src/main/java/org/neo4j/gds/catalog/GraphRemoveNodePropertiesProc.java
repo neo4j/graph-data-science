@@ -47,6 +47,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(graphName);
 
         // input

@@ -35,6 +35,7 @@ public class GraphExistsProc extends CatalogProc {
     @Procedure(name = "gds.graph.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphExistsResult> exists(@Name(value = "graphName") String graphName) {
+        checkLicense();
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(
             username(),

@@ -53,6 +53,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(graphName);
 
         // input
@@ -80,6 +81,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(graphName);
 
         // input

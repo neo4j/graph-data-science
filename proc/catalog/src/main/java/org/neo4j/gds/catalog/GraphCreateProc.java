@@ -72,6 +72,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(username(), graphName);
 
         // input
@@ -101,6 +102,8 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
+
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromStoreConfig.of(
             username(),
@@ -121,6 +124,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(username(), graphName);
 
         // input
@@ -150,6 +154,8 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
+
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
             username(),
@@ -172,6 +178,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        checkLicense();
         validateGraphName(username(), graphName);
 
         var procedureConfig = CypherMapWrapper.create(configuration);
