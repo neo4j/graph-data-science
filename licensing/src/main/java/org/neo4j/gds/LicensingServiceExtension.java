@@ -32,10 +32,10 @@ import java.util.Comparator;
 import java.util.ServiceLoader;
 
 @ServiceProvider
-public final class GdsEditionExtension extends ExtensionFactory<GdsEditionExtension.Dependencies> {
+public final class LicensingServiceExtension extends ExtensionFactory<LicensingServiceExtension.Dependencies> {
 
-    public GdsEditionExtension() {
-        super(ExtensionType.DATABASE, "gds.edition");
+    public LicensingServiceExtension() {
+        super(ExtensionType.DATABASE, "gds.licensing_service");
     }
 
     @Override
