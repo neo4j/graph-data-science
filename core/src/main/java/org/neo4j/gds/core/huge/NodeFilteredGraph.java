@@ -81,7 +81,12 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
-        return super.degreeWithoutParallelRelationships(filteredIdMap.toOriginalNodeId(nodeId));
+        var degreeCounter = new NonDuplicateRelationshipsDegreeCounter();
+
+        // iterates only over valid relationships
+        forEachRelationship(nodeId, degreeCounter);
+
+        return degreeCounter.degree;
     }
 
     @Override
@@ -235,5 +240,23 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return true;
+    }
+
+    private static class NonDuplicateRelationshipsDegreeCounter implements RelationshipConsumer {
+        private long previousNodeId;
+        private int degree;
+
+        NonDuplicateRelationshipsDegreeCounter() {
+            this.previousNodeId = -1;
+        }
+
+        @Override
+        public boolean accept(long s, long t) {
+            if (t != previousNodeId) {
+                degree++;
+                previousNodeId = t;
+            }
+            return true;
+        }
     }
 }
