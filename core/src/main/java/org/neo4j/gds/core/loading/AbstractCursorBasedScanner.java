@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.core.TransactionContext;
-import org.neo4j.gds.core.utils.paged.SparseLongArray;
+import org.neo4j.gds.core.utils.paged.NotSparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -143,7 +143,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
         // We need to make sure that we scan aligned to the super block size, as we are not
         // allowed to write into the same block multiple times.
-        bulkSize = SparseLongArray.toValidBatchSize(bulkSize);
+        bulkSize = NotSparseLongArray.toValidBatchSize(bulkSize);
 
         // The label scan cursor on Neo4j <= 4.1 has a bug where it would add 64 to the bulks size
         // even if the value is already divisible by 64. (#6156)

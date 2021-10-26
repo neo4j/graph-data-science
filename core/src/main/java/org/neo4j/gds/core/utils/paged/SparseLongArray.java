@@ -35,9 +35,8 @@ public final class SparseLongArray {
 
     public static final long NOT_FOUND = NodeMapping.NOT_FOUND;
 
-    public static final int BLOCK_SIZE = 64;
-    public static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
-    public static final int SUPER_BLOCK_SHIFT = Integer.numberOfTrailingZeros(SUPER_BLOCK_SIZE);
+    private static final int BLOCK_SIZE = 64;
+    private static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
     private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
     private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
@@ -62,12 +61,6 @@ public final class SparseLongArray {
     private final long[] sortedBlockOffsets;
     // Maps block indices from the sorted offsets to the unsorted offsets.
     private final int[] blockMapping;
-
-    public static int toValidBatchSize(int batchSize) {
-        // We need to make sure that we scan aligned to the super block size, as we are not
-        // allowed to write into the same block multiple times.
-        return (int) BitUtil.align(batchSize, SUPER_BLOCK_SIZE);
-    }
 
     public static Builder builder(long capacity) {
         return new Builder(capacity);
