@@ -43,8 +43,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -52,10 +50,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class ApproxMaxKCutTest {
 
-    // The optimal max cut for this graph when k = 2 is:
+    // The maximum 2-cut of this graph is:
     //     {a, b, c}, {d, e, f, g} if the graph is unweighted.
     //     {a, c}, {b, d, e, f, g} if the graph is weighted.
-    @GdlGraph
+    @GdlGraph(graphNamePrefix = "max")
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Label1)" +
@@ -83,21 +81,55 @@ final class ApproxMaxKCutTest {
         ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
         ", (g)-[:TYPE1 {weight: 999.0}]->(g)";
 
-    @Inject
-    private TestGraph graph;
+    // The minimum 2-cut of this graph is:
+    //     {a}, {b, c, d} if the graph is unweighted.
+    //     {a, b, c}, {d} if the graph is weighted.
+    @GdlGraph(graphNamePrefix = "min")
+    private static final String DB_CYPHER_MIN =
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
 
-    static Stream<Arguments> maxKCutParameters() {
+        ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
+        ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
+        ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
+        ", (d)-[:TYPE1 {weight: 1.0}]->(b)";
+
+    @Inject
+    private TestGraph maxGraph;
+
+    @Inject
+    private TestGraph minGraph;
+
+    static Stream<Arguments> kCutParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
                 Arguments.of(
+                    false,
                     false,
                     Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
                     13.0D
                 ),
                 Arguments.of(
+                    false,
                     true,
                     Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
                     146.0D
+                ),
+                Arguments.of(
+                    true,
+                    false,
+                    Map.of("a", 0L, "b", 1L, "c", 1L, "d", 1L),
+                    1.0D
+                ),
+                Arguments.of(
+                    true,
+                    true,
+                    Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L),
+                    5.0D
                 )
             ),
             () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order (0 means VNS not used)
@@ -106,8 +138,9 @@ final class ApproxMaxKCutTest {
     }
 
     @ParameterizedTest
-    @MethodSource("maxKCutParameters")
+    @MethodSource("kCutParameters")
     void computeCorrectResults(
+        boolean minimize,
         boolean weighted,
         Map<String, Long> expectedMapping,
         double expectedCost,
@@ -115,6 +148,7 @@ final class ApproxMaxKCutTest {
         int concurrency
     ) {
         var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+            .minimize(minimize)
             .concurrency(concurrency)
             .k((byte) 2)
             .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
@@ -131,6 +165,7 @@ final class ApproxMaxKCutTest {
 
         var config = configBuilder.build();
 
+        var graph = minimize ? minGraph : maxGraph;
         var approxMaxKCut = new ApproxMaxKCut(
             graph,
             Pools.DEFAULT,
@@ -140,8 +175,7 @@ final class ApproxMaxKCutTest {
         );
 
         var result = approxMaxKCut.compute();
-
-        assertEquals(result.cutCost(), expectedCost);
+        assertThat(result.cutCost()).isEqualTo(expectedCost);
 
         var setFunction = result.candidateSolution();
 
@@ -152,9 +186,9 @@ final class ApproxMaxKCutTest {
                 long innerNodeId = graph.toMappedNodeId(innerVar);
 
                 if (outerExpectedSet.equals(innerExpectedSet)) {
-                    assertEquals(setFunction.get(outerNodeId), setFunction.get(innerNodeId));
+                    assertThat(setFunction.get(outerNodeId)).isEqualTo(setFunction.get(innerNodeId));
                 } else {
-                    assertNotEquals(setFunction.get(outerNodeId), setFunction.get(innerNodeId));
+                    assertThat(setFunction.get(outerNodeId)).isNotEqualTo(setFunction.get(innerNodeId));
                 }
             });
         });
@@ -178,7 +212,7 @@ final class ApproxMaxKCutTest {
 
         var log = new TestLog();
         var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
-            graph,
+            maxGraph,
             config,
             AllocationTracker.empty(),
             log,

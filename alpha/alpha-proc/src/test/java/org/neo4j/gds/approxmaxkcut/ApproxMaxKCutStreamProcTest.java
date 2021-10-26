@@ -59,13 +59,13 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
             .yields();
 
         Map<Long, Long> expected = Map.of(
-            idFunction.of("a"), 0L,
-            idFunction.of("b"), 0L,
-            idFunction.of("c"), 0L,
-            idFunction.of("d"), 1L,
-            idFunction.of("e"), 1L,
-            idFunction.of("f"), 1L,
-            idFunction.of("g"), 1L
+            idFunction.of("a"), 1L,
+            idFunction.of("b"), 1L,
+            idFunction.of("c"), 1L,
+            idFunction.of("d"), 0L,
+            idFunction.of("e"), 0L,
+            idFunction.of("f"), 0L,
+            idFunction.of("g"), 0L
         );
         runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();

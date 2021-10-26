@@ -26,6 +26,11 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -47,5 +52,38 @@ public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightC
     @Configuration.IntegerRange(min = 0)
     default int vnsMaxNeighborhoodOrder() {
         return 0;
+    }
+
+    @Value.Default
+    default boolean minimize() {
+        return false;
+    }
+
+    @Value.Default
+    default List<Long> minCommunitySizes() {
+        if (minimize()) {
+            return Collections.nCopies(k(), 1L);
+        }
+        return Collections.nCopies(k(), 0L);
+    }
+
+    @Value.Check
+    default void validateMinCommunitySizes() {
+        if (minCommunitySizes().size() != k()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Configuration parameter 'minCommunitySizes' must be of length 'k' which is equal to %d, but got a %d length list",
+                k(),
+                minCommunitySizes().size()
+            ));
+        }
+
+        long minMinSize = minimize() ? 1L : 0L;
+        if (minCommunitySizes().stream().anyMatch(size -> size < minMinSize)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Configuration parameter 'minCommunitySizes' must only have entries at least as large as %d when %s",
+                minMinSize,
+                minimize() ? "minimizing" : "maximizing"
+            ));
+        }
     }
 }
