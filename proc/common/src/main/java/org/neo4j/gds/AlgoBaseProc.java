@@ -233,7 +233,10 @@ public abstract class AlgoBaseProc<
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
                     return algo.compute();
                 } finally {
-                    algo.releaseAll(releaseAlgorithm);
+                    if (releaseAlgorithm) {
+                        algo.progressTracker.release();
+                        algo.release();
+                    }
                     if (releaseTopology) {
                         graph.releaseTopology();
                     }
