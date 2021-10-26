@@ -33,7 +33,6 @@ import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -48,72 +47,46 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private static final int MAX_TRIES = 100;
 
     private final Graph graph;
-    private final int steps;
-    private final int concurrency;
-    private final int walksPerNode;
-    private final int queueSize;
-    private final double returnParam;
-    private final double inOutParam;
     private final AtomicLong nodeIndex;
-    private final long randomSeed;
+    private final RandomWalkBaseConfig config;
     private final AllocationTracker allocationTracker;
 
     private RandomWalk(
         Graph graph,
-        int steps,
-        int concurrency,
-        int walksPerNode,
-        int queueSize,
-        double returnParam,
-        double inOutParam,
-        long randomSeed,
+        RandomWalkBaseConfig config,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.steps = steps;
-        this.concurrency = concurrency;
-        this.walksPerNode = walksPerNode;
-        this.queueSize = queueSize;
-        this.returnParam = returnParam;
-        this.inOutParam = inOutParam;
-        this.randomSeed = randomSeed;
+        this.config = config;
         this.allocationTracker = allocationTracker;
         nodeIndex = new AtomicLong(0);
     }
 
     public static RandomWalk create(
         Graph graph,
-        int steps,
-        int concurrency,
-        int walksPerNode,
-        int queueSize,
-        double returnParam,
-        double inOutParam,
-        Optional<Long> randomSeed,
+        RandomWalkBaseConfig config,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        var seed = randomSeed.orElseGet(() -> new Random().nextLong());
-
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                concurrency,
+                config.concurrency(),
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
                 Pools.DEFAULT
             );
         }
 
-        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, allocationTracker, progressTracker);
+        return new RandomWalk(graph, config, allocationTracker, progressTracker);
     }
 
     @Override
     public Stream<long[]> compute() {
         int timeout = 100;
-        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(queueSize);
+        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
         long[] TOMB = new long[0];
 
 
@@ -121,17 +94,16 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             ? cumulativeWeights()::get
             : graph::degree;
 
+        var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
+
         var tasks = IntStream
-            .range(0, concurrency)
+            .range(0, config.concurrency())
             .mapToObj(i ->
                 RandomWalkTask.of(
                     nodeIndex::getAndIncrement,
                     cumulativeWeightSupplier,
                     graph.concurrentCopy(),
-                    walksPerNode,
-                    steps,
-                    returnParam,
-                    inOutParam,
+                    config,
                     walks,
                     randomSeed,
                     progressTracker
@@ -139,7 +111,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
         progressTracker.beginSubTask("create walks");
         new Thread(() -> {
-            ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
+            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, terminationFlag, Pools.DEFAULT);
             try {
                 walks.put(TOMB);
             } catch (InterruptedException e) {
@@ -149,8 +121,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     }
 
     private DegreeCentrality.DegreeFunction cumulativeWeights() {
-        var config = ImmutableDegreeCentralityConfig.builder()
-            .concurrency(concurrency)
+        var degreeCentralityConfig = ImmutableDegreeCentralityConfig.builder()
+            .concurrency(config.concurrency())
             // DegreeCentrality internally decides its computation on the config. The actual property key is not relevant
             .relationshipWeightProperty("DUMMY")
             .build();
@@ -158,7 +130,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         return new DegreeCentrality(
             graph,
             Pools.DEFAULT,
-            config,
+            degreeCentralityConfig,
             progressTracker,
             allocationTracker
         ).compute();
@@ -174,8 +146,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
     private static final class RandomWalkTask implements Runnable {
         private final Graph graph;
-        private final int numWalks;
-        private final int walkLength;
         private final Random random = new Random();
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
@@ -189,29 +159,26 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final long randomSeed;
         private final ProgressTracker progressTracker;
         private final CumulativeWeightSupplier cumulativeWeightSupplier;
+        private final RandomWalkBaseConfig config;
 
         static RandomWalkTask of(
             NextNodeSupplier nextNodeSupplier,
             CumulativeWeightSupplier cumulativeWeightSupplier,
             Graph graph,
-            int numWalks,
-            int walkLength,
-            double returnParam,
-            double inOutParam,
+            RandomWalkBaseConfig config,
             BlockingQueue<long[]> walks,
             long randomSeed,
             ProgressTracker progressTracker
         ) {
-            var maxProbability = Math.max(Math.max(1 / returnParam, 1.0), 1 / inOutParam);
-            var normalizedReturnProbability = (1 / returnParam) / maxProbability;
+            var maxProbability = Math.max(Math.max(1 / config.returnFactor(), 1.0), 1 / config.inOutFactor());
+            var normalizedReturnProbability = (1 / config.returnFactor()) / maxProbability;
             var normalizedSameDistanceProbability = 1 / maxProbability;
-            var normalizedInOutProbability = (1 / inOutParam) / maxProbability;
+            var normalizedInOutProbability = (1 / config.inOutFactor()) / maxProbability;
 
             return new RandomWalkTask(
                 nextNodeSupplier,
                 cumulativeWeightSupplier,
-                numWalks,
-                walkLength,
+                config,
                 walks,
                 normalizedReturnProbability,
                 normalizedSameDistanceProbability,
@@ -225,8 +192,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private RandomWalkTask(
             NextNodeSupplier nextNodeSupplier,
             CumulativeWeightSupplier cumulativeWeightSupplier,
-            int numWalks,
-            int walkLength,
+            RandomWalkBaseConfig config,
             BlockingQueue<long[]> walks,
             double normalizedReturnProbability,
             double normalizedSameDistanceProbability,
@@ -238,8 +204,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             this.nextNodeSupplier = nextNodeSupplier;
             this.cumulativeWeightSupplier = cumulativeWeightSupplier;
             this.graph = graph;
-            this.numWalks = numWalks;
-            this.walkLength = walkLength;
+            this.config = config;
             this.walks = walks;
             this.normalizedReturnProbability = normalizedReturnProbability;
             this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
@@ -270,7 +235,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
                 random.setSeed(randomSeed + nodeId);
 
-                for (int walkIndex = 0; walkIndex < numWalks; walkIndex++) {
+                for (int walkIndex = 0; walkIndex < config.walksPerNode(); walkIndex++) {
                     buffer[bufferPosition.getAndIncrement()] = walk(nodeId);
 
                     if (bufferPosition.getValue() == buffer.length) {
@@ -285,11 +250,11 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         }
 
         private long[] walk(long startNode) {
-            var walk = new long[walkLength];
+            var walk = new long[config.walkLength()];
             walk[0] = startNode;
             walk[1] = randomNeighbour(startNode);
 
-            for (int i = 2; i < walkLength; i++) {
+            for (int i = 2; i < config.walkLength(); i++) {
                 var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
                 if (nextNode == -1) {
                     var shortenedWalk = new long[i];
