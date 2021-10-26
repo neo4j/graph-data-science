@@ -178,6 +178,10 @@ public class Task {
         this.estimatedMemoryRangeInBytes = memoryRangeInBytes;
     }
 
+    public void fail() {
+        this.status = Status.FAILED;
+    }
+
     protected Task nextSubTaskAfterValidation() {
         if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
             throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");

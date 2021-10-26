@@ -52,6 +52,8 @@ public interface ProgressTracker {
 
     void release();
 
+    void fail();
+
     class EmptyProgressTracker implements ProgressTracker {
 
         @Override
@@ -101,6 +103,11 @@ public interface ProgressTracker {
 
         @Override
         public void release() {
+        }
+
+        @Override
+        public void fail() {
+
         }
     }
 }
