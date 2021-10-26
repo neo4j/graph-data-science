@@ -195,7 +195,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
 
-        var pair = idMapBehavior.create(loadingContext);
+        var pair = idMapBehavior.create(true, loadingContext);
 
         var scanningNodesImporter = new ScanningNodesImporter<>(
             graphCreateConfig,

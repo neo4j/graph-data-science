@@ -103,8 +103,10 @@ public final class GraphFactory {
         int threadCount = concurrency.orElse(1);
 
         var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
+        var maxIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
 
         var internalIdMappingBuilderTuple = idMapBehavior.create(
+            maxIdKnown,
             maxOriginalId,
             allocationTracker,
             nodeCount

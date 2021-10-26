@@ -14,6 +14,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':core')
+    implementation project(':gds-idmap')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
     implementation project(':string-formatting')

@@ -38,7 +38,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
-        GraphLoaderContext loaderContext
+        boolean maxIdKnown, GraphLoaderContext loaderContext
     ) {
         InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> idMappingBuilderFactory =
             dimensions -> InternalHugeIdMappingBuilder.of(
@@ -50,7 +50,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> create(
-        long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
+        boolean maxIdKnown, long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
     ) {
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
         long capacity = maxOriginalIdKnown
