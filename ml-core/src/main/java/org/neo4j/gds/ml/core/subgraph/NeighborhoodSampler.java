@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.core.subgraph;
 
-import org.neo4j.gds.ml.core.RelationshipWeights;
-import org.neo4j.gds.ml.core.batch.UniformSampler;
-import org.neo4j.gds.ml.core.batch.WeightedUniformSampler;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.ml.core.RelationshipWeights;
+import org.neo4j.gds.ml.core.samplers.UniformSampler;
+import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 
 import java.util.OptionalLong;
 import java.util.stream.LongStream;

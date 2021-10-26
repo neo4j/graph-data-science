@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.batch;
+package org.neo4j.gds.ml.core.samplers;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
@@ -33,7 +33,7 @@ import java.util.function.LongPredicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UniformSamplerByExclusionTest {
+class UniformSamplerWithRetriesTest {
 
     @Property(tries = 50)
     void sample(@ForAll @From("n and k") IntIntPair nAndK) {
@@ -41,7 +41,7 @@ class UniformSamplerByExclusionTest {
         int k = nAndK.getTwo();
         var rng = new SplittableRandom(19L);
 
-        var sampler = new UniformSamplerByExclusion(rng);
+        var sampler = new UniformSamplerWithRetries(rng);
         LongPredicate isOdd = l -> l % 2 != 0;
         var samples= sampler.sample(0, n, n / 2, k, isOdd);
 
