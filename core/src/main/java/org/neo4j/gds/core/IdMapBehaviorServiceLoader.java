@@ -20,19 +20,16 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.gds.LicensingServiceBuilder;
-import org.neo4j.gds.core.loading.IdMappingAllocator;
-import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 
 import java.util.Comparator;
 import java.util.ServiceLoader;
 
 public final class IdMapBehaviorServiceLoader {
 
-    public static final IdMapBehavior<? extends InternalIdMappingBuilder<? extends IdMappingAllocator>, ? extends IdMappingAllocator> INSTANCE = ServiceLoader.load(IdMapBehavior.class)
+    public static final IdMapBehavior INSTANCE = ServiceLoader.load(IdMapBehavior.class)
         .stream()
         .map(ServiceLoader.Provider::get)
         .max(Comparator.comparing(IdMapBehavior::priority))
-        .map(instance -> (IdMapBehavior<? extends InternalIdMappingBuilder<? extends IdMappingAllocator>, ? extends IdMappingAllocator>) instance)
         .orElseThrow(() -> new LinkageError("Could not load " + LicensingServiceBuilder.class + " implementation"));
 
     private IdMapBehaviorServiceLoader() {}

@@ -31,9 +31,9 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import java.util.Optional;
 
 @Service
-public interface IdMapBehavior<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> {
+public interface IdMapBehavior {
 
-    InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR>
+    InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>
     idMappingBuilderFactory(GraphLoaderContext loadingContext);
 
     NodeMappingBuilder nodeMappingBuilder();

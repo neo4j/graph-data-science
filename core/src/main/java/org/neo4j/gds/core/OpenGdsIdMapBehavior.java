@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import java.util.Optional;
 
 @ServiceProvider
-public class OpenGdsIdMapBehavior implements IdMapBehavior<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> {
+public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder>
