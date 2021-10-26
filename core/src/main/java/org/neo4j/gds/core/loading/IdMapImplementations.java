@@ -28,41 +28,5 @@ public final class IdMapImplementations {
         return GdsEdition.instance().isOnEnterpriseEdition() && GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled();
     }
 
-    public static NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
-        return
-            (idMapBuilder, labelInformationBuilder, graphDimensions, concurrency, checkDuplicateIds, allocationTracker) ->
-                IdMapBuilder.build(idMapBuilder, labelInformationBuilder, allocationTracker);
-    }
-
-    public static NodeMappingBuilder.Capturing bitIdMapBuilder(InternalBitIdMappingBuilder idMapBuilder) {
-        return bitIdMapBuilder().capture(idMapBuilder);
-    }
-
-    public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return (idMapBuilder, labelInformationBuilder, highestNeoId, concurrency, checkDuplicateIds, allocationTracker) -> {
-            if (checkDuplicateIds) {
-                return IdMapBuilder.buildChecked(
-                    idMapBuilder,
-                    labelInformationBuilder,
-                    highestNeoId,
-                    concurrency,
-                    allocationTracker
-                );
-            } else {
-                return IdMapBuilder.build(
-                    idMapBuilder,
-                    labelInformationBuilder,
-                    highestNeoId,
-                    concurrency,
-                    allocationTracker
-                );
-            }
-        };
-    }
-
-    public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {
-        return hugeIdMapBuilder().capture(idMapBuilder);
-    }
-
     private IdMapImplementations() {}
 }

@@ -43,11 +43,11 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior<InternalHugeIdMapping
     }
 
     @Override
-    public NodeMappingBuilder<InternalHugeIdMappingBuilder> nodeMappingBuilder() {
+    public NodeMappingBuilder nodeMappingBuilder() {
         return (idMapBuilder, labelInformationBuilder, highestNeoId, concurrency, checkDuplicateIds, allocationTracker) -> {
             if (checkDuplicateIds) {
                 return IdMapBuilder.buildChecked(
-                    idMapBuilder,
+                    (InternalHugeIdMappingBuilder) idMapBuilder,
                     labelInformationBuilder,
                     highestNeoId,
                     concurrency,
@@ -55,7 +55,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior<InternalHugeIdMapping
                 );
             } else {
                 return IdMapBuilder.build(
-                    idMapBuilder,
+                    (InternalHugeIdMappingBuilder) idMapBuilder,
                     labelInformationBuilder,
                     highestNeoId,
                     concurrency,

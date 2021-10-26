@@ -22,10 +22,10 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 
-public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? extends IdMappingAllocator>> {
+public interface NodeMappingBuilder {
 
     NodeMapping build(
-        BUILDER idMapBuilder,
+        InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency,
@@ -33,7 +33,7 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
         AllocationTracker allocationTracker
     );
 
-    default Capturing capture(BUILDER idMapBuilder) {
+    default Capturing capture(InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder) {
         return ((labelInformationBuilder, highestNodeId, concurrency, checkDuplicateIds, allocationTracker) -> this.build(
             idMapBuilder,
             labelInformationBuilder,

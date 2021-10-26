@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjections;
@@ -199,7 +198,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?> internalIdMappingBuilderFactory =
             idMapBehavior.idMappingBuilderFactory(loadingContext);
 
-        NodeMappingBuilder<? extends InternalIdMappingBuilder<?>> nodeMappingBuilder =
+        NodeMappingBuilder nodeMappingBuilder =
             idMapBehavior.nodeMappingBuilder();
 
         var scanningNodesImporter = new ScanningNodesImporter<>(

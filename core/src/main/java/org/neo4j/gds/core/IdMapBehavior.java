@@ -36,7 +36,7 @@ public interface IdMapBehavior<BUILDER extends InternalIdMappingBuilder<ALLOCATO
     InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR>
     idMappingBuilderFactory(GraphLoaderContext loadingContext);
 
-    NodeMappingBuilder<BUILDER> nodeMappingBuilder();
+    NodeMappingBuilder nodeMappingBuilder();
 
     Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> tuple(
         long maxOriginalId,

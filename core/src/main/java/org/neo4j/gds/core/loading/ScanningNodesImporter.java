@@ -53,7 +53,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     private final TerminationFlag terminationFlag;
     private final IndexPropertyMappings.LoadablePropertyMappings properties;
     private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
-    private final NodeMappingBuilder<BUILDER> nodeMappingBuilder;
+    private final NodeMappingBuilder nodeMappingBuilder;
 
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
@@ -69,7 +69,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings properties,
         InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
-        NodeMappingBuilder<BUILDER> nodeMappingBuilder
+        NodeMappingBuilder nodeMappingBuilder
     ) {
         super(
             scannerFactory(loadingContext.transactionContext(), dimensions, log),
