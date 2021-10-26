@@ -38,7 +38,6 @@ dependencies {
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-            [group: 'org.jctools',             name: 'jctools-core',             version: ver.'jctools-core'],
             [group: 'io.jsonwebtoken',         name: 'jjwt-api',                 version: ver.'jjwt'],
     )
 
