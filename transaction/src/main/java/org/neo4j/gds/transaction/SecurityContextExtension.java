@@ -30,14 +30,14 @@ import java.util.Comparator;
 import java.util.ServiceLoader;
 
 @ServiceProvider
-public class SecurityContextExtension extends ExtensionFactory<Void> {
+public class SecurityContextExtension extends ExtensionFactory<SecurityContextExtension.Dependencies> {
 
     public SecurityContextExtension() {
         super(ExtensionType.GLOBAL, "gds.security_context");
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, Void __) {
+    public Lifecycle newInstance(ExtensionContext context, SecurityContextExtension.Dependencies __) {
         var securityContextService = ServiceLoader.load(SecurityContextService.class)
             .stream()
             .map(ServiceLoader.Provider::get)
@@ -46,4 +46,6 @@ public class SecurityContextExtension extends ExtensionFactory<Void> {
         context.dependencySatisfier().satisfyDependency(securityContextService);
         return new LifecycleAdapter();
     }
+
+    interface Dependencies {}
 }
