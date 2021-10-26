@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -297,28 +298,27 @@ class KnnTest {
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .contains(
+            .extracting(replaceTimings())
+            .containsExactly(
                 "Knn :: Start",
                 "Knn :: Initialize random neighbors :: Start",
-                "Knn :: Initialize random neighbors 33%",
                 "Knn :: Initialize random neighbors 100%",
                 "Knn :: Initialize random neighbors :: Finished",
+                "Knn :: Graph init took `some time`",
                 "Knn :: Iteration :: Start",
                 "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Split old and new neighbors 1 of 100 33%",
                 "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%",
                 "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished",
                 "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 33%",
-                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 66%",
                 "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 100%",
                 "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished",
                 "Knn :: Iteration :: Join neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Join neighbors 1 of 100 33%",
                 "Knn :: Iteration :: Join neighbors 1 of 100 100%",
                 "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished",
+                "Knn :: Iteration :: Graph iteration 1 took `some time`",
                 "Knn :: Iteration :: Finished",
-                "Knn :: Finished"
+                "Knn :: Finished",
+                "Knn :: Graph execution took `some time`"
             );
     }
 

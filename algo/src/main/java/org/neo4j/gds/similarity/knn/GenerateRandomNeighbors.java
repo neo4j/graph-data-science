@@ -92,7 +92,7 @@ final class GenerateRandomNeighbors implements Runnable {
             this.neighbors.set(nodeId, neighbors);
             neighborsFound += neighbors.size();
         });
-        progressTracker.logProgress();
+        progressTracker.logProgress(partition.nodeCount());
     }
 
     long neighborsFound() {

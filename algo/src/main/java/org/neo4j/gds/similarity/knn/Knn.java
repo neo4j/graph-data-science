@@ -112,7 +112,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             for (; iteration < maxIterations; iteration++) {
                 int currentIteration = iteration;
                 try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration + 1, took))) {
-                    updateCount = this.iteration(neighbors);
+                    updateCount = iteration(neighbors);
                 }
                 if (updateCount <= updateThreshold) {
                     iteration++;
@@ -215,6 +215,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             allNewNeighbors,
             reverseOldNeighbors,
             reverseNewNeighbors,
+            config,
             progressTracker
         );
         progressTracker.endSubTask();
@@ -255,13 +256,19 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
+        KnnBaseConfig config,
         ProgressTracker progressTracker
     ) {
+        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.concurrency(), config.minBatchSize());
+
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             reverseNeighbors(nodeId, allOldNeighbors, reverseOldNeighbors);
             reverseNeighbors(nodeId, allNewNeighbors, reverseNewNeighbors);
-            progressTracker.logProgress();
+
+            if ((nodeId + 1) % logBatchSize == 0) {
+                progressTracker.logProgress(logBatchSize);
+            }
         }
     }
 
@@ -379,7 +386,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 // this isn't in the paper
                 randomJoins(rng, computer, n, k, allNeighbors, nodeId, this.randomJoins);
             }
-            progressTracker.logProgress();
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         private void joinOldNeighbors(
@@ -511,15 +518,15 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     }
 
     private void logInitTime(long ms) {
-        progressTracker.logMessage(formatWithLocale("KNN-G Graph init took %d ms", ms));
+        progressTracker.logMessage(formatWithLocale("Graph init took %d ms", ms));
     }
 
     private void logIterationTime(int iteration, long ms) {
-        progressTracker.logMessage(formatWithLocale("KNN-G Graph iteration %d took %d ms", iteration, ms));
+        progressTracker.logMessage(formatWithLocale("Graph iteration %d took %d ms", iteration, ms));
     }
 
     private void logOverallTime(long ms) {
-        progressTracker.logMessage(formatWithLocale("KNN-G Graph execution took %d ms", ms));
+        progressTracker.logMessage(formatWithLocale("Graph execution took %d ms", ms));
     }
 
     @ValueClass
