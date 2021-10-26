@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.traversal;
 
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
@@ -33,6 +33,8 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
 import java.util.Arrays;
 import java.util.HashMap;

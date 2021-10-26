@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.traversal.RandomWalk;
 
 public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
 
