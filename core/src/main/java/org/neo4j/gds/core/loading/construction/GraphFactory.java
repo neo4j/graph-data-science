@@ -104,7 +104,7 @@ public final class GraphFactory {
 
         var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
 
-        var internalIdMappingBuilderTuple = idMapBehavior.tuple(
+        var internalIdMappingBuilderTuple = idMapBehavior.create(
             maxOriginalId,
             allocationTracker,
             nodeCount

@@ -37,7 +37,7 @@ import java.util.Optional;
 public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
-    public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> pair(
+    public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
         GraphLoaderContext loaderContext
     ) {
         InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> idMappingBuilderFactory =
@@ -49,7 +49,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     }
 
     @Override
-    public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> tuple(
+    public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> create(
         long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
     ) {
         boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
