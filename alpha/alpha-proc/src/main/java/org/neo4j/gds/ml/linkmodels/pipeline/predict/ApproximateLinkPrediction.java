@@ -82,20 +82,20 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             )
         ).compute();
 
-        return new Result(knnResult, knnResult.nodePairsConsidered(), knnResult.ranIterations(), knnResult.didConverge());
+        return new Result(knnResult);
     }
 
     static class Result implements LinkPredictionResult {
         private final Knn.Result predictions;
         private final Map<String, Object> samplingStats;
 
-        Result(Knn.Result predictions, long linksConsidered, long ranIterations, boolean didConverge) {
-            this.predictions = predictions;
+        Result(Knn.Result knnResult) {
+            this.predictions = knnResult;
             this.samplingStats = Map.of(
                 "strategy", "approximate",
-                "linksConsidered", linksConsidered,
-                "ranIterations", ranIterations,
-                "didConverge", didConverge
+                "linksConsidered", knnResult.nodePairsConsidered(),
+                "ranIterations", knnResult.ranIterations(),
+                "didConverge", knnResult.didConverge()
             );
         }
 
