@@ -132,7 +132,12 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         taskRegistry.unregisterTask();
-        validateTaskFinishedOrCanceled();
+        validateTaskNotRunning();
+    }
+
+    @Override
+    public void fail() {
+        baseTask.fail();
     }
 
     @TestOnly
@@ -155,7 +160,7 @@ public class TaskProgressTracker implements ProgressTracker {
         return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
     }
 
-    private void validateTaskFinishedOrCanceled() {
+    private void validateTaskNotRunning() {
         if (baseTask.status() == Status.RUNNING) {
             var message = formatWithLocale(
                 "Attempted to release algorithm, but task %s is still running",

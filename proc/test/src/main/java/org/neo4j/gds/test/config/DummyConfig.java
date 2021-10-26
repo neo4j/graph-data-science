@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress.tasks;
+package org.neo4j.gds.test.config;
 
-public enum Status {
-    PENDING,
-    RUNNING,
-    FINISHED,
-    CANCELED,
-    FAILED
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.AlgoBaseConfig;
+
+@Configuration
+@ValueClass
+public interface DummyConfig extends AlgoBaseConfig {
 }

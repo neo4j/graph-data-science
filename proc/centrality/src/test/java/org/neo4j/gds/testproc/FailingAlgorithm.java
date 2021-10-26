@@ -17,12 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress.tasks;
+package org.neo4j.gds.testproc;
 
-public enum Status {
-    PENDING,
-    RUNNING,
-    FINISHED,
-    CANCELED,
-    FAILED
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+class FailingAlgorithm extends Algorithm<FailingAlgorithm, ProcedureThatFailsDuringTask.Output> {
+    FailingAlgorithm(ProgressTracker progressTracker) {
+        super(progressTracker);
+    }
+
+    @Override
+    public ProcedureThatFailsDuringTask.Output compute() {
+        progressTracker.beginSubTask();
+        throw new IllegalStateException("Oops");
+    }
+
+    @Override
+    public FailingAlgorithm me() {
+        return this;
+    }
+
+    @Override
+    public void release() {
+
+    }
 }

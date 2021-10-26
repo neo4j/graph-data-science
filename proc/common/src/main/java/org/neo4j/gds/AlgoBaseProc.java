@@ -238,6 +238,9 @@ public abstract class AlgoBaseProc<
             () -> {
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
                     return algo.compute();
+                } catch (Exception e) {
+                    algo.progressTracker.fail();
+                    throw e;
                 } finally {
                     if (releaseAlgorithm) {
                         algo.progressTracker.release();
