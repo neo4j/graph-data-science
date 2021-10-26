@@ -22,8 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.UniformSamplerByExclusion;
-import org.neo4j.gds.ml.core.batch.UniformSamplerWithRetries;
+import org.neo4j.gds.ml.core.batch.UniformSamplerFromRange;
 
 import java.util.SplittableRandom;
 
@@ -70,33 +69,16 @@ final class GenerateRandomNeighbors implements Runnable {
         var k = this.k;
         var boundedK = this.boundedK;
 
-        var uniformSamplerWithRetries = new UniformSamplerWithRetries(rng);
-        var uniformSamplerByExclusion = new UniformSamplerByExclusion(rng);
+        var uniformSamplerFromRange = new UniformSamplerFromRange(rng);
 
         partition.consume(nodeId -> {
-            long[] chosen;
-
-            // If the number of potential neighbors are close in number to how many we want to sample,
-            // we can use retries. Otherwise we use an exclusion based method to avoid a possibly large
-            // number of retries.
-            boolean useRetries = computer.lowerBoundOfPotentialNeighbours(nodeId) / 2.0 > boundedK;
-            if (useRetries) {
-                chosen = uniformSamplerWithRetries.sample(
-                    0,
-                    nodeCount,
-                    computer.lowerBoundOfPotentialNeighbours(nodeId),
-                    boundedK,
-                    l -> computer.excludeNodePair(nodeId, l)
-                );
-            } else {
-                chosen = uniformSamplerByExclusion.sample(
-                    0,
-                    nodeCount,
-                    computer.lowerBoundOfPotentialNeighbours(nodeId),
-                    boundedK,
-                    l -> computer.excludeNodePair(nodeId, l)
-                );
-            }
+            long[] chosen = uniformSamplerFromRange.sample(
+                0,
+                nodeCount,
+                computer.lowerBoundOfPotentialNeighbours(nodeId),
+                boundedK,
+                l -> computer.excludeNodePair(nodeId, l)
+            );
 
             var neighbors = new NeighborList(k);
             for (long candidate : chosen) {
