@@ -77,7 +77,7 @@ class KnnFactoryTest {
         int sampledK,
         MemoryRange actual
     ) {
-        long knnAlgo = /* KNN */ 48;
+        long knnAlgo = /* KNN */ 56;
 
         long topKNeighborList = /* NL */ 24 + sizeOfLongArray(boundedK * 2);
         long topKNeighborsList = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray + nodeCount * topKNeighborList;

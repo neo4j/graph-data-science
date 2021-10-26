@@ -156,7 +156,9 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
                 "postProcessingMillis", 0L,
                 // we are writing undirected rels so we get 2x topN
                 "relationshipsWritten", 2L * topN,
-                "configuration", isA(Map.class)
+                "configuration", isA(Map.class),
+                "samplingStats", isA(Map.class),
+                "probabilityDistribution", isA(Map.class)
             ))
         );
 
