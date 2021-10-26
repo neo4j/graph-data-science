@@ -38,13 +38,7 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    boolean excludeNodePair(long firstNodeId, long secondNodeId);
-
-    long lowerBoundOfPotentialNeighbours(long node);
-
-    default SimilarityComputer concurrentCopy() {
-        return this;
-    };
+    NeighborFilter createNeighborFilter();
 
     static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
         var nodeProperties = Objects.requireNonNull(
@@ -114,14 +108,8 @@ final class DoublePropertySimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeProperties.size() - 1;
+    public NeighborFilter createNeighborFilter() {
+        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -147,14 +135,8 @@ final class LongPropertySimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeProperties.size() - 1;
+    public NeighborFilter createNeighborFilter() {
+        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -177,14 +159,8 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeProperties.size() - 1;
+    public NeighborFilter createNeighborFilter() {
+        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -207,14 +183,8 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeProperties.size() - 1;
+    public NeighborFilter createNeighborFilter() {
+        return new KnnNeighborFilter(nodeProperties.size());
     }
 }
 
@@ -240,12 +210,7 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        return nodeProperties.size() - 1;
+    public NeighborFilter createNeighborFilter() {
+        return new KnnNeighborFilter(nodeProperties.size());
     }
 }

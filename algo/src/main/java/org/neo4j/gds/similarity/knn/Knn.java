@@ -155,7 +155,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             nodeCount,
             partition -> new GenerateRandomNeighbors(
                 random,
-                this.computer.concurrentCopy(),
+                this.computer,
                 neighbors,
                 nodeCount,
                 k,
@@ -224,7 +224,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             nodeCount,
             partition -> new JoinNeighbors(
                 this.random,
-                this.computer.concurrentCopy(),
+                this.computer,
                 neighbors,
                 allOldNeighbors,
                 allNewNeighbors,
@@ -297,6 +297,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         private final int sampledK;
         private final int randomJoins;
         private final ProgressTracker progressTracker;
+        private final NeighborFilter neighborFilter;
         private long updateCount;
         private final Partition partition;
         private long nodePairsConsidered;
@@ -318,6 +319,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         ) {
             this.random = random;
             this.computer = computer;
+            this.neighborFilter = computer.createNeighborFilter();
             this.neighbors = neighbors;
             this.allOldNeighbors = allOldNeighbors;
             this.allNewNeighbors = allNewNeighbors;
@@ -484,7 +486,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             assert base != joiner;
             assert n > 1 && k > 0;
 
-            if (computer.excludeNodePair(base, joiner)) {
+            if (neighborFilter.excludeNodePair(base, joiner)) {
                 return 0;
             }
 

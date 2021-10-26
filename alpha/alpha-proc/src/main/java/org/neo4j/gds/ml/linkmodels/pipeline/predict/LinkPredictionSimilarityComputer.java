@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.SimilarityComputer;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
@@ -47,21 +48,31 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
     }
 
     @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        // Self-loops are always very similar
-        if (firstNodeId == secondNodeId) {
-            return true;
+    public NeighborFilter createNeighborFilter() {
+        return new LinkFilter(graph.concurrentCopy());
+    }
+
+    private static class LinkFilter implements NeighborFilter {
+
+        private final Graph graph;
+
+        LinkFilter(Graph graph) {
+            this.graph = graph;
         }
-        // TODO This is a very naive (slow) approach and should be replaced by a dedicated data structure
-        return graph.exists(firstNodeId, secondNodeId);
-    }
 
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        return graph.nodeCount() - 1 - graph.degree(node);
-    }
+        @Override
+        public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
+            if (firstNodeId == secondNodeId) {
+                return true;
+            }
 
-    public LinkPredictionSimilarityComputer concurrentCopy() {
-        return new LinkPredictionSimilarityComputer(linkFeatureExtractor, predictor, graph.concurrentCopy());
+            // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
+            return graph.exists(firstNodeId, secondNodeId);
+        }
+
+        @Override
+        public long lowerBoundOfPotentialNeighbours(long node) {
+            return graph.nodeCount() - 1 - graph.degree(node);
+        }
     }
 }

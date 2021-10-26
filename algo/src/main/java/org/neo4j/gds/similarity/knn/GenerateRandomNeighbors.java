@@ -68,6 +68,7 @@ final class GenerateRandomNeighbors implements Runnable {
         var nodeCount = this.nodeCount;
         var k = this.k;
         var boundedK = this.boundedK;
+        var neighborFilter = computer.createNeighborFilter();
 
         var uniformSamplerFromRange = new UniformSamplerFromRange(rng);
 
@@ -75,9 +76,9 @@ final class GenerateRandomNeighbors implements Runnable {
             long[] chosen = uniformSamplerFromRange.sample(
                 0,
                 nodeCount,
-                computer.lowerBoundOfPotentialNeighbours(nodeId),
+                neighborFilter.lowerBoundOfPotentialNeighbours(nodeId),
                 boundedK,
-                l -> computer.excludeNodePair(nodeId, l)
+                l -> neighborFilter.excludeNodePair(nodeId, l)
             );
 
             var neighbors = new NeighborList(k);
@@ -85,7 +86,7 @@ final class GenerateRandomNeighbors implements Runnable {
                 neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng);
             };
 
-            assert neighbors.size() >= Math.min(computer.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
+            assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
             assert neighbors.size() <= k;
 
             this.neighbors.set(nodeId, neighbors);

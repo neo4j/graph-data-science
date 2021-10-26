@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFea
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
+import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
 
@@ -92,16 +93,19 @@ class LinkPredictionSimilarityComputerTest {
             new LinkLogisticRegressionPredictor(modelData),
             graph
         );
+
+        NeighborFilter filter = lpSimComputer.createNeighborFilter();
+
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(true);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(true);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(false);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
-        assertThat(lpSimComputer.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(false);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(false);
     }
 
     @Test
@@ -118,13 +122,15 @@ class LinkPredictionSimilarityComputerTest {
             graph
         );
 
-        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
+        NeighborFilter filter = lpSimComputer.createNeighborFilter();
+
+        assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)
             .isGreaterThanOrEqualTo(0);
-        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("b")))
+        assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("b")))
             .isLessThanOrEqualTo(2)
             .isGreaterThanOrEqualTo(0);
-        assertThat(lpSimComputer.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("c")))
+        assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("c")))
             .isLessThanOrEqualTo(1)
             .isGreaterThanOrEqualTo(0);
     }
