@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -71,9 +72,8 @@ public final class TransactionContext {
      * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
      */
     public static TransactionContext of(GraphDatabaseAPI api, SecurityContext securityContext) {
-        securityContext = GdsEdition.instance().isOnEnterpriseEdition()
-            ? securityContext
-            : SecurityContext.AUTH_DISABLED;
+        var securityContextService = GraphDatabaseApiProxy.resolveDependency(api, SecurityContextService.class);
+        securityContext = securityContextService.wrap(securityContext);
         return new TransactionContext(api, securityContext);
     }
 
