@@ -91,8 +91,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 42, 1", "2, 97, 2"})
-    void shouldPredictWithTopK(int topK, long expectedLinksConsidered, long ranIterations) {
+    @CsvSource(value = {"1, 44, 1", "2, 61, 1"})
+    void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
@@ -236,7 +236,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @Test
     void shouldNotPredictExistingLinks() {
         int topK = 50;
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -249,7 +249,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
             var pipelineExecutor = new PipelineExecutor(
                 pipeline,
                 caller,
