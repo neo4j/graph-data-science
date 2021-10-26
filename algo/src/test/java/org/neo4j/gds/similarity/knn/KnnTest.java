@@ -317,12 +317,6 @@ class KnnTest {
                 "Knn :: Iteration :: Join neighbors 1 of 100 33%",
                 "Knn :: Iteration :: Join neighbors 1 of 100 100%",
                 "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished",
-                "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Start",
-                "Knn :: Iteration :: Split old and new neighbors 2 of 100 :: Finished",
-                "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Start",
-                "Knn :: Iteration :: Reverse old and new neighbors 2 of 100 :: Finished",
-                "Knn :: Iteration :: Join neighbors 2 of 100 :: Start",
-                "Knn :: Iteration :: Join neighbors 2 of 100 :: Finished",
                 "Knn :: Iteration :: Finished",
                 "Knn :: Finished"
             );
