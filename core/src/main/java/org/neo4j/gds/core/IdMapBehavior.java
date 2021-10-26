@@ -27,6 +27,7 @@ import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
@@ -45,4 +46,6 @@ public interface IdMapBehavior {
     );
 
     int priority();
+
+    MemoryEstimation memoryEstimation();
 }

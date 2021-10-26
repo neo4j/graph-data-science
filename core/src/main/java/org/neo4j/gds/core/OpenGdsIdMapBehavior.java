@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.core.loading.IdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalHugeIdMappingBuilder;
@@ -30,6 +31,7 @@ import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
@@ -65,6 +67,11 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     @Override
     public int priority() {
         return 0;
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return IdMap.memoryEstimation();
     }
 
     private NodeMappingBuilder nodeMappingBuilder() {

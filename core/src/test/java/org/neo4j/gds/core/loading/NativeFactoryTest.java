@@ -29,40 +29,12 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
-import org.neo4j.gds.utils.CheckedRunnable;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NativeFactoryTest {
-
-    @Test
-    @GdsEditionTest(Edition.EE)
-    void memoryEstimationBitMapEnabled() {
-        var expectedMinUsage = 1813082032L;
-        var expectedMaxUsage = 3013268824L;
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000_000L)
-            .maxRelCount(500_000_000L)
-            .build();
-
-        var memoryEstimation = new AtomicReference<MemoryEstimation>();
-        var runnable = CheckedRunnable.runnable(() ->
-            memoryEstimation.set(NativeFactory.getMemoryEstimation(
-                NodeProjections.all(),
-                RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
-            )));
-
-        GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(runnable);
-
-        var estimate = memoryEstimation.get().estimate(dimensions, 1);
-        assertEquals(expectedMinUsage, estimate.memoryUsage().min);
-        assertEquals(expectedMaxUsage, estimate.memoryUsage().max);
-    }
 
     @Test
     void memoryEstimationBitMapDisabled() {
