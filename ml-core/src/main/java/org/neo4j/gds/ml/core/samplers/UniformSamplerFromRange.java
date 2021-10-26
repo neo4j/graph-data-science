@@ -42,7 +42,7 @@ public class UniformSamplerFromRange {
         // If the number of potential neighbors are close in number to how many we want to sample, we can use retries.
         // Otherwise, we use an exclusion based method to avoid a possibly large number of retries.
         double samplingRatio  = (double) numberOfSamples / lowerBoundOnValidSamplesInRange;
-        if (samplingRatio > RETRY_SAMPLING_RATIO) {
+        if (samplingRatio < RETRY_SAMPLING_RATIO) {
             return retryBasedSampler.sample(
                 inclusiveMin,
                 exclusiveMax,
