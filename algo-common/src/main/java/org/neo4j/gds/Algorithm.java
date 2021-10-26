@@ -41,13 +41,6 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
      */
     public abstract void release();
 
-    public final void releaseAll(boolean releaseAlgorithm) {
-        if (releaseAlgorithm) {
-            progressTracker.release();
-            release();
-        }
-    }
-
     public ME withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return me();
