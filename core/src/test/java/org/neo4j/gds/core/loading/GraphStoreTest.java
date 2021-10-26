@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
@@ -42,9 +41,11 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.huge.TransientCompressedList;
+import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -60,9 +61,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 
 class GraphStoreTest extends BaseTest {
 
@@ -209,6 +210,25 @@ class GraphStoreTest extends BaseTest {
 
         assertEquals(3, deletionResult.deletedRelationships());
         assertThat(deletionResult.deletedProperties()).containsExactlyInAnyOrderEntriesOf(Map.of("p", 3L, "q", 3L));
+    }
+
+
+    @Test
+    void unionGraphPrecedesNodeFilteredGraph() {
+        var graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabels("A", "B")
+            .addRelationshipTypes("T1", "T3")
+            .build()
+            .graphStore();
+
+        Graph graph = graphStore.getGraph(
+            List.of(NodeLabel.of("A")),
+            List.of(RelationshipType.of("T1"), RelationshipType.of("T3")),
+            Optional.empty()
+        );
+
+        assertThat(graph).isExactlyInstanceOf(UnionGraph.class);
     }
 
     @NotNull
