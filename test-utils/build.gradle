@@ -18,6 +18,7 @@ dependencies {
     implementation project(':licensing')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
+    implementation project(':transaction')
     implementation project(':write-services')
 
     implementation(

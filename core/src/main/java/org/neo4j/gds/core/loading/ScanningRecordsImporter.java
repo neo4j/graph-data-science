@@ -21,10 +21,10 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.InternalImporter.ImportResult;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

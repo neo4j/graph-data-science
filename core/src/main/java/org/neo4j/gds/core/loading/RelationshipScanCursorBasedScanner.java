@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.KernelTransaction;

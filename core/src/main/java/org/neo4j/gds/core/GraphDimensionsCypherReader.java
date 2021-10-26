@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;
 

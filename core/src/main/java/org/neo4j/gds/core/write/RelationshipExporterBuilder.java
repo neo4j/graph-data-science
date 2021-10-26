@@ -21,9 +21,9 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.values.storable.Values;
 
 import java.util.Objects;

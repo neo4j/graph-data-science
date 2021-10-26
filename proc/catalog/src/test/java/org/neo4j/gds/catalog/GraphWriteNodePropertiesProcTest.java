@@ -35,11 +35,11 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.IdentityProperties;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Arrays;
 import java.util.List;

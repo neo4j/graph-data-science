@@ -18,6 +18,7 @@ dependencies {
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
+    implementation project(':transaction')
 
     implementation group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false

@@ -21,6 +21,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
     implementation project(':pregel')
+    implementation project(':transaction')
     implementation project(':string-formatting')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'

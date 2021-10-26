@@ -38,11 +38,11 @@ import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsCypherReader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.id.IdGeneratorFactory;
 

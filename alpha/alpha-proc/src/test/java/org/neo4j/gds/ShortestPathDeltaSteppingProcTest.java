@@ -21,13 +21,13 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.impl.walking.VirtualNode;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.function.DoubleConsumer;

@@ -28,10 +28,10 @@ import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 

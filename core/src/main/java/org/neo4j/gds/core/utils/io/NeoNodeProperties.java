@@ -24,7 +24,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.logging.Log;

@@ -29,13 +29,13 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.graphbuilder.DefaultBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 

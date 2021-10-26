@@ -21,13 +21,13 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.internal.kernel.api.SchemaReadCore;

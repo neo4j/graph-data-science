@@ -22,12 +22,12 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;

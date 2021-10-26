@@ -27,7 +27,6 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -39,6 +38,7 @@ import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;

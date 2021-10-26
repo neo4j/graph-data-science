@@ -34,6 +34,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.utils.StatementFunction;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;

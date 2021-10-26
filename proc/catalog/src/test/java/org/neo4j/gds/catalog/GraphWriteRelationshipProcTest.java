@@ -29,9 +29,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 

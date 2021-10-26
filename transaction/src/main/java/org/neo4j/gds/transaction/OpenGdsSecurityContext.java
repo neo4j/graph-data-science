@@ -17,15 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.transaction;
 
-import org.neo4j.annotations.service.Service;
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-@Service
-public interface SecurityContextService {
+@ServiceProvider
+public class OpenGdsSecurityContext implements SecurityContextService {
+    @Override
+    public SecurityContext wrap(SecurityContext securityContext) {
+        return SecurityContext.AUTH_DISABLED;
+    }
 
-    SecurityContext wrap(SecurityContext securityContext);
-
-    int priority();
+    @Override
+    public int priority() {
+        return 0;
+    }
 }

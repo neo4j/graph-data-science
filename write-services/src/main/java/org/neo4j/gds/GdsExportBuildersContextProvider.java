@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
@@ -28,6 +27,7 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;

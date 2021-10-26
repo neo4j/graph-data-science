@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.core.TransactionContext;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.results.SimilarityResult;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Values;

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.utils;
 
-import org.neo4j.gds.core.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public abstract class StatementApi {
