@@ -59,6 +59,30 @@ public final class PathFactory {
         return pathBuilder.build();
     }
 
+    public static Path create(
+        Transaction tx,
+        long[] nodeIds,
+        RelationshipType relationshipType
+    ) {
+        var firstNodeId = nodeIds[0];
+        var pathBuilder = new PathImpl.Builder(tx.getNodeById(firstNodeId));
+
+        for (int i = 0; i < nodeIds.length - 1; i++) {
+            long sourceNodeId = nodeIds[i];
+            long targetNodeId = nodeIds[i + 1];
+
+            var relationship = new VirtualRelationship(
+                RelationshipIds.next(),
+                tx.getNodeById(sourceNodeId),
+                tx.getNodeById(targetNodeId),
+                relationshipType
+            );
+            pathBuilder = pathBuilder.push(relationship);
+        }
+
+        return pathBuilder.build();
+    }
+
     public static final class RelationshipIds {
 
         static final AtomicLong ids = new AtomicLong(0);

@@ -62,12 +62,19 @@ public interface RandomWalkStreamConfig extends RandomWalkBaseConfig {
         return 1.0;
     }
 
+    // Config options currently not present in the base config due to reuse in Node2Vec
+
+    @Value.Default
+    default boolean returnPath() {
+        return false;
+    }
+
     static RandomWalkStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return null;
+        return new RandomWalkStreamConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }
