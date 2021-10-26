@@ -83,7 +83,7 @@ public final class IdMapBuilder {
         );
     }
 
-    static IdMap buildChecked(
+    public static IdMap buildChecked(
         InternalHugeIdMappingBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,

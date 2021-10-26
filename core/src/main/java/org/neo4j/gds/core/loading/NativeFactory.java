@@ -31,6 +31,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
+import org.neo4j.gds.core.IdMapBehaviorServiceLoader;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -193,8 +194,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.transactionContext()
         );
 
-        var scanningNodesImporter = IdMapImplementations.useBitIdMap()
-            ? new ScanningNodesImporter<>(
+        var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
+
+        var scanningNodesImporter = new ScanningNodesImporter<>(
             graphCreateConfig,
             loadingContext,
             dimensions,
@@ -202,19 +204,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.log(),
             concurrency,
             properties,
-            sequentialBitIdMappingBuilderFactory(),
-            IdMapImplementations.bitIdMapBuilder()
-        ) : new ScanningNodesImporter<>(
-                graphCreateConfig,
-                loadingContext,
-                dimensions,
-                progressTracker,
-                loadingContext.log(),
-                concurrency,
-                properties,
-                hugeIdMappingBuilderFactory(),
-                IdMapImplementations.hugeIdMapBuilder()
-            );
+            idMapBehavior.idMappingBuilderFactory(loadingContext),
+            idMapBehavior.nodeMappingBuilder()
+        );
 
         try {
             progressTracker.beginSubTask();
@@ -222,16 +214,6 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         } finally {
             progressTracker.endSubTask();
         }
-    }
-
-    @NotNull
-    private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> sequentialBitIdMappingBuilderFactory() {
-        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestPossibleNodeCount());
-    }
-
-    @NotNull
-    private InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> hugeIdMappingBuilderFactory() {
-        return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.allocationTracker());
     }
 
     private RelationshipImportResult loadRelationships(

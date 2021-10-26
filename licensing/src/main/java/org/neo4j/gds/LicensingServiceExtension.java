@@ -43,6 +43,8 @@ public final class LicensingServiceExtension extends ExtensionFactory<LicensingS
         return new LifecycleAdapter() {
             @Override
             public void init() {
+                // TODO: handle duplicate max priorities
+                // TODO: handle no service provider
                 var serviceBuilder = ServiceLoader.load(LicensingServiceBuilder.class)
                     .stream()
                     .map(ServiceLoader.Provider::get)
