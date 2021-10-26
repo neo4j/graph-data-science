@@ -39,16 +39,14 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.IdMapBehaviorServiceLoader;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.core.loading.InternalBitIdMappingBuilder;
-import org.neo4j.gds.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.NodeMappingBuilder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
@@ -99,34 +97,23 @@ public final class GraphFactory {
         Optional<Integer> concurrency,
         AllocationTracker allocationTracker
     ) {
-        boolean useBitIdMap = IdMapImplementations.useBitIdMap();
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
             .or(() -> hasLabelInformation).orElse(false);
         int threadCount = concurrency.orElse(1);
 
-        NodeMappingBuilder.Capturing nodeMappingBuilder;
-        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
+        var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
 
-        boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
-        if (useBitIdMap && maxOriginalIdKnown) {
-            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1);
-            nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
-            internalIdMappingBuilder = idMappingBuilder;
-        } else {
-            long capacity = maxOriginalIdKnown
-                ? maxOriginalId + 1
-                : nodeCount.orElseThrow(() -> new IllegalArgumentException(
-                    "Either `maxOriginalId` or `nodeCount` must be set"));
-            var idMappingBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
-            nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
-            internalIdMappingBuilder = idMappingBuilder;
-        }
+        var internalIdMappingBuilderTuple = idMapBehavior.tuple(
+            maxOriginalId,
+            allocationTracker,
+            nodeCount
+        );
 
         return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
-            nodeMappingBuilder,
-            internalIdMappingBuilder,
+            internalIdMappingBuilderTuple.getRight(),
+            internalIdMappingBuilderTuple.getLeft(),
             threadCount,
             schema,
             labelInformation,
@@ -145,8 +132,8 @@ public final class GraphFactory {
                 new ObjectIntScatterMap<>(),
                 new IntObjectHashMap<>(),
                 new IntObjectHashMap<>(),
-                nodeMappingBuilder,
-                internalIdMappingBuilder,
+                internalIdMappingBuilderTuple.getRight(),
+                internalIdMappingBuilderTuple.getLeft(),
                 labelInformation,
                 nodeProperties,
                 allocationTracker
