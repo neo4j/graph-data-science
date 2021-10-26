@@ -40,7 +40,7 @@ public class UniformSamplerWithRetries {
      * WARNING: There no maximum number of retries, so can take a long while if the number of possible samples are close
      * to the number of desired samples.
      *
-     * @return array of >= max(k, lowerBoundOnValidSamplesInRange) unique samples
+     * @return array of {@literal >=} max(k, lowerBoundOnValidSamplesInRange) unique samples
      */
     public long[] sample(
         long inclusiveMin,

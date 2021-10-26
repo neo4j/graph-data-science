@@ -37,7 +37,7 @@ public class UniformSamplerByExclusion {
      * Sample number by excluding from the given range. This method is appropriate to call if the amount of
      * samples one wants is not much smaller than the amount of valid numbers we sample from.
      *
-     * @return array of >= max(k, lowerBoundOnValidSamplesInRange) unique samples
+     * @return array of {@literal >=} max(k, lowerBoundOnValidSamplesInRange) unique samples
      */
     public long[] sample(
         final long inclusiveMin,
