@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
-import java.util.LinkedList;
+import com.carrotsearch.hppc.LongArrayList;
+
+import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
@@ -38,17 +40,17 @@ public class UniformSamplerByExclusion {
      * @return array of >= max(k, lowerBoundOnValidSamplesInRange) unique samples
      */
     public long[] sample(
-        long inclusiveMin,
-        long exclusiveMax,
+        final long inclusiveMin,
+        final long exclusiveMax,
         long lowerBoundOnValidSamplesInRange,
-        int numberOfSamples,
+        final int numberOfSamples,
         LongPredicate isInvalidSample
     ) {
         if (numberOfSamples >= lowerBoundOnValidSamplesInRange) {
             return LongStream.range(inclusiveMin, exclusiveMax).filter(l -> !isInvalidSample.test(l)).toArray();
         }
 
-        var validSampleSpace = new LinkedList<Long>();
+        final var validSampleSpace = new LongArrayList((int) lowerBoundOnValidSamplesInRange);
         for (long i = inclusiveMin; i < exclusiveMax; i++) {
             if (isInvalidSample.test(i)) continue;
             validSampleSpace.add(i);
@@ -56,19 +58,28 @@ public class UniformSamplerByExclusion {
 
         assert validSampleSpace.size() >= numberOfSamples;
 
-        var samplesToRemove = samplerWithRetries.sample(
+        final var samplesToRemove = samplerWithRetries.sample(
             0,
             validSampleSpace.size(),
             validSampleSpace.size(),
             validSampleSpace.size() - numberOfSamples,
             __ -> false
         );
+        Arrays.sort(samplesToRemove);
 
-        for (long i : samplesToRemove) {
+        final var samples = new long[numberOfSamples];
+        int count = 0;
+        int nextIdxToKeep = 0;
+        for (long nextIdxToRemove : samplesToRemove) {
             // Safe since samplesToRemove contain indices of an integer-indexed list
-            validSampleSpace.remove(i);
+            int increment = (int) nextIdxToRemove - nextIdxToKeep;
+            System.arraycopy(validSampleSpace.buffer, nextIdxToKeep, samples, count, increment);
+            nextIdxToKeep = (int) nextIdxToRemove + 1;
+            count += increment;
         }
 
-        return validSampleSpace.stream().mapToLong(l -> l).toArray();
+        System.arraycopy(validSampleSpace.buffer, nextIdxToKeep, samples, count, numberOfSamples - count);
+
+        return samples;
     }
 }
