@@ -37,13 +37,37 @@ import java.util.Optional;
 public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
-    public InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder>
-    idMappingBuilderFactory(GraphLoaderContext loadingContext) {
-        return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.allocationTracker());
+    public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> pair(
+        GraphLoaderContext loaderContext
+    ) {
+        InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> idMappingBuilderFactory =
+            dimensions -> InternalHugeIdMappingBuilder.of(
+                dimensions.nodeCount(),
+                loaderContext.allocationTracker()
+            );
+        return Pair.of(idMappingBuilderFactory, nodeMappingBuilder());
     }
 
     @Override
-    public NodeMappingBuilder nodeMappingBuilder() {
+    public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> tuple(
+        long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
+    ) {
+        boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
+        long capacity = maxOriginalIdKnown
+            ? maxOriginalId + 1
+            : nodeCount.orElseThrow(() -> new IllegalArgumentException(
+                "Either `maxOriginalId` or `nodeCount` must be set"));
+        var idMapBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
+        var capture = nodeMappingBuilder().capture(idMapBuilder);
+        return Pair.of(idMapBuilder, capture);
+    }
+
+    @Override
+    public int priority() {
+        return 0;
+    }
+
+    private NodeMappingBuilder nodeMappingBuilder() {
         return (idMapBuilder, labelInformationBuilder, highestNeoId, concurrency, checkDuplicateIds, allocationTracker) -> {
             if (checkDuplicateIds) {
                 return IdMapBuilder.buildChecked(
@@ -63,23 +87,5 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
                 );
             }
         };
-    }
-
-    @Override
-    public Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> tuple(
-        long maxOriginalId, AllocationTracker allocationTracker, Optional<Long> nodeCount
-    ) {
-        boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
-        long capacity = maxOriginalIdKnown
-            ? maxOriginalId + 1
-            : nodeCount.orElseThrow(() -> new IllegalArgumentException(
-                "Either `maxOriginalId` or `nodeCount` must be set"));
-        var idMapBuilder = InternalHugeIdMappingBuilder.of(capacity, allocationTracker);
-        var capture = nodeMappingBuilder().capture(idMapBuilder);
-        return Pair.of(idMapBuilder, capture);
-    }
-
-    public int priority() {
-        return 0;
     }
 }

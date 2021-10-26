@@ -33,10 +33,7 @@ import java.util.Optional;
 @Service
 public interface IdMapBehavior {
 
-    InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>
-    idMappingBuilderFactory(GraphLoaderContext loadingContext);
-
-    NodeMappingBuilder nodeMappingBuilder();
+    Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> pair(GraphLoaderContext loaderContext);
 
     Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> tuple(
         long maxOriginalId,

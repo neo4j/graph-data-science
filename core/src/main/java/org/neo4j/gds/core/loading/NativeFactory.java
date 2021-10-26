@@ -195,11 +195,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
         var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
 
-        InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?> internalIdMappingBuilderFactory =
-            idMapBehavior.idMappingBuilderFactory(loadingContext);
-
-        NodeMappingBuilder nodeMappingBuilder =
-            idMapBehavior.nodeMappingBuilder();
+        var pair = idMapBehavior.pair(loadingContext);
 
         var scanningNodesImporter = new ScanningNodesImporter<>(
             graphCreateConfig,
@@ -209,8 +205,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.log(),
             concurrency,
             properties,
-            internalIdMappingBuilderFactory,
-            nodeMappingBuilder
+            pair.getLeft(),
+            pair.getRight()
         );
 
         try {
