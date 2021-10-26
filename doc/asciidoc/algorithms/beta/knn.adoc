@@ -364,7 +364,7 @@ CALL gds.beta.knn.stream('myGraph', {
     topK: 1,
     nodeWeightProperty: 'age',
     // The following parameters are set to produce a deterministic result
-    randomSeed: 42,
+    randomSeed: 1337,
     concurrency: 1,
     sampleRate: 1.0,
     deltaThreshold: 0.0
