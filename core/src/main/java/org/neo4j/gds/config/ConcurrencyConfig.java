@@ -21,10 +21,8 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface ConcurrencyConfig {
 
@@ -46,17 +44,7 @@ public interface ConcurrencyConfig {
 
     @Value.Check
     default void validateConcurrency() {
-        validateConcurrency(concurrency(), CONCURRENCY_KEY);
+        ConcurrencyValidatorService.validator().validate(concurrency(), CONCURRENCY_KEY, CONCURRENCY_LIMITATION);
     }
 
-    static void validateConcurrency(int requestedConcurrency, String configKey) {
-        if (GdsEdition.instance().isOnCommunityEdition() && requestedConcurrency > CONCURRENCY_LIMITATION) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Community users cannot exceed %1$s=%2$d (you configured %1$s=%3$d), see https://neo4j.com/docs/graph-data-science/",
-                configKey,
-                CONCURRENCY_LIMITATION,
-                requestedConcurrency
-            ));
-        }
-    }
 }

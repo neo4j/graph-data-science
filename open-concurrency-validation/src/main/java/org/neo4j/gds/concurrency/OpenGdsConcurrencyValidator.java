@@ -17,25 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.concurrency;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+public class OpenGdsConcurrencyValidator implements ConcurrencyValidator {
 
-public interface WriteConfig extends ConcurrencyConfig {
-
-    String WRITE_CONCURRENCY_KEY = "writeConcurrency";
-
-    @Value.Default
-    @Configuration.Key(WRITE_CONCURRENCY_KEY)
-    default int writeConcurrency() {
-        return concurrency();
+    @Override
+    public void validate(int requestedConcurrency, String configKey, int concurrencyLimitation) throws IllegalArgumentException {
+        if (requestedConcurrency > concurrencyLimitation) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Community users cannot exceed %1$s=%2$d (you configured %1$s=%3$d), see https://neo4j.com/docs/graph-data-science/",
+                configKey,
+                concurrencyLimitation,
+                requestedConcurrency
+            ));
+        }
     }
 
-    @Value.Check
-    default void validateWriteConcurrency() {
-        ConcurrencyValidatorService.validator().validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
-    }
 }

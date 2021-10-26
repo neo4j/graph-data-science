@@ -17,25 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.concurrency;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.annotations.service.Service;
+import org.neo4j.gds.LicenseState;
 
+@Service
+public interface ConcurrencyValidatorBuilder {
 
-public interface WriteConfig extends ConcurrencyConfig {
+    ConcurrencyValidator build(LicenseState licenseState);
 
-    String WRITE_CONCURRENCY_KEY = "writeConcurrency";
-
-    @Value.Default
-    @Configuration.Key(WRITE_CONCURRENCY_KEY)
-    default int writeConcurrency() {
-        return concurrency();
-    }
-
-    @Value.Check
-    default void validateWriteConcurrency() {
-        ConcurrencyValidatorService.validator().validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
-    }
+    int priority();
 }

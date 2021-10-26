@@ -46,6 +46,7 @@ public final class Pools {
     }
 
     static ExecutorService createDefaultPool() {
+        // TODO: get the pool sizes from a service/serviceProvider
         int corePoolSize, maxPoolSize;
         if (GdsEdition.instance().isOnEnterpriseEdition()) {
             corePoolSize = Runtime.getRuntime().availableProcessors();

@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.TimeUtil;
 
@@ -88,7 +89,7 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Check
     default void validateReadConcurrency() {
-        ConcurrencyConfig.validateConcurrency(readConcurrency(), READ_CONCURRENCY_KEY);
+        ConcurrencyValidatorService.validator().validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
     @Configuration.Ignore

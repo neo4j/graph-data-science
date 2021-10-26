@@ -29,6 +29,8 @@ dependencies {
     implementation project(':collections-memory-estimation')
     implementation project(':transaction')
 
+    implementation project(':concurrency-validation-api')
+
     api(
             project(':neo4j-kernel-adapter'),
             project(':graph-projection-api'),
