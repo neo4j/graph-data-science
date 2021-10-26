@@ -76,7 +76,7 @@ public final class LabelInformation {
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get)));
     }
 
-    BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
+    public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
         BitSet unionBitSet = new BitSet(nodeCount);
         nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
         return unionBitSet;
@@ -96,7 +96,7 @@ public final class LabelInformation {
             : labelSet();
     }
 
-    Set<NodeLabel> nodeLabelsForNodeId(long nodeId) {
+    public Set<NodeLabel> nodeLabelsForNodeId(long nodeId) {
         if (isEmpty()) {
             return ALL_NODES_LABELS;
         } else {
@@ -124,7 +124,7 @@ public final class LabelInformation {
         }
     }
 
-    void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
+    public void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
             .filter(label -> !new HashSet<>(labelSet()).contains(label))
