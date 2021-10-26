@@ -23,32 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeMapping;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.core.loading.BitIdMap;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.kernel.database.DatabaseIdFactory;
-import org.neo4j.values.storable.Values;
 
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -105,42 +91,6 @@ class CsvGraphStoreImporterIntegrationTest {
         assertGraphEquals(graphStore.getUnion(), importedGraph);
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void withBitIdMap(int concurrency) {
-        TestMethodRunner.runWithEEIdMap(() -> {
-            var nodeSchema = NodeSchema.builder()
-                .addProperty(NodeLabel.of("A"), "prop1", ValueType.LONG)
-                .addProperty(NodeLabel.of("B"), "prop2", ValueType.DOUBLE)
-                .build();
-            var nodesBuilder = GraphFactory.initNodesBuilder()
-                .nodeSchema(nodeSchema)
-                .maxOriginalId(1337L)
-                .nodeCount(3L)
-                .allocationTracker(AllocationTracker.empty())
-                .concurrency(concurrency)
-                .build();
-
-            nodesBuilder.addNode(1335L, Map.of("prop1", Values.longValue(42L)), NodeLabel.of("A"));
-            nodesBuilder.addNode(1336L, Map.of("prop1", Values.longValue(43L)), NodeLabel.of("A"));
-            nodesBuilder.addNode(1337L, Map.of("prop2", Values.doubleValue(13.37D)), NodeLabel.of("B"));
-
-            var nodeMapping = nodesBuilder.build().nodeMapping();
-
-            var graphStore = graphStoreFromNodeMapping(nodeMapping);
-            var expectedGraph = graphStore.getUnion();
-
-            GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
-
-            var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, new TestLog(), EmptyTaskRegistryFactory.INSTANCE);
-            var userGraphStore = importer.run(AllocationTracker.empty());
-
-            var importedGraphStore = userGraphStore.graphStore();
-            var importedGraph = importedGraphStore.getUnion();
-            assertThat(importedGraphStore.nodes()).isInstanceOf(BitIdMap.class);
-            assertGraphEquals(expectedGraph, importedGraph);
-        });
-    }
 
     private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
         return ImmutableGraphStoreToFileExporterConfig.builder()
@@ -149,18 +99,4 @@ class CsvGraphStoreImporterIntegrationTest {
             .includeMetaData(true)
             .build();
     }
-
-    static GraphStore graphStoreFromNodeMapping(NodeMapping nodeMapping) {
-        var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
-        var hugeGraph = GraphFactory.create(nodeMapping, relationships, AllocationTracker.empty());
-        return CSRGraphStoreUtil.createFromGraph(
-            DatabaseIdFactory.from("Test", UUID.randomUUID()),
-            hugeGraph,
-            "REL",
-            Optional.empty(),
-            1,
-            AllocationTracker.empty()
-        );
-    }
-
 }
