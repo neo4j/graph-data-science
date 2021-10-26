@@ -23,7 +23,7 @@ import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 
 public class UniformSamplerFromRange {
-    public static final double RETRY_THRESHOLD = 2.0;
+    public static final double RETRY_SAMPLING_RATIO = 0.6;
     private final UniformSamplerWithRetries retryBasedSampler;
     private final UniformSamplerByExclusion exclusionBasedSampler;
 
@@ -41,8 +41,8 @@ public class UniformSamplerFromRange {
     ) {
         // If the number of potential neighbors are close in number to how many we want to sample, we can use retries.
         // Otherwise, we use an exclusion based method to avoid a possibly large number of retries.
-        boolean useRetries = lowerBoundOnValidSamplesInRange > numberOfSamples * RETRY_THRESHOLD;
-        if (useRetries) {
+        double samplingRatio  = (double) numberOfSamples / lowerBoundOnValidSamplesInRange;
+        if (samplingRatio > RETRY_SAMPLING_RATIO) {
             return retryBasedSampler.sample(
                 inclusiveMin,
                 exclusiveMax,
