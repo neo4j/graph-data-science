@@ -21,14 +21,11 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -50,7 +47,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
@@ -424,43 +420,6 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                 List.of("42", "43")
             )
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#idMapImplementation")
-    void exportBitIdMapUsage(TestMethodRunner runTest) {
-        var config = ImmutableGraphStoreToFileExporterConfig
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .build();
-
-        runTest.run(() -> {
-            var graphStore = graphStoreFromGDL("(:A), (:B)");
-            var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
-            exporter.run(AllocationTracker.empty());
-
-            assertDataContent(
-                GRAPH_INFO_FILE_NAME,
-                List.of(
-                    List.of(
-                        CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
-                        CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
-                        CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
-                        CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
-                        CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
-                    ),
-                    List.of(
-                        graphStore.databaseId().databaseId().uuid().toString(),
-                        graphStore.databaseId().name(),
-                        Long.toString(graphStore.nodeCount()),
-                        Long.toString(1L),
-                        CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.ALL_RELATIONSHIPS, 0L))
-                    )
-                )
-            );
-        });
     }
 
     private String stringIdOf(String variable) {

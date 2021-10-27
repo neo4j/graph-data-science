@@ -31,11 +31,11 @@ import java.nio.file.Path;
 public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
     public static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
-    static final String DATABASE_ID_COLUMN_NAME = "databaseId";
-    static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
-    static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
-    static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
-    static final String REL_TYPE_COUNTS_COLUMN_NAME = "relTypeCounts";
+    public static final String DATABASE_ID_COLUMN_NAME = "databaseId";
+    public static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
+    public static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
+    public static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
+    public static final String REL_TYPE_COUNTS_COLUMN_NAME = "relTypeCounts";
 
     private final CsvAppender csvAppender;
 
