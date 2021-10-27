@@ -26,14 +26,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implements ToMapConvertible {
+// TODO use TrainingConfig as bound instead of Mappable
+public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends Model.Mappable> implements ToMapConvertible {
 
     protected final List<NodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
+
+    protected List<TRAINING_CONFIG> trainingParameterSpace;
 
     protected PipelineBuilder() {
         this.nodePropertySteps = new ArrayList<>();
@@ -45,7 +49,8 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implemen
         Map<String, Object> map = new HashMap<>();
         map.put("featurePipeline", Map.of(
             "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
-            "featureSteps", ToMapConvertible.toMap(featureSteps)
+            "featureSteps", ToMapConvertible.toMap(featureSteps),
+            "trainingParameterSpace", trainingParameterSpace.stream().map(Model.Mappable::toMap).collect(Collectors.toList())
         ));
         map.putAll(additionalEntries());
         return map;
@@ -70,6 +75,14 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implemen
 
     public List<FEATURE_STEP> featureSteps() {
         return this.featureSteps;
+    }
+
+    public List<TRAINING_CONFIG> trainingParameterSpace() {
+        return trainingParameterSpace;
+    }
+
+    public void setTrainingParameterSpace(List<TRAINING_CONFIG> trainingConfigs) {
+        this.trainingParameterSpace = trainingConfigs;
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {

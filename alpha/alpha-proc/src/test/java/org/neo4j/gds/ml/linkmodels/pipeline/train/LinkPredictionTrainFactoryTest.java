@@ -43,14 +43,11 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
@@ -144,12 +141,7 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
             pipeline.addNodePropertyStep(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
             pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree", "pr")));
-            pipeline.setParameterSpace(Stream.<Map<String, Object>>of(
-                    Map.of("penalty", 1000000),
-                    Map.of("penalty", 1)
-                )
-                .map(LinkLogisticRegressionTrainConfig::of)
-                .collect(Collectors.toList()));
+            pipeline.setTrainingParameterSpace(List.of(Map.of("penalty", 1000000), Map.of("penalty", 1)));
 
             var pipeModel = Model.of(
                 getUsername(),
