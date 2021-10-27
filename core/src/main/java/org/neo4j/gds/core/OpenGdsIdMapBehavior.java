@@ -38,12 +38,14 @@ import java.util.Optional;
 @ServiceProvider
 public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
+    public interface InternalHugeIdMappingBuilderFactory extends InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> {}
+
     @Override
     public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
         boolean maxIdKnown,
         AllocationTracker allocationTracker
     ) {
-        InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> idMappingBuilderFactory =
+        InternalHugeIdMappingBuilderFactory idMappingBuilderFactory =
             dimensions -> InternalHugeIdMappingBuilder.of(
                 dimensions.nodeCount(),
                 allocationTracker
