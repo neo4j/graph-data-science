@@ -28,7 +28,6 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -49,6 +48,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
+import org.neo4j.gds.transaction.SecurityContextService;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -133,21 +133,14 @@ public abstract class BaseProc {
         );
     }
 
-    // this should be the same as the predefined role from enterprise-security
-    // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-    private static final String PREDEFINED_ADMIN_ROLE = "admin";
-
     protected boolean isGdsAdmin() {
         if (transaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;
         }
-        if (GdsEdition.instance().isOnCommunityEdition()) {
-            // Only GDS-EE knows the concept of GDS Admins
-            return false;
-        }
-        // only users with the admin role are GDS admins
-        return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
+        return GraphDatabaseApiProxy
+            .resolveDependency(api, SecurityContextService.class)
+            .isAdmin(transaction.securityContext());
     }
 
     protected final GraphLoader newLoader(

@@ -25,7 +25,17 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 @Service
 public interface SecurityContextService {
 
+    // this should be the same as the predefined role from enterprise-security
+    // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+    String PREDEFINED_ADMIN_ROLE = "admin";
+
     SecurityContext wrap(SecurityContext securityContext);
 
     int priority();
+
+    default boolean isAdmin(SecurityContext securityContext) {
+        return wrap(securityContext)
+            .roles()
+            .contains(PREDEFINED_ADMIN_ROLE);
+    }
 }
