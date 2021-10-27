@@ -29,7 +29,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.core.loading.IdMapImplementations;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -442,7 +441,6 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
             exporter.run(AllocationTracker.empty());
 
-            var bitIdMap = IdMapImplementations.useBitIdMap();
             assertDataContent(
                 GRAPH_INFO_FILE_NAME,
                 List.of(
