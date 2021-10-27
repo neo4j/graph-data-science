@@ -40,6 +40,10 @@ public enum GdsFeatureToggles {
         return current.get();
     }
 
+    public boolean isDisabled() {
+        return !isEnabled();
+    }
+
     public boolean toggle(boolean value) {
         return current.getAndSet(value);
     }

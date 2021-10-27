@@ -74,7 +74,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
         return IdMap.memoryEstimation();
     }
 
-    private NodeMappingBuilder nodeMappingBuilder() {
+    public NodeMappingBuilder nodeMappingBuilder() {
         return (idMapBuilder, labelInformationBuilder, highestNeoId, concurrency, checkDuplicateIds, allocationTracker) -> {
             if (checkDuplicateIds) {
                 return IdMapBuilder.buildChecked(
