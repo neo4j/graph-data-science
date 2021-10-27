@@ -472,7 +472,7 @@ public class GraphStore {
                 );
 
                 if (filteredNodes.isPresent()) {
-                    return new NodeFilteredGraph(initialGraph, filteredNodes.get());
+                    return new NodeFilteredGraph(initialGraph, filteredNodes.get(), tracker);
                 } else {
                     return initialGraph;
                 }

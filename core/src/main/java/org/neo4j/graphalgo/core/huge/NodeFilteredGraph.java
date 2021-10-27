@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.FilterGraph;
@@ -28,16 +29,32 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
 import java.util.Collection;
 import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
 
-    private final IdMap filteredIdMap;
+    private static final int NO_DEGREE = -1;
 
-    public NodeFilteredGraph(HugeGraph graph, IdMap filteredIdMap) {
-        super(graph);
+    private final IdMap filteredIdMap;
+    private long relationshipCount;
+    private final HugeIntArray degreeCache;
+
+    public NodeFilteredGraph(HugeGraph originalGraph, IdMap filteredIdMap, AllocationTracker allocationTracker) {
+        super(originalGraph);
+        this.relationshipCount = -1;
+        this.filteredIdMap = filteredIdMap;
+        this.degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount(), allocationTracker);
+        degreeCache.fill(NO_DEGREE);
+    }
+
+    public NodeFilteredGraph(HugeGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache) {
+        super(originalGraph);
+
+        this.degreeCache = degreeCache;
         this.filteredIdMap = filteredIdMap;
     }
 
@@ -68,7 +85,20 @@ public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
 
     @Override
     public int degree(long nodeId) {
-        return super.degree(filteredIdMap.toOriginalNodeId(nodeId));
+        int cachedDegree = degreeCache.get(nodeId);
+        if (cachedDegree != NO_DEGREE) {
+            return cachedDegree;
+        }
+
+        MutableInt degree = new MutableInt();
+
+        forEachRelationship(nodeId, (s, t) -> {
+            degree.increment();
+            return true;
+        });
+        degreeCache.set(nodeId, degree.intValue());
+
+        return degree.intValue();
     }
 
     @Override
@@ -131,7 +161,7 @@ public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
 
     @Override
     public IdMapGraph concurrentCopy() {
-        return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap);
+        return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap, degreeCache);
     }
 
     @Override
