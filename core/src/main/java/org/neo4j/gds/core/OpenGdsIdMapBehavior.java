@@ -40,12 +40,13 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
-        boolean maxIdKnown, GraphLoaderContext loaderContext
+        boolean maxIdKnown,
+        AllocationTracker allocationTracker
     ) {
         InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> idMappingBuilderFactory =
             dimensions -> InternalHugeIdMappingBuilder.of(
                 dimensions.nodeCount(),
-                loaderContext.allocationTracker()
+                allocationTracker
             );
         return Pair.of(idMappingBuilderFactory, nodeMappingBuilder());
     }

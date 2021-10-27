@@ -35,7 +35,8 @@ import java.util.Optional;
 public interface IdMapBehavior {
 
     Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
-        boolean maxIdKnown, GraphLoaderContext loaderContext
+        boolean maxIdKnown,
+        AllocationTracker allocationTracker
     );
 
     Pair<InternalIdMappingBuilder<? extends IdMappingAllocator>, NodeMappingBuilder.Capturing> create(
