@@ -110,7 +110,6 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.sllpa.stream.estimate",
         "gds.alpha.sllpa.write",
         "gds.alpha.sllpa.write.estimate",
-        "gds.alpha.systemMonitor",
 
         "gds.alpha.shortestPath.deltaStepping.write",
         "gds.alpha.shortestPath.deltaStepping.stream",

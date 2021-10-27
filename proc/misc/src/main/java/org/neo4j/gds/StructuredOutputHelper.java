@@ -57,7 +57,7 @@ public final class StructuredOutputHelper {
         return formatWithLocale("[%s]", progressBarContent);
     }
 
-    static String computeProgress(long progress, long volume) {
+    public static String computeProgress(long progress, long volume) {
         if (volume == Task.UNKNOWN_VOLUME) {
             return UNKNOWN;
         }
