@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.LinkFeatureStepConfigurationImpl;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.LinkFeatureStepConfiguration;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -36,33 +34,24 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public enum LinkFeatureStepFactory {
     HADAMARD {
         @Override
-        public LinkFeatureStep create(CypherMapWrapper config) {
-            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
-            config.requireOnlyKeysFrom(typedConfig.configKeys());
-
-            return new HadamardFeatureStep(typedConfig.nodeProperties());
+        public LinkFeatureStep create(LinkFeatureStepConfiguration config) {
+            return new HadamardFeatureStep(config.nodeProperties());
         }
     },
     COSINE {
         @Override
-        protected LinkFeatureStep create(CypherMapWrapper config) {
-            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
-            config.requireOnlyKeysFrom(typedConfig.configKeys());
-
-            return new CosineFeatureStep(typedConfig.nodeProperties());
+        protected LinkFeatureStep create(LinkFeatureStepConfiguration config) {
+            return new CosineFeatureStep(config.nodeProperties());
         }
     },
     L2 {
         @Override
-        protected LinkFeatureStep create(CypherMapWrapper config) {
-            var typedConfig = new LinkFeatureStepConfigurationImpl(config);
-            config.requireOnlyKeysFrom(typedConfig.configKeys());
-
-            return new L2FeatureStep(typedConfig.nodeProperties());
+        protected LinkFeatureStep create(LinkFeatureStepConfiguration config) {
+            return new L2FeatureStep(config.nodeProperties());
         }
     };
 
-    protected abstract LinkFeatureStep create(CypherMapWrapper config);
+    protected abstract LinkFeatureStep create(LinkFeatureStepConfiguration config);
 
     public static final List<String> VALUES = Arrays
         .stream(LinkFeatureStepFactory.values())
@@ -71,7 +60,6 @@ public enum LinkFeatureStepFactory {
 
     private static LinkFeatureStepFactory parse(String input) {
         var inputString = toUpperCaseWithLocale(input);
-
         if (VALUES.contains(inputString)) {
             return LinkFeatureStepFactory.valueOf(inputString);
         }
@@ -83,8 +71,8 @@ public enum LinkFeatureStepFactory {
         ));
     }
 
-    public static LinkFeatureStep create(String taskName, Map<String, Object> config) {
+    public static LinkFeatureStep create(String taskName, LinkFeatureStepConfiguration config) {
         LinkFeatureStepFactory factory = parse(taskName);
-        return factory.create(CypherMapWrapper.create(config));
+        return factory.create(config);
     }
 }

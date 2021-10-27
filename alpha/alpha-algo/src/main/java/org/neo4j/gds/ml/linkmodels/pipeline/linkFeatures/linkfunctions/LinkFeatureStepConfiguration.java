@@ -33,6 +33,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 public interface LinkFeatureStepConfiguration {
 
+    // Why do we need to convert this?
     @Configuration.ConvertWith("fromObject")
     List<String> nodeProperties();
 
