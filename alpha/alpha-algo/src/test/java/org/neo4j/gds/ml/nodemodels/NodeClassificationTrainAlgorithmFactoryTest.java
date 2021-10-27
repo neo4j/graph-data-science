@@ -22,8 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.List;
 import java.util.Map;
@@ -31,8 +29,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeClassificationTrainAlgorithmFactoryTest {
+
     @Test
-    @GdsEditionTest(Edition.EE)
     void shouldEstimateMemoryUsage() {
         var config = ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")
@@ -40,7 +38,6 @@ class NodeClassificationTrainAlgorithmFactoryTest {
             .addAllMetrics(List.of())
             .holdoutFraction(0.2)
             .validationFolds(5)
-            .concurrency(64)
             .params(
                 List.of(
                     Map.of("penalty", 1.0, "batchSize", 100),
@@ -57,20 +54,26 @@ class NodeClassificationTrainAlgorithmFactoryTest {
         // at small scales and little concurrency, storing nodes matters most
         var estimateOnSmallishGraph = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 4);
-        assertThat(estimateOnSmallishGraph.memoryUsage().max).isCloseTo(2100L * 1024 * 1024, Percentage.withPercentage(8));
+            .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 1);
+        assertThat(estimateOnSmallishGraph.memoryUsage().max)
+            .as("estimateOnSmallishGraph with concurrency 1")
+            .isCloseTo(900L * 1024 * 1024, Percentage.withPercentage(8));
 
         // as we up concurrency at this scale, the actual training dominates
-        var estimateOnSmallishGraphWithHighConcurrency = new NodeClassificationTrainAlgorithmFactory()
+        var estimateOnSmallishGraphWithHigherConcurrency = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 64);
+            .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 4);
 
-        assertThat(estimateOnSmallishGraphWithHighConcurrency.memoryUsage().max).isCloseTo(24L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
+        assertThat(estimateOnSmallishGraphWithHigherConcurrency.memoryUsage().max)
+            .as("estimateOnSmallishGraphWithHigherConcurrency with concurrency 4")
+            .isCloseTo(2L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
 
         // as number of nodes grows, they start to dominate
         var estimateOnLargeGraph = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(10_000_000_000L, 100_000_000_000L), 64);
-        assertThat(estimateOnLargeGraph.memoryUsage().max).isCloseTo(550L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
+            .estimate(GraphDimensions.of(10_000_000_000L, 100_000_000_000L), 4);
+        assertThat(estimateOnLargeGraph.memoryUsage().max)
+            .as("estimateOnLargeGraph with concurrency 4")
+            .isCloseTo(550L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
     }
 }

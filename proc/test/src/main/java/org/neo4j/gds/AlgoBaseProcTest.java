@@ -48,8 +48,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -67,7 +65,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -530,17 +527,18 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         );
     }
 
-    @Test
-    @GdsEditionTest(Edition.EE)
-    default void shouldAllowManyCoresOnUnlimited() {
-        applyOnProcedure((proc) ->
-            getWriteAndStreamProcedures(proc).forEach(method -> {
-                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();
-
-                assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
-            })
-        );
-    }
+//    FIXME: move that out
+//    @Test
+//    @GdsEditionTest(Edition.EE)
+//    default void shouldAllowManyCoresOnUnlimited() {
+//        applyOnProcedure((proc) ->
+//            getWriteAndStreamProcedures(proc).forEach(method -> {
+//                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();
+//
+//                assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
+//            })
+//        );
+//    }
 
     @Test
     default void testFailOnMissingRelationshipType() {

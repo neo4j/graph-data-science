@@ -496,7 +496,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         var userName = "userName";
         var modelName = "modelName";
 
-        var concurrencies = List.of(1, 42);
+        var concurrencies = List.of(1, 4);
         var batchSizes = List.of(1, 100, 10_000);
         var featurePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);

@@ -44,8 +44,6 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.logging.NullLog;
 
@@ -72,7 +70,6 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-@GdsEditionTest(Edition.EE)
 class GraphSageAlgorithmFactoryTest {
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -474,7 +471,7 @@ class GraphSageAlgorithmFactoryTest {
         var userName = "userName";
         var modelName = "modelName";
 
-        var concurrencies = List.of(1, 4, 42);
+        var concurrencies = List.of(1, 4);
         var batchSizes = List.of(1, 100, 10_000);
         var nodePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);

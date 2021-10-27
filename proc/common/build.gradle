@@ -16,6 +16,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':algo-common')
+//    implementation project(':concurrency-validation-api')
     implementation project(':core')
     implementation project(':licensing')
     implementation project(':memory-usage')
