@@ -33,38 +33,6 @@ import java.util.Optional;
 public interface RandomWalkStreamConfig extends RandomWalkBaseConfig {
 
     @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int walkLength() {
-        return 80;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 2)
-    default int walksPerNode() {
-        return 10;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int walkBufferSize() {
-        return 1000;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double inOutFactor() {
-        return 1.0;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double returnFactor() {
-        return 1.0;
-    }
-
-    // Config options currently not present in the base config due to reuse in Node2Vec
-
-    @Value.Default
     default boolean returnPath() {
         return false;
     }

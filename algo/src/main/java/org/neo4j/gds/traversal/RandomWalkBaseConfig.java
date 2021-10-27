@@ -32,13 +32,13 @@ import java.util.List;
 public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Value.Default
-    @Configuration.IntegerRange(min = 1)
+    @Configuration.IntegerRange(min = 2)
     default int walkLength() {
         return 80;
     }
 
     @Value.Default
-    @Configuration.IntegerRange(min = 2)
+    @Configuration.IntegerRange(min = 1)
     default int walksPerNode() {
         return 10;
     }
