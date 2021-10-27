@@ -133,15 +133,17 @@ class LinkPredictionPipelineBaseConfigTest {
                     "modelName", "testModel",
                     "sampleRate", 0.4,
                     "maxIterations", 42,
-                    "concurrency", 2
+                    "concurrency", 1,
+                    "randomSeed", 42L
                 )
             )
         ).approximateConfig();
         assertThat(approximateConfig.maxIterations()).isEqualTo(42);
         assertThat(approximateConfig.sampleRate()).isEqualTo(0.4);
         assertThat(approximateConfig.topK()).isEqualTo(10);
-        assertThat(approximateConfig.concurrency()).isEqualTo(2);
+        assertThat(approximateConfig.concurrency()).isEqualTo(1);
         assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);
+        assertThat(approximateConfig.randomSeed()).isEqualTo(Optional.of(42L));
 
     }
 

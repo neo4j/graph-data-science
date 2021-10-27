@@ -63,7 +63,7 @@ final class GenerateRandomNeighbors implements Runnable {
 
     @Override
     public void run() {
-        var rng = random.split();
+        var rng = random;
         var computer = this.computer;
         var nodeCount = this.nodeCount;
         var k = this.k;

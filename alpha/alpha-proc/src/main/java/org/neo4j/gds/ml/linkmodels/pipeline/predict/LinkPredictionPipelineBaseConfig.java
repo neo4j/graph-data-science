@@ -118,10 +118,12 @@ public interface LinkPredictionPipelineBaseConfig extends AlgoBaseConfig, Single
             .sampleRate(sampleRate())
             .nodeWeightProperty("NotUsedInLP")
             .concurrency(concurrency());
+
         topK().ifPresent(knnBuilder::topK);
         deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
         maxIterations().ifPresent(knnBuilder::maxIterations);
         randomJoins().ifPresent(knnBuilder::randomJoins);
+        randomSeed().ifPresent(knnBuilder::randomSeed);
 
 
         return knnBuilder.build();

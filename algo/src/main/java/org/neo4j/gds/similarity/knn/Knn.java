@@ -154,7 +154,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             config.concurrency(),
             nodeCount,
             partition -> new GenerateRandomNeighbors(
-                random,
+                random.split(),
                 this.computer,
                 neighbors,
                 nodeCount,
@@ -223,7 +223,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             concurrency,
             nodeCount,
             partition -> new JoinNeighbors(
-                this.random,
+                this.random.split(),
                 this.computer,
                 neighbors,
                 allOldNeighbors,
@@ -337,7 +337,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
         @Override
         public void run() {
-            var rng = random.split();
+            var rng = random;
             var computer = this.computer;
             var n = this.n;
             var k = this.k;
