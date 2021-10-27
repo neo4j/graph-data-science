@@ -21,7 +21,6 @@ package org.neo4j.gds.core;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.annotations.service.Service;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
