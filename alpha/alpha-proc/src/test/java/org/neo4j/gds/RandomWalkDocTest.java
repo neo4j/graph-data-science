@@ -23,9 +23,9 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.walking.RandomWalkProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.walking.RandomWalkStreamProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,7 +61,7 @@ public class RandomWalkDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(RandomWalkProc.class);
+        registerProcedures(RandomWalkStreamProc.class);
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
     }

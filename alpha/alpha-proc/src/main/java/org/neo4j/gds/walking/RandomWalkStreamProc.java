@@ -34,6 +34,8 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -41,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig> {
+public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig> {
 
     private static final String DESCRIPTION =
         "Random Walk is an algorithm that provides random paths in a graph. " +
@@ -60,14 +62,16 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
             return Stream.empty();
         }
 
-        Function<long[], Path> pathCreator = computationResult.config().returnPath()
-            ? (long[] nodes) ->  PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
-            : (long[] nodes) -> null;
+        Function<List<Long>, Path> pathCreator = computationResult.config().returnPath()
+            ? (List<Long> nodes) ->  PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
+            : (List<Long> nodes) -> null;
 
         return computationResult.result()
             .map(nodes -> {
-                translateInternalToNeoIds(nodes, computationResult.graph());
-                return new RandomWalkResult(nodes, pathCreator.apply(nodes));
+                var translatedNodes = translateInternalToNeoIds(nodes, computationResult.graph());
+                var path = pathCreator.apply(translatedNodes);
+
+                return new RandomWalkResult(translatedNodes, path);
             });
     }
 
@@ -86,18 +90,21 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         return new RandomWalkAlgorithmFactory<>();
     }
 
-    private void translateInternalToNeoIds(long[] nodes, IdMapping nodeMapping) {
+    private List<Long> translateInternalToNeoIds(long[] nodes, IdMapping nodeMapping) {
+        var translatedNodes = new ArrayList<Long>(nodes.length);
         for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = nodeMapping.toOriginalNodeId(nodes[i]);
+            translatedNodes.add(i, nodeMapping.toOriginalNodeId(nodes[i]));
         }
+
+        return translatedNodes;
     }
 
     public static final class RandomWalkResult {
-        public long[] nodes;
+        public List<Long> nodeIds;
         public Path path;
 
-        RandomWalkResult(long[] nodes, Path path) {
-            this.nodes = nodes;
+        RandomWalkResult(List<Long> nodeIds, Path path) {
+            this.nodeIds = nodeIds;
             this.path = path;
         }
     }
