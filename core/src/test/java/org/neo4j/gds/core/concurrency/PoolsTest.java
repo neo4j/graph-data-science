@@ -20,8 +20,6 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -38,7 +36,7 @@ class PoolsTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
+//    @GdsEditionTest(Edition.EE)
     void shouldGetUnlimitedPool() {
         ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
 

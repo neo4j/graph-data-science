@@ -22,6 +22,8 @@ package org.neo4j.gds;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorBuilder;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.concurrency.PoolSizesProvider;
+import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
@@ -56,7 +58,15 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
             ConcurrencyValidatorBuilder::priority
         );
 
-        ConcurrencyValidatorService.validator(concurrencyValidatorBuilder.build(licensingService.get()));
+        var licenseState = licensingService.get();
+        ConcurrencyValidatorService.validator(concurrencyValidatorBuilder.build(licenseState));
+
+        var poolSizesProvider = loadServiceByPriority(
+            PoolSizesProvider.class,
+            PoolSizesProvider::priority
+        );
+
+        PoolSizesService.poolSizes(poolSizesProvider.get(licenseState));
     }
 
     private <T> T loadServiceByPriority(Class<T> serviceClass, Function<T, Integer> comparingFunction) {

@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.GdsEdition;
+import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.internal.helpers.NamedThreadFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -46,21 +45,13 @@ public final class Pools {
     }
 
     static ExecutorService createDefaultPool() {
-        // TODO: get the pool sizes from a service/serviceProvider
-        int corePoolSize, maxPoolSize;
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            corePoolSize = Runtime.getRuntime().availableProcessors();
-            maxPoolSize = corePoolSize * 2;
-        } else {
-            corePoolSize = maxPoolSize = ConcurrencyConfig.CONCURRENCY_LIMITATION;
-        }
-
+        var poolSizes = PoolSizesService.poolSizes();
         return new ThreadPoolExecutor(
-            corePoolSize,
-            maxPoolSize,
+            poolSizes.corePoolSize(),
+            poolSizes.corePoolSize(),
             30L,
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(corePoolSize * 50),
+            new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
             NamedThreadFactory.daemon(THREAD_NAME_PREFIX),
             new CallerBlocksPolicy()
         );
