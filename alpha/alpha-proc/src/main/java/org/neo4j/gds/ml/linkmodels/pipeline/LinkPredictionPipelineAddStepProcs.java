@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.LinkFeatureStepConfigurationImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 import org.neo4j.gds.utils.StringJoining;
@@ -85,7 +86,9 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
     ) {
         var pipeline = getPipelineModelInfo(pipelineName, username());
 
-        pipeline.addFeatureStep(LinkFeatureStepFactory.create(featureType, config));
+        var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
+
+        pipeline.addFeatureStep(LinkFeatureStepFactory.create(featureType, parsedConfig));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
