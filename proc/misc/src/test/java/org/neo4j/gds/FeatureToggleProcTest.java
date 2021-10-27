@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
@@ -199,20 +198,6 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", true))
         );
         assertEquals(true, USE_BIT_ID_MAP.isEnabled());
-    }
-
-    @Test
-    void toggleUseBitIdMapFailsOnCommunity() {
-        assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap(false)"))
-            .hasMessageContaining("BitIdMap feature")
-            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition");
-    }
-
-    @Test
-    void resetUseBitIdMapFailsOnCommunity() {
-        assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap.reset()"))
-            .hasMessageContaining("BitIdMap feature")
-            .hasMessageContaining("Neo4j Graph Data Science library Enterprise Edition");
     }
 
     @Test

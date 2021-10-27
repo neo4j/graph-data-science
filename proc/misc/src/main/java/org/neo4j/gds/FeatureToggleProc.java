@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -129,7 +128,6 @@ public final class FeatureToggleProc {
     @Procedure("gds.features.useBitIdMap.reset")
     @Description("Set the behavior of whether to use the bit id map. That value is returned.")
     public Stream<FeatureState> resetUseBitIdMap() {
-        GdsEdition.instance().requireEnterpriseEdition("BitIdMap feature");
         GdsFeatureToggles.USE_BIT_ID_MAP.reset();
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
     }
@@ -138,7 +136,6 @@ public final class FeatureToggleProc {
     @Procedure("gds.features.useBitIdMap")
     @Description("Toggle whether the bit id map should be used during graph creation.")
     public void useBitIdMap(@Name(value = "useBitIdMap") boolean useBitIdMap) {
-        GdsEdition.instance().requireEnterpriseEdition("BitIdMap feature");
         GdsFeatureToggles.USE_BIT_ID_MAP.toggle(useBitIdMap);
     }
 
