@@ -21,16 +21,13 @@ package org.neo4j.gds.concurrency;
 
 public final class ConcurrencyValidatorService {
 
-    private static ConcurrencyValidator instance;
+    private static ConcurrencyValidator instance = new OpenGdsConcurrencyValidator();
 
     private ConcurrencyValidatorService() {
     }
 
     public static void validator(ConcurrencyValidator validator) {
-        if (instance != null) return;
-
         synchronized (ConcurrencyValidatorService.class) {
-            if (instance != null) return;
             instance = validator;
         }
     }

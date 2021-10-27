@@ -12,4 +12,5 @@ dependencies {
     }
 
     implementation project(':licensing')
+    implementation project(':string-formatting')
 }
