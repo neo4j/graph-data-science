@@ -82,25 +82,25 @@ class NeighborList {
     private static final int INSERTED = 1;
 
     // maximum number of elements, aka the top K
-    private final int bound;
+    private final int elementCapacity;
     // currently stored number of elements
     private int elementCount = 0;
     // we actually store tuples of (double, long), but the lack of inline classes forces us to
     // convert the double to their long bits representation and store them next to each other
     // every item occupies two entries in the array, [ doubleToLongBits(priority), element ]
-    private final long[] elements;
+    private final long[] priorityElementPairs;
 
-    NeighborList(int bound) {
-        if (bound <= 0) {
+    NeighborList(int elementCapacity) {
+        if (elementCapacity <= 0) {
             throw new IllegalArgumentException("Bound cannot be smaller than or equal to 0");
         }
 
-        this.bound = bound;
-        this.elements = new long[bound * 2];
+        this.elementCapacity = elementCapacity;
+        this.priorityElementPairs = new long[elementCapacity * 2];
     }
 
     public LongStream elements() {
-        return IntStream.range(0, elementCount).mapToLong(index -> elements[index * 2 + 1]);
+        return IntStream.range(0, elementCount).mapToLong(index -> priorityElementPairs[index * 2 + 1]);
     }
 
     public int size() {
@@ -108,12 +108,12 @@ class NeighborList {
     }
 
     long elementAt(int index) {
-        return elements[index * 2 + 1];
+        return priorityElementPairs[index * 2 + 1];
     }
 
     long getAndFlagAsChecked(int index) {
-        var element = elements[index * 2 + 1];
-        elements[index * 2 + 1] = setCheckedFlag(element);
+        var element = priorityElementPairs[index * 2 + 1];
+        priorityElementPairs[index * 2 + 1] = setCheckedFlag(element);
         return element;
     }
 
@@ -125,72 +125,76 @@ class NeighborList {
      * This allows KNN to just add the return values together without having the check on each of them.
      */
     public long add(long element, double priority, SplittableRandom random) {
-        int insertPosition = 0;
-        int allocatedElementsCount = elementCount * 2;
+        int insertIdx = 0;
+        int currNumElementsWithPriority = elementCount * 2;
 
         if (elementCount != 0) {
             int lastValueIndex = (elementCount - 1) * 2;
-            var lowestPriority = Double.longBitsToDouble(elements[lastValueIndex]);
+            var lowestPriority = Double.longBitsToDouble(priorityElementPairs[lastValueIndex]);
 
-            if (priority < lowestPriority && elementCount == bound) {
+            if (priority < lowestPriority && elementCount == elementCapacity) {
                 return NOT_INSERTED;
             }
 
-            int lowerBoundInclusive = allocatedElementsCount;
-            for (int i = 0; i < allocatedElementsCount; i += 2) {
-                var storedPriority = Double.longBitsToDouble(elements[i]);
+            int lowerBoundIdxInclusive = currNumElementsWithPriority;
+            for (int i = 0; i < currNumElementsWithPriority; i += 2) {
+                var storedPriority = Double.longBitsToDouble(priorityElementPairs[i]);
                 if (priority >= storedPriority) {
-                    lowerBoundInclusive = i;
+                    lowerBoundIdxInclusive = i;
                     break;
                 }
             }
 
-            int upperBoundExclusive = allocatedElementsCount;
-            for (int i = lowerBoundInclusive; i < allocatedElementsCount; i += 2) {
-                var storedPriority = Double.longBitsToDouble(elements[i]);
+            int upperBoundIdxExclusive = currNumElementsWithPriority;
+            for (int i = lowerBoundIdxInclusive; i < currNumElementsWithPriority; i += 2) {
+                var storedPriority = Double.longBitsToDouble(priorityElementPairs[i]);
                 if (priority > storedPriority) {
-                    upperBoundExclusive = i;
+                    upperBoundIdxExclusive = i;
                     break;
                 }
             }
 
-            if (upperBoundExclusive == allocatedElementsCount && lowestPriority == priority) {
-                // TODO: Perturbation
+            int elementsWithPriorityCapacity = elementCapacity * 2;
+            if (upperBoundIdxExclusive == elementsWithPriorityCapacity && lowestPriority == priority) {
+                // TODO: Perturbation (maybe replace last element)
                 return NOT_INSERTED;
             }
 
-            if (lowerBoundInclusive < allocatedElementsCount && priority == Double.longBitsToDouble(elements[lowerBoundInclusive])) {
-                var upperBound = Math.max(upperBoundExclusive, lowerBoundInclusive + 2);
-                for (int i = lowerBoundInclusive; i < upperBound; i += 2) {
-                    if ((clearCheckedFlag(elements[i + 1])) == element) {
+            if (lowerBoundIdxInclusive < currNumElementsWithPriority &&
+                priority == Double.longBitsToDouble(priorityElementPairs[lowerBoundIdxInclusive])
+            ) {
+                var upperBound = Math.max(upperBoundIdxExclusive, lowerBoundIdxInclusive + 2);
+                for (int i = lowerBoundIdxInclusive; i < upperBound; i += 2) {
+                    if ((clearCheckedFlag(priorityElementPairs[i + 1])) == element) {
                         return NOT_INSERTED;
                     }
                 }
             }
 
-            if (lowerBoundInclusive == upperBoundExclusive) {
-                insertPosition = lowerBoundInclusive;
+            if (lowerBoundIdxInclusive == upperBoundIdxExclusive) {
+                insertIdx = lowerBoundIdxInclusive;
             } else {
-                insertPosition = random.nextInt(lowerBoundInclusive / 2, upperBoundExclusive / 2) * 2;
+                // if multiple entries have the same priority randomly chose the one to replace
+                insertIdx = random.nextInt(lowerBoundIdxInclusive / 2, upperBoundIdxExclusive / 2) * 2;
             }
 
-            if (insertPosition != lastValueIndex || elementCount != bound) {
+            if (insertIdx != lastValueIndex || elementCount != elementCapacity) {
                 System.arraycopy(
-                    elements,
-                    insertPosition,
-                    elements,
-                    insertPosition + 2,
-                    elements.length - insertPosition - 2
+                    priorityElementPairs,
+                    insertIdx,
+                    priorityElementPairs,
+                    insertIdx + 2,
+                    priorityElementPairs.length - insertIdx - 2
                 );
             }
         }
 
-        if (elementCount != bound) {
+        if (elementCount != elementCapacity) {
             elementCount++;
         }
 
-        elements[insertPosition] = Double.doubleToRawLongBits(priority);
-        elements[insertPosition + 1] = element;
+        priorityElementPairs[insertIdx] = Double.doubleToRawLongBits(priority);
+        priorityElementPairs[insertIdx + 1] = element;
 
         return INSERTED;
     }
@@ -198,8 +202,8 @@ class NeighborList {
     public Stream<SimilarityResult> similarityStream(long nodeId) {
         return IntStream.range(0, elementCount)
             .mapToObj(index -> {
-                double neighborSimilarity = Double.longBitsToDouble(elements[index * 2]);
-                long neighborId = clearCheckedFlag(elements[index * 2 + 1]);
+                double neighborSimilarity = Double.longBitsToDouble(priorityElementPairs[index * 2]);
+                long neighborId = clearCheckedFlag(priorityElementPairs[index * 2 + 1]);
                 return new SimilarityResult(nodeId, neighborId, neighborSimilarity);
             });
     }
