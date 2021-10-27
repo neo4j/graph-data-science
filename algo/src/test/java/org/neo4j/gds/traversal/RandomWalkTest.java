@@ -25,8 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.gds.TestGraphLoader;
+import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
@@ -35,6 +34,10 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,13 +48,14 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class RandomWalkTest extends AlgoTestBase {
+@GdlExtension
+class RandomWalkTest {
 
-    private static final String DEFAULT_DB_CYPHER =
+    @GdlGraph
+    private static final String GDL =
         "CREATE" +
         "  (a:Node1)" +
         ", (b:Node1)" +
@@ -65,11 +69,15 @@ class RandomWalkTest extends AlgoTestBase {
         ", (b)-[:REL2]->(c)" +
         ", (c)-[:REL2]->(b)";
 
+    @Inject
+    private CSRGraph graph;
+
+    @Inject
+    private IdFunction idFunction;
+
     @Test
     void testWithDefaultConfig() {
-        runQuery(DEFAULT_DB_CYPHER);
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
-        Graph graph = TestGraphLoader.from(db).graph(NATIVE);
 
         var randomWalk = RandomWalk.create(
             graph,
@@ -93,9 +101,7 @@ class RandomWalkTest extends AlgoTestBase {
 
     @Test
     void shouldBeDeterministic() {
-        runQuery(DEFAULT_DB_CYPHER);
         var config = ImmutableNode2VecStreamConfig.builder().concurrency(4).randomSeed(42L).build();
-        var graph = TestGraphLoader.from(db).graph(NATIVE);
 
         var firstResult = runRandomWalkSeeded(config, graph);
         var secondResult = runRandomWalkSeeded(config, graph);
@@ -125,9 +131,7 @@ class RandomWalkTest extends AlgoTestBase {
 
     @Test
     void testSampleFromMultipleRelationshipTypes() {
-        runQuery(DEFAULT_DB_CYPHER);
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
-        Graph graph = TestGraphLoader.from(db).withRelationshipTypes("REL1", "REL2").graph(NATIVE);
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
@@ -149,7 +153,7 @@ class RandomWalkTest extends AlgoTestBase {
 
     @Test
     void returnFactorShouldMakeWalksIncludeStartNodeMoreOften() {
-        runQuery("CREATE (a:Node)" +
+        var graph = fromGdl("CREATE (a:Node)" +
                  ", (a)-[:REL]->(b:Node)-[:REL]->(a)" +
                  ", (b)-[:REL]->(c:Node)-[:REL]->(a)" +
                  ", (c)-[:REL]->(d:Node)-[:REL]->(a)" +
@@ -168,7 +172,6 @@ class RandomWalkTest extends AlgoTestBase {
             .randomSeed(42L)
             .build();
 
-        Graph graph = TestGraphLoader.from(db).graph(NATIVE);
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
@@ -199,7 +202,7 @@ class RandomWalkTest extends AlgoTestBase {
 
     @Test
     void largeInOutFactorShouldMakeTheWalkKeepTheSameDistance() {
-        runQuery("CREATE " +
+        var graph = fromGdl("CREATE " +
                  "  (a:Node)" +
                  ", (b:Node)" +
                  ", (c:Node)" +
@@ -218,8 +221,6 @@ class RandomWalkTest extends AlgoTestBase {
                  ", (d)-[:REL]->(c)" +
                  ", (d)-[:REL]->(e)" +
                  ", (e)-[:REL]->(a)");
-
-        Graph graph = TestGraphLoader.from(db).graph(NATIVE);
 
         var config = ImmutableNode2VecStreamConfig.builder()
             .walkLength(10)
@@ -362,5 +363,30 @@ class RandomWalkTest extends AlgoTestBase {
         assertThat(randomWalk.compute().collect(Collectors.toList()))
             .matches(walks -> walks.size() <= nodeCount * config.walksPerNode())
             .allMatch(walk -> walk.length <= config.walkLength());
+    }
+
+    @Test
+    void testWithConfiguredStartNodes() {
+        var aId = idFunction.of("a");
+        var bId = idFunction.of("b");
+
+        var config = ImmutableNode2VecStreamConfig.builder()
+            .sourceNodes(List.of(aId, bId))
+            .walkLength(3)
+            .concurrency(4)
+            .walksPerNode(1)
+            .build();
+
+        var randomWalk = RandomWalk.create(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThat(randomWalk.compute().collect(Collectors.toList()))
+            .matches(walks -> walks.size() == 2)
+            .anyMatch(walk -> walk[0] == aId)
+            .anyMatch(walk -> walk[0] == bId);
     }
 }

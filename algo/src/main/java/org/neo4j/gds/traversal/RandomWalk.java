@@ -33,21 +33,24 @@ import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
+import static org.neo4j.gds.traversal.RandomWalk.NextNodeSupplier.NO_MORE_NODES;
+
+public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     // The number of tries we will make to draw a random neighbour according to p and q
     private static final int MAX_TRIES = 100;
 
     private final Graph graph;
-    private final AtomicLong nodeIndex;
     private final RandomWalkBaseConfig config;
     private final AllocationTracker allocationTracker;
 
@@ -61,7 +64,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.graph = graph;
         this.config = config;
         this.allocationTracker = allocationTracker;
-        nodeIndex = new AtomicLong(0);
     }
 
     public static RandomWalk create(
@@ -96,11 +98,15 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
         var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
 
+        NextNodeSupplier nextNodeSupplier = config.sourceNodes() == null || config.sourceNodes().isEmpty()
+            ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
+            : new NextNodeSupplier.ListNodeSupplier(config.sourceNodes());
+
         var tasks = IntStream
             .range(0, config.concurrency())
             .mapToObj(i ->
                 RandomWalkTask.of(
-                    nodeIndex::getAndIncrement,
+                    nextNodeSupplier,
                     cumulativeWeightSupplier,
                     graph.concurrentCopy(),
                     config,
@@ -226,7 +232,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             while (true) {
                 nodeId = nextNodeSupplier.nextNode();
 
-                if (nodeId >= graph.nodeCount()) break;
+                if (nodeId == NO_MORE_NODES) break;
 
                 if (graph.degree(nodeId) == 0) {
                     progressTracker.logProgress();
@@ -338,7 +344,41 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
     @FunctionalInterface
     interface NextNodeSupplier {
+        long NO_MORE_NODES = -1;
+
         long nextNode();
+
+        class GraphNodeSupplier implements NextNodeSupplier {
+            private final long numberOfNodes;
+            private final AtomicLong nextNodeId;
+
+            GraphNodeSupplier(long numberOfNodes) {
+                this.numberOfNodes = numberOfNodes;
+                this.nextNodeId = new AtomicLong(0);
+            }
+
+            @Override
+            public long nextNode() {
+                var nextNode = nextNodeId.getAndIncrement();
+                return nextNode < numberOfNodes ? nextNode : NO_MORE_NODES;
+            }
+        }
+
+        class ListNodeSupplier implements NextNodeSupplier {
+            private final List<Long> nodes;
+            private final AtomicInteger nextIndex;
+
+            ListNodeSupplier(List<Long> nodes) {
+                this.nodes = nodes;
+                this.nextIndex = new AtomicInteger(0);
+            }
+
+            @Override
+            public long nextNode() {
+                var index = nextIndex.getAndIncrement();
+                return index < nodes.size() ? nodes.get(index) : NO_MORE_NODES;
+            }
+        }
     }
 
     @FunctionalInterface
