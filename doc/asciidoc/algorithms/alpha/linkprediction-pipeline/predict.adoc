@@ -117,7 +117,11 @@ include::specific-predict-configuration.adoc[]
 In this example we will show how to use a trained model to predict new relationships in your in-memory graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-linkprediction-pipeline-examples-train-query, train example>> which we gave the name `lp-pipeline-model`.
-The algorithm excludes predictions for existing relationships in the graph.
+The algorithm excludes predictions for existing relationships in the graph as well as self-loops.
+
+There are two different strategies for choosing which node pairs to consider when predicting new links, exhaustive search and approximate search.
+Whereas the former considers all possible new links, the latter will use a randomized strategy that only considers a subset of them in order to run faster.
+We will explain each individually with examples in the <<algorithms-link-prediction-pipelines-predict-examples-mutate, mutate examples>> below.
 
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 ==== Stream
@@ -156,9 +160,15 @@ We can see, that our model predicts the most likely link is between Alice and Ch
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
 ==== Mutate
 
-In this example we will show how to write the predictions to your in-memory graph.
+In these examples we will show how to write the predictions to your in-memory graph.
 We will use the model `lp-pipeline-model`, that we trained in the <<algorithms-ml-linkprediction-pipelines-train, train example>>.
 
+
+[[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]
+===== Exhaustive search
+
+The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
+For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
 
 [role=query-example, group=lp]
 --
@@ -166,16 +176,77 @@ We will use the model `lp-pipeline-model`, that we trained in the <<algorithms-m
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
-  mutateRelationshipType: 'KNOWS_PREDICTED',
+  relationshipTypes: ['KNOWS'],
+  mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
   topN: 5,
   threshold: 0.45
-}) YIELD relationshipsWritten
+}) YIELD relationshipsWritten, samplingStats
 ----
+
+We specify `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+Note that we omit setting the `sampleRate` in our configuration as it defaults to 1 implying that the exhaustive search strategy is used.
+Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
 .Results
 [opts="header"]
 |===
-| relationshipsWritten
-| 10
+| relationshipsWritten | samplingStats
+| 10                   | {linksConsidered=16, strategy=exhaustive}
 |===
 --
+
+As we can see in the `samplingStats`, we use the exhaustive search strategy and check 16 possible links during the prediction.
+Indeed, since there are a total of `8 * (8 - 1) / 2 = 28` possible links in the graph and we already have 12, that means we check all possible new links.
+Although 16 links were considered, only 5 of them had a probability high enough to pass the threshold.
+
+If our graph is very large there may be a lot of possible new links.
+As such it may take a very long time to run the predictions.
+It may therefore be a more viable option to use a search strategy that only looks at a subset of all possible new links.
+
+
+[[algorithms-link-prediction-pipelines-predict-examples-approximate]]
+===== Approximate search
+
+To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
+
+The approximate search strategy lets us leverage the <<algorithms-knn, K-Nearest Neighbors algorithm>> with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
+Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions.
+
+The initial set of link predictions for each node is picked at random and verified and then refined in multiple iterations.
+The number of iterations is limited by the configuration parameter `maxIterations`.
+The algorithm may stop earlier if the link predictions per node only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
+See the <<algorithms-knn, K-Nearest Neighbors documentation>> for more details on how the search works.
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
+  modelName: 'lp-pipeline-model',
+  relationshipTypes: ['KNOWS'],
+  mutateRelationshipType: 'KNOWS_APPROX_PREDICTED',
+  sampleRate: 0.5,
+  topK: 1,
+  randomJoins: 2,
+  maxIterations: 3,
+  // necessary for deterministic results
+  concurrency: 1,
+  randomSeed: 42
+})
+ YIELD relationshipsWritten, samplingStats
+----
+
+In order to use the approximate strategy we make sure to set the `sampleRate` explicitly to a value `< 1.0`.
+In this small example we set `topK = 1` to only get one link predicted for each node.
+Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
+
+.Results
+[opts="header",cols="3,7"]
+|===
+| relationshipsWritten | samplingStats
+| 16                   | {linksConsidered=38, didConverge=true, strategy=approximate, ranIterations=2}
+|===
+--
+
+As we can see in the `samplingStats`, we use the approximate search strategy and check 38 possible links during the prediction.
+Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
