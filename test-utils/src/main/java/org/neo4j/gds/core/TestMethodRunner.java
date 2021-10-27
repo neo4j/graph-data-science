@@ -31,21 +31,6 @@ public interface TestMethodRunner {
     <E extends Exception> void run(CheckedRunnable<E> code) throws E;
 
     @TestOnly
-    static Stream<TestMethodRunner> idMapImplementation() {
-        return Stream.of(TestMethodRunner::runWithCEIdMap, TestMethodRunner::runWithEEIdMap);
-    }
-
-    @TestOnly
-    static <E extends Exception> void runWithEEIdMap(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(code));
-    }
-
-    @TestOnly
-    static <E extends Exception> void runWithCEIdMap(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.disableAndRun(code));
-    }
-
-    @TestOnly
     static Stream<TestMethodRunner> adjacencyCompressions() {
         return Stream.of(
             TestMethodRunner::runCompressedUnordered,
