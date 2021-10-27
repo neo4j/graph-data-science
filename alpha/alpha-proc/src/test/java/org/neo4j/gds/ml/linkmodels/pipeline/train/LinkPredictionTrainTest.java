@@ -46,8 +46,6 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -124,12 +122,10 @@ class LinkPredictionTrainTest extends BaseProcTest {
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
-        pipeline.setParameterSpace(Stream.<Map<String, Object>>of(
-                Map.of("penalty", 1000000),
-                Map.of("penalty", 1)
-            )
-            .map(LinkLogisticRegressionTrainConfig::of)
-            .collect(Collectors.toList()));
+        pipeline.setTrainingParameterSpace(List.of(
+            Map.of("penalty", 1000000),
+            Map.of("penalty", 1)
+        ));
 
         LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfig
             .builder()
@@ -166,7 +162,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
-                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
+                .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
 
             assertThat(customInfo.trainingPipeline())
                 .usingRecursiveComparison()
@@ -189,9 +185,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
-        pipeline.setParameterSpace(Stream.<Map<String, Object>>of(Map.of("penalty", 1))
-            .map(LinkLogisticRegressionTrainConfig::of)
-            .collect(Collectors.toList()));
+        pipeline.setTrainingParameterSpace(List.of(Map.of("penalty", 1)));
 
         LinkPredictionTrainConfig config = LinkPredictionTrainConfig
             .builder()

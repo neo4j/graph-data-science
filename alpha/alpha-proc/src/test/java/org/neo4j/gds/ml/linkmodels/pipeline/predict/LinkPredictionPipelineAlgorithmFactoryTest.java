@@ -202,12 +202,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
             pipeline.addNodePropertyStep(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
             pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree", "pr")));
-            pipeline.setParameterSpace(Stream.<Map<String, Object>>of(
-                    Map.of("penalty", 1000000),
-                    Map.of("penalty", 1)
-                )
-                .map(LinkLogisticRegressionTrainConfig::of)
-                .collect(Collectors.toList()));
+            pipeline.setTrainingParameterSpace(List.of(Map.of("penalty", 1000000), Map.of("penalty", 1)));
 
             var pipeModel = Model.of(
                 getUsername(),

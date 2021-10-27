@@ -31,7 +31,7 @@ public class PipelineInfoResult {
     public final List<Map<String, Object>> nodePropertySteps;
     public final List<Map<String, Object>> featureSteps;
     public final Map<String, Object> splitConfig;
-    public final List<Map<String, Object>> parameterSpace;
+    public final Object parameterSpace;
 
     PipelineInfoResult(String pipelineName, LinkPredictionPipeline info) {
         this.name = pipelineName;
@@ -42,6 +42,6 @@ public class PipelineInfoResult {
             .collect(Collectors.toList());
         this.featureSteps = info.featureSteps().stream().map(LinkFeatureStep::toMap).collect(Collectors.toList());
         this.splitConfig = info.splitConfig().toMap();
-        this.parameterSpace = info.parameterSpaceMaps();
+        this.parameterSpace = info.trainingParameterSpace();
     }
 }

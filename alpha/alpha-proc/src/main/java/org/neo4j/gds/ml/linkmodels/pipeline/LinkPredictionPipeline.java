@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
@@ -36,21 +35,20 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
+public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep, LinkLogisticRegressionTrainConfig> {
     private LinkPredictionSplitConfig splitConfig;
-    // List of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
-    private @NotNull List<LinkLogisticRegressionTrainConfig> parameterSpace;
+
 
     public LinkPredictionPipeline() {
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
-        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig());
+        this.trainingParameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig());
     }
 
     public LinkPredictionPipeline copy() {
         var copied = new LinkPredictionPipeline();
         copied.featureSteps.addAll(featureSteps);
         copied.nodePropertySteps.addAll(nodePropertySteps);
-        copied.setParameterSpace(new ArrayList<>(parameterSpace));
+        copied.setTrainingParameterSpace(new ArrayList<>(trainingParameterSpace));
         copied.setSplitConfig(splitConfig);
         return copied;
     }
@@ -58,8 +56,7 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     @Override
     protected Map<String, Object> additionalEntries() {
         return Map.of(
-            "splitConfig", splitConfig.toMap(),
-            "parameterSpace", parameterSpaceMaps()
+            "splitConfig", splitConfig.toMap()
         );
     }
 
@@ -82,21 +79,8 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
         return splitConfig;
     }
 
-    public void setSplitConfig(@NotNull LinkPredictionSplitConfig splitConfig) {
+    public void setSplitConfig(LinkPredictionSplitConfig splitConfig) {
         this.splitConfig = splitConfig;
-    }
-
-    public List<LinkLogisticRegressionTrainConfig> parameterSpace() {
-        return parameterSpace;
-    }
-
-    public List<Map<String, Object>> parameterSpaceMaps() {
-        return parameterSpace.stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
-    }
-
-
-    public void setParameterSpace(@NotNull List<LinkLogisticRegressionTrainConfig> parameterList) {
-        this.parameterSpace = parameterList;
     }
 
     public void validate() {

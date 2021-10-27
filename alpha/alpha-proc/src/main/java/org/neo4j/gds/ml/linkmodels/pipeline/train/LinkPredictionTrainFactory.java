@@ -100,7 +100,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
             Tasks.leaf("extract train features"),
             Tasks.leaf(
                 "select model",
-               pipeline.parameterSpace().size()
+               pipeline.trainingParameterSpace().size()
             ),
             Training.progressTask("train best model"),
             Tasks.leaf("compute train metrics"),
