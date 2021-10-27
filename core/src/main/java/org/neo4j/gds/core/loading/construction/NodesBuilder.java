@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
@@ -40,7 +41,6 @@ import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.NotSparseLongArray;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 
@@ -277,7 +277,7 @@ public final class NodesBuilder {
             this.propertyBuilderFn = propertyBuilderFn;
 
             this.buffer = new NodesBatchBufferBuilder()
-                .capacity(NotSparseLongArray.SUPER_BLOCK_SIZE)
+                .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
                 .highestPossibleNodeCount(highestPossibleNodeCount)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)

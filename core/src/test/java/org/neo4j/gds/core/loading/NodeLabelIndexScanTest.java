@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.paged.NotSparseLongArray;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashSet;
@@ -73,7 +72,7 @@ class NodeLabelIndexScanTest extends BaseTest {
             var storeScan = Neo4jProxy.nodeLabelIndexScan(
                 ktx,
                 aToken,
-                NotSparseLongArray.SUPER_BLOCK_SIZE
+                RecordsBatchBuffer.DEFAULT_BUFFER_SIZE
             );
 
             var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);
