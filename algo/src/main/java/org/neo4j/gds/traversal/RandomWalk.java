@@ -87,6 +87,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
     @Override
     public Stream<long[]> compute() {
+        progressTracker.beginSubTask("RandomWalk");
         int timeout = 100;
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
         long[] TOMB = new long[0];

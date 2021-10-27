@@ -25,6 +25,10 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
+
+import java.util.ArrayList;
 
 public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> extends AlgorithmFactory<RandomWalk, CONFIG> {
     @Override
@@ -48,9 +52,15 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
     }
 
     @Override
-    protected Task progressTask(
+    public Task progressTask(
         Graph graph, CONFIG config
     ) {
-        return super.progressTask(graph, config);
+        var tasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+
+        return Tasks.task(taskName(), tasks);
     }
 }
