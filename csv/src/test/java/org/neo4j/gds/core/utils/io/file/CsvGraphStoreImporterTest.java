@@ -34,7 +34,6 @@ import java.util.Objects;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.core.TestMethodRunner.runWithEEIdMap;
 
 class CsvGraphStoreImporterTest {
 
@@ -69,23 +68,21 @@ class CsvGraphStoreImporterTest {
 
     @Test
     void shouldLogProgress() throws URISyntaxException {
-        runWithEEIdMap(() -> {
-            var log = new TestLog();
-            var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
-            exporter.run(AllocationTracker.empty());
+        var log = new TestLog();
+        var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
+        exporter.run(AllocationTracker.empty());
 
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Finished");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Start");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 20%");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 40%");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 60%");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 80%");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 100%");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
-            log.assertContainsMessage(TestLog.INFO, "Csv import :: Finished");
-        });
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 20%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 40%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 60%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 80%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 100%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Finished");
     }
 
     private Path importPath() throws URISyntaxException {
