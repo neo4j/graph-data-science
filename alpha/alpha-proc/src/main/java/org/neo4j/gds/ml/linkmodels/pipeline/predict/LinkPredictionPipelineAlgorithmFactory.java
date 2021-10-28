@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -29,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -37,7 +38,7 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getLinkPredictionPipeline;
 
-public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictionPipelineBaseConfig> extends AlgorithmFactory<LinkPrediction, CONFIG> {
+public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictionPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPipelinePredictExecutor, CONFIG> {
     private final BaseProc caller;
     private final NamedDatabaseId databaseId;
 
@@ -75,7 +76,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
     }
 
     @Override
-    protected LinkPrediction build(
+    protected LinkPredictionPipelinePredictExecutor build(
         Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         String graphName = configuration
@@ -87,41 +88,18 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
             configuration.modelName(),
             configuration.username()
         );
-        var graphStore = GraphStoreCatalog.get(configuration.username(), databaseId, graphName).graphStore();
-        var pipelineExecutor = new LinkPredictionPipelineExecutor(
-            model.customInfo().trainingPipeline(),
+        var graphStore = GraphStoreCatalog.get(CatalogRequest.of(configuration.username(), databaseId), graphName).graphStore();
+        var linkPredictionPipeline = model.customInfo().trainingPipeline();
+        return new LinkPredictionPipelinePredictExecutor(
+            linkPredictionPipeline,
+            model.data(),
+            configuration,
             caller,
-            databaseId,
-            configuration.username(),
+            graphStore,
+            graph,
             graphName,
             progressTracker
         );
-        var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
-        var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
-
-        if (configuration.isApproximateStrategy()) {
-            return new ApproximateLinkPrediction(
-                model.data(),
-                pipelineExecutor,
-                nodeLabels,
-                relationshipTypes,
-                graphStore,
-                configuration.approximateConfig(),
-                progressTracker
-            );
-        } else {
-            return new ExhaustiveLinkPrediction(
-                model.data(),
-                pipelineExecutor,
-                nodeLabels,
-                relationshipTypes,
-                graphStore,
-                configuration.concurrency(),
-                configuration.topN().orElseThrow(),
-                configuration.thresholdOrDefault(),
-                progressTracker
-            );
-        }
     }
 
     @Override

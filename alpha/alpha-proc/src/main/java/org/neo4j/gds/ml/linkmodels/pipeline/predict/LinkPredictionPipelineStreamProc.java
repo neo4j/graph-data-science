@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -37,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineCompanion.DESCRIPTION;
 
-public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineStreamConfig> {
+public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -83,7 +84,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    protected AlgorithmFactory<LinkPrediction, LinkPredictionPipelineStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPipelinePredictExecutor, LinkPredictionPipelineStreamConfig> algorithmFactory() {
         return new LinkPredictionPipelineAlgorithmFactory<>(this, databaseId());
     }
 

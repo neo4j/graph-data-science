@@ -35,6 +35,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -50,7 +51,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
-public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPipelineMutateConfig> {
+public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
@@ -71,7 +72,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
         var builder = new MutateResult.Builder()
             .withSamplingStats(computeResult.result().samplingStats());
         if (callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
@@ -84,7 +85,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<LinkPrediction, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computationResult
+        ComputationResult<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computationResult
     ) {
         var concurrency = computationResult.config().concurrency();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -136,7 +137,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPrediction,
     }
 
     @Override
-    protected AlgorithmFactory<LinkPrediction, LinkPredictionPipelineMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPipelinePredictExecutor, LinkPredictionPipelineMutateConfig> algorithmFactory() {
         return new LinkPredictionPipelineAlgorithmFactory<>(this, databaseId());
     }
 

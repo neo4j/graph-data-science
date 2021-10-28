@@ -20,56 +20,41 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
-
-import java.util.Collection;
-import java.util.Optional;
 
 public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
 
     private final LinkLogisticRegressionData modelData;
-    private final LinkPredictionPipelineExecutor pipelineExecutor;
-    private final Collection<NodeLabel> nodeLabels;
-    private final Collection<RelationshipType> relationshipTypes;
-    private final GraphStore graphStore;
+    private final LinkFeatureExtractor linkFeatureExtractor;
+    private final Graph graph;
     protected final int concurrency;
 
     LinkPrediction(
         LinkLogisticRegressionData modelData,
-        LinkPredictionPipelineExecutor pipelineExecutor,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes,
-        GraphStore graphStore,
+        LinkFeatureExtractor linkFeatureExtractor,
+        Graph graph,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
 
         this.modelData = modelData;
-        this.pipelineExecutor = pipelineExecutor;
-        this.nodeLabels = nodeLabels;
-        this.relationshipTypes = relationshipTypes;
-        this.graphStore = graphStore;
+        this.linkFeatureExtractor = linkFeatureExtractor;
+        this.graph = graph;
         this.concurrency = concurrency;
     }
 
     @Override
     public LinkPredictionResult compute() {
         progressTracker.beginSubTask("Link Prediction Pipeline");
-        pipelineExecutor.executeNodePropertySteps(nodeLabels, relationshipTypes);
-        assertRunning();
 
         var result = predict();
 
-        pipelineExecutor.removeNodeProperties(graphStore, nodeLabels);
         progressTracker.endSubTask("Link Prediction Pipeline");
 
         return result;
@@ -77,11 +62,8 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
 
     private LinkPredictionResult predict() {
         progressTracker.beginSubTask();
-        // retrieve the graph containing the node-properties added by executing the node property steps
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
-        var featureExtractor = pipelineExecutor.linkFeatureExtractor(graph);
 
-        assert featureExtractor.featureDimension() == modelData
+        assert linkFeatureExtractor.featureDimension() == modelData
             .weights()
             .data()
             .totalSize() : "Model must contain a weight for each feature.";
@@ -89,7 +71,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
         var predictor = new LinkLogisticRegressionPredictor(modelData);
 
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
-            featureExtractor,
+            linkFeatureExtractor,
             predictor,
             graph
         );

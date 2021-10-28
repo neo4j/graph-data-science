@@ -20,8 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -31,10 +29,9 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.LongStream;
 
@@ -44,10 +41,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
     public ExhaustiveLinkPrediction(
         LinkLogisticRegressionData modelData,
-        LinkPredictionPipelineExecutor pipelineExecutor,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes,
-        GraphStore graphStore,
+        LinkFeatureExtractor linkFeatureExtractor,
+        Graph graph,
         int concurrency,
         int topN,
         double threshold,
@@ -55,10 +50,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     ) {
         super(
             modelData,
-            pipelineExecutor,
-            nodeLabels,
-            relationshipTypes,
-            graphStore,
+            linkFeatureExtractor,
+            graph,
             concurrency,
             progressTracker
         );

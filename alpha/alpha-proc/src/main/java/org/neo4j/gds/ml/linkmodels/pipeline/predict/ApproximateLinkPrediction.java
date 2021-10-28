@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -30,7 +27,7 @@ import org.neo4j.gds.core.write.ImmutableRelationship;
 import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -47,19 +44,15 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
     public ApproximateLinkPrediction(
         LinkLogisticRegressionData modelData,
-        LinkPredictionPipelineExecutor pipelineExecutor,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes,
-        GraphStore graphStore,
+        LinkFeatureExtractor linkFeatureExtractor,
+        Graph graph,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
         super(
             modelData,
-            pipelineExecutor,
-            nodeLabels,
-            relationshipTypes,
-            graphStore,
+            linkFeatureExtractor,
+            graph,
             knnConfig.concurrency(),
             progressTracker
         );
