@@ -43,7 +43,12 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
     @Override
     public void init() {
-        // Handle the LicensingState
+        var licenseState = registerLicenseState();
+        setupConcurrencyValidator(licenseState);
+        setupPoolSizes(licenseState);
+    }
+
+    private LicenseState registerLicenseState() {
         var licensingServiceBuilder = loadServiceByPriority(
             LicensingServiceBuilder.class,
             LicensingServiceBuilder::priority
@@ -51,16 +56,19 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
         var licensingService = licensingServiceBuilder.build(config);
 
         globalProceduresRegistry.registerComponent(LicenseState.class, (context) -> licensingService.get(), true);
+        return licensingService.get();
+    }
 
-        // Handle Concurrency validator initializers --> we already have the LicenseState
+    private void setupConcurrencyValidator(LicenseState licenseState) {
         var concurrencyValidatorBuilder = loadServiceByPriority(
             ConcurrencyValidatorBuilder.class,
             ConcurrencyValidatorBuilder::priority
         );
 
-        var licenseState = licensingService.get();
         ConcurrencyValidatorService.validator(concurrencyValidatorBuilder.build(licenseState));
+    }
 
+    private void setupPoolSizes(LicenseState licenseState) {
         var poolSizesProvider = loadServiceByPriority(
             PoolSizesProvider.class,
             PoolSizesProvider::priority
