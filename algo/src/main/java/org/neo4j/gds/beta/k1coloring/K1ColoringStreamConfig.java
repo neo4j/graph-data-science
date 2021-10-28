@@ -40,7 +40,6 @@ public interface K1ColoringStreamConfig extends K1ColoringConfig {
         return new K1ColoringStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             config
         );
     }

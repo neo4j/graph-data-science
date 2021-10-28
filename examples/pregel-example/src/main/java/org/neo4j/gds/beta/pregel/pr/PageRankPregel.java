@@ -109,12 +109,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         }
 
         static PageRankPregelConfig of(
-            String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper userInput
         ) {
-            return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+            return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
         }
     }
 }

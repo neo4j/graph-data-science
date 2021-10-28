@@ -73,7 +73,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return WccWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return WccWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

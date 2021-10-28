@@ -52,12 +52,7 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
 
     @Override
     public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStreamConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return TriangleCountStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
 }

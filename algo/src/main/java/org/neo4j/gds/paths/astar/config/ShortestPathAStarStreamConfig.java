@@ -40,7 +40,6 @@ public interface ShortestPathAStarStreamConfig extends ShortestPathAStarBaseConf
         return new ShortestPathAStarStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

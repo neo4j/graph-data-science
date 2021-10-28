@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig {
 
     static ShortestPathYensStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -40,7 +39,6 @@ public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig
         return new ShortestPathYensStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

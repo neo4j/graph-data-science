@@ -42,7 +42,6 @@ public interface ShortestPathAStarWriteConfig extends ShortestPathAStarBaseConfi
         return new ShortestPathAStarWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

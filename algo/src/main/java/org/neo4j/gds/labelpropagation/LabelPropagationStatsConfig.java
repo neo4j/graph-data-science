@@ -40,7 +40,6 @@ public interface LabelPropagationStatsConfig extends LabelPropagationBaseConfig 
         return new LabelPropagationStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -41,7 +41,6 @@ public interface FastRPWriteConfig extends FastRPBaseConfig, WritePropertyConfig
         return new FastRPWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

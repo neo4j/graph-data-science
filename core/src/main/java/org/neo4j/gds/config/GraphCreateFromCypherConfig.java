@@ -114,8 +114,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
             config = config.withString(RELATIONSHIP_QUERY_KEY, relationshipQuery);
         }
         return new GraphCreateFromCypherConfigImpl(
-            graphName,
             userName,
+            graphName,
             config
         );
     }
@@ -123,8 +123,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         assertNoProjectionsOrExplicitProperties(config);
         return new GraphCreateFromCypherConfigImpl(
-            IMPLICIT_GRAPH_NAME,
             username,
+            IMPLICIT_GRAPH_NAME,
             config
         );
     }

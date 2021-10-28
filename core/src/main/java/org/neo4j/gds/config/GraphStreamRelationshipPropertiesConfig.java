@@ -112,17 +112,15 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
     }
 
     static GraphStreamRelationshipPropertiesConfig of(
-        String userName,
         String graphName,
-        List<String> nodeProperties,
-        List<String> nodeLabels,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
         CypherMapWrapper config
     ) {
         return new GraphStreamRelationshipPropertiesConfigImpl(
             Optional.of(graphName),
-            nodeProperties,
-            nodeLabels,
-            userName,
+            relationshipProperties,
+            relationshipTypes,
             config
         );
     }

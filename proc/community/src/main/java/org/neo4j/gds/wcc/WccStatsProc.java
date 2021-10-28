@@ -79,7 +79,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return WccStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return WccStatsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

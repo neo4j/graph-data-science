@@ -40,7 +40,6 @@ public interface ModularityOptimizationStreamConfig extends ModularityOptimizati
         return new ModularityOptimizationStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             config
         );
     }

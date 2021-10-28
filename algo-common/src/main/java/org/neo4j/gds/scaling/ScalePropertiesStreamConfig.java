@@ -32,7 +32,6 @@ import java.util.Optional;
 interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
 
     static ScalePropertiesStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -40,7 +39,6 @@ interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
         return new ScalePropertiesStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -45,9 +45,8 @@ public interface HarmonicCentralityConfig extends
     static HarmonicCentralityConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
-        String username,
         CypherMapWrapper config
     ) {
-        return new HarmonicCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new HarmonicCentralityConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

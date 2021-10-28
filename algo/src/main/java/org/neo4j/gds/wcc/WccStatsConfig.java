@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface WccStatsConfig extends WccBaseConfig {
 
     static WccStatsConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -40,7 +39,6 @@ public interface WccStatsConfig extends WccBaseConfig {
         WccStatsConfig wccStatsConfig = new WccStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
 

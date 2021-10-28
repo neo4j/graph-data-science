@@ -34,7 +34,6 @@ import java.util.Optional;
 public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, ComponentSizeConfig {
 
     static WccWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -42,7 +41,6 @@ public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, Comp
         return new WccWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -36,7 +36,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", new ShortestPathConfigTest.TestNode(42L));
 
-        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), "", cypherMapWrapper);
+        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
     }
@@ -47,7 +47,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", 42L);
 
-        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), "", cypherMapWrapper);
+        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
     }
@@ -58,7 +58,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", "42");
 
-        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), "", cypherMapWrapper))
+        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper))
             .hasMessageContaining("Expected a node or a node id for `sourceNode`. Got String");
     }
 }

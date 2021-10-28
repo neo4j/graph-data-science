@@ -34,11 +34,10 @@ import java.util.Optional;
 public interface KnnWriteConfig extends KnnBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
     static KnnWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new KnnWriteConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new KnnWriteConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

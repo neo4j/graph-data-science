@@ -31,11 +31,10 @@ import java.util.Optional;
 public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig {
 
     static ApproxMaxKCutStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ApproxMaxKCutStreamConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new ApproxMaxKCutStreamConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

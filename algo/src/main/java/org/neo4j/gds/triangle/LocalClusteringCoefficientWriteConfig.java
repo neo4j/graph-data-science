@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface LocalClusteringCoefficientWriteConfig extends LocalClusteringCoefficientBaseConfig, WritePropertyConfig {
 
     static LocalClusteringCoefficientWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface LocalClusteringCoefficientWriteConfig extends LocalClusteringCo
         return new LocalClusteringCoefficientWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

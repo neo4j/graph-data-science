@@ -34,7 +34,6 @@ import java.util.Optional;
 public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
     static NodeSimilarityWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -42,7 +41,6 @@ public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, Wri
         NodeSimilarityWriteConfig config = new NodeSimilarityWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
         config.validate();

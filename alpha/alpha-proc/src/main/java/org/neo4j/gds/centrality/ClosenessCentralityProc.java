@@ -130,7 +130,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ClosenessCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), username, config);
+        return ClosenessCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), config);
     }
 
     @Override

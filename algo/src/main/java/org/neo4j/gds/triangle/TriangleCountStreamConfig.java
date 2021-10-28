@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface TriangleCountStreamConfig extends TriangleCountBaseConfig {
 
     static TriangleCountStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -40,7 +39,6 @@ public interface TriangleCountStreamConfig extends TriangleCountBaseConfig {
         return new TriangleCountStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

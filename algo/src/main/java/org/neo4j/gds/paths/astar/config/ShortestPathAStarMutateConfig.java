@@ -41,7 +41,6 @@ public interface ShortestPathAStarMutateConfig extends ShortestPathAStarBaseConf
         return new ShortestPathAStarMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

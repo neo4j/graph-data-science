@@ -73,7 +73,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return KnnStatsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

@@ -41,7 +41,6 @@ public interface PageRankWriteConfig extends PageRankConfig, WritePropertyConfig
         return new PageRankWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

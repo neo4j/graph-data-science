@@ -40,12 +40,11 @@ public interface SpanningTreeConfig extends SpanningTreeBaseConfig
     }
 
     static SpanningTreeConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new SpanningTreeConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new SpanningTreeConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
 }

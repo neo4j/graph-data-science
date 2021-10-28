@@ -40,7 +40,6 @@ public interface PageRankStatsConfig extends PageRankConfig {
         return new PageRankStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

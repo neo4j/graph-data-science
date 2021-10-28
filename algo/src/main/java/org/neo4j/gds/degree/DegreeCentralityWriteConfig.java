@@ -38,6 +38,6 @@ public interface DegreeCentralityWriteConfig extends DegreeCentralityConfig, Wri
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new DegreeCentralityWriteConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new DegreeCentralityWriteConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

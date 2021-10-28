@@ -68,7 +68,7 @@ public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Dijkstr
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return of(username, graphName, maybeImplicitCreate, config);
+        return of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

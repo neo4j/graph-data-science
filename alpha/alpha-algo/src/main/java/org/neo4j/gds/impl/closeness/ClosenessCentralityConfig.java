@@ -50,10 +50,8 @@ public interface ClosenessCentralityConfig extends
     static ClosenessCentralityConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
-        String username,
         CypherMapWrapper config
     ) {
-        return new ClosenessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new ClosenessCentralityConfigImpl(graphName, implicitCreateConfig, config);
     }
 }
-

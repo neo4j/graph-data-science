@@ -74,7 +74,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return KnnWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

@@ -56,7 +56,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
 
     @Override
     public WccWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return WccWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

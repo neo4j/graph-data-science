@@ -75,7 +75,7 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new OverlapConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new OverlapConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

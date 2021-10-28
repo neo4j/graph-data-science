@@ -36,11 +36,10 @@ public interface TestPregelConfig extends PregelProcedureConfig {
     }
 
     static TestPregelConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }

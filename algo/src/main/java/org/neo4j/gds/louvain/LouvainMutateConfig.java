@@ -41,7 +41,6 @@ public interface LouvainMutateConfig extends LouvainBaseConfig, MutatePropertyCo
         return new LouvainMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -43,7 +43,6 @@ public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipCo
     }
 
     static CollapsePathConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -51,7 +50,6 @@ public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipCo
         return new CollapsePathConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

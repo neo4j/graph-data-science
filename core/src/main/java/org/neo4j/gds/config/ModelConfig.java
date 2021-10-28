@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.config;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.Username;
 
 import java.io.Serializable;
 
@@ -37,6 +39,12 @@ public interface ModelConfig extends Serializable, BaseConfig {
 
     @Configuration.ConvertWith("validateName")
     String modelName();
+
+    @Configuration.Parameter
+    @Value.Default
+    default String username() {
+        return Username.EMPTY_USERNAME.username();
+    }
 
     static @Nullable String validateName(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), MODEL_NAME_KEY);

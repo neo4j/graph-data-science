@@ -75,7 +75,7 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new CosineConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new CosineConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

@@ -53,7 +53,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
     @Override
     public NodeSimilarityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return NodeSimilarityStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();

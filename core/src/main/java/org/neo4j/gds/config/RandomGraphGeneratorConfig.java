@@ -137,7 +137,7 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
         long averageDegree,
         CypherMapWrapper config
     ) {
-        return new RandomGraphGeneratorConfigImpl(nodeCount, averageDegree, graphName, username, config);
+        return new RandomGraphGeneratorConfigImpl(nodeCount, averageDegree, username, graphName, config);
     }
 
     enum AllowSelfLoops {

@@ -64,7 +64,6 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphWriteNodePropertiesConfig config = GraphWriteNodePropertiesConfig.of(
-            username(),
             graphName,
             nodeProperties,
             nodeLabels,

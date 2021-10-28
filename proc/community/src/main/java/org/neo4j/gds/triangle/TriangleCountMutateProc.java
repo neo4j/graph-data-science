@@ -71,12 +71,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountMutateConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return TriangleCountMutateConfig.of(graphName, maybeImplicitCreate, config );
     }
 
     @Override

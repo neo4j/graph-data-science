@@ -40,7 +40,6 @@ public interface K1ColoringMutateConfig extends K1ColoringConfig, MutateProperty
         return new K1ColoringMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

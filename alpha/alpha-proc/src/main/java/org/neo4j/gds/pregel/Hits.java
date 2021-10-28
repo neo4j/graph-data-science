@@ -197,7 +197,6 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         }
 
         static HitsConfig of(
-            String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitConfig,
             CypherMapWrapper userConfig
@@ -205,7 +204,6 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
             return new HitsConfigImpl(
                 graphName,
                 maybeImplicitConfig,
-                username,
                 userConfig
             );
         }
@@ -252,4 +250,3 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         abstract HitsState advance();
     }
 }
-

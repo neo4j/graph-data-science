@@ -37,6 +37,6 @@ public interface BetweennessCentralityStatsConfig extends BetweennessCentralityB
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new BetweennessCentralityStatsConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new BetweennessCentralityStatsConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

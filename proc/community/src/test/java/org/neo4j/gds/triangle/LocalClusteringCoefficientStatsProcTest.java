@@ -68,11 +68,6 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
 
     @Override
     public LocalClusteringCoefficientStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientStatsConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return LocalClusteringCoefficientStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

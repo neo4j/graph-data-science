@@ -67,7 +67,7 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ApproxMaxKCutMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ApproxMaxKCutMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

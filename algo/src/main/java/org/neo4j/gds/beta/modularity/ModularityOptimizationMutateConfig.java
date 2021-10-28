@@ -41,7 +41,6 @@ public interface ModularityOptimizationMutateConfig extends ModularityOptimizati
         return new ModularityOptimizationMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

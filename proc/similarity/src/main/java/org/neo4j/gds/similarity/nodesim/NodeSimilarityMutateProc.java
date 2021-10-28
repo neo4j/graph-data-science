@@ -83,7 +83,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityMutateConfig.of(username, graphName, maybeImplicitCreate, userInput);
+        return NodeSimilarityMutateConfig.of(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

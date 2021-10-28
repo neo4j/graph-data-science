@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -40,6 +41,12 @@ public interface GraphCreateConfig extends BaseConfig {
     String NODE_COUNT_KEY = "nodeCount";
     String RELATIONSHIP_COUNT_KEY = "relationshipCount";
     String READ_CONCURRENCY_KEY = "readConcurrency";
+
+    @Configuration.Parameter
+    @Value.Default
+    default String username() {
+        return Username.EMPTY_USERNAME.username();
+    }
 
     @Configuration.Parameter
     @Configuration.ConvertWith("validateName")

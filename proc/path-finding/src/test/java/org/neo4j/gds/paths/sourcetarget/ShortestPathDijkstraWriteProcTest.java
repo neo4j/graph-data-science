@@ -65,7 +65,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
     @Override
     public ShortestPathDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

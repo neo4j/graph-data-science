@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface GraphRemoveNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 
     static GraphRemoveNodePropertiesConfig of(
-        String userName,
         String graphName,
         List<String> nodeProperties,
         List<String> nodeLabels,
@@ -42,7 +41,6 @@ public interface GraphRemoveNodePropertiesConfig extends GraphExportNodeProperti
             Optional.of(graphName),
             nodeProperties,
             nodeLabels,
-            userName,
             config
         );
     }

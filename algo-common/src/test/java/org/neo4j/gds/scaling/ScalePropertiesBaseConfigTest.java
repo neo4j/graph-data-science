@@ -42,7 +42,6 @@ class ScalePropertiesBaseConfigTest {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),
-            "",
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -60,7 +59,6 @@ class ScalePropertiesBaseConfigTest {
         var config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),
-            "",
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -80,7 +78,6 @@ class ScalePropertiesBaseConfigTest {
             () -> new ScalePropertiesMutateConfigImpl(
                 Optional.of("graph"),
                 Optional.empty(),
-                "",
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",
@@ -99,7 +96,6 @@ class ScalePropertiesBaseConfigTest {
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),
-            "",
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -117,7 +113,6 @@ class ScalePropertiesBaseConfigTest {
             () -> new ScalePropertiesMutateConfigImpl(
                 Optional.of("graph"),
                 Optional.empty(),
-                "",
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",

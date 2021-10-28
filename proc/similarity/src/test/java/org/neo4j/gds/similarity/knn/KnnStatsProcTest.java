@@ -169,6 +169,6 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Override
     public KnnStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnStatsConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return KnnStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

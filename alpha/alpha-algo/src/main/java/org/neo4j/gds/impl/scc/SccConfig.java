@@ -41,7 +41,6 @@ public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
     }
 
     static SccConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -49,7 +48,6 @@ public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
         return new SccConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

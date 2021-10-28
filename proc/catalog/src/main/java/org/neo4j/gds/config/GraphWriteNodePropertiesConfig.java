@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface GraphWriteNodePropertiesConfig extends GraphExportNodePropertiesConfig, WriteConfig {
 
     static GraphWriteNodePropertiesConfig of(
-        String userName,
         String graphName,
         List<String> nodeProperties,
         List<String> nodeLabels,
@@ -42,7 +41,6 @@ public interface GraphWriteNodePropertiesConfig extends GraphExportNodePropertie
             Optional.of(graphName),
             nodeProperties,
             nodeLabels,
-            userName,
             config
         );
     }

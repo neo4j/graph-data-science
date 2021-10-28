@@ -41,7 +41,6 @@ public interface PageRankMutateConfig extends PageRankConfig, MutatePropertyConf
         return new PageRankMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

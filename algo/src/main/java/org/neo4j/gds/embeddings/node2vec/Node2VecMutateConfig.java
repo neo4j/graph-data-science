@@ -41,7 +41,6 @@ public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutateProperty
         return new Node2VecMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

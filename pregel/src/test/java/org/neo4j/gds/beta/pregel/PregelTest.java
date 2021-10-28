@@ -124,7 +124,6 @@ class PregelTest {
             .generate();
 
         var config = ImmutablePregelConfig.builder()
-            .username("")
             .maxIterations(2)
             .partitioning(partitioning)
             .concurrency(4)
@@ -186,7 +185,6 @@ class PregelTest {
             .generate();
 
         var config = ImmutablePregelConfig.builder()
-            .username("")
             .maxIterations(2)
             .isAsynchronous(false)
             .build();
@@ -239,7 +237,6 @@ class PregelTest {
             .generate();
 
         var configBuilder = ImmutablePregelConfig.builder()
-            .username("")
             .maxIterations(10)
             .partitioning(partitioning)
             .isAsynchronous(false);

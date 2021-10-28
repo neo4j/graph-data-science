@@ -37,6 +37,6 @@ public interface DegreeCentralityStatsConfig extends DegreeCentralityConfig {
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new DegreeCentralityStatsConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new DegreeCentralityStatsConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

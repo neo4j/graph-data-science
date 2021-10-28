@@ -70,7 +70,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return AllShortestPathsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return AllShortestPathsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

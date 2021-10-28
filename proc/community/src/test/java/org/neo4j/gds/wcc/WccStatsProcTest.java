@@ -48,7 +48,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
     @Override
     public WccStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return WccStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

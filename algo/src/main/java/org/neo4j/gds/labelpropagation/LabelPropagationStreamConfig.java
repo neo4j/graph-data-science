@@ -40,7 +40,6 @@ public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig
         return new LabelPropagationStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

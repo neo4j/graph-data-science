@@ -33,7 +33,6 @@ import java.util.Optional;
 interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
 
     static ScalePropertiesMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,9 +40,7 @@ interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutateP
         return new ScalePropertiesMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }
 }
-

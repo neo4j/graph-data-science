@@ -74,7 +74,7 @@ public class WccStreamProc extends StreamProc<
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return WccStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return WccStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

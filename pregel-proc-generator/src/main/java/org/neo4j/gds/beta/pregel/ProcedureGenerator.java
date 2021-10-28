@@ -179,7 +179,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addParameter(ParameterizedTypeName.get(Optional.class, GraphCreateConfig.class), "maybeImplicitCreate")
             .addParameter(CypherMapWrapper.class, "config")
             .returns(pregelSpec.configTypeName())
-            .addStatement("return $T.of(username, graphName, maybeImplicitCreate, config)", pregelSpec.configTypeName())
+            .addStatement("return $T.of(graphName, maybeImplicitCreate, config)", pregelSpec.configTypeName())
             .build();
     }
 

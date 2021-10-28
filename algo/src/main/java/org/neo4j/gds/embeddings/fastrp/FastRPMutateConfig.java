@@ -41,7 +41,6 @@ public interface FastRPMutateConfig extends FastRPBaseConfig, MutatePropertyConf
         return new FastRPMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -77,7 +77,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return KnnMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

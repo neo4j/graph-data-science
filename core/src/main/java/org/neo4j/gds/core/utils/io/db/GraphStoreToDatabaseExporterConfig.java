@@ -55,11 +55,11 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         Neo4jProxy.validateExternalDatabaseName(dbName());
     }
 
-    static GraphStoreToDatabaseExporterConfig of(String username, CypherMapWrapper config) {
+    static GraphStoreToDatabaseExporterConfig of(CypherMapWrapper config) {
         var normalizedConfig = config.getString(DB_NAME_KEY).map(dbName -> {
             var databaseName = Neo4jProxy.validateExternalDatabaseName(dbName);
             return config.withString(DB_NAME_KEY, databaseName);
         }).orElse(config);
-        return new GraphStoreToDatabaseExporterConfigImpl(username, normalizedConfig);
+        return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);
     }
 }

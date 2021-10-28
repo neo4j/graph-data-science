@@ -57,7 +57,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ScalePropertiesMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ScalePropertiesMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

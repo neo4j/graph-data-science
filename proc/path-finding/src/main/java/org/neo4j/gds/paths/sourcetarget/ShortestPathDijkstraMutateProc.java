@@ -66,7 +66,7 @@ public class ShortestPathDijkstraMutateProc extends ShortestPathMutateProc<Dijks
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathDijkstraMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathDijkstraMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

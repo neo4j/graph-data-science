@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface GraphStreamNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 
     static GraphStreamNodePropertiesConfig of(
-        String userName,
         String graphName,
         List<String> nodeProperties,
         List<String> nodeLabels,
@@ -42,7 +41,6 @@ public interface GraphStreamNodePropertiesConfig extends GraphExportNodeProperti
             Optional.of(graphName),
             nodeProperties,
             nodeLabels,
-            userName,
             config
         );
     }

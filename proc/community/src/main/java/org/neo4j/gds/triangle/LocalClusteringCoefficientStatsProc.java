@@ -83,12 +83,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LocalClusteringCoefficientStatsConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return LocalClusteringCoefficientStatsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

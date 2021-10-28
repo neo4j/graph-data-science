@@ -112,12 +112,11 @@ public class LabelPropagationPregel implements PregelComputation<LabelPropagatio
     public interface LabelPropagationPregelConfig extends PregelProcedureConfig, SeedConfig {
 
         static LabelPropagationPregelConfig of(
-            String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper userInput
         ) {
-            return new LabelPropagationPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+            return new LabelPropagationPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
         }
     }
 }

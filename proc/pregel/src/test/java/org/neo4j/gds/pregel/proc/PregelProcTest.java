@@ -315,7 +315,7 @@ public class PregelProcTest extends BaseProcTest {
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
         }
 
         @Override
@@ -385,7 +385,7 @@ public class PregelProcTest extends BaseProcTest {
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
         }
 
         @Override
@@ -453,7 +453,7 @@ public class PregelProcTest extends BaseProcTest {
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
         }
 
         @Override

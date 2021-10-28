@@ -65,7 +65,6 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         var maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
 
         var config = GraphWriteRelationshipConfig.of(
-            username(),
             graphName,
             relationshipType,
             maybeRelationshipProperty,

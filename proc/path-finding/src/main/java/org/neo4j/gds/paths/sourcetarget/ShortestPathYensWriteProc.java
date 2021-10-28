@@ -67,7 +67,7 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathYensWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathYensWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

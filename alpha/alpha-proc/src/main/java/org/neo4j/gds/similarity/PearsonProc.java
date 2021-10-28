@@ -77,7 +77,7 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PearsonConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new PearsonConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

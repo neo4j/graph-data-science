@@ -35,7 +35,6 @@ import java.util.Optional;
 public interface AllShortestPathsDijkstraWriteConfig extends AllShortestPathsBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static AllShortestPathsDijkstraWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -43,7 +42,6 @@ public interface AllShortestPathsDijkstraWriteConfig extends AllShortestPathsBas
         return new AllShortestPathsDijkstraWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

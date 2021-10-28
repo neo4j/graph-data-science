@@ -32,7 +32,6 @@ import java.util.Optional;
 public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
 
     static NodeSimilarityStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -40,7 +39,6 @@ public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
         return new NodeSimilarityStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

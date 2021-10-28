@@ -63,7 +63,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ScalePropertiesStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ScalePropertiesStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

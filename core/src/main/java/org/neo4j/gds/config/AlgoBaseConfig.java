@@ -69,4 +69,12 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
     @Configuration.Parameter
     Optional<GraphCreateConfig> implicitCreateConfig();
 
+    @Configuration.GraphStoreValidation
+    @Value.Auxiliary
+    @Value.Default
+    default void graphStoreValidation(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {}
 }

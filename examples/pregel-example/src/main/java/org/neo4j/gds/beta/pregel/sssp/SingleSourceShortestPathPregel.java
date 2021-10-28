@@ -91,12 +91,11 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
         long startNode();
 
         static SingleSourceShortestPathPregelConfig of(
-            String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper userInput
         ) {
-            return new SingleSourceShortestPathPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+            return new SingleSourceShortestPathPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
         }
     }
 }

@@ -147,7 +147,7 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathDeltaSteppingConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathDeltaSteppingConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

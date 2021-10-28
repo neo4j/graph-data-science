@@ -79,7 +79,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountBaseConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TriangleCountBaseConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

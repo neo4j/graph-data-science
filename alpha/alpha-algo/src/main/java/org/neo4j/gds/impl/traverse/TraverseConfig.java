@@ -51,13 +51,11 @@ public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig
     static TraverseConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        String username,
         CypherMapWrapper userInput
     ) {
         return new TraverseConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

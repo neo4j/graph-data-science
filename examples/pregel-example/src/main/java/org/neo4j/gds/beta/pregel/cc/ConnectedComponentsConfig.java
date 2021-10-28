@@ -41,11 +41,10 @@ public interface ConnectedComponentsConfig extends PregelProcedureConfig, SeedCo
     }
 
     static ConnectedComponentsConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ConnectedComponentsConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new ConnectedComponentsConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }

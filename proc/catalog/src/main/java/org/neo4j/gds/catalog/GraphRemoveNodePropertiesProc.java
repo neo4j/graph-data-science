@@ -53,7 +53,6 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
-            username(),
             graphName,
             nodeProperties,
             nodeLabels,

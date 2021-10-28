@@ -40,7 +40,6 @@ public interface FastRPStreamConfig extends FastRPBaseConfig {
         return new FastRPStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

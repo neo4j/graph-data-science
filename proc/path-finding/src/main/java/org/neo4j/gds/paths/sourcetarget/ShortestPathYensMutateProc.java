@@ -66,7 +66,7 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathYensMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathYensMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

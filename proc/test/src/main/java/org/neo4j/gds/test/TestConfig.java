@@ -46,11 +46,10 @@ public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyCo
     }
 
     static TestConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new TestConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return new TestConfigImpl(graphName, maybeImplicitCreate, config);
     }
 }

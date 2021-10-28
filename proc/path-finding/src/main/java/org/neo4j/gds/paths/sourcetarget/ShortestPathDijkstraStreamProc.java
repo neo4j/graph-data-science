@@ -66,7 +66,7 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathDijkstraStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathDijkstraStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

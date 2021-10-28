@@ -41,7 +41,6 @@ public interface LabelPropagationMutateConfig extends LabelPropagationBaseConfig
         return new LabelPropagationMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

@@ -40,7 +40,6 @@ public interface K1ColoringStatsConfig extends K1ColoringConfig {
         return new K1ColoringStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             config
         );
     }
