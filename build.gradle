@@ -44,7 +44,7 @@ apply from: 'gradle/version.gradle'
 allprojects {
     apply plugin: 'base'
 
-    group = gdsGroup
+    group = 'org.neo4j.gds'
     version = gdsVersion
 
     task ci {
