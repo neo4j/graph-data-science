@@ -276,7 +276,8 @@ public class LinkPredictionTrain
             trainExtractors,
             llrConfig,
             progressTracker,
-            terminationFlag
+            terminationFlag,
+            config.concurrency()
         );
 
         return llrTrain.compute();

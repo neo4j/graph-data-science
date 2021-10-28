@@ -60,10 +60,7 @@ class NodeLogisticRegressionTrainTest {
         var config = new NodeLogisticRegressionTrainConfigImpl(
             List.of("a", "x"),
             "t",
-            CypherMapWrapper.create(Map.of(
-                "penalty", NO_PENALTY,
-                "concurrency", 1
-            ))
+            CypherMapWrapper.create(Map.of("penalty", NO_PENALTY))
         );
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
@@ -73,7 +70,8 @@ class NodeLogisticRegressionTrainTest {
             nodeIds,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         );
         var result = algo.compute();
 
@@ -99,7 +97,6 @@ class NodeLogisticRegressionTrainTest {
             "t",
             CypherMapWrapper.create(Map.of(
                 "penalty", NO_PENALTY,
-                "concurrency", 1,
                 "maxEpochs", 100000,
                 "tolerance", 1e-4
             ))
@@ -112,7 +109,8 @@ class NodeLogisticRegressionTrainTest {
             nodeIds,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         );
 
         var result = algo.compute();
@@ -146,7 +144,6 @@ class NodeLogisticRegressionTrainTest {
             "t",
             CypherMapWrapper.create(Map.of(
                 "penalty", 1.0,
-                "concurrency", 4,
                 "maxEpochs", 1000000,
                 "tolerance", 1e-10
             ))
@@ -159,7 +156,8 @@ class NodeLogisticRegressionTrainTest {
             nodeIds,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            4
         );
 
         var result = algo.compute();

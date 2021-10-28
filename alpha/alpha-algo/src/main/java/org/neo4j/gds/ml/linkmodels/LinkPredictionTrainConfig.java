@@ -57,7 +57,6 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     default List<LinkLogisticRegressionTrainConfig> paramConfigs() {
         return params().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
             featureProperties(),
-            concurrency(),
             params
         )).collect(Collectors.toList());
     }

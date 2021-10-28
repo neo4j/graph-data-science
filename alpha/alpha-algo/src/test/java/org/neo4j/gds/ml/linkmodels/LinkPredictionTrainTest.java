@@ -187,7 +187,6 @@ class LinkPredictionTrainTest {
 
         var expectedWinner = LinkLogisticRegressionTrainConfig.of(
             List.of("array"),
-            concurrency,
             Map.of("maxEpochs", 1000, "minEpochs", 10)
         );
 

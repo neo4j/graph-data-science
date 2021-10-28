@@ -81,10 +81,7 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     public void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
         this.parameterSpace = parameterList.stream()
             .map(trainParams -> {
-                var validatedConfig = LinkLogisticRegressionTrainConfig.of(
-                    ConcurrencyConfig.DEFAULT_CONCURRENCY,
-                    trainParams
-                ).toMap();
+                var validatedConfig = LinkLogisticRegressionTrainConfig.of(trainParams).toMap();
 
                 // The concurrency from `train` should be used
                 // if not specified otherwise by the user
@@ -97,10 +94,7 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     }
 
     public List<LinkLogisticRegressionTrainConfig> parameterConfigs(int concurrency) {
-        return parameterSpace().stream().map(params -> LinkLogisticRegressionTrainConfig.of(
-            concurrency,
-            params
-        )).collect(Collectors.toList());
+        return parameterSpace().stream().map(params -> LinkLogisticRegressionTrainConfig.of(params)).collect(Collectors.toList());
     }
 
     public void validate(Graph graph) {

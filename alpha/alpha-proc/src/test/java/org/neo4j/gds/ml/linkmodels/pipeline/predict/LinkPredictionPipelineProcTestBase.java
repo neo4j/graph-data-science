@@ -101,7 +101,7 @@ public abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                 .pipeline("DUMMY")
                 .negativeClassWeight(1.0)
                 .build(),
-            LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(4, Map.of()), Map.of(), pipeline)
+            LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)
         ));
     }
 

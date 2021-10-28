@@ -83,7 +83,7 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithStreakStopper() {
-        var config = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4));
+        var config = LinkLogisticRegressionTrainConfig.of(Map.of("maxEpochs", 100000, "tolerance", 1e-4));
 
         var linearRegression = new LinkLogisticRegressionTrain(
             trainSet,
@@ -91,7 +91,8 @@ class LinkLogisticRegressionTrainTest {
             targets,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         );
 
         var result = linearRegression.compute();
@@ -105,13 +106,14 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithStreakStopperConcurrently() {
-        var config = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1.0, "maxEpochs", 100, "tolerance", 1e-10, "batchSize", 1));
+        var config = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1.0, "maxEpochs", 100, "tolerance", 1e-10, "batchSize", 1));
         var linearRegression = new LinkLogisticRegressionTrain(trainSet,
             linkFeatures,
             targets,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            4
         );
 
         var result = linearRegression.compute();
@@ -125,15 +127,16 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
-        var config = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4));
-        var configWithPenalty = LinkLogisticRegressionTrainConfig.of(1, Map.of("maxEpochs", 100000, "tolerance", 1e-4,  "penalty", 1));
+        var config = LinkLogisticRegressionTrainConfig.of(Map.of("maxEpochs", 100000, "tolerance", 1e-4));
+        var configWithPenalty = LinkLogisticRegressionTrainConfig.of(Map.of("maxEpochs", 100000, "tolerance", 1e-4,  "penalty", 1));
 
         Matrix result = new LinkLogisticRegressionTrain(trainSet,
             linkFeatures,
             targets,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         )
             .compute()
             .weights()
@@ -144,7 +147,8 @@ class LinkLogisticRegressionTrainTest {
             targets,
             configWithPenalty,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         )
             .compute()
             .weights()

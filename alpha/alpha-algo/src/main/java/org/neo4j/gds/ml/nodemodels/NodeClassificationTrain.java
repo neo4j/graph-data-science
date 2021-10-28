@@ -75,7 +75,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
         var maxBatchSize = config.params().stream()
-            .mapToInt(params -> NodeLogisticRegressionTrainConfig.of(config.featureProperties(), config.targetProperty(), config.concurrency(), params).batchSize())
+            .mapToInt(params -> NodeLogisticRegressionTrainConfig
+                .of(config.featureProperties(), config.targetProperty(), params)
+                .batchSize())
             .max()
             .getAsInt();
         var fudgedClassCount = 1000;
@@ -342,7 +344,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker, terminationFlag);
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker, terminationFlag, config.concurrency());
         return train.compute();
     }
 

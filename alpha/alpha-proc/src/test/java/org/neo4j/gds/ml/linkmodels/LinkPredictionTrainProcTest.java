@@ -150,10 +150,10 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "})";
 
         var params1 = LinkLogisticRegressionTrainConfig
-            .of(List.of("z"), 4, Map.of("penalty", 0.5, "maxEpochs", 1))
+            .of(List.of("z"), Map.of("penalty", 0.5, "maxEpochs", 1))
             .toMap();
         var params2 = LinkLogisticRegressionTrainConfig
-            .of(List.of("z"), 4, Map.of("penalty", 2.0, "maxEpochs", 100))
+            .of(List.of("z"), Map.of("penalty", 2.0, "maxEpochs", 100))
             .toMap();
 
         var expectedModelInfo = Map.of(

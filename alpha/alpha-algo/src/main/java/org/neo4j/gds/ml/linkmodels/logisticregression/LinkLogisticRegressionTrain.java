@@ -39,6 +39,7 @@ public class LinkLogisticRegressionTrain {
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final int concurrency;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
@@ -46,7 +47,8 @@ public class LinkLogisticRegressionTrain {
         List<FeatureExtractor> extractors,
         LinkLogisticRegressionTrainConfig config,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        int concurrency
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
@@ -54,6 +56,7 @@ public class LinkLogisticRegressionTrain {
         this.config = config;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.concurrency = concurrency;
     }
 
     public LinkLogisticRegressionData compute() {
@@ -76,7 +79,7 @@ public class LinkLogisticRegressionTrain {
 
         var training = new Training(config, progressTracker, trainSize, terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
-        training.train(objective, queueSupplier, config.concurrency());
+        training.train(objective, queueSupplier, concurrency);
         return objective.modelData;
     }
 }

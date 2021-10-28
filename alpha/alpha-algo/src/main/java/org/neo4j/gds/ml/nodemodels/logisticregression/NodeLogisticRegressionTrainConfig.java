@@ -53,19 +53,17 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
     static NodeLogisticRegressionTrainConfig of(
         List<String> featureProperties,
         String targetProperty,
-        int defaultConcurrency,
         Map<String, Object> params
     ) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
-        if (!cypherMapWrapper.containsKey(CONCURRENCY_KEY)) {
-            cypherMapWrapper = cypherMapWrapper.withNumber(CONCURRENCY_KEY, defaultConcurrency);
-        }
+
         var config = new NodeLogisticRegressionTrainConfigImpl(
             featureProperties,
             targetProperty,
             cypherMapWrapper
         );
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
+
         return config;
     }
 }

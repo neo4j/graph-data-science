@@ -24,25 +24,14 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LinkLogisticRegressionTrainConfigTest {
 
     @Test
-    void shouldOverrideConcurrency() {
-        var foo = LinkLogisticRegressionTrainConfig.of( 4, Map.of("concurrency", 3));
-        assertEquals(3, foo.concurrency());
-    }
-
-    @Test
-    void shouldUseDefaultConcurrency() {
-        var foo = LinkLogisticRegressionTrainConfig.of(2, Map.of());
-        assertEquals(2, foo.concurrency());
-    }
-
-    @Test
     void failOnUnexpectedKeys() {
-        assertThatThrownBy(() -> LinkLogisticRegressionTrainConfig.of( 2, Map.of("boogiewoogie", 1))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Unexpected configuration key: boogiewoogie");
+        assertThatThrownBy(() -> LinkLogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unexpected configuration key: boogiewoogie");
     }
 
 }

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
 
@@ -47,13 +46,9 @@ public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
     Collection<String> configKeys();
 
     static LinkLogisticRegressionTrainConfig of(
-        int defaultConcurrency,
         Map<String, Object> params
     ) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
-        if (!cypherMapWrapper.containsKey(CONCURRENCY_KEY)) {
-            cypherMapWrapper = cypherMapWrapper.withNumber(CONCURRENCY_KEY, defaultConcurrency);
-        }
 
         var config = new LinkLogisticRegressionTrainConfigImpl(cypherMapWrapper);
 
@@ -62,7 +57,6 @@ public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
     }
 
     static LinkLogisticRegressionTrainConfig defaultConfig() {
-        return LinkLogisticRegressionTrainConfig
-            .of(ConcurrencyConfig.DEFAULT_CONCURRENCY, Map.of());
+        return LinkLogisticRegressionTrainConfig.of(Map.of());
     }
 }

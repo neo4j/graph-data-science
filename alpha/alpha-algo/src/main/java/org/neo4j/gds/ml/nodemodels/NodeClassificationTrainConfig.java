@@ -71,7 +71,6 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
                 NodeLogisticRegressionTrainConfig.of(
                     featureProperties(),
                     targetProperty(),
-                    concurrency(),
                     map
                 )
             ).collect(Collectors.toList());

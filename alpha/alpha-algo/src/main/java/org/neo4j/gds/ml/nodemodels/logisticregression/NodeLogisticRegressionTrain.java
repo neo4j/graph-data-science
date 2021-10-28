@@ -37,6 +37,7 @@ public class NodeLogisticRegressionTrain {
     private final HugeLongArray trainSet;
     private final NodeLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
+    private final int concurrency;
     private TerminationFlag terminationFlag;
 
     public static MemoryEstimation memoryEstimation(
@@ -61,13 +62,15 @@ public class NodeLogisticRegressionTrain {
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig config,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        int concurrency
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
         this.config = config;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.concurrency = concurrency;
     }
 
     public NodeLogisticRegressionData compute() {
@@ -85,7 +88,7 @@ public class NodeLogisticRegressionTrain {
         );
         var training = new Training(config, progressTracker, graph.nodeCount(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
-        training.train(objective, queueSupplier, config.concurrency());
+        training.train(objective, queueSupplier, concurrency);
 
         return objective.modelData();
     }

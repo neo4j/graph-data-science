@@ -162,7 +162,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
-                .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
+                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
             assertThat(customInfo.trainingPipeline())
                 .usingRecursiveComparison()

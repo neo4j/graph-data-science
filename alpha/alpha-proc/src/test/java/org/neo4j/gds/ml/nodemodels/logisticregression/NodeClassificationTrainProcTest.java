@@ -66,8 +66,8 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     "randomSeed: 2," +
                     "params: [{penalty: 1.0}, {penalty: 2.0}]})";
 
-        var params1 = NodeLogisticRegressionTrainConfig.of(List.of("a", "b"), "t", 4, Map.of("penalty", 1.0));
-        var params2 = NodeLogisticRegressionTrainConfig.of(List.of("a", "b"), "t", 4, Map.of("penalty", 2.0));
+        var params1 = NodeLogisticRegressionTrainConfig.of(List.of("a", "b"), "t", Map.of("penalty", 1.0));
+        var params2 = NodeLogisticRegressionTrainConfig.of(List.of("a", "b"), "t", Map.of("penalty", 2.0));
 
         var expectedModelInfo = Map.of(
             "bestParameters", params1.toMap(),

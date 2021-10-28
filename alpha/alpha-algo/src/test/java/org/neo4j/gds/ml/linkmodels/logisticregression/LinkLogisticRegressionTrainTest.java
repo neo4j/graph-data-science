@@ -66,8 +66,7 @@ class LinkLogisticRegressionTrainTest {
             featureProperties,
             CypherMapWrapper.create(Map.of(
                 "maxEpochs", 10_000,
-                "tolerance", 1e-4,
-                "concurrency", concurrency
+                "tolerance", 1e-4
             ))
         );
 
@@ -80,7 +79,8 @@ class LinkLogisticRegressionTrainTest {
             extractors,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            concurrency
         );
 
         var result = linearRegression.compute();
@@ -97,7 +97,6 @@ class LinkLogisticRegressionTrainTest {
             CypherMapWrapper.create(Map.of(
                 "maxEpochs", 100000,
                 "tolerance", 1e-4,
-                "concurrency", 1,
                 "penalty", 1
             ))
         );
@@ -111,7 +110,8 @@ class LinkLogisticRegressionTrainTest {
             extractors,
             config,
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            1
         );
 
         var result = linearRegression.compute();
