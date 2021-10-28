@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
@@ -74,10 +75,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final StatsMap validationStats;
 
     static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
-        var maxBatchSize = config.params().stream()
-            .mapToInt(params -> NodeLogisticRegressionTrainConfig
-                .of(config.featureProperties(), config.targetProperty(), params)
-                .batchSize())
+        var maxBatchSize = config.paramsConfig()
+            .stream()
+            .mapToInt(TrainingConfig::batchSize)
             .max()
             .getAsInt();
         var fudgedClassCount = 1000;
