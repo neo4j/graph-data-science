@@ -100,7 +100,7 @@ public final class NodesBuilder {
         this.maxOriginalId = maxOriginalId;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
-        this.labelInformationBuilder = LabelInformation.emptyBuilder();
+        this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1, allocationTracker);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.allocationTracker = allocationTracker;
         this.nextLabelId = 0;

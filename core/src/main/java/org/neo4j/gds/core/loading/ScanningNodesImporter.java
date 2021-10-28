@@ -105,14 +105,15 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         StoreScanner<NodeReference> scanner
     ) {
         idMapBuilder = internalIdMappingBuilderFactory.of(dimensions);
+        var expectedCapacity = dimensions.highestPossibleNodeCount();
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         labelInformationBuilder =
             graphCreateConfig.nodeProjections().allProjections().size() == 1
             && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-                ? LabelInformation.emptyBuilder()
-                : LabelInformation.builder(labelTokenNodeLabelMapping);
+                ? LabelInformation.emptyBuilder(allocationTracker)
+                : LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
 
         nodePropertyImporter = initializeNodePropertyImporter();
 
