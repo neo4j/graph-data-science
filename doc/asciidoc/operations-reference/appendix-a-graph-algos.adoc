@@ -308,6 +308,8 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.ml.pipeline.linkPrediction.train`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.mutate`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.stream`
+.1+<.^| Node Classification Pipeline
+| `gds.alpha.ml.pipeline.nodeClassification.create`
 | <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
 | <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
 | <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`
@@ -332,6 +334,3 @@ include::../algorithms/algorithm-tiers.adoc[]
 .1+<.^| <<algorithms-celf, Influence Maximization - CELF>>
 | `gds.alpha.influenceMaximization.celf.stream`
 |===
-
-
-

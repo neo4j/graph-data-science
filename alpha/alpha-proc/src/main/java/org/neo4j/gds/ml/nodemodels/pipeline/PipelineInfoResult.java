@@ -32,7 +32,7 @@ public class PipelineInfoResult {
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, NodeClassificationTrainingPipeline info) {
+    PipelineInfoResult(String pipelineName, NodeClassificationPipeline info) {
         this.name = pipelineName;
         this.nodePropertySteps = info
             .nodePropertySteps()
@@ -41,6 +41,6 @@ public class PipelineInfoResult {
             .collect(Collectors.toList());
         this.featureSteps = info.featureProperties();
         this.splitConfig = info.splitConfig().toMap();
-        this.parameterSpace = info.parameterSpace();
+        this.parameterSpace = info.trainingParameterSpace();
     }
 }

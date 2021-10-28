@@ -25,21 +25,26 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.pipelinecommon.PipelineDummyTrainConfig;
+import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
+import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc.PIPELINE_MODEL_TYPE;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreate.PIPELINE_MODEL_TYPE;
 
-public class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
+public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
-    //TODO: move these to analogous places of those for LP
+    //TODO: move these to analogous places of those for LP or share it if possible
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("holdoutFraction", 0.3, "validationFolds", 3);
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(Map.of(
         "maxEpochs", 100,
@@ -47,9 +52,10 @@ public class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
         "penalty", 0.0,
         "patience", 1,
         "batchSize", 100,
-        "tolerance", 0.001,
-        "concurrency", 4
+        "tolerance", 0.001
     ));
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -58,21 +64,21 @@ public class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
     void createPipeline() {
-        assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')",
-            List.of(Map.of(
-                "name", "myPipeline",
-                "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
-                "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "parameterSpace", DEFAULT_PARAM_CONFIG
-            ))
-        );
+        var result = NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
+        assertThat(result.name).isEqualTo("myPipeline");
+        assertThat(result.nodePropertySteps).isEqualTo(List.of());
+        assertThat(result.featureSteps).isEqualTo(List.of());
+        assertThat(result.splitConfig).isEqualTo(DEFAULT_SPLIT_CONFIG);
+        var configs = (List<NodeLogisticRegressionTrainCoreConfig>) result.parameterSpace;
+        assertThat(configs
+            .stream()
+            .map(NodeLogisticRegressionTrainCoreConfig::toMap)
+            .collect(Collectors.toList())).isEqualTo(DEFAULT_PARAM_CONFIG);
 
         assertCypherResult(
             "CALL gds.beta.model.list('myPipeline')",
@@ -86,7 +92,7 @@ public class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
                             "featureSteps", List.of()
                         ),
                         "splitConfig", DEFAULT_SPLIT_CONFIG,
-                        "parameterSpace", DEFAULT_PARAM_CONFIG
+                        "trainingParameterSpace", DEFAULT_PARAM_CONFIG
                     ),
                     "trainConfig", PipelineDummyTrainConfig.of(getUsername()).toMap(),
                     "graphSchema", GraphSchema.empty().toMap(),
@@ -101,13 +107,14 @@ public class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
 
     @Test
     void failOnCreatingPipelineWithExistingName() {
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')");
-        assertError("CALL gds.alpha.ml.pipeline.nodeClassification.create('myPipeline')", "Model with name `myPipeline` already exists.");
+        NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
+        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), "myPipeline"))
+            .hasMessageContaining("Model with name `myPipeline` already exists.");
     }
 
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        assertError("CALL gds.alpha.ml.pipeline.nodeClassification.create(' ')",
-            "`pipelineName` must not end or begin with whitespace characters, but got ` `.");
+        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), " "))
+            .hasMessageContaining("`pipelineName` must not end or begin with whitespace characters, but got ` `.");
     }
 }
