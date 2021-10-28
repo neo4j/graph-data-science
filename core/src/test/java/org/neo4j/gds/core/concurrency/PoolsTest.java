@@ -35,15 +35,4 @@ class PoolsTest {
         assertEquals(4, defaultPool.getMaximumPoolSize());
     }
 
-    @Test
-//    @GdsEditionTest(Edition.EE)
-    void shouldGetUnlimitedPool() {
-        ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
-
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        assertEquals(availableProcessors, defaultPool.getCorePoolSize());
-        assertEquals(2 * availableProcessors, defaultPool.getMaximumPoolSize());
-    }
-
-
 }

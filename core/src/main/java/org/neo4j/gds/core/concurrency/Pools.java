@@ -48,7 +48,7 @@ public final class Pools {
         var poolSizes = PoolSizesService.poolSizes();
         return new ThreadPoolExecutor(
             poolSizes.corePoolSize(),
-            poolSizes.corePoolSize(),
+            poolSizes.maxPoolSize(),
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
