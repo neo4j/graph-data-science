@@ -77,6 +77,7 @@ public abstract class PipelineExecutor<
 
     @Override
     public RESULT compute() {
+        this.pipeline.validate(graphStore, config);
         var dataSplits = splitDataset();
 
         var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);

@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // TODO use TrainingConfig as bound instead of Mappable
-public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends Model.Mappable> implements ToMapConvertible {
+public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends ToMapConvertible> implements ToMapConvertible {
 
     protected final List<NodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
@@ -56,9 +57,21 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING
         return map;
     }
 
-    public abstract void validate(Graph graph);
-
     protected abstract Map<String, Object> additionalEntries();
+
+    public void validate(GraphStore graphStore, AlgoBaseConfig config) {
+        var graphProperties = graphStore.nodePropertyKeys(config.nodeLabelIdentifiers(graphStore));
+
+        var invalidProperties = featureSteps()
+            .stream()
+            .flatMap(step -> step.inputNodeProperties().stream())
+            .filter(property -> !graphProperties.contains(property))
+            .collect(Collectors.toList());
+
+        if (!invalidProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
+        }
+    }
 
     public void addNodePropertyStep(NodePropertyStep step) {
         validateUniqueMutateProperty(step);

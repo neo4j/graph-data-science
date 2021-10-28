@@ -41,7 +41,7 @@ public class LinkPredictionPipelineExecutor extends PipelineExecutor<
     LinkLogisticRegressionTrainConfig,
     Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>,
     LinkPredictionPipelineExecutor
-    > {
+> {
 
     private final RelationshipSplitter relationshipSplitter;
     private final LinkPredictionTrainConfig lpTrainConfig;
