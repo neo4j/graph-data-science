@@ -1,6 +1,9 @@
 apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Beta'
+
+group = 'org.neo4j.gds'
+
 dependencies {
     annotationProcessor project(':annotations')
 

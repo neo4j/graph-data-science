@@ -22,6 +22,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Memory Usage'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'

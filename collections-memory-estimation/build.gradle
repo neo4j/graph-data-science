@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Collections Memory Estimation'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     implementation project(':memory-usage')
     implementation project(':collections')

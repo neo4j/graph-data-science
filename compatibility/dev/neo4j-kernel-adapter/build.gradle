@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter Dev'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     implementation project(':neo4j-kernel-adapter-api')
 

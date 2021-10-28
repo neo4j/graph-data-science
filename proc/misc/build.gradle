@@ -1,6 +1,9 @@
 apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Misc'
+
+group = 'org.neo4j.gds'
+
 dependencies {
     implementation project(':annotations')
     implementation project(':core')

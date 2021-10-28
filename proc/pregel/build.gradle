@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Pregel :: Procedures'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
 

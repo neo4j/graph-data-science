@@ -6,6 +6,9 @@ apply plugin: 'nebula.info-java'
 apply plugin: 'nebula.info-scm'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Common'
+
+group = 'org.neo4j.gds'
+
 dependencies {
     annotationProcessor project(':annotations')
 

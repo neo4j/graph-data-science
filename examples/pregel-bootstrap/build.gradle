@@ -22,6 +22,8 @@ ext {
 
 description = 'Graph Data Science :: Pregel Bootstrap'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     // We depend on the proc artifact of the GDS library
     compileOnly "org.neo4j.gds:proc:$gdsVersion"

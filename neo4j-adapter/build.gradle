@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Neo4j Adapter'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'

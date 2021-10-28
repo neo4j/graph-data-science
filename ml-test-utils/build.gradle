@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Machine Learning Test Utilities'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     implementation project(':core')
     implementation project(':ml-core')

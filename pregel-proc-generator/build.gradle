@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Pregel Procedure Generator'
 
+group = 'org.neo4j.gds'
+
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
