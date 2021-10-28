@@ -20,11 +20,6 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.StringIdentifierValidations;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.pipelinecommon.PipelineDummyTrainConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,25 +30,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("immutables:subtype")
 public class NodeClassificationPipelineCreateProc extends BaseProc {
-    public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.create", mode = READ)
     @Description("Creates a node classification pipeline in the model catalog.")
-    public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
-        var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
-
-        var model = Model.of(
-            username(),
-            pipelineName,
-            PIPELINE_MODEL_TYPE,
-            GraphSchema.empty(),
-            new Object(),
-            PipelineDummyTrainConfig.of(username()),
-            new NodeClassificationTrainingPipeline()
-        );
-
-        ModelCatalog.set(model);
-
-        return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
+    public Stream<PipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
+        return Stream.of(NodeClassificationPipelineCreate.create(username(), pipelineName));
     }
 }
