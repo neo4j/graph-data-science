@@ -19,24 +19,28 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
-public abstract class PipelineExecutor<FEATURE_STEP extends FeatureStep, FEATURE_TYPE> {
+public abstract class PipelineExecutor<
+    FEATURE_STEP extends FeatureStep,
+    FEATURE_TYPE,
+    TRAINING_CONFIG extends Model.Mappable,
+    RESULT,
+    SELF extends PipelineExecutor<FEATURE_STEP, FEATURE_TYPE, TRAINING_CONFIG, RESULT, SELF>
+> extends Algorithm<SELF, RESULT> {
 
     public enum DatasetSplits {
         TRAIN,
@@ -45,66 +49,49 @@ public abstract class PipelineExecutor<FEATURE_STEP extends FeatureStep, FEATURE
         FEATURE_INPUT
     }
 
-    protected final PipelineBuilder<FEATURE_STEP> pipeline;
+    protected final PipelineBuilder<FEATURE_STEP, TRAINING_CONFIG> pipeline;
     protected final AlgoBaseConfig config;
     protected final BaseProc caller;
     protected final GraphStore graphStore;
     protected final String graphName;
-    protected final int concurrency;
-    protected final ProgressTracker progressTracker;
 
     public PipelineExecutor(
-        PipelineBuilder<FEATURE_STEP> pipeline,
+        PipelineBuilder<FEATURE_STEP, TRAINING_CONFIG> pipeline,
         AlgoBaseConfig config,
         BaseProc caller,
         GraphStore graphStore,
         String graphName,
-        int concurrency,
         ProgressTracker progressTracker
     ) {
+        super(progressTracker);
         this.pipeline = pipeline;
         this.config = config;
         this.caller = caller;
         this.graphStore = graphStore;
         this.graphName = graphName;
-        this.concurrency = concurrency;
-        this.progressTracker = progressTracker;
     }
 
-    protected abstract Map<DatasetSplits, GraphFilter> splitDataset();
+    public abstract Map<DatasetSplits, GraphFilter> splitDataset();
 
-    protected abstract HugeObjectArray<FEATURE_TYPE> extractFeatures(Graph graph, List<FEATURE_STEP> featureSteps, int concurrency, ProgressTracker progressTracker);
+    protected abstract RESULT train(Map<DatasetSplits, GraphFilter> dataSplits);
 
-    protected abstract void train(HugeObjectArray<FEATURE_TYPE> features);
+    @Override
+    public RESULT compute() {
+        var dataSplits = splitDataset();
 
-    public void execute() {
-        var datasets = splitDataset();
-
-        var featureInputGraphFilter = datasets.get(DatasetSplits.FEATURE_INPUT);
+        var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
         executeNodePropertySteps(featureInputGraphFilter.nodeLabels(), featureInputGraphFilter.relationshipTypes());
 
-        var trainGraphFilter = datasets.get(DatasetSplits.TRAIN);
-        var features = computeFeatures(
-            trainGraphFilter.nodeLabels(),
-            trainGraphFilter.relationshipTypes(),
-            this.concurrency
-        );
+        var result = train(dataSplits);
 
-        train(features);
+        cleanUpGraphStore(dataSplits);
 
-        cleanUpGraphStore(datasets);
+        return result;
     }
 
-    private HugeObjectArray<FEATURE_TYPE> computeFeatures(
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipType,
-        int concurrency
-    ) {
-        var graph = graphStore.getGraph(nodeLabels, relationshipType, Optional.empty());
+    @Override
+    public void release() {
 
-        pipeline.validate(graph);
-
-        return extractFeatures(graph, pipeline.featureSteps(), concurrency, progressTracker);
     }
 
     private void executeNodePropertySteps(
@@ -139,7 +126,7 @@ public abstract class PipelineExecutor<FEATURE_STEP extends FeatureStep, FEATURE
 
     @ValueClass
     public interface GraphFilter {
-        List<NodeLabel> nodeLabels();
-        List<RelationshipType> relationshipTypes();
+        Collection<NodeLabel> nodeLabels();
+        Collection<RelationshipType> relationshipTypes();
     }
 }
