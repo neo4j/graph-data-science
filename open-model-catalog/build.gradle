@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Open Model Catalog'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+}
