@@ -31,6 +31,10 @@ public class NodeClassificationFeatureStep implements ToMapConvertible, FeatureS
 
     private final String nodeProperty;
 
+    static NodeClassificationFeatureStep of(String nodeProperty) {
+        return new NodeClassificationFeatureStep(nodeProperty);
+    }
+
     NodeClassificationFeatureStep(String nodeProperty) {
         this.nodeProperty = nodeProperty;
     }

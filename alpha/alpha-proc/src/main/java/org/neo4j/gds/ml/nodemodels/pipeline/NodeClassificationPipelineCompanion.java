@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPipelineCompanion {
     public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
@@ -30,4 +34,22 @@ public class NodeClassificationPipelineCompanion {
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
         NodeLogisticRegressionTrainCoreConfig.defaultConfig().toMap()
     );
+    private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+
+    public static NodeClassificationPipeline getNCPipeline(String pipelineName, String username) {
+        var model = modelCatalog.getUntyped(username, pipelineName);
+
+        assert model != null;
+        if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Steps can only be added to a model of type `%s`. But model `%s` is of type `%s`.",
+                PIPELINE_MODEL_TYPE,
+                pipelineName,
+                model.algoType()
+            ));
+        }
+        assert model.customInfo() instanceof NodeClassificationPipeline;
+
+        return (NodeClassificationPipeline) model.customInfo();
+    }
 }
