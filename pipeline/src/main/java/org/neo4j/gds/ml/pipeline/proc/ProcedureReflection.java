@@ -26,12 +26,9 @@ import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Procedure;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
