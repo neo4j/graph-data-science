@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -36,9 +37,9 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
-public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
-    private NamedDatabaseId databaseId;
-    private BaseProc caller;
+public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionPipelineExecutor, LinkPredictionTrainConfig> {
+    private final NamedDatabaseId databaseId;
+    private final BaseProc caller;
 
     public LinkPredictionTrainFactory(NamedDatabaseId databaseId, BaseProc caller) {
         this.databaseId = databaseId;
@@ -46,7 +47,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
     }
 
     @Override
-    public LinkPredictionTrain build(
+    public LinkPredictionPipelineExecutor build(
         Graph graph,
         LinkPredictionTrainConfig trainConfig,
         AllocationTracker allocationTracker,
@@ -56,26 +57,18 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionT
             .graphName()
             .orElseThrow(() -> new UnsupportedOperationException(
                 "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
-        var graphStore = GraphStoreCatalog.get(trainConfig.username(), databaseId, graphName).graphStore();
+
+        var graphStore = GraphStoreCatalog.get(CatalogRequest.of(trainConfig.username(), databaseId), graphName).graphStore();
 
         var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), trainConfig.username());
-
         pipeline.validate();
 
-        var pipelineExecutor = new LinkPredictionPipelineExecutor(
+        return new LinkPredictionPipelineExecutor(
             pipeline,
-            caller,
-            databaseId,
-            trainConfig.username(),
-            graphName,
-            progressTracker
-        );
-
-        return new LinkPredictionTrain(
-            graphStore,
             trainConfig,
-            pipeline,
-            pipelineExecutor,
+            caller,
+            graphStore,
+            graphName,
             progressTracker
         );
     }

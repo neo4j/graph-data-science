@@ -20,36 +20,37 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class LinkPredictionPipelineExecutor extends PipelineExecutor<LinkFeatureStep, double[]> {
+public class LinkPredictionPipelineExecutor extends PipelineExecutor<
+    LinkFeatureStep,
+    double[],
+    LinkLogisticRegressionTrainConfig,
+    Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>,
+    LinkPredictionPipelineExecutor
+    > {
 
-    private final LinkPredictionSplitConfig splitConfig;
-    private final String userName;
-    private final NamedDatabaseId databaseId;
     private final RelationshipSplitter relationshipSplitter;
+    private final LinkPredictionTrainConfig lpTrainConfig;
 
     public LinkPredictionPipelineExecutor(
         LinkPredictionPipeline pipeline,
         LinkPredictionTrainConfig config,
-        LinkPredictionSplitConfig splitConfig,
         BaseProc caller,
-        NamedDatabaseId databaseId,
-        String userName,
+        GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker
     ) {
@@ -57,51 +58,62 @@ public class LinkPredictionPipelineExecutor extends PipelineExecutor<LinkFeature
             pipeline,
             config,
             caller,
-            GraphStoreCatalog.get(CatalogRequest.of(userName, databaseId.name()), graphName).graphStore(),
+            graphStore,
             graphName,
-            config.concurrency(),
             progressTracker
         );
-        this.splitConfig = splitConfig;
-        this.userName = userName;
-        this.databaseId = databaseId;
-        this.relationshipSplitter = new RelationshipSplitter(graphName, splitConfig, caller, progressTracker);
+        this.lpTrainConfig = config;
+
+        this.relationshipSplitter = new RelationshipSplitter(
+            graphName,
+            pipeline.splitConfig(),
+            caller,
+            progressTracker
+        );
     }
 
     @Override
-    protected Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
-        return null;
-    }
+    public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
+        var lpPipeline = (LinkPredictionPipeline) this.pipeline;
 
-    @Override
-    protected HugeObjectArray<double[]> extractFeatures(
-        Graph graph, List<LinkFeatureStep> linkFeatureSteps, int concurrency, ProgressTracker progressTracker
-    ) {
-        return null;
-    }
-
-    @Override
-    protected void train(HugeObjectArray<double[]> features) {
-
-    }
-
-    public LinkFeatureExtractor linkFeatureExtractor(Graph graph) {
-        return LinkFeatureExtractor.of(graph, pipeline.featureSteps());
-    }
-
-    public void splitRelationships(
-        GraphStore graphStore,
-        List<String> relationshipTypes,
-        List<String> nodeLabels,
-        Optional<Long> randomSeed,
-        Optional<String> relationshipWeightProperty
-    ) {
         this.relationshipSplitter.splitRelationships(
             graphStore,
-            relationshipTypes,
-            nodeLabels,
-            randomSeed,
-            relationshipWeightProperty
+            lpTrainConfig.relationshipTypes(),
+            lpTrainConfig.nodeLabels(),
+            lpTrainConfig.randomSeed(),
+            lpPipeline.relationshipWeightProperty()
         );
+
+        var splitConfig = lpPipeline.splitConfig();
+
+        var nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        var trainRelationshipTypes = RelationshipType.listOf(splitConfig.trainRelationshipType());
+        var testRelationshipTypes = RelationshipType.listOf(splitConfig.testRelationshipType());
+
+        return Map.of(
+            DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, trainRelationshipTypes),
+            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, testRelationshipTypes)
+        );
+    }
+
+    @Override
+    protected Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> train(Map<DatasetSplits, GraphFilter> dataSplits) {
+        var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
+        var testDataSplit = dataSplits.get(DatasetSplits.TEST);
+
+        var trainGraph = graphStore.getGraph(trainDataSplit.nodeLabels(), trainDataSplit.relationshipTypes(), Optional.of("label"));
+        var testGraph = graphStore.getGraph(testDataSplit.nodeLabels(), testDataSplit.relationshipTypes(), Optional.of("label"));
+        return new LinkPredictionTrain(
+            trainGraph,
+            testGraph,
+            (LinkPredictionPipeline) pipeline,
+            lpTrainConfig,
+            progressTracker
+        ).compute();
+    }
+
+    @Override
+    public LinkPredictionPipelineExecutor me() {
+        return this;
     }
 }

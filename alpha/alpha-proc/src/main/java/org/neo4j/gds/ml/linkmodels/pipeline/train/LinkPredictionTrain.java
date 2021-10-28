@@ -21,9 +21,8 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -35,8 +34,7 @@ import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
@@ -44,15 +42,14 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
+import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -64,24 +61,24 @@ public class LinkPredictionTrain
 
     public static final String MODEL_TYPE = "Link prediction pipeline";
 
-    private final GraphStore graphStore;
-    private final LinkPredictionTrainConfig trainConfig;
-    private final LinkPredictionPipelineExecutor pipelineExecutor;
+    private final Graph trainGraph;
+    private final Graph validationGraph;
     private final LinkPredictionPipeline pipeline;
+    private final LinkPredictionTrainConfig trainConfig;
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
-        GraphStore graphStore,
-        LinkPredictionTrainConfig trainConfig,
+        Graph trainGraph,
+        Graph validationGraph,
         LinkPredictionPipeline pipeline,
-        LinkPredictionPipelineExecutor pipelineExecutor,
+        LinkPredictionTrainConfig trainConfig,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.graphStore = graphStore;
-        this.trainConfig = trainConfig;
-        this.pipelineExecutor = pipelineExecutor;
+        this.trainGraph = trainGraph;
+        this.validationGraph = validationGraph;
         this.pipeline = pipeline;
+        this.trainConfig = trainConfig;
         this.allocationTracker = AllocationTracker.empty();
     }
 
@@ -89,30 +86,7 @@ public class LinkPredictionTrain
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
         progressTracker.beginSubTask();
 
-        List<String> relationshipTypes = trainConfig
-            .internalRelationshipTypes(graphStore)
-            .stream()
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
-        pipelineExecutor.splitRelationships(
-            graphStore,
-            relationshipTypes,
-            trainConfig.nodeLabels(),
-            trainConfig.randomSeed(),
-            pipeline.relationshipWeightProperty()
-        );
-
-        assertRunning();
-
-        pipelineExecutor.executeNodePropertySteps(
-            trainConfig.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(pipeline.splitConfig().featureInputRelationshipType())
-        );
-
-        assertRunning();
-
-        var trainData = extractFeaturesAndTargets(pipeline.splitConfig().trainRelationshipType());
+        var trainData = extractFeaturesAndTargets(trainGraph);
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
 
@@ -126,8 +100,6 @@ public class LinkPredictionTrain
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
         var testMetrics = computeTestMetric(modelData);
 
-        cleanUpGraphStore();
-
         var model = createModel(
             modelSelectResult,
             modelData,
@@ -139,23 +111,24 @@ public class LinkPredictionTrain
         return model;
     }
 
-    FeaturesAndTargets extractFeaturesAndTargets(String relationshipType) {
-        var features = pipelineExecutor.computeFeatures(
-            trainConfig.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(relationshipType),
-            trainConfig.concurrency()
+    private FeaturesAndTargets extractFeaturesAndTargets(Graph graph) {
+        var features = LinkFeatureExtractor.extractFeatures(
+            graph,
+            pipeline.featureSteps(),
+            trainConfig.concurrency(),
+            progressTracker
         );
-        var targets = extractTargets(features.size(), relationshipType);
+
+        var targets = extractTargets(graph, features.size());
 
         return ImmutableFeaturesAndTargets.of(features, targets);
     }
 
-    public HugeDoubleArray extractTargets(long numberOfTargets, String relationshipType) {
+    private HugeDoubleArray extractTargets(Graph graph, long numberOfTargets) {
         var globalTargets = HugeDoubleArray.newArray(numberOfTargets, allocationTracker);
-        var trainGraph = graphStore.getGraph(RelationshipType.of(relationshipType), Optional.of("label"));
         var relationshipIdx = new MutableLong();
-        trainGraph.forEachNode(nodeId -> {
-            trainGraph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
+        graph.forEachNode(nodeId -> {
+            graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
                 if (weight == 0.0D || weight == 1.0D) {
                     globalTargets.set(relationshipIdx.getAndIncrement(), weight);
                 } else {
@@ -184,7 +157,7 @@ public class LinkPredictionTrain
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        pipeline.parameterSpace().forEach(modelParams -> {
+        pipeline.trainingParameterSpace().forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
@@ -231,7 +204,7 @@ public class LinkPredictionTrain
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
         progressTracker.beginSubTask();
 
-        var testData = extractFeaturesAndTargets(pipeline.splitConfig().testRelationshipType());
+        var testData = extractFeaturesAndTargets(validationGraph);
 
         var result = computeMetric(
             testData,
@@ -409,7 +382,7 @@ public class LinkPredictionTrain
             trainConfig.username(),
             trainConfig.modelName(),
             MODEL_TYPE,
-            graphStore.schema(),
+            trainGraph.schema(),
             modelData,
             trainConfig,
             LinkPredictionModelInfo.of(
@@ -418,18 +391,6 @@ public class LinkPredictionTrain
                 pipeline.copy()
             )
         );
-    }
-
-    private void cleanUpGraphStore() {
-        LinkPredictionSplitConfig splitConfig = pipeline.splitConfig();
-        var trainRelTypes = List.of(
-            splitConfig.trainRelationshipType(),
-            splitConfig.testRelationshipType(),
-            splitConfig.featureInputRelationshipType()
-        );
-        trainRelTypes.forEach(relType -> graphStore.deleteRelationships(RelationshipType.of(relType)));
-
-        pipelineExecutor.removeNodeProperties(graphStore, trainConfig.nodeLabelIdentifiers(graphStore));
     }
 
     @Override
