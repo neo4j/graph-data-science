@@ -184,7 +184,7 @@ public class LinkPredictionTrain
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        pipeline.parameterConfigs(trainConfig.concurrency()).forEach(modelParams -> {
+        pipeline.parameterSpace().forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()

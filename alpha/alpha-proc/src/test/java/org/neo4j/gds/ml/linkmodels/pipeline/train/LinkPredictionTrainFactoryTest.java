@@ -47,6 +47,8 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
@@ -141,7 +143,12 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
             pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
             pipeline.addNodePropertyStep(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
             pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree", "pr")));
-            pipeline.setParameterSpace(List.of(Map.of("penalty", 1000000), Map.of("penalty", 1)));
+            pipeline.setParameterSpace(Stream.<Map<String, Object>>of(
+                    Map.of("penalty", 1000000),
+                    Map.of("penalty", 1)
+                )
+                .map(LinkLogisticRegressionTrainConfig::of)
+                .collect(Collectors.toList()));
 
             var pipeModel = Model.of(
                 getUsername(),

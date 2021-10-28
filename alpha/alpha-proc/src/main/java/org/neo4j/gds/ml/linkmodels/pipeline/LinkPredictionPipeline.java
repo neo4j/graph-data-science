@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.PipelineBuilder;
@@ -34,19 +35,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     private LinkPredictionSplitConfig splitConfig;
     // List of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
-    // currently only storing the parameters as Map to avoid default concurrency issue
-    // TODO resolve default/user-defined concurrency issue and store actual config objects
-    private @NotNull List<Map<String, Object>> parameterSpace;
+    private @NotNull List<LinkLogisticRegressionTrainConfig> parameterSpace;
 
     public LinkPredictionPipeline() {
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
-        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap());
+        this.parameterSpace = List.of(LinkLogisticRegressionTrainConfig.defaultConfig());
     }
 
     public LinkPredictionPipeline copy() {
@@ -74,27 +74,12 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
         this.splitConfig = splitConfig;
     }
 
-     public List<Map<String, Object>> parameterSpace() {
+     public List<LinkLogisticRegressionTrainConfig> parameterSpace() {
         return parameterSpace;
     }
 
-    public void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
-        this.parameterSpace = parameterList.stream()
-            .map(trainParams -> {
-                var validatedConfig = LinkLogisticRegressionTrainConfig.of(trainParams).toMap();
-
-                // The concurrency from `train` should be used
-                // if not specified otherwise by the user
-                if (!trainParams.containsKey(ConcurrencyConfig.CONCURRENCY_KEY)) {
-                    validatedConfig.remove(ConcurrencyConfig.CONCURRENCY_KEY);
-                }
-
-                return validatedConfig;
-            }).collect(Collectors.toList());
-    }
-
-    public List<LinkLogisticRegressionTrainConfig> parameterConfigs(int concurrency) {
-        return parameterSpace().stream().map(params -> LinkLogisticRegressionTrainConfig.of(params)).collect(Collectors.toList());
+    public void setParameterSpace(@NotNull List<LinkLogisticRegressionTrainConfig> parameterList) {
+        this.parameterSpace = parameterList;
     }
 
     public void validate(Graph graph) {

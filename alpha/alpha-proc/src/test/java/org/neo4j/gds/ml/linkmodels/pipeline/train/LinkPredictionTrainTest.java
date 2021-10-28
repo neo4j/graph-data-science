@@ -46,6 +46,8 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -122,10 +124,12 @@ class LinkPredictionTrainTest extends BaseProcTest {
         LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
-        pipeline.setParameterSpace(List.of(
-            Map.of("penalty", 1000000),
-            Map.of("penalty", 1)
-        ));
+        pipeline.setParameterSpace(Stream.<Map<String, Object>>of(
+                Map.of("penalty", 1000000),
+                Map.of("penalty", 1)
+            )
+            .map(LinkLogisticRegressionTrainConfig::of)
+            .collect(Collectors.toList()));
 
         LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfig
             .builder()
@@ -185,7 +189,9 @@ class LinkPredictionTrainTest extends BaseProcTest {
         var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
         pipeline.setSplitConfig(splitConfig);
-        pipeline.setParameterSpace(List.of(Map.of("penalty", 1)));
+        pipeline.setParameterSpace(Stream.<Map<String, Object>>of(Map.of("penalty", 1))
+            .map(LinkLogisticRegressionTrainConfig::of)
+            .collect(Collectors.toList()));
 
         LinkPredictionTrainConfig config = LinkPredictionTrainConfig
             .builder()
