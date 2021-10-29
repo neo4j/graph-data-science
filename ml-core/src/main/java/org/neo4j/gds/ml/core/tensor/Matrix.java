@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.Dimensions;
 
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -70,6 +71,11 @@ public class Matrix extends Tensor<Matrix> {
         }
 
         System.arraycopy(values, 0, data, row * columns, columns);
+    }
+
+
+    public double[] getRow(int rowIdx) {
+        return Arrays.copyOfRange(data, rowIdx * columns, (rowIdx + 1) * columns);
     }
 
     public void addDataAt(int row, int column, double newValue) {

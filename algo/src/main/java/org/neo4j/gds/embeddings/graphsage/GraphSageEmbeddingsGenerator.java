@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
@@ -106,20 +105,13 @@ public class GraphSageEmbeddingsGenerator {
                 layers,
                 featureFunction
             );
-            int cols = embeddingVariable.dimension(1);
-            double[] embeddings = ctx.forward(embeddingVariable).data();
+            Matrix embeddings = ctx.forward(embeddingVariable);
 
             var partitionStartNodeId = partition.startNode();
             var partitionNodeCount = partition.nodeCount();
-            for (int nodeIndex = 0; nodeIndex < partitionNodeCount; nodeIndex++) {
-                // TODO: Try to avoid `Arrays.copyOfRange`
-                double[] nodeEmbedding = Arrays.copyOfRange(
-                    embeddings,
-                    nodeIndex * cols,
-                    (nodeIndex + 1) * cols
-                );
-
-                result.set(nodeIndex + partitionStartNodeId, nodeEmbedding);
+            for (int partitionIdx = 0; partitionIdx < partitionNodeCount; partitionIdx++) {
+                long nodeId = partitionStartNodeId + partitionIdx;
+                result.set(nodeId, embeddings.getRow(partitionIdx));
             }
 
             progressTracker.logProgress(partitionNodeCount);

@@ -188,6 +188,15 @@ class MatrixTest {
     }
 
     @Test
+    void getRow() {
+        var matrix = new Matrix(new double[] {1, 2, 3, 4, 5, 6}, 3, 2);
+
+        assertThat(matrix.getRow(0)).containsExactly(1, 2);
+        assertThat(matrix.getRow(1)).containsExactly(3, 4);
+        assertThat(matrix.getRow(2)).containsExactly(5, 6);
+    }
+
+    @Test
     void failSettingInvalidRow() {
         var matrix = Matrix.create(0, 3, 2);
         assertThatThrownBy(() -> matrix.setRow(1, new double[]{42}))
