@@ -36,6 +36,7 @@ class IdMapBuilderTest {
 
         SparseNodeMapping hugeSparseLongArray = IdMapBuilder.buildSparseNodeMapping(
             hugeLongArray,
+            hugeLongArray.size(),
             nodeId,
             1,
             AllocationTracker.EMPTY

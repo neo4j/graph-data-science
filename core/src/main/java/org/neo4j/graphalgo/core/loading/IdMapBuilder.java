@@ -59,13 +59,14 @@ public final class IdMapBuilder {
 
         HugeLongArray graphIds = idMapBuilder.build();
 
-        SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
+        SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, idMapBuilder.size(), highestNodeId, concurrency, tracker);
         return new IdMap(graphIds, nodeToGraphIds, maybeLabelInformation, idMapBuilder.size());
     }
 
     @NotNull
     static SparseNodeMapping buildSparseNodeMapping(
         HugeLongArray graphIds,
+        long nodeCount,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
@@ -73,7 +74,7 @@ public final class IdMapBuilder {
         SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId + 1, tracker);
         ParallelUtil.readParallel(
                 concurrency,
-                graphIds.size(),
+                nodeCount,
                 Pools.DEFAULT,
                 (start, end) -> {
                     try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), start, end)) {

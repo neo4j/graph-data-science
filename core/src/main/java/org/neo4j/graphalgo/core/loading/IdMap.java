@@ -135,6 +135,7 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
         SparseNodeMapping newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
             newGraphIds,
+            newGraphIds.size(),
             nodeToGraphIds.getCapacity(),
             concurrency,
             AllocationTracker.EMPTY

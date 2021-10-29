@@ -106,13 +106,15 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         Map<String, Integer> nodePropertyTokens = loadNodePropertyTokens(tokenRead);
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
+        // Every node will be counted once for every label it has.
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
             .sum();
-        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
+        final long highestPossibleNodeCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
+        // This is also an upper bound on the node count.
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
-            ? allNodesCount
-            : Math.min(nodeCount, allNodesCount);
+            ? highestPossibleNodeCount
+            : Math.min(nodeCount, highestPossibleNodeCount);
 
         // TODO: this will double count relationships between distinct labels
         Map<RelationshipType, Long> relationshipCounts = relationshipProjectionMappings
@@ -133,7 +135,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         return ImmutableGraphDimensions.builder()
                 .nodeCount(finalNodeCount)
-                .highestNeoId(allNodesCount)
+                .highestNeoId(highestPossibleNodeCount)
                 .maxRelCount(maxRelCount)
                 .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(labelTokenNodeLabelMappings.keys())

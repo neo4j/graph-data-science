@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 
 public class NodeFilteredGraphTest {
 
@@ -43,7 +45,7 @@ public class NodeFilteredGraphTest {
 
     private static final String DB_CYPHER =
         " CREATE" +
-        " (a:Person)," +
+        " (a:Person {name: 'Florentin'})," +
         " (b:Ignore:Person)," +
         " (c:Ignore:Person)," +
         " (d:Person)," +
@@ -62,7 +64,6 @@ public class NodeFilteredGraphTest {
         db.shutdown();
     }
 
-
     @Test
     void filterDegree() {
         GraphStore graphStore = new StoreLoaderBuilder()
@@ -79,8 +80,16 @@ public class NodeFilteredGraphTest {
             4
         );
 
-        long nodeIdOfA = graph.toMappedNodeId(0);
-        assertEquals(1L, graph.degree(nodeIdOfA));
+        String query = "MATCH(n {name: 'Florentin'}) " +
+                       "RETURN id(n) AS id";
+        MutableLong neoNodeIdForA = new MutableLong();
+
+        runQueryWithRowConsumer(db, query, row -> {
+            neoNodeIdForA.setValue(row.getNumber("id"));
+        });
+
+        long mappedNodeIdForA = graph.toMappedNodeId(neoNodeIdForA.getValue());
+        assertEquals(1L, graph.degree(mappedNodeIdForA));
     }
 
 }
