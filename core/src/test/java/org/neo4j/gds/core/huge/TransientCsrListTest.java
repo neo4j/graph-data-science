@@ -283,7 +283,7 @@ class TransientCsrListTest {
             relationshipsBuilder.add(sourceNodeId, target);
         }
         Relationships relationships = relationshipsBuilder.build();
-        var mappedNodeId = idMap.unsafeToMappedNodeId(sourceNodeId);
+        var mappedNodeId = idMap.toMappedNodeId(sourceNodeId);
         var adjacencyList = relationships.topology().adjacencyList();
         return adjacencyList.adjacencyCursor(mappedNodeId);
     }

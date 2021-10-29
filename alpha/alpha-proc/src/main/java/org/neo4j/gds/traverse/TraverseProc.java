@@ -115,7 +115,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                 validateStartNode(configuration.startNode(), graph);
                 configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
 
-                var mappedStartNodeId = graph.unsafeToMappedNodeId(configuration.startNode());
+                var mappedStartNodeId = graph.toMappedNodeId(configuration.startNode());
 
                 return isBfs
                     ? Traverse.bfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction)

@@ -190,7 +190,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readTargetId(Result.ResultRow row) {
         long neoTargetId = row.getNumber(TARGET_COLUMN).longValue();
         if (neoTargetId != lastNeoTargetId) {
-            targetId = nodeMapping.unsafeToMappedNodeId(neoTargetId);
+            targetId = nodeMapping.toMappedNodeId(neoTargetId);
             if (throwOnUnMappedNodeIds) {
                 validateTargetNodeIsLoaded(targetId, neoTargetId);
             }
@@ -201,7 +201,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readSourceId(Result.ResultRow row) {
         long neoSourceId = row.getNumber(SOURCE_COLUMN).longValue();
         if (neoSourceId != lastNeoSourceId) {
-            sourceId = nodeMapping.unsafeToMappedNodeId(neoSourceId);
+            sourceId = nodeMapping.toMappedNodeId(neoSourceId);
             if (throwOnUnMappedNodeIds) {
                 validateSourceNodeIsLoaded(sourceId, neoSourceId);
             }

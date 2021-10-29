@@ -123,8 +123,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
-        return first.unsafeToMappedNodeId(nodeId);
+    public long toMappedNodeId(long nodeId) {
+        return first.toMappedNodeId(nodeId);
     }
 
     @Override

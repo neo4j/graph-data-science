@@ -67,7 +67,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNodeId = (int) graph.unsafeToMappedNodeId(startNodeId);
+        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
     }
 
     @Override

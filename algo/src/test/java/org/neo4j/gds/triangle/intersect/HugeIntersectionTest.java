@@ -78,9 +78,9 @@ final class HugeIntersectionTest extends AlgoTestBase {
         INTERSECT = RelationshipIntersectFactoryLocator.lookup(graph)
             .orElseThrow(IllegalArgumentException::new)
             .load(graph, ImmutableRelationshipIntersectConfig.builder().build());
-        START1 = graph.unsafeToMappedNodeId(neoStarts[0]);
-        START2 = graph.unsafeToMappedNodeId(neoStarts[1]);
-        TARGETS = Arrays.stream(neoTargets).map(graph::unsafeToMappedNodeId).toArray();
+        START1 = graph.toMappedNodeId(neoStarts[0]);
+        START2 = graph.toMappedNodeId(neoStarts[1]);
+        TARGETS = Arrays.stream(neoTargets).map(graph::toMappedNodeId).toArray();
         Arrays.sort(TARGETS);
     }
 

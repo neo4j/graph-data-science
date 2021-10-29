@@ -87,7 +87,7 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = nodeMapping.unsafeToMappedNodeId(neoId);
+                    var mappedId = nodeMapping.toMappedNodeId(neoId);
                     if (mappedId == IdMapping.NOT_FOUND) {
                         continue;
                     }

@@ -44,8 +44,8 @@ public abstract class NodeMappingAdapter implements NodeMapping {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
-        return nodeMapping.unsafeToMappedNodeId(nodeId);
+    public long toMappedNodeId(long nodeId) {
+        return nodeMapping.toMappedNodeId(nodeId);
     }
 
     @Override

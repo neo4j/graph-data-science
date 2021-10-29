@@ -78,8 +78,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
-        return graph.unsafeToMappedNodeId(nodeId);
+    public long toMappedNodeId(long nodeId) {
+        return graph.toMappedNodeId(nodeId);
     }
 
     @Override

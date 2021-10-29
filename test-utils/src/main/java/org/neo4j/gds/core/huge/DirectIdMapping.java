@@ -29,7 +29,7 @@ public final class DirectIdMapping implements IdMapping {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         return nodeId;
     }
 

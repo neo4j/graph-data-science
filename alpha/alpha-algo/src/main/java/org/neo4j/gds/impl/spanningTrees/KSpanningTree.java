@@ -62,7 +62,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.graph = graph;
         this.weights = weights;
         this.minMax = minMax;
-        this.startNodeId = (int) graph.unsafeToMappedNodeId(startNodeId);
+        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 
         this.k = k;
     }

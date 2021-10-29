@@ -99,7 +99,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         throw new NullGraphStore.NullGraphException();
     }
 

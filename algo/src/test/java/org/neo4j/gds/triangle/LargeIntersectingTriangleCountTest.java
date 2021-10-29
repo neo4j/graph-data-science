@@ -98,7 +98,7 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
     }
 
     private void assertTriangle(AtomicIntegerArray triangles) {
-        final int centerMapped = Math.toIntExact(graph.unsafeToMappedNodeId(centerId));
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
         for (int i = 0; i < triangles.length(); i++) {
             if (i == centerMapped) {
@@ -109,7 +109,7 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
     }
 
     private void assertTriangle(PagedAtomicIntegerArray triangles) {
-        final int centerMapped = Math.toIntExact(graph.unsafeToMappedNodeId(centerId));
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
         for (int i = 0; i < triangles.size(); i++) {
             if (i == centerMapped) {

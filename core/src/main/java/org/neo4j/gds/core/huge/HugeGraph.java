@@ -331,8 +331,8 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
-        return idMapping.unsafeToMappedNodeId(nodeId);
+    public long toMappedNodeId(long nodeId) {
+        return idMapping.toMappedNodeId(nodeId);
     }
 
     @Override

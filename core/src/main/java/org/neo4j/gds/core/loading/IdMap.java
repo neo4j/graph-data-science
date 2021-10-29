@@ -94,7 +94,7 @@ public class IdMap implements NodeMapping {
     }
 
     @Override
-    public long unsafeToMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         return nodeToGraphIds.get(nodeId);
     }
 

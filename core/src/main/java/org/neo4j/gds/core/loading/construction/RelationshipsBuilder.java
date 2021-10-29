@@ -86,21 +86,21 @@ public class RelationshipsBuilder {
     }
 
     public void add(long source, long target) {
-        addFromInternal(idMapping.unsafeToMappedNodeId(source), idMapping.unsafeToMappedNodeId(target));
+        addFromInternal(idMapping.toMappedNodeId(source), idMapping.toMappedNodeId(target));
     }
 
     public void add(long source, long target, double relationshipPropertyValue) {
         addFromInternal(
-            idMapping.unsafeToMappedNodeId(source),
-            idMapping.unsafeToMappedNodeId(target),
+            idMapping.toMappedNodeId(source),
+            idMapping.toMappedNodeId(target),
             relationshipPropertyValue
         );
     }
 
     public void add(long source, long target, double[] relationshipPropertyValues) {
         addFromInternal(
-            idMapping.unsafeToMappedNodeId(source),
-            idMapping.unsafeToMappedNodeId(target),
+            idMapping.toMappedNodeId(source),
+            idMapping.toMappedNodeId(target),
             relationshipPropertyValues
         );
     }

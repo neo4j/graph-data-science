@@ -110,7 +110,7 @@ class ClosenessCentralityTest {
         );
         algo.compute();
         algo.resultStream()
-            .forEach(r -> centrality[Math.toIntExact(graph.unsafeToMappedNodeId(r.nodeId))] = r.centrality);
+            .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }

@@ -170,7 +170,7 @@ final class NodesFilter {
                 filteredNodeCount,
                 concurrency,
                 filteredNode -> {
-                    var inputNode = inputMapping.unsafeToMappedNodeId(filteredNodeMapping.toOriginalNodeId(filteredNode));
+                    var inputNode = inputMapping.toMappedNodeId(filteredNodeMapping.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);
                     progressTracker.logProgress();
                 }

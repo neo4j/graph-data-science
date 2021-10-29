@@ -239,11 +239,11 @@ final class RelationshipsFilter {
         public void run() {
             partition.consume(node -> {
                 var neoSource = outputNodes.toOriginalNodeId(node);
-                var inputSource = inputNodes.unsafeToMappedNodeId(neoSource);
+                var inputSource = inputNodes.toMappedNodeId(neoSource);
 
                 relationshipIterator.forEachRelationship(inputSource, (source, target, properties) -> {
                     var neoTarget = inputNodes.toOriginalNodeId(target);
-                    var mappedTarget = outputNodes.unsafeToMappedNodeId(neoTarget);
+                    var mappedTarget = outputNodes.toMappedNodeId(neoTarget);
 
                     if (mappedTarget != NOT_FOUND) {
                         evaluationContext.init(relType.name, properties);

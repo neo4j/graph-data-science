@@ -77,7 +77,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     public ShortestPathDeltaStepping(Graph graph, long startNode, double delta, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
-        this.startNode = Math.toIntExact(graph.unsafeToMappedNodeId(startNode));
+        this.startNode = Math.toIntExact(graph.toMappedNodeId(startNode));
         this.delta = delta;
         this.iDelta = Math.toIntExact(Math.round(multiplier * delta));
         if (iDelta <= 0) {
