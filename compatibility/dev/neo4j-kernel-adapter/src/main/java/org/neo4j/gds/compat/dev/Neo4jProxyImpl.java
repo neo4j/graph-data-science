@@ -248,12 +248,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
         }
 
+        long nodeCount = Arrays.stream(labelIds).mapToLong(read::countsForNode).sum();
+        int labelCount = labelIds.length;
+        int maxPartitionSize = Math.floorDiv(batchSize, labelCount);
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, maxPartitionSize);
+
         return Arrays
             .stream(labelIds)
             .mapToObj(labelId -> {
-                long nodeCount = read.countsForNode(labelId);
-                int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, batchSize);
-
                 PartitionedScan<NodeLabelIndexCursor> partitionedScan;
 
                 try {
