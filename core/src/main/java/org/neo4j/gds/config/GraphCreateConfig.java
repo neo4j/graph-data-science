@@ -96,7 +96,9 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Check
     default void validateReadConcurrency() {
-        ConcurrencyValidatorService.validator().validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+        ConcurrencyValidatorService
+            .validator()
+            .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
     @Configuration.Ignore
