@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class PipelineInfoResult {
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, TrainingPipeline info) {
+    PipelineInfoResult(String pipelineName, LinkPredictionPipeline info) {
         this.name = pipelineName;
         this.nodePropertySteps = info
             .nodePropertySteps()

@@ -43,12 +43,12 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainMutateProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainFactory;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +215,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                 .randomSeed(42L)
                 .build();
 
-            TrainingPipeline pipeline = new TrainingPipeline();
+            LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
             pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
             pipeline.addNodePropertyStep(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
             pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree", "pr")));

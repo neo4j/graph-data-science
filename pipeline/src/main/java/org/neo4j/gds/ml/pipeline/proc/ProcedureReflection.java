@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
+package org.neo4j.gds.ml.pipeline.proc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
@@ -70,15 +70,15 @@ public final class ProcedureReflection {
 
     private List<Method> findProcedureMethodsByName(String shortName) {
         return procedureMethods
-                .stream()
-                .filter(method -> {
-                    if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) {
-                        return false;
-                    }
+            .stream()
+            .filter(method -> {
+                if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) {
+                    return false;
+                }
 
-                    return validShortName(procedureName(method), shortName);
-                })
-                .collect(Collectors.toList());
+                return validShortName(procedureName(method), shortName);
+            })
+            .collect(Collectors.toList());
     }
 
     private static boolean validShortName(String fullName, String shortName) {

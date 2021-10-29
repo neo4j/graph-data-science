@@ -26,6 +26,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.louvain.LouvainMutateProc;
+import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 
 import java.util.Map;
 

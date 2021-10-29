@@ -22,7 +22,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -83,14 +85,14 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
     ) {
         var pipeline = getPipelineModelInfo(pipelineName, username());
 
-        pipeline.addFeatureStep(featureType, config);
+        pipeline.addFeatureStep(LinkFeatureStepFactory.create(featureType, config));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
 
     // check if adding would result in more than one relationshipWeightProperty
     private void validateRelationshipProperty(
-        TrainingPipeline pipeline,
+        LinkPredictionPipeline pipeline,
         Map<String, Object> procedureConfig
     ) {
         if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;

@@ -40,11 +40,11 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.linkmodels.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
 import java.util.List;
@@ -93,7 +93,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"1, 42, 1", "2, 97, 2"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, long ranIterations) {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
@@ -171,7 +171,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
     @Test
     void shouldPredictTwice() {
-        var pipeline = new TrainingPipeline();
+        var pipeline = new LinkPredictionPipeline();
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
 

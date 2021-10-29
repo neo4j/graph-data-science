@@ -30,6 +30,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainStreamProc;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
