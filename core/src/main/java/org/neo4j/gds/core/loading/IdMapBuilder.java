@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -106,7 +106,7 @@ public final class IdMapBuilder {
         AllocationTracker allocationTracker
     ) {
         HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.builder(
-            NodeMapping.NOT_FOUND,
+            IdMapping.NOT_FOUND,
             // We need to allocate space for `highestNode + 1` since we
             // need to be able to store a node with `id = highestNodeId`.
             highestNodeId + 1,

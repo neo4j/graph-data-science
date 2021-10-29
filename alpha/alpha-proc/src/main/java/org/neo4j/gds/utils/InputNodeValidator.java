@@ -20,7 +20,7 @@
 package org.neo4j.gds.utils;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -35,7 +35,7 @@ public final class InputNodeValidator {
     }
 
     private static void validateNodeIsLoaded(long nodeId, long mappedId, String nodeDescription) throws IllegalArgumentException {
-        if (mappedId == NodeMapping.NOT_FOUND) {
+        if (mappedId == IdMapping.NOT_FOUND) {
             throw new IllegalArgumentException(formatWithLocale(
                 "%s with id %d was not loaded",
                 nodeDescription,

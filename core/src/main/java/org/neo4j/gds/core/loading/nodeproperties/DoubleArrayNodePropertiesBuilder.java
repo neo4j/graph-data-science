@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
@@ -90,7 +91,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
                     var mappedId = nodeMapping.unsafeToMappedNodeId(neoId);
-                    if (mappedId == NodeMapping.NOT_FOUND) {
+                    if (mappedId == IdMapping.NOT_FOUND) {
                         continue;
                     }
                     var value = page[pageIndex];
