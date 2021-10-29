@@ -345,6 +345,8 @@ class KnnTest {
                 .deltaThreshold(0)
                 .topK(1)
                 .maxIterations(1)
+                .randomSeed(42L)
+                .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
             var knn = new Knn(graph, config, knnContext);
