@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
@@ -28,8 +30,6 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.operations.DoubleMatrixOperations;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] data = new double[nodeIds.length * projectedFeatureDimension];
+        var result = new Matrix(nodeIds.length, projectedFeatureDimension);
         IntStream.range(0, nodeIds.length).forEach(i -> {
             long nodeId = nodeIds[i];
             NodeLabel label = labels[i];
@@ -68,45 +68,39 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
             double[] nodeFeatures = features.get(nodeId);
 
             DMatrix1Row wrappedWeights = DMatrixRMaj.wrap(
-                weights.dimension(0),
-                weights.dimension(1),
+                weights.dimension(Dimensions.ROWS_INDEX),
+                weights.dimension(Dimensions.COLUMNS_INDEX),
                 weights.data().data()
             );
-            DMatrixRMaj wrappedNodeFeatures = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
-            DMatrixRMaj product = new DMatrixRMaj(weights.dimension(0), 1);
-            DoubleMatrixOperations.multTransB(wrappedWeights, wrappedNodeFeatures, product, index -> (index < projectedFeatureDimension));
-            System.arraycopy(
-                product.getData(),
-                0,
-                data,
-                i * projectedFeatureDimension,
-                projectedFeatureDimension
-            );
+            var wrappedNodeFeatureVector = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
+            var productVector = new DMatrixRMaj(weights.dimension(0), 1);
+            DoubleMatrixOperations.multTransB(wrappedWeights, wrappedNodeFeatureVector, productVector, index -> (index < projectedFeatureDimension));
+            result.setRow(i, productVector.data);
         });
-        return new Matrix(data, nodeIds.length, projectedFeatureDimension);
+        return result;
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        double[] thisGradient = ctx.gradient(this).data();
-        int rows = parent.dimension(0);
-        int cols = parent.dimension(1);
+        var thisGradient = ctx.gradient(this);
+        int rows = parent.dimension(Dimensions.ROWS_INDEX);
+        int cols = parent.dimension(Dimensions.COLUMNS_INDEX);
         double[] gradientData = new double[rows * cols];
 
-        IntStream.range(0, nodeIds.length).forEach(i -> {
-            long nodeId = nodeIds[i];
-            NodeLabel label = labels[i];
+        IntStream.range(0, nodeIds.length).forEach(batchIdx -> {
+            long nodeId = nodeIds[batchIdx];
+            NodeLabel label = labels[batchIdx];
             Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
 
             if (weights == parent) {
                 // perform outer product between nodeFeatures and portion thisGradient corresponding to the node
                 // row is a projected feature
                 // col is a non-projected feature
-
                 double[] nodeFeatures = features.get(nodeId);
                 for (int row = 0; row < rows; row++) {
+                    double nodeFeatureGradient = thisGradient.dataAt(batchIdx, row);
                     for (int col = 0; col < cols; col++) {
-                        gradientData[row * cols + col] += nodeFeatures[col] * thisGradient[i * dimension(1) + row];
+                        gradientData[row * cols + col] += nodeFeatures[col] * nodeFeatureGradient;
                     }
                 }
             }
