@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -85,7 +85,7 @@ public class StratifiedKFoldSplitter {
         this.random = createRandomDataGenerator(randomSeed);
     }
 
-    public List<NodeSplit> splits() {
+    public List<TrainingExamplesSplit> splits() {
         var distinctClasses = distinctClasses();
 
         var nodeCount = ids.size();
@@ -119,7 +119,7 @@ public class StratifiedKFoldSplitter {
             .mapToObj(fold -> {
                 ShuffleUtil.shuffleHugeLongArray(trainSets[fold], random);
                 ShuffleUtil.shuffleHugeLongArray(testSets[fold], random);
-                return NodeSplit.of(trainSets[fold], testSets[fold]);
+                return TrainingExamplesSplit.of(trainSets[fold], testSets[fold]);
             })
             .collect(Collectors.toList());
     }

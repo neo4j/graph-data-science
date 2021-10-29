@@ -44,8 +44,8 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
+import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -193,10 +193,10 @@ public class LinkPredictionTrain
                 modelParams,
                 pipeline.splitConfig().validationFolds()
             );
-            for (NodeSplit split : validationSplits) {
+            for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
-                var trainSet = split.trainSet();
-                var validationSet = split.testSet();
+                var trainSet = relSplit.trainSet();
+                var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
                 var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
 
@@ -263,7 +263,7 @@ public class LinkPredictionTrain
     }
 
 
-    private List<NodeSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
+    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
         var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
         globalTargets.setAll(i -> (long) actualTargets.get(i));
         var splitter = new StratifiedKFoldSplitter(

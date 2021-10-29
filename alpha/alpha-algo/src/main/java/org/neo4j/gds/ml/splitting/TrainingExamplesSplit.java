@@ -23,11 +23,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 @ValueClass
-public interface NodeSplit {
+public interface TrainingExamplesSplit {
     HugeLongArray trainSet();
     HugeLongArray testSet();
 
-    static NodeSplit of(HugeLongArray trainSet, HugeLongArray testSet) {
-        return ImmutableNodeSplit.of(trainSet, testSet);
+    static TrainingExamplesSplit of(HugeLongArray trainSet, HugeLongArray testSet) {
+        return ImmutableTrainingExamplesSplit.of(trainSet, testSet);
     }
 }

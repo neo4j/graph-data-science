@@ -39,8 +39,8 @@ import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
+import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.ArrayList;
@@ -167,7 +167,7 @@ public class LinkPredictionTrain
     }
 
     private ModelSelectResult modelSelect(HugeLongArray allNodeIds) {
-        var splits = trainValidationSplits(allNodeIds);
+        var nodeSplits = trainValidationSplits(allNodeIds);
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
@@ -181,10 +181,10 @@ public class LinkPredictionTrain
                 modelParams,
                 config.validationFolds()
             );
-            for (NodeSplit split : splits) {
+            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 // 3. train each model candidate on the train sets
-                var trainSet = split.trainSet();
-                var validationSet = split.testSet();
+                var trainSet = nodeSplit.trainSet();
+                var validationSet = nodeSplit.testSet();
                 // we use a less fine grained progress logging for LP than for NC
                 var modelData = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
                 var predictor = predictor(modelData, trainExtractors);
@@ -210,7 +210,7 @@ public class LinkPredictionTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private List<NodeSplit> trainValidationSplits(HugeLongArray allNodeIds) {
+    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray allNodeIds) {
         var globalTargets = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
         globalTargets.setAll(i -> 0L);
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), allNodeIds, globalTargets, config.randomSeed());

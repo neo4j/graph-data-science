@@ -41,8 +41,8 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
-import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
+import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
@@ -236,18 +236,18 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         return createModel(bestParameters, metricResults, retrainedModelData);
     }
 
-    private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
+    private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
         for (NodeLogisticRegressionTrainConfig modelParams : config.paramsConfig()) {
             progressTracker.beginSubTask();
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
+            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
-            for (NodeSplit split : splits) {
+            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 progressTracker.beginSubTask();
 
-                var trainSet = split.trainSet();
-                var validationSet = split.testSet();
+                var trainSet = nodeSplit.trainSet();
+                var validationSet = nodeSplit.testSet();
 
                 progressTracker.beginSubTask("Training");
                 var modelData = trainModel(trainSet, modelParams);
@@ -276,7 +276,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     }
 
     private Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> evaluateBestModel(
-        NodeSplit outerSplit,
+        TrainingExamplesSplit outerSplit,
         ModelSelectResult modelSelectResult,
         NodeLogisticRegressionTrainConfig bestParameters
     ) {

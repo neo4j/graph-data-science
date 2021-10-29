@@ -45,12 +45,12 @@ public class FractionSplitter {
         this.allocationTracker = allocationTracker;
     }
 
-    public NodeSplit split(HugeLongArray ids, double trainFraction) {
+    public TrainingExamplesSplit split(HugeLongArray ids, double trainFraction) {
         long trainSize = trainSize(ids.size(), trainFraction);
         long testSize = ids.size() - trainSize;
         var train = initHLA(trainSize, ids::get);
         var test = initHLA(testSize, i -> ids.get(i + trainSize));
-        return NodeSplit.of(train, test);
+        return TrainingExamplesSplit.of(train, test);
     }
 
     private HugeLongArray initHLA(long size, Function<Long, Long> transform) {
