@@ -77,29 +77,28 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         var originalNodeIdsBatch = new MappedBatch(batch, nodeIds);
         var probabilityMatrix = predictor.predict(graph, originalNodeIdsBatch);
         var numberOfClasses = probabilityMatrix.cols();
-        var probabilities = probabilityMatrix.data();
         var currentRow = 0;
         for (long nodeIndex : batch.nodeIds()) {
-            var offset = currentRow * numberOfClasses;
             if (predictedProbabilities != null) {
-                var probabilitiesForNode = new double[numberOfClasses];
-                System.arraycopy(probabilities, offset, probabilitiesForNode, 0, numberOfClasses);
-                predictedProbabilities.set(nodeIndex, probabilitiesForNode);
+                predictedProbabilities.set(nodeIndex, probabilityMatrix.getRow(currentRow));
             }
             var bestClassId = -1;
             var maxProbability = -1d;
+
+            // TODO: replace with a generic DoubleMatrixOperations.maxWithIndex (lookup correct name)
             for (int classId = 0; classId < numberOfClasses; classId++) {
-                var probability = probabilities[offset + classId];
+                var probability = probabilityMatrix.dataAt(currentRow, classId);
                 if (probability > maxProbability) {
                     maxProbability = probability;
                     bestClassId = classId;
                 }
             }
+
             if (bestClassId == -1) {
                 // TODO: Fail training if weights are NaN
                 fail(nodeIds.apply(nodeIndex));
             }
-            var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
+            long bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
             predictedClasses.set(nodeIndex, bestClass);
             currentRow++;
         }
