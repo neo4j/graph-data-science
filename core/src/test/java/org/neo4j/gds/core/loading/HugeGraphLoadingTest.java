@@ -36,7 +36,9 @@ import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -259,5 +261,35 @@ final class HugeGraphLoadingTest extends BaseTest {
         assertTrue(graphStore
             .getGraph(RelationshipType.of("TYPE_SINGLE"), RelationshipType.of("TYPE_PROP_SINGLE"))
             .isMultiGraph());
+    }
+
+    @Test
+    void testLargeLabeledGraph() {
+        int nodeCount = 150_000;
+
+        var labelA = Label.label("A");
+        var labelB = Label.label("B");
+        var labelC = Label.label("C");
+
+        var rand = ThreadLocalRandom.current();
+
+        runInTransaction(db, tx -> {
+            for (int i = 0; i < nodeCount; i++) {
+                var p = rand.nextDouble();
+                var label = (p < 1.0 / 3) ? labelA : (p < 2.0 / 3) ? labelB : labelC;
+                tx.createNode(label);
+            }
+        });
+
+        var graphStore = new StoreLoaderBuilder()
+            .addNodeLabel("A")
+            .addNodeLabel("B")
+            .addNodeLabel("C")
+            .concurrency(1)
+            .api(db)
+            .build()
+            .graphStore();
+
+        assertThat(graphStore.nodeCount()).isEqualTo(nodeCount);
     }
 }
