@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -139,6 +140,11 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
     int batchSize() {
         // We want to scan about 100 pages per bulk, so start with that value
         var bulkSize = prefetchSize * recordsPerPage();
+
+        // When initializing cursors using a scan, kernel might align the given
+        // batch size by 64. Since we use the batch size to allocate our buffers,
+        // we always align.
+        bulkSize = (int) BitUtil.align(bulkSize, 64);
 
         // The label scan cursor on Neo4j <= 4.1 has a bug where it would add 64 to the bulks size
         // even if the value is already divisible by 64. (#6156)
