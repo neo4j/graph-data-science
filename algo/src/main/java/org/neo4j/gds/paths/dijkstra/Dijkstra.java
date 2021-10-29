@@ -82,8 +82,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         ProgressTracker progressTracker,
         AllocationTracker allocationTracker
     ) {
-        long sourceNode = graph.toMappedNodeId(config.sourceNode());
-        long targetNode = graph.toMappedNodeId(config.targetNode());
+        long sourceNode = graph.unsafeToMappedNodeId(config.sourceNode());
+        long targetNode = graph.unsafeToMappedNodeId(config.targetNode());
 
         return new Dijkstra(
             graph,
@@ -107,7 +107,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         AllocationTracker allocationTracker
     ) {
         return new Dijkstra(graph,
-            graph.toMappedNodeId(config.sourceNode()),
+            graph.unsafeToMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
             heuristicFunction,

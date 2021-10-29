@@ -21,9 +21,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Collection;
 import java.util.Set;
@@ -78,8 +78,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return graph.toMappedNodeId(nodeId);
+    public long unsafeToMappedNodeId(long nodeId) {
+        return graph.unsafeToMappedNodeId(nodeId);
     }
 
     @Override

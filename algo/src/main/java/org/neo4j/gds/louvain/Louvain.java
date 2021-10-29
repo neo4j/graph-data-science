@@ -139,7 +139,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ParallelUtil.parallelForEachNode(rootGraph, config.concurrency(), (nodeId) -> {
             long prevId = level == 0
                 ? nodeId
-                : workingGraph.toMappedNodeId(dendrograms[level - 1].get(nodeId));
+                : workingGraph.unsafeToMappedNodeId(dendrograms[level - 1].get(nodeId));
 
             long communityId = modularityOptimization.getCommunityId(prevId);
 

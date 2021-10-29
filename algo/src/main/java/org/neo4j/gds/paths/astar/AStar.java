@@ -69,7 +69,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
 
         var latitudeProperties = graph.nodeProperties(latitudeProperty);
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
-        var targetNode = graph.toMappedNodeId(config.targetNode());
+        var targetNode = graph.unsafeToMappedNodeId(config.targetNode());
 
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, allocationTracker);
 

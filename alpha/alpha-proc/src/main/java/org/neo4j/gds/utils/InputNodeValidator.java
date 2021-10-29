@@ -20,21 +20,22 @@
 package org.neo4j.gds.utils;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class InputNodeValidator {
 
     public static void validateStartNode(long nodeId, Graph graph) throws IllegalArgumentException {
-        validateNodeIsLoaded(nodeId, graph.toMappedNodeId(nodeId), "startNode");
+        validateNodeIsLoaded(nodeId, graph.safeToMappedNodeId(nodeId), "startNode");
     }
 
     public static void validateEndNode(long nodeId, Graph graph) throws IllegalArgumentException {
-        validateNodeIsLoaded(nodeId, graph.toMappedNodeId(nodeId), "endNode");
+        validateNodeIsLoaded(nodeId, graph.safeToMappedNodeId(nodeId), "endNode");
     }
 
     private static void validateNodeIsLoaded(long nodeId, long mappedId, String nodeDescription) throws IllegalArgumentException {
-        if (mappedId == -1) {
+        if (mappedId == NodeMapping.NOT_FOUND) {
             throw new IllegalArgumentException(formatWithLocale(
                 "%s with id %d was not loaded",
                 nodeDescription,

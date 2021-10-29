@@ -46,9 +46,9 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
         wrappedRelationshipIntersect.intersectAll(nodeIdA, (a, b, c) -> {
             if (filteredGraph.contains(a) && filteredGraph.contains(b) && filteredGraph.contains(c)) {
                 consumer.accept(
-                    filteredGraph.toMappedNodeId(a),
-                    filteredGraph.toMappedNodeId(b),
-                    filteredGraph.toMappedNodeId(c)
+                    filteredGraph.unsafeToMappedNodeId(a),
+                    filteredGraph.unsafeToMappedNodeId(b),
+                    filteredGraph.unsafeToMappedNodeId(c)
                 );
             }
         });

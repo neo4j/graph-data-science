@@ -156,8 +156,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public long toMappedNodeId(long neoNodeId) {
-        return filteredIdMap.toMappedNodeId(super.toMappedNodeId(neoNodeId));
+    public long unsafeToMappedNodeId(long neoNodeId) {
+        return filteredIdMap.unsafeToMappedNodeId(super.unsafeToMappedNodeId(neoNodeId));
     }
 
     @Override
@@ -193,7 +193,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     public long getFilteredMappedNodeId(long nodeId) {
-        return filteredIdMap.toMappedNodeId(nodeId);
+        return filteredIdMap.unsafeToMappedNodeId(nodeId);
     }
 
     public long getIntermediateOriginalNodeId(long nodeId) {
@@ -251,8 +251,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
         if (filteredIdMap.contains(source) && filteredIdMap.contains(target)) {
-            long internalSourceId = filteredIdMap.toMappedNodeId(source);
-            long internalTargetId = filteredIdMap.toMappedNodeId(target);
+            long internalSourceId = filteredIdMap.unsafeToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.unsafeToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId);
         }
         return true;
@@ -260,8 +260,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
         if (filteredIdMap.contains(source) && filteredIdMap.contains(target)) {
-            long internalSourceId = filteredIdMap.toMappedNodeId(source);
-            long internalTargetId = filteredIdMap.toMappedNodeId(target);
+            long internalSourceId = filteredIdMap.unsafeToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.unsafeToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return true;

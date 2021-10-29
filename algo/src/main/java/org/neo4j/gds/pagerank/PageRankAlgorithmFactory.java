@@ -96,7 +96,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
         configuration.sourceNodes().stream()
-            .mapToLong(graph::toMappedNodeId)
+            .mapToLong(graph::unsafeToMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
         if (mode == ARTICLE_RANK) {

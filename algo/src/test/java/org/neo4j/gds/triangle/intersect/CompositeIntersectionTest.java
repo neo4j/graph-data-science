@@ -80,9 +80,9 @@ final class CompositeIntersectionTest extends AlgoTestBase {
             .build()
             .graph());
 
-        START1 = GRAPH.toMappedNodeId(neoStarts[0]);
-        START2 = GRAPH.toMappedNodeId(neoStarts[1]);
-        TARGETS = Arrays.stream(neoTargets).map(GRAPH::toMappedNodeId).toArray();
+        START1 = GRAPH.unsafeToMappedNodeId(neoStarts[0]);
+        START2 = GRAPH.unsafeToMappedNodeId(neoStarts[1]);
+        TARGETS = Arrays.stream(neoTargets).map(GRAPH::unsafeToMappedNodeId).toArray();
         Arrays.sort(TARGETS);
     }
 

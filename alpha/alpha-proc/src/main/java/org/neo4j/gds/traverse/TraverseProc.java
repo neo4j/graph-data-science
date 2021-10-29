@@ -98,7 +98,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                 // target node given; terminate if target is reached
                 if (!configuration.targetNodes().isEmpty()) {
                     List<Long> mappedTargets = configuration.targetNodes().stream()
-                        .map(graph::toMappedNodeId)
+                        .map(graph::safeToMappedNodeId)
                         .collect(Collectors.toList());
                     exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> .0;
@@ -113,9 +113,9 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                 }
 
                 validateStartNode(configuration.startNode(), graph);
-                configuration.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
+                configuration.targetNodes().forEach(neoId -> validateEndNode(neoId, graph));
 
-                var mappedStartNodeId = graph.toMappedNodeId(configuration.startNode());
+                var mappedStartNodeId = graph.unsafeToMappedNodeId(configuration.startNode());
 
                 return isBfs
                     ? Traverse.bfs(graph, mappedStartNodeId, exitFunction, aggregatorFunction)

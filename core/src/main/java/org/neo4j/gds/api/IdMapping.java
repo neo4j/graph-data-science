@@ -32,8 +32,19 @@ public interface IdMapping {
 
     /**
      * Map original nodeId to inner nodeId
+     *
+     * @param nodeId must be smaller or equal to highestNeoId
      */
-    long toMappedNodeId(long nodeId);
+    long unsafeToMappedNodeId(long nodeId);
+
+    /**
+     * Map original nodeId to inner nodeId
+     *
+     * Returns org.neo4j.gds.api.IdMapping#NOT_FOUND if the nodeId is not mapped.
+     */
+    default long safeToMappedNodeId(long nodeId) {
+        return highestNeoId() < nodeId ? NodeMapping.NOT_FOUND : unsafeToMappedNodeId(nodeId);
+    };
 
     /**
      * Map inner nodeId back to original nodeId

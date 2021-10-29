@@ -44,7 +44,7 @@ public class TestGraph extends CSRGraphAdapter {
     }
 
     public long toMappedNodeId(String variable) {
-        return graph.toMappedNodeId(idFunction.of(variable));
+        return graph.unsafeToMappedNodeId(idFunction.of(variable));
     }
 
     @Override

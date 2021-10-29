@@ -86,7 +86,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
             assertTrue(nodeIds.remove(graph.toOriginalNodeId(nodeId)));
             assertEquals(
                 nodeId,
-                graph.toMappedNodeId(graph.toOriginalNodeId(nodeId))
+                graph.unsafeToMappedNodeId(graph.toOriginalNodeId(nodeId))
             );
             return true;
         });
@@ -141,7 +141,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
             runInTransaction(db, tx -> {
                 tx.findNodes(Label.label("Label2"))
                     .stream().forEach(n -> {
-                    long graphId = sparseGraph.nodes().toMappedNodeId(n.getId());
+                    long graphId = sparseGraph.nodes().unsafeToMappedNodeId(n.getId());
                     assertNotEquals(-1, graphId, n + " not mapped");
                     long neoId = sparseGraph.nodes().toOriginalNodeId(graphId);
                     assertEquals(n.getId(), neoId, n + " mapped wrongly");

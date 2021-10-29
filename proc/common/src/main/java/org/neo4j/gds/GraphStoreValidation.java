@@ -141,7 +141,7 @@ public final class GraphStoreValidation {
     private static void validateSourceNode(GraphStore graphStore, SourceNodeConfig config) {
         var sourceNodeId = config.sourceNode();
 
-        if (graphStore.nodes().toMappedNodeId(sourceNodeId) == NodeMapping.NOT_FOUND) {
+        if (graphStore.nodes().safeToMappedNodeId(sourceNodeId) == NodeMapping.NOT_FOUND) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Source node does not exist in the in-memory graph: `%d`",
                 sourceNodeId
@@ -152,7 +152,7 @@ public final class GraphStoreValidation {
     private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config) {
         var nodeMapping = graphStore.nodes();
         var missingNodes = config.sourceNodes().stream()
-            .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
+            .filter(nodeId -> nodeMapping.safeToMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
             .map(Object::toString)
             .collect(Collectors.toList());
 
@@ -167,7 +167,7 @@ public final class GraphStoreValidation {
     private static void validateTargetNode(GraphStore graphStore, TargetNodeConfig config) {
         var targetNodeId = config.targetNode();
 
-        if (graphStore.nodes().toMappedNodeId(targetNodeId) == NodeMapping.NOT_FOUND) {
+        if (graphStore.nodes().safeToMappedNodeId(targetNodeId) == NodeMapping.NOT_FOUND) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Target node does not exist in the in-memory graph: `%d`",
                 targetNodeId

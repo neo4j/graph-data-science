@@ -238,7 +238,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var node = indexCursor.nodeReference();
-                var nodeId = idMap.toMappedNodeId(node);
+                var nodeId = idMap.unsafeToMappedNodeId(node);
                 if (nodeId >= 0) {
                     var propertyValue = indexCursor.propertyValue(propertyOffset);
                     var number = ((NumberValue) propertyValue).doubleValue();
@@ -255,7 +255,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var neoNodeId = indexCursor.nodeReference();
-                var nodeId = idMap.toMappedNodeId(neoNodeId);
+                var nodeId = idMap.unsafeToMappedNodeId(neoNodeId);
                 if (nodeId >= 0) {
                     var propertyValue = indexCursor.propertyValue(propertyOffset);
                     propertiesBuilder.set(neoNodeId, propertyValue);

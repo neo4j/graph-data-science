@@ -89,7 +89,7 @@ public class NodePropertyFunc {
             }
         }
 
-        long internalId = graphStore.nodes().toMappedNodeId(nodeId.longValue());
+        long internalId = graphStore.nodes().safeToMappedNodeId(nodeId.longValue());
 
         if (internalId == -1) {
             throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", nodeId.longValue()));

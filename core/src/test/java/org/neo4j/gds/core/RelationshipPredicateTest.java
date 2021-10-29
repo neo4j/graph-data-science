@@ -73,38 +73,38 @@ class RelationshipPredicateTest extends BaseTest {
 
         // A -> B
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // B -> A
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
 
         // B -> C
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
 
         // C -> B
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // C -> A
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
 
         // A -> C
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
     }
 
@@ -119,39 +119,39 @@ class RelationshipPredicateTest extends BaseTest {
 
         // B <- A
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
 
         // A <- B
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // C <- B
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // B <- C
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
 
 
         // A <- C
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
 
         // C <- A
         assertFalse(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
     }
 
@@ -166,39 +166,39 @@ class RelationshipPredicateTest extends BaseTest {
 
         // A -> B
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // B -> A
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
 
 
         // B -> C
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeB),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeB),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
 
         // C -> B
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeB)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeB)
         ));
 
         // C -> A
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeC),
-                graph.toMappedNodeId(nodeA)
+                graph.unsafeToMappedNodeId(nodeC),
+                graph.unsafeToMappedNodeId(nodeA)
         ));
 
         // A -> C
         assertTrue(graph.exists(
-                graph.toMappedNodeId(nodeA),
-                graph.toMappedNodeId(nodeC)
+                graph.unsafeToMappedNodeId(nodeA),
+                graph.unsafeToMappedNodeId(nodeC)
         ));
     }
 
