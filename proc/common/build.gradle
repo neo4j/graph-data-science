@@ -19,9 +19,9 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':algo-common')
-//    implementation project(':concurrency-validation-api')
     implementation project(':core')
     implementation project(':licensing')
+    implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
     implementation project(':pregel')

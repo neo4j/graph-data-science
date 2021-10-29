@@ -17,7 +17,6 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':core')
-    implementation project(':licensing')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
     implementation project(':transaction')

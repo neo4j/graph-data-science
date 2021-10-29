@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.concurrency;
 
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.LicenseState;
 
+@ServiceProvider
 public class OpenGdsPoolSizesProvider implements PoolSizesProvider {
     @Override
     public PoolSizes get(LicenseState licenseState) {
