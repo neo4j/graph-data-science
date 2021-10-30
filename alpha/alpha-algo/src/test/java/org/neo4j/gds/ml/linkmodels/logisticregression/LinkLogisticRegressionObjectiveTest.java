@@ -19,18 +19,17 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
 
@@ -77,7 +76,7 @@ class LinkLogisticRegressionObjectiveTest {
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
         // zero penalty since weights are zero
-        Assertions.assertThat(lossValue).isEqualTo(-Math.log(0.5));
+        assertThat(lossValue).isEqualTo(-Math.log(0.5));
     }
 
     @Test
@@ -89,16 +88,16 @@ class LinkLogisticRegressionObjectiveTest {
             featureProperties,
             LinkFeatureCombiners.L2
         );
+
+        // "injecting" non-zero values for the weights of the model
+        var weights = data.weights();
+        var backingArray = weights.data();
+        backingArray.setRow(0, new double[] {0.2, -0.3, 0.5});
+
         var objective = new LinkLogisticRegressionObjective(data, extractors, 1.0, graph);
-        // we proceed to "injecting" non-zero values for the weights of the model
-        var weights = objective.weights();
-        var backingArray = weights.get(0).data().data();
-        backingArray[0] = 0.2;
-        backingArray[1] = -0.3;
-        backingArray[2] = 0.5;
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
+
         var ctx = new ComputationContext();
-        var lossValue = ctx.forward(loss).value();
 
         var pred = new double[]{
             sigmoid(0.2 * 0.49 - 0.3 * 0.49 + 0.5),
@@ -108,7 +107,9 @@ class LinkLogisticRegressionObjectiveTest {
         };
         var expectedTotalCEL = -Math.log(pred[0]) - Math.log(1 - pred[1]) - Math.log(1 - pred[2]) - Math.log(pred[3]);
         var expectedPenalty = Math.pow(0.2, 2) + Math.pow(0.3, 2);
-        Assertions.assertThat(lossValue).isCloseTo(expectedPenalty + expectedTotalCEL/4, Offset.offset(1e-7));
+
+        assertThat(ctx.forward(loss).value())
+            .isCloseTo(expectedPenalty + expectedTotalCEL / 4, Offset.offset(1e-7));
     }
 
     @Test
