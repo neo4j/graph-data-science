@@ -72,7 +72,7 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
 
         var length = parentData.totalSize();
         double[] grad = new double[length];
-        double scale = ctx.gradient(this).data()[0] / length;
+        double scale = ctx.gradient(this).dataAt(0) / length;
         for (int i = 0; i < length; i++) {
             grad[i] = scale * 2 * (parentData.dataAt(i) - otherParentData.dataAt(i));
         }
