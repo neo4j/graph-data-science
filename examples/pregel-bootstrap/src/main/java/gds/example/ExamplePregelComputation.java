@@ -64,12 +64,11 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     public interface ExampleConfig extends PregelProcedureConfig {
 
         static ExamplePregelComputation.ExampleConfig of(
-                String username,
                 Optional<String> graphName,
                 Optional<GraphCreateConfig> maybeImplicitCreate,
                 CypherMapWrapper userConfig
         ) {
-            return new ExampleConfigImpl(graphName, maybeImplicitCreate, username, userConfig);
+            return new ExampleConfigImpl(graphName, maybeImplicitCreate, userConfig);
         }
     }
 }
