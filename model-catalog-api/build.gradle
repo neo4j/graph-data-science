@@ -5,4 +5,19 @@ description = 'Neo4j Graph Data Science :: Model Catalog API'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
+
+    testImplementation platform(dep.junit5bom)
+    testImplementation dep.junit5jupiter
+    testImplementation dep.junit5migration
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
 }

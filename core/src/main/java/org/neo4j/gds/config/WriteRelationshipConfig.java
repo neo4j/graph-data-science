@@ -21,6 +21,7 @@ package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.StringIdentifierValidations;
 
 public interface WriteRelationshipConfig extends WriteConfig {
 

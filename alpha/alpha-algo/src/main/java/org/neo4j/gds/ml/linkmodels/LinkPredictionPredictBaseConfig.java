@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.model.ModelConfig;
 
 @ValueClass
 @Configuration

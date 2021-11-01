@@ -13,6 +13,7 @@ dependencies {
     implementation     project(':annotations')
     implementation     project(':config-api')
     implementation     project(':core')
+    implementation     project(':model-catalog-api')
     implementation     project(':proc-pregel')
     implementation     project(':string-formatting')
     implementation     project(':test-utils')

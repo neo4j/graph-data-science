@@ -28,6 +28,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':ml-core')
+    implementation project(':model-catalog-api')
     implementation project(':pregel')
     implementation project(':string-formatting')
 

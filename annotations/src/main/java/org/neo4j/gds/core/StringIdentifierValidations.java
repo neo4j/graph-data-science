@@ -17,20 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.core;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class StringIdentifierValidations {
     private static final Pattern TRAILING_WHITESPACES_PATTERN = Pattern.compile("(^\\s)|(\\s$)");
 
     public static @Nullable String validateNoWhiteCharacter(@Nullable String input, String paramterName) {
         if (input != null && TRAILING_WHITESPACES_PATTERN.matcher(input).find()) {
-            throw new IllegalArgumentException(formatWithLocale("`%s` must not end or begin with whitespace characters, but got `%s`.", paramterName, input));
+            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "`%s` must not end or begin with whitespace characters, but got `%s`.", paramterName, input));
         }
 
         return input;

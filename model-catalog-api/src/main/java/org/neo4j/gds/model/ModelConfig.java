@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.model;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.Username;
+import org.neo4j.gds.config.BaseConfig;
 
 import java.io.Serializable;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @Configuration
 public interface ModelConfig extends Serializable, BaseConfig {
@@ -43,7 +43,7 @@ public interface ModelConfig extends Serializable, BaseConfig {
     @Configuration.Parameter
     @Value.Default
     default String username() {
-        return Username.EMPTY_USERNAME.username();
+        return "";
     }
 
     static @Nullable String validateName(String input) {

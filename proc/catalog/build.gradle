@@ -20,6 +20,7 @@ dependencies {
     implementation project(':csv')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
+    implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')

@@ -44,6 +44,7 @@ ext {
         'bouncycastle'         : '1.68',
         'commons-compress'     : '1.19',
         'commons-io'           : '2.7',
+        'commons-lang3'        : '3.11',
         'commons-math3'        : '3.6.1',
         'commons-text'         : '1.9',
         'compile-testing'      : '0.19',

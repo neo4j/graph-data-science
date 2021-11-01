@@ -17,6 +17,7 @@ dependencies {
     implementation project(':core')
     implementation project(':ml-core')
     implementation project(':graph-schema-api')
+    implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')
 

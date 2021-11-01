@@ -22,8 +22,8 @@ package org.neo4j.gds.config;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface WritePropertyConfig extends WriteConfig {
 

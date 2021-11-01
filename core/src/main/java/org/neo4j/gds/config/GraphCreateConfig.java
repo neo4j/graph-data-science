@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.TimeUtil;
 

@@ -24,6 +24,7 @@ dependencies {
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
+    implementation project(':model-catalog-api')
     implementation project(':pipeline')
     implementation project(':string-formatting')
 

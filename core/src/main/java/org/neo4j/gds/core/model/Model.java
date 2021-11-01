@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.core.utils.TimeUtil;
+import org.neo4j.gds.model.ModelConfig;
 
 import java.time.ZonedDateTime;
 import java.util.List;

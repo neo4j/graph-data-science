@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
-import org.neo4j.gds.config.StringIdentifierValidations;
+import org.neo4j.gds.core.StringIdentifierValidations;
 
 @ValueClass
 @Configuration

@@ -63,8 +63,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.config.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.gds.config.ModelConfig.MODEL_TYPE_KEY;
+import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {

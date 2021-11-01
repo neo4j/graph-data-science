@@ -25,6 +25,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':memory-usage')
+    implementation project(':model-catalog-api')
     implementation project(':pipeline')
     implementation project(':pregel')
     implementation project(':proc-catalog')

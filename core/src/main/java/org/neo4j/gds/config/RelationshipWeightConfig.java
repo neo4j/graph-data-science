@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-import static org.neo4j.gds.config.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.config.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface RelationshipWeightConfig {
     String RELATIONSHIP_WEIGHT_PROPERTY = "relationshipWeightProperty";

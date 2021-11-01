@@ -21,18 +21,18 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
 import java.util.Map;
