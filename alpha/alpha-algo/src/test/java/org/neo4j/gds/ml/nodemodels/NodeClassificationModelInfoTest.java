@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrai
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,10 +41,8 @@ class NodeClassificationModelInfoTest {
             Map.of()
         );
 
-        HashMap<String, Object> expectedParams = getExpectedParameters();
-
         var expected = Map.of(
-            "bestParameters", expectedParams,
+            "bestParameters", expectedParameters(),
             "classes", List.of(),
             "metrics", Map.of()
         );
@@ -68,7 +65,7 @@ class NodeClassificationModelInfoTest {
             Map.of(AllClassMetric.F1_WEIGHTED, metricData)
         );
 
-        HashMap<String, Object> expectedParams = getExpectedParameters();
+        var expectedParams = expectedParameters();
 
         var expected = Map.of(
             "bestParameters", expectedParams,
@@ -96,15 +93,14 @@ class NodeClassificationModelInfoTest {
     }
 
     @NotNull
-    private HashMap<String, Object> getExpectedParameters() {
-        var expectedParams = new HashMap<String, Object>();
-        expectedParams.put("batchSize", 100);
-        expectedParams.put("concurrency", 4);
-        expectedParams.put("maxEpochs", 100);
-        expectedParams.put("minEpochs", 1);
-        expectedParams.put("patience", 1);
-        expectedParams.put("penalty", 1.0);
-        expectedParams.put("tolerance", 0.001);
-        return expectedParams;
+    private Map<String, Object> expectedParameters() {
+        return Map.of(
+            "batchSize", 100,
+            "maxEpochs", 100,
+            "minEpochs", 1,
+            "patience", 1,
+            "penalty", 1.0,
+            "tolerance", 0.001
+        );
     }
 }
