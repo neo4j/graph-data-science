@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.ArrayLayout;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.core.utils.BitUtil;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 
 public final class SparseLongArray {
 
-    public static final long NOT_FOUND = NodeMapping.NOT_FOUND;
+    public static final long NOT_FOUND = IdMapping.NOT_FOUND;
 
     public static final int BLOCK_SIZE = 64;
     public static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
@@ -125,6 +125,10 @@ public final class SparseLongArray {
         return highestNeoId;
     }
 
+    /**
+     *
+     * @param originalId must be smaller or equal to highestNeoId
+     */
     public long toMappedNodeId(long originalId) {
         var page = pageId(originalId);
         var indexInPage = indexInPage(originalId);

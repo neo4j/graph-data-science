@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryUsage;
@@ -35,7 +35,7 @@ import static org.neo4j.gds.core.utils.paged.HugeArrays.oversizeInt;
 
 public final class HugeSparseLongArray {
 
-    private static final long NOT_FOUND = NodeMapping.NOT_FOUND;
+    private static final long NOT_FOUND = IdMapping.NOT_FOUND;
 
     private static final int PAGE_SHIFT = 12;
     private static final int PAGE_SIZE = 1 << PAGE_SHIFT;
