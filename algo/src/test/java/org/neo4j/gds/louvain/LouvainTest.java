@@ -44,8 +44,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.Map;
 import java.util.Optional;
@@ -337,7 +335,6 @@ class LouvainTest {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
-    @GdsEditionTest(Edition.CE)
     void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
