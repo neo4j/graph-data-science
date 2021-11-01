@@ -153,16 +153,19 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             config.concurrency(),
             nodeCount,
-            partition -> new GenerateRandomNeighbors(
-                random.split(),
-                this.computer,
-                neighbors,
-                nodeCount,
-                k,
-                boundedK,
-                partition,
-                progressTracker
-            ),
+            partition -> {
+                var localRandom = random.split();
+                return new GenerateRandomNeighbors(
+                    new UniformKnnSampler(localRandom, nodeCount),
+                    localRandom,
+                    this.computer,
+                    neighbors,
+                    k,
+                    boundedK,
+                    partition,
+                    progressTracker
+                );
+            },
             Optional.of(config.minBatchSize())
         );
 

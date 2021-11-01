@@ -63,11 +63,12 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
 
         var similarityComputer = SimilarityComputer.ofProperty(nodeProperties, "myProperty");
 
+        var random = new SplittableRandom();
         var generateRandomNeighbors = new GenerateRandomNeighbors(
-            new SplittableRandom(),
+            new UniformKnnSampler(random, nodeCount),
+            random,
             similarityComputer,
             allNeighbors,
-            nodeCount,
             k,
             k,
             Partition.of(0, nodeCount),

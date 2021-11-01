@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import java.util.SplittableRandom;
 
@@ -30,10 +29,10 @@ import java.util.SplittableRandom;
  * Initial step in KNN calculation.
  */
 final class GenerateRandomNeighbors implements Runnable {
+    private final KnnSampler sampler;
     private final SplittableRandom random;
     private final SimilarityComputer computer;
     private final HugeObjectArray<NeighborList> neighbors;
-    private final long nodeCount;
     private final int k;
     private final int boundedK;
     private final ProgressTracker progressTracker;
@@ -41,19 +40,19 @@ final class GenerateRandomNeighbors implements Runnable {
     private long neighborsFound;
 
     GenerateRandomNeighbors(
+        KnnSampler sampler,
         SplittableRandom random,
         SimilarityComputer computer,
         HugeObjectArray<NeighborList> neighbors,
-        long nodeCount,
         int k,
         int boundedK,
         Partition partition,
         ProgressTracker progressTracker
     ) {
+        this.sampler = sampler;
         this.random = random;
         this.computer = computer;
         this.neighbors = neighbors;
-        this.nodeCount = nodeCount;
         this.k = k;
         this.boundedK = boundedK;
         this.progressTracker = progressTracker;
@@ -65,17 +64,12 @@ final class GenerateRandomNeighbors implements Runnable {
     public void run() {
         var rng = random;
         var computer = this.computer;
-        var nodeCount = this.nodeCount;
         var k = this.k;
         var boundedK = this.boundedK;
         var neighborFilter = computer.createNeighborFilter();
 
-        var uniformSamplerFromRange = new UniformSamplerFromRange(rng);
-
         partition.consume(nodeId -> {
-            long[] chosen = uniformSamplerFromRange.sample(
-                0,
-                nodeCount,
+            long[] chosen = sampler.sample(
                 neighborFilter.lowerBoundOfPotentialNeighbours(nodeId),
                 boundedK,
                 l -> neighborFilter.excludeNodePair(nodeId, l)
