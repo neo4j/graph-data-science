@@ -38,7 +38,7 @@ public interface IdMapping {
     /**
      * Map original nodeId to inner nodeId
      *
-     * @param nodeId must be smaller or equal to highestNeoId
+     * @param nodeId must be smaller or equal to the id returned by {@link IdMapping#highestNeoId}
      */
     long toMappedNodeId(long nodeId);
 
