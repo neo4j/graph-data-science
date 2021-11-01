@@ -197,7 +197,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 
 As we can see in the `samplingStats`, we use the exhaustive search strategy and check 16 possible links during the prediction.
 Indeed, since there are a total of `8 * (8 - 1) / 2 = 28` possible links in the graph and we already have 12, that means we check all possible new links.
-Although 16 links were considered, only 5 of them had a probability high enough to pass the threshold.
+Although 16 links were considered, we only mutate the best five (since `topN = 5`) that are above our threshold.
 
 If our graph is very large there may be a lot of possible new links.
 As such it may take a very long time to run the predictions.
@@ -210,10 +210,10 @@ It may therefore be a more viable option to use a search strategy that only look
 To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
 
 The approximate search strategy lets us leverage the <<algorithms-knn, K-Nearest Neighbors algorithm>> with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
-Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions.
+Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions, i.e. the best predictions that would be made by exhaustive search.
 
-The initial set of link predictions for each node is picked at random and verified and then refined in multiple iterations.
-The number of iterations is limited by the configuration parameter `maxIterations`.
+The initial set of considered links for each node is picked at random and then refined in multiple iterations based of previously predicted links.
+The number of iterations is limited by the configuration parameter `maxIterations`, and we also limit the number of random links considered between kNN iterations using `randomJoins`.
 The algorithm may stop earlier if the link predictions per node only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
 See the <<algorithms-knn, K-Nearest Neighbors documentation>> for more details on how the search works.
 
@@ -250,3 +250,4 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 
 As we can see in the `samplingStats`, we use the approximate search strategy and check 38 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
+Since the relationships we write are undirected, reported `relationshipsWritten` is 16 when we search for the best (`topK = 1`) prediction for each node.
