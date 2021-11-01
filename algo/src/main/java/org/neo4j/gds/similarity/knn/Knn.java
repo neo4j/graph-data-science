@@ -45,7 +45,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Knn extends Algorithm<Knn, Knn.Result> {
 
-    private final long nodeCount;
+    private final Graph graph;
     private final KnnBaseConfig config;
     private final KnnContext context;
     private final SplittableRandom random;
@@ -54,7 +54,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
     public Knn(Graph graph, KnnBaseConfig config, KnnContext context) {
         this(
-            graph.nodeCount(),
+            graph,
             config,
             SimilarityComputer.ofProperty(graph, config.nodeWeightProperty()),
             context
@@ -62,13 +62,13 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     }
 
     public Knn(
-        long nodeCount,
+        Graph graph,
         KnnBaseConfig config,
         SimilarityComputer similarityComputer,
         KnnContext context
     ) {
         super(context.progressTracker());
-        this.nodeCount = nodeCount;
+        this.graph = graph;
         this.config = config;
         this.context = context;
         this.computer = similarityComputer;
@@ -79,7 +79,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     }
 
     public long nodeCount() {
-        return this.nodeCount;
+        return graph.nodeCount();
     }
 
     public KnnContext context() {
@@ -101,7 +101,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             }
 
             var maxIterations = this.config.maxIterations();
-            var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * this.nodeCount);
+            var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
             var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
 
             long updateCount;
@@ -137,26 +137,25 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
     }
     private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
-        var nodeCount = this.nodeCount;
         var k = this.config.topK();
         // (int) is safe since it is at most k, which is an int
-        var boundedK = (int) Math.min(nodeCount - 1, k);
+        var boundedK = (int) Math.min(graph.nodeCount() - 1, k);
 
-        assert boundedK <= k && boundedK <= nodeCount - 1;
+        assert boundedK <= k && boundedK <= graph.nodeCount() - 1;
 
-        if (nodeCount < 2 || k == 0) {
+        if (graph.nodeCount() < 2 || k == 0) {
             return null;
         }
 
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount, this.context.allocationTracker());
+        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount(), this.context.allocationTracker());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             config.concurrency(),
-            nodeCount,
+            graph.nodeCount(),
             partition -> {
                 var localRandom = random.split();
                 return new GenerateRandomNeighbors(
-                    new UniformKnnSampler(localRandom, nodeCount),
+                    initializeSampler(localRandom),
                     localRandom,
                     this.computer,
                     neighbors,
@@ -176,12 +175,29 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         return neighbors;
     }
 
+    private KnnSampler initializeSampler(SplittableRandom random) {
+        switch(config.initialSampler()) {
+            case UNIFORM: {
+                return new UniformKnnSampler(random, graph.nodeCount());
+            }
+            case RANDOM_WALK: {
+                return new RandomWalkKnnSampler(
+                    graph.concurrentCopy(),
+                    random,
+                    config.randomSeed(),
+                    config.boundedK(graph.nodeCount())
+                );
+            }
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
+    }
 
     private long iteration(HugeObjectArray<NeighborList> neighbors) {
         // this is a sanity check
         // we check for this before any iteration and return
         // and just make sure that this invariant holds on every iteration
-        var nodeCount = this.nodeCount;
+        var nodeCount = graph.nodeCount();
         if (nodeCount < 2 || this.config.topK() == 0) {
             return NeighborList.NOT_INSERTED;
         }

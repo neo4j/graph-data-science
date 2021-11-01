@@ -36,7 +36,10 @@ class UniformKnnSampler implements KnnSampler {
 
     @Override
     public long[] sample(
-        long lowerBoundOnValidSamplesInRange, int numberOfSamples, LongPredicate isInvalidSample
+        long unused,
+        long lowerBoundOnValidSamplesInRange,
+        int numberOfSamples,
+        LongPredicate isInvalidSample
     ) {
         return uniformSamplerFromRange.sample(
             0,

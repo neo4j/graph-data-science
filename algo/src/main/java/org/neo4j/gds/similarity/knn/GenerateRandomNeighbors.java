@@ -70,6 +70,7 @@ final class GenerateRandomNeighbors implements Runnable {
 
         partition.consume(nodeId -> {
             long[] chosen = sampler.sample(
+                nodeId,
                 neighborFilter.lowerBoundOfPotentialNeighbours(nodeId),
                 boundedK,
                 l -> neighborFilter.excludeNodePair(nodeId, l)

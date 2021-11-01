@@ -92,4 +92,12 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
         // (int) is safe because value is at most `topK`, which is an int
         return Math.max(0, (int) Math.min(this.topK(), nodeCount - 1));
     }
+
+    @Value.Default
+    @Configuration.Ignore
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
+    default KnnSampler.SamplerType initialSampler() {
+        return KnnSampler.SamplerType.UNIFORM;
+    }
 }

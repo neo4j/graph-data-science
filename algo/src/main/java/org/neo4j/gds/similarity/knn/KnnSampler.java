@@ -19,8 +19,57 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
 
 interface KnnSampler {
-    long[] sample(long lowerBoundOnValidSamplesInRange, int numberOfSamples, LongPredicate isInvalidSample);
+    long[] sample(
+        long nodeId,
+        long lowerBoundOnValidSamplesInRange,
+        int numberOfSamples,
+        LongPredicate isInvalidSample
+    );
+
+    enum SamplerType {
+
+        UNIFORM,
+        RANDOM_WALK;
+
+        private static final List<String> VALUES = Arrays
+            .stream(SamplerType.values())
+            .map(SamplerType::name)
+            .collect(Collectors.toList());
+
+        public static SamplerType parse(Object input) {
+            if (input instanceof String) {
+                var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
+                if (VALUES.contains(inputString)) {
+                    return SamplerType.valueOf(inputString);
+                }
+
+                throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,
+                    "Sampler `%s` is not supported. Must be one of: %s.",
+                    inputString,
+                    VALUES
+                ));
+            }
+            else if (input instanceof SamplerType) {
+                return (SamplerType) input;
+            }
+
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
+                "Expected Sampler or String. Got %s.",
+                input.getClass().getSimpleName()
+            ));
+        }
+
+        public static String toString(SamplerType samplerType) {
+            return samplerType.toString();
+        }
+    }
 }

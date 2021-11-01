@@ -144,7 +144,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
         var knn = new Knn(
-            graph.nodeCount(),
+            graph,
             knnConfig,
             SimilarityComputer.ofProperty(nodeProperties, "knn"),
             knnContext
@@ -170,7 +170,7 @@ class KnnTest {
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
         var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = new Knn(
-            graph.nodeCount(),
+            graph,
             ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").topK(1).concurrency(1).randomSeed(42L).build(),
             SimilarityComputer.ofProperty(nodeProperties, "knn"),
             ImmutableKnnContext.builder().build()
