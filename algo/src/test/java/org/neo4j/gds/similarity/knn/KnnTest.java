@@ -393,4 +393,68 @@ class KnnTest {
             .randomSeed(1337L);
         assertThrows(IllegalArgumentException.class, configBuilder::build);
     }
+
+    @Nested
+    class RandomWalkInitialSamplerTest {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a { knn: 1.2 } )" +
+            ", (b { knn: 1.1 } )" +
+            ", (c { knn: 2.1 } )" +
+            ", (d { knn: 3.1 } )" +
+            ", (e { knn: 4.1 } )" +
+            ", (f { knn: 5.1 } )" +
+            ", (g { knn: 6.1 } )" +
+
+            ", (a)-[:TYPE1]->(b)" +
+            ", (a)-[:TYPE1]->(d)" +
+            ", (b)-[:TYPE1]->(d)" +
+            ", (b)-[:TYPE1]->(e)" +
+            ", (b)-[:TYPE1]->(f)" +
+            ", (b)-[:TYPE1]->(g)" +
+            ", (c)-[:TYPE1]->(b)" +
+            ", (c)-[:TYPE1]->(e)" +
+            ", (d)-[:TYPE1]->(c)" +
+            ", (d)-[:TYPE1]->(b)" +
+            ", (e)-[:TYPE1]->(b)" +
+            ", (f)-[:TYPE1]->(a)" +
+            ", (f)-[:TYPE1]->(b)" +
+            ", (g)-[:TYPE1]->(b)" +
+            ", (g)-[:TYPE1]->(c)" +
+            ", (g)-[:TYPE1]->(g)";
+
+        @Test
+        void testReasonableTopKWithRandomWalk(SoftAssertions softly) {
+            var config = ImmutableKnnBaseConfig.builder()
+                .nodeWeightProperty("knn")
+                .topK(4)
+                .randomJoins(0)
+                .maxIterations(1)
+                .randomSeed(20L)
+                .concurrency(1)
+                .initialSampler(KnnSampler.SamplerType.RANDOM_WALK)
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = new Knn(graph, config, knnContext);
+            var result = knn.compute();
+
+            long nodeAId = idFunction.of("a");
+            long nodeBId = idFunction.of("b");
+            long nodeCId = idFunction.of("c");
+            long nodeDId = idFunction.of("d");
+            long nodeEId = idFunction.of("e");
+            long nodeFId = idFunction.of("f");
+            long nodeGId = idFunction.of("g");
+
+            softly.assertThat(result.neighborsOf(nodeAId)).contains(nodeBId);
+            softly.assertThat(result.neighborsOf(nodeBId)).contains(nodeAId);
+            softly.assertThat(result.neighborsOf(nodeCId)).contains(nodeBId);
+            softly.assertThat(result.neighborsOf(nodeDId)).contains(nodeEId);
+            softly.assertThat(result.neighborsOf(nodeEId)).contains(nodeFId);
+            softly.assertThat(result.neighborsOf(nodeFId)).contains(nodeGId);
+            softly.assertThat(result.neighborsOf(nodeGId)).contains(nodeFId);
+        }
+    }
 }
