@@ -53,7 +53,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
 
     @Override
     public ShortestPathYensWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathYensWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

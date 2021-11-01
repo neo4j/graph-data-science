@@ -13,6 +13,7 @@ dependencies {
     implementation group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 
     implementation project(':algo-common')
+    implementation project(':config-api')
     implementation project(':core')
     implementation project(':licensing')
     implementation project(':memory-usage')

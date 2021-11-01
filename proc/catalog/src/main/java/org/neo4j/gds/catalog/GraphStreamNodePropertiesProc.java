@@ -55,7 +55,6 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
-            username(),
             graphName,
             nodeProperties,
             nodeLabels,
@@ -83,7 +82,6 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
-            username(),
             graphName,
             List.of(nodeProperty),
             nodeLabels,

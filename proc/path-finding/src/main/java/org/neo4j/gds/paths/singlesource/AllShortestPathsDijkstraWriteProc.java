@@ -67,7 +67,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return AllShortestPathsDijkstraWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return AllShortestPathsDijkstraWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

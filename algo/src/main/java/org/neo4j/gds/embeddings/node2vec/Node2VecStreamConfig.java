@@ -41,7 +41,6 @@ public interface Node2VecStreamConfig extends Node2VecBaseConfig, AlgoBaseConfig
         return new Node2VecStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

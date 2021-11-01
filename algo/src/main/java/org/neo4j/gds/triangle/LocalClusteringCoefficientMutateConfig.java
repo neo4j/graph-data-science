@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface LocalClusteringCoefficientMutateConfig extends LocalClusteringCoefficientBaseConfig, MutatePropertyConfig {
 
     static LocalClusteringCoefficientMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface LocalClusteringCoefficientMutateConfig extends LocalClusteringC
         return new LocalClusteringCoefficientMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

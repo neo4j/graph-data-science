@@ -36,12 +36,11 @@ public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
     }
 
     static KSpanningTreeConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new KSpanningTreeConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new KSpanningTreeConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
 }

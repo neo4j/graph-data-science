@@ -71,7 +71,6 @@ public interface RandomWalkConfig extends AlgoBaseConfig {
     }
 
     static RandomWalkConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -79,7 +78,6 @@ public interface RandomWalkConfig extends AlgoBaseConfig {
         return new RandomWalkConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

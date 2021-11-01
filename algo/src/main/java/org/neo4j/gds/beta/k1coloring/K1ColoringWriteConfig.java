@@ -41,7 +41,6 @@ public interface K1ColoringWriteConfig extends K1ColoringConfig, WritePropertyCo
         return new K1ColoringWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             config
         );
     }

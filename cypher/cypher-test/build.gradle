@@ -22,5 +22,6 @@ dependencies {
 
     api project(':storage-engine-adapter')
 
+    testImplementation project(':config-api')
     testImplementation project(":test-utils")
 }

@@ -11,6 +11,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     implementation     project(':annotations')
+    implementation     project(':config-api')
     implementation     project(':core')
     implementation     project(':proc-pregel')
     implementation     project(':string-formatting')

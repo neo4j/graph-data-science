@@ -93,7 +93,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, config);
     }
 
     @Override

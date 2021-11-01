@@ -145,11 +145,6 @@ class TriangleCountMutateProcTest
 
     @Override
     public TriangleCountMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountMutateConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return TriangleCountMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

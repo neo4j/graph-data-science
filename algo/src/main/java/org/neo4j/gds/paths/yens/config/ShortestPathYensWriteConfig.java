@@ -34,7 +34,6 @@ import java.util.Optional;
 public interface ShortestPathYensWriteConfig extends ShortestPathYensBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static ShortestPathYensWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -42,7 +41,6 @@ public interface ShortestPathYensWriteConfig extends ShortestPathYensBaseConfig,
         return new ShortestPathYensWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

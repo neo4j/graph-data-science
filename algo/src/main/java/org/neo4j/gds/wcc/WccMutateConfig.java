@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface WccMutateConfig extends WccBaseConfig, MutatePropertyConfig {
 
     static WccMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface WccMutateConfig extends WccBaseConfig, MutatePropertyConfig {
         return new WccMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

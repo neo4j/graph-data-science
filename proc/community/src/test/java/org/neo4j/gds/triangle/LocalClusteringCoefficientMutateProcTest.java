@@ -129,11 +129,6 @@ class LocalClusteringCoefficientMutateProcTest
 
     @Override
     public LocalClusteringCoefficientMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientMutateConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return LocalClusteringCoefficientMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

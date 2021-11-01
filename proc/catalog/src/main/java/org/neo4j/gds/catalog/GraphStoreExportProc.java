@@ -61,7 +61,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreToDatabaseExporterConfig.of(username(), cypherConfig);
+        var exportConfig = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
         var result = runWithExceptionLogging(

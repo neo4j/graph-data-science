@@ -73,7 +73,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return WccMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return WccMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

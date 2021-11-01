@@ -46,7 +46,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     }
 
     static TriangleCountBaseConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -54,7 +53,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         return new TriangleCountBaseConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

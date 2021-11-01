@@ -143,7 +143,7 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KSpanningTreeConfig.of(username, graphName, maybeImplicitCreate, config);
+        return KSpanningTreeConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

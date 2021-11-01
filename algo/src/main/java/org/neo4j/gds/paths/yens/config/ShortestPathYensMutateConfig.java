@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface ShortestPathYensMutateConfig extends ShortestPathYensBaseConfig, MutateRelationshipConfig {
 
     static ShortestPathYensMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface ShortestPathYensMutateConfig extends ShortestPathYensBaseConfig
         return new ShortestPathYensMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

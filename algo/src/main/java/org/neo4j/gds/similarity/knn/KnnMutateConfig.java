@@ -34,11 +34,10 @@ import java.util.Optional;
 public interface KnnMutateConfig extends KnnBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
     static KnnMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new KnnMutateConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new KnnMutateConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

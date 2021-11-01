@@ -55,7 +55,7 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
 
     @Override
     public ApproxMaxKCutMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ApproxMaxKCutMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return ApproxMaxKCutMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

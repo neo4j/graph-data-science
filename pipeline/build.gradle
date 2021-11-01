@@ -34,6 +34,7 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':config-api')
     implementation project(':core')
     implementation project(':proc-common')
     implementation project(':string-formatting')

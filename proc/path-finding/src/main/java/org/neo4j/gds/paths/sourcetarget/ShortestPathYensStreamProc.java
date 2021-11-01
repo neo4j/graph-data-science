@@ -66,7 +66,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathYensStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathYensStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

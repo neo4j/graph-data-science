@@ -123,6 +123,6 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
 
     @Override
     public NodeSimilarityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStatsConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return NodeSimilarityStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

@@ -138,7 +138,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return SpanningTreeConfig.of(username, graphName, maybeImplicitCreate, config);
+        return SpanningTreeConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

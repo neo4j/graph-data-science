@@ -34,11 +34,10 @@ public interface BFSPregelConfig extends PregelProcedureConfig {
     long startNode();
 
     static BFSPregelConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new BFSPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new BFSPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }

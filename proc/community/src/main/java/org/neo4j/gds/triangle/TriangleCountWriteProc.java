@@ -73,12 +73,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountWriteConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return TriangleCountWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

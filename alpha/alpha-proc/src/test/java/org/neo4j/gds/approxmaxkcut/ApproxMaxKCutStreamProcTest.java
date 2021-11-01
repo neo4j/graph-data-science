@@ -41,7 +41,6 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
     @Override
     public ApproxMaxKCutStreamConfig createConfig(CypherMapWrapper mapWrapper) {
         return ApproxMaxKCutStreamConfig.of(
-            "",
             Optional.empty(),
             Optional.empty(),
             mapWrapper

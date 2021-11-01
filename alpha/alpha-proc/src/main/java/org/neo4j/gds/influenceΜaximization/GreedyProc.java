@@ -93,7 +93,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, config);
     }
 
     @Override

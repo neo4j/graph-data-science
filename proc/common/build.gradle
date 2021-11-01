@@ -19,6 +19,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':algo-common')
+    implementation project(':config-api')
     implementation project(':core')
     implementation project(':licensing')
     implementation project(':edition-api')

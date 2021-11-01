@@ -80,12 +80,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Override
     public TriangleCountStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStatsConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return TriangleCountStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
 }

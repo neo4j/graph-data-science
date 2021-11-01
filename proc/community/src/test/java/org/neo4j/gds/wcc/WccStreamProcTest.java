@@ -52,7 +52,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> implements
 
     @Override
     public WccStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return WccStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @AfterEach

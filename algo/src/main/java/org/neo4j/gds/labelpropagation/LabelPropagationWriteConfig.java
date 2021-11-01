@@ -42,7 +42,6 @@ public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig,
         return new LabelPropagationWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

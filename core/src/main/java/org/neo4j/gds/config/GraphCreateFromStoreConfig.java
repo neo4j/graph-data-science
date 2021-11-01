@@ -193,8 +193,8 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         }
 
         return GraphCreateFromStoreConfigImpl.of(
-            graphName,
             userName,
+            graphName,
             config
         );
     }
@@ -217,8 +217,8 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         }
 
         return GraphCreateFromStoreConfigImpl.of(
-            IMPLICIT_GRAPH_NAME,
             username,
+            IMPLICIT_GRAPH_NAME,
             config
         );
     }

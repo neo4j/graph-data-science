@@ -42,7 +42,6 @@ public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConf
         return new LouvainWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

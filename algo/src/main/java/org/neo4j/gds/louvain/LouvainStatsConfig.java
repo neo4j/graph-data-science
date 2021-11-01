@@ -40,7 +40,6 @@ public interface LouvainStatsConfig extends LouvainBaseConfig {
         return new LouvainStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

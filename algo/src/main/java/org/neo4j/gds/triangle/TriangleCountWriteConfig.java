@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 
     static TriangleCountWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, Write
         return new TriangleCountWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

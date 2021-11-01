@@ -32,11 +32,10 @@ import java.util.Optional;
 public interface KnnStreamConfig extends KnnBaseConfig {
 
     static KnnStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new KnnStreamConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new KnnStreamConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

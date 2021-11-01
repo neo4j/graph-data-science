@@ -41,7 +41,6 @@ public interface AllShortestPathsDijkstraStreamConfig extends AllShortestPathsBa
         return new AllShortestPathsDijkstraStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
 

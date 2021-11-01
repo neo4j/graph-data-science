@@ -57,7 +57,7 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new DummyConfigImpl(graphName,  maybeImplicitCreate, username, config);
+        return new DummyConfigImpl(graphName,  maybeImplicitCreate, config);
     }
 
     @Override

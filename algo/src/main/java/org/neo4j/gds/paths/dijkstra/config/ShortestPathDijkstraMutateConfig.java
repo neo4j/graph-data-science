@@ -34,7 +34,6 @@ import java.util.Optional;
 public interface ShortestPathDijkstraMutateConfig extends ShortestPathBaseConfig, MutateRelationshipConfig {
 
     static ShortestPathDijkstraMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -42,7 +41,6 @@ public interface ShortestPathDijkstraMutateConfig extends ShortestPathBaseConfig
         return new ShortestPathDijkstraMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

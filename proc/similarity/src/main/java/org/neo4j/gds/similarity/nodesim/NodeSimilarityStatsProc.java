@@ -68,7 +68,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeSimilarityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeSimilarityStatsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

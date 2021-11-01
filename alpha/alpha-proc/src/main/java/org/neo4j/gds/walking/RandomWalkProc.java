@@ -83,7 +83,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomWalkConfig.of(username, graphName, maybeImplicitCreate, config);
+        return RandomWalkConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

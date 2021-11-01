@@ -140,7 +140,7 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return HarmonicCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), username, config);
+        return HarmonicCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), config);
     }
 
     @Override

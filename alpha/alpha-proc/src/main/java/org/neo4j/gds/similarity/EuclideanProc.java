@@ -75,7 +75,7 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new EuclideanConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new EuclideanConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

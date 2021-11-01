@@ -40,7 +40,6 @@ public interface FastRPStatsConfig extends FastRPBaseConfig {
         return new FastRPStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

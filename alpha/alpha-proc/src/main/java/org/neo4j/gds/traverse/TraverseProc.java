@@ -78,7 +78,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return TraverseConfig.of(graphName, maybeImplicitCreate, username, userInput);
+        return TraverseConfig.of(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

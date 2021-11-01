@@ -68,12 +68,7 @@ public class LocalClusteringCoefficientStreamProc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LocalClusteringCoefficientStreamConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return LocalClusteringCoefficientStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

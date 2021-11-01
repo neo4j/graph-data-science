@@ -74,7 +74,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TestConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TestConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

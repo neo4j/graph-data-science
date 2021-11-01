@@ -53,7 +53,7 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
 
     @Override
     public AllShortestPathsDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return AllShortestPathsDijkstraWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return AllShortestPathsDijkstraWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

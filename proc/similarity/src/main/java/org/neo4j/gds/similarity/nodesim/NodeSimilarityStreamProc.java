@@ -81,7 +81,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeSimilarityStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeSimilarityStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

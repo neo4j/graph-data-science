@@ -65,7 +65,7 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ApproxMaxKCutStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ApproxMaxKCutStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class NodeSimilarityWriteProcTest
 
     @Override
     public NodeSimilarityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return NodeSimilarityWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @ParameterizedTest(name = "{2}")

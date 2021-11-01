@@ -38,6 +38,6 @@ public interface DegreeCentralityMutateConfig extends DegreeCentralityConfig, Mu
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new DegreeCentralityMutateConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new DegreeCentralityMutateConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

@@ -75,12 +75,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountStatsConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return TriangleCountStatsConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

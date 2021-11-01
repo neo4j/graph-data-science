@@ -65,7 +65,7 @@ class NodeSimilarityMutateProcTest
 
     @Override
     public NodeSimilarityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return NodeSimilarityMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

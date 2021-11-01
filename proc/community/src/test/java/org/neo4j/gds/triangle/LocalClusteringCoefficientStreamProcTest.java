@@ -80,11 +80,6 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
 
     @Override
     public LocalClusteringCoefficientStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientStreamConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return LocalClusteringCoefficientStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 }

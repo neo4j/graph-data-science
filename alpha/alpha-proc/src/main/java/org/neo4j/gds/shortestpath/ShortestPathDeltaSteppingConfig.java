@@ -52,11 +52,10 @@ public interface ShortestPathDeltaSteppingConfig extends AlgoBaseConfig, Relatio
     }
 
     static ShortestPathDeltaSteppingConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ShortestPathDeltaSteppingConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new ShortestPathDeltaSteppingConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

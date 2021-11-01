@@ -161,7 +161,7 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return SccConfig.of(username, graphName, maybeImplicitCreate, config);
+        return SccConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

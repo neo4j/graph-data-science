@@ -86,7 +86,7 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return KnnStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

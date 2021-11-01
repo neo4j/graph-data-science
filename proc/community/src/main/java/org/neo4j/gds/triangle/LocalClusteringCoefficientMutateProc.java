@@ -68,12 +68,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LocalClusteringCoefficientMutateConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return LocalClusteringCoefficientMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

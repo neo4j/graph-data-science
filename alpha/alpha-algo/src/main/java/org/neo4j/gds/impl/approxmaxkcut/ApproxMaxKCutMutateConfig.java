@@ -32,11 +32,10 @@ import java.util.Optional;
 public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePropertyConfig {
 
     static ApproxMaxKCutMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ApproxMaxKCutMutateConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new ApproxMaxKCutMutateConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

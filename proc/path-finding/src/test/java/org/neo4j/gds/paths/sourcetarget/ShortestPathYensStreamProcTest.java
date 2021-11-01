@@ -46,7 +46,7 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
 
     @Override
     public ShortestPathYensStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathYensStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

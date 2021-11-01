@@ -42,7 +42,6 @@ public interface AllShortestPathsDijkstraMutateConfig extends AllShortestPathsBa
         return new AllShortestPathsDijkstraMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

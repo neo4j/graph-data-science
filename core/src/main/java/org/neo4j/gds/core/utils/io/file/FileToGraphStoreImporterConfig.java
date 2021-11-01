@@ -21,8 +21,8 @@ package org.neo4j.gds.core.utils.io.file;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
@@ -31,7 +31,7 @@ public interface FileToGraphStoreImporterConfig extends BaseConfig {
 
     String importName();
 
-    static FileToGraphStoreImporterConfig of(String username, CypherMapWrapper config) {
-        return new FileToGraphStoreImporterConfigImpl(username, config);
+    static FileToGraphStoreImporterConfig of(CypherMapWrapper config) {
+        return new FileToGraphStoreImporterConfigImpl(config);
     }
 }

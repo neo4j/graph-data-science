@@ -57,7 +57,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Override
     public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

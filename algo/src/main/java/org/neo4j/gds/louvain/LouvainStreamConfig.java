@@ -40,7 +40,6 @@ public interface LouvainStreamConfig extends LouvainBaseConfig {
         return new LouvainStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

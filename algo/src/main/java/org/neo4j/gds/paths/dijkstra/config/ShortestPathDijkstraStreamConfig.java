@@ -33,7 +33,6 @@ import java.util.Optional;
 public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig {
 
     static ShortestPathDijkstraStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -41,7 +40,6 @@ public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig
         return new ShortestPathDijkstraStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
 

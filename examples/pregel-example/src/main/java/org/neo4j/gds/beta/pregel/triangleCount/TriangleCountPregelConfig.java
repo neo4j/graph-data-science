@@ -40,11 +40,10 @@ public interface TriangleCountPregelConfig extends PregelProcedureConfig {
     }
 
     static TriangleCountPregelConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TriangleCountPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new TriangleCountPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }

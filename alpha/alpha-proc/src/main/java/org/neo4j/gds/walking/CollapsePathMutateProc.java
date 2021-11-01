@@ -110,7 +110,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return CollapsePathConfig.of(username, graphName, maybeImplicitCreate, config);
+        return CollapsePathConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

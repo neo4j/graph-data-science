@@ -41,7 +41,6 @@ public interface Node2VecWriteConfig extends Node2VecBaseConfig, WritePropertyCo
         return new Node2VecWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
     }

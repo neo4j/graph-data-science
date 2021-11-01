@@ -41,7 +41,6 @@ public interface ModularityOptimizationWriteConfig extends ModularityOptimizatio
         return new ModularityOptimizationWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             config
         );
     }

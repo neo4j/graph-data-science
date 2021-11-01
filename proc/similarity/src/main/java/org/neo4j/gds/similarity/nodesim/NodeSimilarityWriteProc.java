@@ -71,7 +71,7 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityWriteConfig.of(username, graphName, maybeImplicitCreate, userInput);
+        return NodeSimilarityWriteConfig.of(graphName, maybeImplicitCreate, userInput);
     }
 
     @Override

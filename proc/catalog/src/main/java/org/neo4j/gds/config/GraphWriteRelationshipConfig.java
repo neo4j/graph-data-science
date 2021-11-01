@@ -45,7 +45,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
     Optional<String> relationshipProperty();
 
     static GraphWriteRelationshipConfig of(
-        String userName,
         String graphName,
         String relationshipType,
         Optional<String> relationshipProperty,
@@ -56,7 +55,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
             relationshipProperty,
             Optional.of(graphName),
             Optional.empty(),
-            userName,
             config
         );
     }

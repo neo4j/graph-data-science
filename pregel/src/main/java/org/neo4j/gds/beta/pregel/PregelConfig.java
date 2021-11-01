@@ -59,11 +59,10 @@ public interface PregelConfig extends
     }
 
     static PregelConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new PregelConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }

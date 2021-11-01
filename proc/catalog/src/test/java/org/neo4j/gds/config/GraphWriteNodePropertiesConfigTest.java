@@ -36,7 +36,7 @@ class GraphWriteNodePropertiesConfigTest {
     @ParameterizedTest
     void concurrencies(Map<String, Object> inputs, int expectedConcurrency, int expectedWriteConcurrency) {
         var map = CypherMapWrapper.create(inputs);
-        var config = GraphWriteNodePropertiesConfig.of("tester", "g", List.of("a"), List.of("A"), map);
+        var config = GraphWriteNodePropertiesConfig.of("g", List.of("a"), List.of("A"), map);
 
         assertEquals(expectedConcurrency, config.concurrency());
         assertEquals(expectedWriteConcurrency, config.writeConcurrency());

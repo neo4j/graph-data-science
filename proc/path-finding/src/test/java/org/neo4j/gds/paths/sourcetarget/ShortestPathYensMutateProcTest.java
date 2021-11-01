@@ -98,7 +98,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
 
     @Override
     public ShortestPathYensMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensMutateConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathYensMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

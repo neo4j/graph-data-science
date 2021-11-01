@@ -78,7 +78,7 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     @Override
     protected PregelProcedureConfig newConfig(String username, Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate, CypherMapWrapper config) {
-        return PregelProcedureConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PregelProcedureConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

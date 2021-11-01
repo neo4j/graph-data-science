@@ -39,7 +39,6 @@ public interface ShortestPathDijkstraWriteConfig extends ShortestPathBaseConfig,
     String COSTS_KEY = "costs";
 
     static ShortestPathDijkstraWriteConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -47,7 +46,6 @@ public interface ShortestPathDijkstraWriteConfig extends ShortestPathBaseConfig,
         return new ShortestPathDijkstraWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
 

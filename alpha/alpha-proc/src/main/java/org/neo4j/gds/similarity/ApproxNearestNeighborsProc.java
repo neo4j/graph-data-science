@@ -93,7 +93,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
         CypherMapWrapper config
     ) {
         return new ApproximateNearestNeighborsConfigImpl(
-            graphName, maybeImplicitCreate, username, config
+            graphName, maybeImplicitCreate, config
         );
     }
 

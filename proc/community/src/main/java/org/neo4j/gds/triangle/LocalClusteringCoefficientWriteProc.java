@@ -69,12 +69,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LocalClusteringCoefficientWriteConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return LocalClusteringCoefficientWriteConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

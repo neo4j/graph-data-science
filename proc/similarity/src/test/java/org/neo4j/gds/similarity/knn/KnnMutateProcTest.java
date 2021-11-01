@@ -75,7 +75,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
     @Override
     public KnnMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnMutateConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return KnnMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

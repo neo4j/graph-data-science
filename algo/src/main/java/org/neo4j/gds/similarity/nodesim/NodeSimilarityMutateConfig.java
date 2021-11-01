@@ -34,7 +34,6 @@ import java.util.Optional;
 public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
     static NodeSimilarityMutateConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
@@ -42,7 +41,6 @@ public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig, Mu
         NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
-            username,
             userInput
         );
         config.validate();

@@ -15,6 +15,7 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':config-api')
     implementation project(":core")
     implementation project(':annotations')
     implementation project(':memory-usage')

@@ -129,7 +129,6 @@ class PregelProcessorTest {
                 "'static ConfigurationHasNoFactoryMethod.ComputationConfig " +
                 "of" +
                 "(" +
-                "java.lang.String username, " +
                 "java.util.Optional<java.lang.String> graphName, " +
                 "java.util.Optional<org.neo4j.gds.config.GraphCreateConfig> maybeImplicitCreate, " +
                 "org.neo4j.gds.core.CypherMapWrapper userConfig" +

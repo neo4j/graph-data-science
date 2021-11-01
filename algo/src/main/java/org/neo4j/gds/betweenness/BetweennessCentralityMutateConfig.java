@@ -38,6 +38,6 @@ public interface BetweennessCentralityMutateConfig extends BetweennessCentrality
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new BetweennessCentralityMutateConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new BetweennessCentralityMutateConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

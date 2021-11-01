@@ -59,7 +59,6 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamRelationshipPropertiesConfig config = GraphStreamRelationshipPropertiesConfig.of(
-            username(),
             graphName,
             relationshipProperties,
             relationshipTypes,
@@ -87,7 +86,6 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamRelationshipPropertiesConfig config = GraphStreamRelationshipPropertiesConfig.of(
-            username(),
             graphName,
             List.of(relationshipProperty),
             relationshipTypes,

@@ -96,12 +96,7 @@ public class TriangleCountStreamProc
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountStreamConfig.of(
-            username,
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return TriangleCountStreamConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

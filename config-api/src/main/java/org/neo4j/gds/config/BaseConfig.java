@@ -21,11 +21,7 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Username;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,12 +31,6 @@ import java.util.Map;
 public interface BaseConfig {
 
     String SUDO_KEY = "sudo";
-
-    @Configuration.Parameter
-    @Value.Default
-    default String username() {
-        return Username.EMPTY_USERNAME.username();
-    }
 
     @Value.Default
     @Value.Parameter(false)
@@ -71,13 +61,4 @@ public interface BaseConfig {
     default Map<String, Object> toMap() {
         return Collections.emptyMap();
     }
-
-    @Configuration.GraphStoreValidation
-    @Value.Auxiliary
-    @Value.Default
-    default void graphStoreValidation(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {}
 }
