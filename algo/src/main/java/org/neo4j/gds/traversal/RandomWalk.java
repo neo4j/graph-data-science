@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -32,6 +30,7 @@ import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
+import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
 import java.util.List;
 import java.util.Random;
@@ -44,11 +43,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.traversal.RandomWalk.NextNodeSupplier.NO_MORE_NODES;
-
 public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
-    // The number of tries we will make to draw a random neighbour according to p and q
-    private static final int MAX_TRIES = 100;
 
     private final Graph graph;
     private final RandomWalkBaseConfig config;
@@ -92,8 +87,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
         long[] TOMB = new long[0];
 
-
-        CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
+        RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
             ? cumulativeWeights()::get
             : graph::degree;
 
@@ -154,25 +148,21 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     public void release() { }
 
     private static final class RandomWalkTask implements Runnable {
+
         private final Graph graph;
         private final Random random = new Random();
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
-        private final MutableDouble currentWeight;
-        private final MutableLong randomNeighbour;
         private final long[][] buffer;
         private final MutableInt bufferPosition;
-        private final double normalizedReturnProbability;
-        private final double normalizedSameDistanceProbability;
-        private final double normalizedInOutProbability;
         private final long randomSeed;
         private final ProgressTracker progressTracker;
-        private final CumulativeWeightSupplier cumulativeWeightSupplier;
         private final RandomWalkBaseConfig config;
+        private final RandomWalkSampler sampler;
 
         static RandomWalkTask of(
             NextNodeSupplier nextNodeSupplier,
-            CumulativeWeightSupplier cumulativeWeightSupplier,
+            RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
             Graph graph,
             RandomWalkBaseConfig config,
             BlockingQueue<long[]> walks,
@@ -200,7 +190,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
         private RandomWalkTask(
             NextNodeSupplier nextNodeSupplier,
-            CumulativeWeightSupplier cumulativeWeightSupplier,
+            RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
             RandomWalkBaseConfig config,
             BlockingQueue<long[]> walks,
             double normalizedReturnProbability,
@@ -211,19 +201,21 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             ProgressTracker progressTracker
         ) {
             this.nextNodeSupplier = nextNodeSupplier;
-            this.cumulativeWeightSupplier = cumulativeWeightSupplier;
             this.graph = graph;
             this.config = config;
             this.walks = walks;
-            this.normalizedReturnProbability = normalizedReturnProbability;
-            this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
-            this.normalizedInOutProbability = normalizedInOutProbability;
             this.randomSeed = randomSeed;
             this.progressTracker = progressTracker;
+            this.sampler = new RandomWalkSampler(
+                cumulativeWeightSupplier,
+                config.walkLength(),
+                normalizedReturnProbability,
+                normalizedSameDistanceProbability,
+                normalizedInOutProbability,
+                graph,
+                random
+            );
 
-
-            this.currentWeight = new MutableDouble(0);
-            this.randomNeighbour = new MutableLong(-1);
             this.buffer = new long[1000][];
             this.bufferPosition = new MutableInt(0);
         }
@@ -235,7 +227,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             while (true) {
                 nodeId = nextNodeSupplier.nextNode();
 
-                if (nodeId == NO_MORE_NODES) break;
+                if (nodeId == NextNodeSupplier.NO_MORE_NODES) break;
 
                 if (graph.degree(nodeId) == 0) {
                     progressTracker.logProgress();
@@ -247,7 +239,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 var walksPerNode = config.walksPerNode();
 
                 for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
-                    buffer[bufferPosition.getAndIncrement()] = walk(nodeId);
+                    buffer[bufferPosition.getAndIncrement()] = sampler.walk(nodeId);
 
                     if (bufferPosition.getValue() == buffer.length) {
                         flushBuffer();
@@ -258,82 +250,6 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             }
 
             flushBuffer();
-        }
-
-        private long[] walk(long startNode) {
-            var walkLength = config.walkLength();
-            var walk = new long[walkLength];
-            walk[0] = startNode;
-            walk[1] = randomNeighbour(startNode);
-
-            for (int i = 2; i < walkLength; i++) {
-                var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
-                if (nextNode == NO_MORE_NODES) {
-                    var shortenedWalk = new long[i];
-                    System.arraycopy(walk, 0, shortenedWalk, 0, shortenedWalk.length);
-                    walk = shortenedWalk;
-                    break;
-                } else {
-                    walk[i] = nextNode;
-                }
-            }
-            return walk;
-        }
-
-        private long walkOneStep(long previousNode, long currentNode) {
-            var currentNodeDegree = graph.degree(currentNode);
-
-            if (currentNodeDegree == 0) {
-                // We have arrived at a node with no outgoing neighbors, we can stop walking
-                return NO_MORE_NODES;
-            } else if (currentNodeDegree == 1) {
-                // This node only has one neighbour, no need to test
-                return randomNeighbour(currentNode);
-            } else {
-                var tries = 0;
-                while (tries < MAX_TRIES) {
-                    var newNode = randomNeighbour(currentNode);
-                    var r = random.nextDouble();
-
-                    if (newNode == previousNode) {
-                        if (r < normalizedReturnProbability) {
-                            return newNode;
-                        }
-                    } else if (isNeighbour(previousNode, newNode)) {
-                        if (r < normalizedSameDistanceProbability) {
-                            return newNode;
-                        }
-                    } else if (r < normalizedInOutProbability) {
-                        return newNode;
-                    }
-                    tries++;
-                }
-
-                // We did not find a valid neighbour in `MAX_TRIES` tries, so we just pick a random one.
-                return randomNeighbour(currentNode);
-            }
-        }
-
-        private long randomNeighbour(long node) {
-            var cumulativeWeight = cumulativeWeightSupplier.forNode(node);
-            var randomWeight = cumulativeWeight * random.nextDouble();
-
-            currentWeight.setValue(0.0);
-            randomNeighbour.setValue(-1);
-
-            graph.forEachRelationship(node, 1.0D, (source, target, weight) -> {
-                if (randomWeight <= currentWeight.addAndGet(weight)) {
-                    randomNeighbour.setValue(target);
-                    return false;
-                }
-                return true;
-            });
-
-            return randomNeighbour.getValue();
-        }
-
-        private boolean isNeighbour(long source, long target) {
-            return graph.exists(source, target);
         }
 
         private void flushBuffer() {
@@ -385,10 +301,5 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 return index < nodes.size() ? nodes.get(index) : NO_MORE_NODES;
             }
         }
-    }
-
-    @FunctionalInterface
-    interface CumulativeWeightSupplier {
-        double forNode(long nodeId);
     }
 }
