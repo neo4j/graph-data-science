@@ -93,7 +93,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
 | name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
 | "pipe"   | []                | []
            | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-           | [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
+           | [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
 --
 
@@ -163,7 +163,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-| [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4}]
+| [{useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
 
 The pipeline will now execute the <<algorithms-embeddings-fastrp,fastRP algorithm>> in mutate mode both before <<algorithms-ml-linkprediction-pipelines-train, training>> a model, and when the trained model is <<algorithms-link-prediction-pipelines-predict, applied for prediction>>.
@@ -414,7 +414,6 @@ YIELD
 | patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
 | tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
 | useBiasFeature      | Boolean | true            | yes      | Whether the logistic regression model uses a bias feature.
-| concurrency         | Integer | see description | yes      | Concurrency for training the model candidate. By default, the value of `concurrency` defined at training is used.
 |===
 
 include::pipelineInfoResult.adoc[]

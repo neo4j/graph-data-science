@@ -19,4 +19,4 @@ It is also possible, via `minEpochs`, to control a minimum number of epochs befo
 
 The training algorithm applied to the above algorithms is gradient descent.
 The gradient updates are computed batch-wise on batches of `batchSize` examples, and batches are computed concurrently on `concurrency` threads.
-Thus `batchSize` and `concurrency` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
+Thus, `batchSize` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.

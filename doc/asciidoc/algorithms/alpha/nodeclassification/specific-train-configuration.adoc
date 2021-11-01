@@ -20,7 +20,6 @@
 | maxEpochs     | Integer | 100             | yes      | Maximum number of training epochs.
 | patience      | Integer | 1               | yes      | Maximum number of iterations that do not improve the loss before stopping.
 | tolerance     | Float   | 0.001           | yes      | Minimum acceptable loss before stopping.
-| concurrency   | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.
 |===
 
 For hyperparameter tuning ideas, look <<algorithms-ml-models-tuning, here>>.

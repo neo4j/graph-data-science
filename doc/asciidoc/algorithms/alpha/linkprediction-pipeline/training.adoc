@@ -216,7 +216,7 @@ RETURN
 [opts="header", cols="6, 2, 2"]
 |===
 | winningModel                                                                                         | trainGraphScore     | testGraphScore
-| {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001, concurrency=4} | 0.41666666666666663 | 0.7638888888888888
+| {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001} | 0.41666666666666663 | 0.7638888888888888
 |===
 
 We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.
