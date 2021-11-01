@@ -27,12 +27,11 @@ import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.SingleParentVariable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
@@ -62,9 +61,10 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Tensor<?> embeddingData = ctx.data(parent());
-        int batchSize = embeddingData.dimension(ROWS_INDEX) / SAMPLING_BUCKETS;
+        Matrix embeddingData = ctx.data(combinedEmbeddings);
+        int batchSize = embeddingData.rows() / SAMPLING_BUCKETS;
         int negativeNodesOffset = NEGATIVE_NODES_OFFSET * batchSize;
+
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeIdOffset -> {
             int positiveNodeOffset = nodeIdOffset + batchSize;
             int negativeNodeOffset = nodeIdOffset + negativeNodesOffset;
@@ -85,28 +85,34 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         return Math.pow(relationshipWeight, ALPHA);
     }
 
-    private double affinity(Tensor<?> embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
+    private double affinity(Matrix embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
         int embeddingDimension = combinedEmbeddings.dimension(COLUMNS_INDEX);
         double sum = 0;
-        int embeddingOffset = nodeIdOffset * embeddingDimension;
-        int otherEmbeddingOffset = otherNodeIdOffset * embeddingDimension;
         for (int i = 0; i < embeddingDimension; i++) {
-            sum += embeddingData.dataAt(embeddingOffset + i) * embeddingData.dataAt(otherEmbeddingOffset + i);
+            sum += embeddingData.dataAt(nodeIdOffset, i) * embeddingData.dataAt(otherNodeIdOffset, i);
         }
         return sum;
     }
 
     @Override
     public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> embeddings = ctx.data(parent);
-        int totalBatchSize = embeddings.dimension(ROWS_INDEX);
-        int nodeBatchSize = totalBatchSize / SAMPLING_BUCKETS;
+        if (parent != combinedEmbeddings) {
+            throw new IllegalStateException(formatWithLocale(
+                "This variable only has a single parent. Expected %s but got %s",
+                combinedEmbeddings,
+                parent
+            ));
+        }
 
-        int embeddingDimension = embeddings.dimension(COLUMNS_INDEX);
-        Matrix gradientResult = new Matrix(totalBatchSize, embeddingDimension);
+        Matrix embeddings = ctx.data(combinedEmbeddings);
+        Matrix gradientResult = embeddings.createWithSameDimensions();
 
+
+        int nodeBatchSize = embeddings.rows() / SAMPLING_BUCKETS;
         int negativeNodesOffset = NEGATIVE_NODES_OFFSET * nodeBatchSize;
-        IntStream.range(0, nodeBatchSize).forEach(nodeOffset -> {
+        int embeddingDimension = embeddings.cols();
+
+        for (int nodeOffset = 0; nodeOffset < nodeBatchSize; nodeOffset++) {
             int positiveNodeOffset = nodeOffset + nodeBatchSize;
             int negativeNodeOffset = nodeOffset + negativeNodesOffset;
             double positiveAffinity = affinity(embeddings, nodeOffset, positiveNodeOffset);
@@ -115,23 +121,25 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
             double positiveLogistic = logisticFunction(positiveAffinity);
             double negativeLogistic = logisticFunction(-negativeAffinity);
 
-            IntStream.range(0, embeddingDimension).forEach(embeddingIdx -> computeGradientForEmbeddingIdx(
-                embeddings,
-                gradientResult,
-                nodeOffset,
-                positiveNodeOffset,
-                negativeNodeOffset,
-                positiveLogistic,
-                negativeLogistic,
-                embeddingIdx
-            ));
+            for (int embeddingIdx = 0; embeddingIdx < embeddingDimension; embeddingIdx++) {
+                computeGradientForEmbeddingIdx(
+                    embeddings,
+                    gradientResult,
+                    nodeOffset,
+                    positiveNodeOffset,
+                    negativeNodeOffset,
+                    positiveLogistic,
+                    negativeLogistic,
+                    embeddingIdx
+                );
+            }
 
-        });
+        }
         return gradientResult;
     }
 
     private void computeGradientForEmbeddingIdx(
-        Tensor<?> embeddings,
+        Matrix embeddings,
         Matrix gradientResult,
         int nodeOffset,
         int positiveNodeOffset,
@@ -140,20 +148,27 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         double negativeLogistic,
         int embeddingIdx
     ) {
-        var embeddingLength = embeddings.dimension(COLUMNS_INDEX);
-        int nodeIndex = nodeOffset * embeddingLength + embeddingIdx;
-        int positiveNodeIndex = positiveNodeOffset * embeddingLength + embeddingIdx;
-        int negativeNodeIndex = negativeNodeOffset * embeddingLength + embeddingIdx;
-
         double relationshipWeightFactor = relationshipWeightFactor(batch[nodeOffset], batch[positiveNodeOffset]);
         double weightedPositiveLogistic = relationshipWeightFactor * positiveLogistic;
 
-        double scaledPositiveExampleGradient = -embeddings.dataAt(positiveNodeIndex) * weightedPositiveLogistic;
-        double scaledNegativeExampleGradient = negativeSamplingFactor * embeddings.dataAt(negativeNodeIndex) * negativeLogistic;
-        gradientResult.setDataAt(nodeIndex, scaledPositiveExampleGradient + scaledNegativeExampleGradient);
+        double scaledPositiveExampleGradient = - embeddings.dataAt(positiveNodeOffset, embeddingIdx) * weightedPositiveLogistic;
+        double scaledNegativeExampleGradient = negativeSamplingFactor * embeddings.dataAt(negativeNodeOffset, embeddingIdx) * negativeLogistic;
 
-        gradientResult.setDataAt(positiveNodeIndex, -embeddings.dataAt(nodeIndex) * weightedPositiveLogistic);
-        gradientResult.setDataAt(negativeNodeIndex, negativeSamplingFactor * embeddings.dataAt(nodeIndex) * negativeLogistic);
+        gradientResult.setDataAt(nodeOffset, embeddingIdx, scaledPositiveExampleGradient + scaledNegativeExampleGradient);
+
+        double currentEmbeddingValue = embeddings.dataAt(nodeOffset, embeddingIdx);
+
+        gradientResult.setDataAt(
+            positiveNodeOffset,
+            embeddingIdx,
+            -currentEmbeddingValue * weightedPositiveLogistic
+        );
+
+        gradientResult.setDataAt(
+            negativeNodeOffset,
+            embeddingIdx,
+            negativeSamplingFactor * currentEmbeddingValue * negativeLogistic
+        );
     }
 
     private double logisticFunction(double affinity) {
