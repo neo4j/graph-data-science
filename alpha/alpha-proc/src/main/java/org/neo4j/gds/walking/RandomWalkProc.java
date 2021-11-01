@@ -154,15 +154,15 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
                     return cursor.nodeReference();
                 });
             }
-            return ids.map(graph::toMappedNodeId).mapToInt(Math::toIntExact).onClose(cursor::close);
+            return ids.map(graph::safeToMappedNodeId).mapToInt(Math::toIntExact).onClose(cursor::close);
         } else if (start instanceof Collection) {
             return ((Collection<?>) start)
                 .stream()
                 .mapToLong(e -> ((Number) e).longValue())
-                .map(graph::toMappedNodeId)
+                .map(graph::safeToMappedNodeId)
                 .mapToInt(Math::toIntExact);
         } else if (start instanceof Number) {
-            return LongStream.of(((Number) start).longValue()).map(graph::toMappedNodeId).mapToInt(Math::toIntExact);
+            return LongStream.of(((Number) start).longValue()).map(graph::safeToMappedNodeId).mapToInt(Math::toIntExact);
         } else {
             if (nodeCount < limit) {
                 return IntStream.range(0, nodeCount).limit(limit);

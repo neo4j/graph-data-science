@@ -21,9 +21,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Collection;
 import java.util.Set;
