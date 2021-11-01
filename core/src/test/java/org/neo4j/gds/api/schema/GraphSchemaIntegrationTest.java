@@ -33,7 +33,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
@@ -97,7 +97,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
                 PropertyMapping.of("prop")
             ),
             Arguments.of(
-                PropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), GraphStore.PropertyState.PERSISTENT),
+                PropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), PropertyState.PERSISTENT),
                 PropertyMapping.of("prop", 1337)
             )
         );
@@ -114,7 +114,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
                     "relProp",
                     ValueType.DOUBLE,
                     DefaultValue.of(1337.0D),
-                    GraphStore.PropertyState.PERSISTENT,
+                    PropertyState.PERSISTENT,
                     Aggregation.MAX
                 ),
                 PropertyMapping.of("relProp", DefaultValue.of(1337.0D), Aggregation.MAX)

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.io.file.schema;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 
@@ -29,7 +29,7 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     String key;
     ValueType valueType;
     DefaultValue defaultValue;
-    GraphStore.PropertyState state;
+    PropertyState state;
 
     protected abstract void export();
 
@@ -49,7 +49,7 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     }
 
     @Override
-    public GraphStore.PropertyState state() {
+    public PropertyState state() {
         return state;
     }
 
@@ -72,7 +72,7 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     }
 
     @Override
-    public boolean state(GraphStore.PropertyState state) {
+    public boolean state(PropertyState state) {
         this.state = state;
         return true;
     }

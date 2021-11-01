@@ -23,8 +23,8 @@ import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -70,7 +70,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
                 PropertySchema.of(propertyName,
                     valueType,
                     valueType.fallbackValue(),
-                    GraphStore.PropertyState.PERSISTENT
+                    PropertyState.PERSISTENT
                 )
             );
         }

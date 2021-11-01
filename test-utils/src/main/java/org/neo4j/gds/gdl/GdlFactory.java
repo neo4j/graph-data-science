@@ -28,10 +28,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
@@ -160,7 +160,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                     RelationshipProperty.of(
                         propertyKey,
                         NumberType.FLOATING_POINT,
-                        GraphStore.PropertyState.PERSISTENT,
+                        PropertyState.PERSISTENT,
                         propertyValues,
                         DefaultValue.forDouble(),
                         graphCreateConfig.aggregation()

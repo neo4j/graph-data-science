@@ -21,6 +21,7 @@ package org.neo4j.gds.nodeproperties;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
@@ -35,7 +36,7 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
 
     public static LongNodeProperties of(GraphStore graphStore, String seedProperty, LongNodeProperties newProperties) {
         var propertyState = graphStore.nodePropertyState(seedProperty);
-        if (propertyState == GraphStore.PropertyState.PERSISTENT) {
+        if (propertyState == PropertyState.PERSISTENT) {
             NodeProperties seedProperties = graphStore.nodePropertyValues(seedProperty);
             // TODO forbid doubles once we load properties with their correct type
             if (seedProperties.valueType() == ValueType.LONG || seedProperties.valueType() == ValueType.DOUBLE) {

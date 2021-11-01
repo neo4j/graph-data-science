@@ -25,6 +25,7 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
@@ -106,7 +107,7 @@ final class RelationshipsFilter {
                     RelationshipProperty.of(
                         propertyKey,
                         NumberType.FLOATING_POINT,
-                        GraphStore.PropertyState.PERSISTENT,
+                        PropertyState.PERSISTENT,
                         properties,
                         DefaultValue.forDouble(),
                         Aggregation.NONE

@@ -48,13 +48,13 @@ interface NodeProperty {
     }
 
     @Configuration.Ignore
-    default GraphStore.PropertyState propertyState() {
+    default PropertyState propertyState() {
         return propertySchema().state();
     }
 
     static NodeProperty of(
         String key,
-        GraphStore.PropertyState origin,
+        PropertyState origin,
         NodeProperties values
     ) {
         return ImmutableNodeProperty.of(
@@ -65,7 +65,7 @@ interface NodeProperty {
 
     static NodeProperty of(
         String key,
-        GraphStore.PropertyState origin,
+        PropertyState origin,
         NodeProperties values,
         DefaultValue defaultValue
     ) {

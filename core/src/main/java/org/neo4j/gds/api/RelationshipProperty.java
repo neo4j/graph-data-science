@@ -49,7 +49,7 @@ public interface RelationshipProperty {
     }
 
     @Configuration.Ignore
-    default GraphStore.PropertyState propertyState() {
+    default PropertyState propertyState() {
         return propertySchema().state();
     }
 
@@ -61,7 +61,7 @@ public interface RelationshipProperty {
     static RelationshipProperty of(
         String key,
         NumberType type,
-        GraphStore.PropertyState state,
+        PropertyState state,
         Relationships.Properties values,
         DefaultValue defaultValue,
         Aggregation aggregation

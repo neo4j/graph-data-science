@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
@@ -45,7 +45,7 @@ class RelationshipSchemaTest {
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
         Aggregation aggregation = Aggregation.COUNT;
-        GraphStore.PropertyState propertyState = GraphStore.PropertyState.PERSISTENT;
+        PropertyState propertyState = PropertyState.PERSISTENT;
         String propertyName = "baz";
         var relationshipSchema = RelationshipSchema.builder()
             .addProperty(

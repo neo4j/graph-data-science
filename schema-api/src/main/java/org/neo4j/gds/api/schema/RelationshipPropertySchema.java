@@ -21,8 +21,8 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 
 @ValueClass
@@ -36,7 +36,7 @@ public interface RelationshipPropertySchema extends PropertySchema {
             propertyKey,
             valueType,
             valueType.fallbackValue(),
-            GraphStore.PropertyState.PERSISTENT,
+            PropertyState.PERSISTENT,
             Aggregation.DEFAULT
         );
     }
@@ -46,7 +46,7 @@ public interface RelationshipPropertySchema extends PropertySchema {
             propertyKey,
             valueType,
             valueType.fallbackValue(),
-            GraphStore.PropertyState.PERSISTENT,
+            PropertyState.PERSISTENT,
             aggregation
         );
     }
@@ -55,7 +55,7 @@ public interface RelationshipPropertySchema extends PropertySchema {
         String propertyKey,
         ValueType valueType,
         DefaultValue defaultValue,
-        GraphStore.PropertyState propertyState,
+        PropertyState propertyState,
         Aggregation aggregation
     ) {
         return ImmutableRelationshipPropertySchema.of(propertyKey, valueType, defaultValue, propertyState, aggregation);

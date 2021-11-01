@@ -21,6 +21,7 @@ dependencies {
 
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':schema-api')
     implementation project(':string-formatting')
 
     testImplementation project(":test-utils")

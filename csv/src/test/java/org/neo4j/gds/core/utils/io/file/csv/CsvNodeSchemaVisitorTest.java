@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
@@ -40,7 +40,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         nodeSchemaVisitor.key("prop1");
         nodeSchemaVisitor.valueType(ValueType.LONG);
         nodeSchemaVisitor.defaultValue(DefaultValue.of(42L));
-        nodeSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        nodeSchemaVisitor.state(PropertyState.PERSISTENT);
         nodeSchemaVisitor.endOfEntity();
 
         NodeLabel labelB = NodeLabel.of("B");
@@ -48,7 +48,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         nodeSchemaVisitor.key("prop2");
         nodeSchemaVisitor.valueType(ValueType.DOUBLE);
         nodeSchemaVisitor.defaultValue(DefaultValue.of(13.37D));
-        nodeSchemaVisitor.state(GraphStore.PropertyState.TRANSIENT);
+        nodeSchemaVisitor.state(PropertyState.TRANSIENT);
         nodeSchemaVisitor.endOfEntity();
 
         nodeSchemaVisitor.close();
@@ -94,7 +94,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         nodeSchemaVisitor.key("prop1");
         nodeSchemaVisitor.valueType(ValueType.LONG);
         nodeSchemaVisitor.defaultValue(DefaultValue.of(42L));
-        nodeSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        nodeSchemaVisitor.state(PropertyState.PERSISTENT);
         nodeSchemaVisitor.endOfEntity();
 
         NodeLabel labelB = NodeLabel.of("B");

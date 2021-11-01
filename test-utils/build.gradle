@@ -19,6 +19,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':memory-usage')
+    implementation project(':schema-api')
     implementation project(':string-formatting')
     implementation project(':transaction')
     implementation project(':write-services')

@@ -114,7 +114,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                 RelationshipProperty.of(
                     propertyMapping.propertyKey(),
                     NumberType.FLOATING_POINT,
-                    GraphStore.PropertyState.PERSISTENT,
+                    PropertyState.PERSISTENT,
                     ImmutableProperties.of(
                         propertiesList,
                         relationshipCount,

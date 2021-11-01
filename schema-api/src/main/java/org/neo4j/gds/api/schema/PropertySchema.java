@@ -21,7 +21,7 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 @ValueClass
@@ -33,13 +33,13 @@ public interface PropertySchema {
 
     DefaultValue defaultValue();
 
-    GraphStore.PropertyState state();
+    PropertyState state();
 
     static PropertySchema of(String propertyKey, ValueType valueType) {
-        return ImmutablePropertySchema.of(propertyKey, valueType, valueType.fallbackValue(), GraphStore.PropertyState.PERSISTENT);
+        return ImmutablePropertySchema.of(propertyKey, valueType, valueType.fallbackValue(), PropertyState.PERSISTENT);
     }
 
-    static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, GraphStore.PropertyState propertyState) {
+    static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, PropertyState propertyState) {
         return ImmutablePropertySchema.of(propertyKey, valueType, defaultValue, propertyState);
     }
 }

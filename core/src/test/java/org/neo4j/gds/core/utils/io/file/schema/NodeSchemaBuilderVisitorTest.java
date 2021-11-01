@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file.schema;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 
@@ -41,7 +41,7 @@ class NodeSchemaBuilderVisitorTest {
         nodeSchemaBuilderVisitor.key("prop1");
         nodeSchemaBuilderVisitor.valueType(ValueType.LONG);
         nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(42L));
-        nodeSchemaBuilderVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        nodeSchemaBuilderVisitor.state(PropertyState.PERSISTENT);
         nodeSchemaBuilderVisitor.endOfEntity();
 
         NodeLabel labelB = NodeLabel.of("B");
@@ -49,7 +49,7 @@ class NodeSchemaBuilderVisitorTest {
         nodeSchemaBuilderVisitor.key("prop2");
         nodeSchemaBuilderVisitor.valueType(ValueType.DOUBLE);
         nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(13.37D));
-        nodeSchemaBuilderVisitor.state(GraphStore.PropertyState.TRANSIENT);
+        nodeSchemaBuilderVisitor.state(PropertyState.TRANSIENT);
         nodeSchemaBuilderVisitor.endOfEntity();
 
         nodeSchemaBuilderVisitor.close();
@@ -68,7 +68,7 @@ class NodeSchemaBuilderVisitorTest {
                     PropertySchema.of("prop1",
                         ValueType.LONG,
                         DefaultValue.of(42L),
-                        GraphStore.PropertyState.PERSISTENT
+                        PropertyState.PERSISTENT
                     )
                 )
             ));
@@ -82,7 +82,7 @@ class NodeSchemaBuilderVisitorTest {
                     PropertySchema.of("prop2",
                         ValueType.DOUBLE,
                         DefaultValue.of(13.37D),
-                        GraphStore.PropertyState.TRANSIENT
+                        PropertyState.TRANSIENT
                     )
                 )
             ));

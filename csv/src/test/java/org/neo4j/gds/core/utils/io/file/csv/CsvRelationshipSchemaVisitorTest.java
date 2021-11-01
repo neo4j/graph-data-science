@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
@@ -55,7 +55,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.key("prop1");
         relationshipSchemaVisitor.valueType(ValueType.LONG);
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(42L));
-        relationshipSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        relationshipSchemaVisitor.state(PropertyState.PERSISTENT);
         relationshipSchemaVisitor.aggregation(Aggregation.COUNT);
         relationshipSchemaVisitor.endOfEntity();
 
@@ -64,7 +64,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.key("prop2");
         relationshipSchemaVisitor.valueType(ValueType.DOUBLE);
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(13.37D));
-        relationshipSchemaVisitor.state(GraphStore.PropertyState.TRANSIENT);
+        relationshipSchemaVisitor.state(PropertyState.TRANSIENT);
         relationshipSchemaVisitor.aggregation(Aggregation.DEFAULT);
         relationshipSchemaVisitor.endOfEntity();
 
@@ -111,7 +111,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.key("prop1");
         relationshipSchemaVisitor.valueType(ValueType.LONG);
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(42L));
-        relationshipSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        relationshipSchemaVisitor.state(PropertyState.PERSISTENT);
         relationshipSchemaVisitor.aggregation(Aggregation.COUNT);
         relationshipSchemaVisitor.endOfEntity();
 

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 
@@ -69,7 +69,7 @@ class NodeSchemaLoaderTest {
                         "prop1",
                         ValueType.LONG,
                         DefaultValue.of(42L),
-                        GraphStore.PropertyState.PERSISTENT
+                        PropertyState.PERSISTENT
                     )
                 )
             ));
@@ -84,7 +84,7 @@ class NodeSchemaLoaderTest {
                         "prop2",
                         ValueType.DOUBLE,
                         DefaultValue.of(13.37D),
-                        GraphStore.PropertyState.TRANSIENT
+                        PropertyState.TRANSIENT
                     )
                 )
             ));
@@ -134,7 +134,7 @@ class NodeSchemaLoaderTest {
                         "prop1",
                         ValueType.LONG,
                         DefaultValue.of(42L),
-                        GraphStore.PropertyState.PERSISTENT
+                        PropertyState.PERSISTENT
                     )
                 )
             ));

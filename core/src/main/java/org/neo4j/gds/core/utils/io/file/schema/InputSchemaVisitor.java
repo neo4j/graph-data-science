@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.io.file.schema;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.io.Closeable;
@@ -33,7 +33,7 @@ public interface InputSchemaVisitor extends Closeable {
 
     boolean defaultValue(DefaultValue defaultValue);
 
-    boolean state(GraphStore.PropertyState state);
+    boolean state(PropertyState state);
 
     void endOfEntity();
 
@@ -54,7 +54,7 @@ public interface InputSchemaVisitor extends Closeable {
         }
 
         @Override
-        public boolean state(GraphStore.PropertyState state) {
+        public boolean state(PropertyState state) {
             return true;
         }
 

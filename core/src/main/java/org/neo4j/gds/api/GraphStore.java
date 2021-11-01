@@ -42,10 +42,6 @@ import static java.util.Collections.singletonList;
 
 public interface GraphStore {
 
-    enum PropertyState {
-        PERSISTENT, TRANSIENT
-    }
-
     NamedDatabaseId databaseId();
 
     GraphSchema schema();

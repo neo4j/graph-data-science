@@ -24,12 +24,11 @@ import org.neo4j.gds.ElementIdentifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
 
@@ -104,7 +103,8 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
                 Map.Entry::getValue,
                 (leftSchema, rightSchema) -> {
                     if (leftSchema.valueType() != rightSchema.valueType()) {
-                        throw new IllegalArgumentException(formatWithLocale(
+                        throw new IllegalArgumentException(String.format(
+                            Locale.ENGLISH,
                             "Combining schema entries with value type %s and %s is not supported.",
                             leftSchema.valueType(),
                             rightSchema.valueType()
@@ -134,7 +134,8 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
                 Map.Entry::getValue,
                 (leftType, rightType) -> {
                     if (leftType.valueType() != rightType.valueType()) {
-                        throw new IllegalArgumentException(formatWithLocale(
+                        throw new IllegalArgumentException(String.format(
+                            Locale.ENGLISH,
                             "Combining schema entries with value type %s and %s is not supported.",
                             left.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType())),
                             right.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType()))

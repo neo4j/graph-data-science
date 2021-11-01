@@ -25,11 +25,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.gds.core.utils.io.file.schema.NodeSchemaBuilderVisitor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 
@@ -94,6 +94,6 @@ public class NodeSchemaLoader {
         String defaultValue;
 
         @JsonProperty
-        GraphStore.PropertyState state;
+        PropertyState state;
     }
 }

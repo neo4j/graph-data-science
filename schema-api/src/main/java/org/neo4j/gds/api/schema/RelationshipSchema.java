@@ -26,11 +26,10 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.RelationshipType;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
@@ -54,7 +53,8 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         Optional<String> maybeProperty
     ) {
         if (!properties().containsKey(relationshipType)) {
-            throw new IllegalArgumentException(formatWithLocale(
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
                 "Relationship schema does not contain relationship type '%s'",
                 relationshipType.name
             ));
@@ -62,7 +62,8 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
         maybeProperty.ifPresent(property -> {
             if (!properties().get(relationshipType).containsKey(property)) {
-                throw new IllegalArgumentException(formatWithLocale(
+                throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,
                     "Relationship schema does not contain relationship type '%s' and property '%s",
                     relationshipType.name,
                     property

@@ -17,6 +17,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':neo4j-adapter')
+    implementation project(':schema-api')
     implementation project(':string-formatting')
     implementation project(':collections')
 

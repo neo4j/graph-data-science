@@ -22,11 +22,11 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.NodePropertyStore;
+import org.neo4j.gds.api.PropertyState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public interface IdsAndProperties {
                 propertyMapping.propertyKey(),
                 NodeProperty.of(
                     propertyMapping.propertyKey(),
-                    GraphStore.PropertyState.PERSISTENT,
+                    PropertyState.PERSISTENT,
                     propertyValues,
                     propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()

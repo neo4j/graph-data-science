@@ -23,11 +23,9 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface GraphSchema {
@@ -37,7 +35,7 @@ public interface GraphSchema {
     RelationshipSchema relationshipSchema();
 
     default Map<String, Object> toMap() {
-        return map(
+        return Map.of(
             "nodes", nodeSchema().toMap(),
             "relationships", relationshipSchema().toMap()
         );
@@ -67,14 +65,16 @@ public interface GraphSchema {
 
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
         if (propertySchema instanceof RelationshipPropertySchema) {
-            return formatWithLocale(
+            return String.format(
+                Locale.ENGLISH,
                 "%s (%s, %s, Aggregation.%s)",
                 propertySchema.valueType().cypherName(),
                 propertySchema.defaultValue(),
                 propertySchema.state(),
                 ((RelationshipPropertySchema) propertySchema).aggregation());
         }
-        return formatWithLocale(
+        return String.format(
+            Locale.ENGLISH,
             "%s (%s, %s)",
             propertySchema.valueType().cypherName(),
             propertySchema.defaultValue(),

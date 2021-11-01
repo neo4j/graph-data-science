@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.Map;
@@ -53,7 +53,7 @@ class NodeSchemaTest {
                     propertyName,
                     ValueType.DOUBLE,
                     defaultValue,
-                    GraphStore.PropertyState.PERSISTENT
+                    PropertyState.PERSISTENT
                 )
             ).build();
 
@@ -162,9 +162,9 @@ class NodeSchemaTest {
             .build();
 
         var expectedUnionSchema = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), GraphStore.PropertyState.PERSISTENT),
-            "bar", PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), GraphStore.PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), GraphStore.PropertyState.PERSISTENT)
+            "foo", PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "bar", PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT),
+            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.PERSISTENT)
         );
 
         var unionPropertySchema = nodeSchema.unionProperties();
