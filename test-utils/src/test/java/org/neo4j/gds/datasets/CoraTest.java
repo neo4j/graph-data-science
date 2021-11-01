@@ -22,8 +22,6 @@ package org.neo4j.gds.datasets;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.helpers.collection.Iterables;
 
@@ -36,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CoraTest {
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void shouldLoadCoraDataset(@TempDir Path tempDir) {
         DatasetManager datasetManager = new DatasetManager(tempDir, CommunityDbCreator.getInstance());
         GdsGraphDatabaseAPI cora = datasetManager.openDb(Cora.ID);

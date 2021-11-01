@@ -32,8 +32,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.logging.NullLog;
@@ -114,7 +112,6 @@ class NodeClassificationTrainTest {
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
     }
 
-    @GdsEditionTest(Edition.EE)
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(MetricSpecification metricSpecification) {
@@ -184,7 +181,6 @@ class NodeClassificationTrainTest {
             .isNotEqualTo(bananasValidationScore);
     }
 
-    @GdsEditionTest(Edition.EE)
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldLogProgress(MetricSpecification metricSpecification) {

@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.List;
 import java.util.Map;
@@ -33,12 +31,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 import static org.neo4j.gds.MemoryEstimationTestUtil.subTree;
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 
 class LinkPredictionTrainFactoryTest {
     @Test
-    @GdsEditionTest(Edition.EE)
     void nodeCountShouldAffectOnlyNodeIdsAndSplitsAndDoSoLinearlyWhenNodesDominate() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, 5))
             .estimate(graphDimensions(1_000_100L, 700L, 300L), 4);
@@ -58,7 +55,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void nodePropertiesShouldNotAffectWhenUsingCosine() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "COSINE", 10, 5))
             .estimate(graphDimensions(10_100L, 70_000L, 30_000L), 4);
@@ -70,7 +66,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void nodePropertiesShouldAffectWhenNotUsingCosine() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, ASSUMED_MIN_NODE_FEATURES * 1000))
             .estimate(graphDimensions(10_100L, 70_000L, 30_000L), 4);
@@ -82,7 +77,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void batchSizeShouldScaleLinearlyWhenComputationGraphIsDominating() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 100000, 5))
             .estimate(graphDimensions(1_100L, 7_000L, 3_000L), 4);
@@ -97,7 +91,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void concurrencyShouldScaleLinearlyWhenComputationGraphIsDominating() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "L2", 100000, 5))
             .estimate(graphDimensions(1_100L, 7_000L, 3_000L), 4);
@@ -112,7 +105,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void trainRelCountShouldScaleLinearlyWhenTrainMetricsDominate() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "L2", 100, 5))
             .estimate(graphDimensions(1_100L, 7_000_000L, 3_000L), 4);
@@ -126,7 +118,6 @@ class LinkPredictionTrainFactoryTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void testRelCountShouldScaleLinearlyWhenTestMetricsDominate() {
         var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "L2", 100, 5))
             .estimate(graphDimensions(1_100L, 70_000L, 3_000_000L), 4);

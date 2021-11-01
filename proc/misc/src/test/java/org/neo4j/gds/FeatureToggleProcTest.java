@@ -21,8 +21,6 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -31,7 +29,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
@@ -64,7 +64,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.importer.skipOrphanNodes.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, SKIP_ORPHANS.isEnabled());
+        assertFalse(SKIP_ORPHANS.isEnabled());
     }
 
     @Test
@@ -83,7 +83,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.importer.usePreAggregation.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_PRE_AGGREGATION.isEnabled());
+        assertFalse(USE_PRE_AGGREGATION.isEnabled());
     }
 
     @Test
@@ -102,7 +102,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.useKernelTracker.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_KERNEL_TRACKER.isEnabled());
+        assertFalse(USE_KERNEL_TRACKER.isEnabled());
     }
 
     @Test
@@ -121,7 +121,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.usePropertyValueIndex.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_PROPERTY_VALUE_INDEX.isEnabled());
+        assertFalse(USE_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test
@@ -140,7 +140,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.useParallelPropertyValueIndex.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
+        assertFalse(USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test
@@ -159,7 +159,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.useUncompressedAdjacencyList.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled());
+        assertFalse(USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled());
     }
 
     @Test
@@ -178,10 +178,10 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.useReorderedAdjacencyList.reset()",
             List.of(Map.of("enabled", false))
         );
-        assertEquals(false, USE_REORDERED_ADJACENCY_LIST.isEnabled());
+        assertFalse(USE_REORDERED_ADJACENCY_LIST.isEnabled());
     }
 
-    @GdsEditionTest(Edition.EE)
+    @Test
     void toggleUseBitIdMap() {
         var useBitIdMap = USE_BIT_ID_MAP.isEnabled();
         runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", !useBitIdMap));
@@ -190,14 +190,14 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(useBitIdMap, USE_BIT_ID_MAP.isEnabled());
     }
 
-    @GdsEditionTest(Edition.EE)
+    @Test
     void resetUseBitIdMap() {
         USE_BIT_ID_MAP.reset();
         assertCypherResult(
             "CALL gds.features.useBitIdMap.reset()",
             List.of(Map.of("enabled", true))
         );
-        assertEquals(true, USE_BIT_ID_MAP.isEnabled());
+        assertTrue(USE_BIT_ID_MAP.isEnabled());
     }
 
     @Test

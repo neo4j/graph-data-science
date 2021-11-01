@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,7 +81,6 @@ class FractionSplitterTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void estimationIsNotAffectedByConcurrency() {
         var dimensions = GraphDimensions.of(1000);
         var estimator = FractionSplitter.estimate(0.1);

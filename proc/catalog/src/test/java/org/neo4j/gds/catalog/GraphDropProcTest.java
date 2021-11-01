@@ -29,8 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -208,7 +206,6 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    @GdsEditionTest(Edition.EE)
     void doNotAcceptUsernameOverrideForNonGdsAdmins() {
         var graphNameParams = Map.<String, Object>of("name", GRAPH_NAME);
 

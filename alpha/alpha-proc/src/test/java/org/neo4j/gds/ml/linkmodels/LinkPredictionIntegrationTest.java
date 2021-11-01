@@ -23,22 +23,19 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.model.catalog.ModelListProc;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@GdsEditionTest(Edition.EE)
 class LinkPredictionIntegrationTest extends BaseProcTest {
 
     // Five cliques of size 2, 3, or 4

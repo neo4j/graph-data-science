@@ -34,8 +34,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.ArrayList;
@@ -61,7 +59,6 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@GdsEditionTest(Edition.EE)
 class GraphSageTrainAlgorithmFactoryTest {
 
     private static final int SOME_REASONABLE_VALUE = 100;
