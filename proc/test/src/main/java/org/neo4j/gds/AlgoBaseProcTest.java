@@ -527,19 +527,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         );
     }
 
-//    FIXME: move that out
-//    @Test
-//    @GdsEditionTest(Edition.EE)
-//    default void shouldAllowManyCoresOnUnlimited() {
-//        applyOnProcedure((proc) ->
-//            getWriteAndStreamProcedures(proc).forEach(method -> {
-//                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();
-//
-//                assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
-//            })
-//        );
-//    }
-
     @Test
     default void testFailOnMissingRelationshipType() {
         applyOnProcedure((proc) -> {
