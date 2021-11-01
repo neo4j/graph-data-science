@@ -80,8 +80,6 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             probabilitiesBuilder.registerWalk(walk);
             walks.add(walk);
         });
-        progressTracker.endSubTask("create walks");
-        progressTracker.endSubTask("RandomWalk");
 
         var node2VecModel = new Node2VecModel(
             graph.nodeCount(),
