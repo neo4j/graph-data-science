@@ -46,7 +46,7 @@ class LinkPredictionPipelineTest {
             .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipeline::splitConfig)
             .returns(
                 List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap()),
-                LinkPredictionPipeline::parameterSpace
+                LinkPredictionPipeline::parameterSpaceMaps
             );
     }
 
@@ -197,7 +197,7 @@ class LinkPredictionPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    pipeline.parameterSpace(),
+                    pipeline.parameterSpaceMaps(),
                     pipelineMap -> pipelineMap.get("parameterSpace")
                 );
         }

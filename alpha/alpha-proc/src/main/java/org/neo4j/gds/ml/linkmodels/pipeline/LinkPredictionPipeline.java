@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.model.Model.Mappable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.PipelineBuilder;
@@ -35,7 +33,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -62,7 +59,7 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
     protected Map<String, Object> additionalEntries() {
         return Map.of(
             "splitConfig", splitConfig.toMap(),
-            "parameterSpace", parameterSpace
+            "parameterSpace", parameterSpaceMaps()
         );
     }
 
@@ -77,6 +74,11 @@ public class LinkPredictionPipeline extends PipelineBuilder<LinkFeatureStep> {
      public List<LinkLogisticRegressionTrainConfig> parameterSpace() {
         return parameterSpace;
     }
+
+    public List<Map<String, Object>> parameterSpaceMaps() {
+        return parameterSpace.stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList());
+    }
+
 
     public void setParameterSpace(@NotNull List<LinkLogisticRegressionTrainConfig> parameterList) {
         this.parameterSpace = parameterList;

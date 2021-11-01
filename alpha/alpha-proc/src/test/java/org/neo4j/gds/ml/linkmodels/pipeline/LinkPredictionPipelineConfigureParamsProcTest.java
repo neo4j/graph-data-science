@@ -39,8 +39,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
         "patience", 1,
         "batchSize", 100,
         "tolerance", 0.001,
-        "useBiasFeature", true,
-        "concurrency", 4
+        "useBiasFeature", true
     ));
 
     @BeforeEach
@@ -82,7 +81,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4, concurrency: 2}])",
+            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 4}])",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -95,8 +94,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "patience", 1,
                     "batchSize", 100,
                     "tolerance", 0.001,
-                    "useBiasFeature", true,
-                    "concurrency", 2
+                    "useBiasFeature", true
                 ))
             ))
         );
@@ -105,10 +103,10 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     @Test
     void failOnInvalidParameterValues() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{concurrency: 0.5, batchSize: 0.51}])",
+            "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 0.5, batchSize: 0.51}])",
             "Multiple errors in configuration arguments:\n" +
             "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
-            "\t\t\t\tThe value of `concurrency` must be of type `Integer` but was `Double`."
+            "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
         );
     }
 

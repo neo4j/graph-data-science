@@ -36,7 +36,16 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigu
 
 class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
-    static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 3, "trainFraction", 0.1);
+    static final Map<String, Object> DEFAULT_SPLIT_CONFIG = Map.of(
+        "negativeSamplingRatio",
+        1.0,
+        "testFraction",
+        0.1,
+        "validationFolds",
+        3,
+        "trainFraction",
+        0.1
+    );
 
     @BeforeEach
     void setUp() throws Exception {
