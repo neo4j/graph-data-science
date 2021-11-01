@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -36,11 +36,11 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.roaringbitmap.longlong.Roaring64Bitmap;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -278,28 +278,20 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         var labelA = Label.label("A");
         var labelB = Label.label("B");
-        var labelC = Label.label("C");
 
-        var expectedLabelCounts = Map.of(
-            labelA.name(), new MutableInt(),
-            labelB.name(), new MutableInt(),
-            labelC.name(), new MutableInt()
-        );
-
-        var rand = ThreadLocalRandom.current();
+        var labelABits = new Roaring64Bitmap();
+        var labelBBits = new Roaring64Bitmap();
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
-                var probability = rand.nextDouble();
-                // Create node with all available labels
-                if (probability < 1.0 / 6) {
-                    expectedLabelCounts.values().forEach(MutableInt::increment);
-                    tx.createNode(labelA, labelB, labelC);
+                if (i % 3 == 0) {
+                    labelABits.add(tx.createNode(labelA).getId());
+                } else if (i % 3 == 1) {
+                    labelBBits.add(tx.createNode(labelB).getId());
                 } else {
-                    // Pick a single label based on probability
-                    var label = (probability < 1.0 / 3) ? labelA : (probability < 2.0 / 3) ? labelB : labelC;
-                    expectedLabelCounts.get(label.name()).increment();
-                    tx.createNode(label);
+                    var id = tx.createNode(labelA, labelB).getId();
+                    labelABits.add(id);
+                    labelBBits.add(id);
                 }
             }
         });
@@ -307,7 +299,6 @@ final class HugeGraphLoadingTest extends BaseTest {
         var graphStore = new StoreLoaderBuilder()
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
-            .addNodeLabel(labelC.name())
             .concurrency(concurrency)
             .api(db)
             .build()
@@ -315,24 +306,41 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         assertThat(graphStore.nodeCount()).isEqualTo(nodeCount);
 
-        var actualLabelCounts = Map.of(
-            labelA.name(), new MutableInt(),
-            labelB.name(), new MutableInt(),
-            labelC.name(), new MutableInt()
-        );
-
         graphStore.nodes().forEachNode(node -> {
-            graphStore.nodes().forEachNodeLabel(node, nodeLabel -> {
-                actualLabelCounts.get(nodeLabel.name()).increment();
-                return true;
-            });
+            var nodeLabels = graphStore
+                .nodes()
+                .nodeLabels(node)
+                .stream()
+                .map(NodeLabel::name)
+                .collect(Collectors.toSet());
+
+            var neoId = graphStore.nodes().toOriginalNodeId(node);
+
+            if (neoId % 3 == 0) {
+                assertThat(nodeLabels).contains(labelA.name());
+                assertThat(nodeLabels).doesNotContain(labelB.name());
+
+                assertThat(labelABits.contains(neoId)).isTrue();
+                assertThat(labelBBits.contains(neoId)).isFalse();
+            }
+
+            if (neoId % 3 == 1) {
+                assertThat(nodeLabels).doesNotContain(labelA.name());
+                assertThat(nodeLabels).contains(labelB.name());
+
+                assertThat(labelABits.contains(neoId)).isFalse();
+                assertThat(labelBBits.contains(neoId)).isTrue();
+            }
+
+            if (neoId % 3 == 2) {
+                assertThat(nodeLabels).contains(labelA.name());
+                assertThat(nodeLabels).contains(labelB.name());
+
+                assertThat(labelABits.contains(neoId)).isTrue();
+                assertThat(labelBBits.contains(neoId)).isTrue();
+            }
+
             return true;
         });
-
-        var expectedTotalLabelCount = actualLabelCounts.values().stream().mapToInt(MutableInt::getValue).sum();
-        var actualTotalLabelCount = actualLabelCounts.values().stream().mapToInt(MutableInt::getValue).sum();
-
-        assertThat(actualTotalLabelCount).isEqualTo(expectedTotalLabelCount);
-        assertThat(actualLabelCounts).isEqualTo(actualLabelCounts);
     }
 }
