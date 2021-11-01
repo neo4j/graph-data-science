@@ -27,13 +27,54 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.procedure.Context;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ProcedureRunnerTest extends BaseTest {
 
     @Test
-    void shouldPassCorrectUsername() {
+    void shouldValidateThatAllContextFieldsAreSet() {
+        var instantiateProcedureMethodName = "instantiateProcedure";
+        var instantiateProcedureMethod = Arrays.stream(ProcedureRunner.class.getMethods())
+            .filter(method -> method.getName().equals(instantiateProcedureMethodName))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException(formatWithLocale(
+                "Did not find any method with name",
+                instantiateProcedureMethodName
+            )));
+
+        var baseProcClass = BaseProc.class;
+        List<Class<?>> contextFieldTypes = Arrays.stream(baseProcClass.getDeclaredFields())
+            .filter(field -> field.isAnnotationPresent(Context.class))
+            .map(Field::getType)
+            // KernelTransaction is computed from Transaction
+            .filter(paramType -> paramType != KernelTransaction.class)
+            .collect(Collectors.toList());
+
+        var parameterTypes = Arrays.asList(instantiateProcedureMethod.getParameterTypes());
+
+        contextFieldTypes.removeAll(parameterTypes);
+        assertThat(contextFieldTypes)
+            .overridingErrorMessage(
+                formatWithLocale(
+                    "Expecting method %s to set all context injected fields on BaseProc.class but did not find parameters for types %s",
+                    instantiateProcedureMethodName,
+                    contextFieldTypes
+                )
+            )
+            .isEmpty();
+    }
+
+    @Test
+    void shouldPassCorrectParameters() {
         try (var tx = db.beginTx()) {
             var procedureCallContext = new ProcedureCallContext(42, new String[]{"prop"}, true, db.databaseName(), false);
             var log = new TestLog();
