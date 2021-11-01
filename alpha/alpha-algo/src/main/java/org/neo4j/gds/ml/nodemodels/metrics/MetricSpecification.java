@@ -42,7 +42,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface MetricSpecification {
-    SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
+    SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
         F1Score.NAME, F1Score::new,
         Precision.NAME, Precision::new,
         Recall.NAME, Recall::new,
@@ -67,7 +67,7 @@ public interface MetricSpecification {
         return formatWithLocale("%s(class=%s)", metricType, classId);
     }
 
-    Stream<Metric> createMetrics(Collection<Long> classes);
+    Stream<ClassificationMetric> createMetrics(Collection<Long> classes);
 
     String asString();
 
@@ -115,7 +115,7 @@ public interface MetricSpecification {
         }
         var metricType = matcher.group(1);
         if (matcher.group(2).equals("*")) {
-            for (Map.Entry<String, Function<Long, Metric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
+            for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
                 String metric = entry.getKey();
                 if (metric.equals(metricType)) {
                     return createSpecification(
@@ -137,12 +137,12 @@ public interface MetricSpecification {
     }
 
     static MetricSpecification createSpecification(
-        Function<Collection<Long>, Stream<Metric>> metricFactory,
+        Function<Collection<Long>, Stream<ClassificationMetric>> metricFactory,
         String stringRepresentation
     ) {
         return new MetricSpecification() {
             @Override
-            public Stream<Metric> createMetrics(Collection<Long> classes) {
+            public Stream<ClassificationMetric> createMetrics(Collection<Long> classes) {
                 return metricFactory.apply(classes);
             }
 

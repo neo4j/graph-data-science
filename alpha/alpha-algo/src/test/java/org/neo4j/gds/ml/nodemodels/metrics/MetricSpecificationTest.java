@@ -45,7 +45,7 @@ public class MetricSpecificationTest {
     @Test
     void shouldCreateAccuracyMetric() {
         var metricSpecification = MetricSpecification.parse(List.of("Accuracy")).get(0);
-        Metric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.asString()).isEqualTo("ACCURACY");
         assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
@@ -54,7 +54,7 @@ public class MetricSpecificationTest {
     @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = MetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
-        Metric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
         assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
     }
@@ -62,7 +62,7 @@ public class MetricSpecificationTest {
     @Test
     void shouldCreateF1MacroMetric() {
         var metricSpecification = MetricSpecification.parse(List.of("F1_maCRo")).get(0);
-        Metric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
     }
@@ -70,7 +70,7 @@ public class MetricSpecificationTest {
     @Test
     void shouldParseSyntacticSugar() {
         var metricSpecification = MetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
-        List<Metric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
+        List<ClassificationMetric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
         assertThat(metrics.get(0).name()).isEqualTo("F1(class=42)");

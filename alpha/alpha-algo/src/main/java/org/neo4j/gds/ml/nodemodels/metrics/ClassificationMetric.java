@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.nodemodels.Metric;
 import org.openjdk.jol.util.Multiset;
 
-public interface Metric {
+public interface ClassificationMetric extends Metric {
     double EPSILON = 1e-8;
     double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> globalClassCounts);
-    String name();
 }

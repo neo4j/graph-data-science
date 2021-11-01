@@ -26,7 +26,7 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Accuracy implements Metric {
+public class Accuracy implements ClassificationMetric {
 
     // TODO: Accuracy per class clashes with the global Accuracy metric.
     // Let's solve that later, and call this APC for now.

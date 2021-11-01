@@ -17,35 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.metrics;
+package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.openjdk.jol.util.Multiset;
+import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
-public enum AllClassMetric implements ClassificationMetric {
-    F1_WEIGHTED(new F1Weighted()),
-    F1_MACRO(new F1Macro()),
-    ACCURACY(new AccuracyMetric());
+import java.util.Map;
 
-    private final MetricStrategy strategy;
-
-    AllClassMetric(MetricStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public double compute(
-        HugeLongArray targets,
-        HugeLongArray predictions,
-        Multiset<Long> globalClassCounts
-    ) {
-        return strategy.compute(targets, predictions, globalClassCounts);
-    }
-
-    interface MetricStrategy {
-        double compute(
-            HugeLongArray targets,
-            HugeLongArray predictions,
-            Multiset<Long> globalClassCounts
-        );
-    }
+public interface MetricComputer {
+    Map<Metric, Double> computeMetrics(HugeLongArray evaluationSet, Predictor<Matrix, ?> predictor);
 }
