@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -35,6 +38,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -106,7 +110,11 @@ final class HugeGraphLoadingTest extends BaseTest {
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             double propertyValue = nodeProperties.doubleValue(nodeId);
             long neoId = graph.toOriginalNodeId(nodeId);
-            assertEquals(neoId, (long) propertyValue, formatWithLocale("Property for node %d (neo = %d) was overwritten.", nodeId, neoId));
+            assertEquals(
+                neoId,
+                (long) propertyValue,
+                formatWithLocale("Property for node %d (neo = %d) was overwritten.", nodeId, neoId)
+            );
         }
     }
 
@@ -263,33 +271,68 @@ final class HugeGraphLoadingTest extends BaseTest {
             .isMultiGraph());
     }
 
-    @Test
-    void testLargeLabeledGraph() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testMultiNodeLabelIndexScanWithExceedingBufferSizes(int concurrency) {
         int nodeCount = 150_000;
 
         var labelA = Label.label("A");
         var labelB = Label.label("B");
         var labelC = Label.label("C");
 
+        var expectedLabelCounts = Map.of(
+            labelA.name(), new MutableInt(),
+            labelB.name(), new MutableInt(),
+            labelC.name(), new MutableInt()
+        );
+
         var rand = ThreadLocalRandom.current();
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
-                var p = rand.nextDouble();
-                var label = (p < 1.0 / 3) ? labelA : (p < 2.0 / 3) ? labelB : labelC;
-                tx.createNode(label);
+                var probability = rand.nextDouble();
+                // Create node with all available labels
+                if (probability < 1.0 / 6) {
+                    expectedLabelCounts.values().forEach(MutableInt::increment);
+                    tx.createNode(labelA, labelB, labelC);
+                } else {
+                    // Pick a single label based on probability
+                    var label = (probability < 1.0 / 3) ? labelA : (probability < 2.0 / 3) ? labelB : labelC;
+                    expectedLabelCounts.get(label.name()).increment();
+                    tx.createNode(label);
+                }
             }
         });
 
         var graphStore = new StoreLoaderBuilder()
-            .addNodeLabel("A")
-            .addNodeLabel("B")
-            .addNodeLabel("C")
-            .concurrency(1)
+            .addNodeLabel(labelA.name())
+            .addNodeLabel(labelB.name())
+            .addNodeLabel(labelC.name())
+            .concurrency(concurrency)
             .api(db)
             .build()
             .graphStore();
 
         assertThat(graphStore.nodeCount()).isEqualTo(nodeCount);
+
+        var actualLabelCounts = Map.of(
+            labelA.name(), new MutableInt(),
+            labelB.name(), new MutableInt(),
+            labelC.name(), new MutableInt()
+        );
+
+        graphStore.nodes().forEachNode(node -> {
+            graphStore.nodes().forEachNodeLabel(node, nodeLabel -> {
+                actualLabelCounts.get(nodeLabel.name()).increment();
+                return true;
+            });
+            return true;
+        });
+
+        var expectedTotalLabelCount = actualLabelCounts.values().stream().mapToInt(MutableInt::getValue).sum();
+        var actualTotalLabelCount = actualLabelCounts.values().stream().mapToInt(MutableInt::getValue).sum();
+
+        assertThat(actualTotalLabelCount).isEqualTo(expectedTotalLabelCount);
+        assertThat(actualLabelCounts).isEqualTo(actualLabelCounts);
     }
 }
