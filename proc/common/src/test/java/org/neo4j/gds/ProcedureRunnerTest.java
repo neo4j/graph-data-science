@@ -76,10 +76,13 @@ class ProcedureRunnerTest extends BaseTest {
     @Test
     void shouldPassCorrectParameters() {
         try (var tx = db.beginTx()) {
-            var procedureCallContext = new ProcedureCallContext(42, new String[]{"prop"}, true, db.databaseName(), false);
+            var procedureCallContext = ProcedureCallContext.EMPTY;
             var log = new TestLog();
             var username = Username.of("foo");
-            TaskRegistryFactory taskRegistryFactory = () -> new TaskRegistry(username.username(), new GlobalTaskStore());
+            TaskRegistryFactory taskRegistryFactory = () -> new TaskRegistry(
+                username.username(),
+                new GlobalTaskStore()
+            );
             var allocationTracker = AllocationTracker.empty();
             var licenseState = OpenGdsLicenseState.INSTANCE;
             ProcedureRunner.applyOnProcedure(
