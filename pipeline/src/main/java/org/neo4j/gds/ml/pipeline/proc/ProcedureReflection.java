@@ -95,7 +95,7 @@ public final class ProcedureReflection {
 
     private AlgoBaseProc<?, ?, ?> createProcedure(BaseProc caller, Method method) {
         Class<AlgoBaseProc<?, ?, ?>> procClass = (Class<AlgoBaseProc<?, ?, ?>>) method.getDeclaringClass();
-        return ProcedureRunner.instantiateProcedure(caller, procClass);
+        return ProcedureRunner.instantiateProcedureFromCaller(caller, procClass);
     }
 
     public Optional<AlgoBaseConfig> createAlgoConfig(BaseProc caller, Method procMethod, CypherMapWrapper config) {
