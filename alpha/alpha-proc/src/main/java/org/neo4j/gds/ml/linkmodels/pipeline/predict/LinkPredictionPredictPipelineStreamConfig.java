@@ -27,15 +27,15 @@ import java.util.Optional;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPipelineStreamConfig extends LinkPredictionPipelineBaseConfig {
+public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
     
-    static LinkPredictionPipelineStreamConfig of(
+    static LinkPredictionPredictPipelineStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new LinkPredictionPipelineStreamConfigImpl(
+        return new LinkPredictionPredictPipelineStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

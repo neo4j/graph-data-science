@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class LinkPredictionPipelineBaseConfigTest {
+class LinkPredictionPredictPipelineBaseConfigTest {
 
     public static Stream<Arguments> invalidParameterCombinations() {
         return Stream.of(
@@ -79,8 +79,8 @@ class LinkPredictionPipelineBaseConfigTest {
     }
 
     @Test
-    void failOnRandomSeedWithHighCouncurrency() {
-        assertThatThrownBy(() -> new LinkPredictionPipelineBaseConfigImpl(
+    void failOnRandomSeedWithHighConcurrency() {
+        assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
             Optional.empty(),
             "user",
@@ -94,7 +94,7 @@ class LinkPredictionPipelineBaseConfigTest {
     @ParameterizedTest
     @MethodSource("invalidParameterCombinations")
     void failOnIllegalParameterCombinations(Map<String, Object> config, String expectedMessage) {
-        assertThatThrownBy(() -> new LinkPredictionPipelineBaseConfigImpl(
+        assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of(" g"),
             Optional.empty(),
             "user",
@@ -106,7 +106,7 @@ class LinkPredictionPipelineBaseConfigTest {
 
     @Test
     void failOnDeriveKnnConfig() {
-        var exhaustiveConfig = new LinkPredictionPipelineBaseConfigImpl(
+        var exhaustiveConfig = new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
             Optional.empty(),
             "user",
@@ -125,7 +125,7 @@ class LinkPredictionPipelineBaseConfigTest {
 
     @Test
     void deriveKnnConfig() {
-        var approximateConfig = new LinkPredictionPipelineBaseConfigImpl(
+        var approximateConfig = new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
             Optional.empty(),
             "user",
@@ -149,7 +149,7 @@ class LinkPredictionPipelineBaseConfigTest {
 
     @Test
     void failOnMissingTopN() {
-        assertThatThrownBy(() -> new LinkPredictionPipelineBaseConfigImpl(
+        assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
             Optional.empty(),
             "user",

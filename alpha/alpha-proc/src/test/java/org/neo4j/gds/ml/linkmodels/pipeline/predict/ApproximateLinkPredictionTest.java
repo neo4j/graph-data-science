@@ -25,26 +25,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 
 import java.util.List;
@@ -70,7 +64,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
     private static final double[] WEIGHTS = new double[]{-2.0, -1.0, 3.0};
 
-    private GraphStore graphStore;
+    private Graph graph;
 
     @BeforeEach
     void setup() throws Exception {
@@ -87,15 +81,13 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore();
+        graph = graphStore.getUnion();
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
-
         var modelData = ImmutableLinkLogisticRegressionData.of(
             new Weights<>(
                 new Matrix(
@@ -106,46 +98,35 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new LinkPredictionPipelineExecutor(
-                pipeline,
-                caller,
-                db.databaseId(),
-                getUsername(),
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
-            var linkPrediction = new ApproximateLinkPrediction(
-                modelData,
-                pipelineExecutor,
-                List.of(NodeLabel.of("N")),
-                List.of(RelationshipType.of("T")),
-                graphStore,
-                ImmutableKnnBaseConfig.builder()
-                    .randomSeed(42L)
-                    .concurrency(1)
-                    .randomJoins(10)
-                    .maxIterations(10)
-                    .sampleRate(0.9)
-                    .deltaThreshold(0)
-                    .topK(topK)
-                    .nodeWeightProperty("DUMMY")
-                    .build(),
-                ProgressTracker.NULL_TRACKER
-            );
-            var predictionResult = linkPrediction.compute();
-            assertThat(predictionResult.samplingStats()).isEqualTo(
-                Map.of(
-                    "strategy", "approximate",
-                    "linksConsidered", expectedLinksConsidered,
-                    "ranIterations", ranIterations,
-                    "didConverge", true
-                )
-            );
+        var linkPrediction = new ApproximateLinkPrediction(
+            modelData,
+            LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+            graph,
+            ImmutableKnnBaseConfig.builder()
+                .randomSeed(42L)
+                .concurrency(1)
+                .randomJoins(10)
+                .maxIterations(10)
+                .sampleRate(0.9)
+                .deltaThreshold(0)
+                .topK(topK)
+                .nodeWeightProperty("DUMMY")
+                .build(),
+            ProgressTracker.NULL_TRACKER
+        );
+        var predictionResult = linkPrediction.compute();
+        assertThat(predictionResult.samplingStats()).isEqualTo(
+            Map.of(
+                "strategy", "approximate",
+                "linksConsidered", expectedLinksConsidered,
+                "ranIterations", ranIterations,
+                "didConverge", true
+            )
+        );
 
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
 
-            assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graphStore.nodeCount()));
+        assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graph.nodeCount()));
 
             var expectedLinks = List.of(
                 PredictedLink.of(0, 4, 0.49750002083312506),
@@ -163,20 +144,15 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 PredictedLink.of(4, 1, 0.11815697780926958)
             );
 
-            var graph = graphStore.getUnion();
-            assertThat(predictedLinks)
-                .isSubsetOf(expectedLinks)
-                .allMatch(prediction -> !graph.exists(prediction.sourceId(), prediction.targetId()));
-        });
+        assertThat(predictedLinks)
+            .isSubsetOf(expectedLinks)
+            .allMatch(prediction -> !graph.exists(prediction.sourceId(), prediction.targetId()));
+
     }
 
     @Test
     void shouldPredictTwice() {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
-
-        double[] weights = {-2.0, -1.0, 3.0, 1.0};
+        double[] weights = {-2.0, -1.0, 3.0};
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
             new Weights<>(new Matrix(
@@ -196,40 +172,28 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         );
 
         for (int i = 0; i < 2; i++) {
-            TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-                var pipelineExecutor = new LinkPredictionPipelineExecutor(
-                    pipeline,
-                    caller,
-                    db.databaseId(),
-                    getUsername(),
-                    GRAPH_NAME,
-                    ProgressTracker.NULL_TRACKER
-                );
-                var linkPrediction = new ApproximateLinkPrediction(
-                    modelData,
-                    pipelineExecutor,
-                    List.of(NodeLabel.of("N")),
-                    List.of(RelationshipType.of("T")),
-                    graphStore,
-                    ImmutableKnnBaseConfig.builder()
-                        .randomSeed(1337L)
-                        .concurrency(1)
-                        .randomJoins(10)
-                        .maxIterations(10)
-                        .sampleRate(0.9)
-                        .deltaThreshold(0)
-                        .topK(1)
-                        .nodeWeightProperty("DUMMY")
-                        .build(),
-                    ProgressTracker.NULL_TRACKER
-                );
+            var linkPrediction = new ApproximateLinkPrediction(
+                modelData,
+                LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+                graph,
+                ImmutableKnnBaseConfig.builder()
+                    .randomSeed(42L)
+                    .concurrency(1)
+                    .randomJoins(10)
+                    .maxIterations(10)
+                    .sampleRate(0.9)
+                    .deltaThreshold(0)
+                    .topK(1)
+                    .nodeWeightProperty("DUMMY")
+                    .build(),
+                ProgressTracker.NULL_TRACKER
+            );
 
-                var predictionResult = linkPrediction.compute();
-                var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-                assertThat(predictedLinks).hasSize(5);
+            var predictionResult = linkPrediction.compute();
+            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+            assertThat(predictedLinks).hasSize(4);
 
-                assertThat(predictedLinks).containsAll(expectedLinks);
-            });
+            assertThat(predictedLinks).containsAll(expectedLinks);
         }
     }
 

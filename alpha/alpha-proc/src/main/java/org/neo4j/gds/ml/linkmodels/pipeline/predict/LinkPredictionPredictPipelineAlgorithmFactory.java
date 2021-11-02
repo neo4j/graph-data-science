@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -38,11 +37,11 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getLinkPredictionPipeline;
 
-public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictionPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPipelinePredictExecutor, CONFIG> {
+public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
     private final BaseProc caller;
     private final NamedDatabaseId databaseId;
 
-    LinkPredictionPipelineAlgorithmFactory(
+    LinkPredictionPredictPipelineAlgorithmFactory(
         BaseProc caller,
         NamedDatabaseId databaseId
     ) {
@@ -76,7 +75,7 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
     }
 
     @Override
-    protected LinkPredictionPipelinePredictExecutor build(
+    protected LinkPredictionPredictPipelineExecutor build(
         Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
         String graphName = configuration
@@ -90,13 +89,12 @@ public class LinkPredictionPipelineAlgorithmFactory<CONFIG extends LinkPredictio
         );
         var graphStore = GraphStoreCatalog.get(CatalogRequest.of(configuration.username(), databaseId), graphName).graphStore();
         var linkPredictionPipeline = model.customInfo().trainingPipeline();
-        return new LinkPredictionPipelinePredictExecutor(
+        return new LinkPredictionPredictPipelineExecutor(
             linkPredictionPipeline,
             model.data(),
             configuration,
             caller,
             graphStore,
-            graph,
             graphName,
             progressTracker
         );

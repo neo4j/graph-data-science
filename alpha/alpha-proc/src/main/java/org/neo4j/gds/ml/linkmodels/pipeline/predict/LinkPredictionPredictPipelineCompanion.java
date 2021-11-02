@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-class LinkPredictionPipelineCompanion {
+final class LinkPredictionPredictPipelineCompanion {
     static final String DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
 
-    private LinkPredictionPipelineCompanion() {}
+    private LinkPredictionPredictPipelineCompanion() {}
 }

@@ -35,7 +35,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -51,7 +50,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
-public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPipelineMutateConfig> {
+public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
@@ -65,14 +64,14 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
 
     @Override
     protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, LinkPredictionPipelineMutateConfig config
+        GraphCreateConfig graphCreateConfig, LinkPredictionPredictPipelineMutateConfig config
     ) {
         super.validateConfigsBeforeLoad(graphCreateConfig, config);
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computeResult) {
         var builder = new MutateResult.Builder()
             .withSamplingStats(computeResult.result().samplingStats());
         if (callContext.outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
@@ -85,7 +84,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineMutateConfig> computationResult
+        ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computationResult
     ) {
         var concurrency = computationResult.config().concurrency();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -127,18 +126,18 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected LinkPredictionPipelineMutateConfig newConfig(
+    protected LinkPredictionPredictPipelineMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LinkPredictionPipelineMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LinkPredictionPredictPipelineMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPipelinePredictExecutor, LinkPredictionPipelineMutateConfig> algorithmFactory() {
-        return new LinkPredictionPipelineAlgorithmFactory<>(this, databaseId());
+    protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, databaseId());
     }
 
     @SuppressWarnings("unused")
