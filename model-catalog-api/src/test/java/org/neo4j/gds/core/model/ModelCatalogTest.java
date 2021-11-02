@@ -36,6 +36,7 @@ import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -50,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ModelCatalogTest {
 
@@ -106,7 +106,7 @@ class ModelCatalogTest {
             () -> ModelCatalog.set(tippingModel)
         );
 
-        assertEquals(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", allowedModelsCount), ex.getMessage());
+        assertEquals(String.format(Locale.ENGLISH, "Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", allowedModelsCount), ex.getMessage());
     }
 
     @Test

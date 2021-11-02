@@ -21,11 +21,12 @@ package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.model.ModelConfig;
+//import org.neo4j.gds.core.GdsEdition;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -33,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ModelCatalog {
 
@@ -147,7 +147,8 @@ public final class ModelCatalog {
     }
 
     public static Model<?, ?, ?> publish(String username, String modelName) {
-        if (GdsEdition.instance().isOnCommunityEdition()) {
+//        if (GdsEdition.instance().isOnCommunityEdition()) {
+        if (false) {
             throw new IllegalArgumentException("Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
         }
 
@@ -316,7 +317,8 @@ public final class ModelCatalog {
         }
 
         private void verifyModelsLimit(String modelType) {
-            if (GdsEdition.instance().isOnCommunityEdition() && !canStoreModel(modelType)) {
+//            if (GdsEdition.instance().isOnCommunityEdition() && !canStoreModel(modelType)) {
+            if (false) {
                 throw new IllegalArgumentException(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", ALLOWED_MODELS_COUNT));
             }
         }
@@ -335,5 +337,9 @@ public final class ModelCatalog {
         private Model<?, ?, ?> getUntyped(String modelName) {
             return userModels.get(modelName);
         }
+    }
+
+    private static String formatWithLocale(String template, Object... inputs) {
+        return String.format(Locale.ENGLISH, template, inputs);
     }
 }

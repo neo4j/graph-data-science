@@ -20,12 +20,15 @@
 package org.neo4j.gds.core.model;
 
 import org.immutables.value.Value;
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,11 @@ import java.util.stream.Collectors;
 
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.Mappable> {
+
+    private static ZonedDateTime now() {
+        var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
+        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
+    }
 
     String ALL_USERS = "*";
     String PUBLIC_MODEL_SUFFIX = "_public";
@@ -104,7 +112,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             graphSchema,
             modelData,
             trainConfig,
-            TimeUtil.now(),
+            now(),
             customInfo
         );
     }

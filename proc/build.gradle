@@ -41,5 +41,6 @@ dependencies {
 
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
+    testImplementation project(':model-catalog-api')
     testImplementation project(':proc-test')
 }
