@@ -37,7 +37,7 @@ class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
     @Test
     void testScanner() {
         var nodeCount = 150_000;
-        var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE; // leads to a batch size of 576
+        var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
 
         var labelABits = new Roaring64Bitmap();
         var labelBBits = new Roaring64Bitmap();
