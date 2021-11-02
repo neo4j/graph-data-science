@@ -29,7 +29,7 @@ RETURN gds.version() AS version
 [opts="header"]
 |===
 | version
-| "1.7.2"
+| "1.7.3"
 |===
 --
 
@@ -182,4 +182,3 @@ RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 --
 
 As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.
-
