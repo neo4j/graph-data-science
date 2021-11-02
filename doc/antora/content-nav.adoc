@@ -111,7 +111,6 @@
 * xref:production-deployment/index.adoc[]
 ** xref:production-deployment/transaction-handling/index.adoc[]
 ** xref:production-deployment/fabric/index.adoc[]
-** xref:production-deployment/causal-cluster/index.adoc[]
 ** xref:production-deployment/feature-toggles/index.adoc[]
 * Appendix
 ** xref:operations-reference/appendix-a/index.adoc[]
