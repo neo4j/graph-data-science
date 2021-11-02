@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class UniformSamplerFromRange {
     public static final double RETRY_SAMPLING_RATIO = 0.6;
@@ -32,6 +37,21 @@ public class UniformSamplerFromRange {
         this.exclusionBasedSampler = new UniformSamplerByExclusion(random);
     }
 
+    public static MemoryRange memoryEstimation(long numberOfSamples) {
+        var samplerWithRetriesEstimation = UniformSamplerWithRetries.memoryEstimation(numberOfSamples);
+        var samplerByExclusionEstimation = UniformSamplerByExclusion.memoryEstimation(
+            numberOfSamples,
+            (long) Math.ceil(numberOfSamples / RETRY_SAMPLING_RATIO)
+        );
+
+        return samplerWithRetriesEstimation
+            .add(samplerByExclusionEstimation)
+            .add(MemoryRange.of(sizeOfInstance(UniformSamplerFromRange.class)))
+            // Since only one of the samplers will be used at single point in time we can deduct the cost of one of the
+            // samplers return value.
+            .subtract(sizeOfLongArray(numberOfSamples));
+    }
+
     public long[] sample(
         long inclusiveMin,
         long exclusiveMax,
@@ -41,7 +61,7 @@ public class UniformSamplerFromRange {
     ) {
         // If the number of potential neighbors are close in number to how many we want to sample, we can use retries.
         // Otherwise, we use an exclusion based method to avoid a possibly large number of retries.
-        double samplingRatio  = (double) numberOfSamples / lowerBoundOnValidSamplesInRange;
+        double samplingRatio = (double) numberOfSamples / lowerBoundOnValidSamplesInRange;
         if (samplingRatio < RETRY_SAMPLING_RATIO) {
             return retryBasedSampler.sample(
                 inclusiveMin,

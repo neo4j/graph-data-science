@@ -22,7 +22,9 @@ package org.neo4j.gds.mem;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.Containers;
 import com.carrotsearch.hppc.HashContainers;
+import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongDoubleHashMap;
+import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.gds.annotation.SuppressForbidden;
@@ -240,8 +242,16 @@ public final class MemoryUsage {
         return keyArraySize + valueArraySize + sizeOfInstance(LongDoubleHashMap.class);
     }
 
+    public static long sizeOfLongHashSet(long length) {
+        return sizeOfOpenHashContainer(length) + sizeOfInstance(LongHashSet.class);
+    }
+
     public static long sizeOfEmptyOpenHashContainer() {
         return sizeOfOpenHashContainer(Containers.DEFAULT_EXPECTED_ELEMENTS);
+    }
+
+    public static long sizeOfLongArrayList(long length) {
+        return sizeOfInstance(LongArrayList.class) + length * Long.BYTES;
     }
 
     public static long sizeOfOpenHashContainer(final long elements) {

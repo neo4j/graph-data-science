@@ -20,17 +20,41 @@
 package org.neo4j.gds.ml.core.samplers;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArrayList;
+
 public class UniformSamplerByExclusion {
     private final UniformSamplerWithRetries samplerWithRetries;
 
     public UniformSamplerByExclusion(SplittableRandom rng) {
         this.samplerWithRetries = new UniformSamplerWithRetries(rng);
+    }
+
+    public static MemoryRange memoryEstimation(long numberOfSamples, long maxLowerBoundOnValidSamples) {
+        var samplerWithRetriesEstimation =
+            UniformSamplerWithRetries.memoryEstimation(Math.min(
+            numberOfSamples,
+            maxLowerBoundOnValidSamples - numberOfSamples
+        )).union(UniformSamplerWithRetries.memoryEstimation(0));
+
+        return samplerWithRetriesEstimation.add(
+            MemoryRange.of(
+                sizeOfInstance(UniformSamplerByExclusion.class) +
+                sizeOfLongArray(numberOfSamples) +
+                sizeOfLongArrayList(0),
+                sizeOfInstance(UniformSamplerByExclusion.class) +
+                sizeOfLongArray(numberOfSamples) +
+                sizeOfLongArrayList(maxLowerBoundOnValidSamples)
+            )
+        );
     }
 
     /**

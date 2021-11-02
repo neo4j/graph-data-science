@@ -91,6 +91,17 @@ public final class MemoryRange {
         return new MemoryRange(newMin, newMax);
     }
 
+    public MemoryRange subtract(final long value) {
+        if (value == 0) {
+            return this;
+        }
+
+        long newMin = Math.subtractExact(this.min, value);
+        long newMax = Math.subtractExact(this.max, value);
+
+        return MemoryRange.of(newMin, newMax);
+    }
+
     public MemoryRange union(MemoryRange other) {
         return MemoryRange.of(Math.min(this.min, other.min), Math.max(this.max, other.max));
     }
