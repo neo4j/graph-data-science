@@ -26,6 +26,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
@@ -85,11 +86,11 @@ class KnnFactoryTest {
         long tempNeighborsListMin = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray;
         long tempNeighborsListMax = tempNeighborsListMin + nodeCount * (/* LAL */ 24 + sizeOfLongArray(sampledK));
 
-        long randomList = sizeOfLongArray(sizeOfOpenHashContainer(boundedK));
+        var randomList = UniformSamplerFromRange.memoryEstimation(boundedK);
         long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(sampledK));
 
-        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList + sampledList;
-        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList + sampledList;
+        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;
+        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList;
 
         assertEquals(expectedMin, actual.min);
         assertEquals(expectedMax, actual.max);

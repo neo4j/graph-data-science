@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import java.util.List;
 
@@ -89,9 +90,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
                     .add("new-reverse-neighbors", tempListEstimation)
                     .fixed(
                         "initial-random-neighbors (per thread)",
-                        MemoryRange.of(
-                            sizeOfLongArray(sizeOfOpenHashContainer(boundedK)) * concurrency
-                        )
+                        UniformSamplerFromRange.memoryEstimation(boundedK).times(concurrency)
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
