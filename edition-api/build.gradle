@@ -16,6 +16,7 @@ dependencies {
     implementation project(':licensing')
     implementation project(':concurrency-validation-api')
     implementation project(':model-catalog-api')
+    implementation project(':transaction')
 
     testImplementation project(':neo4j-adapter')
     testImplementation project(':open-model-catalog')

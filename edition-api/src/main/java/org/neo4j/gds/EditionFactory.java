@@ -36,7 +36,7 @@ public class EditionFactory extends ExtensionFactory<EditionFactory.Dependencies
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new EditionLifecycleAdapter(dependencies.config(), dependencies.globalProceduresRegistry());
+        return new EditionLifecycleAdapter(context, dependencies.config(), dependencies.globalProceduresRegistry());
     }
 
     interface Dependencies {

@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.annotations.service.Service;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-@Service
 public interface SecurityContextService {
 
     // this should be the same as the predefined role from enterprise-security
@@ -30,8 +28,6 @@ public interface SecurityContextService {
     String PREDEFINED_ADMIN_ROLE = "admin";
 
     SecurityContext wrap(SecurityContext securityContext);
-
-    int priority();
 
     default boolean isAdmin(SecurityContext securityContext) {
         return wrap(securityContext)

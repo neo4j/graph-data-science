@@ -24,9 +24,11 @@ import org.neo4j.gds.concurrency.ConcurrencyValidatorBuilder;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.concurrency.PoolSizesProvider;
 import org.neo4j.gds.concurrency.PoolSizesService;
+import org.neo4j.gds.transaction.SecurityContextServiceFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 import java.util.Comparator;
@@ -35,10 +37,16 @@ import java.util.function.Function;
 
 public class EditionLifecycleAdapter extends LifecycleAdapter {
 
+    private final ExtensionContext context;
     private final Config config;
     private final GlobalProcedures globalProceduresRegistry;
 
-    EditionLifecycleAdapter(Config config, GlobalProcedures globalProceduresRegistry) {
+    EditionLifecycleAdapter(
+        ExtensionContext context,
+        Config config,
+        GlobalProcedures globalProceduresRegistry
+    ) {
+        this.context = context;
         this.config = config;
         this.globalProceduresRegistry = globalProceduresRegistry;
     }
@@ -46,6 +54,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     @Override
     public void init() {
         var licenseState = registerLicenseState();
+        registerSecurityContextService(licenseState);
         setupConcurrencyValidator(licenseState);
         setupPoolSizes(licenseState);
         setupModelCatalog(licenseState);
@@ -60,6 +69,16 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
         globalProceduresRegistry.registerComponent(LicenseState.class, (context) -> licensingService.get(), true);
         return licensingService.get();
+    }
+
+    private void registerSecurityContextService(LicenseState licenseState) {
+        var securityContextServiceFactory = loadServiceByPriority(
+            SecurityContextServiceFactory.class,
+            SecurityContextServiceFactory::priority
+        );
+
+        var securityContextService = securityContextServiceFactory.create(licenseState);
+        context.dependencySatisfier().satisfyDependency(securityContextService);
     }
 
     private void setupConcurrencyValidator(LicenseState licenseState) {
