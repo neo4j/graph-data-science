@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 class UniformKnnSampler implements KnnSampler {
 
@@ -32,6 +35,11 @@ class UniformKnnSampler implements KnnSampler {
     UniformKnnSampler(SplittableRandom random, long exclusiveMax) {
         this.uniformSamplerFromRange = new UniformSamplerFromRange(random);
         this.exclusiveMax = exclusiveMax;
+    }
+
+    public static MemoryRange memoryEstimation(long boundedK) {
+        return UniformSamplerFromRange.memoryEstimation(boundedK)
+            .add(MemoryRange.of(sizeOfInstance(UniformKnnSampler.class)));
     }
 
     @Override

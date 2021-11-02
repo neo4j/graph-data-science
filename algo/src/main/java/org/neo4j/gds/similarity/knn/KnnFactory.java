@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
 import java.util.List;
 
@@ -90,7 +89,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
                     .add("new-reverse-neighbors", tempListEstimation)
                     .fixed(
                         "initial-random-neighbors (per thread)",
-                        UniformSamplerFromRange.memoryEstimation(boundedK).times(concurrency)
+                        initialSamplerMemoryEstimation(configuration.initialSampler(), boundedK).times(concurrency)
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
@@ -101,6 +100,19 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
                     .build();
             }
         );
+    }
+
+    static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
+        switch(samplerType) {
+            case UNIFORM: {
+                return UniformKnnSampler.memoryEstimation(boundedK);
+            }
+            case RANDOM_WALK: {
+                return RandomWalkKnnSampler.memoryEstimation(boundedK);
+            }
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
     }
 
     @Override

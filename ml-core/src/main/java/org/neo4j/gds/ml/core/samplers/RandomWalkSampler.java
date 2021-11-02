@@ -22,8 +22,12 @@ package org.neo4j.gds.ml.core.samplers;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.Random;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class RandomWalkSampler {
 
@@ -62,10 +66,19 @@ public class RandomWalkSampler {
         this.randomNeighbour = new MutableLong(-1);
     }
 
+    public static MemoryRange memoryEstimation(long walkLength) {
+        return MemoryRange.of(
+            sizeOfInstance(RandomWalkSampler.class) +
+            sizeOfLongArray(walkLength),
+            sizeOfInstance(RandomWalkSampler.class) +
+            2 * sizeOfLongArray(walkLength)
+        );
+    }
+
     public long[] walk(long startNode) {
-            var walk = new long[walkLength];
-            walk[0] = startNode;
-            walk[1] = randomNeighbour(startNode);
+        var walk = new long[walkLength];
+        walk[0] = startNode;
+        walk[1] = randomNeighbour(startNode);
 
         for (int i = 2; i < walkLength; i++) {
             var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);

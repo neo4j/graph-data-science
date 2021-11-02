@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 import org.neo4j.gds.ml.core.samplers.UniformSamplerFromRange;
 
@@ -28,6 +29,10 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
 
 class RandomWalkKnnSampler implements KnnSampler {
 
@@ -42,7 +47,7 @@ class RandomWalkKnnSampler implements KnnSampler {
     RandomWalkKnnSampler(
         Graph graph,
         SplittableRandom random,
-        // Workaround since RandomWalk doesn't support SplittableRandom.
+        // Since RandomWalk seeds per node the RandomWalkSampler can't take a SplittableRandom.
         Optional<Long> randomSeed,
         int k
     ) {
@@ -61,6 +66,19 @@ class RandomWalkKnnSampler implements KnnSampler {
         this.uniformSamplerFromRange = new UniformSamplerFromRange(random);
         this.exclusiveMax = graph.nodeCount();
         this.sampledValuesCache = new LongHashSet();
+    }
+
+    public static MemoryRange memoryEstimation(long boundedK) {
+        var baseEstimation = RandomWalkSampler.memoryEstimation(boundedK * WALK_LENGTH_MULTIPLIER)
+            .add(MemoryRange.of(
+                sizeOfInstance(RandomWalkKnnSampler.class) +
+                sizeOfLongArray(boundedK) +
+                sizeOfLongHashSet(boundedK)
+            ));
+
+        return baseEstimation
+            .add(UniformSamplerFromRange.memoryEstimation(0))
+            .union(baseEstimation.add(UniformSamplerFromRange.memoryEstimation(boundedK)));
     }
 
     @Override

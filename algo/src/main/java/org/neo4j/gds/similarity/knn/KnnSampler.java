@@ -34,7 +34,6 @@ interface KnnSampler {
     );
 
     enum SamplerType {
-
         UNIFORM,
         RANDOM_WALK;
 
