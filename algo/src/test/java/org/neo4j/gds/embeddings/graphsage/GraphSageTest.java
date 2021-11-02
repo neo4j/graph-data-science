@@ -35,6 +35,7 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -76,6 +77,8 @@ class GraphSageTest {
     private static final int FEATURES_COUNT = 1;
     private static final int EMBEDDING_DIMENSION = 64;
     private static final String MODEL_NAME = "graphSageModel";
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     private Graph graph;
     private HugeObjectArray<double[]> features;
@@ -126,7 +129,7 @@ class GraphSageTest {
             AllocationTracker.empty()
         );
         var model = trainAlgo.compute();
-        ModelCatalog.set(model);
+        modelCatalog.set(model);
 
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
@@ -159,7 +162,7 @@ class GraphSageTest {
             .build();
 
         var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
-        ModelCatalog.set(graphSageTrain.compute());
+        modelCatalog.set(graphSageTrain.compute());
 
 
         int predictNodeCount = 2000;
@@ -203,7 +206,7 @@ class GraphSageTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        ModelCatalog.set(graphSageTrain.compute());
+        modelCatalog.set(graphSageTrain.compute());
 
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
@@ -254,6 +257,6 @@ class GraphSageTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 }

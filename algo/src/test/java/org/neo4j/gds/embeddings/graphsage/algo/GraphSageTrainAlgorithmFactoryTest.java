@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -577,7 +577,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        OpenModelCatalog.INSTANCE.removeAllLoadedModels();
     }
 
 }

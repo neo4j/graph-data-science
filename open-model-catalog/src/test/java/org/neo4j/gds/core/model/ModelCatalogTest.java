@@ -67,9 +67,11 @@ class ModelCatalogTest {
         Map::of
     );
 
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+
     @AfterEach
     void afterEach() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -79,7 +81,7 @@ class ModelCatalogTest {
         for (int i = 0; i < allowedModelsCount; i++) {
             int modelIndex = i;
             assertDoesNotThrow(() -> {
-                ModelCatalog.set(Model.of(
+                modelCatalog.set(Model.of(
                     USERNAME,
                     "testModel_" + modelIndex,
                     "testAlgo",
@@ -103,7 +105,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.set(tippingModel)
+            () -> modelCatalog.set(tippingModel)
         );
 
         assertEquals(String.format(Locale.ENGLISH, "Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", allowedModelsCount), ex.getMessage());
@@ -130,18 +132,18 @@ class ModelCatalogTest {
             Map::of
         );
 
-        ModelCatalog.set(model);
-        ModelCatalog.set(model2);
+        modelCatalog.set(model);
+        modelCatalog.set(model2);
 
-        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
-        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, Model.Mappable.class));
     }
 
     @Test
     void shouldThrowWhenPublishingOnCE() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
-        assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
+        assertThatThrownBy(() -> modelCatalog.publish(USERNAME, TEST_MODEL.name()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
                 "Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
@@ -168,20 +170,20 @@ class ModelCatalogTest {
             Map::of
         );
 
-        ModelCatalog.set(model);
-        ModelCatalog.set(model2);
+        modelCatalog.set(model);
+        modelCatalog.set(model2);
 
-        assertEquals(model, ModelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
-        assertEquals(model2, ModelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, Model.Mappable.class));
     }
 
     @Test
     void shouldThrowWhenTryingToGetOtherUsersModel() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> ModelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -190,11 +192,11 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelDataTypeMismatch() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals(
@@ -206,11 +208,11 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelConfigTypeMismatch() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, Model.Mappable.class)
         );
 
         assertEquals(
@@ -223,11 +225,11 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowIfModelNameAlreadyExists() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.checkStorable(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
+            () -> modelCatalog.checkStorable(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
         );
 
         assertEquals(
@@ -238,11 +240,11 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowIfModelNameAlreadyExistsOnSet() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.set(TEST_MODEL)
+            () -> modelCatalog.set(TEST_MODEL)
         );
 
         assertEquals(
@@ -253,45 +255,45 @@ class ModelCatalogTest {
 
     @Test
     void checksIfModelExists() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
-        assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
-        assertFalse(ModelCatalog.exists(USERNAME, "bogusModel"));
-        assertFalse(ModelCatalog.exists("fakeUser", "testModel"));
+        assertTrue(modelCatalog.exists(USERNAME, "testModel"));
+        assertFalse(modelCatalog.exists(USERNAME, "bogusModel"));
+        assertFalse(modelCatalog.exists("fakeUser", "testModel"));
     }
 
     @Test
     void getModelType() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
-        Optional<String> testModel = ModelCatalog.type(USERNAME, "testModel");
+        Optional<String> testModel = modelCatalog.type(USERNAME, "testModel");
         assertFalse(testModel.isEmpty());
         assertEquals("testAlgo", testModel.get());
     }
 
     @Test
     void getNonExistingModelType() {
-        Optional<String> bogusModel = ModelCatalog.type(USERNAME, "bogusModel");
+        Optional<String> bogusModel = modelCatalog.type(USERNAME, "bogusModel");
         assertTrue(bogusModel.isEmpty());
     }
 
     @Test
     void shouldDropModel() {
-        ModelCatalog.set(TEST_MODEL);
+        modelCatalog.set(TEST_MODEL);
 
-        assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
-        ModelCatalog.drop(USERNAME, "testModel");
-        assertFalse(ModelCatalog.exists(USERNAME, "testModel"));
+        assertTrue(modelCatalog.exists(USERNAME, "testModel"));
+        modelCatalog.drop(USERNAME, "testModel");
+        assertFalse(modelCatalog.exists(USERNAME, "testModel"));
     }
 
     @Test
     void shouldNotThrowWhenListingNonExistentModel() {
-        assertDoesNotThrow(() -> ModelCatalog.list(USERNAME, "nonExistentModel"));
+        assertDoesNotThrow(() -> modelCatalog.list(USERNAME, "nonExistentModel"));
     }
 
     @Test
     void shouldReturnEmptyList() {
-        assertEquals(0, ModelCatalog.list(USERNAME).size());
+        assertEquals(0, modelCatalog.list(USERNAME).size());
     }
 
     @Nested
@@ -330,13 +332,13 @@ class ModelCatalogTest {
                 Map::of
             );
 
-            ModelCatalog.set(model1);
-            ModelCatalog.set(model2);
-            ModelCatalog.set(publicModel);
-            var publishedModel = ModelCatalog.publish("anotherUser", "testModel2");
+            modelCatalog.set(model1);
+            modelCatalog.set(model2);
+            modelCatalog.set(publicModel);
+            var publishedModel = modelCatalog.publish("anotherUser", "testModel2");
 
 
-            var models = ModelCatalog.list(USERNAME);
+            var models = modelCatalog.list(USERNAME);
             assertEquals(3, models.size());
 
             assertThat(models).containsExactlyInAnyOrder(model1, model2, publishedModel);
@@ -344,36 +346,36 @@ class ModelCatalogTest {
 
         @Test
         void shouldOnlyBeDroppedByCreator() {
-            ModelCatalog.set(TEST_MODEL);
-            ModelCatalog.publish(USERNAME, "testModel");
+            modelCatalog.set(TEST_MODEL);
+            modelCatalog.publish(USERNAME, "testModel");
 
-            assertThatThrownBy(() -> ModelCatalog.drop("anotherUser", "testModel_public"))
+            assertThatThrownBy(() -> modelCatalog.drop("anotherUser", "testModel_public"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Only the creator");
 
-            ModelCatalog.drop(USERNAME, "testModel_public");
-            assertEquals(0, ModelCatalog.list(USERNAME).size());
+            modelCatalog.drop(USERNAME, "testModel_public");
+            assertEquals(0, modelCatalog.list(USERNAME).size());
         }
 
         @Test
         void checksIfPublicModelExists() {
-            ModelCatalog.set(TEST_MODEL);
-            ModelCatalog.publish(USERNAME, "testModel");
+            modelCatalog.set(TEST_MODEL);
+            modelCatalog.publish(USERNAME, "testModel");
 
-            assertThat(ModelCatalog.exists(USERNAME, "testModel")).isFalse();
-            assertThat(ModelCatalog.exists(USERNAME, "testModel_public")).isTrue();
-            assertThat(ModelCatalog.exists(USERNAME, "bogusModel")).isFalse();
-            assertThat(ModelCatalog.exists("anotherUser", "testModel")).isFalse();
-            assertThat(ModelCatalog.exists("anotherUser", "testModel_public")).isTrue();
+            assertThat(modelCatalog.exists(USERNAME, "testModel")).isFalse();
+            assertThat(modelCatalog.exists(USERNAME, "testModel_public")).isTrue();
+            assertThat(modelCatalog.exists(USERNAME, "bogusModel")).isFalse();
+            assertThat(modelCatalog.exists("anotherUser", "testModel")).isFalse();
+            assertThat(modelCatalog.exists("anotherUser", "testModel_public")).isTrue();
         }
 
         @Test
         void shouldPublishModels() {
-            ModelCatalog.set(TEST_MODEL);
-            var publishedModel = ModelCatalog.publish(USERNAME, "testModel");
-            assertEquals(1, ModelCatalog.list(USERNAME).size());
+            modelCatalog.set(TEST_MODEL);
+            var publishedModel = modelCatalog.publish(USERNAME, "testModel");
+            assertEquals(1, modelCatalog.list(USERNAME).size());
 
-            var publicModel = ModelCatalog.get(
+            var publicModel = modelCatalog.get(
                 "anotherUser",
                 publishedModel.name(),
                 String.class,
@@ -393,26 +395,26 @@ class ModelCatalogTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.core.model.ModelCatalogTest#modelInput")
         void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
-            existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
+            existingModels.forEach(existingModel -> modelCatalog.set(testModel(existingModel)));
 
             // test the get code path
             assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, Model.Mappable.class))
+                .isThrownBy(() -> modelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, Model.Mappable.class))
                 .withMessage(expectedMessage);
 
             // test the drop code path
             assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> ModelCatalog.drop(USERNAME, searchModel))
+                .isThrownBy(() -> modelCatalog.drop(USERNAME, searchModel))
                 .withMessage(expectedMessage);
         }
 
         @Test
         void shouldThrowOnOverridingModels() {
-            ModelCatalog.set(TEST_MODEL);
+            modelCatalog.set(TEST_MODEL);
 
             IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> ModelCatalog.set(TEST_MODEL)
+                () -> modelCatalog.set(TEST_MODEL)
             );
 
             assertEquals("Model with name `testModel` already exists.", ex.getMessage());

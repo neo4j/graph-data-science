@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictMutateProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictStreamProc;
@@ -60,7 +60,7 @@ class LinkPredictionDocTest extends DocTestBase {
     protected Runnable cleanup() {
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
-            ModelCatalog.removeAllLoadedModels();
+            OpenModelCatalog.INSTANCE.removeAllLoadedModels();
         };
     }
 }

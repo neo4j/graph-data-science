@@ -22,6 +22,13 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
@@ -29,22 +36,16 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.wcc.WccMutateProc;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.math.L2Norm.l2Norm;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
 
@@ -103,8 +104,11 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         "(j)-[{w: 0.5}]->(i)"
     );
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         runQuery(DB_CYPHER);
         registerProcedures(
             GraphCreateProc.class,
@@ -132,7 +136,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
     @AfterEach
     void shutdown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

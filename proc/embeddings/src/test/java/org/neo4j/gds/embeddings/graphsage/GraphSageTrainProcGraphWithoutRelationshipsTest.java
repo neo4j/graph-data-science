@@ -27,7 +27,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -65,7 +65,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        ModelCatalog.removeAllLoadedModels();
+        OpenModelCatalog.INSTANCE.removeAllLoadedModels();
     }
 
     @Test

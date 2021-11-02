@@ -21,6 +21,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':open-model-catalog')
     implementation project(':string-formatting')
     implementation project(':transaction')
     implementation project(':write-services')

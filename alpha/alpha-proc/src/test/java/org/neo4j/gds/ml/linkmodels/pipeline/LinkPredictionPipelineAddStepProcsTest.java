@@ -26,6 +26,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -47,8 +48,11 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         0.1
     );
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPipelineAddStepProcs.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
@@ -56,7 +60,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -238,7 +242,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
             Map::of
         );
 
-        ModelCatalog.set(model1);
+        modelCatalog.set(model1);
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('testModel1', 'pageRank', {mutateProperty: 'pr'})",
             "Steps can only be added to a model of type `Link prediction training pipeline`. But model `testModel1` is of type `testAlgo1`."
@@ -257,7 +261,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
             Map::of
         );
 
-        ModelCatalog.set(model1);
+        modelCatalog.set(model1);
         assertError(
             "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('testModel1', 'pageRank', {mutateProperty: 'pr'})",
             "Steps can only be added to a model of type `Link prediction training pipeline`. But model `testModel1` is of type `testAlgo1`."

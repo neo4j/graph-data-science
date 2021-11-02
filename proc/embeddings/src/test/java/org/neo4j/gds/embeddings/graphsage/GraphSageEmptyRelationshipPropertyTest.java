@@ -32,6 +32,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.List;
@@ -78,6 +79,8 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     private static final  String relationshipWeightProperty = "weight";
 
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -93,7 +96,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -141,7 +144,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
         runQuery(train);
 
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             getUsername(),
             modelName,
             ModelData.class,

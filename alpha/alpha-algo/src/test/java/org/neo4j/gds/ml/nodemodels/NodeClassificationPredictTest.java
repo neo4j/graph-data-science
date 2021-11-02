@@ -25,7 +25,7 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -226,7 +226,8 @@ class NodeClassificationPredictTest {
                 .build(),
             NodeClassificationModelInfo.defaultConfig()
         );
-        ModelCatalog.set(model);
+        var modelCatalog = OpenModelCatalog.INSTANCE;
+        modelCatalog.set(model);
 
         var log = new TestLog();
         var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>().build(
@@ -259,7 +260,7 @@ class NodeClassificationPredictTest {
                 "NodeLogisticRegressionPredict 100%",
                 "NodeLogisticRegressionPredict :: Finished"
             );
-        ModelCatalog.drop("", modelName);
+        modelCatalog.drop("", modelName);
     }
 
     @Test

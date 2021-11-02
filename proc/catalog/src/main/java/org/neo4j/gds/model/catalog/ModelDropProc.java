@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,12 +37,14 @@ public class ModelDropProc extends ModelCatalogProc {
     public Stream<ModelCatalogResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        var model = ModelCatalog.getUntyped(username(), modelName);
+
+        var modelCatalog = OpenModelCatalog.INSTANCE;
+        var model = modelCatalog.getUntyped(username(), modelName);
 
         if (model.stored()) {
             model.unload();
         } else {
-            ModelCatalog.drop(username(), modelName);
+            modelCatalog.drop(username(), modelName);
         }
 
         return Stream.of(new ModelCatalogResult(model));

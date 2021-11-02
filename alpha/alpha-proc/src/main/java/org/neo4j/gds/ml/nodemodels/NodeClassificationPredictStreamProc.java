@@ -28,6 +28,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
@@ -47,6 +48,8 @@ import java.util.stream.Stream;
 
 public class NodeClassificationPredictStreamProc
     extends StreamProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -95,7 +98,7 @@ public class NodeClassificationPredictStreamProc
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationStreamConfig config
     ) {
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        var trainConfig = ModelCatalog.get(
+        var trainConfig = modelCatalog.get(
             config.username(),
             config.modelName(),
             NodeLogisticRegressionData.class,

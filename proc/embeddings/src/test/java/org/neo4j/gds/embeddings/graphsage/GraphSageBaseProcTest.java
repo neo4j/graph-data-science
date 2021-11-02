@@ -22,9 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.model.catalog.ModelDropProc;
-import org.neo4j.gds.model.catalog.ModelExistsProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
@@ -35,9 +32,12 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.model.catalog.ModelExistsProc;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -119,7 +119,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        ModelCatalog.removeAllLoadedModels();
+        OpenModelCatalog.INSTANCE.removeAllLoadedModels();
     }
 
     static Stream<Arguments> configVariations() {

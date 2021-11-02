@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -103,8 +104,11 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         "(j)-[:TEST {label: 0}]->(o), " +
         "(k)-[:TEST {label: 0}]->(o)";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionTrainProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
@@ -132,7 +136,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -201,8 +205,8 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(ModelCatalog.exists(getUsername(), "model"));
-        var model = ModelCatalog.list(getUsername(), "model");
+        assertTrue(modelCatalog.exists(getUsername(), "model"));
+        var model = modelCatalog.list(getUsername(), "model");
         assertThat(model.algoType()).isEqualTo("Link Prediction");
         assertThat(model.customInfo().toMap()).containsKeys("metrics", "bestParameters");
     }

@@ -24,9 +24,4 @@ dependencies {
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     testImplementation project(':test-utils')
-    // GdlFactory extends CSRGraphStoreFactory which lives in :core
-    // Suggests :core should be an api dependency of :test-utils
-    // But that also seems wrong--one should be able to use the latter without the former
-    // Best solution TBD
-    testImplementation project(':core')
 }

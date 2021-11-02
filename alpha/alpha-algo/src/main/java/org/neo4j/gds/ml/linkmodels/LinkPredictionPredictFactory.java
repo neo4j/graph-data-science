@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,8 +36,11 @@ import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_
 
 class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfig> extends AlgorithmFactory<LinkPredictionPredict, CONFIG> {
 
+    private final ModelCatalog modelCatalog;
+
     public LinkPredictionPredictFactory() {
         super();
+        this.modelCatalog = OpenModelCatalog.INSTANCE;
     }
 
     @Override
@@ -51,7 +55,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             configuration.username(),
             configuration.modelName(),
             LinkLogisticRegressionData.class,
@@ -74,7 +78,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             configuration.username(),
             configuration.modelName(),
             LinkLogisticRegressionData.class,

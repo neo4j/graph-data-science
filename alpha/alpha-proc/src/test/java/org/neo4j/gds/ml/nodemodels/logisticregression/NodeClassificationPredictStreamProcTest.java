@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -50,8 +51,11 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
         ", (n4:N {a: -0.60765016, b:  1.0186564})" +
         ", (n5:N {a: -0.48403364, b: -0.49152604})";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
+        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class, NodeClassificationPredictStreamProc.class);
 
         runQuery(DB_CYPHER);
@@ -68,13 +72,13 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void stream() {
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
+        addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "b"));
 
         var query = GdsCypher
             .call()
@@ -112,7 +116,7 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
 
     @Test
     void streamWithProbabilities() {
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
+        addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "b"));
 
         var query = GdsCypher
             .call()
@@ -152,7 +156,7 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
     @Test
     void validateFeaturesExistOnGraph() {
         // c is not in graph
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "c"));
+        addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "c"));
 
         var query = GdsCypher
             .call()
@@ -167,7 +171,7 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
+        addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "b"));
 
         var query = GdsCypher
             .call()

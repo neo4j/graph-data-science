@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,11 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigu
 
 class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPipelineConfigureSplitProc.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
@@ -41,7 +45,7 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

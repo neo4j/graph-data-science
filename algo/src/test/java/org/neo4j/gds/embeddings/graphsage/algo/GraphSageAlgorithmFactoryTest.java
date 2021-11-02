@@ -33,6 +33,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -71,6 +72,8 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 class GraphSageAlgorithmFactoryTest {
+
+    private static final ModelCatalog MODEL_CATALOG = OpenModelCatalog.INSTANCE;
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @ParameterizedTest
@@ -280,7 +283,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        ModelCatalog.set(model);
+        MODEL_CATALOG.set(model);
 
         var gsConfig = ImmutableGraphSageStreamConfig
             .builder()
@@ -336,7 +339,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        ModelCatalog.set(model);
+        MODEL_CATALOG.set(model);
 
         var gsConfig = ImmutableGraphSageMutateConfig
             .builder()
@@ -516,7 +519,7 @@ class GraphSageAlgorithmFactoryTest {
                                             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
                                         );
 
-                                        ModelCatalog.set(model);
+                                        MODEL_CATALOG.set(model);
 
                                         var streamConfig = ImmutableGraphSageStreamConfig
                                             .builder()
@@ -562,7 +565,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        ModelCatalog.set(model);
+        MODEL_CATALOG.set(model);
 
         var config = ImmutableGraphSageMutateConfig
             .builder()
@@ -586,6 +589,6 @@ class GraphSageAlgorithmFactoryTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        MODEL_CATALOG.removeAllLoadedModels();
     }
 }

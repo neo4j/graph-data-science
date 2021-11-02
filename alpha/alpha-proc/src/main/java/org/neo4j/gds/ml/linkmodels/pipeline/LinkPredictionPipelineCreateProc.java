@@ -27,6 +27,7 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,6 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LinkPredictionPipelineCreateProc extends BaseProc {
     public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
 
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the model catalog.")
@@ -56,7 +58,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
             new LinkPredictionPipeline()
         );
 
-        ModelCatalog.set(model);
+        modelCatalog.set(model);
 
         return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
     }

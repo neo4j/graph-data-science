@@ -38,6 +38,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -164,8 +165,11 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
         );
     }
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class);
 
         String createQuery = GdsCypher.call()
@@ -182,7 +186,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
 
     @AfterEach
     void tearDown(){
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @ParameterizedTest
@@ -218,7 +222,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                 LinkPredictionPipelineCreateProc.PipelineDummyTrainConfig.of(getUsername()),
                 pipeline
             );
-            ModelCatalog.set(pipeModel);
+            modelCatalog.set(pipeModel);
 
             var trainAlgo = new LinkPredictionTrainFactory(db.databaseId(), caller).build(
                 graphStore.getUnion(),
@@ -227,7 +231,7 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
                 ProgressTracker.NULL_TRACKER
             );
             var trainedModel = trainAlgo.compute();
-            ModelCatalog.set(trainedModel);
+            modelCatalog.set(trainedModel);
 
             var predictConfig = new LinkPredictionPipelineMutateConfigImpl(
                 Optional.of(GRAPH_NAME),

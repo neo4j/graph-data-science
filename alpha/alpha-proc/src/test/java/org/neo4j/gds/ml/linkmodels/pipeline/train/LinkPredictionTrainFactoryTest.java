@@ -35,6 +35,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -105,8 +106,11 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
         "(m)-[:IGNORED]->(b), " +
         "(m)-[:IGNORED]->(c) ";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             SplitRelationshipsMutateProc.class
@@ -126,7 +130,7 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -160,7 +164,7 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
                 LinkPredictionPipelineCreateProc.PipelineDummyTrainConfig.of(getUsername()),
                 pipeline
             );
-            ModelCatalog.set(pipeModel);
+            modelCatalog.set(pipeModel);
 
             var factory = new LinkPredictionTrainFactory(db.databaseId(), caller);
 

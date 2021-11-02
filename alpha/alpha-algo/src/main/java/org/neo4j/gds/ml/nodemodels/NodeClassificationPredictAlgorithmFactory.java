@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,8 +33,11 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 
 public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
+    private final ModelCatalog modelCatalog;
+
     public NodeClassificationPredictAlgorithmFactory() {
         super();
+        this.modelCatalog = OpenModelCatalog.INSTANCE;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             configuration.username(),
             configuration.modelName(),
             NodeLogisticRegressionData.class,
@@ -73,7 +77,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
         var fudgedFeatureCount = 500;
 
-        var classCount = ModelCatalog
+        var classCount = modelCatalog
             .get(configuration.username(),
                 configuration.modelName(),
                 NodeLogisticRegressionData.class,

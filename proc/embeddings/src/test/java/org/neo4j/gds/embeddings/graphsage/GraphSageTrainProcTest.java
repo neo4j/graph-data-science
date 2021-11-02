@@ -39,6 +39,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -69,6 +70,8 @@ import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+
     @Test
     void runsTraining() {
         String modelName = "gsModel";
@@ -96,7 +99,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             getUsername(),
             modelName,
             ModelData.class,
@@ -163,7 +166,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        var model = ModelCatalog.get(
+        var model = modelCatalog.get(
             getUsername(),
             modelName,
             ModelData.class,
@@ -342,7 +345,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             config,
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
-        ModelCatalog.set(model);
+        modelCatalog.set(model);
 
         var proc = new GraphSageTrainProc() {
             @Override

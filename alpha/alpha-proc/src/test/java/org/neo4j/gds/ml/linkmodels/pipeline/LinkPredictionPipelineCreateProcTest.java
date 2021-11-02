@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -33,14 +34,17 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigu
 
 public class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPipelineCreateProc.class);
     }
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

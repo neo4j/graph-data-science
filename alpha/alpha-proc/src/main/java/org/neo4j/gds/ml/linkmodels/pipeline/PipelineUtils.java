@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 
@@ -29,10 +30,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineUtils {
 
+    private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+
     private PipelineUtils() {}
 
     public static LinkPredictionPipeline getPipelineModelInfo(String pipelineName, String username) {
-       var model = ModelCatalog.getUntyped(username, pipelineName);
+       var model = modelCatalog.getUntyped(username, pipelineName);
 
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
@@ -52,6 +55,6 @@ public final class PipelineUtils {
         String pipelineName,
         String username
     ) {
-        return ModelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
+        return  modelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
     }
 }

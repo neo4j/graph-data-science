@@ -29,6 +29,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':open-licensing')
+    implementation project(':open-model-catalog')
     implementation project(':string-formatting')
     implementation project(':collections')
     implementation project(':collections-memory-estimation')

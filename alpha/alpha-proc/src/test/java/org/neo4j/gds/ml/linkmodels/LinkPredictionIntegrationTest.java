@@ -27,6 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
@@ -105,8 +106,11 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
     private static final String PREDICTED_REL_TYPE = "REL_PREDICTED";
 
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             FastRPMutateProc.class,
@@ -124,7 +128,7 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

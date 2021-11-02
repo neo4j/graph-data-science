@@ -33,6 +33,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
@@ -95,8 +96,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(m)-[:IGNORED { weight: 1.0 } ]->(b), " +
         "(m)-[:IGNORED { weight: 1.0 } ]->(c) ";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineCreateProc.class,
@@ -131,7 +135,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -305,7 +309,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     }
 
     private LinkLogisticRegressionData modelData() {
-        Stream<Model<?, ?, ?>> allModels = ModelCatalog.getAllModels();
+        Stream<Model<?, ?, ?>> allModels = modelCatalog.getAllModels();
         Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
         return (LinkLogisticRegressionData) model.data();
     }

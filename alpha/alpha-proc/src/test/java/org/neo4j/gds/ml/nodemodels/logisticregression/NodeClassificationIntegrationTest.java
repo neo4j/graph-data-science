@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.BaseProcTest;
@@ -66,8 +67,11 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
         ", (:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 2})" +
         ", (:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 2})";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class,
@@ -82,7 +86,7 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

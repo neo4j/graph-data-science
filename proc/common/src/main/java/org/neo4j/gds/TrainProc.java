@@ -25,7 +25,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collections;
@@ -59,15 +59,16 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     ) {
         var result = compute(graphNameOrConfig, configuration);
         var model = Objects.requireNonNull(result.result());
-        ModelCatalog.checkStorable(username(), model.name(), model.algoType());
-        ModelCatalog.set(model);
+        var modelCatalog = OpenModelCatalog.INSTANCE;
+        modelCatalog.checkStorable(username(), model.name(), model.algoType());
+        modelCatalog.set(model);
         return Stream.of(resultConstructor.apply(model, result));
     }
 
     @Override
     protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
         super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        ModelCatalog.checkStorable(username(), config.modelName(), modelType());
+        OpenModelCatalog.INSTANCE.checkStorable(username(), config.modelName(), modelType());
     }
 
     @SuppressWarnings("unused")

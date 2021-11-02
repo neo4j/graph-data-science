@@ -27,6 +27,7 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
@@ -48,6 +49,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictMutateProc
     extends MutatePropertyProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -93,7 +96,7 @@ public class NodeClassificationPredictMutateProc
             }
         });
 
-        var trainConfig = ModelCatalog.get(
+        var trainConfig = modelCatalog.get(
             config.username(),
             config.modelName(),
             NodeLogisticRegressionData.class,

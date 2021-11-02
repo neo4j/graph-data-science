@@ -22,6 +22,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
+    implementation project(':open-model-catalog')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':transaction')

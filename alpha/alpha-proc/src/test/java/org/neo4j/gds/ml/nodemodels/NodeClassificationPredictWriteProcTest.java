@@ -33,7 +33,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -44,8 +43,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -78,6 +79,8 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     public static final String GRAPH_NAME = "g";
     public static final String MODEL_NAME = "model";
 
+    private ModelCatalog modelCatalog;
+
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
@@ -87,6 +90,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @BeforeEach
     void setup() throws Exception {
+        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class, NodeClassificationPredictWriteProc.class);
 
         runQuery(DB_CYPHER);
@@ -97,14 +101,14 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
             .graphCreate(GRAPH_NAME)
             .yields();
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
+        addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "b"));
 
         runQuery(loadQuery);
     }
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

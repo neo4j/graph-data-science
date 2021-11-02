@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.Map;
 
@@ -34,20 +35,23 @@ class ModelExistsProcTest extends ModelProcBaseTest {
 
     private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(ModelExistsProc.class);
     }
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
     void checksIfModelExists() {
         String existingModel = "testModel";
-        ModelCatalog.set(Model.of(
+        modelCatalog.set(Model.of(
             getUsername(),
             existingModel,
             "testAlgo",

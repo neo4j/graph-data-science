@@ -20,13 +20,13 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ class GraphSageDocTest extends DocTestBase {
     protected Runnable cleanup() {
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
-            ModelCatalog.removeAllLoadedModels();
+            OpenModelCatalog.INSTANCE.removeAllLoadedModels();
         };
     }
 }

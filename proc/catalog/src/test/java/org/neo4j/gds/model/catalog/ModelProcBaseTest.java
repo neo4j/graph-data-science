@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Map;
@@ -44,9 +42,4 @@ class ModelProcBaseTest extends BaseProcTest {
             )
         )
     );
-
-    @AfterEach
-    void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
-    }
 }

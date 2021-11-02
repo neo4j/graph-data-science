@@ -21,13 +21,13 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ class NodeClassificationDocTest extends DocTestBase {
     Runnable cleanup() {
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
-            ModelCatalog.removeAllLoadedModels();
+            OpenModelCatalog.INSTANCE.removeAllLoadedModels();
         };
     }
 

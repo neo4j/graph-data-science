@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -36,9 +37,12 @@ import org.neo4j.gds.junit.annotation.GdsEditionTest;
 @GdsEditionTest(Edition.EE)
 abstract class ModelCatalogDocTest extends DocTestBase {
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void loadModel() {
-        ModelCatalog.set(Model.of(
+        modelCatalog = OpenModelCatalog.INSTANCE;
+        modelCatalog.set(Model.of(
             getUsername(),
             "my-model",
             GraphSage.MODEL_TYPE,
@@ -51,6 +55,6 @@ abstract class ModelCatalogDocTest extends DocTestBase {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 }

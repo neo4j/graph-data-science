@@ -30,6 +30,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -61,9 +62,11 @@ public abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class, getProcedureClazz());
 
         withModelInCatalog();
@@ -73,7 +76,7 @@ public abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     private void withModelInCatalog() {
@@ -90,7 +93,7 @@ public abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        ModelCatalog.set(Model.of(
+        modelCatalog.set(Model.of(
             getUsername(),
             "model",
             MODEL_TYPE,

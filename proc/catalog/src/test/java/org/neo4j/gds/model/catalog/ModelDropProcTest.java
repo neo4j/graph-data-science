@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -35,14 +36,17 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ModelDropProcTest extends ModelProcBaseTest {
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(ModelDropProc.class);
     }
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -51,7 +55,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
         String testModelType = "testAlgo";
 
         TestTrainConfig trainConfig = TestTrainConfig.of();
-        ModelCatalog.set(
+        modelCatalog.set(
             Model.of(
                 getUsername(),
                 existingModel,

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.node2vec.Node2VecWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
@@ -66,8 +67,11 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         ", (i)-[:TYPE]->(l)" +
         ", (j)-[:TYPE]->(k)";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setup() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         runQuery(DB_CYPHER);
         registerProcedures(
             GraphCreateProc.class,
@@ -89,7 +93,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
     @AfterEach
     void shutdown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

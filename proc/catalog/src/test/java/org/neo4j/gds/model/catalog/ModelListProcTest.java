@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.model.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -39,9 +41,17 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ModelListProcTest extends ModelProcBaseTest {
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(ModelListProc.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        modelCatalog.removeAllLoadedModels();
     }
 
     @ParameterizedTest
@@ -77,9 +87,9 @@ class ModelListProcTest extends ModelProcBaseTest {
             Map::of
         );
 
-        ModelCatalog.set(model1);
-        ModelCatalog.set(model2);
-        ModelCatalog.set(otherUserModel);
+        modelCatalog.set(model1);
+        modelCatalog.set(model2);
+        modelCatalog.set(otherUserModel);
 
         assertCypherResult(
             formatWithLocale(
@@ -145,8 +155,8 @@ class ModelListProcTest extends ModelProcBaseTest {
             Map::of
         );
 
-        ModelCatalog.set(model1);
-        ModelCatalog.set(model2);
+        modelCatalog.set(model1);
+        modelCatalog.set(model2);
 
         assertCypherResult(
             "CALL gds.beta.model.list('testModel2')",

@@ -30,7 +30,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -111,7 +111,9 @@ class LinkPredictionPredictTest {
             .nodeFeatureDimension(numberOfNodeFeatures)
             .build();
         var modelName = "model";
-        ModelCatalog.set(Model.of(
+        var modelCatalog = OpenModelCatalog.INSTANCE;
+
+        modelCatalog.set(Model.of(
             "",
             modelName,
             LinkPredictionTrain.MODEL_TYPE,
@@ -158,7 +160,7 @@ class LinkPredictionPredictTest {
                 "LinkPrediction 100%",
                 "LinkPrediction :: Finished"
             );
-        ModelCatalog.drop("", modelName);
+        modelCatalog.drop("", modelName);
     }
 
     @Test

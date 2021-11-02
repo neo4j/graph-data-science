@@ -36,7 +36,7 @@ public final class NodeClassificationPredictProcTestUtil {
 
     private NodeClassificationPredictProcTestUtil() {}
 
-    public static void addModelWithFeatures(String username, String modelName, List<String> properties) {
+    public static void addModelWithFeatures(ModelCatalog modelCatalog, String username, String modelName, List<String> properties) {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
         classIdMap.toMapped(1);
@@ -63,6 +63,6 @@ public final class NodeClassificationPredictProcTestUtil {
                 .build(),
             NodeClassificationModelInfo.defaultConfig()
         );
-        ModelCatalog.set(model);
+        modelCatalog.set(model);
     }
 }

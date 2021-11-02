@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,11 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
         "useBiasFeature", true
     ));
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
@@ -51,7 +55,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

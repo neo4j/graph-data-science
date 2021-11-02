@@ -32,6 +32,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
@@ -62,8 +63,11 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
         "(n:N {a: 400}), " +
         "(o:N {a: 400})";
 
+    private ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
+        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPredictStreamProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
@@ -82,7 +86,7 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -133,7 +137,7 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     private void addModel(String modelName, GraphSchema graphSchema) {
         List<String> featureProperties = List.of("a");
-        ModelCatalog.set(Model.of(
+        modelCatalog.set(Model.of(
             getUsername(),
             modelName,
             LinkPredictionTrain.MODEL_TYPE,
