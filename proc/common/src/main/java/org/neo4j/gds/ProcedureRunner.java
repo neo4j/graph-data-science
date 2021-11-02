@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.graphdb.Transaction;
@@ -33,7 +34,7 @@ public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
-    public static <P extends BaseProc> P instantiateProcedure(BaseProc caller, Class<P> procedureClass) {
+    public static <P extends BaseProc> P instantiateProcedureFromCaller(BaseProc caller, Class<P> procedureClass) {
         return ProcedureRunner.instantiateProcedure(
             caller.api,
             procedureClass,
@@ -42,7 +43,8 @@ public final class ProcedureRunner {
             caller.taskRegistryFactory,
             caller.allocationTracker,
             caller.procedureTransaction,
-            caller.licenseState
+            caller.licenseState,
+            caller.username
         );
     }
 
@@ -54,7 +56,8 @@ public final class ProcedureRunner {
         TaskRegistryFactory taskRegistryFactory,
         AllocationTracker allocationTracker,
         Transaction tx,
-        LicenseState licenseState
+        LicenseState licenseState,
+        Username username
     ) {
         P proc;
         try {
@@ -71,6 +74,7 @@ public final class ProcedureRunner {
         proc.allocationTracker = allocationTracker;
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.licenseState = licenseState;
+        proc.username = username;
 
         return proc;
     }
@@ -84,6 +88,7 @@ public final class ProcedureRunner {
         AllocationTracker allocationTracker,
         Transaction tx,
         LicenseState licenseState,
+        Username username,
         Consumer<P> func
     ) {
         var proc = instantiateProcedure(
@@ -94,7 +99,8 @@ public final class ProcedureRunner {
             taskRegistryFactory,
             allocationTracker,
             tx,
-            licenseState
+            licenseState,
+            username
         );
         func.accept(proc);
         return proc;

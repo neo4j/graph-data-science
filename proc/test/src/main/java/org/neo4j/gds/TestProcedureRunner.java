@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.graphdb.Transaction;
@@ -45,7 +46,6 @@ public final class TestProcedureRunner {
         GraphDatabaseAPI graphDb,
         Class<P> procClass,
         Log log,
-
         Consumer<P> func
     ) {
         GraphDatabaseApiProxy.runInTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
@@ -57,6 +57,7 @@ public final class TestProcedureRunner {
             AllocationTracker.empty(),
             tx,
             OpenGdsLicenseState.INSTANCE,
+            Username.EMPTY_USERNAME,
             func
         ));
     }
@@ -66,22 +67,16 @@ public final class TestProcedureRunner {
         Class<P> procClass,
         Transaction tx
     ) {
-        P proc;
-        try {
-            proc = procClass.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
-        }
-
-        proc.procedureTransaction = tx;
-        proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
-        proc.api = graphDb;
-        proc.callContext = ProcedureCallContext.EMPTY;
-        proc.log = new TestLog();
-        proc.allocationTracker = AllocationTracker.empty();
-        proc.taskRegistryFactory = EmptyTaskRegistryFactory.INSTANCE;
-        proc.licenseState = OpenGdsLicenseState.INSTANCE;
-
-        return proc;
+        return ProcedureRunner.instantiateProcedure(
+            graphDb,
+            procClass,
+            ProcedureCallContext.EMPTY,
+            new TestLog(),
+            EmptyTaskRegistryFactory.INSTANCE,
+            AllocationTracker.empty(),
+            tx,
+            OpenGdsLicenseState.INSTANCE,
+            Username.EMPTY_USERNAME
+        );
     }
 }
