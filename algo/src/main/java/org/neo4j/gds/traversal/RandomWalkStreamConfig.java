@@ -38,11 +38,10 @@ public interface RandomWalkStreamConfig extends RandomWalkBaseConfig {
     }
 
     static RandomWalkStreamConfig of(
-        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new RandomWalkStreamConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new RandomWalkStreamConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
 }
