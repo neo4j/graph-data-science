@@ -106,7 +106,7 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_4_2;
             case "4.3":
                 return Neo4jVersion.V_4_3;
-            case "4.4":
+            case "5.0":
             case "dev":
                 return Neo4jVersion.V_Dev;
             default:

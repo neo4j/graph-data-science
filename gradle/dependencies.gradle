@@ -8,7 +8,7 @@ ext {
         '4.3.0-drop04.3': properties.getOrDefault('neo4jVersion43drop4', '4.3.0-drop04.3'),
         '4.3.0-drop04.4': properties.getOrDefault('neo4jVersion43drop4', '4.3.0-drop04.4'),
         '4.3.0-drop05.0': properties.getOrDefault('neo4jVersion43drop5', '4.3.0-drop05.0'),
-        'dev'           : properties.getOrDefault('neo4jVersionDev', '4.4.0-dev'),
+        'dev'           : properties.getOrDefault('neo4jVersionDev', '5.0.0-dev'),
     ]
 
     neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
@@ -17,7 +17,8 @@ ext {
         '4.1': neos.'4.3',
         '4.2': neos.'4.3',
         '4.3': neos.'4.3',
-        '4.4': neos.'dev',
+        '4.4': neos.'4.4',
+        '5.0': neos.'dev',
     ]
     scalas = [
         '4.0': '2.12.7',
@@ -25,6 +26,7 @@ ext {
         '4.2': '2.12.10',
         '4.3': '2.12.13',
         '4.4': '2.12.13',
+        '5.0': '2.12.13',
     ]
     ver = [
         doc                    : [
