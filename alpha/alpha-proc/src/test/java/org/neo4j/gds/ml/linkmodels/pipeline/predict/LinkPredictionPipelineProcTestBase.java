@@ -47,7 +47,7 @@ import java.util.Map;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
 @ModelCatalogExtension
-public abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
+abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
     abstract Class<? extends AlgoBaseProc<?, ?, ?>> getProcedureClazz();
 

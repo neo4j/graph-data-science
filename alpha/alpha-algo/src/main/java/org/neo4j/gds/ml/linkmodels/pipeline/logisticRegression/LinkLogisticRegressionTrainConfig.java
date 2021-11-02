@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
@@ -30,7 +29,6 @@ import java.util.Collection;
 import java.util.Map;
 
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {

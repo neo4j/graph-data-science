@@ -30,20 +30,20 @@ import java.util.Optional;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPipelineMutateConfig extends LinkPredictionPipelineBaseConfig, MutateRelationshipConfig, MutatePropertyConfig {
+public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictionPredictPipelineBaseConfig, MutateRelationshipConfig, MutatePropertyConfig {
     @Value.Default
     @Override
     default String mutateProperty() {
         return "probability";
     }
 
-    static LinkPredictionPipelineMutateConfig of(
+    static LinkPredictionPredictPipelineMutateConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new LinkPredictionPipelineMutateConfigImpl(
+        return new LinkPredictionPredictPipelineMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

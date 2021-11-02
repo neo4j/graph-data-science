@@ -77,11 +77,12 @@ public abstract class PipelineExecutor<
 
     @Override
     public RESULT compute() {
-        this.pipeline.validate(graphStore, config);
         var dataSplits = splitDataset();
 
         var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
         executeNodePropertySteps(featureInputGraphFilter.nodeLabels(), featureInputGraphFilter.relationshipTypes());
+
+        this.pipeline.validate(graphStore, config);
 
         var result = train(dataSplits);
 
@@ -108,7 +109,15 @@ public abstract class PipelineExecutor<
         progressTracker.endSubTask("execute node property steps");
     }
 
-    private void removeNodeProperties(GraphStore graphstore, Collection<NodeLabel> nodeLabels) {
+
+    private void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
+        removeDataSplitRelationships(datasets);
+        removeNodeProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
+    }
+
+    protected abstract void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets);
+
+    private void removeNodeProperties(GraphStore graphstore, Iterable<NodeLabel> nodeLabels) {
         pipeline.nodePropertySteps().forEach(step -> {
             var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
             if (intermediateProperty instanceof String) {
@@ -117,13 +126,6 @@ public abstract class PipelineExecutor<
         });
     }
 
-    private void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
-        datasets.values()
-            .stream()
-            .flatMap(graphFilter -> graphFilter.relationshipTypes().stream()).forEach(graphStore::deleteRelationships);
-
-        removeNodeProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
-    }
 
     @ValueClass
     public interface GraphFilter {

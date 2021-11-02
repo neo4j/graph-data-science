@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelinePredictExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -36,9 +35,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineCompanion.DESCRIPTION;
+import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineCompanion.DESCRIPTION;
 
-public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPipelinePredictExecutor, LinkPredictionResult, LinkPredictionPipelineStreamConfig> {
+public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -64,18 +63,18 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPipelineStreamConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPredictPipelineStreamConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override
-    protected LinkPredictionPipelineStreamConfig newConfig(
+    protected LinkPredictionPredictPipelineStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LinkPredictionPipelineStreamConfig.of(
+        return LinkPredictionPredictPipelineStreamConfig.of(
             username,
             graphName,
             maybeImplicitCreate,
@@ -84,8 +83,8 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPipelinePredictExecutor, LinkPredictionPipelineStreamConfig> algorithmFactory() {
-        return new LinkPredictionPipelineAlgorithmFactory<>(this, databaseId());
+    protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, databaseId());
     }
 
     @SuppressWarnings("unused")

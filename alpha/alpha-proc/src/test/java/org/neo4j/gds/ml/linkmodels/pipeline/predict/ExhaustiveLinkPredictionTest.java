@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
@@ -28,7 +27,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -36,18 +34,16 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,8 +88,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+        var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
             new Weights<>(
@@ -105,59 +100,52 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new LinkPredictionPipelineExecutor(
-                pipeline,
-                caller,
-                db.databaseId(),
-                getUsername(),
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
-            var linkPrediction = new ExhaustiveLinkPrediction(
-                modelData,
-                pipelineExecutor,
-                List.of(NodeLabel.of("N")),
-                List.of(RelationshipType.of("T")),
-                graphStore,
-                concurrency,
-                topN,
-                0D,
-                ProgressTracker.NULL_TRACKER
-            );
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("N")),
+            List.of(RelationshipType.of("T")),
+            Optional.empty()
+        );
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
+        var linkPrediction = new ExhaustiveLinkPrediction(
+            modelData,
+            linkFeatureExtractor,
+            graph,
+            concurrency,
+            topN,
+            0D,
+            ProgressTracker.NULL_TRACKER
+        );
 
-            var predictionResult = linkPrediction.compute();
-            assertThat(predictionResult.samplingStats()).isEqualTo(
-                Map.of(
-                    "strategy", "exhaustive",
-                    "linksConsidered", 6L
-                )
-            );
+        var predictionResult = linkPrediction.compute();
+        assertThat(predictionResult.samplingStats()).isEqualTo(
+            Map.of(
+                "strategy", "exhaustive",
+                "linksConsidered", 6L
+            )
+        );
 
 
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(Math.min(topN, 6));
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(Math.min(topN, 6));
 
-            var expectedLinks = List.of(
-                PredictedLink.of(0, 4, 0.49750002083312506),
-                PredictedLink.of(1, 4, 0.11815697780926958),
-                PredictedLink.of(0, 1, 0.11506673204554983),
-                PredictedLink.of(0, 3, 0.0024726231566347774),
-                PredictedLink.of(0, 2, 2.0547103309367397E-4),
-                PredictedLink.of(2, 3, 2.810228605019867E-9)
-            );
-            var endIndex = Math.min(topN, expectedLinks.size());
-            assertThat(predictedLinks).containsExactly(expectedLinks
-                .subList(0, endIndex)
-                .toArray(PredictedLink[]::new));
-        });
+        var expectedLinks = List.of(
+            PredictedLink.of(0, 4, 0.49750002083312506),
+            PredictedLink.of(1, 4, 0.11815697780926958),
+            PredictedLink.of(0, 1, 0.11506673204554983),
+            PredictedLink.of(0, 3, 0.0024726231566347774),
+            PredictedLink.of(0, 2, 2.0547103309367397E-4),
+            PredictedLink.of(2, 3, 2.810228605019867E-9)
+        );
+        var endIndex = Math.min(topN, expectedLinks.size());
+        assertThat(predictedLinks).containsExactly(expectedLinks
+            .subList(0, endIndex)
+            .toArray(PredictedLink[]::new));
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1, 0.3", "3, 0.05", "4, 0.002", "6, 0.00000000001", "6, 0.0"})
     void shouldPredictWithThreshold(int expectedPredictions, double threshold) {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
+        var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLinkLogisticRegressionData.of(
             new Weights<>(
@@ -169,143 +157,27 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var executor = new LinkPredictionPipelineExecutor(
-                pipeline,
-                caller,
-                db.databaseId(),
-                getUsername(),
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
-            var linkPrediction = new ExhaustiveLinkPrediction(
-                modelData,
-                executor,
-                List.of(NodeLabel.of("N")),
-                List.of(RelationshipType.of("T")),
-                graphStore,
-                4,
-                6,
-                threshold,
-                ProgressTracker.NULL_TRACKER
-            );
-            var predictionResult = linkPrediction.compute();
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(expectedPredictions);
-
-            assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
-        });
-    }
-
-    @Test
-    void shouldPredictWithPipelineContainingNodePropertySteps() {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
-
-        double[] weights = {-2.0, -1.0, 3.0, 1.0};
-
-        var modelData = ImmutableLinkLogisticRegressionData.of(
-            new Weights<>(new Matrix(
-                weights,
-                1,
-                weights.length
-            )),
-            Weights.ofScalar(0)
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("N")),
+            List.of(RelationshipType.of("T")),
+            Optional.empty()
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new LinkPredictionPipelineExecutor(
-                pipeline,
-                caller,
-                db.databaseId(),
-                getUsername(),
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
-            var linkPrediction = new ExhaustiveLinkPrediction(
-                modelData,
-                pipelineExecutor,
-                List.of(NodeLabel.of("N")),
-                List.of(RelationshipType.of("T")),
-                graphStore,
-                4,
-                6,
-                0D,
-                ProgressTracker.NULL_TRACKER
-            );
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
 
-            var predictionResult = linkPrediction.compute();
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(6);
-
-            var expectedLinks = List.of(
-                PredictedLink.of(0, 4, 0.9818363089715674),
-                PredictedLink.of(0, 1, 0.8765329524347759),
-                PredictedLink.of(0, 3, 0.11920292202211766),
-                PredictedLink.of(1, 4, 0.11815697780926958),
-                PredictedLink.of(0, 2, 0.011096137997457569),
-                PredictedLink.of(2, 3, 2.810228605019867E-9)
-            );
-
-            assertThat(predictedLinks).containsAll(expectedLinks);
-        });
-    }
-
-    @Test
-    void shouldPredictTwice() {
-        var pipeline = new LinkPredictionPipeline();
-        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
-        pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
-
-        double[] weights = {-2.0, -1.0, 3.0, 1.0};
-
-        var modelData = ImmutableLinkLogisticRegressionData.of(
-            new Weights<>(new Matrix(
-                weights,
-                1,
-                weights.length
-            )),
-            Weights.ofScalar(0)
+        var linkPrediction = new ExhaustiveLinkPrediction(
+            modelData,
+            linkFeatureExtractor,
+            graph,
+            4,
+            6,
+            threshold,
+            ProgressTracker.NULL_TRACKER
         );
+        var predictionResult = linkPrediction.compute();
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(expectedPredictions);
 
-        var expectedLinks = List.of(
-            PredictedLink.of(0, 4, 0.9818363089715674),
-            PredictedLink.of(0, 1, 0.8765329524347759),
-            PredictedLink.of(0, 3, 0.11920292202211766),
-            PredictedLink.of(1, 4, 0.11815697780926958),
-            PredictedLink.of(0, 2, 0.011096137997457569),
-            PredictedLink.of(2, 3, 2.810228605019867E-9)
-        );
-
-        for (int i = 0; i < 2; i++) {
-            TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-                var pipelineExecutor = new LinkPredictionPipelineExecutor(
-                    pipeline,
-                    caller,
-                    db.databaseId(),
-                    getUsername(),
-                    GRAPH_NAME,
-                    ProgressTracker.NULL_TRACKER
-                );
-                var linkPrediction = new ExhaustiveLinkPrediction(
-                    modelData,
-                    pipelineExecutor,
-                    List.of(NodeLabel.of("N")),
-                    List.of(RelationshipType.of("T")),
-                    graphStore,
-                    4,
-                    6,
-                    0D,
-                    ProgressTracker.NULL_TRACKER
-                );
-
-                var predictionResult = linkPrediction.compute();
-                var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-                assertThat(predictedLinks).hasSize(6);
-
-                assertThat(predictedLinks).containsAll(expectedLinks);
-            });
-        }
+        assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
     }
 }
