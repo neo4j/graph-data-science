@@ -15,4 +15,14 @@ dependencies {
 
     implementation project(':licensing')
     implementation project(':concurrency-validation-api')
+    implementation project(':model-catalog-api')
+
+    testImplementation project(':neo4j-adapter')
+    testImplementation project(':open-model-catalog')
+    testImplementation project(':open-licensing')
+
+    testImplementation platform(dep.junit5bom)
+    testImplementation dep.junit5jupiter
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j'
 }
