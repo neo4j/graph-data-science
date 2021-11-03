@@ -32,17 +32,17 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-// TODO use TrainingConfig as bound instead of Mappable
-public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends ToMapConvertible> implements ToMapConvertible {
+public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends ToMapConvertible> implements ToMapConvertible {
 
     protected final List<NodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
 
     protected List<TRAINING_CONFIG> trainingParameterSpace;
 
-    protected PipelineBuilder() {
+    protected Pipeline(List<TRAINING_CONFIG> initialTrainingParameterSpace) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
+        this.trainingParameterSpace = initialTrainingParameterSpace;
     }
 
     @Override
