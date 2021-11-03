@@ -25,6 +25,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
+import java.util.List;
+
 public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RandomWalkBaseConfig {
 
     @Value.Default
@@ -73,5 +75,12 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     @Value.Default
     default int iterations() {
         return 1;
+    }
+
+    @Configuration.Ignore
+    @Value.Default
+    @Override
+    default List<Long> sourceNodes() {
+        return List.of();
     }
 }
