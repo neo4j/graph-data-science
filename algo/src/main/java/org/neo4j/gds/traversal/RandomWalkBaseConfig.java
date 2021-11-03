@@ -20,16 +20,13 @@
 package org.neo4j.gds.traversal;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.NodeConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodesConfig;
 
-import java.util.List;
-
-public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig {
+public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig, SourceNodesConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
@@ -59,18 +56,5 @@ public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeight
     @Configuration.DoubleRange(min = 0.0)
     default double returnFactor() {
         return 1.0;
-    }
-
-    String SOURCE_NODES_KEY = "sourceNodes";
-
-    @Value.Default
-    @Nullable
-    @Configuration.ConvertWith("org.neo4j.gds.traversal.RandomWalkBaseConfig#parseSourceNodeId")
-    default List<Long> sourceNodes() {
-        return null;
-    }
-
-    static List<Long> parseSourceNodeId(Object input) {
-        return NodeConfig.parseNodeIds(input, SOURCE_NODES_KEY);
     }
 }

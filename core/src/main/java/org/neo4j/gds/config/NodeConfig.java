@@ -21,9 +21,6 @@ package org.neo4j.gds.config;
 
 import org.neo4j.graphdb.Node;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface NodeConfig {
@@ -37,25 +34,6 @@ public interface NodeConfig {
 
         throw new IllegalArgumentException(formatWithLocale(
             "Expected a node or a node id for `%s`. Got %s.",
-            field,
-            input.getClass().getSimpleName()
-        ));
-    }
-
-    static List<Long> parseNodeIds(Object input, String field) {
-        if (input instanceof Node) {
-            return List.of(((Node) input).getId());
-        } else if (input instanceof Number) {
-            return List.of(((Number) input).longValue());
-        } else if (input instanceof List) {
-            var inputList = (List<Object>) input;
-            return inputList.stream().map(listElement -> parseNodeId(listElement, field)).collect(Collectors.toList());
-        } else if (input == null) {
-            return null;
-        }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Expected a node, a node id, a list of nodes or a list of node ids for `%s`. Got %s.",
             field,
             input.getClass().getSimpleName()
         ));

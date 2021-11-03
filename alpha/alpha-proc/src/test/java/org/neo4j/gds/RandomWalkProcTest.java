@@ -23,9 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.traversal.RandomWalk;
@@ -44,10 +41,12 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @SuppressWarnings("unchecked")
-class RandomWalkProcTest extends BaseProcTest implements AlgoBaseProcTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>> {
+class RandomWalkProcTest extends BaseProcTest implements
+    AlgoBaseProcTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
+    SourceNodesConfigTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>
+{
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -118,35 +117,6 @@ class RandomWalkProcTest extends BaseProcTest implements AlgoBaseProcTest<Random
 
             AtomicInteger indexInPath = new AtomicInteger(0);
             path.nodes().forEach(node -> assertEquals(node.getId(), nodes.get(indexInPath.getAndIncrement())));
-        }
-    }
-
-    static Stream<Arguments> sourceNodes() {
-        return Stream.of(
-            arguments(List.of(0L, 1L), List.of(0L, 1L)),
-            arguments(List.of(0L), 0L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("sourceNodes")
-    void shouldParseSourceNodeIds(Collection<Long> parsedSourceNodes, Object rawSourceNodes) {
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
-            .streamMode()
-            .addParameter("walksPerNode", 1)
-            .addParameter("walkLength", 3)
-            .addParameter("returnPath", true)
-            .addParameter("sourceNodes", rawSourceNodes)
-            .yields();
-
-        List<List<Long>> nodeIds = new ArrayList<>();
-        runQueryWithRowConsumer(query, row -> nodeIds.add((List<Long>) row.get("nodeIds")));
-
-        assertThat(nodeIds).matches(walks -> walks.size() == parsedSourceNodes.size());
-        for (long sourceNode : parsedSourceNodes) {
-            assertThat(nodeIds).anyMatch(walk -> walk.get(0) == sourceNode);
         }
     }
 
