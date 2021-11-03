@@ -21,7 +21,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':schema-api')
+    implementation project(':graph-schema-api')
     implementation project(':string-formatting')
 
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false

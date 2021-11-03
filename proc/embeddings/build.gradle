@@ -16,8 +16,8 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':ml-core')
+    implementation project(':graph-schema-api')
     implementation project(':neo4j-adapter')
-    implementation project(':schema-api')
     implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

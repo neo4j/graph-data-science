@@ -15,11 +15,11 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':neo4j-adapter')
     implementation project(':pregel')
-    implementation project(':schema-api')
     implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

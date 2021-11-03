@@ -15,11 +15,11 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':graph-schema-api')
     implementation project(':licensing')
     implementation project(':memory-usage')
     implementation project(':open-licensing')
     implementation project(':pregel')
-    implementation project(':schema-api')
     implementation project(':string-formatting')
     implementation project(':transaction')
 
