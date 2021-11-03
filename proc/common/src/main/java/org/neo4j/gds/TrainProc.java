@@ -25,8 +25,9 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.procedure.Context;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +48,9 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     TRAIN_INFO extends Model.Mappable>
     extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> {
 
+    @Context
+    public ModelCatalog modelCatalog;
+
     protected abstract String modelType();
 
     protected <T> Stream<T> trainAndStoreModelWithResult(
@@ -59,7 +63,6 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     ) {
         var result = compute(graphNameOrConfig, configuration);
         var model = Objects.requireNonNull(result.result());
-        var modelCatalog = OpenModelCatalog.INSTANCE;
         modelCatalog.checkStorable(username(), model.name(), model.algoType());
         modelCatalog.set(model);
         return Stream.of(resultConstructor.apply(model, result));
@@ -68,7 +71,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @Override
     protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
         super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        OpenModelCatalog.INSTANCE.checkStorable(username(), config.modelName(), modelType());
+        modelCatalog.checkStorable(username(), config.modelName(), modelType());
     }
 
     @SuppressWarnings("unused")

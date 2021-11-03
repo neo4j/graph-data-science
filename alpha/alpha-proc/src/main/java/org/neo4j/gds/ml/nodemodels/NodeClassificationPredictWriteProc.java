@@ -27,12 +27,12 @@ import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,7 +49,8 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class NodeClassificationPredictWriteProc
     extends WriteProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write", mode = WRITE)
     @Description("Predicts classes for all nodes based on a previously trained model")

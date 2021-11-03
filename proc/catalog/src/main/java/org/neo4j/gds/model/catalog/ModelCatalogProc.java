@@ -21,10 +21,15 @@ package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.procedure.Context;
 
 abstract class ModelCatalogProc extends BaseProc {
 
     static final String NO_VALUE = "__NO_VALUE";
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     void validateModelName(String modelName) {
         CypherMapWrapper.failOnBlank("modelName", modelName);

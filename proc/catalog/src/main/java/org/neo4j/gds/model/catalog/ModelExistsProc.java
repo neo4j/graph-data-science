@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,7 +36,6 @@ public class ModelExistsProc extends ModelCatalogProc {
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        var modelCatalog = OpenModelCatalog.INSTANCE;
         return Stream.of(new ModelExistsResult(
             modelName,
             modelCatalog.type(username(), modelName).orElse("n/a"),
