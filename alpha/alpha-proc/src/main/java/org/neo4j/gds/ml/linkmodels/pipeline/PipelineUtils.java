@@ -55,6 +55,6 @@ public final class PipelineUtils {
         String pipelineName,
         String username
     ) {
-        return  modelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
+        return modelCatalog.get(username, pipelineName, LinkLogisticRegressionData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
     }
 }

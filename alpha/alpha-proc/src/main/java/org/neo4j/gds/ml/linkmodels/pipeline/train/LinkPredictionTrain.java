@@ -45,8 +45,8 @@ import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegre
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
+import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
 import java.util.Collections;

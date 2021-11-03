@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
@@ -213,41 +214,28 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             Weights.ofScalar(0)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var pipelineExecutor = new PipelineExecutor(
-                pipeline,
-                caller,
-                db.databaseId(),
-                getUsername(),
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
-            var linkPrediction = new ApproximateLinkPrediction(
-                modelData,
-                pipelineExecutor,
-                List.of(NodeLabel.of("N")),
-                List.of(RelationshipType.of("T")),
-                graphStore,
-                ImmutableKnnBaseConfig.builder()
-                    .randomSeed(42L)
-                    .concurrency(1)
-                    .randomJoins(10)
-                    .maxIterations(10)
-                    .sampleRate(0.9)
-                    .deltaThreshold(0)
-                    .topK(topK)
-                    .nodeWeightProperty("DUMMY")
-                    .build(),
-                ProgressTracker.NULL_TRACKER
-            );
-            var predictionResult = linkPrediction.compute();
-            var graph = graphStore.getGraph(RelationshipType.of("T"));
+        var linkPrediction = new ApproximateLinkPrediction(
+            modelData,
+            LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+            graph,
+            ImmutableKnnBaseConfig.builder()
+                .randomSeed(42L)
+                .concurrency(1)
+                .randomJoins(10)
+                .maxIterations(10)
+                .sampleRate(0.9)
+                .deltaThreshold(0)
+                .topK(topK)
+                .nodeWeightProperty("DUMMY")
+                .build(),
+            ProgressTracker.NULL_TRACKER
+        );
+        var predictionResult = linkPrediction.compute();
 
-            predictionResult.stream().forEach(predictedLink -> {
-                assertThat(graph.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
-                assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
-                assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
-            });
+        predictionResult.stream().forEach(predictedLink -> {
+            assertThat(graph.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
+            assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
+            assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
         });
     }
 }

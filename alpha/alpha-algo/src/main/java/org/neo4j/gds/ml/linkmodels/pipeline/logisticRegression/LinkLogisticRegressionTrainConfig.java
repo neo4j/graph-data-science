@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
 
@@ -49,9 +48,7 @@ public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
     @Configuration.CollectKeys
     Collection<String> configKeys();
 
-    static LinkLogisticRegressionTrainConfig of(
-        Map<String, Object> params
-    ) {
+    static LinkLogisticRegressionTrainConfig of(Map<String, Object> params) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
 
         var config = new LinkLogisticRegressionTrainConfigImpl(cypherMapWrapper);
