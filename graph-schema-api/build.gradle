@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Model Catalog API'
+description = 'Neo4j Graph Data Science :: Graph Schema API'
 
 group = 'org.neo4j.gds'
 
