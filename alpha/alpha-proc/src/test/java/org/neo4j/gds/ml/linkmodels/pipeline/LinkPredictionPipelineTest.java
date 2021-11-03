@@ -83,7 +83,7 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canSetParameterSpace() {
-        var config = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 19));
+        var config = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 19));
 
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
@@ -95,9 +95,9 @@ class LinkPredictionPipelineTest {
 
     @Test
     void overridesTheParameterSpace() {
-        var config1 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 19));
-        var config2 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1337));
-        var config3 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 42));
+        var config1 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config2 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
+        var config3 = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
@@ -171,8 +171,8 @@ class LinkPredictionPipelineTest {
             pipeline.addFeatureStep(hadamardFeatureStep);
 
             pipeline.setTrainingParameterSpace(List.of(
-                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
-                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
+                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
@@ -250,8 +250,8 @@ class LinkPredictionPipelineTest {
         void deepCopiesParameterSpace() {
             var pipeline = new LinkPredictionPipeline();
             pipeline.setTrainingParameterSpace(List.of(
-                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
-                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
+                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+                LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
             var copy = pipeline.copy();

@@ -38,6 +38,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -64,7 +65,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
-class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
+class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
     @Neo4jGraph
@@ -80,6 +81,8 @@ class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @BeforeEach
     void setup() throws Exception {
@@ -101,7 +104,7 @@ class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
@@ -216,7 +219,7 @@ class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
                 Weights.ofScalar(0)
             );
 
-            ModelCatalog.set(Model.of(
+            modelCatalog.set(Model.of(
                 getUsername(),
                 "model",
                 MODEL_TYPE,
@@ -227,7 +230,7 @@ class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
                     .pipeline("DUMMY")
                     .negativeClassWeight(1.0)
                     .build(),
-                LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(4, Map.of()), Map.of(), pipeline)
+                LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)
             ));
 
             var log = new TestLog();

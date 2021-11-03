@@ -79,7 +79,7 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TestMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TestMutateConfig.of(graphName, maybeImplicitCreate, config);
     }
 
     @Override

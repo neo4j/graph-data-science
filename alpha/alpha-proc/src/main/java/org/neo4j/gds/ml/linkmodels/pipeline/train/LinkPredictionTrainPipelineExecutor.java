@@ -70,17 +70,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
 
     @Override
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
-        var lpPipeline = (LinkPredictionPipeline) this.pipeline;
-
         this.relationshipSplitter.splitRelationships(
             graphStore,
             config.relationshipTypes(),
             config.nodeLabels(),
             config.randomSeed(),
-            lpPipeline.relationshipWeightProperty()
+            pipeline.relationshipWeightProperty()
         );
 
-        var splitConfig = lpPipeline.splitConfig();
+        var splitConfig = pipeline.splitConfig();
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var trainRelationshipTypes = RelationshipType.listOf(splitConfig.trainRelationshipType());

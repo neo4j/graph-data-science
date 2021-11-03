@@ -131,7 +131,7 @@ class LinkPredictionTrainTest {
 
         assertThat(customInfo.bestParameters())
             .usingRecursiveComparison()
-            .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
+            .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
     }
 
     @Test
@@ -163,8 +163,8 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
-            LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
         ));
 
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));

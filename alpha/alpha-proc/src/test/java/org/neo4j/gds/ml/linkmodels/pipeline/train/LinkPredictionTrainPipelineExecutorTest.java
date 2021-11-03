@@ -30,7 +30,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
@@ -42,6 +41,7 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -105,9 +105,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     public static final String GRAPH_NAME = "g";
     public static final NodeLabel NODE_LABEL = NodeLabel.of("N");
-    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.of("REL");
 
     private GraphStore graphStore;
+
+    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @BeforeEach
     void setup() throws Exception {
@@ -129,7 +130,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
+        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
@@ -145,8 +146,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .build());
 
         pipeline.setTrainingParameterSpace(List.of(
-            LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
-            LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
+            LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))
         ));
 
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array")));
@@ -186,7 +187,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
-                .isEqualTo(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1)));
+                .isEqualTo(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
         });
     }
 
@@ -306,7 +307,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))));
+        pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1))));
 
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree")));
@@ -330,7 +331,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             pipeline
         );
 
-        ModelCatalog.set(model);
+        modelCatalog.set(model);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = new TestLog();

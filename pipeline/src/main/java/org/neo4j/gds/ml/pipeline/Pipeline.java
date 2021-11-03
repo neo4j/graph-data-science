@@ -54,7 +54,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         ));
         map.put(
             "trainingParameterSpace",
-            trainingParameterSpace.stream().map(Model.Mappable::toMap).collect(Collectors.toList())
+            trainingParameterSpace.stream().map(ToMapConvertible::toMap).collect(Collectors.toList())
         );
         map.putAll(additionalEntries());
         return map;
