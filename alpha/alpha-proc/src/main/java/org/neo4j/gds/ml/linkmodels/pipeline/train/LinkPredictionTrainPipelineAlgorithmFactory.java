@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -89,18 +88,8 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
                 () -> List.of(Tasks.leaf("step")),
                 pipeline.nodePropertySteps().size()
             ),
-            Tasks.leaf("extract train features"),
-            Tasks.leaf(
-                "select model",
-               pipeline.trainingParameterSpace().size()
-            ),
-            Training.progressTask("train best model"),
-            Tasks.leaf("compute train metrics"),
-            Tasks.task(
-                "evaluate on test data",
-                Tasks.leaf("extract test features"),
-                Tasks.leaf("compute test metrics")
-            )
+            LinkPredictionTrain.progressTask(),
+            Tasks.leaf("clean up[ graph store")
         );
     }
 

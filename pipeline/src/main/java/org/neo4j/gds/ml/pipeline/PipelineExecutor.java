@@ -77,17 +77,25 @@ public abstract class PipelineExecutor<
 
     @Override
     public RESULT compute() {
+        progressTracker.beginSubTask();
+
         var dataSplits = splitDataset();
 
         var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+
+        progressTracker.beginSubTask("execute node property steps");
         executeNodePropertySteps(featureInputGraphFilter.nodeLabels(), featureInputGraphFilter.relationshipTypes());
+        progressTracker.endSubTask("execute node property steps");
 
         this.pipeline.validate(graphStore, config);
 
         var result = train(dataSplits);
 
+        progressTracker.beginSubTask("clean up graph store");
         cleanUpGraphStore(dataSplits);
+        progressTracker.endSubTask("clean up graph store");
 
+        progressTracker.endSubTask();
         return result;
     }
 
@@ -100,15 +108,12 @@ public abstract class PipelineExecutor<
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes
     ) {
-        progressTracker.beginSubTask("execute node property steps");
         for (NodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(caller, graphName, nodeLabels, relationshipTypes);
             progressTracker.endSubTask();
         }
-        progressTracker.endSubTask("execute node property steps");
     }
-
 
     private void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
         removeDataSplitRelationships(datasets);
@@ -125,7 +130,6 @@ public abstract class PipelineExecutor<
             }
         });
     }
-
 
     @ValueClass
     public interface GraphFilter {
