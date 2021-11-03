@@ -35,7 +35,6 @@ import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
