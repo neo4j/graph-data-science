@@ -35,7 +35,7 @@ import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig,
-    PIPELINE extends PipelineBuilder<?, ?>,
+    PIPELINE extends Pipeline<?, ?>,
     RESULT,
     SELF extends PipelineExecutor<PIPELINE_CONFIG, PIPELINE, RESULT, SELF>
 > extends Algorithm<SELF, RESULT> {
