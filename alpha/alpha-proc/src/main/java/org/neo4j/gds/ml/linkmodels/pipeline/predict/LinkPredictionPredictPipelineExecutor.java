@@ -86,7 +86,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected LinkPredictionResult train(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
