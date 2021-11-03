@@ -37,15 +37,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
-    LinkFeatureStep,
-    double[],
-    LinkLogisticRegressionTrainConfig,
+    LinkPredictionTrainConfig,
+    LinkPredictionPipeline,
     Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>,
     LinkPredictionTrainPipelineExecutor
 > {
 
     private final RelationshipSplitter relationshipSplitter;
-    private final LinkPredictionTrainConfig lpTrainConfig;
 
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionPipeline pipeline,
@@ -63,7 +61,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
             graphName,
             progressTracker
         );
-        this.lpTrainConfig = config;
 
         this.relationshipSplitter = new RelationshipSplitter(
             graphName,
@@ -79,9 +76,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
 
         this.relationshipSplitter.splitRelationships(
             graphStore,
-            lpTrainConfig.relationshipTypes(),
-            lpTrainConfig.nodeLabels(),
-            lpTrainConfig.randomSeed(),
+            config.relationshipTypes(),
+            config.nodeLabels(),
+            config.randomSeed(),
             lpPipeline.relationshipWeightProperty()
         );
 
@@ -109,8 +106,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         return new LinkPredictionTrain(
             trainGraph,
             testGraph,
-            (LinkPredictionPipeline) pipeline,
-            lpTrainConfig,
+            pipeline,
+            config,
             progressTracker
         ).compute();
     }
