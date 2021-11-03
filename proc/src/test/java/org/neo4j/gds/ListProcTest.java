@@ -37,12 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ListProcTest extends BaseProcTest {
-
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "com.neo4j.gds",
-        "org.neo4j.gds"
-    );
-
     public static final List<String> PROCEDURES = asList(
         "gds.alpha.create.cypherdb",
 
