@@ -117,7 +117,7 @@ public final class NodesBuilder {
             hasProperties
         );
 
-        var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, allocationTracker);
+        var seenIds = HugeAtomicBitSet.fixed(maxOriginalId + 1, allocationTracker);
 
         Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
             ? this::getOrCreateLabelTokenId

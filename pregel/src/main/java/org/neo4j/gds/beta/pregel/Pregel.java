@@ -147,7 +147,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .config(config)
             .nodeValues(nodeValues)
             .messenger(messenger)
-            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), allocationTracker))
+            .voteBits(HugeAtomicBitSet.fixed(graph.nodeCount(), allocationTracker))
             .executorService(config.useForkJoin()
                 ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
                 : executor)
