@@ -89,7 +89,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         "(b)-[:REL]->(d), " +
         "(e)-[:REL]->(g), " +
         "(j)-[:REL]->(l), " +
-        "(m)-[:REL]->(o), ";
+        "(m)-[:REL]->(o)";
 
 
     public static final String GRAPH_NAME = "g";
@@ -106,9 +106,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
         String createQuery = GdsCypher.call()
             .withNodeLabel("N")
-            .withNodeLabel("Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
             .graphCreate(GRAPH_NAME)
             .yields();
@@ -138,7 +136,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var config = LinkPredictionTrainConfig
             .builder()
-            .graphName("graph")
+            .graphName(GRAPH_NAME)
             .modelName("model")
             .pipeline("DUMMY")
             .negativeClassWeight(1)
@@ -151,7 +149,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller,
                 graphStore,
-                "graph",
+                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER
             ).compute();
 
@@ -246,7 +244,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         String createQuery = GdsCypher.call()
             .withAnyLabel()
             .withRelationshipType("_TEST_", "REL")
-            .withRelationshipType("_TEST_COMPLEMENT_", "IGNORE")
+            .withRelationshipType("_TEST_COMPLEMENT_", "REL")
             .graphCreate(graphName)
             .yields();
 
