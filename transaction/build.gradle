@@ -15,4 +15,7 @@ dependencies {
 
     implementation project(':neo4j-kernel-adapter')
     implementation project(':licensing')
+
+    testImplementation project(':edition-api')
+    testImplementation project(':test-utils')
 }
