@@ -233,12 +233,7 @@ public final class LabelInformation {
                     var importBitSet = e.getValue();
                     var internBitSet = new BitSet(nodeCount);
 
-                    // TODO: cursor / set bits stream
-                    for (long neoId = 0; neoId < importBitSet.size(); neoId++) {
-                        if (importBitSet.get(neoId)) {
-                            internBitSet.set(mappedIdFn.applyAsLong(neoId));
-                        }
-                    }
+                    importBitSet.forEachSetBit(neoId -> internBitSet.set(mappedIdFn.applyAsLong(neoId)));
 
                     return internBitSet;
                 }));
