@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
-interface KnnSampler {
+public interface KnnSampler {
     long[] sample(
         long nodeId,
         long lowerBoundOnValidSamplesInRange,
