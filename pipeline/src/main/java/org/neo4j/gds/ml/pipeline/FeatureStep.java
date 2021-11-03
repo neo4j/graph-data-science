@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.List;
 import java.util.Map;
 
-public interface FeatureStep extends ToMap {
+public interface FeatureStep extends ToMapConvertible {
 
     List<String> inputNodeProperties();
 

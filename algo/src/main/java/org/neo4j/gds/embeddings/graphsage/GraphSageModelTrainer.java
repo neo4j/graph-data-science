@@ -24,7 +24,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -312,7 +312,7 @@ public class GraphSageModelTrainer {
     }
 
     @ValueClass
-    public interface GraphSageTrainMetrics extends ToMap {
+    public interface GraphSageTrainMetrics extends ToMapConvertible {
         static GraphSageTrainMetrics empty() {
             return ImmutableGraphSageTrainMetrics.of(List.of(), false);
         }

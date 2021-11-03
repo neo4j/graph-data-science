@@ -31,7 +31,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
@@ -61,7 +61,7 @@ class ModelCatalogTest {
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
 
-    private static final Model<String, TestTrainConfig, ToMap> TEST_MODEL = Model.of(
+    private static final Model<String, TestTrainConfig, ToMapConvertible> TEST_MODEL = Model.of(
         USERNAME,
         "testModel",
         "testAlgo",
@@ -135,8 +135,8 @@ class ModelCatalogTest {
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMap.class));
-        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMap.class));
+        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMapConvertible.class));
     }
 
     @Disabled("Joanatan broke it")
@@ -173,8 +173,8 @@ class ModelCatalogTest {
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMap.class));
-        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMap.class));
+        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class));
     }
 
     @Test
@@ -183,7 +183,7 @@ class ModelCatalogTest {
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, ToMap.class)
+            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -196,7 +196,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, ToMap.class)
+            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals(
@@ -212,7 +212,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, ToMap.class)
+            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals(
@@ -380,7 +380,7 @@ class ModelCatalogTest {
                 publishedModel.name(),
                 String.class,
                 TestTrainConfig.class,
-                ToMap.class
+                ToMapConvertible.class
             );
 
             assertThat(publicModel)
@@ -399,7 +399,7 @@ class ModelCatalogTest {
 
             // test the get code path
             assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> modelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, ToMap.class))
+                .isThrownBy(() -> modelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, ToMapConvertible.class))
                 .withMessage(expectedMessage);
 
             // test the drop code path
@@ -442,7 +442,7 @@ class ModelCatalogTest {
         );
     }
 
-    private static Model<Integer, TestTrainConfig, ToMap> testModel(String name) {
+    private static Model<Integer, TestTrainConfig, ToMapConvertible> testModel(String name) {
         return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of(), Map::of);
     }
 

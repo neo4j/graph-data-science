@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @FunctionalInterface
-public interface ToMap {
+public interface ToMapConvertible {
 
     Map<String, Object> toMap();
 
-    static <T extends ToMap> List<Map<String, Object>> toMap(List<T> data) {
-        return data.stream().map(ToMap::toMap).collect(Collectors.toList());
+    static <T extends ToMapConvertible> List<Map<String, Object>> toMap(List<T> data) {
+        return data.stream().map(ToMapConvertible::toMap).collect(Collectors.toList());
     }
 }

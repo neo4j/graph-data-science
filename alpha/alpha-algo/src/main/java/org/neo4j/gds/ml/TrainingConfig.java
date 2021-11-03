@@ -21,9 +21,9 @@ package org.neo4j.gds.ml;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 
-public interface TrainingConfig extends ToMap {
+public interface TrainingConfig extends ToMapConvertible {
 
     int DEFAULT_BATCH_SIZE = 100;
     int MAX_EPOCHS = 100;

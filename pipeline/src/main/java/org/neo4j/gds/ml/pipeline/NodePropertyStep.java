@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
 
 import java.lang.reflect.Method;
@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class NodePropertyStep implements ToMap {
+public final class NodePropertyStep implements ToMapConvertible {
     private final String procName;
     private final Method procMethod;
     private final Map<String, Object> config;

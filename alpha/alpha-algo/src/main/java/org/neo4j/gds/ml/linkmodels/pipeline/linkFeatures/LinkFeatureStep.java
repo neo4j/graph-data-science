@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.FeatureStep;
 
 import java.util.Map;
 
-public interface LinkFeatureStep extends ToMap, FeatureStep {
+public interface LinkFeatureStep extends ToMapConvertible, FeatureStep {
     LinkFeatureAppender linkFeatureAppender(Graph graph);
 
     @Override
