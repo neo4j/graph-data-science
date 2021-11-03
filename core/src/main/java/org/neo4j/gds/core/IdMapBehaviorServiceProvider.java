@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.LicensingServiceBuilder;
+public final class IdMapBehaviorServiceProvider {
 
-import java.util.Comparator;
-import java.util.ServiceLoader;
+    private static IdMapBehavior instance = new OpenGdsIdMapBehavior();
 
-public final class IdMapBehaviorServiceLoader {
+    public static void idMapBehavior(IdMapBehavior idMapBehavior) {
+        synchronized (IdMapBehaviorServiceProvider.class) {
+            instance = idMapBehavior;
+        }
+    }
 
-    public static final IdMapBehavior INSTANCE = ServiceLoader.load(IdMapBehavior.class)
-        .stream()
-        .map(ServiceLoader.Provider::get)
-        .max(Comparator.comparing(IdMapBehavior::priority))
-        .orElseThrow(() -> new LinkageError("Could not load " + LicensingServiceBuilder.class + " implementation"));
+    public static IdMapBehavior idMapBehavior() {
+        return instance;
+    }
 
-    private IdMapBehaviorServiceLoader() {}
+
+    private IdMapBehaviorServiceProvider() {}
 }
