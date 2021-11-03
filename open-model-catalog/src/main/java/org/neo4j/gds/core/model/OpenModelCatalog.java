@@ -40,14 +40,14 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     private OpenModelCatalog() {}
 
-    private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
-    private static final UserCatalog publicModels = new UserCatalog();
+    private static final Map<String, OpenUserCatalog> userCatalogs = new ConcurrentHashMap<>();
+    private static final OpenUserCatalog publicModels = new OpenUserCatalog();
 
     @Override
     public void set(Model<?, ?, ?> model) {
         userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
-                userCatalog = new UserCatalog();
+                userCatalog = new OpenUserCatalog();
             }
             userCatalog.set(model);
             return userCatalog;
@@ -58,7 +58,7 @@ public final class OpenModelCatalog implements ModelCatalog {
     public void setUnsafe(Model<?, ?, ?> model) {
         userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
-                userCatalog = new UserCatalog();
+                userCatalog = new OpenUserCatalog();
             }
             userCatalog.setUnsafe(model);
             return userCatalog;
@@ -86,7 +86,7 @@ public final class OpenModelCatalog implements ModelCatalog {
         throw new NoSuchElementException(prettySuggestions(
             formatWithLocale("Model with name `%s` does not exist.", modelName),
             modelName,
-            userCatalog.userModels.keySet()
+            userCatalog.availableModelNames()
         ));
     }
 
@@ -107,7 +107,7 @@ public final class OpenModelCatalog implements ModelCatalog {
             throw new NoSuchElementException(prettySuggestions(
                 formatWithLocale("Model with name `%s` does not exist.", modelName),
                 modelName,
-                userCatalog.userModels.keySet()
+                userCatalog.availableModelNames()
             ));
         }
 
@@ -165,22 +165,11 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     @Override
     public Model<?, ?, ?> publish(String username, String modelName) {
-//        if (GdsEdition.instance().isOnCommunityEdition()) {
-        if (false) {
-            throw new IllegalArgumentException("Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
-        }
-
-        var model = getUntyped(username, modelName);
-        // not published => publish it
-        if (!model.sharedWith().contains(Model.ALL_USERS)) {
-            var publicModel = model.publish();
-            publicModels.set(publicModel);
-            drop(username, modelName);
-            return publicModel;
-        }
-
-        // already published, return it
-        return model;
+        throw new IllegalStateException(
+            "Publishing models is not available in openGDS. " +
+            "Please consider licensing the Graph Data Science library. " +
+            "See documentation at https://neo4j.com/docs/graph-data-science/"
+        );
     }
 
     @Override
@@ -202,162 +191,8 @@ public final class OpenModelCatalog implements ModelCatalog {
         getUserCatalog(username).checkStorable(modelName, modelType);
     }
 
-    private static UserCatalog getUserCatalog(String username) {
-        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
-    }
-
-    static class UserCatalog {
-        private static final long ALLOWED_MODELS_COUNT = 3;
-        private static final UserCatalog EMPTY = new UserCatalog();
-
-        private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
-
-        public void set(Model<?, ?, ?> model) {
-            checkStorable(model.name(), model.algoType());
-            userModels.put(model.name(), model);
-        }
-
-        void setUnsafe(Model<?, ?, ?> model) {
-            userModels.put(model.name(), model);
-        }
-
-        public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
-            String modelName,
-            Class<D> dataClass,
-            Class<C> configClass,
-            Class<I> infoClass
-        ) {
-            return get(
-                getUntyped(modelName),
-                dataClass,
-                configClass,
-                infoClass
-            );
-        }
-
-        private <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
-            Model<?, ?, ?> model,
-            Class<D> dataClass,
-            Class<C> configClass,
-            Class<I> infoClass
-        ) {
-            if (model != null) {
-                var modelName = model.name();
-                if (!dataClass.isInstance(model.data())) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "The model `%s` has data with different types than expected. " +
-                        "Expected data type: `%s`, invoked with model data type: `%s`.",
-                        modelName,
-                        model.data().getClass().getName(),
-                        dataClass.getName()
-                    ));
-                }
-                if (!configClass.isInstance(model.trainConfig())) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "The model `%s` has a training config with different types than expected. " +
-                        "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                        modelName,
-                        model.trainConfig().getClass().getName(),
-                        configClass.getName()
-                    ));
-                }
-
-
-                if (!infoClass.isInstance(model.customInfo())) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "The model `%s` has a customInfo with different types than expected. " +
-                        "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
-                        modelName,
-                        model.customInfo().getClass().getName(),
-                        infoClass.getName()
-                    ));
-                }
-            }
-
-            // We just did the check
-            // noinspection unchecked
-            return (Model<D, C, I>) model;
-        }
-
-        public boolean exists(String modelName) {
-            return userModels.containsKey(modelName);
-        }
-
-        public Optional<String> type(String modelName) {
-            return Optional.ofNullable(userModels.get(modelName))
-                .map(Model::algoType);
-        }
-
-        public Model<?, ?, ?> drop(String modelName, boolean failOnMissing) {
-            var storedModel = userModels.remove(modelName);
-
-            if (failOnMissing && storedModel == null) {
-                throw new NoSuchElementException(prettySuggestions(
-                    formatWithLocale("Model with name `%s` does not exist.", modelName),
-                    modelName,
-                    userModels.keySet()
-                ));
-            } else {
-                return storedModel;
-            }
-        }
-
-        public Collection<Model<?, ?, ?>> list() {
-            return userModels.values();
-        }
-
-        public Model<?, ?, ?> list(String modelName) {
-            return getUntyped(modelName);
-        }
-
-        public void removeAllLoadedModels() {
-            userModels.clear();
-        }
-
-        private Stream<Model<?, ?, ?>> streamModels() {
-            return userModels.values().stream();
-        }
-
-        public UserCatalog join(UserCatalog other) {
-            userModels.putAll(other.userModels);
-            return this;
-        }
-
-        private void checkStorable(String modelName, String modelType) {
-            verifyModelNameIsUnique(modelName);
-            verifyModelsLimit(modelType);
-        }
-
-        private void verifyModelNameIsUnique(String model) {
-            if (exists(model)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Model with name `%s` already exists.",
-                    model
-                ));
-            }
-        }
-
-        private void verifyModelsLimit(String modelType) {
-//            if (GdsEdition.instance().isOnCommunityEdition() && !canStoreModel(modelType)) {
-            if (false) {
-                throw new IllegalArgumentException(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", ALLOWED_MODELS_COUNT));
-            }
-        }
-
-        private boolean canStoreModel(String modelType) {
-            return modelsPerType(modelType) < ALLOWED_MODELS_COUNT;
-        }
-
-        private long modelsPerType(String modelType) {
-            return userModels.values()
-                .stream()
-                .filter(model -> model.algoType().equals(modelType))
-                .count();
-        }
-
-        private Model<?, ?, ?> getUntyped(String modelName) {
-            return userModels.get(modelName);
-        }
+    private static OpenUserCatalog getUserCatalog(String username) {
+        return userCatalogs.getOrDefault(username, new OpenUserCatalog());
     }
 
     private static String formatWithLocale(String template, Object... inputs) {
