@@ -78,7 +78,11 @@ public class RandomWalkSampler {
     public long[] walk(long startNode) {
         var walk = new long[walkLength];
         walk[0] = startNode;
+
         walk[1] = randomNeighbour(startNode);
+        if (walk[1] == -1) {
+            return new long[]{walk[0]};
+        }
 
         for (int i = 2; i < walkLength; i++) {
             var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
