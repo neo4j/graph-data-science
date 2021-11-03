@@ -28,6 +28,9 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
@@ -82,23 +85,49 @@ public class LinkPredictionTrain
         this.allocationTracker = AllocationTracker.empty();
     }
 
+    static Task progressTask() {
+        return Tasks.task(
+            LinkPredictionTrain.class.getSimpleName(),
+            Tasks.leaf("extract train features"),
+            Tasks.leaf("select model"),
+            Training.progressTask("train best model"),
+            Tasks.leaf("compute train metrics"),
+            Tasks.task(
+                "evaluate on test data",
+                Tasks.leaf("extract test features"),
+                Tasks.leaf("compute test metrics")
+            )
+        );
+    }
+
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> compute() {
         progressTracker.beginSubTask();
 
+        progressTracker.beginSubTask("extract train features");
         var trainData = extractFeaturesAndTargets(trainGraph);
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
+        progressTracker.endSubTask("extract train features");
 
+        progressTracker.beginSubTask("select model");
         var modelSelectResult = modelSelect(trainData, trainRelationshipIds);
         var bestParameters = modelSelectResult.bestParameters();
+        progressTracker.endSubTask("select model");
 
         // train best model on the entire training graph
+        progressTracker.beginSubTask("train best model");
         var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
+        progressTracker.endSubTask("train best model");
 
         // evaluate the best model on the training and test graphs
+        progressTracker.beginSubTask("compute train metrics");
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
+        progressTracker.endSubTask("compute train metrics");
+
+        progressTracker.beginSubTask("evaluate on test data");
         var testMetrics = computeTestMetric(modelData);
+        progressTracker.endSubTask("evaluate on test data");
 
         var model = createModel(
             modelSelectResult,
@@ -112,6 +141,7 @@ public class LinkPredictionTrain
     }
 
     private FeaturesAndTargets extractFeaturesAndTargets(Graph graph) {
+        progressTracker.setVolume(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(
             graph,
             pipeline.featureSteps(),
@@ -141,6 +171,7 @@ public class LinkPredictionTrain
                 }
                 return true;
             });
+            progressTracker.logProgress(graph.degree(nodeId));
             return true;
         });
         return globalTargets;
@@ -150,14 +181,14 @@ public class LinkPredictionTrain
         FeaturesAndTargets trainData,
         HugeLongArray trainRelationshipIds
     ) {
-        progressTracker.beginSubTask("select model");
-
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        pipeline.trainingParameterSpace().forEach(modelParams -> {
+        var linkLogisticRegressionTrainConfigs = pipeline.trainingParameterSpace();
+        progressTracker.setVolume(linkLogisticRegressionTrainConfigs.size());
+        linkLogisticRegressionTrainConfigs.forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
@@ -196,24 +227,22 @@ public class LinkPredictionTrain
 
         var bestConfig = winner.params();
 
-        progressTracker.endSubTask("select model");
-
         return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
-        progressTracker.beginSubTask();
-
+        progressTracker.beginSubTask("extract test features");
         var testData = extractFeaturesAndTargets(validationGraph);
+        progressTracker.endSubTask("extract test features");
 
+        progressTracker.beginSubTask("compute test metrics");
         var result = computeMetric(
             testData,
             modelData,
             new BatchQueue(testData.size()),
             progressTracker
         );
-
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("compute test metrics");
 
         return result;
     }
@@ -279,8 +308,6 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask("train best model");
-
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
             trainData.features(),
@@ -291,11 +318,7 @@ public class LinkPredictionTrain
             trainConfig.concurrency()
         );
 
-        var modelData= llrTrain.compute();
-
-        progressTracker.endSubTask("train best model");
-
-        return modelData;
+        return llrTrain.compute();
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(
@@ -313,7 +336,7 @@ public class LinkPredictionTrain
         BatchQueue evaluationQueue,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask(inputData.size());
+        progressTracker.setVolume(inputData.size());
 
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var signedProbabilities = SignedProbabilities.create(inputData.size());
@@ -333,8 +356,6 @@ public class LinkPredictionTrain
             },
             terminationFlag
         );
-
-        progressTracker.endSubTask();
 
         return trainConfig.metrics().stream().collect(Collectors.toMap(
             Function.identity(),

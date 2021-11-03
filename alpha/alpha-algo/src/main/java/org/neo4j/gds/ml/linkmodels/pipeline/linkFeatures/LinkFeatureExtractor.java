@@ -72,8 +72,6 @@ public final class LinkFeatureExtractor {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask(graph.relationshipCount());
-
         var extractor = of(graph, linkFeatureSteps);
 
         var linkFeatures = HugeObjectArray.newArray(
@@ -104,8 +102,6 @@ public final class LinkFeatureExtractor {
         }
 
         ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
-
-        progressTracker.endSubTask();
 
         return linkFeatures;
     }
