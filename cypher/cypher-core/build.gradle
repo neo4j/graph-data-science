@@ -25,4 +25,5 @@ dependencies {
     implementation project(':string-formatting')
 
     testImplementation project(":test-utils")
+    testImplementation project(':edition-api')
 }
