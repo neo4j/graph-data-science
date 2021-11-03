@@ -32,7 +32,7 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
