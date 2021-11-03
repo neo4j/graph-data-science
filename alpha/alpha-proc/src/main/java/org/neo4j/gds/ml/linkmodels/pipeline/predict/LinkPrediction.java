@@ -51,18 +51,16 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
 
     @Override
     public LinkPredictionResult compute() {
-        progressTracker.beginSubTask("Link Prediction Pipeline");
+        progressTracker.beginSubTask();
 
         var result = predict();
 
-        progressTracker.endSubTask("Link Prediction Pipeline");
+        progressTracker.endSubTask();
 
         return result;
     }
 
     private LinkPredictionResult predict() {
-        progressTracker.beginSubTask();
-
         assert linkFeatureExtractor.featureDimension() == modelData
             .weights()
             .data()
@@ -76,9 +74,7 @@ public abstract class LinkPrediction extends Algorithm<LinkPrediction, LinkPredi
             graph
         );
 
-        var result = predictLinks(graph, linkPredictionSimilarityComputer);
-        progressTracker.endSubTask();
-        return result;
+        return predictLinks(graph, linkPredictionSimilarityComputer);
     }
 
     abstract LinkPredictionResult predictLinks(

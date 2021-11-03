@@ -65,13 +65,14 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             ),
             config.isApproximateStrategy()
                 ? Tasks.task("approximate link prediction", KnnFactory.knnTaskTree(graph, config.approximateConfig()))
-                : Tasks.leaf("exhaustive link prediction", graph.nodeCount())
+                : Tasks.leaf("exhaustive link prediction", graph.nodeCount()),
+            Tasks.leaf("clean up graph store")
         );
     }
 
     @Override
     protected String taskName() {
-        return "Link Prediction Pipeline";
+        return "Link Prediction Predict Pipeline";
     }
 
     @Override
