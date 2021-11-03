@@ -20,28 +20,23 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.ImmutableLinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class LinkFeatureStepFactoryTest {
 
-    private static final String INPUT_NODE_PROPERTIES = "nodeProperties";
-
     @Test
-    public void testCreateHadamard() {
+    void testCreateHadamard() {
         List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "hadaMard",
-            Map.of("nodeProperties", nodeProperties)
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(HadamardFeatureStep.class);
@@ -49,66 +44,26 @@ final class LinkFeatureStepFactoryTest {
     }
 
     @Test
-    public void testCreateCosine() {
-        List<String> featureProperties = List.of("noise", "z", "array");
+    void testCreateCosine() {
+        List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "coSine",
-            Map.of("nodeProperties", featureProperties)
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(CosineFeatureStep.class);
-        assertThat(step.inputNodeProperties()).isEqualTo(featureProperties);
+        assertThat(step.inputNodeProperties()).isEqualTo(nodeProperties);
     }
 
     @Test
-    public void testCreateL2() {
-        List<String> featureProperties = List.of("noise", "z", "array");
+    void testCreateL2() {
+        List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "L2",
-            Map.of("nodeProperties", featureProperties)
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(L2FeatureStep.class);
-        assertThat(step.inputNodeProperties()).isEqualTo(featureProperties);
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
-    public void shouldFailOnMissingFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of()))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("No value specified for the mandatory configuration parameter `nodeProperties`");
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
-    public void shouldFailOnEmptyFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of())))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("`nodeProperties` must be non-empty.");
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
-    public void shouldFailOnNotListFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, Map.of())))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessage("The value of `nodeProperties` must be of type `List` but was `MapN`.");
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
-    public void shouldFailOnUnexpectedConfigurationKey(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES,  List.of("noise", "z", "array"), "otherThing", 1)))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Unexpected configuration key: otherThing");
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
-    public void shouldFailOnListOfNonStringsFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of("foo", List.of(), "  "))))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid property names defined in `nodeProperties`: ['  ', '[]']. Expecting a String with at least one non-white space character.");
+        assertThat(step.inputNodeProperties()).isEqualTo(nodeProperties);
     }
 }
