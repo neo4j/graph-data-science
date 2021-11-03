@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.pipeline;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -28,17 +29,18 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.louvain.LouvainStreamProc;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class NodePropertyStepTest extends BaseProcTest {
+    private static final String GRAPH_NAME = "g";
+    private static final String PROPERTY_NAME = "foo";
 
     @Neo4jGraph
     private static final String GRAPH =
@@ -58,24 +60,28 @@ class NodePropertyStepTest extends BaseProcTest {
         );
         String createQuery = GdsCypher.call()
             .loadEverything()
-            .graphCreate("g")
+            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
     }
 
+    @AfterEach
+    void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
     @Test
     void testInvokeProc() {
-        var step = NodePropertyStep.of("pageRank", Map.of("mutateProperty", "foo"));
-        TestProcedureRunner.applyOnProcedure(db, LouvainStreamProc.class, proc -> {
-            step.execute(proc, "g", List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS));
-        });
-        String streamQuery = "CALL gds.graph.streamNodeProperties('g', ['foo'])";
-        runQueryWithResultConsumer(streamQuery, result -> {
-            for (int i = 0; i < 3; i++) {
-                assertThat(result.next().get("propertyValue")).isEqualTo(0.9612404689154856);
-            }
-            assertFalse(result.hasNext());
-        });
+        var step = NodePropertyStep.of("gds.testProc.mutate", Map.of("mutateProperty", PROPERTY_NAME));
+        TestProcedureRunner.applyOnProcedure(
+            db,
+            TestProc.class,
+            proc -> step.execute(proc, GRAPH_NAME, List.of(NodeLabel.ALL_NODES), List.of(RelationshipType.ALL_RELATIONSHIPS))
+        );
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), GRAPH_NAME).graphStore();
+
+        graphStore.nodeLabels().forEach(label -> assertThat(graphStore.nodePropertyKeys(label)).containsExactly(PROPERTY_NAME));
     }
 }
