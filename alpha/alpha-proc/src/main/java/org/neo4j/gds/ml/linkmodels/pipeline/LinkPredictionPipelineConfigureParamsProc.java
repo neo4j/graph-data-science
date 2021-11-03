@@ -44,9 +44,12 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
         List<LinkLogisticRegressionTrainConfig> trainConfigs = parameterSpace
             .stream()
             .map(CypherMapWrapper::create)
-            .map(LinkLogisticRegressionTrainConfigImpl::new)
-            .collect(
-                Collectors.toList());
+            .map(rawConfig -> {
+                var config = new LinkLogisticRegressionTrainConfigImpl(rawConfig);
+                validateConfig(rawConfig, config.configKeys());
+                return config;
+            })
+            .collect(Collectors.toList());
 
         pipeline.setTrainingParameterSpace(trainConfigs);
 
