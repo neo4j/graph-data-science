@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -154,6 +155,32 @@ final class MemoryRangeTest {
         // Zero Property
         assertEquals(MemoryRange.empty(), range1.times(0));
         assertEquals(MemoryRange.empty(), MemoryRange.empty().times(42));
+    }
+
+    @Test
+    void subtractFromMinAndMaxValues() {
+        assertEquals(MemoryRange.of(42, 1337).subtract(41), MemoryRange.of(42 - 41, 1337 - 41));
+    }
+
+    @Test
+    void subtractionLaws() {
+        MemoryRange range = MemoryRange.of(42, 1337);
+
+        // Commutativity
+        assertEquals(range.subtract(10).subtract(1), range.subtract(1).subtract(10));
+        // Associativity
+        assertEquals(range.subtract(10).subtract(1), range.subtract(10 + 1));
+        // Identity
+        assertEquals(range, range.subtract(0));
+    }
+
+    @Test
+    void throwOnInvalidSubtraction() {
+        MemoryRange range = MemoryRange.of(42, 1337);
+
+        assertThatThrownBy(() -> range.subtract(42 + 1))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("min range < 0: -1");
     }
 
     @Test
