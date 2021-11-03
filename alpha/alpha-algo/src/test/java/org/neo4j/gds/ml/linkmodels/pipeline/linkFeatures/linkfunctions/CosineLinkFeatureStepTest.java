@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -38,7 +37,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
 
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            Map.of("nodeProperties", List.of("noise", "z", "array"))
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("noise", "z", "array")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER);
@@ -62,7 +61,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     public void handlesZeroVectors() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            Map.of("nodeProperties", List.of("zeros"))
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("zeros")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER);
@@ -76,7 +75,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     public void failsOnNaNValues() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            Map.of("nodeProperties", List.of("invalidValue", "z"))
+            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("invalidValue", "z")).build()
         );
 
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4, ProgressTracker.NULL_TRACKER))
