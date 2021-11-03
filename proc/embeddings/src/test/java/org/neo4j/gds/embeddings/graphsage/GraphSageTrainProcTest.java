@@ -373,6 +373,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         proc.api = db;
         proc.log = NullLog.getInstance();
         proc.licenseState = OpenGdsLicenseState.INSTANCE;
+        proc.modelCatalog = modelCatalog;
 
         assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
             .isInstanceOf(IllegalArgumentException.class)

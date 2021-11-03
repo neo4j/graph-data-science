@@ -33,6 +33,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -45,14 +46,17 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.as;
@@ -110,6 +114,26 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     void tearDown() {
         modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public void applyOnProcedure(Consumer<? super AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig>> func) {
+        TestProcedureRunner.applyOnProcedure(
+            graphDb(),
+            getProcedureClazz(),
+            algoBaseProc -> {
+                var proc = (NodeClassificationPredictWriteProc) algoBaseProc;
+                proc.nodePropertyExporterBuilder = new NativeNodePropertyExporter.Builder(
+                    TransactionContext.of(
+                        proc.api,
+                        proc.procedureTransaction
+                    )
+                );
+                proc.modelCatalog = modelCatalog;
+
+                func.accept(proc);
+            }
+        );
     }
 
     @Test
