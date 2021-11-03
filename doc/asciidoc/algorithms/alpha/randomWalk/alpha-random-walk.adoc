@@ -1,0 +1,173 @@
+[[alpha-algorithms-random-walk]]
+[.alpha]
+= Random Walk
+
+[abstract]
+--
+This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
+--
+
+Random Walk is an algorithm that provides random paths in a graph.
+
+A random walk simulates a traversal of the graph in which the traversed relationships are chosen at random.
+In a classic random walk, each relationship has the same, possibly weighted, probability of being picked.
+This probability is not influenced by the previously visited nodes.
+The random walk implementation of the Neo4j Graph Data Science library supports the concept of second order random walks.
+This method tries to model the transition probability based on the currently visited node `v`, the node `t` visited before the current one, and the node `x` which is the target of a candidate relationship.
+Random walks are thus influenced by two parameters: the `returnFactor` and the `inOutFactor`:
+
+* The `returnFactor` is used if `t` equals `x`, i.e., the random walk returns to the previously visited node.
+* The `inOutFactor` is used if the distance from `t` to `x` is equal to 2, i.e., the walk traverses further away from the node `t`
+
+image::randomWalk.svg[Visuzalition of random walk parameters,align="center"]
+
+The probabilities for traversing a relationship during a random walk can be further influenced by specifying a `relationshipWeightProperty`.
+A relationship property value greater than 1 will increase the likelihood of a relationship being traversed, a property value between 0 and 1 will decrease that probability.
+
+[NOTE]
+To obtain a random walk where the transition probability is independent of the previously visited nodes both the `returnFactor` and the `inOutFactor` can be set to 1.0.
+
+[[algorithms-random-walk-syntax]]
+== Syntax
+
+.RandomWalk syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run RandomWalk in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.node2vec.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+YIELD
+  nodeIds: List of Integer,
+  path: Path
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name      | Type            | Description
+| nodeIds   | List of Integer | The nodes of the random walk.
+| path      | Path            | A `Path` object of the random walk, null if `returnPath` is set to false.
+|===
+======
+====
+
+[[algorithms-random-walk-example]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE (home:Page {name: 'Home'}),
+       (about:Page {name: 'About'}),
+       (product:Page {name: 'Product'}),
+       (links:Page {name: 'Links'}),
+       (a:Page {name: 'Site A'}),
+       (b:Page {name: 'Site B'}),
+       (c:Page {name: 'Site C'}),
+       (d:Page {name: 'Site D'}),
+
+       (home)-[:LINKS]->(about),
+       (about)-[:LINKS]->(home),
+       (product)-[:LINKS]->(home),
+       (home)-[:LINKS]->(product),
+       (links)-[:LINKS]->(home),
+       (home)-[:LINKS]->(links),
+       (links)-[:LINKS]->(a),
+       (a)-[:LINKS]->(home),
+       (links)-[:LINKS]->(b),
+       (b)-[:LINKS]->(home),
+       (links)-[:LINKS]->(c),
+       (c)-[:LINKS]->(home),
+       (links)-[:LINKS]->(d),
+       (d)-[:LINKS]->(home)
+----
+
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    '*',
+    { LINKS: { orientation: 'UNDIRECTED' } }
+);
+----
+
+[role=query-example]
+--
+.Run the RandomWalk algorithm on `myGraph`
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.randomWalk.stream(
+  'myGraph',
+  {
+    walkLength: 3,
+    walksPerNode: 1,
+    returnPath: true,
+    randomSeed: 42,
+    concurrency: 1
+  }
+)
+YIELD nodeIds, path
+RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
+----
+
+.Results
+[opts="header"]
+|===
+| nodeIds   | pages
+| [0, 5, 3] | [Home, Site B, Links]
+| [1, 0, 6] | [About, Home, Site C]
+| [2, 0, 5] | [Product, Home, Site B]
+| [3, 6, 3] | [Links, Site C, Links]
+| [4, 3, 4] | [Site A, Links, Site A]
+| [5, 3, 5] | [Site B, Links, Site B]
+| [6, 3, 7] | [Site C, Links, Site D]
+| [7, 3, 0] | [Site D, Links, Home]
+|===
+--
+
+[role=query-example]
+--
+.Run the RandomWalk algorithm on `myGraph` with specified sourceNodes
+[source, cypher, role=noplay]
+----
+MATCH (page:Page)
+WHERE page.name IN ['Home', 'About']
+WITH COLLECT(page) as sourceNodes
+CALL gds.alpha.randomWalk.stream(
+  'myGraph',
+  {
+    sourceNodes: sourceNodes,
+    walkLength: 3,
+    walksPerNode: 1,
+    returnPath: true,
+    randomSeed: 42,
+    concurrency: 1
+  }
+)
+YIELD nodeIds, path
+RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
+----
+
+.Results
+[opts="header"]
+|===
+| nodeIds   | pages
+| [0, 5, 3] | [Home, Site B, Links]
+| [1, 0, 6] | [About, Home, Site C]
+|===
+--
