@@ -26,16 +26,17 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.config.ModelConfig;
+import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.Mappable> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMap> {
 
     private static ZonedDateTime now() {
         var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
@@ -95,7 +96,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .build();
     }
 
-    static <D, C extends ModelConfig & BaseConfig, INFO extends Mappable> Model<D, C, INFO> of(
+    static <D, C extends ModelConfig & BaseConfig, INFO extends ToMap> Model<D, C, INFO> of(
         String creator,
         String name,
         String algoType,
@@ -115,13 +116,5 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             now(),
             customInfo
         );
-    }
-
-    interface Mappable {
-        Map<String, Object> toMap();
-
-        static <T extends Model.Mappable> List<Map<String, Object>> toMap(List<T> data) {
-            return data.stream().map(Model.Mappable::toMap).collect(Collectors.toList());
-        }
     }
 }

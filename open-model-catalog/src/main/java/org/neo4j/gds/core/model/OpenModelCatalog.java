@@ -20,6 +20,9 @@
 package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.ArrayList;
@@ -65,7 +68,7 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public <D, C extends ModelConfig, I extends Model.Mappable> Model<D, C, I> get(
+    public <D, C extends ModelConfig, I extends ToMap> Model<D, C, I> get(
         String username,
         String modelName,
         Class<D> dataClass,

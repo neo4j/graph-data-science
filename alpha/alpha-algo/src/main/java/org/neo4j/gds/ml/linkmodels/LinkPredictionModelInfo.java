@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.ToMap;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface LinkPredictionModelInfo extends Model.Mappable {
+public interface LinkPredictionModelInfo extends ToMap {
 
     LinkLogisticRegressionTrainConfig bestParameters();
 

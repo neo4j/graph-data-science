@@ -26,8 +26,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ToMap;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
@@ -42,7 +42,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
-public interface LinkPredictionSplitConfig extends Model.Mappable {
+public interface LinkPredictionSplitConfig extends ToMap {
 
     String TEST_FRACTION_KEY = "testFraction";
     String TRAIN_FRACTION_KEY = "trainFraction";
