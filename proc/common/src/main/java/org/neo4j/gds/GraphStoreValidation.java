@@ -59,7 +59,7 @@ public final class GraphStoreValidation {
             validateMutateRelationships(graphStore, (MutateRelationshipConfig) config);
         }
         if (config instanceof SourceNodesConfig) {
-            validateSourceNodes(graphStore, (SourceNodesConfig) config);
+            validateSourceNodes(graphStore, (SourceNodesConfig) config, filterLabels);
 
         }
         if (config instanceof SourceNodeConfig) {
@@ -149,18 +149,29 @@ public final class GraphStoreValidation {
         }
     }
 
-    private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config) {
-        var nodeMapping = graphStore.nodes();
-        var missingNodes = config.sourceNodes().stream()
-            .filter(nodeId -> nodeMapping.safeToMappedNodeId(nodeId) == IdMapping.NOT_FOUND)
-            .map(Object::toString)
-            .collect(Collectors.toList());
+    private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config, Collection<NodeLabel> filteredNodeLabels) {
+        if (!config.sourceNodes().isEmpty()) {
+            var nodeMapping = graphStore.nodes();
 
-        if (!missingNodes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Source nodes do not exist in the in-memory graph: %s",
-                StringJoining.join(missingNodes)
-            ));
+            var missingNodes = config
+                .sourceNodes()
+                .stream()
+                .filter(sourceNode -> {
+                    var internalNodeId = nodeMapping.safeToMappedNodeId(sourceNode);
+                    return internalNodeId == IdMapping.NOT_FOUND || nodeMapping
+                        .nodeLabels(internalNodeId)
+                        .stream()
+                        .noneMatch(filteredNodeLabels::contains);
+                })
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+            if (!missingNodes.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Source nodes do not exist in the in-memory graph or do not have the specified node labels: %s",
+                    StringJoining.join(missingNodes)
+                ));
+            }
         }
     }
 

@@ -43,11 +43,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("unchecked")
-class RandomWalkProcTest extends BaseProcTest implements
+class RandomWalkStreamProcTest extends BaseProcTest implements
     AlgoBaseProcTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
     SourceNodesConfigTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>
 {
-
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node1)" +
@@ -118,6 +117,35 @@ class RandomWalkProcTest extends BaseProcTest implements
             AtomicInteger indexInPath = new AtomicInteger(0);
             path.nodes().forEach(node -> assertEquals(node.getId(), nodes.get(indexInPath.getAndIncrement())));
         }
+    }
+
+    @Test
+    void shouldThrowOnUnknownStartNode() {
+        String query = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("walksPerNode", 3)
+            .addParameter("walkLength", 10)
+            .addParameter("sourceNodes", 42)
+            .yields();
+
+        assertError(query, "Source nodes do not exist in the in-memory graph or do not have the specified node labels: ['42']");
+    }
+
+    @Test
+    void shouldThrowOnUnselectedStartNode() {
+        String query = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("walksPerNode", 3)
+            .addParameter("walkLength", 10)
+            .addParameter("sourceNodes", 3)
+            .addParameter("nodeLabels", List.of("Node1", "Node2"))
+            .yields();
+
+        assertError(query, "Source nodes do not exist in the in-memory graph or do not have the specified node labels: ['3']");
     }
 
     @Override
