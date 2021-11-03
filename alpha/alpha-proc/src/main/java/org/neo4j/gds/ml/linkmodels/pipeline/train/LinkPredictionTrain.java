@@ -106,8 +106,7 @@ public class LinkPredictionTrain
 
         progressTracker.beginSubTask("extract train features");
         var trainData = extractFeaturesAndTargets(trainGraph);
-        var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
-        trainRelationshipIds.setAll(i -> i);
+        var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
         progressTracker.endSubTask("extract train features");
 
         progressTracker.beginSubTask("select model");
@@ -264,14 +263,11 @@ public class LinkPredictionTrain
         ));
     }
 
-
     private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
-        var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
-        globalTargets.setAll(i -> (long) actualTargets.get(i));
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            globalTargets,
+            new ReadOnlyHugeLongArrayWrapper(actualTargets),
             trainConfig.randomSeed()
         );
         return splitter.splits();
