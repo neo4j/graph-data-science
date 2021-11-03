@@ -244,7 +244,9 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
                 random.setSeed(randomSeed + nodeId);
 
-                for (int walkIndex = 0; walkIndex < config.walksPerNode(); walkIndex++) {
+                var walksPerNode = config.walksPerNode();
+
+                for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
                     buffer[bufferPosition.getAndIncrement()] = walk(nodeId);
 
                     if (bufferPosition.getValue() == buffer.length) {
@@ -259,13 +261,14 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         }
 
         private long[] walk(long startNode) {
-            var walk = new long[config.walkLength()];
+            var walkLength = config.walkLength();
+            var walk = new long[walkLength];
             walk[0] = startNode;
             walk[1] = randomNeighbour(startNode);
 
-            for (int i = 2; i < config.walkLength(); i++) {
+            for (int i = 2; i < walkLength; i++) {
                 var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
-                if (nextNode == -1) {
+                if (nextNode == NO_MORE_NODES) {
                     var shortenedWalk = new long[i];
                     System.arraycopy(walk, 0, shortenedWalk, 0, shortenedWalk.length);
                     walk = shortenedWalk;
@@ -282,7 +285,7 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             if (currentNodeDegree == 0) {
                 // We have arrived at a node with no outgoing neighbors, we can stop walking
-                return -1;
+                return NO_MORE_NODES;
             } else if (currentNodeDegree == 1) {
                 // This node only has one neighbour, no need to test
                 return randomNeighbour(currentNode);

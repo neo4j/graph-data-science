@@ -22,7 +22,6 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -44,11 +43,6 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
         ProgressTracker progressTracker
     ) {
         return RandomWalk.create(graph, configuration, allocationTracker, progressTracker);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return super.memoryEstimation(configuration);
     }
 
     @Override
