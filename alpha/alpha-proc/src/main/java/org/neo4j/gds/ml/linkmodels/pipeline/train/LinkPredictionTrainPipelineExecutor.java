@@ -90,10 +90,12 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var trainRelationshipTypes = RelationshipType.listOf(splitConfig.trainRelationshipType());
         var testRelationshipTypes = RelationshipType.listOf(splitConfig.testRelationshipType());
+        var featureInputRelationshipType = RelationshipType.listOf(splitConfig.featureInputRelationshipType());
 
         return Map.of(
             DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, trainRelationshipTypes),
-            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, testRelationshipTypes)
+            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, testRelationshipTypes),
+            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, featureInputRelationshipType)
         );
     }
 
