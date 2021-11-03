@@ -25,29 +25,43 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.ImmutableLinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.test.TestProc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
+import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
 class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
@@ -171,61 +185,84 @@ class LinkPredictionPredictPipelineExecutorTest  extends BaseProcTest {
         });
     }
 
-//    @Test
-//    void progressTracking() {
-//
-//            var trainedModel = trainAlgo.compute();
-//            ModelCatalog.set(trainedModel);
-//
-//            var predictConfig = new LinkPredictionPredictPipelineMutateConfigImpl(
-//                Optional.of(GRAPH_NAME),
-//                Optional.empty(),
-//                "",
-//                CypherMapWrapper.create(predictParameters)
-//            );
-//
-//
-//            var progressTask = factory.progressTask(graphStore.getUnion(), predictConfig);
-//            var log = new TestLog();
-//            var progressTracker = new TestProgressTracker(
-//                progressTask,
-//                log,
-//                1,
-//                EmptyTaskRegistryFactory.INSTANCE
-//            );
-//
-//            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
-//                pipeline,
-//                model,
-//                cnfig,
-//                caller,
-//                graphStore,
-//                graph,
-//                GRAPH_NAME,
-//                progressTracker
-//            );
-//
-//        pipelineExecutor.compute();
-//
-//            var expectedMessages = new ArrayList<String>();
-//            expectedMessages.addAll(List.of(
-//                "Link Prediction Pipeline :: Start",
-//                "Link Prediction Pipeline :: execute node property steps :: Start",
-//                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Start",
-//                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 100%",
-//                "Link Prediction Pipeline :: execute node property steps :: step 1 of 2 :: Finished",
-//                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Start",
-//                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 100%",
-//                "Link Prediction Pipeline :: execute node property steps :: step 2 of 2 :: Finished",
-//                "Link Prediction Pipeline :: execute node property steps :: Finished"
-//            ));
-//            expectedMessages.addAll(expectedPredictLogEntries);
-//            expectedMessages.add("Link Prediction Pipeline :: Finished");
-//
-//            assertThat(log.getMessages(INFO))
-//                .extracting(removingThreadId())
-//                .extracting(replaceTimings())
-//                .containsExactly(expectedMessages.toArray(String[]::new));
-//        }
-//    }
+    @Test
+    void progressTracking() {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var config = LinkPredictionPredictPipelineStreamConfig.of(
+                "",
+                Optional.of(GRAPH_NAME),
+                Optional.empty(),
+                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
+            );
+
+            var pipeline = new LinkPredictionPipeline();
+            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c", "degree")));
+
+            var modelData = ImmutableLinkLogisticRegressionData.of(
+                new Weights<>(
+                    new Matrix(
+                        new double[]{-2.0, -1.0, 3.0, 1.0},
+                        1,
+                        4
+                    )),
+                Weights.ofScalar(0)
+            );
+
+            ModelCatalog.set(Model.of(
+                getUsername(),
+                "model",
+                MODEL_TYPE,
+                GraphSchema.empty(),
+                modelData,
+                LinkPredictionTrainConfig.builder()
+                    .modelName("model")
+                    .pipeline("DUMMY")
+                    .negativeClassWeight(1.0)
+                    .build(),
+                LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(4, Map.of()), Map.of(), pipeline)
+            ));
+
+            var log = new TestLog();
+            var progressTracker = new TestProgressTracker(
+                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller, db.databaseId()).progressTask(graphStore.getUnion(), config),
+                log,
+                1,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+                pipeline,
+                modelData,
+                config,
+                caller,
+                graphStore,
+                GRAPH_NAME,
+                progressTracker
+            );
+
+            pipelineExecutor.compute();
+
+            var expectedMessages = new ArrayList<>(List.of(
+                "Link Prediction Predict Pipeline :: Start",
+                "Link Prediction Predict Pipeline :: execute node property steps :: Start",
+                "Link Prediction Predict Pipeline :: execute node property steps :: step 1 of 1 :: Start",
+                "Link Prediction Predict Pipeline :: execute node property steps :: step 1 of 1 100%",
+                "Link Prediction Predict Pipeline :: execute node property steps :: step 1 of 1 :: Finished",
+                "Link Prediction Predict Pipeline :: execute node property steps :: Finished",
+                "Link Prediction Predict Pipeline :: exhaustive link prediction :: Start",
+                "Link Prediction Predict Pipeline :: exhaustive link prediction 100%",
+                "Link Prediction Predict Pipeline :: exhaustive link prediction :: Finished",
+                "Link Prediction Predict Pipeline :: clean up graph store :: Start",
+                "Link Prediction Predict Pipeline :: clean up graph store 100%",
+                "Link Prediction Predict Pipeline :: clean up graph store :: Finished",
+                "Link Prediction Predict Pipeline :: Finished"
+            ));
+
+            assertThat(log.getMessages(INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(expectedMessages.toArray(String[]::new));
+        });
+    }
 }
