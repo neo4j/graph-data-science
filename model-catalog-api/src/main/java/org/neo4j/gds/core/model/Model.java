@@ -27,7 +27,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.config.ModelConfig;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.Clock;
@@ -36,7 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMap> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> {
 
     private static ZonedDateTime now() {
         var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
@@ -96,7 +96,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .build();
     }
 
-    static <D, C extends ModelConfig & BaseConfig, INFO extends ToMap> Model<D, C, INFO> of(
+    static <D, C extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> Model<D, C, INFO> of(
         String creator,
         String name,
         String algoType,

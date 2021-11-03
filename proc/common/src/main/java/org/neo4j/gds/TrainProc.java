@@ -24,7 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ToMap;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
@@ -46,7 +46,7 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>>,
     TRAIN_RESULT,
     TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig,
-    TRAIN_INFO extends ToMap>
+    TRAIN_INFO extends ToMapConvertible>
     extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG> {
 
     @Context
@@ -84,7 +84,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends ToMap> TrainResult(
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends ToMapConvertible> TrainResult(
             Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
             long trainMillis,
             long nodeCount,
