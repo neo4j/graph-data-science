@@ -94,7 +94,6 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     }
 
     @Value.Default
-    @Configuration.Ignore
     @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {

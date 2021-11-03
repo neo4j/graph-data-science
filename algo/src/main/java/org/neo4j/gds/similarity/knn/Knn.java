@@ -180,7 +180,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             case UNIFORM: {
                 return new UniformKnnSampler(random, graph.nodeCount());
             }
-            case RANDOM_WALK: {
+            case RANDOMWALK: {
                 return new RandomWalkKnnSampler(
                     graph.concurrentCopy(),
                     random,

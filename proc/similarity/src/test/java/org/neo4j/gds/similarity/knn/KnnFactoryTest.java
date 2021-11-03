@@ -45,7 +45,7 @@ class KnnFactoryTest {
             () -> Stream.of(Arguments.of(1L), Arguments.of(10L), Arguments.of(100L), Arguments.of(10_00L)),
             () -> Stream.of(
                 Arguments.of(KnnSampler.SamplerType.UNIFORM),
-                Arguments.of(KnnSampler.SamplerType.RANDOM_WALK)
+                Arguments.of(KnnSampler.SamplerType.RANDOMWALK)
             )
         );
     }
@@ -78,7 +78,7 @@ class KnnFactoryTest {
             () -> Stream.of(Arguments.of(1_000_000_000L), Arguments.of(100_000_000_000L)),
             () -> Stream.of(
                 Arguments.of(KnnSampler.SamplerType.UNIFORM),
-                Arguments.of(KnnSampler.SamplerType.RANDOM_WALK)
+                Arguments.of(KnnSampler.SamplerType.RANDOMWALK)
             )
         );
     }

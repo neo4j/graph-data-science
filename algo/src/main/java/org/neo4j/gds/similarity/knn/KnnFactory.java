@@ -107,7 +107,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends AlgorithmFactory<K
             case UNIFORM: {
                 return UniformKnnSampler.memoryEstimation(boundedK);
             }
-            case RANDOM_WALK: {
+            case RANDOMWALK: {
                 return RandomWalkKnnSampler.memoryEstimation(boundedK);
             }
             default:

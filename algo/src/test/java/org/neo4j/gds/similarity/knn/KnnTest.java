@@ -434,7 +434,7 @@ class KnnTest {
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .initialSampler(KnnSampler.SamplerType.RANDOM_WALK)
+                .initialSampler(KnnSampler.SamplerType.RANDOMWALK)
                 .build();
             var knnContext = KnnContext.empty();
             var knn = new Knn(graph, config, knnContext);

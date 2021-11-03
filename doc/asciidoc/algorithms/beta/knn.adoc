@@ -84,6 +84,32 @@ See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm fo
 If the cosine similarity is negative, we clip the value to `0`, i.e., `max(cosine(a, b), 0))`.
 
 
+[[algorithms-knn-introduction-sampling]]
+=== Initial neighbor sampling
+
+The algorithm starts off by picking `k` random neighbors for each node.
+There are two options for how this random sampling can be done.
+
+Uniform::
+
+The first `k` neighbors for each node are chosen uniformly at random from all other nodes in the graph.
+This is the classic way of doing the initial sampling.
+It is also the algorithm's default.
+Note that this method does not actually use the topology of the input graph.
+
+Random Walk::
+
+From each node we take a depth biased random walk and choose the first `k` unique nodes we visit on that walk as our initial random neighbors.
+If after some internally defined `O(k)` number of steps a random walk, `k` unique neighbors have not been visited, we will fill in the remaining neighbors we require using the uniform method described above.
+The random walk method makes use of the input graph's topology and may be suitable if one thinks that it is more likely to find good similarity scores between nodes that are somewhat topologically close in the graph.
+
+[NOTE]
+====
+The random walk used is biased towards depth in the sense that it will more likely choose to go further away from its previously visited node, rather that go back to it or to a node equidistant to it.
+The intuition of why we have this bias, is that subsequent iterations of comparing neighbor-of-neighbors will likely cover an extended (topological) neighborhood of each node anyway.
+====
+
+
 [[algorithms-knn-syntax]]
 == Syntax
 
@@ -284,7 +310,7 @@ The results are the same as running write mode on a named graph, see <<algorithm
 To get a deterministic result when running the algorithm:
 
 * the `concurrency` parameter must be set to one
-* the `randomSeed` must be explicitly set to something other than `-1`.
+* the `randomSeed` must be explicitly set.
 ====
 
 [[algorithms-knn-examples]]

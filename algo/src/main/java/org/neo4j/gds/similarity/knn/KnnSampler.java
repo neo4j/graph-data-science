@@ -35,7 +35,7 @@ public interface KnnSampler {
 
     enum SamplerType {
         UNIFORM,
-        RANDOM_WALK;
+        RANDOMWALK;
 
         private static final List<String> VALUES = Arrays
             .stream(SamplerType.values())
