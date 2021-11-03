@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("immutables:subtype")
-public interface BaseConfig {
+public interface BaseConfig extends ToMap {
 
     String SUDO_KEY = "sudo";
 

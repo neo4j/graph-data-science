@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.config.ToMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.Map;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implements Model.Mappable {
+public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implements ToMap {
 
     protected final List<NodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
@@ -43,8 +43,8 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep> implemen
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("featurePipeline", Map.of(
-            "nodePropertySteps", Model.Mappable.toMap(nodePropertySteps),
-            "featureSteps", Model.Mappable.toMap(featureSteps)
+            "nodePropertySteps", ToMap.toMap(nodePropertySteps),
+            "featureSteps", ToMap.toMap(featureSteps)
         ));
         map.putAll(additionalEntries());
         return map;

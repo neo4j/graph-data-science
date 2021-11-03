@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.ToMap;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface NodeClassificationModelInfo extends Model.Mappable {
+public interface NodeClassificationModelInfo extends ToMap {
 
     /**
      * The distinct values of the target property which represent the

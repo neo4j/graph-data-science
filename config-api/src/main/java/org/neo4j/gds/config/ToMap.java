@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
+package org.neo4j.gds.config;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ToMap;
-import org.neo4j.gds.ml.pipeline.FeatureStep;
-
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public interface LinkFeatureStep extends ToMap, FeatureStep {
-    LinkFeatureAppender linkFeatureAppender(Graph graph);
+@FunctionalInterface
+public interface ToMap {
 
-    @Override
-    default Map<String, Object> toMap() {
-        return Map.of("name", name(), "config", configuration());
+    Map<String, Object> toMap();
+
+    static <T extends ToMap> List<Map<String, Object>> toMap(List<T> data) {
+        return data.stream().map(ToMap::toMap).collect(Collectors.toList());
     }
 }
