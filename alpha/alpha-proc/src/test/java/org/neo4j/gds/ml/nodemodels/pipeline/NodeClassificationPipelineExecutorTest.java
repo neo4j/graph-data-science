@@ -1,7 +1,21 @@
 /*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
- * This file is a commercial add-on to Neo4j Enterprise Edition.
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
@@ -19,21 +33,21 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PipelineDummyTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrain.MODEL_TYPE;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineExecutor.MODEL_TYPE;
 
-class NodeClassificationPipelineTrainTest extends BaseProcTest {
+class NodeClassificationPipelineExecutorTest extends BaseProcTest {
     private static String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
 
@@ -80,6 +94,7 @@ class NodeClassificationPipelineTrainTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         modelCatalog.removeAllLoadedModels();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -91,7 +106,9 @@ class NodeClassificationPipelineTrainTest extends BaseProcTest {
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        pipeline.setParameterSpace(List.of(Map.of("penalty", 1000, "maxEpochs", 1)));
+        pipeline.setTrainingParameterSpace(List.of(NodeLogisticRegressionTrainCoreConfig.of(
+            Map.of("penalty", 1000, "maxEpochs", 1)
+        )));
 
         pipeline.setSplitConfig(ImmutableNodeClassificationSplitConfig.builder()
             .holdoutFraction(0.01)
@@ -105,15 +122,14 @@ class NodeClassificationPipelineTrainTest extends BaseProcTest {
             1L
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-            var ncPipeTrain = new NodeClassificationPipelineTrain(
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncPipeTrain = new NodeClassificationPipelineExecutor(
+                pipeline,
                 config,
+                caller,
                 graphStore,
                 GRAPH_NAME,
-                AllocationTracker.empty(),
-                ProgressTracker.NULL_TRACKER,
-                caller,
-                getUsername()
+                ProgressTracker.NULL_TRACKER
             );
 
             var model = ncPipeTrain.compute();
@@ -123,13 +139,15 @@ class NodeClassificationPipelineTrainTest extends BaseProcTest {
             assertThat(customInfo.metrics().get(metric).validation()).hasSize(1);
             assertThat(customInfo.metrics().get(metric).train()).hasSize(1);
 
-            assertThat(customInfo.trainingPipeline()).isEqualTo(pipeline);
+            assertThat(customInfo.trainingPipeline()).isNotEqualTo(pipeline);
+            assertThat(customInfo.trainingPipeline()).usingRecursiveComparison().isEqualTo(pipeline);
+            assertThat(customInfo.trainingPipeline().toMap()).isEqualTo(pipeline.toMap());
         });
     }
 
-    private NodeClassificationTrainingPipeline insertPipelineIntoCatalog() {
+    private NodeClassificationPipeline insertPipelineIntoCatalog() {
         var dummyConfig = PipelineDummyTrainConfig.of(getUsername());
-        var info = new NodeClassificationTrainingPipeline();
+        var info = new NodeClassificationPipeline();
         modelCatalog.set(
             Model.of("", PIPELINE_NAME, MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)
         );

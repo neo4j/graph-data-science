@@ -20,37 +20,42 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.TrainingConfig;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 @Configuration
 // This class is currently used internally in NodeClassification and is not
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
-public interface NodeLogisticRegressionTrainConfig extends NodeLogisticRegressionTrainCoreConfig, FeaturePropertiesConfig {
+public interface NodeLogisticRegressionTrainCoreConfig extends TrainingConfig {
 
-    @Configuration.Parameter
-    List<String> featureProperties();
+    @Configuration.DoubleRange(min = 0.0)
+    double penalty();
 
-    @Configuration.Parameter
-    String targetProperty();
+    @Configuration.CollectKeys
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    }
 
-    static NodeLogisticRegressionTrainConfig of(
-        List<String> featureProperties,
-        String targetProperty,
+    @Configuration.ToMap
+    Map<String, Object> toMap();
+
+    static NodeLogisticRegressionTrainCoreConfig of(
         Map<String, Object> params
     ) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
 
-        var config = new NodeLogisticRegressionTrainConfigImpl(
-            featureProperties,
-            targetProperty,
-            cypherMapWrapper
-        );
-        cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
+        var config = new NodeLogisticRegressionTrainCoreConfigImpl(cypherMapWrapper);
 
+        cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
+    }
+
+    static NodeLogisticRegressionTrainCoreConfig defaultConfig() {
+        return NodeLogisticRegressionTrainCoreConfig
+            .of(Map.of("penalty", 0.0));
     }
 }
