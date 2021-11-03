@@ -25,6 +25,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
@@ -50,6 +52,19 @@ class HugeAtomicGrowingBitSetTest {
         assertFalse(bitSet.get(7));
         assertFalse(bitSet.get(8));
         assertFalse(bitSet.get(9));
+    }
+
+    @Test
+    void testForEachSetBit() {
+        var bitSet = HugeAtomicBitSet.create(4096, AllocationTracker.empty());
+
+        var expected = List.of(0L, 1L, 3L, 7L, 15L, 63L, 64L, 72L, 128L, 420L, 1337L, 4095L);
+        expected.forEach(bitSet::set);
+
+        var actual = new ArrayList<Long>();
+        bitSet.forEachSetBit(actual::add);
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

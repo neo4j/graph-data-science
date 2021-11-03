@@ -26,6 +26,8 @@ import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.StringFormatting;
 
+import java.util.function.LongConsumer;
+
 public final class HugeAtomicBitSet {
     private static final int NUM_BITS = Long.SIZE;
 
@@ -177,6 +179,31 @@ public final class HugeAtomicBitSet {
             }
             // CAS unsuccessful, try again
             oldWord = currentWord;
+        }
+    }
+
+    /**
+     * Iterates the bit set in increasing order and calls the given consumer for each set bit.
+     *
+     * This method is not thread-safe.
+     */
+    public void forEachSetBit(LongConsumer consumer) {
+        var cursor = bits.initCursor(bits.newCursor());
+
+        while (cursor.next()) {
+            long[] block = cursor.array;
+            int offset = cursor.offset;
+            int limit = cursor.limit;
+            long base = cursor.base;
+
+            for (int i = offset; i < limit; i++) {
+                long word = block[i];
+                while (word != 0) {
+                    long next = Long.numberOfTrailingZeros(word);
+                    consumer.accept(Long.SIZE * (base + i) + next);
+                    word = word ^ Long.lowestOneBit(word);
+                }
+            }
         }
     }
 

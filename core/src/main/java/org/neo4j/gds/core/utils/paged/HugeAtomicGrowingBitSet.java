@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import com.carrotsearch.hppc.BitSet;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
@@ -27,7 +28,9 @@ import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.StringFormatting;
 
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.LongConsumer;
 
 public final class HugeAtomicGrowingBitSet {
     private static final int NUM_BITS = Long.SIZE;
@@ -205,6 +208,31 @@ public final class HugeAtomicGrowingBitSet {
     }
 
     /**
+     * Iterates the bit set in increasing order and calls the given consumer for each set bit.
+     *
+     * This method is not thread-safe.
+     */
+    public void forEachSetBit(LongConsumer consumer) {
+        var cursor = bits.initCursor(bits.newCursor());
+
+        while (cursor.next()) {
+            long[] block = cursor.array;
+            int offset = cursor.offset;
+            int limit = cursor.limit;
+            long base = cursor.base;
+
+            for (int i = offset; i < limit; i++) {
+                long word = block[i];
+                while (word != 0) {
+                    long next = Long.numberOfTrailingZeros(word);
+                    consumer.accept(Long.SIZE * (base + i) + next);
+                    word = word ^ Long.lowestOneBit(word);
+                }
+            }
+        }
+    }
+
+    /**
      * Returns the number of set bits in the bit set.
      * <p>
      * Note: this method is not thread-safe.
@@ -290,18 +318,7 @@ public final class HugeAtomicGrowingBitSet {
         }
     }
 
-    public BitSet toBitSet() {
-        if (bits.size() <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return new BitSet(((HugeAtomicLongArray.SingleHugeAtomicLongArray) bits).page(), (int) bits.size());
-        }
-        throw new UnsupportedOperationException(StringFormatting.formatWithLocale(
-            "Cannot convert HugeAtomicBitSet with more than %s entries.",
-            ArrayUtil.MAX_ARRAY_LENGTH
-        ));
-    }
-
-
-    private final ReentrantLock growLock = new ReentrantLock(true);
+    private final Lock growLock = new ReentrantLock(true);
 
     private void grow(long minNumBits) {
         growLock.lock();
@@ -322,5 +339,16 @@ public final class HugeAtomicGrowingBitSet {
         } finally {
             growLock.unlock();
         }
+    }
+
+    @TestOnly
+    BitSet toBitSet() {
+        if (bits.size() <= ArrayUtil.MAX_ARRAY_LENGTH) {
+            return new BitSet(((HugeAtomicLongArray.SingleHugeAtomicLongArray) bits).page(), (int) bits.size());
+        }
+        throw new UnsupportedOperationException(StringFormatting.formatWithLocale(
+            "Cannot convert HugeAtomicBitSet with more than %s entries.",
+            ArrayUtil.MAX_ARRAY_LENGTH
+        ));
     }
 }
