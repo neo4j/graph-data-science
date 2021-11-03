@@ -50,9 +50,12 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING
         Map<String, Object> map = new HashMap<>();
         map.put("featurePipeline", Map.of(
             "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
-            "featureSteps", ToMapConvertible.toMap(featureSteps),
-            "trainingParameterSpace", trainingParameterSpace.stream().map(Model.Mappable::toMap).collect(Collectors.toList())
+            "featureSteps", ToMapConvertible.toMap(featureSteps)
         ));
+        map.put(
+            "trainingParameterSpace",
+            trainingParameterSpace.stream().map(Model.Mappable::toMap).collect(Collectors.toList())
+        );
         map.putAll(additionalEntries());
         return map;
     }
@@ -69,7 +72,10 @@ public abstract class PipelineBuilder<FEATURE_STEP extends FeatureStep, TRAINING
             .collect(Collectors.toList());
 
         if (!invalidProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale("Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline", invalidProperties));
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline",
+                invalidProperties
+            ));
         }
     }
 

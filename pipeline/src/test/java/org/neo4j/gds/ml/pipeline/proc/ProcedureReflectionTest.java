@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.procedureutils;
+package org.neo4j.gds.ml.pipeline.proc;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,15 +25,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.louvain.LouvainMutateProc;
-import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
+import org.neo4j.gds.test.TestProc;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class ProcedureReflectionTest extends BaseProcTest {
+class ProcedureReflectionTest extends BaseProcTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"boogieewoogie", "gds.graph.create", "ageRank", ".pageRank"})
@@ -59,7 +58,7 @@ public class ProcedureReflectionTest extends BaseProcTest {
 
     @Test
     void failOnInvalidConfig() {
-        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod("pageRank");
             assertThatThrownBy(() -> ProcedureReflection.INSTANCE.createAlgoConfig(
                 caller,
