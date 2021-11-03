@@ -26,9 +26,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 
@@ -97,7 +95,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> train(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
         var testDataSplit = dataSplits.get(DatasetSplits.TEST);
 

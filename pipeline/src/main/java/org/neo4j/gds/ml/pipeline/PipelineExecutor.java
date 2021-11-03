@@ -71,7 +71,7 @@ public abstract class PipelineExecutor<
 
     public abstract Map<DatasetSplits, GraphFilter> splitDataset();
 
-    protected abstract RESULT train(Map<DatasetSplits, GraphFilter> dataSplits);
+    protected abstract RESULT execute(Map<DatasetSplits, GraphFilter> dataSplits);
 
     @Override
     public RESULT compute() {
@@ -87,7 +87,7 @@ public abstract class PipelineExecutor<
 
         this.pipeline.validate(graphStore, config);
 
-        var result = train(dataSplits);
+        var result = execute(dataSplits);
 
         progressTracker.beginSubTask("clean up graph store");
         cleanUpGraphStore(dataSplits);
