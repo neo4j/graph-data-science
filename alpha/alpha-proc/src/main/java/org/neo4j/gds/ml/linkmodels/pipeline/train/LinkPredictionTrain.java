@@ -133,7 +133,7 @@ public class LinkPredictionTrain
                     globalTargets.set(relationshipIdx.getAndIncrement(), weight);
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Target should be either `1` or `0`. But got %d for relationship (%d, %d)",
+                        "Target should be either `1` or `0`. But got %f for relationship (%d, %d)",
                         weight,
                         src,
                         trg

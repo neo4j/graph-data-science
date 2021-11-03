@@ -20,8 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.data.Index;
-import org.assertj.core.data.MapEntry;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
@@ -31,6 +29,7 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,11 +42,11 @@ class LinkPredictionPipelineTest {
         assertThat(pipeline)
             .returns(List.of(), LinkPredictionPipeline::featureSteps)
             .returns(List.of(), LinkPredictionPipeline::nodePropertySteps)
-            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipeline::splitConfig)
-            .returns(
-                List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap()),
-                LinkPredictionPipeline::trainingParameterSpace
-            );
+            .returns(LinkPredictionSplitConfig.DEFAULT_CONFIG, LinkPredictionPipeline::splitConfig);
+
+        assertThat(pipeline.trainingParameterSpace())
+            .usingRecursiveComparison()
+            .isEqualTo(List.of(LinkLogisticRegressionTrainConfig.defaultConfig()));
     }
 
     @Test
@@ -84,33 +83,33 @@ class LinkPredictionPipelineTest {
 
     @Test
     void canSetParameterSpace() {
+        var config = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 19));
+
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
-            Map.of("penalty", 19)
+            config
         ));
 
-        assertThat(pipeline.trainingParameterSpace())
-            .hasSize(1)
-            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 19D)), Index.atIndex(0));
+        assertThat(pipeline.trainingParameterSpace()).containsExactly(config);
     }
 
     @Test
     void overridesTheParameterSpace() {
+        var config1 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 19));
+        var config2 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1337));
+        var config3 = LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 42));
+
         var pipeline = new LinkPredictionPipeline();
         pipeline.setTrainingParameterSpace(List.of(
-            Map.of("penalty", 19)
+            config1
         ));
-
         pipeline.setTrainingParameterSpace(List.of(
-            Map.of("penalty", 1337),
-            Map.of("penalty", 42)
+            config2,
+            config3
         ));
 
         var parameterSpace = pipeline.trainingParameterSpace();
-        assertThat(parameterSpace)
-            .hasSize(2)
-            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 1337D)), Index.atIndex(0))
-            .satisfies(parameterSpaceConfig -> assertThat(parameterSpaceConfig).contains(MapEntry.entry("penalty", 42D)), Index.atIndex(1));
+        assertThat(parameterSpace).containsExactly(config2, config3);
     }
 
     @Test
@@ -143,7 +142,7 @@ class LinkPredictionPipelineTest {
         void returnsCorrectDefaultsMap() {
             var pipeline = new LinkPredictionPipeline();
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "parameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
                 .satisfies(pipelineMap -> {
                     assertThat(pipelineMap.get("featurePipeline"))
                         .isInstanceOf(Map.class)
@@ -158,7 +157,7 @@ class LinkPredictionPipelineTest {
                 )
                 .returns(
                     List.of(LinkLogisticRegressionTrainConfig.defaultConfig().toMap()),
-                    pipelineMap -> pipelineMap.get("parameterSpace")
+                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
 
@@ -172,30 +171,36 @@ class LinkPredictionPipelineTest {
             pipeline.addFeatureStep(hadamardFeatureStep);
 
             pipeline.setTrainingParameterSpace(List.of(
-                Map.of("penalty", 1000000),
-                Map.of("penalty", 1)
+                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
+                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
             ));
 
             var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "parameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
                 .satisfies(pipelineMap -> {
                     assertThat(pipelineMap.get("featurePipeline"))
                         .isInstanceOf(Map.class)
                         .asInstanceOf(InstanceOfAssertFactories.MAP)
                         .containsOnlyKeys("nodePropertySteps", "featureSteps")
-                        .returns(List.of(pageRankPropertyStep.toMap()), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
-                        .returns(List.of(hadamardFeatureStep.toMap()), featurePipelineMap -> featurePipelineMap.get("featureSteps"));
+                        .returns(
+                            List.of(pageRankPropertyStep.toMap()),
+                            featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
+                        )
+                        .returns(
+                            List.of(hadamardFeatureStep.toMap()),
+                            featurePipelineMap -> featurePipelineMap.get("featureSteps")
+                        );
                 })
                 .returns(
                     pipeline.splitConfig().toMap(),
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    pipeline.trainingParameterSpace(),
-                    pipelineMap -> pipelineMap.get("parameterSpace")
+                    pipeline.trainingParameterSpace().stream().map(LinkLogisticRegressionTrainConfig::toMap).collect(Collectors.toList()),
+                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 );
         }
     }
@@ -245,8 +250,8 @@ class LinkPredictionPipelineTest {
         void deepCopiesParameterSpace() {
             var pipeline = new LinkPredictionPipeline();
             pipeline.setTrainingParameterSpace(List.of(
-                Map.of("penalty", 1000000),
-                Map.of("penalty", 1)
+                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1000000)),
+                LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))
             ));
 
             var copy = pipeline.copy();

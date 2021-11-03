@@ -17,36 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class LinkPredictionPipelineExecutor extends PipelineExecutor<
+public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
     LinkFeatureStep,
     double[],
     LinkLogisticRegressionTrainConfig,
     Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo>,
-    LinkPredictionPipelineExecutor
+    LinkPredictionTrainPipelineExecutor
 > {
 
     private final RelationshipSplitter relationshipSplitter;
     private final LinkPredictionTrainConfig lpTrainConfig;
 
-    public LinkPredictionPipelineExecutor(
+    public LinkPredictionTrainPipelineExecutor(
         LinkPredictionPipeline pipeline,
         LinkPredictionTrainConfig config,
         BaseProc caller,
@@ -113,7 +114,17 @@ public class LinkPredictionPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public LinkPredictionPipelineExecutor me() {
+    public LinkPredictionTrainPipelineExecutor me() {
         return this;
+    }
+
+    @Override
+    protected void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
+        datasets.values()
+            .stream()
+            .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
+            .distinct()
+            .collect(Collectors.toList())
+            .forEach(graphStore::deleteRelationships);
     }
 }

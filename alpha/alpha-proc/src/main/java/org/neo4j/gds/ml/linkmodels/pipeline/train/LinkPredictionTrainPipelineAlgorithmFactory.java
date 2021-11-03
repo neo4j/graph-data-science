@@ -31,23 +31,22 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineExecutor;
 import org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
-public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionPipelineExecutor, LinkPredictionTrainConfig> {
+public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
 
-    public LinkPredictionTrainFactory(NamedDatabaseId databaseId, BaseProc caller) {
+    public LinkPredictionTrainPipelineAlgorithmFactory(NamedDatabaseId databaseId, BaseProc caller) {
         this.databaseId = databaseId;
         this.caller = caller;
     }
 
     @Override
-    public LinkPredictionPipelineExecutor build(
+    public LinkPredictionTrainPipelineExecutor build(
         Graph graph,
         LinkPredictionTrainConfig trainConfig,
         AllocationTracker allocationTracker,
@@ -63,7 +62,7 @@ public class LinkPredictionTrainFactory extends AlgorithmFactory<LinkPredictionP
         var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), trainConfig.username());
         pipeline.validate();
 
-        return new LinkPredictionPipelineExecutor(
+        return new LinkPredictionTrainPipelineExecutor(
             pipeline,
             trainConfig,
             caller,
