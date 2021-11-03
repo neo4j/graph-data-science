@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,20 +31,28 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -52,6 +61,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
@@ -114,6 +125,12 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+    }
+
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -278,101 +295,99 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         });
     }
 
-//    @Test
-//    void progressTracking() {
-//        TestProcedureRunner.applyOnProcedure(db, LouvainMutateProc.class, caller -> {
-//            var config = LinkPredictionTrainConfig.builder()
-//                .graphName(GRAPH_NAME)
-//                .pipeline(PIPELINE_NAME)
-//                .modelName("outputModel")
-//                .concurrency(1)
-//                .randomSeed(42L)
-//                .build();
-//
-//            LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
-//            pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
-//            pipeline.addNodePropertyStep(NodePropertyStep.of("pageRank", Map.of("mutateProperty", "pr")));
-//            pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree", "pr")));
-//            pipeline.setTrainingParameterSpace(List.of(Map.of("penalty", 1000000), Map.of("penalty", 1)));
-//
-//            var pipeModel = Model.of(
-//                getUsername(),
-//                PIPELINE_NAME,
-//                PIPELINE_MODEL_TYPE,
-//                GraphSchema.empty(),
-//                new Object(),
-//                LinkPredictionPipelineCreateProc.PipelineDummyTrainConfig.of(getUsername()),
-//                pipeline
-//            );
-//            ModelCatalog.set(pipeModel);
-//
-//            var factory = new LinkPredictionTrainFactory(db.databaseId(), caller);
-//
-//            var progressTask = factory.progressTask(graph, config);
-//            var log = new TestLog();
-//            var progressTracker = new TestProgressTracker(
-//                progressTask,
-//                log,
-//                1,
-//                EmptyTaskRegistryFactory.INSTANCE
-//            );
-//
-//            var linkPredictionTrain = factory.build(
-//                graph,
-//                config,
-//                AllocationTracker.empty(),
-//                progressTracker
-//            );
-//
-//            linkPredictionTrain.compute();
-//
-//            assertThat(log.getMessages(INFO))
-//                .extracting(removingThreadId())
-//                .containsExactly(
-//                    "Link Prediction pipeline train :: Start",
-//                    "Link Prediction pipeline train :: split relationships :: Start",
-//                    "Link Prediction pipeline train :: split relationships 100%",
-//                    "Link Prediction pipeline train :: split relationships :: Finished",
-//                    "Link Prediction pipeline train :: execute node property steps :: Start",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 1 of 2 :: Start",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 1 of 2 100%",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 1 of 2 :: Finished",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 2 of 2 :: Start",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 2 of 2 100%",
-//                    "Link Prediction pipeline train :: execute node property steps :: step 2 of 2 :: Finished",
-//                    "Link Prediction pipeline train :: execute node property steps :: Finished",
-//                    "Link Prediction pipeline train :: extract train features :: Start",
-//                    "Link Prediction pipeline train :: extract train features 100%",
-//                    "Link Prediction pipeline train :: extract train features :: Finished",
-//                    "Link Prediction pipeline train :: select model :: Start",
-//                    "Link Prediction pipeline train :: select model 50%",
-//                    "Link Prediction pipeline train :: select model 100%",
-//                    "Link Prediction pipeline train :: select model :: Finished",
-//                    "Link Prediction pipeline train :: train best model :: Start",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 1 :: Start",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 1 :: Loss: 3.9999999420000014",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 1 100%",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 1 :: Finished",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 2 :: Start",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 2 :: Loss: 4.427497785339087",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 2 100%",
-//                    "Link Prediction pipeline train :: train best model :: Epoch 2 :: Finished",
-//                    "Link Prediction pipeline train :: train best model :: converged after 2 epochs. Initial loss: 0.6931471805599453, Last loss: 4.427497785339087.",
-//                    "Link Prediction pipeline train :: train best model :: Finished",
-//                    "Link Prediction pipeline train :: compute train metrics :: Start",
-//                    "Link Prediction pipeline train :: compute train metrics 100%",
-//                    "Link Prediction pipeline train :: compute train metrics :: Finished",
-//                    "Link Prediction pipeline train :: evaluate on test data :: Start",
-//                    "Link Prediction pipeline train :: evaluate on test data :: extract test features :: Start",
-//                    "Link Prediction pipeline train :: evaluate on test data :: extract test features 100%",
-//                    "Link Prediction pipeline train :: evaluate on test data :: extract test features :: Finished",
-//                    "Link Prediction pipeline train :: evaluate on test data :: compute test metrics :: Start",
-//                    "Link Prediction pipeline train :: evaluate on test data :: compute test metrics 100%",
-//                    "Link Prediction pipeline train :: evaluate on test data :: compute test metrics :: Finished",
-//                    "Link Prediction pipeline train :: evaluate on test data :: Finished",
-//                    "Link Prediction pipeline train :: Finished"
-//                );
-//        });
-//    }
+    @Test
+    void shouldLogProgress() {
+        LinkPredictionPipeline pipeline = new LinkPredictionPipeline();
 
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.setTrainingParameterSpace(List.of(LinkLogisticRegressionTrainConfig.of(4, Map.of("penalty", 1))));
+
+        pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("noise", "z", "array", "degree")));
+
+        var config = LinkPredictionTrainConfig
+            .builder()
+            .graphName(GRAPH_NAME)
+            .modelName("model")
+            .pipeline("DUMMY")
+            .negativeClassWeight(1)
+            .randomSeed(1337L)
+            .build();
+
+        var model = Model.of(
+            getUsername(),
+            "DUMMY",
+            PIPELINE_MODEL_TYPE,
+            GraphSchema.empty(),
+            new Object(),
+            LinkPredictionPipelineCreateProc.PipelineDummyTrainConfig.of(getUsername()),
+            pipeline
+        );
+
+        ModelCatalog.set(model);
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var log = new TestLog();
+            var progressTracker = new TestProgressTracker(
+                new LinkPredictionTrainPipelineAlgorithmFactory(caller, db.databaseId()).progressTask(graphStore.getUnion(), config),
+                log,
+                1,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+            new LinkPredictionTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller,
+                graphStore,
+                GRAPH_NAME,
+                progressTracker
+            ).compute();
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .contains(
+                    "Link Prediction Train Pipeline :: Start",
+                    "Link Prediction Train Pipeline :: split relationships :: Start",
+                    "Link Prediction Train Pipeline :: split relationships 100%",
+                    "Link Prediction Train Pipeline :: split relationships :: Finished",
+                    "Link Prediction Train Pipeline :: execute node property steps :: Start",
+                    "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 :: Start",
+                    "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 100%",
+                    "Link Prediction Train Pipeline :: execute node property steps :: step 1 of 1 :: Finished",
+                    "Link Prediction Train Pipeline :: execute node property steps :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: extract train features :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: select model :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: select model 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: select model :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 1 :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 1 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 1 :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 2 :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 2 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Epoch 2 :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: train best model :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: compute train metrics :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: compute train metrics 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: compute train metrics :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: extract test features :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: extract test features 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: extract test features :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: compute test metrics :: Start",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: compute test metrics 100%",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: compute test metrics :: Finished",
+                    "Link Prediction Train Pipeline :: LinkPredictionTrain :: evaluate on test data :: Finished",
+                    "Link Prediction Train Pipeline :: Finished"
+                );
+        });
+    }
 }
