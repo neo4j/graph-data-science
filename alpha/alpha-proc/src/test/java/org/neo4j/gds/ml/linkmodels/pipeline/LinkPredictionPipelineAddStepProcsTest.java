@@ -221,7 +221,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowInvalidFeatureStepName() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'juggleSpoons', {mutateProperty: 'pr'})",
+            "CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('myPipeline', 'juggleSpoons', {nodeProperties: ['pr']})",
             "LinkFeatureStep `juggleSpoons` is not supported. Must be one of: [HADAMARD, COSINE, L2]."
         );
     }

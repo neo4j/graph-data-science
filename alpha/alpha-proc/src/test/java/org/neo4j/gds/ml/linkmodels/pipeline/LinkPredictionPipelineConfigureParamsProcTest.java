@@ -55,7 +55,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
     }
 
     @Test
-    void shoulSetParams() {
+    void shouldSetParams() {
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('myPipeline', [{minEpochs: 42}])",
             List.of(Map.of(
@@ -70,7 +70,8 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "patience", 1,
                     "batchSize", 100,
                     "useBiasFeature", true,
-                    "tolerance", 0.001
+                    "tolerance", 0.001,
+                    "concurrency", 4
                 ))
             ))
         );
