@@ -36,12 +36,12 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import java.util.List;
 
 public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
-    private final NamedDatabaseId databaseId;
     private final BaseProc caller;
+    private final NamedDatabaseId databaseId;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(NamedDatabaseId databaseId, BaseProc caller) {
-        this.databaseId = databaseId;
+    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, NamedDatabaseId databaseId) {
         this.caller = caller;
+        this.databaseId = databaseId;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
 
     @Override
     protected String taskName() {
-        return "Link Prediction pipeline train";
+        return "Link Prediction Train Pipeline";
     }
 
     @Override
@@ -89,7 +89,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
                 pipeline.nodePropertySteps().size()
             ),
             LinkPredictionTrain.progressTask(),
-            Tasks.leaf("clean up[ graph store")
+            Tasks.leaf("clean up graph store")
         );
     }
 
