@@ -26,9 +26,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 
@@ -36,15 +34,12 @@ import java.util.Map;
 import java.util.Optional;
 
 public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
-    LinkFeatureStep,
-    double[],
-    LinkLogisticRegressionTrainConfig,
+    LinkPredictionPredictPipelineBaseConfig,
+    LinkPredictionPipeline,
     LinkPredictionResult,
     LinkPredictionPredictPipelineExecutor
-    > {
-
+> {
     private final LinkLogisticRegressionData linkLogisticRegressionData;
-    private final LinkPredictionPredictPipelineBaseConfig lpConfig; // TODO fix this
 
     LinkPredictionPredictPipelineExecutor(
         LinkPredictionPipeline pipeline,
@@ -57,7 +52,6 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, caller, graphStore, graphName, progressTracker);
         this.linkLogisticRegressionData = linkLogisticRegressionData;
-        this.lpConfig = config;
     }
 
     @Override
@@ -100,7 +94,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         );
 
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, pipeline.featureSteps());
-        var linkPrediction = getLinkPredictionStrategy(graph, lpConfig.isApproximateStrategy(), linkFeatureExtractor);
+        var linkPrediction = getLinkPredictionStrategy(graph, config.isApproximateStrategy(), linkFeatureExtractor);
         return linkPrediction.compute();
     }
 
@@ -114,7 +108,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 linkLogisticRegressionData,
                 linkFeatureExtractor,
                 graph,
-                lpConfig.approximateConfig(),
+                config.approximateConfig(),
                 progressTracker
             );
         } else {
@@ -122,9 +116,9 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 linkLogisticRegressionData,
                 linkFeatureExtractor,
                 graph,
-                lpConfig.concurrency(),
-                lpConfig.topN().orElseThrow(),
-                lpConfig.thresholdOrDefault(),
+                config.concurrency(),
+                config.topN().orElseThrow(),
+                config.thresholdOrDefault(),
                 progressTracker
             );
         }

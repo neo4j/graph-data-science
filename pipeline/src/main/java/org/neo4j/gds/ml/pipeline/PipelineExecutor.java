@@ -26,7 +26,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
@@ -35,11 +34,10 @@ import java.util.Map;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public abstract class PipelineExecutor<
-    FEATURE_STEP extends FeatureStep,
-    FEATURE_TYPE,
-    TRAINING_CONFIG extends Model.Mappable,
+    PIPELINE_CONFIG extends AlgoBaseConfig,
+    PIPELINE extends PipelineBuilder<?, ?>,
     RESULT,
-    SELF extends PipelineExecutor<FEATURE_STEP, FEATURE_TYPE, TRAINING_CONFIG, RESULT, SELF>
+    SELF extends PipelineExecutor<PIPELINE_CONFIG, PIPELINE, RESULT, SELF>
 > extends Algorithm<SELF, RESULT> {
 
     public enum DatasetSplits {
@@ -49,15 +47,15 @@ public abstract class PipelineExecutor<
         FEATURE_INPUT
     }
 
-    protected final PipelineBuilder<FEATURE_STEP, TRAINING_CONFIG> pipeline;
-    protected final AlgoBaseConfig config;
+    protected final PIPELINE pipeline;
+    protected final PIPELINE_CONFIG config;
     protected final BaseProc caller;
     protected final GraphStore graphStore;
     protected final String graphName;
 
     public PipelineExecutor(
-        PipelineBuilder<FEATURE_STEP, TRAINING_CONFIG> pipeline,
-        AlgoBaseConfig config,
+        PIPELINE pipeline,
+        PIPELINE_CONFIG config,
         BaseProc caller,
         GraphStore graphStore,
         String graphName,
