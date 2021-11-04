@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @GdlExtension
 class CypherGraphStoreCatalogHelperTest {
@@ -70,6 +71,16 @@ class CypherGraphStoreCatalogHelperTest {
         assertThatThrownBy(() -> CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("incompatible graph store wrapper");
+    }
+
+    @Test
+    void shouldNotReleaseTheOldGraphStore() {
+        var graphStoreWrapper = new TestGraphStoreWrapper(aGraphStore);
+        var graphName = "testGraph";
+        var config = GraphCreateFromStoreConfig.emptyWithName("", graphName);
+        GraphStoreCatalog.set(config, aGraphStore);
+        CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper);
+        assertDoesNotThrow(() -> aGraphStore.getUnion().degree(0L));
     }
 
     static class TestGraphStoreWrapper extends GraphStoreAdapter {

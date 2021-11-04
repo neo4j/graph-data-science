@@ -21,12 +21,12 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -34,6 +34,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,14 +55,29 @@ class GraphStoreCatalogTest {
     @GdlGraph
     private static final String TEST_GRAPH = "()";
 
+    @GdlGraph(graphNamePrefix = "other")
+    private static final String TEST_GRAPH2 = "()";
+
     @Inject
     private GraphStore graphStore;
+
+    @Inject
+    private GraphStore otherGraphStore;
 
     @Test
     void set() {
         Assertions.assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void overwrite() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), graphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(graphStore);
+        GraphStoreCatalog.overwrite(GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), otherGraphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(otherGraphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isNotEqualTo(graphStore);
     }
 
     @Test

@@ -135,6 +135,14 @@ public final class GraphStoreCatalog {
     }
 
     public static void set(GraphCreateConfig config, GraphStore graphStore) {
+        set(config, graphStore, false);
+    }
+
+    public static void overwrite(GraphCreateConfig config, GraphStore graphStore) {
+        set(config, graphStore, true);
+    }
+
+    private static void set(GraphCreateConfig config, GraphStore graphStore, boolean overwrite) {
         graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
@@ -143,7 +151,8 @@ public final class GraphStoreCatalog {
             userCatalog.set(
                 UserCatalog.UserCatalogKey.of(graphStore.databaseId(), config.graphName()),
                 config,
-                graphStore
+                graphStore,
+                overwrite
             );
             return userCatalog;
         });
@@ -254,18 +263,24 @@ public final class GraphStoreCatalog {
 
         private final Map<UserCatalogKey, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
 
-        private void set(UserCatalogKey userCatalogKey, GraphCreateConfig config, GraphStore graphStore) {
+        private void set(
+            UserCatalogKey userCatalogKey,
+            GraphCreateConfig config,
+            GraphStore graphStore,
+            boolean overwrite
+        ) {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
             GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
 
-            if (graphsByName.putIfAbsent(userCatalogKey, graphStoreWithConfig) != null) {
+            if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(formatWithLocale(
                     "Graph name %s already loaded",
                     config.graphName()
                 ));
             }
+            graphsByName.put(userCatalogKey, graphStoreWithConfig);
             graphStore.canRelease(false);
         }
 

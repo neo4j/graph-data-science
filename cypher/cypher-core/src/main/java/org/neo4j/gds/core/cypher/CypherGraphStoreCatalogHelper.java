@@ -39,7 +39,6 @@ public final class CypherGraphStoreCatalogHelper {
             throw new IllegalArgumentException("Attempted to override a graph store with an incompatible graph store wrapper.");
         }
 
-        GraphStoreCatalog.remove(catalogRequest, graphName, __ -> {}, true);
-        GraphStoreCatalog.set(config, graphStoreWrapper);
+        GraphStoreCatalog.overwrite(config, graphStoreWrapper);
     }
 }
