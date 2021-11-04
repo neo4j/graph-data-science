@@ -46,4 +46,6 @@ dependencies {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }
     implementation(group: 'junit', name: 'junit', version: ver.'junit4')
+
+    testImplementation project(':edition-api')
 }

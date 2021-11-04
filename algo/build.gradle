@@ -37,6 +37,7 @@ dependencies {
 
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
+    testImplementation project(':edition-api')
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation group: 'com.google.protobuf', name: 'protobuf-java', version: ver.'protobuf'

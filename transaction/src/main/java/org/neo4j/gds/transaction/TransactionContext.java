@@ -72,7 +72,7 @@ public final class TransactionContext {
      * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
      */
     public static TransactionContext of(GraphDatabaseAPI api, SecurityContext securityContext) {
-        var securityContextService = GraphDatabaseApiProxy.resolveDependency(api, SecurityContextService.class);
+        var securityContextService = GraphDatabaseApiProxy.resolveDependency(api, SecurityContextWrapper.class);
         securityContext = securityContextService.wrap(securityContext);
         return new TransactionContext(api, securityContext);
     }

@@ -17,30 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.transaction;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Config;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.extension.ExtensionFactory;
-import org.neo4j.kernel.extension.ExtensionType;
-import org.neo4j.kernel.extension.context.ExtensionContext;
-import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.gds.LicenseState;
 
 @ServiceProvider
-public class EditionFactory extends ExtensionFactory<EditionFactory.Dependencies> {
+public class OpenGdsSecurityContextWrapperFactory implements SecurityContextWrapperFactory {
 
-    public EditionFactory() {
-        super(ExtensionType.DATABASE, "gds.edition_factory");
+    @Override
+    public SecurityContextWrapper create(LicenseState licenseState) {
+        return new OpenGdsSecurityContextWrapper();
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new EditionLifecycleAdapter(context, dependencies.config(), dependencies.globalProceduresRegistry());
-    }
-
-    interface Dependencies {
-        Config config();
-        GlobalProcedures globalProceduresRegistry();
+    public int priority() {
+        return 0;
     }
 }

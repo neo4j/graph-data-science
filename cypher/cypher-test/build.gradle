@@ -24,4 +24,5 @@ dependencies {
 
     testImplementation project(':config-api')
     testImplementation project(":test-utils")
+    testImplementation project(':edition-api')
 }
