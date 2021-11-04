@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
@@ -32,8 +33,11 @@ import java.util.Map;
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
 public interface NodeLogisticRegressionTrainCoreConfig extends TrainingConfig {
 
+    @Value.Default
     @Configuration.DoubleRange(min = 0.0)
-    double penalty();
+    default double penalty() {
+        return 0.0;
+    }
 
     @Configuration.CollectKeys
     default Collection<String> configKeys() {
@@ -55,7 +59,6 @@ public interface NodeLogisticRegressionTrainCoreConfig extends TrainingConfig {
     }
 
     static NodeLogisticRegressionTrainCoreConfig defaultConfig() {
-        return NodeLogisticRegressionTrainCoreConfig
-            .of(Map.of("penalty", 0.0));
+        return NodeLogisticRegressionTrainCoreConfig.of(Map.of());
     }
 }
