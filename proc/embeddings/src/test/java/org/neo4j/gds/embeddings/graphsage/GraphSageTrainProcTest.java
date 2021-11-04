@@ -38,8 +38,6 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -69,8 +67,6 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
-
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @Test
     void runsTraining() {
@@ -185,25 +181,25 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void runsTrainingOnAnonymousNativeGraph() {
         String train = GdsCypher.call().implicitCreation(
-            ImmutableGraphCreateFromStoreConfig.builder()
-                .graphName("implicitWeightedGraph")
-                .nodeProjections(NodeProjections
-                    .builder()
-                    .putProjection(
-                        NodeLabel.of("King"),
-                        NodeProjection.of(
-                            "King",
-                            PropertyMappings.of(
-                                PropertyMapping.of("age", 1.0D),
-                                PropertyMapping.of("birth_year", 1.0D),
-                                PropertyMapping.of("death_year", 1.0D)
+                ImmutableGraphCreateFromStoreConfig.builder()
+                    .graphName("implicitWeightedGraph")
+                    .nodeProjections(NodeProjections
+                        .builder()
+                        .putProjection(
+                            NodeLabel.of("King"),
+                            NodeProjection.of(
+                                "King",
+                                PropertyMappings.of(
+                                    PropertyMapping.of("age", 1.0D),
+                                    PropertyMapping.of("birth_year", 1.0D),
+                                    PropertyMapping.of("death_year", 1.0D)
+                                )
                             )
                         )
-                    )
-                    .build())
-                .relationshipProjections(RelationshipProjections.fromString("REL")
-                ).build()
-        )
+                        .build())
+                    .relationshipProjections(RelationshipProjections.fromString("REL")
+                    ).build()
+            )
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))

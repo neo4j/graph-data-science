@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
+@ModelCatalogExtension
 class LinkPredictionTrainProcTest extends BaseProcTest {
 
     // Five cliques of size 2, 3, or 4
@@ -104,11 +105,11 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         "(j)-[:TEST {label: 0}]->(o), " +
         "(k)-[:TEST {label: 0}]->(o)";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionTrainProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
@@ -132,11 +133,6 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             )
             .graphCreate(graphName)
             .yields();
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

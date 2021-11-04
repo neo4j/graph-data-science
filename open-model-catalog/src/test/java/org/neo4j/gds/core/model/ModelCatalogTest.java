@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
@@ -53,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ModelCatalogExtension
 class ModelCatalogTest {
 
     private static final String USERNAME = "testUser";
@@ -68,12 +70,8 @@ class ModelCatalogTest {
         Map::of
     );
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
-
-    @AfterEach
-    void afterEach() {
-        modelCatalog.removeAllLoadedModels();
-    }
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @Disabled("Jonatan broke it")
     void shouldNotStoreMoreThanAllowedModels() {

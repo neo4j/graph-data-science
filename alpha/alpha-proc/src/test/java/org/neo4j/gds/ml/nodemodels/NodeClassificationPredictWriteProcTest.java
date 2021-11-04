@@ -42,9 +42,10 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
@@ -70,6 +71,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KE
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
+@ModelCatalogExtension
 class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
 
     private static final String DB_CYPHER =
@@ -83,6 +85,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     public static final String GRAPH_NAME = "g";
     public static final String MODEL_NAME = "model";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @TestFactory
@@ -94,7 +97,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @BeforeEach
     void setup() throws Exception {
-        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class, NodeClassificationPredictWriteProc.class);
 
         runQuery(DB_CYPHER);
@@ -112,7 +114,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @AfterEach
     void tearDown() {
-        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

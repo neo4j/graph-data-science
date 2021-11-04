@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -30,10 +29,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
@@ -46,6 +46,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
+@ModelCatalogExtension
 class LinkPredictionPredictWriteProcTest extends BaseProcTest {
 
     private static final String GRAPH =
@@ -66,11 +67,11 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
         "(n:N {a: 400}), " +
         "(o:N {a: 400})";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPredictWriteProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
@@ -85,11 +86,6 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
             .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
             .graphCreate(graphName)
             .yields();
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

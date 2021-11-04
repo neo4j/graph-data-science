@@ -24,8 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -50,6 +52,7 @@ import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
+@ModelCatalogExtension
 class NodeClassificationPredictTest {
 
     @GdlGraph
@@ -63,6 +66,9 @@ class NodeClassificationPredictTest {
 
     @Inject
     private TestGraph graph;
+
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @Test
     void shouldPredict() {
@@ -226,7 +232,6 @@ class NodeClassificationPredictTest {
                 .build(),
             NodeClassificationModelInfo.defaultConfig()
         );
-        var modelCatalog = OpenModelCatalog.INSTANCE;
         modelCatalog.set(model);
 
         var log = new TestLog();

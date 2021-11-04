@@ -26,22 +26,28 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ModelCatalogExtension
 class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:King{ name: 'A', age: 20 })" +
-            ", (b:King{ name: 'B', age: 12 })";
+        "CREATE" +
+        "  (a:King{ name: 'A', age: 20 })" +
+        ", (b:King{ name: 'B', age: 12 })";
 
     private static final String GRAPH_NAME = "embeddingsGraph";
+
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -65,7 +71,6 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        OpenModelCatalog.INSTANCE.removeAllLoadedModels();
     }
 
     @Test

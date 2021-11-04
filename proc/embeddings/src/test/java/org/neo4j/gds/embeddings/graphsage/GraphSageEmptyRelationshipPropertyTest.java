@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,8 +30,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.List;
@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ModelCatalogExtension
 class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     private static final String DB_CYPHER =
         "CREATE" +
@@ -75,11 +76,12 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     private static final String graphName = "weightedGsGraph";
 
-    private static final  String modelName = "weightedGsModel";
+    private static final String modelName = "weightedGsModel";
 
-    private static final  String relationshipWeightProperty = "weight";
+    private static final String relationshipWeightProperty = "weight";
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -92,11 +94,6 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         );
 
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

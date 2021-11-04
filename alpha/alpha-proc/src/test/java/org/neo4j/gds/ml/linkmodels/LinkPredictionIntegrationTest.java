@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ModelCatalogExtension
 class LinkPredictionIntegrationTest extends BaseProcTest {
 
     // Five cliques of size 2, 3, or 4
@@ -59,13 +60,13 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         "(o:N {z: 400}), " +
 
         "(a)-[:REL {label: 1}]->(b), " +
-        "(a)-[:REL {label: 1}]->(c), " +       
+        "(a)-[:REL {label: 1}]->(c), " +
         "(a)-[:REL {label: 1}]->(d), " +
         "(b)-[:REL {label: 1}]->(c), " +
-        "(b)-[:REL {label: 1}]->(d), " +       
+        "(b)-[:REL {label: 1}]->(d), " +
         "(c)-[:REL {label: 1}]->(d), " +
 
-        "(e)-[:REL {label: 1}]->(f), " +       
+        "(e)-[:REL {label: 1}]->(f), " +
         "(e)-[:REL {label: 1}]->(g), " +
         "(f)-[:REL {label: 1}]->(g), " +
 
@@ -75,8 +76,8 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         "(j)-[:REL {label: 1}]->(l), " +
         "(k)-[:REL {label: 1}]->(l), " +
 
-        "(m)-[:REL {label: 1}]->(n), " +       
-        "(m)-[:REL {label: 1}]->(o), " +       
+        "(m)-[:REL {label: 1}]->(n), " +
+        "(m)-[:REL {label: 1}]->(o), " +
         "(n)-[:REL {label: 1}]->(o), " +
 
         "(a)-[:REL {label: 0}]->(e), " +
@@ -105,12 +106,11 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
     private static final String EMBEDDING_FEATURE = "embedding";
     private static final String PREDICTED_REL_TYPE = "REL_PREDICTED";
 
-
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             FastRPMutateProc.class,
@@ -124,11 +124,6 @@ class LinkPredictionIntegrationTest extends BaseProcTest {
         registerFunctions(AsNodeFunc.class);
 
         runQuery(GRAPH);
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

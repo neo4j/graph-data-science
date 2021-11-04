@@ -29,8 +29,10 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -52,21 +54,26 @@ import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
+@ModelCatalogExtension
 class LinkPredictionPredictTest {
+
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GDL = "CREATE " +
-            "  (n0:N {a: 1.0, b: 0.9})" +
-            ", (n1:N {a: 2.0, b: 1.0})" +
-            ", (n2:N {a: 3.0, b: 1.5})" +
-            ", (n3:N {a: 0.0, b: 2.8})" +
-            ", (n4:N {a: 1.0, b: 0.9})" +
-            ", (n1)-[:T]->(n2)" +
-            ", (n3)-[:T]->(n4)" +
-            ", (n1)-[:T]->(n3)" +
-            ", (n2)-[:T]->(n4)";
+                        "  (n0:N {a: 1.0, b: 0.9})" +
+                        ", (n1:N {a: 2.0, b: 1.0})" +
+                        ", (n2:N {a: 3.0, b: 1.5})" +
+                        ", (n3:N {a: 0.0, b: 2.8})" +
+                        ", (n4:N {a: 1.0, b: 0.9})" +
+                        ", (n1)-[:T]->(n2)" +
+                        ", (n3)-[:T]->(n4)" +
+                        ", (n1)-[:T]->(n3)" +
+                        ", (n2)-[:T]->(n4)";
 
     @Inject
     Graph graph;
+
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @ParameterizedTest
     @ValueSource(ints = {3, 50})
@@ -111,7 +118,6 @@ class LinkPredictionPredictTest {
             .nodeFeatureDimension(numberOfNodeFeatures)
             .build();
         var modelName = "model";
-        var modelCatalog = OpenModelCatalog.INSTANCE;
 
         modelCatalog.set(Model.of(
             "",

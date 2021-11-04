@@ -26,9 +26,10 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
@@ -47,6 +48,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.math.L2Norm.l2Norm;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@ModelCatalogExtension
 class GraphMutateProcIntegrationTest extends BaseProcTest {
 
     private static final String TEST_GRAPH = "testGraph";
@@ -104,11 +106,11 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         "(j)-[{w: 0.5}]->(i)"
     );
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         runQuery(DB_CYPHER);
         registerProcedures(
             GraphCreateProc.class,
@@ -136,7 +138,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
     @AfterEach
     void shutdown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

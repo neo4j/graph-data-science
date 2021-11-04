@@ -22,14 +22,12 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -574,10 +572,4 @@ class GraphSageTrainAlgorithmFactoryTest {
             );
         });
     }
-
-    @AfterEach
-    void tearDown() {
-        OpenModelCatalog.INSTANCE.removeAllLoadedModels();
-    }
-
 }

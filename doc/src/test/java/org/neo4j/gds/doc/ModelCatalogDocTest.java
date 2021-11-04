@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.doc;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -35,13 +35,14 @@ import org.neo4j.gds.junit.annotation.Edition;
 import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 @GdsEditionTest(Edition.EE)
+@ModelCatalogExtension
 abstract class ModelCatalogDocTest extends DocTestBase {
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void loadModel() {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         modelCatalog.set(Model.of(
             getUsername(),
             "my-model",
@@ -51,10 +52,5 @@ abstract class ModelCatalogDocTest extends DocTestBase {
             ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         ));
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 }

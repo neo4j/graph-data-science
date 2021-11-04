@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -35,10 +34,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -65,6 +65,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 
+@ModelCatalogExtension
 class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
     public static final String PIPELINE_NAME = "p";
@@ -165,11 +166,11 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
         );
     }
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(GraphCreateProc.class);
 
         String createQuery = GdsCypher.call()
@@ -182,11 +183,6 @@ class LinkPredictionPipelineAlgorithmFactoryTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
-    }
-
-    @AfterEach
-    void tearDown(){
-        modelCatalog.removeAllLoadedModels();
     }
 
     @ParameterizedTest

@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphdb.Result;
 
@@ -41,22 +41,18 @@ import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ModelCatalogExtension
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(NodeClassificationTrainProc.class, GraphCreateProc.class);
         runQuery(createQuery());
 
         runQuery("CALL gds.graph.create('g', 'N', '*', {nodeProperties: ['a', 'b', 't']})");
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
