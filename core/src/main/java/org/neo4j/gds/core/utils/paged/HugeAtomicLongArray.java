@@ -213,6 +213,8 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
         };
     }
 
+    public abstract void copyTo(HugeAtomicLongArray dest, long length);
+
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link org.neo4j.gds.core.utils.mem.AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
@@ -373,6 +375,38 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
             }
             return 0L;
         }
+
+        @Override
+        public void copyTo(HugeAtomicLongArray dest, long length) {
+            if (length > size) {
+                length = size;
+            }
+            if (length > dest.size()) {
+                length = dest.size();
+            }
+            if (dest instanceof HugeAtomicLongArray.SingleHugeAtomicLongArray) {
+                HugeAtomicLongArray.SingleHugeAtomicLongArray dst = (HugeAtomicLongArray.SingleHugeAtomicLongArray) dest;
+                System.arraycopy(page, 0, dst.page, 0, (int) length);
+                Arrays.fill(dst.page, (int) length, dst.size, 0L);
+            } else if (dest instanceof HugeAtomicLongArray.PagedHugeAtomicLongArray) {
+                HugeAtomicLongArray.PagedHugeAtomicLongArray dst = (HugeAtomicLongArray.PagedHugeAtomicLongArray) dest;
+                int start = 0;
+                int remaining = (int) length;
+                for (long[] dstPage : dst.pages) {
+                    int toCopy = Math.min(remaining, dstPage.length);
+                    if (toCopy == 0) {
+                        Arrays.fill(page, 0L);
+                    } else {
+                        System.arraycopy(page, start, dstPage, 0, toCopy);
+                        if (toCopy < dstPage.length) {
+                            Arrays.fill(dstPage, toCopy, dstPage.length, 0L);
+                        }
+                        start += toCopy;
+                        remaining -= toCopy;
+                    }
+                }
+            }
+        }
     }
 
     static final class PagedHugeAtomicLongArray extends HugeAtomicLongArray {
@@ -509,6 +543,50 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
             }
             return 0L;
         }
+
+        @Override
+        public void copyTo(HugeAtomicLongArray dest, long length) {
+            if (length > size) {
+                length = size;
+            }
+            if (length > dest.size()) {
+                length = dest.size();
+            }
+            if (dest instanceof HugeAtomicLongArray.SingleHugeAtomicLongArray) {
+                HugeAtomicLongArray.SingleHugeAtomicLongArray dst = (HugeAtomicLongArray.SingleHugeAtomicLongArray) dest;
+                int start = 0;
+                int remaining = (int) length;
+                for (long[] page : pages) {
+                    int toCopy = Math.min(remaining, page.length);
+                    if (toCopy == 0) {
+                        break;
+                    }
+                    System.arraycopy(page, 0, dst.page, start, toCopy);
+                    start += toCopy;
+                    remaining -= toCopy;
+                }
+                Arrays.fill(dst.page, start, dst.size, 0L);
+            } else if (dest instanceof HugeAtomicLongArray.PagedHugeAtomicLongArray) {
+                HugeAtomicLongArray.PagedHugeAtomicLongArray dst = (HugeAtomicLongArray.PagedHugeAtomicLongArray) dest;
+                int pageLen = Math.min(pages.length, dst.pages.length);
+                int lastPage = pageLen - 1;
+                long remaining = length;
+                for (int i = 0; i < lastPage; i++) {
+                    long[] page = pages[i];
+                    long[] dstPage = dst.pages[i];
+                    System.arraycopy(page, 0, dstPage, 0, page.length);
+                    remaining -= page.length;
+                }
+                if (remaining > 0) {
+                    System.arraycopy(pages[lastPage], 0, dst.pages[lastPage], 0, (int) remaining);
+                    Arrays.fill(dst.pages[lastPage], (int) remaining, dst.pages[lastPage].length, 0L);
+                }
+                for (int i = pageLen; i < dst.pages.length; i++) {
+                    Arrays.fill(dst.pages[i], 0L);
+                }
+            }
+        }
+
     }
 
 }

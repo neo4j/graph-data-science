@@ -24,7 +24,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.NodeMapping;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -142,35 +143,61 @@ public final class LabelInformation {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }
 
-    public static Builder emptyBuilder() {
-        return new Builder();
+    public static Builder emptyBuilder(AllocationTracker allocationTracker) {
+        return Builder.of(allocationTracker);
     }
 
-    public static Builder builder(IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping) {
-        return Builder.of(labelTokenNodeLabelMapping);
+    public static Builder builder(long expectedCapacity, AllocationTracker allocationTracker) {
+        return Builder.of(expectedCapacity, allocationTracker);
+    }
+
+    public static Builder builder(
+        long expectedCapacity,
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        AllocationTracker allocationTracker
+    ) {
+        return Builder.of(expectedCapacity, labelTokenNodeLabelMapping, allocationTracker);
     }
 
     public static final class Builder {
-        final Map<NodeLabel, Roaring64NavigableMap> labelInformation;
+        private final long expectedCapacity;
+        final Map<NodeLabel, HugeAtomicBitSet> labelInformation;
         private final List<NodeLabel> starNodeLabelMappings;
-
-        Builder() {
-            this(new ConcurrentHashMap<>(), List.of());
-        }
+        private final AllocationTracker allocationTracker;
 
         private Builder(
-            Map<NodeLabel, Roaring64NavigableMap> labelInformation,
-            List<NodeLabel> starNodeLabelMappings
+            long expectedCapacity,
+            Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+            List<NodeLabel> starNodeLabelMappings,
+            AllocationTracker allocationTracker
         ) {
-            this.starNodeLabelMappings = starNodeLabelMappings;
+            this.expectedCapacity = expectedCapacity;
             this.labelInformation = labelInformation;
+            this.starNodeLabelMappings = starNodeLabelMappings;
+            this.allocationTracker = allocationTracker;
         }
 
-        static Builder of(IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping) {
+        static Builder of(AllocationTracker allocationTracker) {
+            return of(0, allocationTracker);
+        }
+
+        static Builder of(long expectedCapacity, AllocationTracker allocationTracker) {
+            return new Builder(expectedCapacity, new ConcurrentHashMap<>(), List.of(), allocationTracker);
+        }
+
+        static Builder of(
+            long expectedCapacity,
+            IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+            AllocationTracker allocationTracker
+        ) {
             var starNodeLabelMappings = labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, List.of());
 
-            var nodeLabelBitSetMap = prepareLabelMap(labelTokenNodeLabelMapping, Roaring64NavigableMap::bitmapOf);
-            return new Builder(nodeLabelBitSetMap, starNodeLabelMappings);
+            var nodeLabelBitSetMap = prepareLabelMap(
+                labelTokenNodeLabelMapping,
+                () -> HugeAtomicBitSet.growing(expectedCapacity, allocationTracker)
+            );
+
+            return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings, allocationTracker);
         }
 
         private static <T> Map<NodeLabel, T> prepareLabelMap(
@@ -191,15 +218,11 @@ public final class LabelInformation {
         }
 
         public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
-            var bitMap = labelInformation
+            labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> Roaring64NavigableMap.bitmapOf()
-                );
-
-            synchronized (bitMap) {
-                bitMap.addLong(nodeId);
-            }
+                    (ignored) -> HugeAtomicBitSet.growing(expectedCapacity, allocationTracker)
+                ).set(nodeId);
         }
 
         Map<NodeLabel, BitSet> buildInner(long nodeCount, LongUnaryOperator mappedIdFn) {
@@ -210,7 +233,7 @@ public final class LabelInformation {
                     var importBitSet = e.getValue();
                     var internBitSet = new BitSet(nodeCount);
 
-                    importBitSet.stream().map(mappedIdFn).forEach(internBitSet::set);
+                    importBitSet.forEachSetBit(neoId -> internBitSet.set(mappedIdFn.applyAsLong(neoId)));
 
                     return internBitSet;
                 }));

@@ -103,8 +103,14 @@ class IdMapTest {
         int length = 1337;
         int highestNeoId = length - 1;
         var hugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(length, AllocationTracker.empty());
-        var emptyLabelInformationBuilder = LabelInformation.emptyBuilder();
-        var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, emptyLabelInformationBuilder, highestNeoId, 1, AllocationTracker.empty());
+        var emptyLabelInformationBuilder = LabelInformation.emptyBuilder(AllocationTracker.empty());
+        var hugeIdMap = IdMapBuilder.build(
+            hugeIdMappingBuilder,
+            emptyLabelInformationBuilder,
+            highestNeoId,
+            1,
+            AllocationTracker.empty()
+        );
 
         assertThat(hugeIdMap.highestNeoId()).isEqualTo(highestNeoId);
     }

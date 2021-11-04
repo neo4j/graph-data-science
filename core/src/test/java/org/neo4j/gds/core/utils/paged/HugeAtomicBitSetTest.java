@@ -19,99 +19,133 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.mem.BitUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class HugeAtomicBitSetTest {
 
-    @Test
-    void testGetSetClear() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
-        assertFalse(bitSet.get(7));
-        assertFalse(bitSet.get(8));
-        assertFalse(bitSet.get(9));
+    interface HabsSupplier {
+        HugeAtomicBitSet get(long size, AllocationTracker tracker);
+    }
+
+    static Stream<HabsSupplier> suppliers() {
+        return Stream.of(
+            HugeAtomicBitSet::fixed,
+            HugeAtomicBitSet::growing
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testGetSetClear(HabsSupplier provider) {
+        var bitSet = provider.get(42, AllocationTracker.empty());
+        assertThat(bitSet.get(7)).isFalse();
+        assertThat(bitSet.get(8)).isFalse();
+        assertThat(bitSet.get(9)).isFalse();
         bitSet.set(8);
-        assertFalse(bitSet.get(7));
-        assertTrue(bitSet.get(8));
-        assertFalse(bitSet.get(9));
+        assertThat(bitSet.get(7)).isFalse();
+        assertThat(bitSet.get(8)).isTrue();
+        assertThat(bitSet.get(9)).isFalse();
         bitSet.clear(8);
-        assertFalse(bitSet.get(7));
-        assertFalse(bitSet.get(8));
-        assertFalse(bitSet.get(9));
+        assertThat(bitSet.get(7)).isFalse();
+        assertThat(bitSet.get(8)).isFalse();
+        assertThat(bitSet.get(9)).isFalse();
     }
 
-    @Test
-    void getAndSetReturnsTrueIfTheBitWasSet() {
-        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testForEachSetBit(HabsSupplier supplier) {
+        var bitSet = supplier.get(4096, AllocationTracker.empty());
+
+        var expected = List.of(0L, 1L, 3L, 7L, 15L, 63L, 64L, 72L, 128L, 420L, 1337L, 4095L);
+        expected.forEach(bitSet::set);
+
+        var actual = new ArrayList<Long>();
+        bitSet.forEachSetBit(actual::add);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void getAndSetReturnsTrueIfTheBitWasSet(HabsSupplier supplier) {
+        var bitSet = supplier.get(1, AllocationTracker.empty());
         bitSet.set(0);
-        assertTrue(bitSet.getAndSet(0));
+        assertThat(bitSet.getAndSet(0)).isTrue();
     }
 
-    @Test
-    void getAndSetReturnsFalseIfTheBitWasNotSet() {
-        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.empty());
-        assertFalse(bitSet.getAndSet(0));
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void getAndSetReturnsFalseIfTheBitWasNotSet(HabsSupplier supplier) {
+        var bitSet = supplier.get(1, AllocationTracker.empty());
+        assertThat(bitSet.getAndSet(0)).isFalse();
     }
 
-    @Test
-    void getAndSetSetsTheBit() {
-        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.empty());
-        assertFalse(bitSet.get(0));
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void getAndSetSetsTheBit(HabsSupplier supplier) {
+        var bitSet = supplier.get(1, AllocationTracker.empty());
+        assertThat(bitSet.get(0)).isFalse();
         bitSet.getAndSet(0);
-        assertTrue(bitSet.get(0));
+        assertThat(bitSet.get(0)).isTrue();
     }
 
-    @Test
-    void testSize() {
-        var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testSize(HabsSupplier supplier) {
+        var bitSet = supplier.get(1337, AllocationTracker.empty());
         assertThat(bitSet.size()).isEqualTo(1337);
     }
 
     @ParameterizedTest
     @CsvSource({"0,1336", "0,63", "70,140"})
     void setRange(int startIndex, int endIndex) {
-        var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
-        bitSet.set(startIndex, endIndex);
-        for (int i = 0; i < bitSet.size(); i++) {
-            if (i >= startIndex && i < endIndex) {
-                assertTrue(bitSet.get(i), formatWithLocale("index %d expected to be true", i));
-            } else {
-                assertFalse(bitSet.get(i), formatWithLocale("index %d expected to be false", i));
+        suppliers().forEach(supplier -> {
+            var bitSet = supplier.get(1337, AllocationTracker.empty());
+            bitSet.set(startIndex, endIndex);
+            for (int i = 0; i < bitSet.size(); i++) {
+                if (i >= startIndex && i < endIndex) {
+                    assertThat(bitSet.get(i)).as(formatWithLocale("index %d expected to be true", i)).isTrue();
+                } else {
+                    assertThat(bitSet.get(i)).as(formatWithLocale("index %d expected to be false", i)).isFalse();
+                }
             }
-        }
+        });
     }
 
-    @Test
-    void setRangeDoesNotSetOutsideOfRange() {
-        var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void setRangeDoesNotSetOutsideOfRange(HabsSupplier supplier) {
+        var bitSet = supplier.get(1337, AllocationTracker.empty());
         bitSet.set(0, 1337);
         // need to go through the inner bitset to check for values outside of size()
-        var innerBitSet = bitSet.toBitSet();
+        var innerBitSet = bitSet.toHppcBitSet();
         var max = BitUtil.align(1337, 64);
         for (int i = 0; i < max; i++) {
             if (i < 1337) {
-                assertTrue(innerBitSet.get(i), formatWithLocale("index %d expected to be true", i));
+                assertThat(innerBitSet.get(i)).as(formatWithLocale("index %d expected to be true", i)).isTrue();
             } else {
-                assertFalse(innerBitSet.get(i), formatWithLocale("index %d expected to be false", i));
+                assertThat(innerBitSet.get(i)).as(formatWithLocale("index %d expected to be false", i)).isFalse();
             }
         }
     }
 
-    @Test
-    void setRangeParallel() {
-        var bitSet = HugeAtomicBitSet.create(128, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void setRangeParallel(HabsSupplier supplier) {
+        var bitSet = supplier.get(128, AllocationTracker.empty());
         var phaser = new Phaser(5);
         var pool = Executors.newCachedThreadPool();
         pool.submit(new SetTask(bitSet, phaser, 0, 16));
@@ -122,16 +156,17 @@ class HugeAtomicBitSetTest {
         phaser.arriveAndAwaitAdvance();
 
         for (int i = 0; i < bitSet.size(); i++) {
-            if (i >= 0 && i < 32) assertTrue(bitSet.get(i));
-            else if (i >= 40 && i < 80) assertTrue(bitSet.get(i));
-            else if (i >= 100 && i < 127) assertTrue(bitSet.get(i));
-            else assertFalse(bitSet.get(i));
+            if (i >= 0 && i < 32) assertThat(bitSet.get(i)).isTrue();
+            else if (i >= 40 && i < 80) assertThat(bitSet.get(i)).isTrue();
+            else if (i >= 100 && i < 127) assertThat(bitSet.get(i)).isTrue();
+            else assertThat(bitSet.get(i)).isFalse();
         }
     }
 
-    @Test
-    void setRangeParallelDoesNotSetOutsideOfRange() {
-        var bitSet = HugeAtomicBitSet.create(168, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void setRangeParallelDoesNotSetOutsideOfRange(HabsSupplier supplier) {
+        var bitSet = supplier.get(168, AllocationTracker.empty());
         var phaser = new Phaser(5);
         var pool = Executors.newCachedThreadPool();
         pool.submit(new SetTask(bitSet, phaser, 0, 42));
@@ -142,13 +177,13 @@ class HugeAtomicBitSetTest {
         phaser.arriveAndAwaitAdvance();
 
         // need to go through the inner bitset to check for values outside of size()
-        var innerBitSet = bitSet.toBitSet();
+        var innerBitSet = bitSet.toHppcBitSet();
         var max = BitUtil.align(168, 64);
         for (int i = 0; i < max; i++) {
             if (i < 84 || (i >= 92 && i < 122) || (i >= 133 && i < 137)) {
-                assertTrue(innerBitSet.get(i), formatWithLocale("index %d expected to be true", i));
+                assertThat(innerBitSet.get(i)).as(formatWithLocale("index %d expected to be true", i)).isTrue();
             } else {
-                assertFalse(innerBitSet.get(i), formatWithLocale("index %d expected to be false", i));
+                assertThat(innerBitSet.get(i)).as(formatWithLocale("index %d expected to be false", i)).isFalse();
             }
         }
     }
@@ -174,32 +209,35 @@ class HugeAtomicBitSetTest {
         }
     }
 
-    @Test
-    void testFlipping() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testFlipping(HabsSupplier supplier) {
+        var bitSet = supplier.get(42, AllocationTracker.empty());
         bitSet.flip(41);
-        assertTrue(bitSet.get(41));
+        assertThat(bitSet.get(41)).isTrue();
         bitSet.flip(41);
-        assertFalse(bitSet.get(41));
+        assertThat(bitSet.get(41)).isFalse();
     }
 
-    @Test
-    void testCardinality() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
-        assertEquals(0L, bitSet.cardinality());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testCardinality(HabsSupplier supplier) {
+        var bitSet = supplier.get(42, AllocationTracker.empty());
+        assertThat(bitSet.cardinality()).isEqualTo(0L);
 
         bitSet.set(41);
-        assertEquals(1L, bitSet.cardinality());
+        assertThat(bitSet.cardinality()).isEqualTo(1L);
 
         for (long i = 0; i < bitSet.size(); i++) {
             bitSet.set(i);
         }
-        assertEquals(42L, bitSet.cardinality());
+        assertThat(bitSet.cardinality()).isEqualTo(42L);
     }
 
-    @Test
-    void testClearAll() {
-        var bitSet = HugeAtomicBitSet.create(100, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testClearAll(HabsSupplier supplier) {
+        var bitSet = supplier.get(100, AllocationTracker.empty());
         for (long i = 0; i < bitSet.size(); i++) {
             bitSet.set(i);
         }
@@ -207,47 +245,50 @@ class HugeAtomicBitSetTest {
         bitSet.clear();
 
         for (long i = 0; i < bitSet.size(); i++) {
-            assertFalse(bitSet.get(i));
+            assertThat(bitSet.get(i)).isFalse();
         }
     }
 
-    @Test
-    void testToBitSet() {
-        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testToBitSet(HabsSupplier supplier) {
+        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
         atomicBitSet.set(1);
         atomicBitSet.set(9);
         atomicBitSet.set(8);
         atomicBitSet.set(4);
 
-        var bitSet = atomicBitSet.toBitSet();
-        assertEquals(atomicBitSet.cardinality(), bitSet.cardinality());
-        assertTrue(bitSet.get(1));
-        assertTrue(bitSet.get(9));
-        assertTrue(bitSet.get(8));
-        assertTrue(bitSet.get(4));
+        var bitSet = atomicBitSet.toHppcBitSet();
+        assertThat(atomicBitSet.cardinality()).isEqualTo(bitSet.cardinality());
+        assertThat(bitSet.get(1)).isTrue();
+        assertThat(bitSet.get(9)).isTrue();
+        assertThat(bitSet.get(8)).isTrue();
+        assertThat(bitSet.get(4)).isTrue();
 
         bitSet.set(43);
     }
 
-    @Test
-    void testIsEmpty() {
-        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
-        assertTrue(atomicBitSet.isEmpty());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testIsEmpty(HabsSupplier supplier) {
+        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
+        assertThat(atomicBitSet.isEmpty()).isTrue();
         atomicBitSet.set(23);
-        assertFalse(atomicBitSet.isEmpty());
+        assertThat(atomicBitSet.isEmpty()).isFalse();
         atomicBitSet.flip(23);
-        assertTrue(atomicBitSet.isEmpty());
+        assertThat(atomicBitSet.isEmpty()).isTrue();
     }
 
-    @Test
-    void testAllSet() {
-        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
-        assertFalse(atomicBitSet.allSet());
+    @ParameterizedTest
+    @MethodSource("suppliers")
+    void testAllSet(HabsSupplier supplier) {
+        var atomicBitSet = supplier.get(42, AllocationTracker.empty());
+        assertThat(atomicBitSet.allSet()).isFalse();
         atomicBitSet.set(23);
-        assertFalse(atomicBitSet.allSet());
+        assertThat(atomicBitSet.allSet()).isFalse();
         atomicBitSet.set(0, 42);
-        assertTrue(atomicBitSet.allSet());
+        assertThat(atomicBitSet.allSet()).isTrue();
         atomicBitSet.flip(23);
-        assertFalse(atomicBitSet.allSet());
+        assertThat(atomicBitSet.allSet()).isFalse();
     }
 }
