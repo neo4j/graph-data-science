@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -316,28 +317,19 @@ final class HugeGraphLoadingTest extends BaseTest {
 
             var neoId = graphStore.nodes().toOriginalNodeId(node);
 
-            if (neoId % 3 == 0) {
+            if (labelABits.contains(neoId) && !labelBBits.contains(neoId)) {
                 assertThat(nodeLabels).contains(labelA.name());
                 assertThat(nodeLabels).doesNotContain(labelB.name());
-
-                assertThat(labelABits.contains(neoId)).isTrue();
-                assertThat(labelBBits.contains(neoId)).isFalse();
             }
-
-            if (neoId % 3 == 1) {
+            else if (!labelABits.contains(neoId) && labelBBits.contains(neoId)) {
                 assertThat(nodeLabels).doesNotContain(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
-
-                assertThat(labelABits.contains(neoId)).isFalse();
-                assertThat(labelBBits.contains(neoId)).isTrue();
             }
-
-            if (neoId % 3 == 2) {
+            else if (labelABits.contains(neoId) && labelBBits.contains(neoId)) {
                 assertThat(nodeLabels).contains(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
-
-                assertThat(labelABits.contains(neoId)).isTrue();
-                assertThat(labelBBits.contains(neoId)).isTrue();
+            } else {
+                Assertions.fail("no labels found for id: " + node);
             }
 
             return true;
