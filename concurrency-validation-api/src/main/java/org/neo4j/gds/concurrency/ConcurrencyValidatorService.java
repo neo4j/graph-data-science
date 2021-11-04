@@ -27,9 +27,7 @@ public final class ConcurrencyValidatorService {
     }
 
     public static void validator(ConcurrencyValidator validator) {
-        synchronized (ConcurrencyValidatorService.class) {
-            instance = validator;
-        }
+        instance = validator;
     }
 
     public static ConcurrencyValidator validator() {

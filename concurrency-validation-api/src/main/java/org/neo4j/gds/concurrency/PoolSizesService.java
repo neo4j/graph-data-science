@@ -27,9 +27,7 @@ public final class PoolSizesService {
     }
 
     public static void poolSizes(PoolSizes poolSizes) {
-        synchronized (PoolSizesService.class) {
-            instance = poolSizes;
-        }
+        instance = poolSizes;
     }
 
     public static PoolSizes poolSizes() {
