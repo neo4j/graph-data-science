@@ -20,9 +20,7 @@
 package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.ArrayList;
