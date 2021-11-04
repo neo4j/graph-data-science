@@ -82,7 +82,7 @@ public abstract class PipelineExecutor<
         var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
 
         progressTracker.beginSubTask("execute node property steps");
-        executeNodePropertySteps(featureInputGraphFilter.nodeLabels(), featureInputGraphFilter.relationshipTypes());
+        executeNodePropertySteps(featureInputGraphFilter);
         progressTracker.endSubTask("execute node property steps");
 
         this.pipeline.validate(graphStore, config);
@@ -102,13 +102,10 @@ public abstract class PipelineExecutor<
 
     }
 
-    private void executeNodePropertySteps(
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes
-    ) {
+    private void executeNodePropertySteps(GraphFilter graphFilter) {
         for (NodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
-            step.execute(caller, graphName, nodeLabels, relationshipTypes);
+            step.execute(caller, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
             progressTracker.endSubTask();
         }
     }
