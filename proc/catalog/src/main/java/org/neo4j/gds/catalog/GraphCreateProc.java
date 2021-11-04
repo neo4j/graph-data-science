@@ -50,6 +50,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphCreateProc extends CatalogProc {
@@ -72,7 +73,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
         validateGraphName(username(), graphName);
 
         // input
@@ -102,7 +103,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromStoreConfig.of(
@@ -124,7 +125,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
         validateGraphName(username(), graphName);
 
         // input
@@ -154,7 +155,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
 
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
@@ -178,7 +179,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
         validateGraphName(username(), graphName);
 
         var procedureConfig = CypherMapWrapper.create(configuration);

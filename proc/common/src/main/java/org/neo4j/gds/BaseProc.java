@@ -98,9 +98,6 @@ public abstract class BaseProc {
     @Context
     public Username username = Username.EMPTY_USERNAME;
 
-    @Context
-    public LicenseState licenseState;
-
     protected BaseProc() {
         if (allocationTracker == null) {
             allocationTracker = AllocationTracker.empty();
@@ -208,12 +205,6 @@ public abstract class BaseProc {
                 "A graph with name '%s' already exists.",
                 graphName
             ));
-        }
-    }
-
-    protected final void checkLicense() {
-        if (!licenseState.isValid()) {
-            throw new RuntimeException(licenseState.errorMessage().get());
         }
     }
 

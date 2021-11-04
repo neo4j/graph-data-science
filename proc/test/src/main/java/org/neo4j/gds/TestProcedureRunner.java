@@ -56,7 +56,6 @@ public final class TestProcedureRunner {
             EmptyTaskRegistryFactory.INSTANCE,
             AllocationTracker.empty(),
             tx,
-            OpenGdsLicenseState.INSTANCE,
             Username.EMPTY_USERNAME,
             func
         ));
@@ -75,7 +74,6 @@ public final class TestProcedureRunner {
             EmptyTaskRegistryFactory.INSTANCE,
             AllocationTracker.empty(),
             tx,
-            OpenGdsLicenseState.INSTANCE,
             Username.EMPTY_USERNAME
         );
     }
