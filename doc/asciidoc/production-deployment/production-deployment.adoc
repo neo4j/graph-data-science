@@ -10,9 +10,11 @@ This chapter is divided into the following sections:
 
 * <<transaction-handling>>
 * <<fabric>>
+* <<cluster>>
 * <<feature-toggles>>
 
 
 include::transaction-handling.adoc[leveloffset=+1]
 include::fabric.adoc[leveloffset=+1]
+include::gds-on-cluster.adoc[leveloffset=+1]
 include::feature-toggles.adoc[leveloffset=+1]
