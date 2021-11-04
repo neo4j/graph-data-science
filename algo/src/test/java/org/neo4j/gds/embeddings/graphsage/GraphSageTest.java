@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,9 +32,10 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -61,6 +61,7 @@ import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
+@ModelCatalogExtension
 class GraphSageTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "orphan")
@@ -73,12 +74,13 @@ class GraphSageTest {
     @Inject
     private Graph orphanGraph;
 
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
+
     private static final int NODE_COUNT = 20;
     private static final int FEATURES_COUNT = 1;
     private static final int EMBEDDING_DIMENSION = 64;
     private static final String MODEL_NAME = "graphSageModel";
-
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     private Graph graph;
     private HugeObjectArray<double[]> features;
@@ -253,10 +255,5 @@ class GraphSageTest {
                 "GraphSage 100%",
                 "GraphSage :: Finished"
             );
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 }

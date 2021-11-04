@@ -19,18 +19,19 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcsTest.DEFAULT_SPLIT_CONFIG;
 
+@ModelCatalogExtension
 class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(Map.of(
@@ -43,19 +44,14 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
         "useBiasFeature", true
     ));
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(LinkPredictionPipelineConfigureParamsProc.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('myPipeline')");
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

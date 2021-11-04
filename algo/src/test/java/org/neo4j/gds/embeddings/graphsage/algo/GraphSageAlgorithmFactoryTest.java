@@ -23,7 +23,6 @@ import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,9 +30,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -71,19 +72,23 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
+@ModelCatalogExtension
 class GraphSageAlgorithmFactoryTest {
 
-    private static final ModelCatalog MODEL_CATALOG = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @ParameterizedTest
     @MethodSource("parameters")
     void memoryEstimation(
-        GraphSageBaseConfig gsConfig,
+        Function<ModelCatalog, GraphSageBaseConfig> gsConfigProvider,
         GraphSageTrainConfig trainConfig,
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
+        var gsConfig = gsConfigProvider.apply(modelCatalog);
+
         // features: HugeOA[nodeCount * double[featureSize]]
         var initialFeaturesArray = sizeOfDoubleArray(trainConfig.estimationFeatureDimension());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
@@ -283,7 +288,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        MODEL_CATALOG.set(model);
+        modelCatalog.set(model);
 
         var gsConfig = ImmutableGraphSageStreamConfig
             .builder()
@@ -339,7 +344,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        MODEL_CATALOG.set(model);
+        modelCatalog.set(model);
 
         var gsConfig = ImmutableGraphSageMutateConfig
             .builder()
@@ -519,18 +524,20 @@ class GraphSageAlgorithmFactoryTest {
                                             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
                                         );
 
-                                        MODEL_CATALOG.set(model);
+                                        Function<ModelCatalog, GraphSageBaseConfig> streamConfigProvider = (modelCatalog) -> {
+                                            modelCatalog.set(model);
 
-                                        var streamConfig = ImmutableGraphSageStreamConfig
-                                            .builder()
-                                            .concurrency(concurrency)
-                                            .modelName(modelName)
-                                            .username(userName)
-                                            .batchSize(batchSize)
-                                            .build();
+                                            return ImmutableGraphSageStreamConfig
+                                                .builder()
+                                                .concurrency(concurrency)
+                                                .modelName(modelName)
+                                                .username(userName)
+                                                .batchSize(batchSize)
+                                                .build();
+                                        };
 
                                         return arguments(
-                                            streamConfig,
+                                            streamConfigProvider,
                                             trainConfig,
                                             nodeCount,
                                             hugeObjectArraySize
@@ -565,7 +572,7 @@ class GraphSageAlgorithmFactoryTest {
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         );
 
-        MODEL_CATALOG.set(model);
+        modelCatalog.set(model);
 
         var config = ImmutableGraphSageMutateConfig
             .builder()
@@ -585,10 +592,5 @@ class GraphSageAlgorithmFactoryTest {
             .isPresent()
             .map(MemoryTree::memoryUsage)
             .contains(MemoryRange.of(5320040L));
-    }
-
-    @AfterEach
-    void tearDown() {
-        MODEL_CATALOG.removeAllLoadedModels();
     }
 }

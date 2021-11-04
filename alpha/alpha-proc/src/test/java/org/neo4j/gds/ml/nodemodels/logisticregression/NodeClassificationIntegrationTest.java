@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.BaseProcTest;
@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.assertj.ConditionFactory.hasSize;
 
+@ModelCatalogExtension
 class NodeClassificationIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH =
@@ -67,11 +68,11 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
         ", (:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 2})" +
         ", (:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 2})";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        this.modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class,
@@ -82,11 +83,6 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
         runQuery(GRAPH);
 
         runQuery("CALL gds.graph.create('g', ['N', 'Hidden'], '*', {nodeProperties: ['a', 'b', 'class']})");
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

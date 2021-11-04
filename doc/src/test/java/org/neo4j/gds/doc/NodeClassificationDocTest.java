@@ -21,8 +21,10 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
@@ -31,7 +33,11 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 
 import java.util.List;
 
+@ModelCatalogExtension
 class NodeClassificationDocTest extends DocTestBase {
+
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @Override
     List<Class<?>> functions() {
@@ -54,7 +60,7 @@ class NodeClassificationDocTest extends DocTestBase {
     Runnable cleanup() {
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
-            OpenModelCatalog.INSTANCE.removeAllLoadedModels();
+            modelCatalog.removeAllLoadedModels();
         };
     }
 

@@ -19,33 +19,29 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.gds.compat.MapUtil.map;
 
+@ModelCatalogExtension
 class ModelExistsProcTest extends ModelProcBaseTest {
 
     private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(ModelExistsProc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

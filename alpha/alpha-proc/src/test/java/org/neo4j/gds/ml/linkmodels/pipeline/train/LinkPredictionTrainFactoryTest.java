@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -32,10 +31,11 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -57,6 +57,7 @@ import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 
+@ModelCatalogExtension
 public class LinkPredictionTrainFactoryTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
     public static final String PIPELINE_NAME = "p";
@@ -106,11 +107,11 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
         "(m)-[:IGNORED]->(b), " +
         "(m)-[:IGNORED]->(c) ";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             GraphCreateProc.class,
             SplitRelationshipsMutateProc.class
@@ -126,11 +127,6 @@ public class LinkPredictionTrainFactoryTest extends BaseProcTest {
         runQuery(createQuery);
 
         graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore().getUnion();
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test

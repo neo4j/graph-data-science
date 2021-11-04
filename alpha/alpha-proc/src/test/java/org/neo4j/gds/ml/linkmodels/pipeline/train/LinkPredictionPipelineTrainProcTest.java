@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -30,10 +29,11 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 
+@ModelCatalogExtension
 class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
     // Five cliques of size 2, 3, or 4
@@ -96,11 +97,11 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(m)-[:IGNORED { weight: 1.0 } ]->(b), " +
         "(m)-[:IGNORED { weight: 1.0 } ]->(c) ";
 
+    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
-        modelCatalog = OpenModelCatalog.INSTANCE;
         registerProcedures(
             LinkPredictionPipelineTrainProc.class,
             LinkPredictionPipelineCreateProc.class,
@@ -131,11 +132,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         runQuery(createQuery);
         runQuery(createQueryWeighted);
-    }
-
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
