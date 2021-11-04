@@ -43,7 +43,6 @@ public final class ProcedureRunner {
             caller.taskRegistryFactory,
             caller.allocationTracker,
             caller.procedureTransaction,
-            caller.licenseState,
             caller.username
         );
     }
@@ -56,7 +55,6 @@ public final class ProcedureRunner {
         TaskRegistryFactory taskRegistryFactory,
         AllocationTracker allocationTracker,
         Transaction tx,
-        LicenseState licenseState,
         Username username
     ) {
         P proc;
@@ -73,7 +71,6 @@ public final class ProcedureRunner {
         proc.log = log;
         proc.allocationTracker = allocationTracker;
         proc.taskRegistryFactory = taskRegistryFactory;
-        proc.licenseState = licenseState;
         proc.username = username;
 
         return proc;
@@ -87,7 +84,6 @@ public final class ProcedureRunner {
         TaskRegistryFactory taskRegistryFactory,
         AllocationTracker allocationTracker,
         Transaction tx,
-        LicenseState licenseState,
         Username username,
         Consumer<P> func
     ) {
@@ -99,7 +95,6 @@ public final class ProcedureRunner {
             taskRegistryFactory,
             allocationTracker,
             tx,
-            licenseState,
             username
         );
         func.accept(proc);

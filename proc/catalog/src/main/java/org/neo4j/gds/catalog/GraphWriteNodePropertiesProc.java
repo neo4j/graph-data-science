@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodePropertiesProc extends CatalogProc {
@@ -58,7 +59,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
         validateGraphName(graphName);
 
         // input

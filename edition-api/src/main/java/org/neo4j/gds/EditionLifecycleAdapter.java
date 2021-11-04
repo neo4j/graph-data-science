@@ -72,6 +72,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
         var licensingService = licensingServiceBuilder.build(config);
 
         globalProceduresRegistry.registerComponent(LicenseState.class, (context) -> licensingService.get(), true);
+        context.dependencySatisfier().satisfyDependency(licensingService.get());
         return licensingService.get();
     }
 

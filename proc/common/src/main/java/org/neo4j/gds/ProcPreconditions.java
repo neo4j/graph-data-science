@@ -17,25 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserFunction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
+public final class ProcPreconditions {
 
-public class GraphExistsFunc extends CatalogProc {
+    private ProcPreconditions() {}
 
-    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
-
-    @UserFunction("gds.graph.exists")
-    @Description(DESCRIPTION)
-    public boolean existsFunction(@Name(value = "graphName") String graphName) {
-        checkPreconditions(api);
-        validateGraphName(graphName);
-        return GraphStoreCatalog.exists(username(), databaseId(), graphName);
+    public static void checkPreconditions(GraphDatabaseAPI api) {
+        var licenseState = api.getDependencyResolver().resolveDependency(LicenseState.class);
+        if (!licenseState.isValid()) {
+            throw new RuntimeException(licenseState.errorMessage().get());
+        }
     }
 
 }

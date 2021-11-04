@@ -27,7 +27,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.OpenGdsLicenseState;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
@@ -368,7 +367,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         };
         proc.api = db;
         proc.log = NullLog.getInstance();
-        proc.licenseState = OpenGdsLicenseState.INSTANCE;
         proc.modelCatalog = modelCatalog;
 
         assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))

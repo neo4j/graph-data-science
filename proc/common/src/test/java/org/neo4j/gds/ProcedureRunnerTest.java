@@ -84,7 +84,6 @@ class ProcedureRunnerTest extends BaseTest {
                 new GlobalTaskStore()
             );
             var allocationTracker = AllocationTracker.empty();
-            var licenseState = OpenGdsLicenseState.INSTANCE;
             ProcedureRunner.applyOnProcedure(
                 db,
                 TestProc.class,
@@ -93,7 +92,6 @@ class ProcedureRunnerTest extends BaseTest {
                 taskRegistryFactory,
                 allocationTracker,
                 tx,
-                licenseState,
                 username,
                 proc -> {
                     assertThat(proc.procedureTransaction).isEqualTo(tx);
@@ -102,7 +100,6 @@ class ProcedureRunnerTest extends BaseTest {
                     assertThat(proc.taskRegistryFactory).isEqualTo(taskRegistryFactory);
                     assertThat(proc.username).isEqualTo(username);
                     assertThat(proc.allocationTracker).isEqualTo(allocationTracker);
-                    assertThat(proc.licenseState).isEqualTo(licenseState);
                 }
             );
         }

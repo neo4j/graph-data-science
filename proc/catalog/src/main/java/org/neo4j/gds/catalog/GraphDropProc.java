@@ -32,6 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -47,7 +48,7 @@ public class GraphDropProc extends CatalogProc {
         @Name(value = "dbName", defaultValue = "") String dbName,
         @Name(value = "username", defaultValue = "") String username
     ) {
-        checkLicense();
+        checkPreconditions(api);
 
         final List<String> graphNames;
         if (graphName instanceof Collection<?>) {

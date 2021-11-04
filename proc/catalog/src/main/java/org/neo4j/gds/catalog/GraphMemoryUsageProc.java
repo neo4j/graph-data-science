@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMemoryUsageProc extends CatalogProc {
@@ -41,7 +42,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        checkLicense();
+        checkPreconditions(api);
 
         graphName = Objects.requireNonNull(StringUtils.trimToNull(graphName), "graphName must not be empty");
         var graphStoreWithConfig = graphStoreFromCatalog(graphName);

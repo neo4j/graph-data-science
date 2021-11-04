@@ -53,6 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
@@ -191,7 +192,7 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        checkLicense();
+        checkPreconditions(api);
         return compute(graphNameOrConfig, configuration, true, true);
     }
 
