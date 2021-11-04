@@ -99,8 +99,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
-            .addParameter("returnPath", true)
-            .yields();
+            .yields("nodeIds", "path");
 
         List<List<Long>> nodeIds = new ArrayList<>();
         List<Path> paths = new ArrayList<>();

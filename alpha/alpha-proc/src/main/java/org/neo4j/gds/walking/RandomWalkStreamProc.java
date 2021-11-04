@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig> {
@@ -62,8 +63,12 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
             return Stream.empty();
         }
 
-        Function<List<Long>, Path> pathCreator = computationResult.config().returnPath()
-            ? (List<Long> nodes) ->  PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
+        var returnPath = callContext
+            .outputFields()
+            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+
+        Function<List<Long>, Path> pathCreator = returnPath
+            ? (List<Long> nodes) -> PathFactory.create(procedureTransaction, nodes, RelationshipType.withName("NEXT"))
             : (List<Long> nodes) -> null;
 
         return computationResult.result()

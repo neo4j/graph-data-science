@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -31,11 +30,6 @@ import java.util.Optional;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface RandomWalkStreamConfig extends RandomWalkBaseConfig {
-
-    @Value.Default
-    default boolean returnPath() {
-        return false;
-    }
 
     static RandomWalkStreamConfig of(
         Optional<String> graphName,

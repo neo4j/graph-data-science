@@ -39,7 +39,7 @@ To obtain a random walk where the transition probability is independent of the p
 .Run RandomWalk in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.stream(
+CALL gds.alpha.randomWalk.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -60,7 +60,7 @@ include::specific-configuration.adoc[]
 |===
 | Name      | Type            | Description
 | nodeIds   | List of Integer | The nodes of the random walk.
-| path      | Path            | A `Path` object of the random walk, null if `returnPath` is set to false.
+| path      | Path            | A `Path` object of the random walk.
 |===
 ======
 ====
@@ -116,7 +116,6 @@ CALL gds.alpha.randomWalk.stream(
   {
     walkLength: 3,
     walksPerNode: 1,
-    returnPath: true,
     randomSeed: 42,
     concurrency: 1
   }
@@ -154,7 +153,6 @@ CALL gds.alpha.randomWalk.stream(
     sourceNodes: sourceNodes,
     walkLength: 3,
     walksPerNode: 1,
-    returnPath: true,
     randomSeed: 42,
     concurrency: 1
   }
