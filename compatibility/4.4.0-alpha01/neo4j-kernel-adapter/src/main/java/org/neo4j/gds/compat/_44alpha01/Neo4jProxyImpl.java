@@ -228,51 +228,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         int[] labelIds,
         int batchSize
     ) {
-        var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
-            transaction,
-            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
-        );
-
-        if (indexDescriptor == IndexDescriptor.NO_INDEX) {
-            throw new IllegalStateException("There is no index that can back a node label scan.");
-        }
-
         var read = transaction.dataRead();
-
-        final TokenReadSession session;
-        try {
-            session = read.tokenReadSession(indexDescriptor);
-        } catch (KernelException e) {
-            // should not happen, we check for the index existence and applicability
-            // before reading it
-            throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
-        }
-
-        long nodeCount = Arrays.stream(labelIds).mapToLong(read::countsForNode).sum();
-        int labelCount = labelIds.length;
-        int maxPartitionSize = Math.floorDiv(batchSize, labelCount);
-        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, maxPartitionSize);
-
         return Arrays
             .stream(labelIds)
-            .mapToObj(labelId -> {
-                PartitionedScan<NodeLabelIndexCursor> partitionedScan;
-
-                try {
-                    partitionedScan = read.nodeLabelScan(
-                        session,
-                        numberOfPartitions,
-                        transaction.cursorContext(),
-                        new TokenPredicate(labelId)
-                    );
-                } catch (KernelException e) {
-                    // should not happen, we check for the index existence and applicability
-                    // before reading it
-                    throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
-                }
-
-                return new PartitionedStoreScan(partitionedScan);
-            })
+            .mapToObj(read::nodeLabelScan)
+            .map(scan -> scanToStoreScan(scan, batchSize))
             .collect(Collectors.toList());
     }
 
