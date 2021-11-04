@@ -25,8 +25,6 @@ import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.GdsEditionUtils.setToEnterpriseAndRun;
-
 public interface TestMethodRunner {
     <E extends Exception> void run(CheckedRunnable<E> code) throws E;
 
@@ -42,29 +40,25 @@ public interface TestMethodRunner {
 
     @TestOnly
     static <E extends Exception> void runCompressedUnordered(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
-                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code)));
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code));
     }
 
     @TestOnly
     static <E extends Exception> void runCompressedOrdered(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
-                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code));
     }
 
     @TestOnly
     static <E extends Exception> void runUncompressedUnordered(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
-                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code)));
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code));
     }
 
     @TestOnly
     static <E extends Exception> void runUncompressedOrdered(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() ->
-            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
-                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code));
     }
 }
