@@ -120,9 +120,9 @@ public final class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         new Thread(() -> {
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, terminationFlag, Pools.DEFAULT);
             try {
-                walks.put(TOMB);
                 progressTracker.endSubTask("create walks");
                 progressTracker.endSubTask("RandomWalk");
+                walks.put(TOMB);
             } catch (InterruptedException e) {
             }
         }).start();
