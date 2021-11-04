@@ -40,6 +40,7 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
     @Configuration.Parameter
     String targetProperty();
 
+    @Configuration.DoubleRange(min = 0.0)
     double penalty();
 
     @Configuration.CollectKeys

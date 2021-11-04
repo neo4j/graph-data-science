@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.TrainingConfig;
@@ -31,6 +32,8 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 public interface LinkLogisticRegressionTrainConfig extends TrainingConfig {
 
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0)
     default double penalty() {
         return 0.0;
     }

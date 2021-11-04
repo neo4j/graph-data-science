@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -37,6 +38,8 @@ public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConf
     @Override
     List<String> featureProperties();
 
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0)
     default double penalty() {
         return 0.0;
     }
