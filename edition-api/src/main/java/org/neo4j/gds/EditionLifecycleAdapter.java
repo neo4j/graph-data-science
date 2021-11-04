@@ -24,7 +24,7 @@ import org.neo4j.gds.concurrency.ConcurrencyValidatorBuilder;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.concurrency.PoolSizesProvider;
 import org.neo4j.gds.concurrency.PoolSizesService;
-import org.neo4j.gds.transaction.SecurityContextServiceFactory;
+import org.neo4j.gds.transaction.SecurityContextWrapperFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -73,8 +73,8 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
     private void registerSecurityContextService(LicenseState licenseState) {
         var securityContextServiceFactory = loadServiceByPriority(
-            SecurityContextServiceFactory.class,
-            SecurityContextServiceFactory::priority
+            SecurityContextWrapperFactory.class,
+            SecurityContextWrapperFactory::priority
         );
 
         var securityContextService = securityContextServiceFactory.create(licenseState);

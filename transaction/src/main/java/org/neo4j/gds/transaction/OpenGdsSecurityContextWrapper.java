@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.annotations.service.Service;
-import org.neo4j.gds.LicenseState;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-@Service
-public interface SecurityContextServiceFactory {
-    SecurityContextService create(LicenseState licenseState);
-
-    int priority();
+public class OpenGdsSecurityContextWrapper implements SecurityContextWrapper {
+    @Override
+    public SecurityContext wrap(SecurityContext securityContext) {
+        return SecurityContext.AUTH_DISABLED;
+    }
 }

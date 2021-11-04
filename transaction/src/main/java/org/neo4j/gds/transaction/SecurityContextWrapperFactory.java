@@ -19,19 +19,12 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.annotations.service.Service;
 import org.neo4j.gds.LicenseState;
 
-@ServiceProvider
-public class OpenGdsSecurityContextServiceFactory implements SecurityContextServiceFactory {
+@Service
+public interface SecurityContextWrapperFactory {
+    SecurityContextWrapper create(LicenseState licenseState);
 
-    @Override
-    public SecurityContextService create(LicenseState licenseState) {
-        return new OpenGdsSecurityContext();
-    }
-
-    @Override
-    public int priority() {
-        return 0;
-    }
+    int priority();
 }

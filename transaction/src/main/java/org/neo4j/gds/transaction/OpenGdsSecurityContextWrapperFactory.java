@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.LicenseState;
 
-public interface SecurityContextService {
+@ServiceProvider
+public class OpenGdsSecurityContextWrapperFactory implements SecurityContextWrapperFactory {
 
-    // this should be the same as the predefined role from enterprise-security
-    // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-    String PREDEFINED_ADMIN_ROLE = "admin";
+    @Override
+    public SecurityContextWrapper create(LicenseState licenseState) {
+        return new OpenGdsSecurityContextWrapper();
+    }
 
-    SecurityContext wrap(SecurityContext securityContext);
-
-    default boolean isAdmin(SecurityContext securityContext) {
-        return wrap(securityContext)
-            .roles()
-            .contains(PREDEFINED_ADMIN_ROLE);
+    @Override
+    public int priority() {
+        return 0;
     }
 }

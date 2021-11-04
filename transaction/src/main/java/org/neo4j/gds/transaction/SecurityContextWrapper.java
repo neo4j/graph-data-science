@@ -21,9 +21,17 @@ package org.neo4j.gds.transaction;
 
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
-public class OpenGdsSecurityContext implements SecurityContextService {
-    @Override
-    public SecurityContext wrap(SecurityContext securityContext) {
-        return SecurityContext.AUTH_DISABLED;
+public interface SecurityContextWrapper {
+
+    // this should be the same as the predefined role from enterprise-security
+    // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+    String PREDEFINED_ADMIN_ROLE = "admin";
+
+    SecurityContext wrap(SecurityContext securityContext);
+
+    default boolean isAdmin(SecurityContext securityContext) {
+        return wrap(securityContext)
+            .roles()
+            .contains(PREDEFINED_ADMIN_ROLE);
     }
 }

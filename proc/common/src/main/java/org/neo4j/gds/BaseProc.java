@@ -48,7 +48,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
-import org.neo4j.gds.transaction.SecurityContextService;
+import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -139,7 +139,7 @@ public abstract class BaseProc {
             return false;
         }
         return GraphDatabaseApiProxy
-            .resolveDependency(api, SecurityContextService.class)
+            .resolveDependency(api, SecurityContextWrapper.class)
             .isAdmin(transaction.securityContext());
     }
 
