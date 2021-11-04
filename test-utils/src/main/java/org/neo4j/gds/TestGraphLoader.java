@@ -26,7 +26,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -35,10 +34,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.GdsEditionUtils.setToEnterpriseAndRun;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.DEFAULT;
@@ -116,14 +113,15 @@ public final class TestGraphLoader {
     @TestOnly
     public GraphStore graphStore(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
-            if (factoryType == TestSupport.FactoryType.NATIVE_BIT_ID_MAP) {
-                var graphStore = new AtomicReference<GraphStore>();
-                setToEnterpriseAndRun(() ->
-                    GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(() ->
-                        graphStore.set(loader(factoryType).graphStore())));
-
-                return graphStore.get();
-            }
+            // TODO: Figure out how to move this functionality in Neo4j GDS world
+//            if (factoryType == TestSupport.FactoryType.NATIVE_BIT_ID_MAP) {
+//                var graphStore = new AtomicReference<GraphStore>();
+//                setToEnterpriseAndRun(() ->
+//                    GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(() ->
+//                        graphStore.set(loader(factoryType).graphStore())));
+//
+//                return graphStore.get();
+//            }
             return loader(factoryType).graphStore();
         }
     }
