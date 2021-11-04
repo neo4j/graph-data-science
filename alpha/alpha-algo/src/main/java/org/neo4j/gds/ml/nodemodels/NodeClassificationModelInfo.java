@@ -73,7 +73,7 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
 
     static NodeClassificationModelInfo defaultConfig() {
         return NodeClassificationModelInfo.of(List.of(),
-            new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of("penalty", 1))),
+            new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of())),
             Map.of()
         );
     }
