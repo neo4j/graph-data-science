@@ -23,9 +23,7 @@ public final class ProcedurePreconditionsProvider {
     private static ProcedurePreconditions instance = new OpenGdsProcedurePreconditions();
 
     public static void procedurePreconditions(ProcedurePreconditions procedurePreconditions) {
-        synchronized (ProcedurePreconditionsProvider.class) {
-            instance = procedurePreconditions;
-        }
+        instance = procedurePreconditions;
     }
 
     public static ProcedurePreconditions procedurePreconditions() {

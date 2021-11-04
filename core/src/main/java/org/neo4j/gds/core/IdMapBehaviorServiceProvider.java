@@ -24,9 +24,7 @@ public final class IdMapBehaviorServiceProvider {
     private static IdMapBehavior instance = new OpenGdsIdMapBehavior();
 
     public static void idMapBehavior(IdMapBehavior idMapBehavior) {
-        synchronized (IdMapBehaviorServiceProvider.class) {
-            instance = idMapBehavior;
-        }
+        instance = idMapBehavior;
     }
 
     public static IdMapBehavior idMapBehavior() {
