@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
@@ -211,8 +212,17 @@ public class LinkPredictionTrain
     }
 
     private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray allNodeIds) {
-        var globalTargets = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
-        globalTargets.setAll(i -> 0L);
+        var globalTargets = new ReadOnlyHugeLongArray() {
+            @Override
+            public long get(long index) {
+                return 0L;
+            }
+
+            @Override
+            public long size() {
+                return trainGraph.nodeCount();
+            }
+        };
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), allNodeIds, globalTargets, config.randomSeed());
         return splitter.splits();
     }
