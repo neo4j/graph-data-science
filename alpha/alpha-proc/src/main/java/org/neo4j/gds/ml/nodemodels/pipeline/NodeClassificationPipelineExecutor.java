@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
@@ -87,7 +86,7 @@ public class NodeClassificationPipelineExecutor extends PipelineExecutor<
             .classes(innerInfo.classes())
             .bestParameters(innerInfo.bestParameters())
             .metrics(innerInfo.metrics())
-            .trainingPipeline(getPipeline().copy())
+            .trainingPipeline(pipeline.copy())
             .build();
 
         return Model.of(
@@ -114,8 +113,7 @@ public class NodeClassificationPipelineExecutor extends PipelineExecutor<
     public NodeClassificationTrainConfig innerConfig() {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
-        var pipeline = getPipeline();
-        return org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig.builder()
+        return NodeClassificationTrainConfig.builder()
             .modelName(config.modelName())
             .concurrency(config.concurrency())
             .metrics(config.metrics())
@@ -125,17 +123,5 @@ public class NodeClassificationPipelineExecutor extends PipelineExecutor<
             .holdoutFraction(pipeline.splitConfig().holdoutFraction())
             .validationFolds(pipeline.splitConfig().validationFolds())
             .build();
-    }
-
-    private NodeClassificationPipeline getPipeline() {
-        String pipeline = config.pipeline();
-        var model = OpenModelCatalog.INSTANCE.getUntyped(config.username(), pipeline);
-
-        //TODO: are asserts necessary?
-        assert model != null;
-        //TODO: here we had before some model type validation. figure out where that validation should be
-        assert model.customInfo() instanceof NodeClassificationPipeline;
-
-        return (NodeClassificationPipeline) model.customInfo();
     }
 }
