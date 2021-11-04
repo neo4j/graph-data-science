@@ -17,35 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+public interface ReadOnlyHugeLongArray {
+    long get(long index);
 
-public class ReadOnlyHugeLongArrayWrapper extends ReadOnlyHugeLongArrayAdapter {
-
-    private final HugeDoubleArray array;
-
-    ReadOnlyHugeLongArrayWrapper(HugeDoubleArray array) {
-        this.array = array;
-    }
-
-    @Override
-    public long get(long index) {
-        return (long) array.get(index);
-    }
-
-    @Override
-    public long size() {
-        return array.size();
-    }
-
-    @Override
-    public long sizeOf() {
-        return array.sizeOf();
-    }
-
-    @Override
-    public long release() {
-        return array.release();
-    }
+    long size();
 }

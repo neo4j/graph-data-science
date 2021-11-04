@@ -19,23 +19,24 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
-public class ReadOnlyHugeLongIdentityArray implements ReadOnlyHugeLongArray {
+public class ReadOnlyHugeDoubleToLongArrayWrapper implements ReadOnlyHugeLongArray {
 
-    private final long size;
+    private final HugeDoubleArray array;
 
-    ReadOnlyHugeLongIdentityArray(long size) {
-        this.size = size;
+    ReadOnlyHugeDoubleToLongArrayWrapper(HugeDoubleArray array) {
+        this.array = array;
     }
 
     @Override
     public long get(long index) {
-        return index;
+        return (long) array.get(index);
     }
 
     @Override
     public long size() {
-        return this.size;
+        return array.size();
     }
 }

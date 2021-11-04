@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.HashSet;
@@ -46,8 +47,8 @@ import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 public class StratifiedKFoldSplitter {
     private final AllocationTracker allocationTracker;
     private final int k;
-    private final HugeLongArray targets;
-    private final HugeLongArray ids;
+    private final ReadOnlyHugeLongArray ids;
+    private final ReadOnlyHugeLongArray targets;
     private final RandomDataGenerator random;
 
     public static MemoryEstimation memoryEstimation(int k, double trainFraction) {
@@ -77,7 +78,7 @@ public class StratifiedKFoldSplitter {
         );
     }
 
-    public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets, Optional<Long> randomSeed) {
+    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, ReadOnlyHugeLongArray targets, Optional<Long> randomSeed) {
         this.k = k;
         this.ids = ids;
         this.targets = targets;

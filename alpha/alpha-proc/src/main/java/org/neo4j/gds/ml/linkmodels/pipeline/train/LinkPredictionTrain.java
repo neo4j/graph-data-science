@@ -26,7 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -178,7 +178,7 @@ public class LinkPredictionTrain
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
         FeaturesAndTargets trainData,
-        HugeLongArray trainRelationshipIds
+        ReadOnlyHugeLongArray trainRelationshipIds
     ) {
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
@@ -263,11 +263,11 @@ public class LinkPredictionTrain
         ));
     }
 
-    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
+    private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            new ReadOnlyHugeLongArrayWrapper(actualTargets),
+            new ReadOnlyHugeDoubleToLongArrayWrapper(actualTargets),
             trainConfig.randomSeed()
         );
         return splitter.splits();
@@ -299,7 +299,7 @@ public class LinkPredictionTrain
 
 
     private LinkLogisticRegressionData trainModel(
-        HugeLongArray trainSet,
+        ReadOnlyHugeLongArray trainSet,
         FeaturesAndTargets trainData,
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
@@ -320,7 +320,7 @@ public class LinkPredictionTrain
     private Map<LinkMetric, Double> computeTrainMetric(
         FeaturesAndTargets trainData,
         LinkLogisticRegressionData modelData,
-        HugeLongArray evaluationSet,
+        ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
         return computeMetric(trainData, modelData, new HugeBatchQueue(evaluationSet), progressTracker);
