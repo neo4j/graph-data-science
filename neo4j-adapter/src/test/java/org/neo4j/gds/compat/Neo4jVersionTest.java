@@ -22,8 +22,10 @@ package org.neo4j.gds.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.kernel.internal.Version;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -42,16 +44,33 @@ class Neo4jVersionTest {
         "4.2.1-foo, V_4_2",
         "4.3.0-drop04, V_4_3",
         "4.3.0, V_4_3",
-        "4.3.0-drop04.3, V_4_3_drop43",
-        "4.3.0-drop04.4, V_4_3_drop44",
-        "4.3.0-drop04.4, V_4_3_drop44",
-        "4.3.0-drop05.0, V_4_3_drop50",
+        "4.4.0, V_4_4_alpha01",
         "4.4.0-alpha01, V_4_4_alpha01",
-        "5.0.0-dev, V_Dev",
-        "dev, V_Dev",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "4.3.0-drop04.3",
+        "4.3.0-drop04.4",
+        "4.3.0-drop04.4",
+        "4.3.0-drop05.0"
+    })
+    void testDropVersions(String input) {
+        assertEquals("V_4_3", Neo4jVersion.parse(input).name());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "5.0.0-dev",
+        "dev"
+    })
+    void testUnsupportedVersions(String input) {
+        assertThatThrownBy(() -> Neo4jVersion.parse(input).name())
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Cannot run on Neo4j Version " + input);
     }
 
     @Test

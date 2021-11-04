@@ -29,11 +29,7 @@ public enum Neo4jVersion {
     V_4_1,
     V_4_2,
     V_4_3,
-    V_4_3_drop43,
-    V_4_3_drop44,
-    V_4_3_drop50,
-    V_4_4_alpha01,
-    V_Dev;
+    V_4_4_alpha01;
 
     @Override
     public String toString() {
@@ -44,16 +40,8 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
-            case V_4_3_drop43:
-                return "4.3.0-drop04.3";
-            case V_4_3_drop44:
-                return "4.3.0-drop04.4";
-            case V_4_3_drop50:
-                return "4.3.0-drop05.0";
             case V_4_4_alpha01:
                 return "4.4.0-alpha01";
-            case V_Dev:
-                return "dev";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -88,18 +76,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        switch (version) {
-            case "4.3.0-drop04.3":
-                return Neo4jVersion.V_4_3_drop43;
-            case "4.3.0-drop04.4":
-                return Neo4jVersion.V_4_3_drop44;
-            case "4.3.0-drop05.0":
-                return Neo4jVersion.V_4_3_drop50;
-            case "4.4.0-alpha01":
-                return Neo4jVersion.V_4_4_alpha01;
-            default:
-                break;
-        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -111,9 +87,8 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_4_2;
             case "4.3":
                 return Neo4jVersion.V_4_3;
-            case "5.0":
-            case "dev":
-                return Neo4jVersion.V_Dev;
+            case "4.4":
+                return Neo4jVersion.V_4_4_alpha01;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }

@@ -114,13 +114,14 @@ class InMemoryNodeCursorTest extends CypherTest {
         assertThat(nodeCursor.propertiesReference()).isEqualTo(0L);
     }
 
-    @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
-    void shouldHavePropertiesDev() {
-        nodeCursor.next();
-        assertThat(nodeCursor.hasProperties()).isTrue();
-        assertThat(nodeCursor.propertiesReference()).hasFieldOrPropertyWithValue("id", 0L);
-    }
+//    FIXME: Enable for 4.4.0
+//    @Test
+//    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
+//    void shouldHavePropertiesDev() {
+//        nodeCursor.next();
+//        assertThat(nodeCursor.hasProperties()).isTrue();
+//        assertThat(nodeCursor.propertiesReference()).hasFieldOrPropertyWithValue("id", 0L);
+//    }
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
