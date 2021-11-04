@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
@@ -36,12 +37,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.lang.invoke.MethodType.methodType;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TestModelCatalogResolver implements ParameterResolver, TestInstancePostProcessor, AfterEachCallback {
 
     public enum CatalogType {
-        OPEN, CLOSED;
+        OPEN, UNLICENSED, LICENSED;
     }
 
     private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create("gds");
@@ -52,12 +54,12 @@ public class TestModelCatalogResolver implements ParameterResolver, TestInstance
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
         var store = context.getStore(NAMESPACE);
-        var modelCatalog = store.get(INJECT_CLASS, INJECT_TARGET_CLASS);
-        if (modelCatalog == null) {
-            // TODO warn: test misuse?
-            return;
+        for (var catalogType : CatalogType.values()) {
+            var modelCatalog = store.get(catalogType, INJECT_TARGET_CLASS);
+            if (modelCatalog != null) {
+                modelCatalog.removeAllLoadedModels();
+            }
         }
-        modelCatalog.removeAllLoadedModels();
     }
 
     @Override
@@ -126,13 +128,39 @@ public class TestModelCatalogResolver implements ParameterResolver, TestInstance
     ) {
         var store = extensionContext.getStore(NAMESPACE);
         return store.getOrComputeIfAbsent(
-            INJECT_CLASS,
+            annotation.catalogType(),
             (annotationClass) -> modelCatalog(annotation.catalogType()),
             INJECT_TARGET_CLASS
         );
     }
 
     private static ModelCatalog modelCatalog(CatalogType catalogType) {
-        return OpenModelCatalog.INSTANCE;
+        if (catalogType == CatalogType.OPEN) {
+            return OpenModelCatalog.INSTANCE;
+        }
+        try {
+            return gdsModelCatalog(catalogType == CatalogType.LICENSED);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ModelCatalog gdsModelCatalog(boolean licensed) throws Throwable {
+        var lookup = MethodHandles.lookup();
+
+        var gdsLicenseStateClass = Class.forName("com.neo4j.gds.licensing.GdsLicenseState");
+        var getter = licensed ? "licensed" : "unlicensed";
+        var licenseHandle = lookup.findStatic(gdsLicenseStateClass, getter, methodType(gdsLicenseStateClass));
+        var license = licenseHandle.invoke();
+
+        var gdsModelCatalogProviderClass = Class.forName("com.neo4j.gds.core.model.GdsModelCatalogProvider");
+        var licenseStateClass = Class.forName("org.neo4j.gds.LicenseState");
+        var provider = lookup.findConstructor(gdsModelCatalogProviderClass, methodType(void.class));
+        var providerMethod = lookup.findVirtual(gdsModelCatalogProviderClass, "get", methodType(ModelCatalog.class, licenseStateClass));
+
+        var providerInstance = provider.invoke();
+        var instance = providerMethod.invoke(providerInstance, license);
+
+        return (ModelCatalog) instance;
     }
 }
