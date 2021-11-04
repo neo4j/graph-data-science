@@ -165,11 +165,11 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         );
 
         var expectedLinks = List.of(
-            PredictedLink.of(0, 4, 0.9818363089715674),
-            PredictedLink.of(1, 0, 0.8765329524347759),
-            PredictedLink.of(2, 0, 0.011096137997457569),
-            PredictedLink.of(3, 0, 0.11920292202211766),
-            PredictedLink.of(4, 0, 0.9818363089715674)
+            PredictedLink.of(0, 4, 0.49750002083312506),
+            PredictedLink.of(1, 0, 0.11506673204554983),
+            PredictedLink.of(2, 0, 2.0547103309367397E-4),
+            PredictedLink.of(3, 0, 0.0024726231566347774),
+            PredictedLink.of(4, 0, 0.49750002083312506)
         );
 
         for (int i = 0; i < 2; i++) {
@@ -192,7 +192,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
             var predictionResult = linkPrediction.compute();
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(4);
+            assertThat(predictedLinks).hasSize(5);
 
             assertThat(predictedLinks).containsAll(expectedLinks);
         }

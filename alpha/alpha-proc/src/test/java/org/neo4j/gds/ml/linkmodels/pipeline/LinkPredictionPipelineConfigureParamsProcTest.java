@@ -70,8 +70,7 @@ class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
                     "patience", 1,
                     "batchSize", 100,
                     "useBiasFeature", true,
-                    "tolerance", 0.001,
-                    "concurrency", 4
+                    "tolerance", 0.001
                 ))
             ))
         );

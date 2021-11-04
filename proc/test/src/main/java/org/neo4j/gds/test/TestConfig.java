@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -34,7 +33,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig, MutatePropertyConfig {
+public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig {
 
     @Value.Default
     default int maxIterations() {
