@@ -33,11 +33,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 
-class OpenUserCatalog {
+class OpenUserCatalog implements UserCatalog {
     private static final long ALLOWED_MODELS_COUNT = 3;
 
     private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
+    @Override
     public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String modelName,
         Class<D> dataClass,
@@ -52,44 +53,54 @@ class OpenUserCatalog {
         );
     }
 
-    Model<?, ?, ?> getUntyped(String modelName) {
+    @Override
+    public Model<?, ?, ?> getUntyped(String modelName) {
         return userModels.get(modelName);
     }
 
+    @Override
     public void set(Model<?, ?, ?> model) {
         checkStorable(model.name(), model.algoType());
         userModels.put(model.name(), model);
     }
 
-    void setUnsafe(Model<?, ?, ?> model) {
+    @Override
+    public void setUnsafe(Model<?, ?, ?> model) {
         userModels.put(model.name(), model);
     }
 
+    @Override
     public Collection<Model<?, ?, ?>> list() {
         return userModels.values();
     }
 
+    @Override
     public Model<?, ?, ?> list(String modelName) {
         return getUntyped(modelName);
     }
 
-    Stream<Model<?, ?, ?>> streamModels() {
+    @Override
+    public Stream<Model<?, ?, ?>> streamModels() {
         return userModels.values().stream();
     }
 
-    Set<String> availableModelNames() {
+    @Override
+    public Set<String> availableModelNames() {
         return userModels.keySet();
     }
 
+    @Override
     public boolean exists(String modelName) {
         return userModels.containsKey(modelName);
     }
 
+    @Override
     public Optional<String> type(String modelName) {
         return Optional.ofNullable(userModels.get(modelName))
             .map(Model::algoType);
     }
 
+    @Override
     public Model<?, ?, ?> drop(String modelName, boolean failOnMissing) {
         var storedModel = userModels.remove(modelName);
 
@@ -104,11 +115,13 @@ class OpenUserCatalog {
         }
     }
 
+    @Override
     public void removeAllLoadedModels() {
         userModels.clear();
     }
 
-    void checkStorable(String modelName, String modelType) {
+    @Override
+    public void checkStorable(String modelName, String modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
     }
