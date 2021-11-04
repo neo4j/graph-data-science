@@ -180,7 +180,7 @@ class OpenUserCatalog implements UserCatalog {
 
     private void verifyModelsLimit(String modelType) {
         if (!canStoreModel(modelType)) {
-            throw new IllegalArgumentException(
+            throw new IllegalStateException(
                 formatWithLocale(
                     "Storing more than `%d` models in the catalog is not available in openGDS. " +
                     "Please consider licensing the Graph Data Science library. " +

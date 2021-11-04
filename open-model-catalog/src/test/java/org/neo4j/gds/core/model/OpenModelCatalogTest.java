@@ -19,12 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -32,20 +27,14 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.junit.annotation.Edition;
-import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ModelCatalogExtension
-class ModelCatalogTest {
+class OpenModelCatalogTest {
 
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
@@ -73,7 +62,7 @@ class ModelCatalogTest {
     @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
-    @Disabled("Jonatan broke it")
+    @Test
     void shouldNotStoreMoreThanAllowedModels() {
         int allowedModelsCount = 3;
 
@@ -102,12 +91,14 @@ class ModelCatalogTest {
             Map::of
         );
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> modelCatalog.set(tippingModel)
-        );
-
-        assertEquals(String.format(Locale.ENGLISH, "Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", allowedModelsCount), ex.getMessage());
+        assertThatThrownBy(() -> modelCatalog.set(tippingModel))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining(String.format(
+                    Locale.ENGLISH,
+                    "Storing more than `%d` models in the catalog is not available in openGDS.",
+                    allowedModelsCount
+                )
+            );
     }
 
     @Test
@@ -138,14 +129,13 @@ class ModelCatalogTest {
         assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, Model.Mappable.class));
     }
 
-    @Disabled("Joanatan broke it")
-    void shouldThrowWhenPublishingOnCE() {
+    @Test
+    void shouldThrowWhenPublishing() {
         modelCatalog.set(TEST_MODEL);
 
         assertThatThrownBy(() -> modelCatalog.publish(USERNAME, TEST_MODEL.name()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Publishing models is not available in openGDS.");
     }
 
     @Test
@@ -217,7 +207,7 @@ class ModelCatalogTest {
         assertEquals(
             "The model `testModel` has a training config with different types than expected. " +
             "Expected train config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`, " +
-            "invoked with model config type: `org.neo4j.gds.core.model.ModelCatalogTest$ModelCatalogTestTrainConfig`.",
+            "invoked with model config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`.",
             ex.getMessage()
         );
     }
@@ -293,156 +283,6 @@ class ModelCatalogTest {
     @Test
     void shouldReturnEmptyList() {
         assertEquals(0, modelCatalog.list(USERNAME).size());
-    }
-
-    @Nested
-    @GdsEditionTest(Edition.EE)
-    class ModelCatalogEnterpriseFeaturesTest {
-
-        @Test
-        void shouldListModels() {
-            var model1 = Model.of(
-                USERNAME,
-                "testModel1",
-                "testAlgo1",
-                GRAPH_SCHEMA,
-                "modelData1",
-                TestTrainConfig.of(),
-                Map::of
-            );
-
-            var model2 = Model.of(
-                USERNAME,
-                "testModel2",
-                "testAlgo2",
-                GRAPH_SCHEMA,
-                1337L,
-                TestTrainConfig.of(),
-                Map::of
-            );
-
-            var publicModel = Model.of(
-                "anotherUser",
-                "testModel2",
-                "testAlgo2",
-                GRAPH_SCHEMA,
-                1337L,
-                TestTrainConfig.of(),
-                Map::of
-            );
-
-            modelCatalog.set(model1);
-            modelCatalog.set(model2);
-            modelCatalog.set(publicModel);
-            var publishedModel = modelCatalog.publish("anotherUser", "testModel2");
-
-
-            var models = modelCatalog.list(USERNAME);
-            assertEquals(3, models.size());
-
-            assertThat(models).containsExactlyInAnyOrder(model1, model2, publishedModel);
-        }
-
-        @Test
-        void shouldOnlyBeDroppedByCreator() {
-            modelCatalog.set(TEST_MODEL);
-            modelCatalog.publish(USERNAME, "testModel");
-
-            assertThatThrownBy(() -> modelCatalog.drop("anotherUser", "testModel_public"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Only the creator");
-
-            modelCatalog.drop(USERNAME, "testModel_public");
-            assertEquals(0, modelCatalog.list(USERNAME).size());
-        }
-
-        @Test
-        void checksIfPublicModelExists() {
-            modelCatalog.set(TEST_MODEL);
-            modelCatalog.publish(USERNAME, "testModel");
-
-            assertThat(modelCatalog.exists(USERNAME, "testModel")).isFalse();
-            assertThat(modelCatalog.exists(USERNAME, "testModel_public")).isTrue();
-            assertThat(modelCatalog.exists(USERNAME, "bogusModel")).isFalse();
-            assertThat(modelCatalog.exists("anotherUser", "testModel")).isFalse();
-            assertThat(modelCatalog.exists("anotherUser", "testModel_public")).isTrue();
-        }
-
-        @Test
-        void shouldPublishModels() {
-            modelCatalog.set(TEST_MODEL);
-            var publishedModel = modelCatalog.publish(USERNAME, "testModel");
-            assertEquals(1, modelCatalog.list(USERNAME).size());
-
-            var publicModel = modelCatalog.get(
-                "anotherUser",
-                publishedModel.name(),
-                String.class,
-                TestTrainConfig.class,
-                Model.Mappable.class
-            );
-
-            assertThat(publicModel)
-                .usingRecursiveComparison()
-                .ignoringFields("sharedWith", "name")
-                .withStrictTypeChecking()
-                .isEqualTo(TEST_MODEL);
-
-            assertEquals(List.of(Model.ALL_USERS), publicModel.sharedWith());
-        }
-
-        @ParameterizedTest
-        @MethodSource("org.neo4j.gds.core.model.ModelCatalogTest#modelInput")
-        void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
-            existingModels.forEach(existingModel -> modelCatalog.set(testModel(existingModel)));
-
-            // test the get code path
-            assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> modelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class, Model.Mappable.class))
-                .withMessage(expectedMessage);
-
-            // test the drop code path
-            assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> modelCatalog.drop(USERNAME, searchModel))
-                .withMessage(expectedMessage);
-        }
-
-        @Test
-        void shouldThrowOnOverridingModels() {
-            modelCatalog.set(TEST_MODEL);
-
-            IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> modelCatalog.set(TEST_MODEL)
-            );
-
-            assertEquals("Model with name `testModel` already exists.", ex.getMessage());
-        }
-    }
-
-    static Stream<Arguments> modelInput() {
-        return Stream.of(
-            Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
-            Arguments.of(
-                List.of("model0"),
-                "model1",
-                "Model with name `model1` does not exist. Did you mean `model0`?"
-            ),
-            Arguments.of(
-                List.of("model0", "model1"),
-                "model2",
-                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
-            ),
-            Arguments.of(
-                List.of("model0", "model1", "foobar"),
-                "model2",
-                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
-            )
-        );
-    }
-
-    private static Model<Integer, TestTrainConfig, Model.Mappable> testModel(String name) {
-        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of(), Map::of);
     }
 
     @ValueClass
