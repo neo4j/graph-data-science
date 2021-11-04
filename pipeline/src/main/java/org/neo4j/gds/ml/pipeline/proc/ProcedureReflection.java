@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.proc;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.ProcedureAndFunctionScanner;
+import org.neo4j.gds.OpenProcedureAndFunctionScanner;
 import org.neo4j.gds.ProcedureRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -46,7 +46,7 @@ public final class ProcedureReflection {
     public static final ProcedureReflection INSTANCE = new ProcedureReflection();
 
     private ProcedureReflection() {
-        this.procedureMethods = ProcedureAndFunctionScanner
+        this.procedureMethods = OpenProcedureAndFunctionScanner
             .streamMethodsContainingAnnotation(Procedure.class)
             .collect(Collectors.toList());
     }

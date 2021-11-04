@@ -44,8 +44,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             " modelName: 'model'," +
             " threshold: 0," +
             " topN: $topN," +
-            " concurrency:" +
-            " $concurrency" +
+            " concurrency: $concurrency" +
             "})" +
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
@@ -55,6 +54,29 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
                 Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
                 Map.of("node1", 1L, "node2", 4L, "probability", .11815697780926958),
                 Map.of("node1", 0L, "node2", 1L, "probability", .11506673204554983)
+            )
+        );
+    }
+
+    @Test
+    void shouldPredictWithTopK() {
+        assertCypherResult(
+            "CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream('g', {" +
+            " modelName: 'model'," +
+            " sampleRate: 0.9," +
+            " topK: 1," +
+            " randomSeed: 42," +
+            " concurrency: 1" +
+            "})" +
+            "YIELD node1, node2, probability" +
+            " RETURN node1, node2" +
+            " ORDER BY node1",
+            List.of(
+                Map.of("node1", 0L, "node2", 4L),
+                Map.of("node1", 1L, "node2", 0L),
+                Map.of("node1", 2L, "node2", 0L),
+                Map.of("node1", 3L, "node2", 0L),
+                Map.of("node1", 4L, "node2", 0L)
             )
         );
     }

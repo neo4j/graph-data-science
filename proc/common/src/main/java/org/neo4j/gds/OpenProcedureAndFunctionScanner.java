@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class ProcedureAndFunctionScanner {
+public final class OpenProcedureAndFunctionScanner {
 
     private static final List<Reflections> reflections = Stream.of("org.neo4j.gds")
         .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
         .collect(Collectors.toList());
 
-    private ProcedureAndFunctionScanner() {}
+    private OpenProcedureAndFunctionScanner() {}
 
     public static Stream<Method> streamMethodsContainingAnnotation(Class<? extends Annotation> annotation) {
         return reflections

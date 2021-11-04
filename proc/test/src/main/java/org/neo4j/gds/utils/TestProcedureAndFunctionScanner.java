@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.utils;
 
-import org.neo4j.gds.ProcedureAndFunctionScanner;
+import org.neo4j.gds.OpenProcedureAndFunctionScanner;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserFunction;
@@ -45,7 +45,7 @@ public final class TestProcedureAndFunctionScanner {
     }
 
     private static Class<?>[] classesContainingAnnotation(Class<? extends Annotation> annotation) {
-        return ProcedureAndFunctionScanner.streamMethodsContainingAnnotation(annotation)
+        return OpenProcedureAndFunctionScanner.streamMethodsContainingAnnotation(annotation)
             .map(Method::getDeclaringClass)
             .filter(declaringClass -> !declaringClass.getPackage().getName().startsWith("org.neo4j.gds.test"))
             .distinct()
