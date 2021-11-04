@@ -24,9 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
@@ -94,7 +94,7 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RE
         var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
         var config = createMinimalConfig(mapWrapper).toMap();
 
-        applyOnProcedure(proc -> proc.compute(graphName, config));
+        applyOnProcedure(proc -> proc.compute(graphName, config, false, false));
     }
 
     @Test

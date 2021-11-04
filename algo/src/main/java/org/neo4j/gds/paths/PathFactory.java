@@ -25,6 +25,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class PathFactory {
@@ -53,6 +54,30 @@ public final class PathFactory {
             );
             var costDifference = costs[i + 1] - costs[i];
             relationship.setProperty(costPropertyName, costDifference);
+            pathBuilder = pathBuilder.push(relationship);
+        }
+
+        return pathBuilder.build();
+    }
+
+    public static Path create(
+        Transaction tx,
+        List<Long> nodeIds,
+        RelationshipType relationshipType
+    ) {
+        var firstNodeId = nodeIds.get(0);
+        var pathBuilder = new PathImpl.Builder(tx.getNodeById(firstNodeId));
+
+        for (int i = 0; i < nodeIds.size() - 1; i++) {
+            long sourceNodeId = nodeIds.get(i);
+            long targetNodeId = nodeIds.get(i + 1);
+
+            var relationship = new VirtualRelationship(
+                RelationshipIds.next(),
+                tx.getNodeById(sourceNodeId),
+                tx.getNodeById(targetNodeId),
+                relationshipType
+            );
             pathBuilder = pathBuilder.push(relationship);
         }
 

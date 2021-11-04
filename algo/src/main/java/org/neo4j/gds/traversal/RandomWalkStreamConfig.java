@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.walking;
+package org.neo4j.gds.traversal;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -32,54 +29,13 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface RandomWalkConfig extends AlgoBaseConfig {
+public interface RandomWalkStreamConfig extends RandomWalkBaseConfig {
 
-    @Value.Default
-    default @Nullable Object start() {
-        return null;
-    }
-
-    @Value.Default
-    default long steps() {
-        return 10L;
-    }
-
-    @Value.Default
-    default long walks() {
-        return 1L;
-    }
-
-    @Value.Default
-    default String mode() {
-        return "random";
-    }
-
-    @Value.Default
-    @Configuration.Key(value = "return")
-    default double returnKey() {
-        return 1.0D;
-    }
-
-    @Value.Default
-    default double inOut() {
-        return 1.0D;
-    }
-
-    @Value.Default
-    default boolean path() {
-        return false;
-    }
-
-    static RandomWalkConfig of(
+    static RandomWalkStreamConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new RandomWalkConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new RandomWalkStreamConfigImpl(graphName, maybeImplicitCreate, userInput);
     }
-
 }

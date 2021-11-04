@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.traversal.RandomWalk;
 
 public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
 
@@ -58,16 +59,9 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
     public HugeObjectArray<FloatVector> compute() {
         progressTracker.beginSubTask("Node2Vec");
 
-        progressTracker.beginSubTask("RandomWalk");
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            config.walkLength(),
-            config.concurrency(),
-            config.walksPerNode(),
-            config.walkBufferSize(),
-            config.returnFactor(),
-            config.inOutFactor(),
-            config.randomSeed(),
+            config,
             allocationTracker,
             progressTracker
         );
@@ -85,8 +79,6 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             probabilitiesBuilder.registerWalk(walk);
             walks.add(walk);
         });
-        progressTracker.endSubTask("create walks");
-        progressTracker.endSubTask("RandomWalk");
 
         var node2VecModel = new Node2VecModel(
             graph.nodeCount(),

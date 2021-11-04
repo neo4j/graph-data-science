@@ -23,45 +23,16 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, RandomSeedConfig {
+import java.util.List;
 
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int walkLength() {
-        return 80;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 2)
-    default int walksPerNode() {
-        return 10;
-    }
+public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RandomWalkBaseConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int windowSize() {
         return 10;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int walkBufferSize() {
-        return 1000;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double inOutFactor() {
-        return 1.0;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double returnFactor() {
-        return 1.0;
     }
 
     @Value.Default
@@ -104,5 +75,12 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     @Value.Default
     default int iterations() {
         return 1;
+    }
+
+    @Configuration.Ignore
+    @Value.Default
+    @Override
+    default List<Long> sourceNodes() {
+        return List.of();
     }
 }
