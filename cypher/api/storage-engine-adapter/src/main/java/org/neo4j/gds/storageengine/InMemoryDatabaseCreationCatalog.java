@@ -19,26 +19,30 @@
  */
 package org.neo4j.gds.storageengine;
 
+import org.neo4j.configuration.helpers.NormalizedDatabaseName;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class InMemoryDatabaseCreationCatalog {
-    private static final Map<String, String> CATALOG = new ConcurrentHashMap<>();
+    private static final Map<NormalizedDatabaseName, String> CATALOG = new ConcurrentHashMap<>();
 
     private InMemoryDatabaseCreationCatalog() {}
 
     public static void registerDbCreation(String databaseName, String graphName) {
-        if (CATALOG.containsKey(databaseName)) {
+        var normalizedDatabaseName = new NormalizedDatabaseName(databaseName);
+        if (CATALOG.containsKey(normalizedDatabaseName)) {
             throw new IllegalArgumentException(formatWithLocale("An entry with key `%s` already exists", databaseName));
         }
-        CATALOG.put(databaseName, graphName);
+        CATALOG.put(normalizedDatabaseName, graphName);
     }
 
     public static String getRegisteredDbCreationGraphName(String databaseName) {
-        return CATALOG.get(databaseName);
+        return CATALOG.get(new NormalizedDatabaseName(databaseName));
     }
 
     public static void removeAllRegisteredDbCreations() {
@@ -46,6 +50,6 @@ public final class InMemoryDatabaseCreationCatalog {
     }
 
     public static Set<String> databaseNamesRegisteredForCreation() {
-        return CATALOG.keySet();
+        return CATALOG.keySet().stream().map(NormalizedDatabaseName::name).collect(Collectors.toSet());
     }
 }
