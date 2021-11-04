@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -29,7 +30,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphListProc extends CatalogProc {
@@ -40,7 +40,7 @@ public class GraphListProc extends CatalogProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
 
         var graphEntries = isGdsAdmin()
             ? GraphStoreCatalog.getAllGraphStores().map(graphStore -> Map.entry(graphStore.config(), graphStore.graphStore()))

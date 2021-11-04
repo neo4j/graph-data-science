@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.DeleteRelationshipsConfig;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -30,7 +31,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDeleteRelationshipProc extends CatalogProc {
@@ -43,7 +43,7 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
 
         GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
 

@@ -58,6 +58,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
         var licenseState = registerLicenseState();
         registerSecurityContextService(licenseState);
 
+        setupProcedurePreconditions(licenseState);
         setupIdMapBehavior(licenseState);
         setupConcurrencyValidator(licenseState);
         setupPoolSizes(licenseState);
@@ -84,6 +85,16 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
         var securityContextService = securityContextServiceFactory.create(licenseState);
         context.dependencySatisfier().satisfyDependency(securityContextService);
+    }
+
+    private void setupProcedurePreconditions(LicenseState licenseState) {
+        var procedurePreconditionsFactory = loadServiceByPriority(
+            ProcedurePreconditionsFactory.class,
+            ProcedurePreconditionsFactory::priority
+        );
+
+        var procedurePreconditions = procedurePreconditionsFactory.create(licenseState);
+        ProcedurePreconditionsProvider.procedurePreconditions(procedurePreconditions);
     }
 
     private void setupIdMapBehavior(LicenseState licenseState) {

@@ -20,11 +20,12 @@
 package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphExportNodePropertiesConfig;
 import org.neo4j.gds.config.GraphStreamNodePropertiesConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -37,7 +38,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
@@ -50,7 +50,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         // input
@@ -77,7 +77,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         // input

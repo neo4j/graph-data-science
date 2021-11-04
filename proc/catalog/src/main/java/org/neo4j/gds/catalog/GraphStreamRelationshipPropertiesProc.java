@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -41,7 +42,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
@@ -54,7 +54,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         // input
@@ -81,7 +81,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         // input
