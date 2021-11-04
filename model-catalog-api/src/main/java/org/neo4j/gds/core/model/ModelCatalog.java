@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
@@ -32,7 +33,7 @@ public interface ModelCatalog {
 
     void setUnsafe(Model<?, ?, ?> model);
 
-    <D, C extends ModelConfig, I extends Model.Mappable> Model<D, C, I> get(
+    <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String username,
         String modelName,
         Class<D> dataClass,

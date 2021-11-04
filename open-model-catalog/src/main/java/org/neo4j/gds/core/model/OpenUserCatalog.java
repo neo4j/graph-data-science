@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
@@ -38,7 +39,7 @@ class OpenUserCatalog implements UserCatalog {
     private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
     @Override
-    public <D, C extends ModelConfig, I extends Model.Mappable> Model<D, C, I> get(
+    public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String modelName,
         Class<D> dataClass,
         Class<C> configClass,
@@ -125,7 +126,7 @@ class OpenUserCatalog implements UserCatalog {
         verifyModelsLimit(modelType);
     }
 
-    private <D, C extends ModelConfig, I extends Model.Mappable> Model<D, C, I> get(
+    private <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         Model<?, ?, ?> model,
         Class<D> dataClass,
         Class<C> configClass,

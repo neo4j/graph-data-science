@@ -25,10 +25,8 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.gds.config.ModelConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.utils.TimeUtil;
+import org.neo4j.gds.model.ModelConfig;
 
 import java.time.Clock;
 import java.time.ZoneId;

@@ -24,6 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -49,7 +50,7 @@ class OpenModelCatalogTest {
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
 
-    private static final Model<String, TestTrainConfig, Model.Mappable> TEST_MODEL = Model.of(
+    private static final Model<String, TestTrainConfig, ToMapConvertible> TEST_MODEL = Model.of(
         USERNAME,
         "testModel",
         "testAlgo",
@@ -125,8 +126,8 @@ class OpenModelCatalogTest {
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
-        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMapConvertible.class));
     }
 
     @Test
@@ -162,8 +163,8 @@ class OpenModelCatalogTest {
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class));
-        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, Model.Mappable.class));
+        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class));
     }
 
     @Test
@@ -172,7 +173,7 @@ class OpenModelCatalogTest {
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -185,7 +186,7 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals(
@@ -201,7 +202,7 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, Model.Mappable.class)
+            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, ToMapConvertible.class)
         );
 
         assertEquals(
