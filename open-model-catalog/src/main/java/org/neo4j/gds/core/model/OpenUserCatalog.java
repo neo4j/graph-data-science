@@ -38,19 +38,6 @@ class OpenUserCatalog {
 
     private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
-    Set<String> availableModelNames() {
-        return userModels.keySet();
-    }
-
-    public void set(Model<?, ?, ?> model) {
-        checkStorable(model.name(), model.algoType());
-        userModels.put(model.name(), model);
-    }
-
-    void setUnsafe(Model<?, ?, ?> model) {
-        userModels.put(model.name(), model);
-    }
-
     public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String modelName,
         Class<D> dataClass,
@@ -63,6 +50,67 @@ class OpenUserCatalog {
             configClass,
             infoClass
         );
+    }
+
+    Model<?, ?, ?> getUntyped(String modelName) {
+        return userModels.get(modelName);
+    }
+
+    public void set(Model<?, ?, ?> model) {
+        checkStorable(model.name(), model.algoType());
+        userModels.put(model.name(), model);
+    }
+
+    void setUnsafe(Model<?, ?, ?> model) {
+        userModels.put(model.name(), model);
+    }
+
+    public Collection<Model<?, ?, ?>> list() {
+        return userModels.values();
+    }
+
+    public Model<?, ?, ?> list(String modelName) {
+        return getUntyped(modelName);
+    }
+
+    Stream<Model<?, ?, ?>> streamModels() {
+        return userModels.values().stream();
+    }
+
+    Set<String> availableModelNames() {
+        return userModels.keySet();
+    }
+
+    public boolean exists(String modelName) {
+        return userModels.containsKey(modelName);
+    }
+
+    public Optional<String> type(String modelName) {
+        return Optional.ofNullable(userModels.get(modelName))
+            .map(Model::algoType);
+    }
+
+    public Model<?, ?, ?> drop(String modelName, boolean failOnMissing) {
+        var storedModel = userModels.remove(modelName);
+
+        if (failOnMissing && storedModel == null) {
+            throw new NoSuchElementException(prettySuggestions(
+                formatWithLocale("Model with name `%s` does not exist.", modelName),
+                modelName,
+                userModels.keySet()
+            ));
+        } else {
+            return storedModel;
+        }
+    }
+
+    public void removeAllLoadedModels() {
+        userModels.clear();
+    }
+
+    void checkStorable(String modelName, String modelType) {
+        verifyModelNameIsUnique(modelName);
+        verifyModelsLimit(modelType);
     }
 
     private <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
@@ -109,50 +157,6 @@ class OpenUserCatalog {
         return (Model<D, C, I>) model;
     }
 
-    public boolean exists(String modelName) {
-        return userModels.containsKey(modelName);
-    }
-
-    public Optional<String> type(String modelName) {
-        return Optional.ofNullable(userModels.get(modelName))
-            .map(Model::algoType);
-    }
-
-    public Model<?, ?, ?> drop(String modelName, boolean failOnMissing) {
-        var storedModel = userModels.remove(modelName);
-
-        if (failOnMissing && storedModel == null) {
-            throw new NoSuchElementException(prettySuggestions(
-                formatWithLocale("Model with name `%s` does not exist.", modelName),
-                modelName,
-                userModels.keySet()
-            ));
-        } else {
-            return storedModel;
-        }
-    }
-
-    public Collection<Model<?, ?, ?>> list() {
-        return userModels.values();
-    }
-
-    public Model<?, ?, ?> list(String modelName) {
-        return getUntyped(modelName);
-    }
-
-    public void removeAllLoadedModels() {
-        userModels.clear();
-    }
-
-    Stream<Model<?, ?, ?>> streamModels() {
-        return userModels.values().stream();
-    }
-
-    void checkStorable(String modelName, String modelType) {
-        verifyModelNameIsUnique(modelName);
-        verifyModelsLimit(modelType);
-    }
-
     private void verifyModelNameIsUnique(String model) {
         if (exists(model)) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -184,10 +188,6 @@ class OpenUserCatalog {
             .stream()
             .filter(model -> model.algoType().equals(modelType))
             .count();
-    }
-
-    Model<?, ?, ?> getUntyped(String modelName) {
-        return userModels.get(modelName);
     }
 
     private static String formatWithLocale(String template, Object... inputs) {
