@@ -42,16 +42,8 @@ class ProcedureReflectionTest extends BaseProcTest {
             .hasMessage(formatWithLocale("Invalid procedure name `%s` for pipelining.", proc));
     }
 
-    @Test
-    void shouldFailOnNonUniqueMatch() {
-        assertThatThrownBy(() -> ProcedureReflection.INSTANCE.findProcedureMethod("dijkstra"))
-            .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageStartingWith(
-                "Ambiguous procedure name `dijkstra`. Found matching procedures gds.shortestPath.dijkstra.mutate, gds.allShortestPaths.dijkstra.mutate.");
-    }
-
     @ParameterizedTest
-    @ValueSource(strings = {"pageRank", "pageRank.mutate", "gds.pageRank", "gds.pageRank.mutate"})
+    @ValueSource(strings = {"gds.testProc", "gds.testProc.mutate", "testProc", "testProc.mutate"})
     void shouldNotFailOnValidName(String name) {
         ProcedureReflection.INSTANCE.findProcedureMethod(name);
     }
@@ -59,7 +51,7 @@ class ProcedureReflectionTest extends BaseProcTest {
     @Test
     void failOnInvalidConfig() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod("pageRank");
+            var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod("testProc");
             assertThatThrownBy(() -> ProcedureReflection.INSTANCE.createAlgoConfig(
                 caller,
                 procedureMethod,
