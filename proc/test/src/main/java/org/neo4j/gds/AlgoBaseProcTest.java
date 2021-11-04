@@ -49,6 +49,7 @@ import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporter;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporter;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
@@ -95,8 +96,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * clears the data after each test.
  */
 public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
-    extends GraphCreateConfigSupport
-{
+    extends GraphCreateConfigSupport {
 
     String TEST_USERNAME = Username.EMPTY_USERNAME.username();
 
@@ -237,7 +237,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
             assertTrue(
                 maybeGraphCreateConfig.get() instanceof GraphCreateFromCypherConfig,
-                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName()));
+                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName())
+            );
 
             GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
 
@@ -274,7 +275,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         var taskStore = new InvocationCountingTaskStore();
 
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
+        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+            "",
+            loadedGraphName,
+            relationshipProjections()
+        );
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = () -> new TaskRegistry("", taskStore);
 
@@ -301,7 +306,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             // trigger consumption of stream return values
             assertResultEquals(computationResult1.result(), computationResult2.result());
 
-            assertThat(taskStore.taskStream()).isEmpty();
+            assertThat(taskStore.taskStream())
+                .withFailMessage(() -> formatWithLocale(
+                    "Expected no tasks to be open but found %s",
+                    StringJoining.join(taskStore.taskStream().map(Task::description))
+                )).isEmpty();
             assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
         });
     }
@@ -418,8 +427,18 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap, releaseAlgorithm(), true);
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(loadedGraphName, configMap, releaseAlgorithm(), true);
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
+                loadedGraphName,
+                configMap,
+                releaseAlgorithm(),
+                true
+            );
+            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(
+                loadedGraphName,
+                configMap,
+                releaseAlgorithm(),
+                true
+            );
 
             assertResultEquals(resultRun1.result(), resultRun2.result());
         });
@@ -470,7 +489,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
-    default void loadGraph(String graphName){
+    default void loadGraph(String graphName) {
         runQuery(
             graphDb(),
             GdsCypher.call()
@@ -486,7 +505,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     String missingLabel = "___THIS_LABEL_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = MapUtil.map(NODE_PROJECTION_KEY, Collections.singletonList(missingLabel));
+                    Map<String, Object> tempConfig = MapUtil.map(
+                        NODE_PROJECTION_KEY,
+                        Collections.singletonList(missingLabel)
+                    );
 
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
@@ -500,7 +522,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         .hasMessageContaining(formatWithLocale(
                             "Invalid node projection, one or more labels not found: '%s'",
                             missingLabel
-                    ));
+                        ));
                 });
         });
     }
@@ -522,7 +544,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 assertThat(ex)
                     .getRootCause()
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Community users cannot exceed readConcurrency=4 (you configured readConcurrency=10), see https://neo4j.com/docs/graph-data-science/");
+                    .hasMessageContaining(
+                        "Community users cannot exceed readConcurrency=4 (you configured readConcurrency=10), see https://neo4j.com/docs/graph-data-science/");
             })
         );
     }
@@ -533,7 +556,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     String missingRelType = "___THIS_REL_TYPE_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = Map.of(RELATIONSHIP_PROJECTION_KEY, relationshipProjectionForType(missingRelType));
+                    Map<String, Object> tempConfig = Map.of(
+                        RELATIONSHIP_PROJECTION_KEY,
+                        relationshipProjectionForType(missingRelType)
+                    );
 
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
@@ -607,22 +633,44 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         NODE_QUERY_KEY,
         RELATIONSHIP_QUERY_KEY
     );
+
     // No value specified for the mandatory configuration parameter `relationshipProjection`
     static Stream<Arguments> failingConfigurationMaps() {
         return Stream.of(
             Arguments.of(FAIL_ANY_CONFIG, MapUtil.map()),
-            Arguments.of("No value specified for the mandatory configuration parameter `relationshipProjection`", MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name)),
-            Arguments.of("No value specified for the mandatory configuration parameter `nodeProjection`", MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name)),
-            Arguments.of("No value specified for the mandatory configuration parameter `relationshipQuery`", MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)),
-            Arguments.of("No value specified for the mandatory configuration parameter `nodeQuery`", MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
+            Arguments.of(
+                "No value specified for the mandatory configuration parameter `relationshipProjection`",
+                MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name)
+            ),
+            Arguments.of(
+                "No value specified for the mandatory configuration parameter `nodeProjection`",
+                MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name)
+            ),
+            Arguments.of(
+                "No value specified for the mandatory configuration parameter `relationshipQuery`",
+                MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)
+            ),
+            Arguments.of(
+                "No value specified for the mandatory configuration parameter `nodeQuery`",
+                MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
+            ),
+            Arguments.of(
+                FAIL_ANY_CONFIG,
+                MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
+            ),
+            Arguments.of(
+                FAIL_ANY_CONFIG,
+                MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name, NODE_QUERY_KEY, ALL_NODES_QUERY)
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("failingConfigurationMaps")
-    default void failOnImplicitLoadingWithoutProjectionsOrQueries(String expectedMessage, Map<String, Object> configurationMap) {
+    default void failOnImplicitLoadingWithoutProjectionsOrQueries(
+        String expectedMessage,
+        Map<String, Object> configurationMap
+    ) {
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(configurationMap)).toMap();
         config.remove("nodeWeightProperty");
 
@@ -693,7 +741,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return getProcedureMethods(proc)
             .filter(method -> {
                 var procedureMethodName = getProcedureMethodName(method);
-                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write") || procedureMethodName.endsWith("stats");
+                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write") || procedureMethodName.endsWith(
+                    "stats");
             });
     }
 
