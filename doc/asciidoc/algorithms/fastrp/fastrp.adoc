@@ -598,6 +598,16 @@ The algorithm then proceeds with the same logic as the FastRP algorithm.
 Therefore, the algorithm will output arrays of size `embeddingDimension`.
 The last `propertyDimension` coordinates in the embedding captures information about property values of nearby nodes, and the remaining coordinates (`embeddingDimension` - `propertyDimension` of them) captures information about nearby presence of nodes.
 
+To explain the novel initialization using node properties, let us consider an example where `embeddingDimension` is 10, `propertyRatio` is 0.2.
+The dimension of the embedded properties, `propertyDimension` is thus 2.
+Assume we have a property `f1` of scalar type, and a property `f2` storing arrays of length 2.
+This means that there are 3 features which we order like `f1` followed by the two values of `f2`.
+For each of these three features we sample a two dimensional random vector.
+Lets say these are stem:[p1=[0.0, 2.4]], stem:[p2=[-2.4, 0.0]] and stem:[p3=[2.4, 0.0]].
+Consider now a node `(n {f1: 0.5, f2: [1.0, -1.0])`.
+The linear combination mentioned above, is in concrete terms stem:[0.5 * p1 + 1.0 * p2 - 1.0 * p3 = [-4.8, 1.2]] ].
+The initial random vector for the node `n` contains first 8 values sampled as in the original fastRP paper, and then our computed values `-4.8` and `1.2`, totalling 10 entries.
+
 [role=query-example]
 --
 .The following will run FastRP with feature properties:
