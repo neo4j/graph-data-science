@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -42,7 +43,6 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteRelationshipProc extends CatalogProc {
@@ -58,7 +58,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         // input

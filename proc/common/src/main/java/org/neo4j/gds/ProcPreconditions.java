@@ -19,17 +19,12 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
 public final class ProcPreconditions {
 
     private ProcPreconditions() {}
 
-    public static void checkPreconditions(GraphDatabaseAPI api) {
-        var licenseState = api.getDependencyResolver().resolveDependency(LicenseState.class);
-        if (!licenseState.isValid()) {
-            throw new RuntimeException(licenseState.errorMessage().get());
-        }
+    public static void check() throws IllegalStateException {
+        ProcedurePreconditionsProvider.procedurePreconditions().check();
     }
 
 }

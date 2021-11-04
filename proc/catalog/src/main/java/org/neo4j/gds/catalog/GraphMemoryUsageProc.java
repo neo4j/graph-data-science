@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -34,7 +35,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMemoryUsageProc extends CatalogProc {
@@ -42,7 +42,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
 
         graphName = Objects.requireNonNull(StringUtils.trimToNull(graphName), "graphName must not be empty");
         var graphStoreWithConfig = graphStoreFromCatalog(graphName);

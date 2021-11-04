@@ -24,6 +24,7 @@ import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementException;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.catalog.CatalogProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StorageEngineProxy;
@@ -37,7 +38,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.gds.core.cypher.CypherGraphStoreCatalogHelper.setWrappedGraphStore;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
@@ -52,7 +52,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName
     ) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
 
         CreateCypherDbResult result = runWithExceptionLogging(

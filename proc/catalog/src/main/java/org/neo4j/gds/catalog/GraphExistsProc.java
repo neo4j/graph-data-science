@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -26,7 +27,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcPreconditions.checkPreconditions;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphExistsProc extends CatalogProc {
@@ -36,7 +36,7 @@ public class GraphExistsProc extends CatalogProc {
     @Procedure(name = "gds.graph.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphExistsResult> exists(@Name(value = "graphName") String graphName) {
-        checkPreconditions(api);
+        ProcPreconditions.check();
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(
             username(),
