@@ -148,11 +148,6 @@ class OpenUserCatalog {
         return userModels.values().stream();
     }
 
-    public OpenUserCatalog join(OpenUserCatalog other) {
-        userModels.putAll(other.userModels);
-        return this;
-    }
-
     void checkStorable(String modelName, String modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
