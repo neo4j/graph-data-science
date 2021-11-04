@@ -20,7 +20,6 @@
 package org.neo4j.gds.core;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.annotations.service.Service;
 import org.neo4j.gds.core.loading.IdMappingAllocator;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilder;
 import org.neo4j.gds.core.loading.InternalIdMappingBuilderFactory;
@@ -30,7 +29,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
-@Service
 public interface IdMapBehavior {
 
     Pair<InternalIdMappingBuilderFactory<? extends InternalIdMappingBuilder<?>, ?>, NodeMappingBuilder> create(
@@ -44,8 +42,6 @@ public interface IdMapBehavior {
         AllocationTracker allocationTracker,
         Optional<Long> nodeCount
     );
-
-    int priority();
 
     MemoryEstimation memoryEstimation();
 }

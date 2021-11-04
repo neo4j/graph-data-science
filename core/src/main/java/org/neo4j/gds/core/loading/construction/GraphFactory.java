@@ -39,7 +39,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.IdMapBehaviorServiceLoader;
+import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -102,7 +102,7 @@ public final class GraphFactory {
             .or(() -> hasLabelInformation).orElse(false);
         int threadCount = concurrency.orElse(1);
 
-        var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
+        var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
         var maxIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
 
         var internalIdMappingBuilderTuple = idMapBehavior.create(

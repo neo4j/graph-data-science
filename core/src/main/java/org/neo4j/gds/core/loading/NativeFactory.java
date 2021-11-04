@@ -30,7 +30,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
-import org.neo4j.gds.core.IdMapBehaviorServiceLoader;
+import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.compress.AdjacencyFactory;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -91,7 +91,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
 
         // node information
-        builder.add("nodeIdMap", IdMapBehaviorServiceLoader.INSTANCE.memoryEstimation());
+        builder.add("nodeIdMap", IdMapBehaviorServiceProvider.idMapBehavior().memoryEstimation());
 
         // nodeProperties
         nodeProjections.allProperties()
@@ -189,9 +189,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.transactionContext()
         );
 
-        var idMapBehavior = IdMapBehaviorServiceLoader.INSTANCE;
-
-        var pair = idMapBehavior.create(true, loadingContext.allocationTracker());
+        var pair = IdMapBehaviorServiceProvider.idMapBehavior().create(true, loadingContext.allocationTracker());
 
         var scanningNodesImporter = new ScanningNodesImporter<>(
             graphCreateConfig,

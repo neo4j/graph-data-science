@@ -24,6 +24,8 @@ import org.neo4j.gds.concurrency.ConcurrencyValidatorBuilder;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.concurrency.PoolSizesProvider;
 import org.neo4j.gds.concurrency.PoolSizesService;
+import org.neo4j.gds.core.IdMapBehaviorFactory;
+import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.transaction.SecurityContextWrapperFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
@@ -55,6 +57,8 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     public void init() {
         var licenseState = registerLicenseState();
         registerSecurityContextService(licenseState);
+
+        setupIdMapBehavior(licenseState);
         setupConcurrencyValidator(licenseState);
         setupPoolSizes(licenseState);
         setupModelCatalog(licenseState);
@@ -79,6 +83,15 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
         var securityContextService = securityContextServiceFactory.create(licenseState);
         context.dependencySatisfier().satisfyDependency(securityContextService);
+    }
+
+    private void setupIdMapBehavior(LicenseState licenseState) {
+        var idMapBehaviorFactory = loadServiceByPriority(
+            IdMapBehaviorFactory.class,
+            IdMapBehaviorFactory::priority
+        );
+
+        IdMapBehaviorServiceProvider.idMapBehavior(idMapBehaviorFactory.create(licenseState));
     }
 
     private void setupConcurrencyValidator(LicenseState licenseState) {
