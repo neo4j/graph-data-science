@@ -7,7 +7,7 @@ plugins {
 
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
-    gdsVersion = '1.8.0-alpha03'
+    gdsVersion = '2.0.0-alpha01'
     neo4jVersion = '4.3.6'
 
     // Necessary to generate value classes for Pregel configs
