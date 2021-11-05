@@ -63,7 +63,7 @@ public class RandomWalkSampler {
         this.normalizedInOutProbability = normalizedInOutProbability;
 
         this.currentWeight = new MutableDouble(0);
-        this.randomNeighbour = new MutableLong(-1);
+        this.randomNeighbour = new MutableLong(NO_MORE_NODES);
     }
 
     public static MemoryRange memoryEstimation(long walkLength) {
@@ -80,7 +80,7 @@ public class RandomWalkSampler {
         walk[0] = startNode;
 
         walk[1] = randomNeighbour(startNode);
-        if (walk[1] == -1) {
+        if (walk[1] == NO_MORE_NODES) {
             return new long[]{walk[0]};
         }
 
