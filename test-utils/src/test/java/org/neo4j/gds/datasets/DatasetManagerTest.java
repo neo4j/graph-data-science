@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.datasets;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.core.GdsEdition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,11 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class DatasetManagerTest {
-
-    @AfterAll
-    static void resetToCommunityEdition() {
-        GdsEdition.instance().setToCommunityEdition();
-    }
 
     @Test
     void testCloseRemovesDbDirectory(@TempDir Path tempDir) throws Exception {
