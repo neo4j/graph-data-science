@@ -685,13 +685,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public <T> ThrowingFunction<Context, T, ProcedureException> lookupComponentProvider(
-        GlobalProcedures registry, Class<T> cls, boolean safe
-    ) {
-        return registry.lookupComponentProvider(cls, safe);
-    }
-
-    @Override
     public long getHighestPossibleNodeCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
