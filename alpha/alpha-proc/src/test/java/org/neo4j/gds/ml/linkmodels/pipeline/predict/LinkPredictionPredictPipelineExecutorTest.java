@@ -35,10 +35,11 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -65,6 +66,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
+@ModelCatalogExtension
 class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
@@ -82,7 +84,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -104,7 +107,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        modelCatalog.removeAllLoadedModels();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

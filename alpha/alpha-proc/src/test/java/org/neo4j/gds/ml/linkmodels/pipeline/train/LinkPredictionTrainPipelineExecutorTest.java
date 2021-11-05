@@ -38,10 +38,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -64,6 +65,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 
+@ModelCatalogExtension
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -108,7 +110,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
