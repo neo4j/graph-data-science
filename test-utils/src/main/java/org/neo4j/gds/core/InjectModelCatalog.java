@@ -27,5 +27,4 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InjectModelCatalog {
-    TestModelCatalogResolver.CatalogType catalogType() default TestModelCatalogResolver.CatalogType.OPEN;
 }

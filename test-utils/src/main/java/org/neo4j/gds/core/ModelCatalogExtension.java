@@ -30,6 +30,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(TestModelCatalogResolver.class)
+@ExtendWith(TestOpenModelCatalogResolver.class)
 public @interface ModelCatalogExtension {
 }
