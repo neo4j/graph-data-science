@@ -19,7 +19,7 @@ The K-Nearest Neighbors algorithm computes a distance value for all node pairs i
 The distance is calculated based on node properties.
 
 The input of this algorithm is a monopartite graph.
-The graph does not need to be connected, in fact, existing relationships between nodes will be ignored.
+The graph does not need to be connected, in fact, existing relationships between nodes will be ignored - apart from random walk sampling if that that initial sampling option is used.
 New relationships are created between each node and its k nearest neighbors.
 
 The K-Nearest Neighbors algorithm compares a given property of each node.
@@ -100,13 +100,13 @@ Note that this method does not actually use the topology of the input graph.
 Random Walk::
 
 From each node we take a depth biased random walk and choose the first `k` unique nodes we visit on that walk as our initial random neighbors.
-If after some internally defined `O(k)` number of steps a random walk, `k` unique neighbors have not been visited, we will fill in the remaining neighbors we require using the uniform method described above.
-The random walk method makes use of the input graph's topology and may be suitable if one thinks that it is more likely to find good similarity scores between nodes that are somewhat topologically close in the graph.
+If after some internally defined `O(k)` number of steps a random walk, `k` unique neighbors have not been visited, we will fill in the remaining neighbors using the uniform method described above.
+The random walk method makes use of the input graph's topology and may be suitable if it is more likely to find good similarity scores between topologically close nodes.
 
 [NOTE]
 ====
 The random walk used is biased towards depth in the sense that it will more likely choose to go further away from its previously visited node, rather that go back to it or to a node equidistant to it.
-The intuition of why we have this bias, is that subsequent iterations of comparing neighbor-of-neighbors will likely cover an extended (topological) neighborhood of each node anyway.
+The intuition of this bias is that subsequent iterations of comparing neighbor-of-neighbors will likely cover the extended (topological) neighborhood of each node.
 ====
 
 
