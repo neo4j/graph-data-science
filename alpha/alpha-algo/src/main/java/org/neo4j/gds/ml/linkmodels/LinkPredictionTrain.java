@@ -168,7 +168,7 @@ public class LinkPredictionTrain
     }
 
     private ModelSelectResult modelSelect(HugeLongArray allNodeIds) {
-        var nodeSplits = trainValidationSplits(allNodeIds);
+        var nodeSplits = trainValidationSplits(ReadOnlyHugeLongArray.of(allNodeIds));
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
@@ -211,7 +211,7 @@ public class LinkPredictionTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray allNodeIds) {
+    private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray allNodeIds) {
         var globalTargets = new ReadOnlyHugeLongArray() {
             @Override
             public long get(long index) {
@@ -259,7 +259,7 @@ public class LinkPredictionTrain
         var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
         progressTracker.setVolume(evaluationGraph.nodeCount());
-        var queue = new HugeBatchQueue(evaluationSet);
+        var queue = new HugeBatchQueue(ReadOnlyHugeLongArray.of(evaluationSet));
         queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
                 evaluationGraph.concurrentCopy(),
                 predictor,

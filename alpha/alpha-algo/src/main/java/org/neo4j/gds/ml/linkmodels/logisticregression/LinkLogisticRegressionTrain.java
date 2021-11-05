@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
@@ -34,7 +35,7 @@ import java.util.function.Supplier;
 public class LinkLogisticRegressionTrain {
 
     private final Graph graph;
-    private final HugeLongArray trainSet;
+    private final ReadOnlyHugeLongArray trainSet;
     private final List<FeatureExtractor> extractors;
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressTracker progressTracker;
@@ -51,7 +52,7 @@ public class LinkLogisticRegressionTrain {
         int concurrency
     ) {
         this.graph = graph;
-        this.trainSet = trainSet;
+        this.trainSet = ReadOnlyHugeLongArray.of(trainSet);
         this.extractors = extractors;
         this.config = config;
         this.progressTracker = progressTracker;
