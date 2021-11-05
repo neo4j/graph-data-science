@@ -61,13 +61,4 @@ class BaseProcUnitTest {
         assertThrows(RuntimeException.class, () -> baseProc.runWithExceptionLogging("test message", supplier));
         assertTrue(log.containsMessage("warn", "test message - Exception when using Supplier"));
     }
-
-    // TODO: Move this check to the Neo4j GDS world
-//    @Test
-//    void testRunWithInvalidLicense() {
-//        GdsEdition.instance().setToInvalidLicense("foobar");
-//        var ex = assertThrows(RuntimeException.class, () -> new BaseProc() {});
-//        assertEquals("foobar", ex.getMessage());
-//    }
-
 }
