@@ -113,15 +113,6 @@ public final class TestGraphLoader {
     @TestOnly
     public GraphStore graphStore(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
-            // TODO: Figure out how to move this functionality in Neo4j GDS world
-//            if (factoryType == TestSupport.FactoryType.NATIVE_BIT_ID_MAP) {
-//                var graphStore = new AtomicReference<GraphStore>();
-//                setToEnterpriseAndRun(() ->
-//                    GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(() ->
-//                        graphStore.set(loader(factoryType).graphStore())));
-//
-//                return graphStore.get();
-//            }
             return loader(factoryType).graphStore();
         }
     }
