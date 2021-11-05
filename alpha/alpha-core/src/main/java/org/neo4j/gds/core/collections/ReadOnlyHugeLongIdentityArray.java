@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.core.collections;
 
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
@@ -25,7 +25,7 @@ public class ReadOnlyHugeLongIdentityArray implements ReadOnlyHugeLongArray {
 
     private final long size;
 
-    ReadOnlyHugeLongIdentityArray(long size) {
+    public ReadOnlyHugeLongIdentityArray(long size) {
         this.size = size;
     }
 

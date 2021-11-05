@@ -52,7 +52,7 @@ import java.util.function.LongUnaryOperator;
  * {@code}
  * </pre>
  */
-public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> implements ReadOnlyHugeLongArray {
+public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> {
 
     /**
      * @return the long value at the given index

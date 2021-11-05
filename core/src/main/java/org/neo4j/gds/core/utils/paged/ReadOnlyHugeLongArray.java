@@ -23,4 +23,18 @@ public interface ReadOnlyHugeLongArray {
     long get(long index);
 
     long size();
+
+    static ReadOnlyHugeLongArray of(HugeLongArray hla) {
+        return new ReadOnlyHugeLongArray() {
+            @Override
+            public long get(long index) {
+                return hla.get(index);
+            }
+
+            @Override
+            public long size() {
+                return hla.size();
+            }
+        };
+    }
 }

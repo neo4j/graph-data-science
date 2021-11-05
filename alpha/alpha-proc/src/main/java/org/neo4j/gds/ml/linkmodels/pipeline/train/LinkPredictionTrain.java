@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -201,12 +202,12 @@ public class LinkPredictionTrain
                 var trainSet = relSplit.trainSet();
                 var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
-                var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
+                var modelData = trainModel(ReadOnlyHugeLongArray.of(trainSet), trainData, modelParams, ProgressTracker.NULL_TRACKER);
 
                 // evaluate each model candidate on the train and validation sets
-                computeTrainMetric(trainData, modelData, trainSet, ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
                     .forEach(trainStatsBuilder::update);
-                computeTrainMetric(trainData, modelData, validationSet, ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(validationSet), ProgressTracker.NULL_TRACKER)
                     .forEach(validationStatsBuilder::update);
             }
 
