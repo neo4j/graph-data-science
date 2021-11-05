@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMapping;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -63,10 +64,10 @@ public final class GraphStoreValidation {
 
         }
         if (config instanceof SourceNodeConfig) {
-            validateSourceNode(graphStore, (SourceNodeConfig) config);
+            validateSourceNode(graphStore, (SourceNodeConfig) config, filterLabels);
         }
         if (config instanceof TargetNodeConfig) {
-            validateTargetNode(graphStore, (TargetNodeConfig) config);
+            validateTargetNode(graphStore, (TargetNodeConfig) config, filterLabels);
         }
     }
 
@@ -138,10 +139,14 @@ public final class GraphStoreValidation {
         }
     }
 
-    private static void validateSourceNode(GraphStore graphStore, SourceNodeConfig config) {
+    private static void validateSourceNode(
+        GraphStore graphStore,
+        SourceNodeConfig config,
+        Collection<NodeLabel> filterLabels
+    ) {
         var sourceNodeId = config.sourceNode();
 
-        if (graphStore.nodes().safeToMappedNodeId(sourceNodeId) == IdMapping.NOT_FOUND) {
+        if (labelFilteredGraphContainsNode(filterLabels, graphStore.nodes(), sourceNodeId)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Source node does not exist in the in-memory graph: `%d`",
                 sourceNodeId
@@ -151,18 +156,11 @@ public final class GraphStoreValidation {
 
     private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config, Collection<NodeLabel> filteredNodeLabels) {
         if (!config.sourceNodes().isEmpty()) {
-            var nodeMapping = graphStore.nodes();
 
             var missingNodes = config
                 .sourceNodes()
                 .stream()
-                .filter(sourceNode -> {
-                    var internalNodeId = nodeMapping.safeToMappedNodeId(sourceNode);
-                    return internalNodeId == IdMapping.NOT_FOUND || nodeMapping
-                        .nodeLabels(internalNodeId)
-                        .stream()
-                        .noneMatch(filteredNodeLabels::contains);
-                })
+                .filter(sourceNode -> labelFilteredGraphContainsNode(filteredNodeLabels, graphStore.nodes(), sourceNode))
                 .map(Object::toString)
                 .collect(Collectors.toList());
 
@@ -175,15 +173,31 @@ public final class GraphStoreValidation {
         }
     }
 
-    private static void validateTargetNode(GraphStore graphStore, TargetNodeConfig config) {
+    private static void validateTargetNode(
+        GraphStore graphStore,
+        TargetNodeConfig config,
+        Collection<NodeLabel> filterLabels
+    ) {
         var targetNodeId = config.targetNode();
 
-        if (graphStore.nodes().safeToMappedNodeId(targetNodeId) == IdMapping.NOT_FOUND) {
+        if (labelFilteredGraphContainsNode(filterLabels, graphStore.nodes(), targetNodeId)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Target node does not exist in the in-memory graph: `%d`",
                 targetNodeId
             ));
         }
+    }
+
+    private static boolean labelFilteredGraphContainsNode(
+        Collection<NodeLabel> filteredNodeLabels,
+        NodeMapping nodeMapping,
+        long neoNodeId
+    ) {
+        var internalNodeId = nodeMapping.safeToMappedNodeId(neoNodeId);
+        return internalNodeId == IdMapping.NOT_FOUND || nodeMapping
+            .nodeLabels(internalNodeId)
+            .stream()
+            .noneMatch(filteredNodeLabels::contains);
     }
 
     private GraphStoreValidation() {}
