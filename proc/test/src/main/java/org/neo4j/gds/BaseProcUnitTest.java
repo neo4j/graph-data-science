@@ -21,11 +21,9 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GdsEdition;
 
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,11 +62,12 @@ class BaseProcUnitTest {
         assertTrue(log.containsMessage("warn", "test message - Exception when using Supplier"));
     }
 
-    @Test
-    void testRunWithInvalidLicense() {
-        GdsEdition.instance().setToInvalidLicense("foobar");
-        var ex = assertThrows(RuntimeException.class, () -> new BaseProc() {});
-        assertEquals("foobar", ex.getMessage());
-    }
+    // TODO: Move this check to the Neo4j GDS world
+//    @Test
+//    void testRunWithInvalidLicense() {
+//        GdsEdition.instance().setToInvalidLicense("foobar");
+//        var ex = assertThrows(RuntimeException.class, () -> new BaseProc() {});
+//        assertEquals("foobar", ex.getMessage());
+//    }
 
 }

@@ -35,7 +35,6 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GdsEdition;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
@@ -529,7 +528,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @Test
     default void shouldThrowWhenTooManyCoresOnLimited() {
-        GdsEdition.instance().setToCommunityEdition();
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
                 Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
