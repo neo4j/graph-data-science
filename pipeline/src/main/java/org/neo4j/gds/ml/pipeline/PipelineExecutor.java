@@ -110,12 +110,9 @@ public abstract class PipelineExecutor<
         }
     }
 
-    private void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
-        removeDataSplitRelationships(datasets);
+    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
         removeNodeProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
     }
-
-    protected abstract void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets);
 
     private void removeNodeProperties(GraphStore graphstore, Iterable<NodeLabel> nodeLabels) {
         pipeline.nodePropertySteps().forEach(step -> {

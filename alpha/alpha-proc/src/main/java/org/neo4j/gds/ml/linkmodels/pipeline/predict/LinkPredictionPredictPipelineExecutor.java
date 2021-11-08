@@ -124,8 +124,4 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         }
     }
 
-    @Override
-    protected void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
-        // In predict mode there is no splitting.
-    }
 }
