@@ -49,6 +49,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -91,7 +92,9 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

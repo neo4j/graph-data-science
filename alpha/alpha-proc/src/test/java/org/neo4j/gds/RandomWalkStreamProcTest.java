@@ -24,6 +24,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
@@ -182,7 +183,8 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 }

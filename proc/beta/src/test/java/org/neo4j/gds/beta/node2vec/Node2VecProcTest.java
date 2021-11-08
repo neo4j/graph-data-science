@@ -23,16 +23,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -46,10 +47,18 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
     HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(
+            modeSpecificConfigTests(),
+            Stream.of(
+                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     @Neo4jGraph

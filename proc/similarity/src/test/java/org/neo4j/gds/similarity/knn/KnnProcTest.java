@@ -44,6 +44,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -65,10 +66,18 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @TestFactory
     Stream<DynamicTest> configTests() {
-        return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            NodeWeightConfigProcTest.mandatoryParameterTest(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        return Stream.concat(
+            modeSpecificConfigTests(),
+            Stream.of(
+                IterationsConfigProcTest.test(proc(), createMinimalConfig()),
+                NodeWeightConfigProcTest.mandatoryParameterTest(proc(), createMinimalConfig()),
+                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final String GRAPH_NAME = "myGraph";

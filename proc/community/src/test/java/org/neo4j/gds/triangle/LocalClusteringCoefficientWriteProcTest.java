@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -44,7 +45,9 @@ class LocalClusteringCoefficientWriteProcTest
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
