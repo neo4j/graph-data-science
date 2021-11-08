@@ -46,6 +46,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.test.config.ToleranceConfigProcTest;
@@ -74,7 +75,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
         return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream));
     }
 

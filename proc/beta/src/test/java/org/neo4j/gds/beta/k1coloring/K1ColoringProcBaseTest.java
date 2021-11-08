@@ -24,15 +24,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.HeapControlTest;
-import org.neo4j.gds.test.config.IterationsConfigProcTest;
-import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.HeapControlTest;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
+import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -46,10 +47,17 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     HeapControlTest<K1Coloring, CONFIG, HugeLongArray> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(
+            modeSpecificConfigTests(), Stream.of(
+                IterationsConfigProcTest.test(proc(), createMinimalConfig()),
+                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     @Neo4jGraph

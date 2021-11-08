@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
@@ -27,11 +28,14 @@ import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,6 +43,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
+
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream
+            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
+            .flatMap(Collection::stream);
+    }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {

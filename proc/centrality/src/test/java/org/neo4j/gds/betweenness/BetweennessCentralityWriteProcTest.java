@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
+import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
 import java.util.Collection;
 import java.util.Map;
@@ -41,9 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
+    final Stream<DynamicTest> configTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

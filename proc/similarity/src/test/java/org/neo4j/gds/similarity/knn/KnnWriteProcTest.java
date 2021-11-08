@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -34,9 +35,12 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,6 +50,13 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelationshipWithPropertyTest<Knn, KnnWriteConfig, Knn.Result> {
+
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream
+            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
+            .flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<Knn, Knn.Result, KnnWriteConfig>> getProcedureClazz() {

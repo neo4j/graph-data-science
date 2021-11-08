@@ -41,6 +41,7 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
@@ -70,7 +71,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig()),
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
+            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream));
     }
 
