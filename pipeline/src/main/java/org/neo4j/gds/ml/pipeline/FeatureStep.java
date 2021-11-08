@@ -33,5 +33,5 @@ public interface FeatureStep extends ToMapConvertible {
 
     Map<String, Object> configuration();
 
-    int outputFeatureDimension(Graph graph);
+    int featureDimension(Graph graph);
 }

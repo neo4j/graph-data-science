@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class FeatureStepUtil {
+public final class FeatureStepUtil {
 
     private FeatureStepUtil() {}
 
@@ -37,7 +37,7 @@ final class FeatureStepUtil {
         return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
     }
 
-    static int propertyDimension(Graph graph, String nodeProperty) {
+    public static int propertyDimension(Graph graph, String nodeProperty) {
         var nodeProperties = graph.nodeProperties(nodeProperty);
 
         int dimension = 0;
