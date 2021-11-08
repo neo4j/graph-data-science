@@ -94,7 +94,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public int outputFeatureDimension(Graph graph) {
+    public int featureDimension(Graph graph) {
         return 1;
     }
 

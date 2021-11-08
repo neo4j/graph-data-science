@@ -88,7 +88,7 @@ public class L2FeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public int outputFeatureDimension(Graph graph) {
+    public int featureDimension(Graph graph) {
         return FeatureStepUtil.totalPropertyDimension(graph, nodeProperties);
     }
 

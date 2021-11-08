@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.FeatureStep;
 
 import java.util.List;
@@ -41,24 +42,21 @@ public class NodeClassificationFeatureStep implements ToMapConvertible, FeatureS
 
     @Override
     public String name() {
-        //TODO move this method to LinkFeatureStep
-        throw new IllegalStateException("NodeClassificationFeatureStep does not have name");
+        return "feature";
     }
 
     @Override
     public Map<String, Object> configuration() {
-        //TODO move this method to LinkFeatureStep
-        throw new IllegalStateException("NodeClassificationFeatureStep does not have configuration");
+        return Map.of("nodeProperty", nodeProperty);
     }
 
     @Override
-    public int outputFeatureDimension(Graph graph) {
-        //TODO move this method to LinkFeatureStep
-        throw new IllegalStateException("NodeClassificationFeatureStep does not support outputFeatureDimension");
+    public int featureDimension(Graph graph) {
+        return FeatureStepUtil.propertyDimension(graph, nodeProperty);
     }
 
     @Override
     public Map<String, Object> toMap() {
-        return Map.of("feature", nodeProperty);
+        return Map.of(name(), nodeProperty);
     }
 }
