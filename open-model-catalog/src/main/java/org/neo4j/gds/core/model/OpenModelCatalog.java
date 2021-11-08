@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -116,11 +115,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     @Override
     public boolean exists(String username, String modelName) {
         return getUserCatalog(username).exists(modelName);
-    }
-
-    @Override
-    public Optional<String> type(String username, String modelName) {
-        return getUserCatalog(username).type(modelName);
     }
 
     @Override

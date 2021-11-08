@@ -24,7 +24,6 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface ModelCatalog {
@@ -48,8 +47,6 @@ public interface ModelCatalog {
     Stream<Model<?, ?, ?>> getAllModels();
 
     boolean exists(String username, String modelName);
-
-    Optional<String> type(String username, String modelName);
 
     Model<?, ?, ?> drop(String username, String modelName);
 
