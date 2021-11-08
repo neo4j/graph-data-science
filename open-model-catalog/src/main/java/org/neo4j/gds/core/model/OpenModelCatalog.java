@@ -41,7 +41,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     private OpenModelCatalog() {}
 
     private static final Map<String, OpenUserCatalog> userCatalogs = new ConcurrentHashMap<>();
-    private static final OpenUserCatalog publicModels = new OpenUserCatalog();
 
     @Override
     public void set(Model<?, ?, ?> model) {
@@ -74,20 +73,16 @@ public final class OpenModelCatalog implements ModelCatalog {
         Class<I> infoClass
     ) {
         var userCatalog = getUserCatalog(username);
-        var userModel = userCatalog.get(modelName, dataClass, configClass, infoClass);
-        if (userModel != null) {
-            return userModel;
-        } else {
-            var publicModel = publicModels.get(modelName, dataClass, configClass, infoClass);
-            if (publicModel != null) {
-                return publicModel;
-            }
+        var model = userCatalog.get(modelName, dataClass, configClass, infoClass);
+        if (model == null) {
+            throw new NoSuchElementException(prettySuggestions(
+                formatWithLocale("Model with name `%s` does not exist.", modelName),
+                modelName,
+                userCatalog.availableModelNames()
+            ));
         }
-        throw new NoSuchElementException(prettySuggestions(
-            formatWithLocale("Model with name `%s` does not exist.", modelName),
-            modelName,
-            userCatalog.availableModelNames()
-        ));
+
+        return model;
     }
 
     @Override
@@ -99,10 +94,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
         var userCatalog = getUserCatalog(username);
         var model = userCatalog.getUntyped(modelName);
-        if (model == null) {
-            model = publicModels.getUntyped(modelName);
-        }
-
         if (model == null && failOnMissing) {
             throw new NoSuchElementException(prettySuggestions(
                 formatWithLocale("Model with name `%s` does not exist.", modelName),
@@ -124,8 +115,7 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     @Override
     public boolean exists(String username, String modelName) {
-        return getUserCatalog(username).exists(modelName) ||
-               publicModels.exists(modelName);
+        return getUserCatalog(username).exists(modelName);
     }
 
     @Override
@@ -140,27 +130,12 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     @Override
     public Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
-        if (publicModels.exists(modelName)) {
-            var model = publicModels.getUntyped(modelName);
-            if (model.creator().equals(username)) {
-                return publicModels.drop(modelName, failOnMissing);
-            }
-            throw new IllegalStateException(formatWithLocale("Only the creator of model %s can drop it.", modelName));
-        } else {
-            return getUserCatalog(username).drop(modelName, failOnMissing);
-        }
+        return getUserCatalog(username).drop(modelName, failOnMissing);
     }
 
     @Override
     public Collection<Model<?, ?, ?>> list(String username) {
-        var models = new ArrayList<>(getUserCatalog(username).list());
-        models.addAll(publicModels.list());
-        return models;
-    }
-
-    @Override
-    public @Nullable Model<?, ?, ?> list(String username, String modelName) {
-        return getUntyped(username, modelName, false);
+        return new ArrayList<>(getUserCatalog(username).list());
     }
 
     @Override
@@ -183,7 +158,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     @Override
     public void removeAllLoadedModels() {
         userCatalogs.clear();
-        publicModels.removeAllLoadedModels();
     }
 
     @Override

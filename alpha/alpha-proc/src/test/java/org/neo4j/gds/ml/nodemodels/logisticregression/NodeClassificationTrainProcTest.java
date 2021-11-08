@@ -108,7 +108,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         )));
 
         assertTrue(modelCatalog.exists("", "model"));
-        var model = modelCatalog.list("", "model");
+        var model = modelCatalog.getUntyped("", "model", false);
         assertThat(model.algoType()).isEqualTo("nodeLogisticRegression");
         assertThat(model.customInfo().toMap()).containsKeys("metrics", "classes", "bestParameters");
     }
