@@ -34,7 +34,6 @@ import org.neo4j.gds.model.catalog.TestTrainConfig;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -250,21 +249,6 @@ class OpenModelCatalogTest {
         assertTrue(modelCatalog.exists(USERNAME, "testModel"));
         assertFalse(modelCatalog.exists(USERNAME, "bogusModel"));
         assertFalse(modelCatalog.exists("fakeUser", "testModel"));
-    }
-
-    @Test
-    void getModelType() {
-        modelCatalog.set(TEST_MODEL);
-
-        Optional<String> testModel = modelCatalog.type(USERNAME, "testModel");
-        assertFalse(testModel.isEmpty());
-        assertEquals("testAlgo", testModel.get());
-    }
-
-    @Test
-    void getNonExistingModelType() {
-        Optional<String> bogusModel = modelCatalog.type(USERNAME, "bogusModel");
-        assertTrue(bogusModel.isEmpty());
     }
 
     @Test
