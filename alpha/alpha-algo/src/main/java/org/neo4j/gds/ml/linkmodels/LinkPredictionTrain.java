@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
@@ -167,7 +168,7 @@ public class LinkPredictionTrain
     }
 
     private ModelSelectResult modelSelect(HugeLongArray allNodeIds) {
-        var nodeSplits = trainValidationSplits(allNodeIds);
+        var nodeSplits = trainValidationSplits(ReadOnlyHugeLongArray.of(allNodeIds));
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
@@ -210,9 +211,18 @@ public class LinkPredictionTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray allNodeIds) {
-        var globalTargets = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
-        globalTargets.setAll(i -> 0L);
+    private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray allNodeIds) {
+        var globalTargets = new ReadOnlyHugeLongArray() {
+            @Override
+            public long get(long index) {
+                return 0L;
+            }
+
+            @Override
+            public long size() {
+                return trainGraph.nodeCount();
+            }
+        };
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), allNodeIds, globalTargets, config.randomSeed());
         return splitter.splits();
     }
@@ -249,7 +259,7 @@ public class LinkPredictionTrain
         var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
         progressTracker.setVolume(evaluationGraph.nodeCount());
-        var queue = new HugeBatchQueue(evaluationSet);
+        var queue = new HugeBatchQueue(ReadOnlyHugeLongArray.of(evaluationSet));
         queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
                 evaluationGraph.concurrentCopy(),
                 predictor,

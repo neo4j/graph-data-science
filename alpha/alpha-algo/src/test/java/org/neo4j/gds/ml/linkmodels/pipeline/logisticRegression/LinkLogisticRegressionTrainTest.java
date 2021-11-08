@@ -23,11 +23,12 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -63,15 +64,14 @@ class LinkLogisticRegressionTrainTest {
     List<String> features = List.of("a", "b");
     private HugeObjectArray<double[]> linkFeatures;
     private HugeDoubleArray targets;
-    private HugeLongArray trainSet;
+    private ReadOnlyHugeLongArray trainSet;
 
     @BeforeEach
     void setup() {
         this.targets = HugeDoubleArray.newArray(graph.relationshipCount(), AllocationTracker.empty());
         targets.setAll(idx -> (idx < 2) ? 1 : 0);
 
-        this.trainSet = HugeLongArray.newArray(graph.relationshipCount(), AllocationTracker.empty());
-        trainSet.setAll(i -> i);
+        trainSet = new ReadOnlyHugeLongIdentityArray(graph.relationshipCount());
 
         this.linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
@@ -107,7 +107,8 @@ class LinkLogisticRegressionTrainTest {
     @Test
     void shouldComputeWithStreakStopperConcurrently() {
         var config = LinkLogisticRegressionTrainConfig.of(Map.of("penalty", 1.0, "maxEpochs", 100, "tolerance", 1e-10, "batchSize", 1));
-        var linearRegression = new LinkLogisticRegressionTrain(trainSet,
+        var linearRegression = new LinkLogisticRegressionTrain(
+            trainSet,
             linkFeatures,
             targets,
             config,
@@ -130,7 +131,8 @@ class LinkLogisticRegressionTrainTest {
         var config = LinkLogisticRegressionTrainConfig.of(Map.of("maxEpochs", 100000, "tolerance", 1e-4));
         var configWithPenalty = LinkLogisticRegressionTrainConfig.of(Map.of("maxEpochs", 100000, "tolerance", 1e-4,  "penalty", 1));
 
-        Matrix result = new LinkLogisticRegressionTrain(trainSet,
+        Matrix result = new LinkLogisticRegressionTrain(
+            trainSet,
             linkFeatures,
             targets,
             config,
@@ -142,7 +144,8 @@ class LinkLogisticRegressionTrainTest {
             .weights()
             .data();
 
-        Matrix resultWithPenality = new LinkLogisticRegressionTrain(trainSet,
+        Matrix resultWithPenality = new LinkLogisticRegressionTrain(
+            trainSet,
             linkFeatures,
             targets,
             configWithPenalty,

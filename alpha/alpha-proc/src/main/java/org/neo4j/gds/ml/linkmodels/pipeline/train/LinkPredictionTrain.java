@@ -23,10 +23,11 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.collections.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -106,8 +107,7 @@ public class LinkPredictionTrain
 
         progressTracker.beginSubTask("extract train features");
         var trainData = extractFeaturesAndTargets(trainGraph);
-        var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
-        trainRelationshipIds.setAll(i -> i);
+        var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
         progressTracker.endSubTask("extract train features");
 
         progressTracker.beginSubTask("select model");
@@ -179,7 +179,7 @@ public class LinkPredictionTrain
 
     private LinkPredictionTrain.ModelSelectResult modelSelect(
         FeaturesAndTargets trainData,
-        HugeLongArray trainRelationshipIds
+        ReadOnlyHugeLongArray trainRelationshipIds
     ) {
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
@@ -202,12 +202,12 @@ public class LinkPredictionTrain
                 var trainSet = relSplit.trainSet();
                 var validationSet = relSplit.testSet();
                 // the below calls intentionally suppress progress logging of individual models
-                var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
+                var modelData = trainModel(ReadOnlyHugeLongArray.of(trainSet), trainData, modelParams, ProgressTracker.NULL_TRACKER);
 
                 // evaluate each model candidate on the train and validation sets
-                computeTrainMetric(trainData, modelData, trainSet, ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(trainSet), ProgressTracker.NULL_TRACKER)
                     .forEach(trainStatsBuilder::update);
-                computeTrainMetric(trainData, modelData, validationSet, ProgressTracker.NULL_TRACKER)
+                computeTrainMetric(trainData, modelData, ReadOnlyHugeLongArray.of(validationSet), ProgressTracker.NULL_TRACKER)
                     .forEach(validationStatsBuilder::update);
             }
 
@@ -264,14 +264,11 @@ public class LinkPredictionTrain
         ));
     }
 
-
-    private List<TrainingExamplesSplit> trainValidationSplits(HugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
-        var globalTargets = HugeLongArray.newArray(trainRelationshipIds.size(), allocationTracker);
-        globalTargets.setAll(i -> (long) actualTargets.get(i));
+    private List<TrainingExamplesSplit> trainValidationSplits(ReadOnlyHugeLongArray trainRelationshipIds, HugeDoubleArray actualTargets) {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            globalTargets,
+            new ReadOnlyHugeDoubleToLongArrayWrapper(actualTargets),
             trainConfig.randomSeed()
         );
         return splitter.splits();
@@ -303,7 +300,7 @@ public class LinkPredictionTrain
 
 
     private LinkLogisticRegressionData trainModel(
-        HugeLongArray trainSet,
+        ReadOnlyHugeLongArray trainSet,
         FeaturesAndTargets trainData,
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
@@ -324,7 +321,7 @@ public class LinkPredictionTrain
     private Map<LinkMetric, Double> computeTrainMetric(
         FeaturesAndTargets trainData,
         LinkLogisticRegressionData modelData,
-        HugeLongArray evaluationSet,
+        ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
         return computeMetric(trainData, modelData, new HugeBatchQueue(evaluationSet), progressTracker);

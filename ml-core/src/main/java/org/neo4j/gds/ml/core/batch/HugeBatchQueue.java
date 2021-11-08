@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.LinkedList;
 import java.util.Optional;
 
 public class HugeBatchQueue extends BatchQueue {
-    private final HugeLongArray data;
+    private final ReadOnlyHugeLongArray data;
 
-    public HugeBatchQueue(HugeLongArray data) {
+    public HugeBatchQueue(ReadOnlyHugeLongArray data) {
         super(data.size(), DEFAULT_BATCH_SIZE);
         this.data = data;
     }
 
-    public HugeBatchQueue(HugeLongArray data, int batchSize) {
+    public HugeBatchQueue(ReadOnlyHugeLongArray data, int batchSize) {
         super(data.size(), batchSize);
         this.data = data;
     }

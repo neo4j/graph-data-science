@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,7 +71,12 @@ class StratifiedKFoldSplitterTest {
         var totalClassCounts = classCounts(targets);
 
 
-        var kFoldSplitter = new StratifiedKFoldSplitter(k, nodeIds, targets, Optional.of(42L));
+        var kFoldSplitter = new StratifiedKFoldSplitter(
+            k,
+            ReadOnlyHugeLongArray.of(nodeIds),
+            ReadOnlyHugeLongArray.of(targets),
+            Optional.of(42L)
+        );
         var splits = kFoldSplitter.splits();
         assertThat(splits.size()).isEqualTo(k);
         var unionOfTestSets = new HashSet<Long>();
