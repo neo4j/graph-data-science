@@ -96,8 +96,7 @@ class OpenUserCatalog implements UserCatalog {
 
     @Override
     public Optional<String> type(String modelName) {
-        return Optional.ofNullable(userModels.get(modelName))
-            .map(Model::algoType);
+        return Optional.ofNullable(userModels.get(modelName)).map(Model::algoType);
     }
 
     @Override

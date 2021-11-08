@@ -57,8 +57,6 @@ public interface ModelCatalog {
 
     Collection<Model<?, ?, ?>> list(String username);
 
-    @Nullable Model<?, ?, ?> list(String username, String modelName);
-
     Model<?, ?, ?> publish(String username, String modelName);
 
     boolean isEmpty();
