@@ -97,8 +97,16 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
         var testDataSplit = dataSplits.get(DatasetSplits.TEST);
 
-        var trainGraph = graphStore.getGraph(trainDataSplit.nodeLabels(), trainDataSplit.relationshipTypes(), Optional.of("label"));
-        var testGraph = graphStore.getGraph(testDataSplit.nodeLabels(), testDataSplit.relationshipTypes(), Optional.of("label"));
+        var trainGraph = graphStore.getGraph(
+            trainDataSplit.nodeLabels(),
+            trainDataSplit.relationshipTypes(),
+            Optional.of("label")
+        );
+        var testGraph = graphStore.getGraph(
+            testDataSplit.nodeLabels(),
+            testDataSplit.relationshipTypes(),
+            Optional.of("label")
+        );
         return new LinkPredictionTrain(
             trainGraph,
             testGraph,
@@ -113,13 +121,18 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<
         return this;
     }
 
-    @Override
-    protected void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
+    private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
         datasets.values()
             .stream()
             .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
             .distinct()
             .collect(Collectors.toList())
             .forEach(graphStore::deleteRelationships);
+    }
+
+    @Override
+    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
+        removeDataSplitRelationships(datasets);
+        super.cleanUpGraphStore(datasets);
     }
 }

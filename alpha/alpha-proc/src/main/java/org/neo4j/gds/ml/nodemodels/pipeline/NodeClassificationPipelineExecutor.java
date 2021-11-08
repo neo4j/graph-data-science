@@ -101,11 +101,6 @@ public class NodeClassificationPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
-        // We didnt create any relationships so no need to remove
-    }
-
-    @Override
     public NodeClassificationPipelineExecutor me() {
         return this;
     }
