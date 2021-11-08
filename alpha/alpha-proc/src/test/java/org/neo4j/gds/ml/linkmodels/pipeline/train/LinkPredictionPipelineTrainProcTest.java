@@ -144,13 +144,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe1', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            "   { pipeline: 'pipe1', modelName: 'trainedModel1', negativeClassWeight: 1.0, randomSeed: 1337 }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
                 Map.of(
                     "modelInfo", Matchers.allOf(
-                        Matchers.hasEntry("modelName", "trainedModel"),
+                        Matchers.hasEntry("modelName", "trainedModel1"),
                         Matchers.hasEntry("modelType", "Link prediction pipeline"),
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("metrics"),
@@ -174,7 +174,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
                     "   $graphName, " +
-                    "   { pipeline: 'pipe2', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { pipeline: 'pipe2', modelName: 'trainedModel2', negativeClassWeight: 1.0, randomSeed: 1337 }" +
                     ")",
             Map.of("graphName", GRAPH_NAME),
             "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
@@ -187,7 +187,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe3', 'L2', {nodeProperties: ['pr']})");
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
-                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe3', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe3', modelName: 'trainedModel3', negativeClassWeight: 1.0, randomSeed: 1337 }" +
                     ")",
             "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
         );
@@ -203,13 +203,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe4', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
+            "   { pipeline: 'pipe4', modelName: 'trainedModel4', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
                 Map.of(
                     "modelInfo", Matchers.allOf(
-                        Matchers.hasEntry("modelName", "trainedModel"),
+                        Matchers.hasEntry("modelName", "trainedModel4"),
                         Matchers.hasEntry("modelType", "Link prediction pipeline"),
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("metrics"),
@@ -236,7 +236,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe5', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe5', modelName: 'trainedModel5', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         Map<String, Object> firstModelInfo = runQuery(
@@ -245,7 +245,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             row -> (Map<String, Object>) row.next().get("modelInfo")
         );
 
-        runQuery("CALL gds.beta.model.drop('trainedModel')");
+        runQuery("CALL gds.beta.model.drop('trainedModel5')");
 
         Map<String, Object> secondModelInfo = runQuery(
             trainQuery,
@@ -267,17 +267,17 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe6', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe6', modelName: 'trainedModel6', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
-        var data1 = modelData();
+        var data1 = modelData("trainedModel6");
 
-        runQuery("CALL gds.beta.model.drop('trainedModel')");
+        runQuery("CALL gds.beta.model.drop('trainedModel6')");
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
 
-        assertThat(data1).usingRecursiveComparison().isEqualTo(modelData());
+        assertThat(data1).usingRecursiveComparison().isEqualTo(modelData("trainedModel6"));
     }
 
     @Test
@@ -291,22 +291,22 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe7', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe7', modelName: 'trainedModel7', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
-        var data1 = modelData();
+        var data1 = modelData("trainedModel7");
 
-        runQuery("CALL gds.beta.model.drop('trainedModel')");
+        runQuery("CALL gds.beta.model.drop('trainedModel7')");
 
         runQuery(trainQuery, Map.of("graphName", "weighted_graph", "relFilter", List.of("*")));
 
-        assertThat(data1).usingRecursiveComparison().isNotEqualTo(modelData());
+        assertThat(data1).usingRecursiveComparison().isNotEqualTo(modelData("trainedModel7"));
     }
 
-    private LinkLogisticRegressionData modelData() {
+    private LinkLogisticRegressionData modelData(String trainedModelName) {
         Stream<Model<?, ?, ?>> allModels = modelCatalog.getAllModels();
-        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals("trainedModel")).findFirst().get();
+        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals(trainedModelName)).findFirst().get();
         return (LinkLogisticRegressionData) model.data();
     }
 }
