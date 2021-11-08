@@ -136,15 +136,15 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void trainAModel() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe1')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe1', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe1', [{penalty: 1}, {penalty: 2}] )");
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            "   { pipeline: 'pipe1', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
@@ -169,12 +169,12 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void failsWhenMissingFeatures() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe2')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe2', 'pageRank', {mutateProperty: 'pr'})");
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
                     "   $graphName, " +
-                    "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { pipeline: 'pipe2', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
                     ")",
             Map.of("graphName", GRAPH_NAME),
             "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.alpha.ml.pipeline.linkPrediction.addFeature`.");
@@ -182,12 +182,12 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void failOnAnonymousGraph() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe3')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe3', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe3', 'L2', {nodeProperties: ['pr']})");
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
-                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe3', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337 }" +
                     ")",
             "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
         );
@@ -195,15 +195,15 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void trainOnNodeLabelFilteredGraph() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['array', 'pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe4')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe4', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe4', 'L2', {nodeProperties: ['array', 'pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe4', [{penalty: 1}, {penalty: 2}] )");
 
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
+            "   { pipeline: 'pipe4', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
@@ -227,16 +227,16 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void trainOnRelationshipFilteredGraph() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 1}, {penalty: 2}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe5')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe5', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe5', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe5', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe5', [{penalty: 1}, {penalty: 2}] )");
 
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe5', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         Map<String, Object> firstModelInfo = runQuery(
@@ -258,16 +258,16 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void trainIsDeterministic() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe6')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe6', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe6', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe6', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe6', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
 
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe6', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
@@ -282,16 +282,16 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void trainUsesRelationshipWeight() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe7')");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe7', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe7', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureSplit('pipe7', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.configureParams('pipe7', [{penalty: 0, maxEpochs: 10, minEpochs: 10}] )");
 
         String trainQuery =
             "CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe7', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
             ")";
 
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
