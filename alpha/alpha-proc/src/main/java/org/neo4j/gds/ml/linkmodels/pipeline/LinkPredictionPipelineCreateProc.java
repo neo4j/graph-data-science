@@ -20,14 +20,11 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -64,11 +61,4 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
         return Stream.of(new PipelineInfoResult(pipelineName, model.customInfo()));
     }
 
-    @ValueClass
-    @Configuration
-    public interface PipelineDummyTrainConfig extends BaseConfig, ModelConfig {
-        static PipelineDummyTrainConfig of(String username) {
-            return ImmutablePipelineDummyTrainConfig.of(username, "");
-        }
-    }
 }
