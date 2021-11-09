@@ -148,7 +148,8 @@ public final class GraphStoreValidation {
 
         if (labelFilteredGraphContainsNode(filterLabels, graphStore.nodes(), sourceNodeId)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Source node does not exist in the in-memory graph: `%d`",
+                "Source node does not exist in the in-memory graph%s: `%d`",
+                nodeLabelFilterDescription(filterLabels, graphStore),
                 sourceNodeId
             ));
         }
@@ -166,7 +167,8 @@ public final class GraphStoreValidation {
 
             if (!missingNodes.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Source nodes do not exist in the in-memory graph or do not have the specified node labels: %s",
+                    "Source nodes do not exist in the in-memory graph%s: %s",
+                    nodeLabelFilterDescription(filteredNodeLabels, graphStore),
                     StringJoining.join(missingNodes)
                 ));
             }
@@ -182,10 +184,17 @@ public final class GraphStoreValidation {
 
         if (labelFilteredGraphContainsNode(filterLabels, graphStore.nodes(), targetNodeId)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Target node does not exist in the in-memory graph: `%d`",
+                "Target node does not exist in the in-memory graph%s: `%d`",
+                nodeLabelFilterDescription(filterLabels, graphStore),
                 targetNodeId
             ));
         }
+    }
+
+    private static String nodeLabelFilterDescription(Collection<NodeLabel> filteredNodeLabels, GraphStore graphStore) {
+        return filteredNodeLabels.containsAll(graphStore.nodeLabels())
+            ? ""
+            : " for the labels " + StringJoining.join(filteredNodeLabels.stream().map(NodeLabel::name));
     }
 
     private static boolean labelFilteredGraphContainsNode(
