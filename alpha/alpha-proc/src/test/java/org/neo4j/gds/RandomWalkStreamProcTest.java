@@ -129,7 +129,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .addParameter("sourceNodes", 42)
             .yields();
 
-        assertError(query, "Source nodes do not exist in the in-memory graph or do not have the specified node labels: ['42']");
+        assertError(query, "Source nodes do not exist in the in-memory graph: ['42']");
     }
 
     @Test
@@ -144,7 +144,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .addParameter("nodeLabels", List.of("Node1", "Node2"))
             .yields();
 
-        assertError(query, "Source nodes do not exist in the in-memory graph or do not have the specified node labels: ['3']");
+        assertError(query, "Source nodes do not exist in the in-memory graph for the labels ['Node1', 'Node2']: ['3']");
     }
 
     @Override
