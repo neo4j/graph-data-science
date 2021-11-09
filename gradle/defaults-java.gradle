@@ -1,4 +1,14 @@
 allprojects {
+    plugins.withType(JavaPlugin) {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(17)
+            }
+        }
+    }
+}
+
+allprojects {
     plugins.withType(JavaLibraryPlugin) {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -40,7 +50,13 @@ allprojects {
                 suspend = true
             }
 
-            jvmArgs += '--illegal-access=permit'
+            // Since JDK 17 the default access to the following
+            // packages is "deny". We need to open them in order
+            // to gain access in GDS / Neo4j.
+            jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
