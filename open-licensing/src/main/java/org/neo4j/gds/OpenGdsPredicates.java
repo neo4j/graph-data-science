@@ -19,11 +19,6 @@
  */
 package org.neo4j.gds;
 
-public final class ProcPreconditions {
-
-    private ProcPreconditions() {}
-
-    public static void check() throws IllegalStateException {
-        ProcedurePreconditionsProvider.procedurePreconditions().check();
-    }
+public class OpenGdsPredicates {
+    public static final String CAN_RUN_PROCEDURE = "can i run a normal procedure please thanks";
 }
