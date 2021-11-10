@@ -55,5 +55,5 @@ public interface UserCatalog {
 
     void removeAllLoadedModels();
 
-    void checkStorable(String modelName, String modelType);
+    void verifyModelCanBeStored(String modelName, String modelType);
 }

@@ -60,7 +60,7 @@ class OpenUserCatalog implements UserCatalog {
 
     @Override
     public void set(Model<?, ?, ?> model) {
-        checkStorable(model.name(), model.algoType());
+        verifyModelCanBeStored(model.name(), model.algoType());
         userModels.put(model.name(), model);
     }
 
@@ -115,7 +115,7 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public void checkStorable(String modelName, String modelType) {
+    public void verifyModelCanBeStored(String modelName, String modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
     }

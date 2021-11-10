@@ -218,7 +218,7 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.checkStorable(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
+            () -> modelCatalog.verifyModelCanBeStored(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
         );
 
         assertEquals(
