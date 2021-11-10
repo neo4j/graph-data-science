@@ -111,6 +111,8 @@ public final class Neo4jProxy {
         );
         log.info("Loaded compatibility layer: %s", IMPL.getClass());
         log.info("Loaded version: %s", neo4jVersion);
+        log.info("Java vendor: %s", System.getProperty("java.vendor"));
+        log.info("Java version: %s", System.getProperty("java.version"));
     }
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
