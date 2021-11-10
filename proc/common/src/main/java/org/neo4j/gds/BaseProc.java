@@ -20,9 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -31,13 +29,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
@@ -49,7 +45,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
-import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -140,38 +135,6 @@ public abstract class BaseProc {
             .isAdmin(transaction.securityContext());
     }
 
-    protected final GraphLoader newLoader(
-        GraphCreateConfig createConfig,
-        AllocationTracker allocationTracker,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
-        if (api == null) {
-            return newFictitiousLoader(createConfig);
-        }
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .transactionContext(TransactionContext.of(api, procedureTransaction))
-                .api(api)
-                .log(log)
-                .allocationTracker(allocationTracker)
-                .taskRegistryFactory(taskRegistryFactory)
-                .terminationFlag(TerminationFlag.wrap(transaction))
-                .build())
-            .username(username())
-            .createConfig(createConfig)
-            .build();
-    }
-
-    private GraphLoader newFictitiousLoader(GraphCreateConfig createConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(GraphLoaderContext.NULL_CONTEXT)
-            .username(username())
-            .createConfig(createConfig)
-            .build();
-    }
-
     protected final void runWithExceptionLogging(String message, Runnable runnable) {
         try {
             runnable.run();
@@ -259,13 +222,13 @@ public abstract class BaseProc {
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();
 
-            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
+            GraphLoader loader = ImplicitGraphStoreLoader.fromBaseProc(config, taskRegistryFactory, this).newLoader();
             graphStoreFactory = loader
                 .createConfig()
                 .graphStoreFactory()
                 .getWithDimension(loader.context(), estimateDimensions);
         } else {
-            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
+            GraphLoader loader = ImplicitGraphStoreLoader.fromBaseProc(config, EmptyTaskRegistryFactory.INSTANCE, this).newLoader();
             graphStoreFactory = loader.graphStoreFactory();
             estimateDimensions = graphStoreFactory.estimationDimensions();
         }

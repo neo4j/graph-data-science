@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ImplicitGraphStoreLoader;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipProjections;
@@ -31,7 +32,6 @@ import org.neo4j.gds.config.GraphCreateFromCypherConfig;
 import org.neo4j.gds.config.GraphCreateFromGraphConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -273,8 +273,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphLoader loader = newLoader(config, allocationTracker(), taskRegistryFactory);
-            GraphStore graphStore = loader.graphStore();
+            GraphStore graphStore = ImplicitGraphStoreLoader.fromBaseProc(config, taskRegistryFactory, this).graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())

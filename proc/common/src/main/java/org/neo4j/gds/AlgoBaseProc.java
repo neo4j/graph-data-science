@@ -32,7 +32,6 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -346,25 +345,25 @@ public abstract class AlgoBaseProc<
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
-        GraphStoreWithConfig graphCandidate;
+        var graphStoreLoader = GraphStoreLoader.of(
+            config,
+            maybeGraphName,
+            username(),
+            databaseId(),
+            isGdsAdmin(),
+            allocationTracker(),
+            taskRegistryFactory,
+            api,
+            procedureTransaction,
+            transaction,
+            log
+        );
 
-        if (maybeGraphName.isPresent()) {
-            graphCandidate = graphStoreFromCatalog(maybeGraphName.get(), config);
-            validateConfigsBeforeLoad(graphCandidate.config(), config);
-        } else if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            validateConfigsBeforeLoad(createConfig, config);
+        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
+        validateConfigsBeforeLoad(graphCreateConfig, config);
+        var graphStore = graphStoreLoader.graphStore();
+        validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
 
-            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty(), taskRegistryFactory);
-            GraphStore graphStore = loader.graphStore();
-
-            graphCandidate = GraphStoreWithConfig.of(graphStore, createConfig);
-        } else {
-            throw new IllegalStateException("There must be either a graph name or an implicit create config");
-        }
-
-        var graphStore = graphCandidate.graphStore();
-        validateConfigWithGraphStore(graphStore, graphCandidate.config(), config);
         return graphStore;
     }
 
