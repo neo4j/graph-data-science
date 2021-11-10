@@ -56,6 +56,9 @@ allprojects {
             jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
             jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
             jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/com.sun.tools.javac.api=ALL-UNNAMED'
 
             maxHeapSize = "3G"
             useJUnitPlatform {
