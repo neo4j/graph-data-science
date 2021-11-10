@@ -41,7 +41,7 @@ public class ModelDropProc extends ModelCatalogProc {
     public Stream<ModelCatalogResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        var model = modelCatalog.getUntyped(username(), modelName);
+        var model = modelCatalog.getUntypedOrThrow(username(), modelName);
 
         if (model.stored()) {
             model.unload();

@@ -43,7 +43,7 @@ public final class LinkPredictionPipelineCompanion {
     private LinkPredictionPipelineCompanion() {}
 
     public static LinkPredictionPipeline getLPPipeline(String pipelineName, String username) {
-       var model = modelCatalog.getUntyped(username, pipelineName);
+       var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
 
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
