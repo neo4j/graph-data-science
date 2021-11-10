@@ -26,56 +26,39 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 
 public class ImplicitGraphStoreLoader implements GraphStoreLoader {
 
     private final GraphCreateConfig graphCreateConfig;
-    private final AllocationTracker allocationTracker;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final GraphDatabaseAPI api;
-    private final Transaction transaction;
-    private final KernelTransaction kernelTransaction;
-    private final Log log;
     private final String username;
+    private final GraphLoaderContext graphLoaderContext;
 
     public static ImplicitGraphStoreLoader fromBaseProc(GraphCreateConfig graphCreateConfig, TaskRegistryFactory taskRegistryFactory, BaseProc baseProc) {
+        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
+            .transactionContext(TransactionContext.of(baseProc.api, baseProc.procedureTransaction))
+            .api(baseProc.api)
+            .log(baseProc.log)
+            .allocationTracker(baseProc.allocationTracker)
+            .taskRegistryFactory(taskRegistryFactory)
+            .terminationFlag(TerminationFlag.wrap(baseProc.transaction))
+            .build();
         return new ImplicitGraphStoreLoader(
             graphCreateConfig,
-            baseProc.allocationTracker(),
-            taskRegistryFactory,
-            baseProc.api,
-            baseProc.procedureTransaction,
-            baseProc.transaction,
-            baseProc.log,
-            baseProc.username()
+            baseProc.username(),
+            graphLoaderContext
         );
     }
 
     ImplicitGraphStoreLoader(
         GraphCreateConfig graphCreateConfig,
-        AllocationTracker allocationTracker,
-        TaskRegistryFactory taskRegistryFactory,
-        GraphDatabaseAPI api,
-        Transaction transaction,
-        KernelTransaction kernelTransaction,
-        Log log,
-        String username
+        String username,
+        GraphLoaderContext graphLoaderContext
     ) {
         this.graphCreateConfig = graphCreateConfig;
-        this.allocationTracker = allocationTracker;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.api = api;
-        this.transaction = transaction;
-        this.kernelTransaction = kernelTransaction;
-        this.log = log;
         this.username = username;
+        this.graphLoaderContext = graphLoaderContext;
     }
 
     @Override
@@ -89,19 +72,12 @@ public class ImplicitGraphStoreLoader implements GraphStoreLoader {
     }
 
     GraphLoader newLoader() {
-        if (api == null) {
+        if (graphLoaderContext.api() == null) {
             return newFictitiousLoader(graphCreateConfig);
         }
         return ImmutableGraphLoader
             .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .transactionContext(TransactionContext.of(api, transaction))
-                .api(api)
-                .log(log)
-                .allocationTracker(allocationTracker)
-                .taskRegistryFactory(taskRegistryFactory)
-                .terminationFlag(TerminationFlag.wrap(kernelTransaction))
-                .build())
+            .context(graphLoaderContext)
             .username(username)
             .createConfig(graphCreateConfig)
             .build();

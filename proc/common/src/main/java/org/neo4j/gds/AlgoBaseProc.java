@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -41,6 +42,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -345,18 +347,22 @@ public abstract class AlgoBaseProc<
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
+        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
+            .transactionContext(TransactionContext.of(api, procedureTransaction))
+            .api(api)
+            .log(log)
+            .allocationTracker(allocationTracker)
+            .taskRegistryFactory(taskRegistryFactory)
+            .terminationFlag(TerminationFlag.wrap(transaction))
+            .build();
+
         var graphStoreLoader = GraphStoreLoader.of(
             config,
             maybeGraphName,
             username(),
             databaseId(),
             isGdsAdmin(),
-            allocationTracker(),
-            taskRegistryFactory,
-            api,
-            procedureTransaction,
-            transaction,
-            log
+            graphLoaderContext
         );
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
