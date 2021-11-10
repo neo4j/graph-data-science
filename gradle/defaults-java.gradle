@@ -2,7 +2,11 @@ allprojects {
     plugins.withType(JavaPlugin) {
         java {
             toolchain {
-                languageVersion = JavaLanguageVersion.of(17)
+                if (ver.'neo4j' != neos.'dev') {
+                    languageVersion = JavaLanguageVersion.of(11)
+                } else {
+                    languageVersion = JavaLanguageVersion.of(17)
+                }
             }
         }
     }
@@ -50,16 +54,20 @@ allprojects {
                 suspend = true
             }
 
+
             // Since JDK 17 the default access to the following
             // packages is "deny". We need to open them in order
             // to gain access in GDS / Neo4j.
-            jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
-            jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
-            jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
-            jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
-            jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
-            jvmArgs += '--add-opens=java.base/com.sun.tools.javac.api=ALL-UNNAMED'
-
+            if (ver.'neo4j' == neos.'dev') {
+                jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+                jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+                jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+                jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+                jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+                jvmArgs += '--add-opens=java.base/com.sun.tools.javac.api=ALL-UNNAMED'
+            } else {
+                jvmArgs += '--illegal-access=permit'
+            }
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
