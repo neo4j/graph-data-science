@@ -2,6 +2,12 @@ allprojects {
     plugins.withType(JavaPlugin) {
         java {
             toolchain {
+                // By specifying the vendor, we force us (and CI) to
+                // use that specific JDK version. If it is not locally
+                // available, Gradle will provision the toolchain, i.e.
+                // download it.
+                vendor = JvmVendorSpec.matching("ADOPTIUM")
+//                vendor = JvmVendorSpec.ADOPTOPENJDK
                 if (ver.'neo4j' != neos.'dev') {
                     languageVersion = JavaLanguageVersion.of(11)
                 } else {
