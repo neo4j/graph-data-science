@@ -27,15 +27,14 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.impl.closeness.MSClosenessCentrality;
 
-import java.util.function.DoubleConsumer;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.mockito.AdditionalMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
@@ -65,6 +64,9 @@ class ClosenessCentralityDiscoTest {
     @Inject
     private Graph graph;
 
+    @Inject
+    IdFunction idFunction;
+
     @Test
     void testHuge() {
         final MSClosenessCentrality algo = new MSClosenessCentrality(
@@ -75,12 +77,19 @@ class ClosenessCentralityDiscoTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        final DoubleConsumer mock = mock(DoubleConsumer.class);
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> mock.accept(r.centrality));
 
-        verify(mock, times(3)).accept(eq(0.5, 0.01));
-        verify(mock, times(2)).accept(eq(0.25, 0.01));
+        algo.compute();
+
+        var actual = algo.resultStream().collect(Collectors.toMap(r -> r.nodeId, r -> r.centrality));
+
+        var expected = Map.of(
+            idFunction.of("a"), 0.5,
+            idFunction.of("b"), 0.5,
+            idFunction.of("c"), 0.5,
+            idFunction.of("d"), 0.25,
+            idFunction.of("e"), 0.25
+        );
+
+        assertThat(actual).isEqualTo(expected);
     }
 }
