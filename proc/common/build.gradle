@@ -44,7 +44,7 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
-    testImplementation project(':open-licensing')
+    implementation project(':open-licensing')
     testImplementation project(':proc-test')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
