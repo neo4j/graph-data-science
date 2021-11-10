@@ -65,11 +65,6 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public void setUnsafe(Model<?, ?, ?> model) {
-        userModels.put(model.name(), model);
-    }
-
-    @Override
     public Collection<Model<?, ?, ?>> list() {
         return userModels.values();
     }
