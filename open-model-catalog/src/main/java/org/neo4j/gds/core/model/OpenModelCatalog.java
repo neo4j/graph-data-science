@@ -53,17 +53,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public void setUnsafe(Model<?, ?, ?> model) {
-        userCatalogs.compute(model.creator(), (user, userCatalog) -> {
-            if (userCatalog == null) {
-                userCatalog = new OpenUserCatalog();
-            }
-            userCatalog.setUnsafe(model);
-            return userCatalog;
-        });
-    }
-
-    @Override
     public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String username,
         String modelName,

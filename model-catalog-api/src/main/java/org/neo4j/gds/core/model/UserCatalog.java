@@ -39,8 +39,6 @@ public interface UserCatalog {
 
     void set(Model<?, ?, ?> model);
 
-    void setUnsafe(Model<?, ?, ?> model);
-
     Collection<Model<?, ?, ?>> list();
 
     Model<?, ?, ?> list(String modelName);

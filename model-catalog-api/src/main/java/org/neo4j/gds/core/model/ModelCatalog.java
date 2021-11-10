@@ -30,8 +30,6 @@ public interface ModelCatalog {
 
     void set(Model<?, ?, ?> model);
 
-    void setUnsafe(Model<?, ?, ?> model);
-
     <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String username,
         String modelName,
