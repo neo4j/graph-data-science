@@ -45,7 +45,7 @@ public class ModelExistsProc extends ModelCatalogProc {
 
         return Stream.of(new ModelExistsResult(
             modelName,
-            Optional.ofNullable(modelCatalog.getUntyped(username(), modelName, false)).map(Model::algoType).orElse("n/a"),
+            Optional.ofNullable(modelCatalog.getUntyped(username(), modelName)).map(Model::algoType).orElse("n/a"),
             modelCatalog.exists(username(), modelName)
         ));
     }

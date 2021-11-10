@@ -262,7 +262,7 @@ class OpenModelCatalogTest {
 
     @Test
     void shouldNotThrowWhenListingNonExistentModel() {
-        assertDoesNotThrow(() -> modelCatalog.getUntyped(USERNAME, "nonExistentModel", false));
+        assertDoesNotThrow(() -> modelCatalog.getUntyped(USERNAME, "nonExistentModel"));
     }
 
     @Test

@@ -38,9 +38,9 @@ public interface ModelCatalog {
         Class<I> infoClass
     );
 
-    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName);
+    Model<?, ?, ?> getUntypedOrThrow(String username, String modelName);
 
-    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing);
+    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName);
 
     Stream<Model<?, ?, ?>> getAllModels();
 

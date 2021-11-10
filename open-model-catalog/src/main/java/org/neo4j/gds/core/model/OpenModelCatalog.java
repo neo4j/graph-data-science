@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
@@ -74,23 +75,13 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
+    public Model<?, ?, ?> getUntypedOrThrow(String username, String modelName) {
         return getUntyped(username, modelName, true);
     }
 
     @Override
-    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
-        var userCatalog = getUserCatalog(username);
-        var model = userCatalog.getUntyped(modelName);
-        if (model == null && failOnMissing) {
-            throw new NoSuchElementException(prettySuggestions(
-                formatWithLocale("Model with name `%s` does not exist.", modelName),
-                modelName,
-                userCatalog.availableModelNames()
-            ));
-        }
-
-        return model;
+    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
+        return getUntyped(username, modelName, false);
     }
 
     @Override
@@ -146,6 +137,21 @@ public final class OpenModelCatalog implements ModelCatalog {
     @Override
     public void verifyModelCanBeStored(String username, String modelName, String modelType) {
         getUserCatalog(username).verifyModelCanBeStored(modelName, modelType);
+    }
+
+    @Contract(value = "_, _, true -> !null")
+    private @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
+        var userCatalog = getUserCatalog(username);
+        var model = userCatalog.getUntyped(modelName);
+        if (model == null && failOnMissing) {
+            throw new NoSuchElementException(prettySuggestions(
+                formatWithLocale("Model with name `%s` does not exist.", modelName),
+                modelName,
+                userCatalog.availableModelNames()
+            ));
+        }
+
+        return model;
     }
 
     private static OpenUserCatalog getUserCatalog(String username) {
