@@ -42,11 +42,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.condition.JRE.JAVA_12;
 import static org.junit.jupiter.api.condition.JRE.JAVA_13;
 import static org.junit.jupiter.api.condition.JRE.JAVA_14;
+import static org.junit.jupiter.api.condition.JRE.JAVA_17;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // Need to disable this for Java versions > 11
-// the dependency to com.google.testing.compile:compile-testing has not been updated since May 2019
-@DisabledOnJre({JAVA_12, JAVA_13, JAVA_14})
+// the dependency to com.google.testing.compile:compile-testing has not been updated since October 2020
+@DisabledOnJre({JAVA_12, JAVA_13, JAVA_14, JAVA_17})
 @EnableRuleMigrationSupport
 class PregelProcessorTest {
 
