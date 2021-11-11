@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 public class NodeClassificationPipelineCompanion {
+    public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("holdoutFraction", 0.3, "validationFolds", 3);
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
         NodeLogisticRegressionTrainCoreConfig.defaultConfig().toMap()
