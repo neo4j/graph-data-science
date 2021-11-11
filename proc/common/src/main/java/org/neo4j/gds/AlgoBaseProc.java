@@ -25,9 +25,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -41,7 +39,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -286,28 +283,7 @@ public abstract class AlgoBaseProc<
     MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        GraphStoreLoader graphStoreLoader;
-        // We need to manually decide which store loader to choose as
-        // opposed to using `GraphStoreLoader.of()` as i.e. the estimation CLI
-        // will set only a minimal amount of fields in the base proc.
-        // Calling into username() would cause a null pointer exception.
-        // However, we know that the CLI will always use the implicit loader.
-        if (config.implicitCreateConfig().isPresent()) {
-            graphStoreLoader = ImplicitGraphStoreLoader.fromBaseProc(
-                config.implicitCreateConfig().get(),
-                taskRegistryFactory,
-                this
-            );
-        } else {
-            String graphName = config.graphName().orElseThrow(IllegalStateException::new);
-            graphStoreLoader = new GraphStoreFromCatalogLoader(
-                graphName,
-                config,
-                username(),
-                databaseId(),
-                isGdsAdmin()
-            );
-        }
+        var graphStoreLoader = GraphStoreLoader.of(config, config.graphName(), this);
 
         GraphDimensions estimateDimensions = graphStoreLoader.memoryEstimation(config, estimationBuilder);
 
@@ -343,16 +319,7 @@ public abstract class AlgoBaseProc<
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
-        var graphLoaderContext = graphLoaderContext();
-
-        var graphStoreLoader = GraphStoreLoader.of(
-            config,
-            maybeGraphName,
-            username(),
-            databaseId(),
-            isGdsAdmin(),
-            graphLoaderContext
-        );
+        var graphStoreLoader = GraphStoreLoader.of(config, maybeGraphName, this);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
         validateConfigsBeforeLoad(graphCreateConfig, config);
@@ -360,17 +327,6 @@ public abstract class AlgoBaseProc<
         validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
 
         return graphStore;
-    }
-
-    private GraphLoaderContext graphLoaderContext() {
-        return ImmutableGraphLoaderContext.builder()
-            .transactionContext(TransactionContext.of(api, procedureTransaction))
-            .api(api)
-            .log(log)
-            .allocationTracker(allocationTracker)
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(transaction))
-            .build();
     }
 
     @ValueClass

@@ -20,12 +20,15 @@
 package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -34,6 +37,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -147,6 +151,19 @@ public abstract class BaseProc {
 
     protected <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
         return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
+    }
+
+    GraphLoaderContext graphLoaderContext() {
+        return api == null
+        ? GraphLoaderContext.NULL_CONTEXT
+        : ImmutableGraphLoaderContext.builder()
+            .transactionContext(TransactionContext.of(api, procedureTransaction))
+            .api(api)
+            .log(log)
+            .allocationTracker(allocationTracker)
+            .taskRegistryFactory(taskRegistryFactory)
+            .terminationFlag(TerminationFlag.wrap(transaction))
+            .build();
     }
 
     public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(

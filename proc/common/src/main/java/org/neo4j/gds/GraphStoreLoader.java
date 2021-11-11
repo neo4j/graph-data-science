@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Optional;
 
@@ -37,15 +35,23 @@ public interface GraphStoreLoader {
     static GraphStoreLoader of(
         AlgoBaseConfig config,
         Optional<String> maybeGraphName,
-        String username,
-        NamedDatabaseId databaseId,
-        boolean isGdsAdmin,
-        GraphLoaderContext graphLoaderContext
+        BaseProc baseProc
     ) {
+        var username = baseProc.username();
         if (maybeGraphName.isPresent()) {
-            return new GraphStoreFromCatalogLoader(maybeGraphName.get(), config, username, databaseId, isGdsAdmin);
+            return new GraphStoreFromCatalogLoader(
+                maybeGraphName.get(),
+                config,
+                username,
+                baseProc.databaseId(),
+                baseProc.isGdsAdmin()
+            );
         } else if (config.implicitCreateConfig().isPresent()) {
-            return new ImplicitGraphStoreLoader(config.implicitCreateConfig().get(), username, graphLoaderContext);
+            return new ImplicitGraphStoreLoader(
+                config.implicitCreateConfig().get(),
+                username,
+                baseProc.graphLoaderContext()
+            );
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
