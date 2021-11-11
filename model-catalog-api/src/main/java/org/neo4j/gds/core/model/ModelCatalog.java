@@ -52,8 +52,6 @@ public interface ModelCatalog {
 
     Collection<Model<?, ?, ?>> list(String username);
 
-    Model<?, ?, ?> publish(String username, String modelName);
-
     boolean isEmpty();
 
     void removeAllLoadedModels();

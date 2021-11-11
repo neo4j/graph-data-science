@@ -130,15 +130,6 @@ class OpenModelCatalogTest {
     }
 
     @Test
-    void shouldThrowWhenPublishing() {
-        modelCatalog.set(TEST_MODEL);
-
-        assertThatThrownBy(() -> modelCatalog.publish(USERNAME, TEST_MODEL.name()))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Publishing models is not available in openGDS.");
-    }
-
-    @Test
     void shouldStoreModels() {
         var model = Model.of(
             "user1",
