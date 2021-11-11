@@ -26,8 +26,8 @@ import org.neo4j.gds.model.ModelConfig;
 
 @ValueClass
 @Configuration
-public interface PipelineDummyTrainConfig extends BaseConfig, ModelConfig {
-    static PipelineDummyTrainConfig of(String username) {
-        return ImmutablePipelineDummyTrainConfig.of(username, "");
+public interface PipelineCreateConfig extends BaseConfig, ModelConfig {
+    static PipelineCreateConfig of(String username) {
+        return ImmutablePipelineCreateConfig.of(username, "");
     }
 }

@@ -38,7 +38,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -146,7 +146,7 @@ class NodeClassificationPipelineExecutorTest extends BaseProcTest {
     }
 
     private NodeClassificationPipeline insertPipelineIntoCatalog() {
-        var dummyConfig = PipelineDummyTrainConfig.of(getUsername());
+        var dummyConfig = PipelineCreateConfig.of(getUsername());
         var info = new NodeClassificationPipeline();
         modelCatalog.set(
             Model.of("", PIPELINE_NAME, MODEL_TYPE, GraphSchema.empty(), new Object(), dummyConfig, info)

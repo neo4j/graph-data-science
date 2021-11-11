@@ -53,7 +53,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -330,7 +330,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             PIPELINE_MODEL_TYPE,
             GraphSchema.empty(),
             new Object(),
-            PipelineDummyTrainConfig.of(getUsername()),
+            PipelineCreateConfig.of(getUsername()),
             pipeline
         );
 

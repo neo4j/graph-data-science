@@ -23,7 +23,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
@@ -38,7 +38,7 @@ public class NodeClassificationPipelineCreate {
             PIPELINE_MODEL_TYPE,
             GraphSchema.empty(),
             new Object(),
-            PipelineDummyTrainConfig.of(username),
+            PipelineCreateConfig.of(username),
             new NodeClassificationPipeline()
         );
         OpenModelCatalog.INSTANCE.set(model);
