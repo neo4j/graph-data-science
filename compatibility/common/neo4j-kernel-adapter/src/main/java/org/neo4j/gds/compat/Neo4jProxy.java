@@ -113,6 +113,7 @@ public final class Neo4jProxy {
         log.info("Loaded version: %s", neo4jVersion);
         log.info("Java vendor: %s", System.getProperty("java.vendor"));
         log.info("Java version: %s", System.getProperty("java.version"));
+        log.info("Java home: %s", System.getProperty("java.home"));
     }
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
