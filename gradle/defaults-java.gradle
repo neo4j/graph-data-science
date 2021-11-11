@@ -7,8 +7,9 @@ allprojects {
                 // available, Gradle will provision the toolchain, i.e.
                 // download it.
                 vendor = JvmVendorSpec.matching("ADOPTIUM")
-//                vendor = JvmVendorSpec.ADOPTOPENJDK
-                if (ver.'neo4j' != neos.'dev') {
+                if (project.hasProperty("javaLanguageVersion")) {
+                    languageVersion = JavaLanguageVersion.of(project.property('javaLanguageVersion'))
+                } else if (ver.'neo4j' != neos.'dev') {
                     languageVersion = JavaLanguageVersion.of(11)
                 } else {
                     languageVersion = JavaLanguageVersion.of(17)
