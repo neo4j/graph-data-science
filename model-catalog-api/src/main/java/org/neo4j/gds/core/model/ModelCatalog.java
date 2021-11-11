@@ -46,9 +46,9 @@ public interface ModelCatalog {
 
     boolean exists(String username, String modelName);
 
-    Model<?, ?, ?> drop(String username, String modelName);
+    Model<?, ?, ?> dropOrThrow(String username, String modelName);
 
-    Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing);
+    @Nullable Model<?, ?, ?> drop(String username, String modelName);
 
     Collection<Model<?, ?, ?>> list(String username);
 

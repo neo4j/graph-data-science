@@ -98,13 +98,13 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public Model<?, ?, ?> drop(String username, String modelName) {
+    public Model<?, ?, ?> dropOrThrow(String username, String modelName) {
         return drop(username, modelName, true);
     }
 
     @Override
-    public Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
-        return getUserCatalog(username).drop(modelName, failOnMissing);
+    public @Nullable Model<?, ?, ?> drop(String username, String modelName) {
+        return drop(username, modelName, false);
     }
 
     @Override
@@ -152,6 +152,11 @@ public final class OpenModelCatalog implements ModelCatalog {
         }
 
         return model;
+    }
+
+    @Contract(value = "_, _, true -> !null")
+    private @Nullable Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
+        return getUserCatalog(username).drop(modelName, failOnMissing);
     }
 
     private static OpenUserCatalog getUserCatalog(String username) {

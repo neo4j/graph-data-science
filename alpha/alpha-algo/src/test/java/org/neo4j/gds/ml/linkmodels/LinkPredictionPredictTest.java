@@ -166,7 +166,7 @@ class LinkPredictionPredictTest {
                 "LinkPrediction 100%",
                 "LinkPrediction :: Finished"
             );
-        modelCatalog.drop("", modelName);
+        modelCatalog.dropOrThrow("", modelName);
     }
 
     @Test
