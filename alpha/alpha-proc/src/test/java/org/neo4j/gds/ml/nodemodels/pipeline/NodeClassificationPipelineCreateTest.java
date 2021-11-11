@@ -27,7 +27,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.time.ZonedDateTime;
@@ -83,7 +83,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
                         "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
                         "trainingParameterSpace", NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG
                     ),
-                    "trainConfig", PipelineDummyTrainConfig.of(getUsername()).toMap(),
+                    "trainConfig", PipelineCreateConfig.of(getUsername()).toMap(),
                     "graphSchema", GraphSchema.empty().toMap(),
                     "loaded", true,
                     "stored", false,
