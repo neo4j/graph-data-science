@@ -39,7 +39,7 @@ public class LinkPredictionPipelineConfigureParamsProc extends BaseProc {
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureParams", mode = READ)
     @Description("Configures the parameters of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> configureParams(@Name("pipelineName") String pipelineName, @Name("parameterSpace") List<Map<String, Object>> parameterSpace) {
-        var pipeline = PipelineUtils.getPipelineModelInfo(pipelineName, username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(pipelineName, username());
 
         List<LinkLogisticRegressionTrainConfig> trainConfigs = parameterSpace
             .stream()

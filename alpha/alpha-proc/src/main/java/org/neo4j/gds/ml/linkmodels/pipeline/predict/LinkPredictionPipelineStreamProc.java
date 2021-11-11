@@ -35,12 +35,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineCompanion.DESCRIPTION;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
-    @Description(DESCRIPTION)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -28,13 +28,14 @@ import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class PipelineUtils {
+public final class LinkPredictionPipelineCompanion {
 
+    public static final String PREDICT_DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
     private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
-    private PipelineUtils() {}
+    private LinkPredictionPipelineCompanion() {}
 
-    public static LinkPredictionPipeline getPipelineModelInfo(String pipelineName, String username) {
+    public static LinkPredictionPipeline getLPPipeline(String pipelineName, String username) {
        var model = modelCatalog.getUntyped(username, pipelineName);
 
         assert model != null;
@@ -51,7 +52,7 @@ public final class PipelineUtils {
         return (LinkPredictionPipeline) model.customInfo();
     }
 
-    public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getLinkPredictionPipeline(
+    public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
         String pipelineName,
         String username
     ) {

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
-import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getPipelineModelInfo;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getLPPipeline;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -52,7 +52,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = getPipelineModelInfo(pipelineName, username());
+        var pipeline = getLPPipeline(pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
         if (reservedConfigKeys.stream().anyMatch(procedureConfig::containsKey)) {
@@ -84,7 +84,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("featureType") String featureType,
         @Name("configuration") Map<String, Object> config
     ) {
-        var pipeline = getPipelineModelInfo(pipelineName, username());
+        var pipeline = getLPPipeline(pipelineName, username());
 
         var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
 
