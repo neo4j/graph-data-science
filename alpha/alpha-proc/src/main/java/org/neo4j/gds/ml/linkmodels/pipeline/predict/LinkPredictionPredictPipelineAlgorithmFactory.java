@@ -35,7 +35,7 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils.getLinkPredictionPipeline;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
 
 public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
     private final BaseProc caller;
@@ -52,7 +52,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
 
     @Override
     protected Task progressTask(Graph graph, CONFIG config) {
-        var trainingPipeline = getLinkPredictionPipeline(config.modelName(), config.username())
+        var trainingPipeline = getTrainedLPPipelineModel(config.modelName(), config.username())
             .customInfo()
             .trainingPipeline();
 
@@ -84,7 +84,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             .orElseThrow(() -> new UnsupportedOperationException(
                 "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
 
-        var model = getLinkPredictionPipeline(
+        var model = getTrainedLPPipelineModel(
             configuration.modelName(),
             configuration.username()
         );

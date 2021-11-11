@@ -35,7 +35,7 @@ public class LinkPredictionPipelineConfigureSplitProc extends BaseProc {
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.configureSplit", mode = READ)
     @Description("Configures the split of the link prediction pipeline.")
     public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        var pipeline = PipelineUtils.getPipelineModelInfo(pipelineName, username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(pipelineName, username());
 
         var cypherConfig = CypherMapWrapper.create(configMap);
         var config = LinkPredictionSplitConfig.of(cypherConfig);

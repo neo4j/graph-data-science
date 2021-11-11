@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.linkmodels.pipeline.PipelineUtils;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
 
         var graphStore = GraphStoreCatalog.get(CatalogRequest.of(trainConfig.username(), databaseId), graphName).graphStore();
 
-        var pipeline = PipelineUtils.getPipelineModelInfo(trainConfig.pipeline(), trainConfig.username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(trainConfig.pipeline(), trainConfig.username());
         pipeline.validate();
 
         return new LinkPredictionTrainPipelineExecutor(
@@ -78,7 +78,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
 
     @Override
     public Task progressTask(Graph graph, LinkPredictionTrainConfig config) {
-        var pipeline = PipelineUtils.getPipelineModelInfo(config.pipeline(), config.username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(config.pipeline(), config.username());
 
         return Tasks.task(
             taskName(),
