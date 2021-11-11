@@ -6,13 +6,18 @@ allprojects {
                 // use that specific JDK version. If it is not locally
                 // available, Gradle will provision the toolchain, i.e.
                 // download it.
-                vendor = JvmVendorSpec.matching("ADOPTIUM")
+                if (project.hasProperty("javaLanguageVendor")) {
+                    vendor = JvmVendorSpec.matching(project.property('javaLanguageVendor'))
+                } else {
+                    vendor = JvmVendorSpec.matching("ADOPTIUM")
+                }
+
                 if (project.hasProperty("javaLanguageVersion")) {
                     languageVersion = JavaLanguageVersion.of(project.property('javaLanguageVersion'))
-                } else if (ver.'neo4j' != neos.'dev') {
-                    languageVersion = JavaLanguageVersion.of(11)
-                } else {
+                } else if (ver.'neo4j' == neos.'dev') {
                     languageVersion = JavaLanguageVersion.of(17)
+                } else {
+                    languageVersion = JavaLanguageVersion.of(11)
                 }
             }
         }
