@@ -44,17 +44,6 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCre
 
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
-    //TODO: move these to analogous places of those for LP or share it if possible
-    static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("holdoutFraction", 0.3, "validationFolds", 3);
-    static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(Map.of(
-        "maxEpochs", 100,
-        "minEpochs", 1,
-        "penalty", 0.0,
-        "patience", 1,
-        "batchSize", 100,
-        "tolerance", 0.001
-    ));
-
     private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     @BeforeEach
@@ -73,12 +62,12 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
         assertThat(result.featureSteps).isEqualTo(List.of());
-        assertThat(result.splitConfig).isEqualTo(DEFAULT_SPLIT_CONFIG);
+        assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
         var configs = (List<NodeLogisticRegressionTrainCoreConfig>) result.parameterSpace;
         assertThat(configs
             .stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap)
-            .collect(Collectors.toList())).isEqualTo(DEFAULT_PARAM_CONFIG);
+            .collect(Collectors.toList())).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
 
         assertCypherResult(
             "CALL gds.beta.model.list('myPipeline')",
@@ -91,8 +80,8 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
                             "nodePropertySteps", List.of(),
                             "featureSteps", List.of()
                         ),
-                        "splitConfig", DEFAULT_SPLIT_CONFIG,
-                        "trainingParameterSpace", DEFAULT_PARAM_CONFIG
+                        "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
+                        "trainingParameterSpace", NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG
                     ),
                     "trainConfig", PipelineDummyTrainConfig.of(getUsername()).toMap(),
                     "graphSchema", GraphSchema.empty().toMap(),
