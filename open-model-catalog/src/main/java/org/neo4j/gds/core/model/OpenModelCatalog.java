@@ -113,15 +113,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public Model<?, ?, ?> publish(String username, String modelName) {
-        throw new IllegalStateException(
-            "Publishing models is not available in openGDS. " +
-            "Please consider licensing the Graph Data Science library. " +
-            "See documentation at https://neo4j.com/docs/graph-data-science/"
-        );
-    }
-
-    @Override
     public boolean isEmpty() {
         return userCatalogs
             .values()
