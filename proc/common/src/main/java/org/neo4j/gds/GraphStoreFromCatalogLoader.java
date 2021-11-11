@@ -29,7 +29,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
@@ -41,16 +41,18 @@ import java.util.stream.Stream;
 
 public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
+    private final AlgoBaseConfig config;
     private final GraphStore graphStore;
     private final GraphCreateConfig graphCreateConfig;
 
     GraphStoreFromCatalogLoader(
         String graphName,
-        BaseConfig config,
+        AlgoBaseConfig config,
         String username,
         NamedDatabaseId databaseId,
         boolean isGdsAdmin
     ) {
+        this.config = config;
         var graphStoreWithConfig = graphStoreFromCatalog(graphName, config, username, databaseId, isGdsAdmin);
         this.graphStore = graphStoreWithConfig.graphStore();
         this.graphCreateConfig = graphStoreWithConfig.config();
@@ -67,7 +69,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     }
 
     @Override
-    public GraphDimensions memoryEstimation(AlgoBaseConfig config, MemoryEstimations.Builder estimationBuilder) {
+    public GraphDimensions graphDimensions() {
         var graphStore = graphStore();
         Graph filteredGraph = graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
@@ -81,6 +83,11 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
             .maxRelCount(relCount)
             .build();
+    }
+
+    @Override
+    public Optional<MemoryEstimation> memoryEstimation() {
+        return Optional.empty();
     }
 
     public static GraphStoreWithConfig graphStoreFromCatalog(

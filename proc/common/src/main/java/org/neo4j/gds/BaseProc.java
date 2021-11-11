@@ -153,10 +153,8 @@ public abstract class BaseProc {
         return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }
 
-    GraphLoaderContext graphLoaderContext() {
-        return api == null
-        ? GraphLoaderContext.NULL_CONTEXT
-        : ImmutableGraphLoaderContext.builder()
+    protected GraphLoaderContext graphLoaderContext() {
+        return ImmutableGraphLoaderContext.builder()
             .transactionContext(TransactionContext.of(api, procedureTransaction))
             .api(api)
             .log(log)

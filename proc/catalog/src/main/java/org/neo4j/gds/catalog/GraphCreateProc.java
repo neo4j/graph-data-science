@@ -20,6 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.GraphStoreLoader;
 import org.neo4j.gds.ImplicitGraphStoreLoader;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcPreconditions;
@@ -273,7 +274,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphStore graphStore = ImplicitGraphStoreLoader.fromBaseProc(config, taskRegistryFactory, this).graphStore();
+            GraphStore graphStore = new ImplicitGraphStoreLoader(config, username(), graphLoaderContext()).graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
@@ -290,11 +291,13 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
-        var memoryEstimationAndDimensions = ImplicitGraphStoreLoader
-            .fromBaseProc(config, taskRegistryFactory, this)
-            .estimateGraphCreate(config);
-        MemoryTree memoryTree = memoryEstimationAndDimensions.memoryEstimation().estimate(memoryEstimationAndDimensions.graphDimensions(), config.readConcurrency());
-        return new MemoryTreeWithDimensions(memoryTree, memoryEstimationAndDimensions.graphDimensions());
+        var graphStoreLoader = GraphStoreLoader.implicitGraphStoreLoader(config, this);
+        var graphDimensions = graphStoreLoader.graphDimensions();
+        var memoryEstimation = graphStoreLoader
+            .memoryEstimation()
+            .orElseThrow(() -> new IllegalStateException("GraphCreateProc should provide memory estimation"));
+        MemoryTree memoryTree = memoryEstimation.estimate(graphDimensions, config.readConcurrency());
+        return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 
     @SuppressWarnings("unused")

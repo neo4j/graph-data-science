@@ -285,7 +285,8 @@ public abstract class AlgoBaseProc<
 
         var graphStoreLoader = GraphStoreLoader.of(config, config.graphName(), this);
 
-        GraphDimensions estimateDimensions = graphStoreLoader.memoryEstimation(config, estimationBuilder);
+        GraphDimensions estimateDimensions = graphStoreLoader.graphDimensions();
+        graphStoreLoader.memoryEstimation().map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
 
         estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
 

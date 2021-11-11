@@ -23,14 +23,15 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
 public interface GraphStoreLoader {
     GraphCreateConfig graphCreateConfig();
     GraphStore graphStore();
-    GraphDimensions memoryEstimation(AlgoBaseConfig config, MemoryEstimations.Builder estimationBuilder);
+    GraphDimensions graphDimensions();
+    Optional<MemoryEstimation> memoryEstimation();
 
     static GraphStoreLoader of(
         AlgoBaseConfig config,
@@ -47,13 +48,24 @@ public interface GraphStoreLoader {
                 baseProc.isGdsAdmin()
             );
         } else if (config.implicitCreateConfig().isPresent()) {
-            return new ImplicitGraphStoreLoader(
-                config.implicitCreateConfig().get(),
-                username,
-                baseProc.graphLoaderContext()
-            );
+            return implicitGraphStoreLoader(config.implicitCreateConfig().get(), baseProc);
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
+        }
+    }
+
+    static GraphStoreLoader implicitGraphStoreLoader(
+        GraphCreateConfig graphCreateConfig,
+        BaseProc baseProc
+    ) {
+        if (graphCreateConfig.isFictitiousLoading()) {
+            return new FictitiousGraphStoreLoader(graphCreateConfig);
+        } else {
+            return new ImplicitGraphStoreLoader(
+                graphCreateConfig,
+                baseProc.username(),
+                baseProc.graphLoaderContext()
+            );
         }
     }
 }

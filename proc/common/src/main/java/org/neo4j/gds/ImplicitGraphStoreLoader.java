@@ -22,52 +22,21 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-import java.util.Collections;
-import java.util.Set;
-
-import static java.util.function.Predicate.isEqual;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
+import java.util.Optional;
 
 public class ImplicitGraphStoreLoader implements GraphStoreLoader {
 
     private final GraphCreateConfig graphCreateConfig;
     private final String username;
     private final GraphLoaderContext graphLoaderContext;
+    private final GraphStoreFactory<?, ?> graphStoreFactory;
 
-    public static ImplicitGraphStoreLoader fromBaseProc(GraphCreateConfig graphCreateConfig, TaskRegistryFactory taskRegistryFactory, BaseProc baseProc) {
-        var graphLoaderContext = baseProc.api == null
-        ? GraphLoaderContext.NULL_CONTEXT
-        : ImmutableGraphLoaderContext.builder()
-            .transactionContext(TransactionContext.of(baseProc.api, baseProc.procedureTransaction))
-            .api(baseProc.api)
-            .log(baseProc.log)
-            .allocationTracker(baseProc.allocationTracker)
-            .taskRegistryFactory(taskRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(baseProc.transaction))
-            .build();
-        return new ImplicitGraphStoreLoader(
-            graphCreateConfig,
-            baseProc.username(),
-            graphLoaderContext
-        );
-    }
-
-    ImplicitGraphStoreLoader(
+    public ImplicitGraphStoreLoader(
         GraphCreateConfig graphCreateConfig,
         String username,
         GraphLoaderContext graphLoaderContext
@@ -75,6 +44,7 @@ public class ImplicitGraphStoreLoader implements GraphStoreLoader {
         this.graphCreateConfig = graphCreateConfig;
         this.username = username;
         this.graphLoaderContext = graphLoaderContext;
+        this.graphStoreFactory = graphStoreFactory();
     }
 
     @Override
@@ -84,73 +54,26 @@ public class ImplicitGraphStoreLoader implements GraphStoreLoader {
 
     @Override
     public GraphStore graphStore() {
-        return newLoader().graphStore();
+        return this.graphStoreFactory.build().graphStore();
     }
 
     @Override
-    public GraphDimensions memoryEstimation(
-        AlgoBaseConfig config, MemoryEstimations.Builder estimationBuilder
-    ) {
-        var memoryTreeWithDimensions = estimateGraphCreate(graphCreateConfig);
-        estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
-        return memoryTreeWithDimensions.graphDimensions();
+    public GraphDimensions graphDimensions() {
+        return graphStoreFactory.estimationDimensions();
     }
 
-    public MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {
-        GraphDimensions estimateDimensions;
-        GraphStoreFactory<?, ?> graphStoreFactory;
-
-        if (config.isFictitiousLoading()) {
-            var labelCount = 0;
-            if (config instanceof GraphCreateFromStoreConfig) {
-                var storeConfig = (GraphCreateFromStoreConfig) config;
-                Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
-                labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
-            }
-
-            estimateDimensions = ImmutableGraphDimensions.builder()
-                .nodeCount(config.nodeCount())
-                .highestPossibleNodeCount(config.nodeCount())
-                .estimationNodeLabelCount(labelCount)
-                .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
-                .maxRelCount(Math.max(config.relationshipCount(), 0))
-                .build();
-
-            GraphLoader loader = newLoader();
-            graphStoreFactory = loader
-                .createConfig()
-                .graphStoreFactory()
-                .getWithDimension(loader.context(), estimateDimensions);
-        } else {
-            GraphLoader loader = newLoader();
-            graphStoreFactory = loader.graphStoreFactory();
-            estimateDimensions = graphStoreFactory.estimationDimensions();
-        }
-
-        return ImmutableMemoryEstimationWithDimensions.builder()
-            .memoryEstimation(graphStoreFactory.memoryEstimation())
-            .graphDimensions(estimateDimensions)
-            .build();
+    @Override
+    public Optional<MemoryEstimation> memoryEstimation() {
+        return Optional.of(this.graphStoreFactory.memoryEstimation());
     }
 
-    private GraphLoader newLoader() {
-        if (graphLoaderContext == GraphLoaderContext.NULL_CONTEXT) {
-            return newFictitiousLoader(graphCreateConfig);
-        }
+    private GraphStoreFactory<?, ?> graphStoreFactory() {
         return ImmutableGraphLoader
             .builder()
             .context(graphLoaderContext)
             .username(username)
             .createConfig(graphCreateConfig)
-            .build();
-    }
-
-    private GraphLoader newFictitiousLoader(GraphCreateConfig createConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(graphLoaderContext)
-            .username(username)
-            .createConfig(createConfig)
-            .build();
+            .build()
+            .graphStoreFactory();
     }
 }
