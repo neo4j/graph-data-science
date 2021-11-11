@@ -66,12 +66,23 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @TestFactory
     Stream<DynamicTest> configTests() {
+        // KNN's createMinimalConfig() is not really minimal, but deterministic
+        // it overrides several default parameters, and we don't want or need that
+        // but we do need it to get the mutate and write mandatory params, so we'll just remove the default ones
+        var minimalConfig = createMinimalConfig()
+            .withoutEntry("randomSeed")
+            .withoutEntry("concurrency")
+            .withoutEntry("sampleRate")
+            .withoutEntry("deltaThreshold")
+            .withoutEntry("randomJoins")
+            .withoutEntry("topK");
+
         return Stream.concat(
             modeSpecificConfigTests(),
             Stream.of(
-                IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-                NodeWeightConfigProcTest.mandatoryParameterTest(proc(), createMinimalConfig()),
-                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+                IterationsConfigProcTest.test(proc(), minimalConfig),
+                NodeWeightConfigProcTest.mandatoryParameterTest(proc(), minimalConfig),
+                ConcurrencyConfigProcTest.test(proc(), minimalConfig)
             ).flatMap(Collection::stream)
         );
     }
