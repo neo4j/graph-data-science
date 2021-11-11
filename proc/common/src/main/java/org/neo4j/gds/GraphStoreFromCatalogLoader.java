@@ -19,17 +19,27 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
+public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
     private final GraphStore graphStore;
     private final GraphCreateConfig graphCreateConfig;
@@ -56,7 +66,24 @@ final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         return this.graphStore;
     }
 
-    private GraphStoreWithConfig graphStoreFromCatalog(
+    @Override
+    public GraphDimensions memoryEstimation(AlgoBaseConfig config, MemoryEstimations.Builder estimationBuilder) {
+        var graphStore = graphStore();
+        Graph filteredGraph = graphStore.getGraph(
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore),
+            Optional.empty()
+        );
+        long relCount = filteredGraph.relationshipCount();
+
+        return ImmutableGraphDimensions.builder()
+            .nodeCount(filteredGraph.nodeCount())
+            .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
+            .maxRelCount(relCount)
+            .build();
+    }
+
+    public static GraphStoreWithConfig graphStoreFromCatalog(
         String graphName,
         BaseConfig config,
         String username,
@@ -70,5 +97,24 @@ final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             isGdsAdmin
         );
         return GraphStoreCatalog.get(request, graphName);
+    }
+
+    private Map<RelationshipType, Long> filteredGraphRelationshipCounts(
+        AlgoBaseConfig config,
+        GraphStore graphStore,
+        Graph filteredGraph
+    ) {
+        var relCount = filteredGraph.relationshipCount();
+        return Stream.concat(config.internalRelationshipTypes(graphStore).stream(), Stream.of(RelationshipType.ALL_RELATIONSHIPS))
+            .distinct()
+            .collect(Collectors.toMap(
+                    Function.identity(),
+                    key -> key == RelationshipType.ALL_RELATIONSHIPS
+                        ? relCount
+                        : filteredGraph
+                            .relationshipTypeFilteredGraph(Set.of(key))
+                            .relationshipCount()
+                )
+            );
     }
 }

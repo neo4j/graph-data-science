@@ -290,7 +290,9 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
-        var memoryEstimationAndDimensions = estimateGraphCreate(config);
+        var memoryEstimationAndDimensions = ImplicitGraphStoreLoader
+            .fromBaseProc(config, taskRegistryFactory, this)
+            .estimateGraphCreate(config);
         MemoryTree memoryTree = memoryEstimationAndDimensions.memoryEstimation().estimate(memoryEstimationAndDimensions.graphDimensions(), config.readConcurrency());
         return new MemoryTreeWithDimensions(memoryTree, memoryEstimationAndDimensions.graphDimensions());
     }

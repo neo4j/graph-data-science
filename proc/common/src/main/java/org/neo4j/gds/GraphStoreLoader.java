@@ -23,6 +23,8 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Optional;
@@ -30,6 +32,7 @@ import java.util.Optional;
 public interface GraphStoreLoader {
     GraphCreateConfig graphCreateConfig();
     GraphStore graphStore();
+    GraphDimensions memoryEstimation(AlgoBaseConfig config, MemoryEstimations.Builder estimationBuilder);
 
     static GraphStoreLoader of(
         AlgoBaseConfig config,

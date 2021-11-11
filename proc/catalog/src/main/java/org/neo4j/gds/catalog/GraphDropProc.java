@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -70,7 +71,12 @@ public class GraphDropProc extends CatalogProc {
         }
 
         var config = GraphDropConfig.of(failIfMissing, dbName, username);
-        var request = catalogRequest(config.catalogUser(), config.databaseName());
+        var request = ImmutableCatalogRequest.of(
+            config.databaseName().orElseGet(databaseId()::name),
+            username(),
+            config.catalogUser(),
+            isGdsAdmin()
+        );
 
         if (failIfMissing) {
             var missingGraphs = graphNames.stream().flatMap(name -> {
