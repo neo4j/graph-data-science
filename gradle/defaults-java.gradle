@@ -20,9 +20,6 @@ allprojects {
 
 allprojects {
     plugins.withType(JavaLibraryPlugin) {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-
         repositories {
             mavenCentral()
             if (project.hasProperty('pipelineRepository')) {
@@ -91,8 +88,7 @@ allprojects {
         }
 
         tasks.withType(JavaCompile) {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
+            options.compilerArgs += "--release=11"
             options.warnings = true
             options.encoding = 'UTF-8'
 
