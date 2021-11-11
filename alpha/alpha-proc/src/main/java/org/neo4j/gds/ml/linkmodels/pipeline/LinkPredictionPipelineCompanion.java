@@ -23,7 +23,11 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc.PIPELINE_MODEL_TYPE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -31,6 +35,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class LinkPredictionPipelineCompanion {
 
     public static final String PREDICT_DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
+    static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
+        LinkLogisticRegressionTrainConfig.defaultConfig().toMap()
+    );
     private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     private LinkPredictionPipelineCompanion() {}

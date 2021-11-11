@@ -34,16 +34,6 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStep
 @ModelCatalogExtension
 class LinkPredictionPipelineConfigureParamsProcTest extends BaseProcTest {
 
-    static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(Map.of(
-        "maxEpochs", 100,
-        "minEpochs", 1,
-        "penalty", 0.0,
-        "patience", 1,
-        "batchSize", 100,
-        "tolerance", 0.001,
-        "useBiasFeature", true
-    ));
-
     @InjectModelCatalog
     private ModelCatalog modelCatalog;
 

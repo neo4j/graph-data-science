@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProcTest.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
 @ModelCatalogExtension
 class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
