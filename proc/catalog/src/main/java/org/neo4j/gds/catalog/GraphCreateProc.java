@@ -291,7 +291,11 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
-        var graphStoreLoader = GraphStoreLoader.implicitGraphStoreLoader(config, this);
+        var graphStoreLoader = GraphStoreLoader.implicitGraphStoreLoader(
+            config,
+            this::username,
+            this::graphLoaderContext
+        );
         var graphDimensions = graphStoreLoader.graphDimensions();
         var memoryEstimation = graphStoreLoader
             .memoryEstimation()

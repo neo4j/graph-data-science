@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public interface GraphStoreLoader {
     GraphCreateConfig graphCreateConfig();
@@ -33,22 +36,29 @@ public interface GraphStoreLoader {
     GraphDimensions graphDimensions();
     Optional<MemoryEstimation> memoryEstimation();
 
+    // The supplier arguments are necessary as the EstimationCLI will create
+    // procedures without any of the context injected fields set. This will
+    // cause method calls like `BaseProc#username()` to throw an NPE.
+    // This will be fixed once all procedure logic is encapsulated in separate
+    // classes and the EstimationCLI will call these classes directly instead.
     static GraphStoreLoader of(
         AlgoBaseConfig config,
         Optional<String> maybeGraphName,
-        BaseProc baseProc
+        Supplier<NamedDatabaseId> databaseIdSupplier,
+        Supplier<String> usernameSupplier,
+        Supplier<GraphLoaderContext> graphLoaderContextSupplier,
+        boolean isGdsAdmin
     ) {
-        var username = baseProc.username();
         if (maybeGraphName.isPresent()) {
             return new GraphStoreFromCatalogLoader(
                 maybeGraphName.get(),
                 config,
-                username,
-                baseProc.databaseId(),
-                baseProc.isGdsAdmin()
+                usernameSupplier.get(),
+                databaseIdSupplier.get(),
+                isGdsAdmin
             );
         } else if (config.implicitCreateConfig().isPresent()) {
-            return implicitGraphStoreLoader(config.implicitCreateConfig().get(), baseProc);
+            return implicitGraphStoreLoader(config.implicitCreateConfig().get(), usernameSupplier, graphLoaderContextSupplier);
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
@@ -56,15 +66,16 @@ public interface GraphStoreLoader {
 
     static GraphStoreLoader implicitGraphStoreLoader(
         GraphCreateConfig graphCreateConfig,
-        BaseProc baseProc
+        Supplier<String> usernameSupplier,
+        Supplier<GraphLoaderContext> graphLoaderContextSupplier
     ) {
         if (graphCreateConfig.isFictitiousLoading()) {
             return new FictitiousGraphStoreLoader(graphCreateConfig);
         } else {
             return new ImplicitGraphStoreLoader(
                 graphCreateConfig,
-                baseProc.username(),
-                baseProc.graphLoaderContext()
+                usernameSupplier.get(),
+                graphLoaderContextSupplier.get()
             );
         }
     }

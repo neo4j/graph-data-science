@@ -283,7 +283,7 @@ public abstract class AlgoBaseProc<
     MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        var graphStoreLoader = GraphStoreLoader.of(config, config.graphName(), this);
+        var graphStoreLoader = graphStoreLoader(config, config.graphName());
 
         GraphDimensions estimateDimensions = graphStoreLoader.graphDimensions();
         graphStoreLoader.memoryEstimation().map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
@@ -320,7 +320,7 @@ public abstract class AlgoBaseProc<
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
-        var graphStoreLoader = GraphStoreLoader.of(config, maybeGraphName, this);
+        var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
         validateConfigsBeforeLoad(graphCreateConfig, config);
@@ -328,6 +328,17 @@ public abstract class AlgoBaseProc<
         validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
 
         return graphStore;
+    }
+
+    private GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
+        return GraphStoreLoader.of(
+            config,
+            maybeGraphName,
+            this::databaseId,
+            this::username,
+            this::graphLoaderContext,
+            isGdsAdmin()
+        );
     }
 
     @ValueClass
