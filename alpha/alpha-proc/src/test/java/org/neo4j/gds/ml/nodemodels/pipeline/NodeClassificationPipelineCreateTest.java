@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreate.PIPELINE_MODEL_TYPE;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 

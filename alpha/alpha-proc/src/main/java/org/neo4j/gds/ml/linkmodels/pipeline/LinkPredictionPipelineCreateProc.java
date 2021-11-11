@@ -32,11 +32,11 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PIPELINE_MODEL_TYPE;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("immutables:subtype")
 public class LinkPredictionPipelineCreateProc extends BaseProc {
-    public static final String PIPELINE_MODEL_TYPE = "Link prediction training pipeline";
 
     @Context
     public ModelCatalog modelCatalog;

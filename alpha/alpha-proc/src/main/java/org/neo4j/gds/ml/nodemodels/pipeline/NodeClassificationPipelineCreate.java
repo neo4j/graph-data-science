@@ -25,9 +25,9 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineDummyTrainConfig;
 
-public class NodeClassificationPipelineCreate {
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
-    public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
+public class NodeClassificationPipelineCreate {
 
     public static PipelineInfoResult create(String username, String pipelineName) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
