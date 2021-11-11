@@ -63,19 +63,15 @@ allprojects {
                 suspend = true
             }
 
-
             // Since JDK 17 the default access to the following
             // packages is "deny". We need to open them in order
             // to gain access in GDS / Neo4j.
-            if (ver.'neo4j' == neos.'dev') {
-                jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
-                jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
-                jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
-                jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
-                jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
-            } else {
-                jvmArgs += '--illegal-access=permit'
-            }
+            jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
@@ -101,15 +97,11 @@ allprojects {
             // Since JDK 17 the default access to the following
             // packages is "deny". We need to open them in order
             // to gain access in GDS / Neo4j.
-            if (ver.'neo4j' == neos.'dev') {
-                options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
-                options.forkOptions.jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
-                options.forkOptions.jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
-                options.forkOptions.jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
-                options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
-            } else {
-                options.forkOptions.jvmArgs += '--illegal-access=permit'
-            }
+            options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+            options.forkOptions.jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+            options.forkOptions.jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+            options.forkOptions.jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+            options.forkOptions.jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
 
             options.compilerArgs += [
                     '-parameters',
