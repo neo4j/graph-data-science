@@ -33,7 +33,6 @@ import org.neo4j.gds.model.catalog.ModelListProc;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,11 +62,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
         assertThat(result.featureSteps).isEqualTo(List.of());
         assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
-        var configs = (List<NodeLogisticRegressionTrainCoreConfig>) result.parameterSpace;
-        assertThat(configs
-            .stream()
-            .map(NodeLogisticRegressionTrainCoreConfig::toMap)
-            .collect(Collectors.toList())).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.parameterSpace).usingRecursiveComparison().isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
 
         assertCypherResult(
             "CALL gds.beta.model.list('myPipeline')",
