@@ -46,7 +46,7 @@ public class ModelDropProc extends ModelCatalogProc {
         if (model.stored()) {
             model.unload();
         } else {
-            modelCatalog.drop(username(), modelName);
+            modelCatalog.dropOrThrow(username(), modelName);
         }
 
         return Stream.of(new ModelCatalogResult(model));

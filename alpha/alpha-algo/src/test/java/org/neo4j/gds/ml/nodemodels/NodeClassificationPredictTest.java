@@ -265,7 +265,7 @@ class NodeClassificationPredictTest {
                 "NodeLogisticRegressionPredict 100%",
                 "NodeLogisticRegressionPredict :: Finished"
             );
-        modelCatalog.drop("", modelName);
+        modelCatalog.dropOrThrow("", modelName);
     }
 
     @Test

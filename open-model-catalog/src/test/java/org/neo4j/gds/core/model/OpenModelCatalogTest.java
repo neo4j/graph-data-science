@@ -256,7 +256,7 @@ class OpenModelCatalogTest {
         modelCatalog.set(TEST_MODEL);
 
         assertTrue(modelCatalog.exists(USERNAME, "testModel"));
-        modelCatalog.drop(USERNAME, "testModel");
+        modelCatalog.dropOrThrow(USERNAME, "testModel");
         assertFalse(modelCatalog.exists(USERNAME, "testModel"));
     }
 
