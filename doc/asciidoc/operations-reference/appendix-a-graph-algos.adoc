@@ -308,8 +308,10 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.ml.pipeline.linkPrediction.train`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.mutate`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.stream`
-.1+<.^| Node Classification Pipeline
+.3+<.^| Node Classification Pipeline
 | `gds.alpha.ml.pipeline.nodeClassification.create`
+| `gds.alpha.ml.pipeline.nodeClassification.addNodeProperty`
+| `gds.alpha.ml.pipeline.nodeClassification.addFeatures`
 | <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
 | <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
 | <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`
