@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -30,21 +29,17 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
@@ -59,7 +54,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
@@ -342,36 +336,12 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         modelCatalog.set(model);
 
-        var proc = new GraphSageTrainProc() {
-            @Override
-            protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-                return new AlgorithmFactory<>() {
-
-                    @Override
-                    protected String taskName() {
-                        return null;
-                    }
-
-                    @Override
-                    protected GraphSageTrain build(
-                        Graph graph,
-                        GraphSageTrainConfig configuration,
-                        AllocationTracker allocationTracker,
-                        ProgressTracker progressTracker
-                    ) {
-                        return fail(
-                            "Created the train algo factory with an invalid model, should have thrown that model already exists.");
-                    }
-                };
-            }
-        };
-        proc.api = db;
-        proc.log = NullLog.getInstance();
-        proc.modelCatalog = modelCatalog;
-
-        assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName);
+        TestProcedureRunner.applyOnProcedure(db, GraphSageTrainProc.class, proc -> {
+            proc.modelCatalog = modelCatalog;
+            assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName);
+        });
     }
 
     @Test

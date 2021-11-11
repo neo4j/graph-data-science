@@ -27,7 +27,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.test.TestProc;
-import org.neo4j.logging.NullLog;
 
 import java.util.Map;
 
@@ -54,16 +53,15 @@ class AlgorithmCleanupTest extends BaseProcTest {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
 
-        var proc = new TestProc();
-        proc.taskRegistryFactory = taskRegistryFactory;
-        proc.api = db;
-        proc.log = NullLog.getInstance();
-        Map<String, Object> config = Map.of("writeProperty", "test");
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
+            proc.taskRegistryFactory = taskRegistryFactory;
+            Map<String, Object> config = Map.of("writeProperty", "test");
 
-        assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-        assertThat(taskStore.tasks()).isEmpty();
-        assertThat(taskStore.tasksSeen())
-            .containsExactlyInAnyOrder("TestAlgorithm");
+            assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
+            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.tasksSeen())
+                .containsExactlyInAnyOrder("TestAlgorithm");
+        });
     }
 
     @Test
@@ -71,15 +69,14 @@ class AlgorithmCleanupTest extends BaseProcTest {
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
 
-        var proc = new TestProc();
-        proc.taskRegistryFactory = taskRegistryFactory;
-        proc.api = db;
-        proc.log = NullLog.getInstance();
-        Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
+            proc.taskRegistryFactory = taskRegistryFactory;
+            Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
-        assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-        assertThat(taskStore.tasks()).isEmpty();
-        assertThat(taskStore.tasksSeen())
-            .containsExactlyInAnyOrder("TestAlgorithm");
+            assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
+            assertThat(taskStore.tasks()).isEmpty();
+            assertThat(taskStore.tasksSeen())
+                .containsExactlyInAnyOrder("TestAlgorithm");
+        });
     }
 }
