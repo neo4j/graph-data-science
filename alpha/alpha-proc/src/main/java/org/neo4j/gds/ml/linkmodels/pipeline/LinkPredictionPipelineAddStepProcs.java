@@ -20,31 +20,24 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.LinkFeatureStepConfigurationImpl;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.pipeline.proc.ProcedureReflection;
-import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getLPPipeline;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddStepProcs extends BaseProc {
-    private static final List<String> reservedConfigKeys = List.of(AlgoBaseConfig.NODE_LABELS_KEY, AlgoBaseConfig.RELATIONSHIP_TYPES_KEY);
-
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing link prediction pipeline.")
     public Stream<PipelineInfoResult> addNodeProperty(
@@ -55,24 +48,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         var pipeline = getLPPipeline(pipelineName, username());
         validateRelationshipProperty(pipeline, procedureConfig);
 
-        if (reservedConfigKeys.stream().anyMatch(procedureConfig::containsKey)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Cannot configure %s for an individual node property step, but can only be configured at `train` and `predict` mode.",
-                StringJoining.join(reservedConfigKeys)
-            ));
-        }
-
-        var wrappedConfig = CypherMapWrapper.create(procedureConfig);
-        var procedureMethod = ProcedureReflection.INSTANCE.findProcedureMethod(taskName);
-        Optional<AlgoBaseConfig> typedConfig = ProcedureReflection.INSTANCE.createAlgoConfig(
-            this,
-            procedureMethod,
-            wrappedConfig
-        );
-        typedConfig.ifPresent(config -> wrappedConfig.requireOnlyKeysFrom(config.configKeys()));
-
-        NodePropertyStep step = NodePropertyStep.of(taskName, procedureConfig);
-        pipeline.addNodePropertyStep(step);
+        pipeline.addNodePropertyStep(createNodePropertyStep(this, taskName, procedureConfig));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }
