@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
@@ -33,7 +34,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -54,8 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
-import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
+import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -179,7 +179,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void parallelRelationshipsWithoutProperties(TestSupport.FactoryType factoryType) {
+    void parallelRelationshipsWithoutProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.NONE)
             .graph();
@@ -198,7 +198,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void parallelRelationships(TestSupport.FactoryType factoryType) {
+    void parallelRelationships(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDefaultAggregation(NONE)
@@ -218,7 +218,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     static Stream<Arguments> deduplicateWithWeightsParams() {
-        return crossArguments(toArguments(TestSupport::allFactoryTypes), () -> Stream.of(
+        return crossArguments(toArguments(GraphFactoryTestSupport::allFactoryTypes), () -> Stream.of(
             Arguments.of(SUM, 1379.0),
             Arguments.of(MAX, 1337.0),
             Arguments.of(MIN, 42.0)
@@ -228,7 +228,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("deduplicateWithWeightsParams")
     void parallelRelationshipsWithAggregation(
-        TestSupport.FactoryType factoryType,
+        GraphFactoryTestSupport.FactoryType factoryType,
         Aggregation aggregation,
         double expectedWeight
     ) {
@@ -270,7 +270,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void multipleTypes(TestSupport.FactoryType factoryType) {
+    void multipleTypes(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2")
             .graphStore();
@@ -291,7 +291,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void multipleTypesWithProperties(TestSupport.FactoryType factoryType) {
+    void multipleTypesWithProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2")
             .withRelationshipProperties(PropertyMapping.of("prop1", 1337D))
@@ -350,7 +350,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
 
     @AllGraphStoreFactoryTypesTest
-    void multipleProperties(TestSupport.FactoryType factoryType) {
+    void multipleProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         runQuery(
             "CREATE" +
@@ -405,7 +405,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void multiplePropertiesWithDefaultValues(TestSupport.FactoryType factoryType) {
+    void multiplePropertiesWithDefaultValues(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         runQuery(
             "CREATE" +
@@ -448,7 +448,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void multiplePropertiesWithIncompatibleAggregations(TestSupport.FactoryType factoryType) {
+    void multiplePropertiesWithIncompatibleAggregations(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         runQuery(
             "CREATE" +
@@ -480,7 +480,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void singlePropertyWithAggregations(TestSupport.FactoryType factoryType) {
+    void singlePropertyWithAggregations(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         runQuery(
             "CREATE" +
@@ -658,7 +658,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void multiplePropertiesWithAggregation_SINGLE(TestSupport.FactoryType factoryType) {
+    void multiplePropertiesWithAggregation_SINGLE(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         runQuery(
             "CREATE" +
@@ -691,7 +691,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void graphCanBeReleased(TestSupport.FactoryType factoryType) {
+    void graphCanBeReleased(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2")
             .graphStore();
@@ -717,7 +717,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void graphsStoreGivesCorrectElementCounts(TestSupport.FactoryType factoryType) {
+    void graphsStoreGivesCorrectElementCounts(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2", "REL3")
             .graphStore();
