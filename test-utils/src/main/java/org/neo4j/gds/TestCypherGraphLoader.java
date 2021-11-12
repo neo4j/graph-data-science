@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
@@ -52,10 +51,6 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
 
     private Optional<Aggregation> maybeAggregation = Optional.empty();
     private Optional<Log> maybeLog = Optional.empty();
-
-    public static TestCypherGraphLoader from(@NotNull GraphDatabaseAPI db) {
-        return new TestCypherGraphLoader(db);
-    }
 
     TestCypherGraphLoader(GraphDatabaseAPI db) {
         this.db = db;
