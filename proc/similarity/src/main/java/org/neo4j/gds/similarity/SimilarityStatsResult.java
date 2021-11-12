@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class SimilarityStatsResult {
+public class SimilarityStatsResult {
 
     public long createMillis;
     public long computeMillis;
@@ -39,7 +39,7 @@ public final class SimilarityStatsResult {
         long postProcessingMillis,
         long nodesCompared,
         long similarityPairs,
-        Map<String, Object> communityDistribution,
+        Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
 
     ) {
@@ -48,7 +48,7 @@ public final class SimilarityStatsResult {
         this.postProcessingMillis = postProcessingMillis;
         this.nodesCompared = nodesCompared;
         this.similarityPairs = similarityPairs;
-        this.similarityDistribution = communityDistribution;
+        this.similarityDistribution = similarityDistribution;
         this.configuration = configuration;
     }
 

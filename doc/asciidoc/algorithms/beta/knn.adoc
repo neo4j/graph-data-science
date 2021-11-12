@@ -163,6 +163,9 @@ YIELD
   computeMillis: Integer,
   postProcessingMillis: Integer,
   nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
   similarityPairs: Integer,
   similarityDistribution: Map,
   configuration: Map
@@ -183,6 +186,9 @@ include::knn-specific-algo-config.adoc[]
 | postProcessingMillis          | Integer   | Milliseconds for computing similarity value distribution statistics.
 | nodesCompared                 | Integer   | The number of nodes compared.
 | similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| ranIterations                 | Integer   | Number of iterations run.
+| didConverge                   | Boolean   | Indicates if the algorithm converged.
+| nodePairsConsidered           | Integer   | The number of node pairs evaluated.
 | similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
 | configuration                 | Map       | The configuration used for running the algorithm.
 |===
@@ -204,6 +210,9 @@ YIELD
   postProcessingMillis: Integer,
   relationshipsWritten: Integer,
   nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
   similarityDistribution: Map,
   configuration: Map
 ----
@@ -224,6 +233,9 @@ include::knn-specific-algo-config.adoc[]
 | postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.
+| ranIterations          | Integer | Number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| nodePairsConsidered    | Integer | The number of node pairs evaluated.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
@@ -244,6 +256,9 @@ YIELD
   writeMillis: Integer,
   postProcessingMillis: Integer,
   nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
   relationshipsWritten: Integer,
   similarityDistribution: Map,
   configuration: Map
@@ -265,6 +280,9 @@ include::knn-specific-algo-config.adoc[]
 | postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.
+| ranIterations          | Integer | Number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| nodePairsConsidered    | Integer | The number of node pairs evaluated.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
@@ -289,6 +307,9 @@ YIELD
   writeMillis: Integer,
   postProcessingMillis: Integer,
   nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
   relationshipsWritten: Integer,
   similarityDistribution: Map,
   configuration: Map

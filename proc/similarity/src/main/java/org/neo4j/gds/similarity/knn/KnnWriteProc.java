@@ -42,11 +42,11 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteConfig> {
+public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteProc.Result, KnnWriteConfig> {
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<SimilarityWriteResult> write(
+    public Stream<Result> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,6 +65,18 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
     @Override
     public String procedureName() {
         return "KNN";
+    }
+
+    @Override
+    protected SimilarityProc.SimilarityResultBuilder<Result> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
+        if (computationResult.isGraphEmpty()) {
+            return new Result.Builder();
+        }
+
+        return new Result.Builder()
+            .withDidConverge(computationResult.result().didConverge())
+            .withNodePairsConsidered(computationResult.result().nodePairsConsidered())
+            .withRanIterations(computationResult.result().ranIterations());
     }
 
     @Override
@@ -111,54 +123,76 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
 
-    @SuppressWarnings("unused")
-    public static class WriteResult {
-        public final long createMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long postProcessingMillis;
+    public static class Result extends SimilarityWriteResult {
+        public final long ranIterations;
+        public final boolean didConverge;
+        public final long nodePairsConsidered;
 
-        public final long nodesCompared;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> similarityDistribution;
-        public final Map<String, Object> configuration;
-
-        WriteResult(
+        Result(
             long createMillis,
             long computeMillis,
             long writeMillis,
             long postProcessingMillis,
             long nodesCompared,
             long relationshipsWritten,
+            boolean didConverge,
+            long ranIterations,
+            long nodePairsCompared,
             Map<String, Object> similarityDistribution,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.relationshipsWritten = relationshipsWritten;
-            this.similarityDistribution = similarityDistribution;
-            this.configuration = configuration;
+            super(
+                createMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingMillis,
+                nodesCompared,
+                relationshipsWritten,
+                similarityDistribution,
+                configuration
+            );
+
+            this.nodePairsConsidered = nodePairsCompared;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
         }
 
         @SuppressWarnings("unused")
-        static class Builder extends SimilarityProc.SimilarityResultBuilder<KnnWriteProc.WriteResult> {
+        static class Builder extends SimilarityProc.SimilarityResultBuilder<Result> {
+            public long ranIterations;
+            public boolean didConverge;
+            public long nodePairsConsidered;
 
             @Override
-            public KnnWriteProc.WriteResult build() {
-                return new KnnWriteProc.WriteResult(
+            public Result build() {
+                return new Result(
                     createMillis,
                     computeMillis,
                     writeMillis,
                     postProcessingMillis,
                     nodesCompared,
                     relationshipsWritten,
+                    didConverge,
+                    ranIterations,
+                    nodePairsConsidered,
                     distribution(),
                     config.toMap()
                 );
+            }
+
+            public Builder withDidConverge(boolean didConverge) {
+                this.didConverge = didConverge;
+                return this;
+            }
+
+            public Builder withRanIterations(long ranIterations) {
+                this.ranIterations = ranIterations;
+                return this;
+            }
+
+            Builder withNodePairsConsidered(long nodePairsConsidered) {
+                this.nodePairsConsidered = nodePairsConsidered;
+                return this;
             }
         }
     }

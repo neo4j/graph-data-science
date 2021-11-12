@@ -25,6 +25,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityWriteProc;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 import org.neo4j.procedure.Description;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARIT
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity, NodeSimilarityResult, SimilarityWriteResult, NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -62,6 +63,11 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     @Override
     public String procedureName() {
         return "NodeSimilarity";
+    }
+
+    @Override
+    protected SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+        return new SimilarityWriteResult.Builder();
     }
 
     @Override
