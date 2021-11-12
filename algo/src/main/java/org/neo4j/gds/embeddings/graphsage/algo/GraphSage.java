@@ -49,6 +49,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     public GraphSage(
         Graph graph,
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
         GraphSageBaseConfig config,
         ExecutorService executor,
         AllocationTracker allocationTracker,
@@ -57,7 +58,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.model = config.model();
+        this.model = model;
         this.executor = executor;
         this.allocationTracker = allocationTracker;
     }

@@ -19,11 +19,22 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.BatchSizeConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig, RelationshipWeightConfig {
-    long serialVersionUID = 0x42L;
+public final class GraphSageModelResolver {
+    private GraphSageModelResolver() {}
+
+    public static Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> resolveModel(
+        ModelCatalog modelCatalog, String username, String modelName) {
+        return modelCatalog.get(
+            username,
+            modelName,
+            ModelData.class,
+            GraphSageTrainConfig.class,
+            GraphSageModelTrainer.GraphSageTrainMetrics.class
+        );
+    }
 }
