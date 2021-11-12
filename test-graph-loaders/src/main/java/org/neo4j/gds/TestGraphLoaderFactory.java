@@ -32,9 +32,8 @@ public final class TestGraphLoaderFactory {
                 return new TestNativeGraphLoader(db);
             case CYPHER:
                 return new TestCypherGraphLoader(db);
-            case NATIVE_BIT_ID_MAP:
             default:
-                throw new NotImplementedException("BitIdMap store loader not implemented yet");
+                throw new IllegalArgumentException("Unknown FactoryType: " + factoryType);
         }
     }
 
