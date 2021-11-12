@@ -19,239 +19,32 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+public interface TestGraphLoader {
 
-import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.Aggregation.DEFAULT;
-import static org.neo4j.gds.core.Aggregation.NONE;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringJoining.join;
+    TestGraphLoader withLabels(String... labels);
 
-public final class TestGraphLoader {
+    TestGraphLoader withRelationshipTypes(String... types);
 
-    private final GraphDatabaseAPI db;
+    TestGraphLoader withNodeProperties(PropertyMappings nodeProperties);
 
-    private final Set<String> nodeLabels;
-    private final Set<String> relTypes;
+    TestGraphLoader withRelationshipProperties(PropertyMapping... relProperties);
 
-    private PropertyMappings nodeProperties = PropertyMappings.of();
-    private PropertyMappings relProperties = PropertyMappings.of();
-    private boolean addRelationshipPropertiesToLoader;
+    TestGraphLoader withRelationshipProperties(PropertyMappings relProperties);
 
-    private Optional<Aggregation> maybeAggregation = Optional.empty();
-    private Optional<Log> maybeLog = Optional.empty();
+    TestGraphLoader withRelationshipProperties(PropertyMappings relProperties, boolean addToLoader);
 
-    public static TestGraphLoader from(@NotNull GraphDatabaseAPI db) {
-        return new TestGraphLoader(db);
-    }
+    TestGraphLoader withDefaultAggregation(Aggregation aggregation);
 
-    private TestGraphLoader(GraphDatabaseAPI db) {
-        this.db = db;
-        this.nodeLabels = new HashSet<>();
-        this.relTypes = new HashSet<>();
-    }
+    TestGraphLoader withLog(Log log);
 
-    public TestGraphLoader withLabels(String... labels) {
-        nodeLabels.addAll(Arrays.asList(labels));
-        return this;
-    }
-
-    public TestGraphLoader withRelationshipTypes(String... types) {
-        relTypes.addAll(Arrays.asList(types));
-        return this;
-    }
-
-    public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties) {
-        this.nodeProperties = nodeProperties;
-        return this;
-    }
-
-    public TestGraphLoader withRelationshipProperties(PropertyMapping... relProperties) {
-        return withRelationshipProperties(PropertyMappings.of(relProperties));
-    }
-
-    public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties) {
-        return withRelationshipProperties(relProperties, true);
-    }
-
-    public TestGraphLoader withRelationshipProperties(PropertyMappings relProperties, boolean addToLoader) {
-        this.relProperties = relProperties;
-        this.addRelationshipPropertiesToLoader = addToLoader;
-        return this;
-    }
-
-    public TestGraphLoader withDefaultAggregation(Aggregation aggregation) {
-        this.maybeAggregation = Optional.of(aggregation);
-        return this;
-    }
-
-    public TestGraphLoader withLog(Log log) {
-        this.maybeLog = Optional.of(log);
-        return this;
-    }
-
-    public Graph graph(TestSupport.FactoryType factoryType) {
-        return graphStore(factoryType).getUnion();
-    }
+    Graph graph();
 
     @TestOnly
-    public GraphStore graphStore(TestSupport.FactoryType factoryType) {
-        try (Transaction ignored = db.beginTx()) {
-            return loader(factoryType).graphStore();
-        }
-    }
-
-    private GraphLoader loader(TestSupport.FactoryType factoryType) {
-        return factoryType == TestSupport.FactoryType.CYPHER ? cypherLoader() : storeLoader();
-    }
-
-    private GraphLoader cypherLoader() {
-        CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
-
-        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s%s";
-
-        String labelString = nodeLabels.isEmpty()
-            ? ""
-            : nodeLabels
-                .stream()
-                .map(l -> "n:" + l)
-                .collect(Collectors.joining(" OR ", "WHERE ", ""));
-
-        String nodePropertiesString = getNodePropertiesString(nodeProperties, "n");
-
-        cypherLoaderBuilder.nodeQuery(formatWithLocale(nodeQueryTemplate,
-            labelString,
-            nodeLabels.isEmpty() ? "" : ", labels(n) AS labels",
-            nodePropertiesString));
-
-        String relationshipQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN ";
-        if (!Arrays.asList(DEFAULT, NONE).contains(maybeAggregation.orElse(NONE))) {
-            relationshipQueryTemplate += "DISTINCT ";
-        }
-
-        relationshipQueryTemplate += relTypes.isEmpty()
-            ? " id(n) AS source, id(m) AS target%s"
-            : " type(r) AS type, id(n) AS source, id(m) AS target%s";
-
-        String relTypeString = relTypes.isEmpty()
-            ? ""
-            : join(relTypes, "|", ":", "");
-
-        relProperties = getUniquePropertyMappings(relProperties);
-        String relPropertiesString = getRelationshipPropertiesString(relProperties, "r");
-
-        cypherLoaderBuilder.relationshipQuery(formatWithLocale(
-            relationshipQueryTemplate,
-            relTypeString,
-            relPropertiesString
-        ));
-
-        cypherLoaderBuilder.validateRelationships(false);
-
-        cypherLoaderBuilder.log(maybeLog);
-
-        return cypherLoaderBuilder.build();
-    }
-
-    private GraphLoader storeLoader() {
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
-        nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
-
-        if (relTypes.isEmpty()) {
-            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
-                ALL_RELATIONSHIPS.name,
-                RelationshipProjection.all().withAggregation(maybeAggregation.orElse(DEFAULT))
-            );
-        } else {
-            relTypes.forEach(relType -> {
-                RelationshipProjection template = RelationshipProjection.builder()
-                    .type(relType)
-                    .aggregation(maybeAggregation.orElse(DEFAULT))
-                    .build();
-                storeLoaderBuilder.addRelationshipProjection(template.withOrientation(NATURAL));
-            });
-        }
-        storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
-        if (!nodeProperties.mappings().isEmpty()) storeLoaderBuilder.nodeProperties(nodeProperties);
-        if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
-
-        storeLoaderBuilder.log(maybeLog);
-
-        return storeLoaderBuilder.build();
-    }
-
-    private PropertyMappings getUniquePropertyMappings(PropertyMappings propertyMappings) {
-        MutableInt mutableInt = new MutableInt(0);
-        return PropertyMappings.of(propertyMappings.stream()
-            .map(mapping -> PropertyMapping.of(
-                mapping.propertyKey(),
-                addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
-                mapping.defaultValue(),
-                mapping.aggregation() == DEFAULT ? maybeAggregation.orElse(NONE) : mapping.aggregation()
-            ))
-            .toArray(PropertyMapping[]::new)
-        );
-    }
-
-    private String getNodePropertiesString(PropertyMappings propertyMappings, String entityVar) {
-        return propertyMappings.hasMappings()
-            ? propertyMappings
-                .stream()
-                .map(mapping -> formatWithLocale(
-                    "COALESCE(%s.%s, %s) AS %s",
-                    entityVar,
-                    mapping.neoPropertyKey(),
-                    mapping.defaultValue().getObject(),
-                    mapping.propertyKey()
-                ))
-                .collect(Collectors.joining(", ", ", ", ""))
-            : "";
-    }
-
-    private String getRelationshipPropertiesString(PropertyMappings propertyMappings, String entityVar) {
-        return propertyMappings.hasMappings()
-            ? propertyMappings
-            .stream()
-            .map(mapping -> formatWithLocale(
-                "%s AS %s",
-                TestSupport.getCypherAggregation(
-                    mapping.aggregation().name(),
-                    formatWithLocale(
-                        "COALESCE(%s.%s, %f)",
-                        entityVar,
-                        removeSuffix(mapping.neoPropertyKey()),
-                        mapping.defaultValue().getObject()
-                    )
-                ),
-                mapping.propertyKey()
-            ))
-            .collect(Collectors.joining(", ", ", ", ""))
-            : "";
-    }
-
-    private static final String SUFFIX = "___";
-
-    private static String addSuffix(String propertyKey, int id) {
-        return formatWithLocale("%s%s%d", propertyKey, SUFFIX, id);
-    }
-
-    private String removeSuffix(String propertyKey) {
-        return propertyKey.substring(0, propertyKey.indexOf(SUFFIX));
-    }
+    GraphStore graphStore();
 }

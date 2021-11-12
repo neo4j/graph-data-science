@@ -88,11 +88,10 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, R
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        GraphStore graphStore = TestGraphLoader
-            .from(graphDb())
+        GraphStore graphStore = TestGraphLoaderFactory.graphLoader(graphDb(), NATIVE)
             .withLabels("A", "B")
             .withRelationshipTypes("REL")
-            .graphStore(NATIVE);
+            .graphStore();
 
         String graphName = "myGraph";
         var createConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
