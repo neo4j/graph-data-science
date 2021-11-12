@@ -124,15 +124,6 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
-        long[] labels,
-        int[] propertyKeyIds,
-        EntityType entityType
-    ) {
-        return Collections.emptyList();
-    }
-
-    @Override
     public boolean hasRelatedSchema(long[] labels, int propertyKey, EntityType entityType) {
         return false;
     }
