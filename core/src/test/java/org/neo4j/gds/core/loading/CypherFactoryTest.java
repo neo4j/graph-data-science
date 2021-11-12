@@ -32,7 +32,7 @@ import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.TestGraphLoader;
+import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.MapUtil;
@@ -143,10 +143,9 @@ class CypherFactoryTest extends BaseTest {
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0);
         PropertyMapping prop3 = PropertyMapping.of("prop3", 0);
 
-        Graph graph = TestGraphLoader
-            .from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, CYPHER)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
-            .graph(CYPHER);
+            .graph();
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -170,11 +169,10 @@ class CypherFactoryTest extends BaseTest {
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
         PropertyMapping prop3 = PropertyMapping.of("prop3", 42D);
 
-        GraphStore graphs = TestGraphLoader
-            .from(db)
+        GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, CYPHER)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .withDefaultAggregation(Aggregation.DEFAULT)
-            .graphStore(CYPHER);
+            .graphStore();
 
         String expectedGraph =
             "  (a)-[{w: %f}]->(b)" +

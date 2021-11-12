@@ -28,7 +28,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestGraphLoader;
+import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -69,19 +70,19 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testAnyLabel(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(factoryType);
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withDefaultAggregation(Aggregation.SINGLE).graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithLabel(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db).withLabels("Node1").graph(factoryType);
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withLabels("Node1").graph();
         assertGraphEquals(fromGdl("(:Node1)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithMultipleLabels(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db).withLabels("Node1", "Node2").graph(factoryType);
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withLabels("Node1", "Node2").graph();
         assertGraphEquals(fromGdl("(a:Node1)-->(b:Node2)"), graph);
     }
 
@@ -93,16 +94,16 @@ class GraphLoaderTest extends BaseTest {
             PropertyMapping.of("prop2", 42L)
         );
 
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1L})-->(b:Node2 {prop1: 42L})"), graph);
 
-        graph = TestGraphLoader.from(db)
+        graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1L, prop2: 42L})-->(b:Node2 {prop1: 42L, prop2: 2L})"), graph);
     }
 
@@ -168,7 +169,7 @@ class GraphLoaderTest extends BaseTest {
     public void shouldTrackProgressWithNativeLoadingUsingIndex() {
         TestLog log = new TestLog();
 
-        USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> testPropertyLoadingWithIndex(TestSupport.FactoryType.NATIVE, log));
+        USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> testPropertyLoadingWithIndex(NATIVE, log));
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -239,40 +240,40 @@ class GraphLoaderTest extends BaseTest {
             PropertyMapping.of("prop2", 42)
         );
 
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1")
             .withNodeProperties(properties)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1})"), graph);
 
-        graph = TestGraphLoader.from(db)
+        graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1")
             .withNodeProperties(multipleProperties)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1, prop2: 42})"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testAnyRelation(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(factoryType);
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withDefaultAggregation(Aggregation.SINGLE).graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithBothWeightedRelationship(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL3")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .graph(factoryType);
+            .graph();
 
         assertGraphEquals(fromGdl("(), ()-[{w:1337}]->()"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithOutgoingRelationship(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL3")
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(), ()-->()"), graph);
     }
 
@@ -284,11 +285,10 @@ class GraphLoaderTest extends BaseTest {
             PropertyMapping.of("prop3", "prop3", 0)
         );
 
-        Graph graph = TestGraphLoader
-            .from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withNodeProperties(nodePropertyMappings)
             .withDefaultAggregation(Aggregation.SINGLE)
-            .graph(factoryType);
+            .graph();
 
         Graph expected = fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
                                  "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -299,28 +299,28 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testWithRelationshipProperty(TestSupport.FactoryType factoryType) {
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(PropertyMapping.of("weight", "prop1", 3.14))
             .withDefaultAggregation(Aggregation.SINGLE)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 3.14D}]->(c), (b)-[{w: 3.14D}]->(c)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testLoadCorrectLabelCombinations(TestSupport.FactoryType factoryType) {
         runQuery("CREATE (n:Node1:Node2)");
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1", "Node2")
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1), (b:Node2), (c:Node1:Node2), (a)-->(b)"), graph);
     }
 
     @Test
     void testLoadNodeWithMultipleLabelsOnPartialLabelMatch() {
         runQuery("CREATE (n:Node1:Node2)");
-        Graph graph = TestGraphLoader.from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE)
             .withLabels("Node1")
-            .graph(TestSupport.FactoryType.NATIVE);
+            .graph();
         assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
     }
 
@@ -350,13 +350,12 @@ class GraphLoaderTest extends BaseTest {
             PropertyMapping.of("prop3", "prop3", 43L)
         );
 
-        Graph graph = TestGraphLoader
-            .from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1", "Node2", "Node3")
             .withNodeProperties(nodePropertyMappings)
             .withDefaultAggregation(Aggregation.SINGLE)
             .withLog(log)
-            .graph(factoryType);
+            .graph();
 
         Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
                                  "(b:Node2 {prop1: 41, prop2: 2, prop3: 43})" +
@@ -369,7 +368,7 @@ class GraphLoaderTest extends BaseTest {
     void testDontSkipOrphanNodesByDefault() {
         // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
         runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
-        Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE).graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d), (e), (f), (g)-->(h)"), graph);
     }
 
@@ -378,7 +377,7 @@ class GraphLoaderTest extends BaseTest {
         SKIP_ORPHANS.enableAndRun(() -> {
             // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
             runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
-            Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);
+            Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE).graph();
             assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d)-->(e)"), graph);
         });
     }
@@ -398,11 +397,10 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphStoreFactoryTypesTest
     void testLoggingActualGraphSize(TestSupport.FactoryType factoryType) {
         var log = new TestLog();
-        Graph graph = TestGraphLoader
-            .from(db)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.SINGLE)
             .withLog(log)
-            .graph(factoryType);
+            .graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
         log.containsMessage(TestLog.INFO, "Loading :: Actual memory usage of the loaded graph:");
     }
@@ -414,12 +412,12 @@ class GraphLoaderTest extends BaseTest {
                              ", (:Label { weight2: 1.0 })" +
                              ", (:Label { weight1: 0.0 })";
         runQuery(createQuery);
-        var graph = TestGraphLoader.from(db)
+        var graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Label")
             .withNodeProperties(PropertyMappings.of(
                 PropertyMapping.of("weight1", 0.0),
                 PropertyMapping.of("weight2", 1.0)
-            )).graph(factoryType);
+            )).graph();
 
         graph.forEachNode(nodeId -> {
             assertEquals(0.0, graph.nodeProperties("weight1").doubleValue(nodeId));
@@ -434,9 +432,9 @@ class GraphLoaderTest extends BaseTest {
         String createQuery = "CREATE (a)-[:Foo]->(b)-[:Bar]->(c)-[:Foo]->(d)";
         runQuery(createQuery);
 
-        var graph = TestGraphLoader.from(db)
+        var graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("Foo")
-            .graph(factoryType);
+            .graph();
 
         assertGraphEquals(fromGdl("(a)-->(b), (c)-->(d)"), graph);
     }
@@ -447,11 +445,11 @@ class GraphLoaderTest extends BaseTest {
         String createQuery = "CREATE (a)-[:Foo { bar: 3.14 }]->(b)-[:Baz { bar: 2.71 }]->(c)-[:Foo]->(d)";
         runQuery(createQuery);
 
-        var graph = TestGraphLoader.from(db)
+        var graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("Foo")
             .withRelationshipProperties(PropertyMappings.of(
                 PropertyMapping.of("bar", 1.61)
-            )).graph(factoryType);
+            )).graph();
 
         assertGraphEquals(fromGdl("(a)-[{bar: 3.14D}]->(b), (c)-[{bar: 1.61D}]->(d)"), graph);
     }
