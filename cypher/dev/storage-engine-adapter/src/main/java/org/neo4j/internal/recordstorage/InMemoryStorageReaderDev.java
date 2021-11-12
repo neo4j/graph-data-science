@@ -19,6 +19,7 @@
  */
 package org.neo4j.internal.recordstorage;
 
+import org.neo4j.common.EntityType;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.compat.dev.InMemoryNodeCursor;
 import org.neo4j.gds.compat.dev.InMemoryPropertyCursor;
@@ -28,6 +29,7 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
+import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.StorageNodeCursor;
@@ -37,6 +39,9 @@ import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public class InMemoryStorageReaderDev extends AbstractInMemoryStorageReader {
 
     public InMemoryStorageReaderDev(
@@ -45,6 +50,17 @@ public class InMemoryStorageReaderDev extends AbstractInMemoryStorageReader {
         CountsAccessor counts
     ) {
         super(graphStore, tokenHolders, counts);
+    }
+
+    @Override
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] changedLabels,
+        long[] unchangedLabels,
+        int[] propertyKeyIds,
+        boolean propertyKeyListIsComplete,
+        EntityType entityType
+    ) {
+        return Collections.emptyList();
     }
 
     @Override
