@@ -40,6 +40,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -94,13 +95,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        var model = modelCatalog.get(
-            getUsername(),
-            modelName,
-            ModelData.class,
-            GraphSageTrainConfig.class,
-            GraphSageModelTrainer.GraphSageTrainMetrics.class
-        );
+        var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
+
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
 
@@ -161,13 +157,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        var model = modelCatalog.get(
-            getUsername(),
-            modelName,
-            ModelData.class,
-            GraphSageTrainConfig.class,
-            GraphSageModelTrainer.GraphSageTrainMetrics.class
-        );
+        var model = GraphSageModelResolver.resolveModel(modelCatalog, getUsername(), modelName);
+
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
 

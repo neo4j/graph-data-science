@@ -26,11 +26,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -41,10 +44,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualConfig;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getNodeProperties;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage.GraphSageResult, GraphSageMutateProc.MutateResult, GraphSageMutateConfig> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPHSAGE_DESCRIPTION)
@@ -52,6 +60,8 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+
         ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
@@ -65,6 +75,8 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
@@ -82,7 +94,8 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     protected void validateConfigsAfterLoad(
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageMutateConfig config
     ) {
-        GraphStoreValidation.validate(graphStore, config.model().trainConfig());
+        var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
+        GraphStoreValidation.validate(graphStore, model.trainConfig());
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
     }
 
@@ -98,7 +111,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     protected AlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>();
+        return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 
     @SuppressWarnings("unused")

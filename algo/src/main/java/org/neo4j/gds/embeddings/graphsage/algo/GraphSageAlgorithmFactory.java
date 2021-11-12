@@ -23,6 +23,7 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -34,13 +35,17 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
 public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends AlgorithmFactory<GraphSage, CONFIG> {
 
-    public GraphSageAlgorithmFactory() {
+    private final ModelCatalog modelCatalog;
+
+    public GraphSageAlgorithmFactory(ModelCatalog modelCatalog) {
         super();
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -57,12 +62,19 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     ) {
 
         var executorService = Pools.DEFAULT;
-        if(configuration.model().trainConfig().hasRelationshipWeightProperty()) {
+        var model = resolveModel(
+            modelCatalog,
+            configuration.username(),
+            configuration.modelName()
+        );
+
+        if(model.trainConfig().hasRelationshipWeightProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
         return new GraphSage(
             graph,
+            model,
             configuration,
             executorService,
             allocationTracker,
@@ -72,10 +84,12 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
+        var model = resolveModel(modelCatalog, config.username(), config.modelName());
+
         return MemoryEstimations.setup(
             "",
             graphDimensions -> withNodeCount(
-                config.model().trainConfig(),
+                model.trainConfig(),
                 graphDimensions.nodeCount(),
                 config instanceof MutateConfig
             )

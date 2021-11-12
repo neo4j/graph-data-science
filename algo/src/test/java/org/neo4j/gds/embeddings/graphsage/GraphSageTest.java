@@ -139,7 +139,7 @@ class GraphSageTest {
             .concurrency(4)
             .build();
 
-        var graphSage = new GraphSageAlgorithmFactory<>().build(
+        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             orphanGraph,
             streamConfig,
             AllocationTracker.empty(),
@@ -164,7 +164,7 @@ class GraphSageTest {
             .build();
 
         var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
-        modelCatalog.set(graphSageTrain.compute());
+        var model = graphSageTrain.compute();
 
 
         int predictNodeCount = 2000;
@@ -188,7 +188,7 @@ class GraphSageTest {
             .batchSize(2)
             .build();
 
-        var graphSage = new GraphSage(trainGraph, streamConfig, Pools.DEFAULT, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
+        var graphSage = new GraphSage(trainGraph, model, streamConfig, Pools.DEFAULT, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
 
         assertThat(graphSage.compute().embeddings().size()).isEqualTo(predictNodeCount);
     }
@@ -217,7 +217,7 @@ class GraphSageTest {
             .build();
 
         var log = new TestLog();
-        var graphSage = new GraphSageAlgorithmFactory<>().build(
+        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,
             AllocationTracker.empty(),
