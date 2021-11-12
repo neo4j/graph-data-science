@@ -27,9 +27,7 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
@@ -51,8 +49,6 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,22 +73,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
 
-    public enum FactoryType {
-        NATIVE,
-        NATIVE_BIT_ID_MAP,
-        CYPHER
-    }
-
     private TestSupport() {}
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.TestSupport#allFactoryTypes")
-    public @interface AllGraphStoreFactoryTypesTest {}
-
-    public static Stream<FactoryType> allFactoryTypes() {
-        return Stream.of(FactoryType.NATIVE, FactoryType.NATIVE_BIT_ID_MAP, FactoryType.CYPHER);
-    }
 
     public static Stream<Orientation> allDirectedProjections() {
         return Stream.of(NATURAL, REVERSE);

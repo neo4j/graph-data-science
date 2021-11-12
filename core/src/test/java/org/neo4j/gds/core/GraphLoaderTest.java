@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
+import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -30,8 +31,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.TestLog;
-import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.logging.Log;
@@ -42,7 +42,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -69,25 +69,25 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testAnyLabel(TestSupport.FactoryType factoryType) {
+    void testAnyLabel(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withDefaultAggregation(Aggregation.SINGLE).graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithLabel(TestSupport.FactoryType factoryType) {
+    void testWithLabel(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withLabels("Node1").graph();
         assertGraphEquals(fromGdl("(:Node1)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithMultipleLabels(TestSupport.FactoryType factoryType) {
+    void testWithMultipleLabels(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withLabels("Node1", "Node2").graph();
         assertGraphEquals(fromGdl("(a:Node1)-->(b:Node2)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithMultipleLabelsAndProperties(TestSupport.FactoryType factoryType) {
+    void testWithMultipleLabelsAndProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42L));
         PropertyMappings multipleProperties = PropertyMappings.of(
             PropertyMapping.of("prop1", 42L),
@@ -233,7 +233,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithSingleLabelAndProperties(TestSupport.FactoryType factoryType) {
+    void testWithSingleLabelAndProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42));
         PropertyMappings multipleProperties = PropertyMappings.of(
             PropertyMapping.of("prop1", 42),
@@ -254,13 +254,13 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testAnyRelation(TestSupport.FactoryType factoryType) {
+    void testAnyRelation(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType).withDefaultAggregation(Aggregation.SINGLE).graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithBothWeightedRelationship(TestSupport.FactoryType factoryType) {
+    void testWithBothWeightedRelationship(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL3")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
@@ -270,7 +270,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithOutgoingRelationship(TestSupport.FactoryType factoryType) {
+    void testWithOutgoingRelationship(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL3")
             .graph();
@@ -278,7 +278,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithNodeProperties(TestSupport.FactoryType factoryType) {
+    void testWithNodeProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         PropertyMappings nodePropertyMappings = PropertyMappings.of(
             PropertyMapping.of("prop1", "prop1", 0),
             PropertyMapping.of("prop2", "prop2", 0),
@@ -298,7 +298,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testWithRelationshipProperty(TestSupport.FactoryType factoryType) {
+    void testWithRelationshipProperty(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(PropertyMapping.of("weight", "prop1", 3.14))
             .withDefaultAggregation(Aggregation.SINGLE)
@@ -307,7 +307,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testLoadCorrectLabelCombinations(TestSupport.FactoryType factoryType) {
+    void testLoadCorrectLabelCombinations(GraphFactoryTestSupport.FactoryType factoryType) {
         runQuery("CREATE (n:Node1:Node2)");
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withLabels("Node1", "Node2")
@@ -325,19 +325,19 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testPropertyViaIndex(TestSupport.FactoryType factoryType) {
+    void testPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
             testPropertyLoadingWithIndex(factoryType, NullLog.getInstance()));
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testParallelPropertyViaIndex(TestSupport.FactoryType factoryType) {
+    void testParallelPropertyViaIndex(GraphFactoryTestSupport.FactoryType factoryType) {
         USE_PROPERTY_VALUE_INDEX.enableAndRun(() ->
             USE_PARALLEL_PROPERTY_VALUE_INDEX.enableAndRun(() ->
                 testPropertyLoadingWithIndex(factoryType, NullLog.getInstance())));
     }
 
-    private void testPropertyLoadingWithIndex(TestSupport.FactoryType factoryType, Log log) {
+    private void testPropertyLoadingWithIndex(GraphFactoryTestSupport.FactoryType factoryType, Log log) {
         var indexQueries = List.of(
             "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
             "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
@@ -395,7 +395,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testLoggingActualGraphSize(TestSupport.FactoryType factoryType) {
+    void testLoggingActualGraphSize(GraphFactoryTestSupport.FactoryType factoryType) {
         var log = new TestLog();
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.SINGLE)
@@ -406,7 +406,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void testNodePropertyDefaultValue(TestSupport.FactoryType factoryType) {
+    void testNodePropertyDefaultValue(GraphFactoryTestSupport.FactoryType factoryType) {
         String createQuery = "CREATE" +
                              "  (:Label { weight1: 0.0, weight2: 1.0 })" +
                              ", (:Label { weight2: 1.0 })" +
@@ -427,7 +427,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void shouldFilterRelationshipType(TestSupport.FactoryType factoryType) {
+    void shouldFilterRelationshipType(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         String createQuery = "CREATE (a)-[:Foo]->(b)-[:Bar]->(c)-[:Foo]->(d)";
         runQuery(createQuery);
@@ -440,7 +440,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void shouldFilterRelationshipTypeAndApplyDefaultRelationshipProperty(TestSupport.FactoryType factoryType) {
+    void shouldFilterRelationshipTypeAndApplyDefaultRelationshipProperty(GraphFactoryTestSupport.FactoryType factoryType) {
         clearDb();
         String createQuery = "CREATE (a)-[:Foo { bar: 3.14 }]->(b)-[:Baz { bar: 2.71 }]->(c)-[:Foo]->(d)";
         runQuery(createQuery);

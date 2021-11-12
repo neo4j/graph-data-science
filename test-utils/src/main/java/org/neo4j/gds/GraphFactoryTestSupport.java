@@ -19,23 +19,29 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public final class TestGraphLoaderFactory {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.stream.Stream;
 
-    private TestGraphLoaderFactory() {}
+public final class GraphFactoryTestSupport {
 
-    public static TestGraphLoader graphLoader(GraphDatabaseAPI db, GraphFactoryTestSupport.FactoryType factoryType) {
-        switch (factoryType) {
-            case NATIVE:
-                return new TestNativeGraphLoader(db);
-            case CYPHER:
-                return new TestCypherGraphLoader(db);
-            case NATIVE_BIT_ID_MAP:
-            default:
-                throw new NotImplementedException("BitIdMap store loader not implemented yet");
-        }
+    public enum FactoryType {
+        NATIVE,
+        NATIVE_BIT_ID_MAP,
+        CYPHER
     }
 
+    private GraphFactoryTestSupport() {}
+
+    public static Stream<FactoryType> allFactoryTypes() {
+        return Stream.of(FactoryType.NATIVE, FactoryType.NATIVE_BIT_ID_MAP, FactoryType.CYPHER);
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.GraphFactoryTestSupport#allFactoryTypes")
+    public @interface AllGraphStoreFactoryTypesTest {}
 }

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -75,7 +75,7 @@ import static org.neo4j.gds.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
+import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -315,7 +315,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     @AllGraphStoreFactoryTypesTest
-    default void testRunOnLoadedGraph(TestSupport.FactoryType factoryType) {
+    default void testRunOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
         // FIXME rethink this test for mutate
         if (supportsImplicitGraphCreate()) {
             String loadedGraphName = "loadedGraph";
@@ -414,7 +414,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     @AllGraphStoreFactoryTypesTest
-    default void testRunMultipleTimesOnLoadedGraph(TestSupport.FactoryType factoryType) {
+    default void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = factoryType == CYPHER
             ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName)
