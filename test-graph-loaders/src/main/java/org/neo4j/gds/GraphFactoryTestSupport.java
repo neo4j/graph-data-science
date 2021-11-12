@@ -30,14 +30,13 @@ public final class GraphFactoryTestSupport {
 
     public enum FactoryType {
         NATIVE,
-        NATIVE_BIT_ID_MAP,
         CYPHER
     }
 
     private GraphFactoryTestSupport() {}
 
     public static Stream<FactoryType> allFactoryTypes() {
-        return Stream.of(FactoryType.NATIVE, FactoryType.NATIVE_BIT_ID_MAP, FactoryType.CYPHER);
+        return Stream.of(FactoryType.NATIVE, FactoryType.CYPHER);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

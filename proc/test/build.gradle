@@ -26,4 +26,5 @@ dependencies {
     api project(':proc-catalog')
     api project(':proc-common')
     api project(':test-utils')
+    api project(':test-graph-loaders')
 }
