@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestLog;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -66,7 +66,6 @@ class NodeClassificationSerializerIntegrationTest {
     void roundTripTest(String metric) throws IOException {
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
-        var log = new TestLog();
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
         var ncTrain = NodeClassificationTrain.create(trainGraph, config, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
@@ -79,18 +78,17 @@ class NodeClassificationSerializerIntegrationTest {
 
         var deserializedModel = serializer.fromSerializable(serializableModel, modelMetaData);
 
+        assertThat(deserializedModel.stored()).isNotEqualTo(modelBeforeSerialization.stored());
+
         assertThat(deserializedModel)
             .usingRecursiveComparison()
+            .withEqualsForType(DefaultValue::equals, DefaultValue.class)
             .ignoringFields(
                 "trainConfig.params",
                 "data.classIdMap",
                 "stored"
             )
-            .ignoringFieldsMatchingRegexes(
-                "graphSchema\\.nodeSchema\\.properties\\..+\\.defaultValue\\.defaultValue"
-            )
             .isEqualTo(modelBeforeSerialization);
-
     }
 
     private NodeClassificationTrainConfig createConfig(

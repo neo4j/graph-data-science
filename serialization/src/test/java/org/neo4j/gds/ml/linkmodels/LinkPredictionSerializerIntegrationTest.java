@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.model.ModelMetaDataSerializer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -32,7 +33,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +75,7 @@ class LinkPredictionSerializerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("validLinkFeatureCombiners")
-    void roundTripTest(LinkFeatureCombiners linkFeatureCombiner) throws IOException {
+    void roundTripTest(LinkFeatureCombiners linkFeatureCombiner) {
         Map<String, Object> model2 = Map.of(
             "penalty", 1,
             "maxEpochs", 10000,
@@ -97,14 +97,11 @@ class LinkPredictionSerializerIntegrationTest {
 
         assertThat(deserializedModel)
             .usingRecursiveComparison()
+            .withEqualsForType(DefaultValue::equals, DefaultValue.class)
             .ignoringFields(
                 "params",
                 "trainConfig.params",
                 "stored"
-            )
-            .ignoringFieldsMatchingRegexes(
-                "graphSchema\\.nodeSchema\\.properties\\..+\\.defaultValue\\.defaultValue",
-                "graphSchema\\.relationshipSchema\\.properties\\..+\\.defaultValue\\.defaultValue"
             )
             .isEqualTo(modelBeforeSerialization);
     }
