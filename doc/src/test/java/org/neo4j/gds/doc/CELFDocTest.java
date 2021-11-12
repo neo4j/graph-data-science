@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.influenceΜaximization.CELFProc;
+import org.neo4j.gds.influenceMaximization.CELFProc;
 
 import java.util.List;
 

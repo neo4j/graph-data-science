@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.influenceΜaximization;
+package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
@@ -27,7 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.influenceMaximization.CELF;
+import org.neo4j.gds.impl.influenceMaximization.Greedy;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 import org.neo4j.procedure.Description;
@@ -40,17 +40,17 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConfig> {
-    private static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
+public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizationConfig> {
+    private static final String DESCRIPTION = "The Greedy algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
-    @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)
+    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
-        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(
+        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,13 +64,13 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
         return computationResult.algorithm().resultStream();
     }
 
-//    @Procedure(name = "gds.alpha.influenceMaximization.celf.stats", mode = READ)
+//    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(
+        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -97,21 +97,21 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     }
 
     @Override
-    protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
+    protected AlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
             protected String taskName() {
-                return "CELF";
+                return "Greedy";
             }
 
             @Override
-            protected CELF build(
+            protected Greedy build(
                 Graph graph,
                 InfluenceMaximizationConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
-                return new CELF(
+                return new Greedy(
                     graph,
                     configuration.seedSetSize(),
                     configuration.propagationProbability(),
