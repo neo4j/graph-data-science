@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels;
+package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.List;
@@ -32,7 +31,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface NodeClassificationModelInfo extends ToMapConvertible {
+public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
+
+    NodeClassificationPipeline trainingPipeline();
 
     /**
      * The distinct values of the target property which represent the
@@ -47,6 +48,7 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
      * @return
      */
     NodeLogisticRegressionTrainConfig bestParameters();
+
     Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics();
 
     @Override
@@ -59,23 +61,12 @@ public interface NodeClassificationModelInfo extends ToMapConvertible {
             "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().toString(),
                 entry -> entry.getValue().toMap()
-            ))
+            )),
+            "trainingPipeline", trainingPipeline().toMap()
         );
     }
 
-    static NodeClassificationModelInfo of(
-        List<Long> classes,
-        NodeLogisticRegressionTrainConfig bestParameters,
-        Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics
-    ) {
-        return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
-    }
-
-    static NodeClassificationModelInfo defaultConfig() {
-        return NodeClassificationModelInfo.of(List.of(),
-            new NodeLogisticRegressionTrainConfigImpl(List.of(), "", CypherMapWrapper.create(Map.of())),
-            Map.of()
-        );
+    static ImmutableNodeClassificationPipelineModelInfo.Builder builder() {
+        return ImmutableNodeClassificationPipelineModelInfo.builder();
     }
 }
-

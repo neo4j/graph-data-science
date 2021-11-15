@@ -60,7 +60,7 @@ public final class LinkFeatureExtractor {
             .map(step -> step.linkFeatureAppender(graph))
             .collect(Collectors.toList());
 
-        var featureDimensions = linkFeatureSteps.stream().map(step -> step.outputFeatureDimension(graph)).collect(
+        var featureDimensions = linkFeatureSteps.stream().map(step -> step.featureDimension(graph)).collect(
             Collectors.toList());
         int featureDimension = featureDimensions.stream().mapToInt(Integer::intValue).sum();
         return new LinkFeatureExtractor(linkFeatureProducers, featureDimension, featureDimensions);
