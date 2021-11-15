@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.condition.AnyOf.anyOf;
+import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 
 class SysInfoProcTest extends BaseProcTest {
 
@@ -66,7 +67,6 @@ class SysInfoProcTest extends BaseProcTest {
         ));
         var buildInfoProperties = BuildInfoProperties.get();
         var isNotNull = new Condition<>(Objects::nonNull, "is not null");
-        var openGds = new Condition<>("OpenGDS"::equals, "OpenGDS");
         var isTrue = new Condition<>(Boolean.TRUE::equals, "true");
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
@@ -83,7 +83,7 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildJavaVersion", buildInfoProperties.buildJavaVersion())
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
-            .hasEntrySatisfying("gdsEdition", openGds)
+            .hasEntrySatisfying("gdsEdition", GDS_EDITION)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
             .hasEntrySatisfying("availableHeapInBytes", isInteger)
