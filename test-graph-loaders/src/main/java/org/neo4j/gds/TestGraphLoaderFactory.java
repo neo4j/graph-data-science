@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 public final class TestGraphLoaderFactory {
