@@ -55,10 +55,9 @@ import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig> extends BaseProc {
+    CONFIG extends AlgoBaseConfig> extends BaseProc  {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
-
     protected String procName() {
         return this.getClass().getSimpleName();
     }
@@ -156,30 +155,6 @@ public abstract class AlgoBaseProc<
         return Tuples.pair(config, graphName);
     }
 
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {}
-
-    public final void validateConfigWithGraphStore(
-        GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {
-        config.graphStoreValidation(
-            graphStore,
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore)
-        );
-        GraphStoreValidation.validate(graphStore, config);
-        validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-    }
-
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {}
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -316,16 +291,20 @@ public abstract class AlgoBaseProc<
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
+    public ValidationConfig<CONFIG> getValidationConfig(){
+        return ValidationConfig.empty();
+    }
+
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
-
+        Validator<CONFIG> validator =new Validator<>(getValidationConfig());
         var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
-        validateConfigsBeforeLoad(graphCreateConfig, config);
+        validator.validateConfigsBeforeLoad(graphCreateConfig, config);
         var graphStore = graphStoreLoader.graphStore();
-        validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
+        validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
 
         return graphStore;
     }
