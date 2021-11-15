@@ -122,7 +122,7 @@ public class TestOpenModelCatalogResolver implements ParameterResolver, TestInst
         var store = extensionContext.getStore(NAMESPACE);
         return store.getOrComputeIfAbsent(
             INJECT_CLASS,
-            (annotationClass) -> OpenModelCatalog.INSTANCE,
+            (annotationClass) -> new OpenModelCatalog(),
             INJECT_TARGET_CLASS
         );
     }
