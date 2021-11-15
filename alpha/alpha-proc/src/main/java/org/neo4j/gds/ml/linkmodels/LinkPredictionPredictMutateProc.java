@@ -29,10 +29,12 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -48,6 +50,9 @@ import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIP
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -89,7 +94,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>();
+        return new LinkPredictionPredictFactory<>(modelCatalog);
     }
 
     @Override
