@@ -116,7 +116,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
                 .withNodePairsConsidered(result.nodePairsConsidered())
                 .withDidConverge(result.didConverge());
 
-            SimilarityProc.resultBuilder(resultBuilder, computationResult);
+            SimilarityProc.resultBuilderWithTimings(resultBuilder, computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {

@@ -22,10 +22,10 @@ package org.neo4j.gds.similarity;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -46,21 +46,21 @@ public final class SimilarityProc {
             .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
     }
 
-    public static <RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> resultBuilder(
+    public static <RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> withGraphsizeAndTimings(
         SimilarityResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<? extends Algorithm<?, ?>, RESULT, CONFIG> computationResult,
         Function<RESULT, SimilarityGraphResult> graphResultFunc
     ) {
         RESULT result = computationResult.result();
         SimilarityGraphResult graphResult = graphResultFunc.apply(result);
-        resultBuilder(procResultBuilder, computationResult)
+        resultBuilderWithTimings(procResultBuilder, computationResult)
             .withNodesCompared(graphResult.comparedNodes())
             .withRelationshipsWritten(graphResult.similarityGraph().relationshipCount());
 
         return procResultBuilder;
     }
 
-    public static <PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> resultBuilder(
+    public static <PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> resultBuilderWithTimings(
         SimilarityResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<? extends Algorithm<?, ?>, ?, CONFIG> computationResult
     ) {

@@ -68,8 +68,9 @@ public abstract class SimilarityWriteProc<
                 ? similarityGraph
                 : computationResult.graphStore().nodes();
 
-            SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder =
-                SimilarityProc.resultBuilder(resultBuilder(computationResult), computationResult, (ignore) -> similarityGraphResult);
+            SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder = resultBuilder(computationResult);
+
+            SimilarityProc.withGraphsizeAndTimings(resultBuilder, computationResult, (ignore) -> similarityGraphResult);
 
             if (similarityGraph.relationshipCount() > 0) {
                 String writeRelationshipType = config.writeRelationshipType();
