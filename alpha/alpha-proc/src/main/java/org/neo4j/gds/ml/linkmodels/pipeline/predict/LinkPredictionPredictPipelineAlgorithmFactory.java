@@ -24,6 +24,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,19 +41,22 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompani
 public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
     private final BaseProc caller;
     private final NamedDatabaseId databaseId;
+    private final ModelCatalog modelCatalog;
 
     LinkPredictionPredictPipelineAlgorithmFactory(
         BaseProc caller,
-        NamedDatabaseId databaseId
+        NamedDatabaseId databaseId,
+        ModelCatalog modelCatalog
     ) {
         super();
         this.caller = caller;
         this.databaseId = databaseId;
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
     protected Task progressTask(Graph graph, CONFIG config) {
-        var trainingPipeline = getTrainedLPPipelineModel(config.modelName(), config.username())
+        var trainingPipeline = getTrainedLPPipelineModel(modelCatalog, config.modelName(), config.username())
             .customInfo()
             .trainingPipeline();
 
@@ -85,6 +89,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
                 "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
 
         var model = getTrainedLPPipelineModel(
+            modelCatalog,
             configuration.modelName(),
             configuration.username()
         );

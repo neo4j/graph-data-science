@@ -23,9 +23,11 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -36,6 +38,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model based on a pipeline")
@@ -56,7 +61,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
 
     @Override
     protected AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
-        return new LinkPredictionTrainPipelineAlgorithmFactory(this, databaseId());
+        return new LinkPredictionTrainPipelineAlgorithmFactory(this, databaseId(), modelCatalog);
     }
 
     @Override
