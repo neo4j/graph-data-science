@@ -24,30 +24,18 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 
 public interface ValidationConfig<CONFIG extends AlgoBaseConfig> {
-    void validateConfigsBeforeLoad(
+    default void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig,
         CONFIG config
-    );
+    ){}
 
-    void validateConfigsAfterLoad(
+    default void validateConfigsAfterLoad(
         GraphStore graphStore,
         GraphCreateConfig graphCreateConfig,
         CONFIG config
-    );
+    ){}
 
     static <CONFIG extends AlgoBaseConfig> ValidationConfig<CONFIG> empty() {
-        return new ValidationConfig<>() {
-            @Override
-            public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
-
-            }
-
-            @Override
-            public void validateConfigsAfterLoad(
-                GraphStore graphStore, GraphCreateConfig graphCreateConfig, CONFIG config
-            ) {
-
-            }
-        };
+        return new ValidationConfig<>(){};
     }
 }

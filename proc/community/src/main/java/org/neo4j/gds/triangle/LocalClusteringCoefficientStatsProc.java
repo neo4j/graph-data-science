@@ -22,6 +22,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.ValidationConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -63,9 +64,15 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
-        warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
+    public ValidationConfig<LocalClusteringCoefficientStatsConfig> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
+                validateIsUndirectedGraph(graphCreateConfig, config);
+                warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
+            }
+
+        };
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreValidation;
+import org.neo4j.gds.ValidationConfig;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
@@ -76,12 +77,16 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageWriteConfig config
-    ) {
-        var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
-        GraphStoreValidation.validate(graphStore, model.trainConfig());
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
+    public ValidationConfig<GraphSageWriteConfig> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public void validateConfigsAfterLoad(
+                GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageWriteConfig config
+            ) {
+                var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
+                GraphStoreValidation.validate(graphStore, model.trainConfig());
+            }
+        };
     }
 
     @Override

@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromCypherConfig;
@@ -69,9 +70,13 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        modelCatalog.verifyModelCanBeStored(username(), config.modelName(), modelType());
+    public ValidationConfig<TRAIN_CONFIG> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
+                modelCatalog.verifyModelCanBeStored(username(), config.modelName(), modelType());
+            }
+        };
     }
 
     @SuppressWarnings("unused")
