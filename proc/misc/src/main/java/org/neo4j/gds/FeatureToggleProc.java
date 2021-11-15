@@ -125,21 +125,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.useBitIdMap.reset")
-    @Description("Set the behavior of whether to use the bit id map. That value is returned.")
-    public Stream<FeatureState> resetUseBitIdMap() {
-        GdsFeatureToggles.USE_BIT_ID_MAP.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
-    }
-
-    @Internal
-    @Procedure("gds.features.useBitIdMap")
-    @Description("Toggle whether the bit id map should be used during graph creation.")
-    public void useBitIdMap(@Name(value = "useBitIdMap") boolean useBitIdMap) {
-        GdsFeatureToggles.USE_BIT_ID_MAP.toggle(useBitIdMap);
-    }
-
-    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
@@ -181,7 +166,7 @@ public final class FeatureToggleProc {
     public static final class FeatureState {
         public final boolean enabled;
 
-        FeatureState(boolean enabled) {
+        public FeatureState(boolean enabled) {
             this.enabled = enabled;
         }
     }
