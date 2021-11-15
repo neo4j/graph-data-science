@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -34,14 +35,17 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -57,6 +61,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
 
     TestLog testLog;
+
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream
+            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
+            .flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig>> getProcedureClazz() {

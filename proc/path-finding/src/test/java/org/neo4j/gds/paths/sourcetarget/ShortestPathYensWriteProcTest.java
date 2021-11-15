@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.sourcetarget;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -30,10 +31,13 @@ import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,6 +49,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 
 class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
+
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream
+            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
+            .flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig>> getProcedureClazz() {

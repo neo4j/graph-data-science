@@ -31,7 +31,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -41,6 +40,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -59,10 +60,18 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     private static final String K_KEY = "k";
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(
+            modeSpecificConfigTests(),
+            Stream.of(
+                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     protected static final String GRAPH_NAME = "graph";

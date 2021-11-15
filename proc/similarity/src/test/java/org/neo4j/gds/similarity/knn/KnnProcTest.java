@@ -44,6 +44,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -65,10 +66,29 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @TestFactory
     Stream<DynamicTest> configTests() {
-        return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            NodeWeightConfigProcTest.mandatoryParameterTest(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+        // KNN's createMinimalConfig() is not really minimal, but deterministic
+        // it overrides several default parameters, and we don't want or need that
+        // but we do need it to get the mutate and write mandatory params, so we'll just remove the default ones
+        var minimalConfig = createMinimalConfig()
+            .withoutEntry("randomSeed")
+            .withoutEntry("concurrency")
+            .withoutEntry("sampleRate")
+            .withoutEntry("deltaThreshold")
+            .withoutEntry("randomJoins")
+            .withoutEntry("topK");
+
+        return Stream.concat(
+            modeSpecificConfigTests(),
+            Stream.of(
+                IterationsConfigProcTest.test(proc(), minimalConfig),
+                NodeWeightConfigProcTest.mandatoryParameterTest(proc(), minimalConfig),
+                ConcurrencyConfigProcTest.test(proc(), minimalConfig)
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     static final String GRAPH_NAME = "myGraph";

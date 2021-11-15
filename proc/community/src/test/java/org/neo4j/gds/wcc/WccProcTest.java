@@ -31,7 +31,6 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -40,6 +39,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
+import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -58,10 +59,18 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     HeapControlTest<Wcc, CONFIG, DisjointSetStruct> {
 
     @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
+    final Stream<DynamicTest> configTests() {
+        return Stream.concat(
+            modeSpecificConfigTests(),
+            Stream.of(
+                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
+                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ).flatMap(Collection::stream)
+        );
+    }
+
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream.empty();
     }
 
     private static final String GRAPH_NAME = "myGraph";

@@ -20,16 +20,20 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -37,6 +41,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConfig> {
+
+    @Override
+    Stream<DynamicTest> modeSpecificConfigTests() {
+        return Stream
+            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
+            .flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringWriteConfig>> getProcedureClazz() {
