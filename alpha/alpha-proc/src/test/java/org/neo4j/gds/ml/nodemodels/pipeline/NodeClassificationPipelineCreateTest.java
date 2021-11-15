@@ -26,7 +26,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
@@ -39,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
@@ -62,7 +62,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
         assertThat(result.featureSteps).isEqualTo(List.of());
         assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
-        assertThat(result.parameterSpace).usingRecursiveComparison().isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+        assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
 
         assertCypherResult(
             "CALL gds.beta.model.list('myPipeline')",
@@ -76,7 +76,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
                             "featureSteps", List.of()
                         ),
                         "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
-                        "trainingParameterSpace", NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG
+                        "trainingParameterSpace", DEFAULT_PARAM_CONFIG
                     ),
                     "trainConfig", PipelineCreateConfig.of(getUsername()).toMap(),
                     "graphSchema", GraphSchema.empty().toMap(),

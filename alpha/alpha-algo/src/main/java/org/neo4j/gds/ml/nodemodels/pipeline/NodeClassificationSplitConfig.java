@@ -26,6 +26,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 @ValueClass
@@ -57,4 +59,9 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
     @Override
     @Configuration.ToMap
     Map<String, Object> toMap();
+
+    @Configuration.CollectKeys
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    }
 }
