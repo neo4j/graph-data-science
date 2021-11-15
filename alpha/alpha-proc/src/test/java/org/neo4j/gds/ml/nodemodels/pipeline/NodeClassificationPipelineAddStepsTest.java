@@ -30,7 +30,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.louvain.LouvainMutateProc;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -40,6 +39,7 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
 
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
@@ -73,9 +73,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     "config", Map.of("mutateProperty", "pr")
                 )));
             assertThat(result.featureSteps).isEqualTo(List.of());
-            assertThat(result.parameterSpace)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
 
@@ -96,9 +94,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
             assertThat(result.nodePropertySteps).isEqualTo(List.of());
             assertThat(result.featureSteps).isEqualTo(List.of("test", "pr", "pr2"));
-            assertThat(result.parameterSpace)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
 
@@ -181,9 +177,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     "config", Map.of("mutateProperty", "pr")
                 )));
             assertThat(result.featureSteps).isEqualTo(List.of("pr", "pr2"));
-            assertThat(result.parameterSpace)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
 
@@ -217,9 +211,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 ))
             );
             assertThat(result.featureSteps).isEqualTo(List.of());
-            assertThat(result.parameterSpace)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
+            assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
 
