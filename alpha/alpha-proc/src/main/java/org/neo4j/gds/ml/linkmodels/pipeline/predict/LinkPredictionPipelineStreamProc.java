@@ -24,7 +24,9 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -38,6 +40,9 @@ import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndire
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -84,7 +89,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, databaseId());
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, databaseId(), modelCatalog);
     }
 
     @SuppressWarnings("unused")
