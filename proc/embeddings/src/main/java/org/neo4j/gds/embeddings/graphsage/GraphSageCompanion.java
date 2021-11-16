@@ -21,11 +21,17 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GraphStoreValidation;
+import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.validation.AfterLoadValidation;
+import org.neo4j.gds.validation.ValidationConfig;
+
+import java.util.List;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -55,6 +61,18 @@ public final class GraphSageCompanion {
             public double[] doubleArrayValue(long nodeId) {
 
                 return embeddings.get(nodeId);
+            }
+        };
+    }
+
+    static <CONFIG extends GraphSageBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
+                return List.of(
+                    (graphStore, graphCreateConfig, graphSageConfig) ->
+                        GraphStoreValidation.validate(graphStore, graphSageConfig.model().trainConfig())
+                );
             }
         };
     }

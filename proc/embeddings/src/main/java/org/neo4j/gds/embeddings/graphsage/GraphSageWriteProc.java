@@ -20,10 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
-import org.neo4j.gds.ValidationConfig;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -34,6 +31,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -78,15 +76,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
 
     @Override
     public ValidationConfig<GraphSageWriteConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
-            @Override
-            public void validateConfigsAfterLoad(
-                GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageWriteConfig config
-            ) {
-                var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
-                GraphStoreValidation.validate(graphStore, model.trainConfig());
-            }
-        };
+        return GraphSageCompanion.getValidationConfig();
     }
 
     @Override
