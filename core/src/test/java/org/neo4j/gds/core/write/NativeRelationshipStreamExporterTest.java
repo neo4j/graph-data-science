@@ -168,7 +168,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var idD =  idFunction.of("d");
 
         //@formatter:off
-        var query = "MATCH (a)-[r:FOOBAR]->(b) WHERE id(a) = $idA AND id(b) = $idB RETURN r.x AS x, r.y AS y";
+        var query = "MATCH (a)-[r:FOOBAR]->(b) WHERE id(a) = $idA AND id(b) = $idB RETURN r.x AS x, r.y AS y ORDER BY x, y";
         assertCypherResult(query, Map.of("idA", idA, "idB", idB), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
         assertCypherResult(query, Map.of("idA", idA, "idB", idC), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
         assertCypherResult(query, Map.of("idA", idB, "idB", idA), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
