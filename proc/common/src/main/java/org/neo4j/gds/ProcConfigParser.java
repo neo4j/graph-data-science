@@ -36,12 +36,12 @@ import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 
-public abstract class ConfigParser<CONFIG extends AlgoBaseConfig> {
+public abstract class ProcConfigParser<CONFIG extends AlgoBaseConfig> {
 
     protected final String username;
     private Map<String, Class<?>> sharedConfigKeys;
 
-    protected ConfigParser(String username) {
+    protected ProcConfigParser(String username) {
         this.username = username;
         this.sharedConfigKeys = new HashMap<>();
     }

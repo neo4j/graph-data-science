@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.neo4j.gds.ConfigParser;
 import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
@@ -41,7 +41,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJE
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
-public class AlphaSimilarityConfigParser<CONFIG extends SimilarityConfig> extends ConfigParser<CONFIG> {
+public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> extends ProcConfigParser<CONFIG> {
 
     private final NamedDatabaseId databaseId;
     private final NewConfigFunction<CONFIG> newConfigFunction;
@@ -55,7 +55,7 @@ public class AlphaSimilarityConfigParser<CONFIG extends SimilarityConfig> extend
         );
     }
 
-    AlphaSimilarityConfigParser(
+    AlphaSimilarityProcConfigParser(
         String username,
         NamedDatabaseId databaseId,
         NewConfigFunction<CONFIG> newConfigFunction

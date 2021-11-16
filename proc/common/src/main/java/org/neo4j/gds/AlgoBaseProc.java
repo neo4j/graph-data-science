@@ -56,8 +56,8 @@ public abstract class AlgoBaseProc<
         return this.getClass().getSimpleName();
     }
 
-    public ConfigParser<CONFIG> configParser() {
-        return new ConfigParser<>(username()) {
+    public ProcConfigParser<CONFIG> configParser() {
+        return new ProcConfigParser<>(username()) {
             @Override
             protected CONFIG newConfig(
                 String username,

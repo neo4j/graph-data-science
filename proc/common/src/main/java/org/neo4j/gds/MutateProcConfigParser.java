@@ -28,11 +28,11 @@ import java.util.Optional;
 import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 
-public class MutateProcConfigParser<CONFIG extends AlgoBaseConfig> extends ConfigParser<CONFIG> {
+public class MutateProcConfigParser<CONFIG extends AlgoBaseConfig> extends ProcConfigParser<CONFIG> {
 
-    private final ConfigParser<CONFIG> defaultParser;
+    private final ProcConfigParser<CONFIG> defaultParser;
 
-    public MutateProcConfigParser(ConfigParser<CONFIG> defaultParser) {
+    public MutateProcConfigParser(ProcConfigParser<CONFIG> defaultParser) {
         super(defaultParser.username);
         this.defaultParser = defaultParser;
     }

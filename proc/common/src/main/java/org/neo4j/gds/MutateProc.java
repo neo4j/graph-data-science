@@ -31,7 +31,7 @@ public abstract class MutateProc<
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     @Override
-    public ConfigParser<CONFIG> configParser() {
+    public ProcConfigParser<CONFIG> configParser() {
         return new MutateProcConfigParser<>(super.configParser());
     }
 

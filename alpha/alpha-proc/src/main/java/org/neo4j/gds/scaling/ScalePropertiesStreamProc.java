@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.ConfigParser;
+import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -53,7 +53,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    public ConfigParser<ScalePropertiesStreamConfig> configParser() {
+    public ProcConfigParser<ScalePropertiesStreamConfig> configParser() {
         var configParser = super.configParser();
         configParser.withSharedConfigKeys(Map.of("nodeProperties", Object.class));
         return configParser;
