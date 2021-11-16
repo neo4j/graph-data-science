@@ -24,8 +24,12 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Locale;
 
 final class BetweennessCentralityProc {
@@ -73,6 +77,17 @@ final class BetweennessCentralityProc {
             procResultBuilder.withCentralityFunction(computeResult.result()::get);
         }
         return procResultBuilder;
+    }
+
+    static <CONFIG extends BetweennessCentralityBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(
+                    new GraphCreateConfigValidations.OrientationValidation<>()
+                );
+            }
+        };
     }
 
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {

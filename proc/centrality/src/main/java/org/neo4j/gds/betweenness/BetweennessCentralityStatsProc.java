@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,7 +40,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateOrientationCombinations;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsProc.StatsResult, BetweennessCentralityStatsConfig> {
@@ -73,8 +73,8 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, BetweennessCentralityStatsConfig config) {
-        validateOrientationCombinations(graphCreateConfig, config);
+    public ValidationConfig<BetweennessCentralityStatsConfig> getValidationConfig() {
+        return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override

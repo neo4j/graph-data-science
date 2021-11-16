@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.validation;
 
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.gds.Orientation;
 
 import java.util.Collections;
 
@@ -59,48 +62,46 @@ public final class GraphCreateConfigValidations {
      * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
      * config, only those relationship projections are considered in the validation.
      */
-    public static <CONFIG extends AlgoBaseConfig> void validateOrientationCombinations(
-        GraphCreateConfig graphCreateConfig,
-        CONFIG algorithmConfig
-    ) {
-        graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
-            @Override
-            public void visit(GraphCreateFromStoreConfig storeConfig) {
-                var filteredProjections = storeConfig
-                    .relationshipProjections()
-                    .projections()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> algorithmConfig
-                                         .relationshipTypes()
-                                         .equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
-                                     algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
-                    .collect(toList());
+    public static class OrientationValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
+        @Override
+        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
+            graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
+                @Override
+                public void visit(GraphCreateFromStoreConfig storeConfig) {
+                    var filteredProjections = storeConfig
+                        .relationshipProjections()
+                        .projections()
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> algorithmConfig
+                                             .relationshipTypes()
+                                             .equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
+                                         algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
+                        .collect(toList());
 
-                boolean allUndirected = filteredProjections
-                    .stream()
-                    .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+                    boolean allUndirected = filteredProjections
+                        .stream()
+                        .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
 
-                boolean anyUndirected = filteredProjections
-                    .stream()
-                    .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+                    boolean anyUndirected = filteredProjections
+                        .stream()
+                        .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
 
-                if (anyUndirected && !allUndirected) {
-                    throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                        "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
-                        StringJoining.join(filteredProjections
-                            .stream()
-                            .map(entry -> formatWithLocale(
-                                "%s (%s)",
-                                entry.getKey().name,
-                                entry.getValue().orientation()
-                            ))
-                            .sorted())
-                    ));
+                    if (anyUndirected && !allUndirected) {
+                        throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                            "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
+                            StringJoining.join(filteredProjections
+                                .stream()
+                                .map(entry -> formatWithLocale(
+                                    "%s (%s)",
+                                    entry.getKey().name,
+                                    entry.getValue().orientation()
+                                ))
+                                .sorted())
+                        ));
+                    }
                 }
-            }
-        });
+            });
+        }
     }
-
-    private GraphCreateConfigValidations() {}
 }

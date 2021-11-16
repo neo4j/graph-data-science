@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +37,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateOrientationCombinations;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, HugeAtomicDoubleArray, CentralityStreamResult, BetweennessCentralityStreamConfig> {
@@ -86,8 +86,8 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, BetweennessCentralityStreamConfig config) {
-        validateOrientationCombinations(graphCreateConfig, config);
+    public ValidationConfig<BetweennessCentralityStreamConfig> getValidationConfig() {
+        return BetweennessCentralityProc.getValidationConfig();
     }
 
     @Override
