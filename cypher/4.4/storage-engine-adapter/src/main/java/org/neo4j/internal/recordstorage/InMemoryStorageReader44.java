@@ -54,8 +54,17 @@ public class InMemoryStorageReader44 extends AbstractInMemoryStorageReader {
 
     @Override
     public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
-        long[] labels,
+        long[] labels, int propertyKeyId, EntityType entityType
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] changedLabels,
+        long[] unchangedLabels,
         int[] propertyKeyIds,
+        boolean propertyKeyListIsComplete,
         EntityType entityType
     ) {
         return Collections.emptyList();
