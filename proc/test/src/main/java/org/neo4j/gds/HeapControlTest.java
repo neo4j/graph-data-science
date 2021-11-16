@@ -20,9 +20,9 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Optional;
@@ -38,7 +38,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
     default void shouldPassOnSufficientMemory() {
         applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
-            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
+            CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 10000000);
         });
     }
@@ -47,7 +47,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
     default void shouldFailOnInsufficientMemory() {
         assertThatThrownBy(() -> applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
-            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
+            CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 21);
         })).isInstanceOf(IllegalStateException.class)
             .hasMessageMatching(failOnInsufficientMemoryMessageTemplate());
@@ -70,7 +70,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
             CypherMapWrapper configMap = CypherMapWrapper.empty().withBoolean(BaseConfig.SUDO_KEY, true);
-            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(configMap));
+            CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(configMap));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
         });
     }
@@ -83,7 +83,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 .withBoolean(BaseConfig.SUDO_KEY, true)
                 .withString("nodeProjection", "*")
                 .withString("relationshipProjection", "*");
-            CONFIG config = proc.newConfig(Optional.empty(), createMinimalConfig(configMap));
+            CONFIG config = proc.configParser().newConfig(Optional.empty(), createMinimalConfig(configMap));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
         }));
     }

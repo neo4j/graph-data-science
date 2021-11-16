@@ -57,7 +57,7 @@ public final class RelationshipWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("relationshipWeightProperty", () -> {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "foo");
-            var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("foo");
         });
     }
@@ -67,7 +67,7 @@ public final class RelationshipWeightConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultRelationshipWeightProperty", () -> {
-            var algoConfig = proc.newConfig(GRAPH_NAME, config);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, config);
             assertThat(algoConfig.relationshipWeightProperty()).isNull();
         });
     }
@@ -78,7 +78,7 @@ public final class RelationshipWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("blankRelationshipWeightProperty", () -> {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "  ");
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, relationshipWeightConfig)).hasMessage(
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, relationshipWeightConfig)).hasMessage(
                 "`relationshipWeightProperty` must not end or begin with whitespace characters, but got `  `.");
         });
     }
@@ -91,7 +91,7 @@ public final class RelationshipWeightConfigProcTest {
             var configAsMap = config.toMap();
             configAsMap.put("relationshipWeightProperty", null);
             var relationshipWeightConfig = CypherMapWrapper.create(configAsMap);
-            var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isNull();
         });
     }
@@ -103,7 +103,7 @@ public final class RelationshipWeightConfigProcTest {
         var graphStore = GdlFactory.of("()-[:A {rrw: 4}]->()-[:A {rw: 3}]->(), ()-[:A {rw: 2}]->(), ()-[:A {rw: 1}]->()").build().graphStore();
         return DynamicTest.dynamicTest("validRelationshipWeightProperty", () -> {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "rw");
-            var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("rw");
 
             var validator = new Validator<>(proc.getValidationConfig());
@@ -122,7 +122,7 @@ public final class RelationshipWeightConfigProcTest {
         var graphStore = GdlFactory.of("()-[:A {foo: 1}]->()").build().graphStore();
         return DynamicTest.dynamicTest("invalidRelationshipWeightProperty", () -> {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "bar");
-            var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("bar");
 
             var validator = new Validator<>(proc.getValidationConfig());

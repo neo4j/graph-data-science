@@ -49,7 +49,7 @@ public final class ToleranceConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidTolerance", () -> {
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withNumber("tolerance", -0.1)))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withNumber("tolerance", -0.1)))
                 .hasMessageContaining("tolerance")
                 .hasMessageContaining("-0.1");
         });
@@ -61,7 +61,7 @@ public final class ToleranceConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validTolerance", () -> {
             var toleranceConfig = config.withNumber("tolerance", 42.42);
-            var algoConfig = ((ToleranceConfig) proc.newConfig(GRAPH_NAME, toleranceConfig));
+            var algoConfig = ((ToleranceConfig) proc.configParser().newConfig(GRAPH_NAME, toleranceConfig));
             assertThat(algoConfig.tolerance()).isEqualTo(42.42);
         });
     }

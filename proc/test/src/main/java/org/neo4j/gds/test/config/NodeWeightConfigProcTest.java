@@ -74,7 +74,7 @@ public final class NodeWeightConfigProcTest {
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
-                    proc.newConfig(GRAPH_NAME, config.withString("nodeWeightProperty", "notA"))
+                    proc.configParser().newConfig(GRAPH_NAME, config.withString("nodeWeightProperty", "notA"))
                 )
             )
                 .hasMessageContaining("Node weight property")
@@ -97,7 +97,7 @@ public final class NodeWeightConfigProcTest {
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
-                    proc.newConfig(GRAPH_NAME, config
+                    proc.configParser().newConfig(GRAPH_NAME, config
                         .withString("nodeWeightProperty", "foo")
                         .withEntry("nodeLabels", List.of("Node"))
                     )
@@ -114,7 +114,7 @@ public final class NodeWeightConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultNodeWeightProperty", () -> {
-            var algoConfig = proc.newConfig(GRAPH_NAME, config);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, config);
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
@@ -125,7 +125,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "");
-            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
@@ -136,7 +136,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", " a");
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, nodeWeightConfig))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig))
                 .hasMessage("`nodeWeightProperty` must not end or begin with whitespace characters, but got ` a`.");
         });
     }
@@ -146,7 +146,7 @@ public final class NodeWeightConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedNodeWeightProperty", () -> {
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withoutEntry("nodeWeightProperty")))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withoutEntry("nodeWeightProperty")))
                 .hasMessageContaining("nodeWeightProperty")
                 .hasMessageContaining("mandatory");
         });
@@ -159,7 +159,7 @@ public final class NodeWeightConfigProcTest {
         var graphStore = GdlFactory.of("(:A {nw: 1})").build().graphStore();
         return DynamicTest.dynamicTest("validNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "nw");
-            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
 
             var validator = new Validator<>(proc.getValidationConfig());

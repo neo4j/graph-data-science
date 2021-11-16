@@ -210,7 +210,7 @@ public abstract class AlphaSimilarityProcTest<
     @Test
     void shouldNotLoadAnything() {
         applyOnProcedure(proc -> {
-            Pair<? extends SimilarityConfig, Optional<String>> input = proc.processInput(
+            Pair<? extends SimilarityConfig, Optional<String>> input = proc.configParser().processInput(
                 minimalViableConfig(),
                 Map.of()
             );

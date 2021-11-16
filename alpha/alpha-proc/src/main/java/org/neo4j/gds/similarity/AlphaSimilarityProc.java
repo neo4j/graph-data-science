@@ -20,13 +20,10 @@
 package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.ConfigParser;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -37,19 +34,14 @@ import org.neo4j.gds.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.gds.similarity.nil.NullGraphStore;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 abstract class AlphaSimilarityProc
@@ -147,56 +139,23 @@ abstract class AlphaSimilarityProc
             protected ALGO build(
                 Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
             ) {
-                removeGraph();
+                removeGraph(username(), databaseId());
                 return newAlgo(configuration, allocationTracker);
             }
         };
     }
 
-    // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override
-    public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
-        if (graphNameOrConfig instanceof String) {
-            throw new IllegalArgumentException("Similarity algorithms do not support named graphs");
-        } else if (graphNameOrConfig instanceof Map) {
-            // User is doing the only supported thing: anonymous syntax
-
-            Map<String, Object> configMap = (Map<String, Object>) graphNameOrConfig;
-
-            // We will tell the rest of the system that we are in named graph mode, with a fake graph name
-            graphNameOrConfig = SIMILARITY_FAKE_GRAPH_NAME;
-            // We move the map to the second argument position of CALL gds.algo.mode(name, config)
-            configuration = configMap;
-
-            // We must curate the configuration map to remove any eventual projection keys
-            // This is backwards compatibility since the alpha similarities featured anonymous star projections in docs
-            configuration.remove(NODE_QUERY_KEY);
-            configuration.remove(RELATIONSHIP_QUERY_KEY);
-            configuration.remove(NODE_PROJECTION_KEY);
-            configuration.remove(RELATIONSHIP_PROJECTION_KEY);
-
-            // We put the fake graph store into the graph catalog
-            GraphStoreCatalog.set(
-                ImmutableGraphCreateFromStoreConfig.of(
-                    username(),
-                    graphNameOrConfig.toString(),
-                    NodeProjections.ALL,
-                    RelationshipProjections.ALL
-                ),
-                new NullGraphStore(databaseId())
-            );
-        }
-        // And finally we call super in named graph mode
-        try {
-            return super.processInput(graphNameOrConfig, configuration);
-        } catch (RuntimeException e) {
-            removeGraph();
-            throw e;
-        }
+    public ConfigParser<CONFIG> configParser() {
+        return new AlphaSimilarityConfigParser<>(
+            username(),
+            databaseId(),
+            this::newConfig
+        );
     }
 
-    private void removeGraph() {
-        GraphStoreCatalog.remove(CatalogRequest.of(username(), databaseId()), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
+    static void removeGraph(String username, NamedDatabaseId databaseId) {
+        GraphStoreCatalog.remove(CatalogRequest.of(username, databaseId), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
     }
 
     private Stream<AlphaSimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {

@@ -62,7 +62,7 @@ public final class ConcurrencyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("lowConcurrency", () -> {
             var concurrencyConfig = config.withNumber("concurrency", 2);
-            var algoConfig = proc.newConfig(GRAPH_NAME, concurrencyConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, concurrencyConfig);
             assertThat(algoConfig.concurrency()).isEqualTo(2);
         });
     }
@@ -73,7 +73,7 @@ public final class ConcurrencyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("lowWriteConcurrency", () -> {
             var concurrencyConfig = config.withNumber("writeConcurrency", 2);
-            var algoConfig = proc.newConfig(GRAPH_NAME, concurrencyConfig);
+            var algoConfig = proc.configParser().newConfig(GRAPH_NAME, concurrencyConfig);
             assertThat(algoConfig.writeConcurrency()).isEqualTo(2);
         });
     }
@@ -84,7 +84,7 @@ public final class ConcurrencyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("tooHighConcurrency", () -> {
             var concurrencyConfig = config.withNumber("concurrency", 1337);
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, concurrencyConfig))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, concurrencyConfig))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("concurrency")
                 .hasMessageContaining("1337");
@@ -97,7 +97,7 @@ public final class ConcurrencyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("tooHighWriteConcurrency", () -> {
             var concurrencyConfig = config.withNumber("writeConcurrency", 1337);
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, concurrencyConfig))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, concurrencyConfig))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("writeConcurrency")
                 .hasMessageContaining("1337");

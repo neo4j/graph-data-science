@@ -20,11 +20,11 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 import java.util.Set;
@@ -79,11 +79,11 @@ public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM,
             .withEntry("seedProperty", "prop");
 
         applyOnProcedure((proc) -> {
-            var config = proc.newConfig(Optional.of(graphName), createMinimalConfig(CypherMapWrapper.empty()));
+            var config = proc.configParser().newConfig(Optional.of(graphName), createMinimalConfig(CypherMapWrapper.empty()));
             if (config instanceof SeedConfig) {
                 var ex = assertThrows(
                     IllegalArgumentException.class,
-                    () -> proc.newConfig(Optional.of(graphName), consecutiveIdsConfig)
+                    () -> proc.configParser().newConfig(Optional.of(graphName), consecutiveIdsConfig)
                 );
                 assertTrue(ex.getMessage().contains("Seeding and the `consecutiveIds` option cannot be used at the same time"));
             }

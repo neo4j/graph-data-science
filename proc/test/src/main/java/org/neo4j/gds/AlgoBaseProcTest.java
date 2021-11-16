@@ -190,7 +190,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
         )));
         applyOnProcedure(proc -> {
-            CONFIG config = proc.newConfig(Optional.empty(), wrapper);
+            CONFIG config = proc.configParser().newConfig(Optional.empty(), wrapper);
             assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
@@ -230,7 +230,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(tempConfig));
 
         applyOnProcedure(proc -> {
-            CONFIG config = proc.newConfig(Optional.empty(), wrapper);
+            CONFIG config = proc.configParser().newConfig(Optional.empty(), wrapper);
             assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
             Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
@@ -395,7 +395,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         );
 
         applyOnProcedure((proc) -> {
-            CONFIG algoConfig = proc.newConfig(Optional.empty(), config);
+            CONFIG algoConfig = proc.configParser().newConfig(Optional.empty(), config);
             assertTrue(algoConfig.implicitCreateConfig().isPresent());
             assertEquals(2, algoConfig.implicitCreateConfig().get().readConcurrency());
         });

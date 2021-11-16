@@ -19,15 +19,10 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
-import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -36,13 +31,8 @@ public abstract class MutateProc<
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     @Override
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        if (graphName.isEmpty() && !(config.containsKey(NODE_COUNT_KEY) || config.containsKey(RELATIONSHIP_COUNT_KEY))) {
-            throw new IllegalArgumentException(
-                "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
-            );
-        }
-        return super.newConfig(graphName, config);
+    public ConfigParser<CONFIG> configParser() {
+        return new MutateProcConfigParser<>(super.configParser());
     }
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
