@@ -20,18 +20,18 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -102,18 +102,8 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationPredictWriteConfig config
-    ) {
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        var trainConfig = modelCatalog.get(
-            config.username(),
-            config.modelName(),
-            NodeLogisticRegressionData.class,
-            NodeClassificationTrainConfig.class,
-            NodeClassificationModelInfo.class
-        ).trainConfig();
-        GraphStoreValidation.validate(graphStore, trainConfig);
+    public ValidationConfig<NodeClassificationPredictWriteConfig> getValidationConfig() {
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 
     @Override
