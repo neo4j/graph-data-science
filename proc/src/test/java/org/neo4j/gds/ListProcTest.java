@@ -96,10 +96,11 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.ml.pipeline.linkPrediction.predict.stream",
         "gds.alpha.ml.pipeline.linkPrediction.train",
 
-        "gds.alpha.ml.pipeline.nodeClassification.create",
-        "gds.alpha.ml.pipeline.nodeClassification.addNodeProperty",
         "gds.alpha.ml.pipeline.nodeClassification.addFeatures",
+        "gds.alpha.ml.pipeline.nodeClassification.addNodeProperty",
+        "gds.alpha.ml.pipeline.nodeClassification.configureParams",
         "gds.alpha.ml.pipeline.nodeClassification.configureSplit",
+        "gds.alpha.ml.pipeline.nodeClassification.create",
 
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
