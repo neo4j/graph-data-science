@@ -77,14 +77,34 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(
-                    (graphCreateConfig, config) -> modelCatalog..verifyModelCanBeStored(
-                        username(),
-                        config.modelName(),
-                        modelType()
-                    )
+                   new TrainingConfigValidation<>(modelCatalog, username(), modelType())
                 );
             }
         };
+    }
+
+    static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
+        private final ModelCatalog modelCatalog;
+        private final String username;
+        private final String modelType;
+
+        TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
+            this.modelCatalog = modelCatalog;
+            this.username = username;
+            this.modelType = modelType;
+        }
+
+        @Override
+        public void validateConfigsBeforeLoad(
+            GraphCreateConfig graphCreateConfig,
+            TRAIN_CONFIG config
+        ) {
+            modelCatalog..verifyModelCanBeStored(
+                username,
+                config.modelName(),
+                modelType
+            );
+        }
     }
 
     @SuppressWarnings("unused")
