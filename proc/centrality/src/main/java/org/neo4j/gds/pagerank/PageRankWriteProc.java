@@ -27,7 +27,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -84,7 +84,7 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    public ValidationConfig<PageRankWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<PageRankWriteConfig> getValidationConfig() {
         return PageRankProc.getValidationConfig(log);
     }
 

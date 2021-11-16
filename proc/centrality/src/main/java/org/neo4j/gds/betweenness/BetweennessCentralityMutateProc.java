@@ -29,7 +29,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -72,7 +72,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Override
-    public ValidationConfig<BetweennessCentralityMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<BetweennessCentralityMutateConfig> getValidationConfig() {
         return BetweennessCentralityProc.getValidationConfig();
     }
 

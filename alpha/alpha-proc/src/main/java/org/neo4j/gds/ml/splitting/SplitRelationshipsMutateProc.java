@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -131,8 +131,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    public ValidationConfig<SplitRelationshipsMutateConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<SplitRelationshipsMutateConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<SplitRelationshipsMutateConfig>> afterLoadValidations() {
                 return List.of(new Validation());

@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 
+@FunctionalInterface
 public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
     void validateConfigsAfterLoad(
         GraphStore graphStore,

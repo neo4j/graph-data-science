@@ -27,7 +27,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -65,7 +65,7 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
-    public ValidationConfig<LinkPredictionPredictWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictWriteConfig> getValidationConfig() {
         return LinkPredictionPredictCompanion.getValidationConfig();
     }
 

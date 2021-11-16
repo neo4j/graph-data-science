@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -81,8 +81,8 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    public ValidationConfig<TriangleCountBaseConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<TriangleCountBaseConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<TriangleCountBaseConfig>> beforeLoadValidations() {
                 return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());

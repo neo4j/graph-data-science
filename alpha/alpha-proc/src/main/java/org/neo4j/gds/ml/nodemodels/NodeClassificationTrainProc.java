@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -72,8 +72,8 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    public ValidationConfig<NodeClassificationTrainConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<NodeClassificationTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<NodeClassificationTrainConfig>> afterLoadValidations() {
                 return List.of(

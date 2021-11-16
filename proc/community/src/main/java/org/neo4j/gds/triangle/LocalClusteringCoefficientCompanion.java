@@ -30,7 +30,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
@@ -72,8 +72,8 @@ final class LocalClusteringCoefficientCompanion {
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient());
     }
 
-    static <CONFIG extends LocalClusteringCoefficientBaseConfig> ValidationConfig<CONFIG> getValidationConfig(Log log) {
-        return new ValidationConfig<>() {
+    static <CONFIG extends LocalClusteringCoefficientBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(

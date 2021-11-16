@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelin
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Map;
@@ -61,8 +61,8 @@ public final class LinkPredictionPipelineCompanion {
         return (LinkPredictionPipeline) model.customInfo();
     }
 
-    public static <CONFIG extends LinkPredictionPredictPipelineBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public static <CONFIG extends LinkPredictionPredictPipelineBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());

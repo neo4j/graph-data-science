@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -91,8 +91,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    public ValidationConfig<GraphSageTrainConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<GraphSageTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<GraphSageTrainConfig>> afterLoadValidations() {
                 return List.of(

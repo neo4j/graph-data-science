@@ -27,7 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -76,7 +76,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     }
 
     @Override
-    public ValidationConfig<LocalClusteringCoefficientMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<LocalClusteringCoefficientMutateConfig> getValidationConfig() {
         return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 

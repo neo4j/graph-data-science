@@ -29,7 +29,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
@@ -65,8 +65,8 @@ public final class GraphSageCompanion {
         };
     }
 
-    static <CONFIG extends GraphSageBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
-        return new ValidationConfig<>() {
+    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(

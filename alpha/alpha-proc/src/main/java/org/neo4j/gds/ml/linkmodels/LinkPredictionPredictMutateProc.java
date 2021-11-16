@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -73,7 +73,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
-    public ValidationConfig<LinkPredictionPredictMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictMutateConfig> getValidationConfig() {
         return LinkPredictionPredictCompanion.getValidationConfig();
     }
 

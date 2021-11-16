@@ -23,7 +23,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.List;
 
-public interface ValidationConfig<CONFIG extends AlgoBaseConfig> {
+public interface ValidationConfiguration<CONFIG extends AlgoBaseConfig> {
     default List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
         return List.of();
     }
@@ -32,7 +32,7 @@ public interface ValidationConfig<CONFIG extends AlgoBaseConfig> {
         return List.of();
     }
 
-    static <CONFIG extends AlgoBaseConfig> ValidationConfig<CONFIG> empty() {
-        return new ValidationConfig<>(){};
+    static <CONFIG extends AlgoBaseConfig> ValidationConfiguration<CONFIG> empty() {
+        return new ValidationConfiguration<>(){};
     }
 }

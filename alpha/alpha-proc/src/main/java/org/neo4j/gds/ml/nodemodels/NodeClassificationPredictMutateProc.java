@@ -30,7 +30,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -76,7 +76,7 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    public ValidationConfig<NodeClassificationMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationMutateConfig> getValidationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 

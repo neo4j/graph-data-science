@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -90,8 +90,8 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    public ValidationConfig<LinkPredictionTrainConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<LinkPredictionTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<LinkPredictionTrainConfig>> beforeLoadValidations() {
                 return List.of(

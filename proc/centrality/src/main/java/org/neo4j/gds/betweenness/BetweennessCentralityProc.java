@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
@@ -79,8 +79,8 @@ final class BetweennessCentralityProc {
         return procResultBuilder;
     }
 
-    static <CONFIG extends BetweennessCentralityBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
-        return new ValidationConfig<>() {
+    static <CONFIG extends BetweennessCentralityBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(

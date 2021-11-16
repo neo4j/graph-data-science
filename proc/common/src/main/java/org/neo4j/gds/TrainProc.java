@@ -29,7 +29,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 
 import java.util.Collections;
@@ -72,8 +72,8 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     }
 
     @Override
-    public ValidationConfig<TRAIN_CONFIG> getValidationConfig() {
-        return new ValidationConfig<>() {
+    public ValidationConfiguration<TRAIN_CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
                 return List.of(

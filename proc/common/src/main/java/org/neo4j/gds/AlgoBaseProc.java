@@ -39,7 +39,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 
 import java.util.Collection;
@@ -293,8 +293,8 @@ public abstract class AlgoBaseProc<
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
-    public ValidationConfig<CONFIG> getValidationConfig(){
-        return ValidationConfig.empty();
+    public ValidationConfiguration<CONFIG> getValidationConfig(){
+        return ValidationConfiguration.empty();
     }
 
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {

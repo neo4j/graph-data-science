@@ -40,7 +40,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -68,7 +68,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    public ValidationConfig<LinkPredictionPredictPipelineMutateConfig> getValidationConfig() {
+    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> getValidationConfig() {
         return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 

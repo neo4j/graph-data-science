@@ -23,7 +23,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.validation.BeforeLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
@@ -61,8 +61,8 @@ final class PageRankProc {
         return computeResult.result().scores().asNodeProperties();
     }
 
-    static <CONFIG extends PageRankConfig> ValidationConfig<CONFIG> getValidationConfig(Log log) {
-        return new ValidationConfig<>() {
+    static <CONFIG extends PageRankConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(

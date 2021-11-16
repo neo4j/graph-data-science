@@ -26,20 +26,20 @@ import org.neo4j.gds.config.GraphCreateConfig;
 
 public class Validator<CONFIG extends AlgoBaseConfig> {
 
-    private final ValidationConfig<CONFIG> validationConfig;
+    private final ValidationConfiguration<CONFIG> validationConfiguration;
 
-    public Validator(ValidationConfig<CONFIG> validationConfig) {this.validationConfig = validationConfig;}
+    public Validator(ValidationConfiguration<CONFIG> validationConfiguration) {this.validationConfiguration = validationConfiguration;}
 
-    public final void validateConfigsBeforeLoad(
+    public void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig,
         CONFIG config
     ) {
-        validationConfig
+        validationConfiguration
             .beforeLoadValidations()
             .forEach(validation -> validation.validateConfigsBeforeLoad(graphCreateConfig, config));
     }
 
-    public final void validateConfigWithGraphStore(
+    public void validateConfigWithGraphStore(
         GraphStore graphStore,
         GraphCreateConfig graphCreateConfig,
         CONFIG config
@@ -51,7 +51,7 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
         );
         GraphStoreValidation.validate(graphStore, config);
 
-        validationConfig
+        validationConfiguration
             .afterLoadValidations()
             .forEach(validation -> validation.validateConfigsAfterLoad(graphStore, graphCreateConfig, config));
     }

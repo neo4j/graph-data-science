@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -102,7 +102,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    public ValidationConfig<NodeClassificationPredictWriteConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationPredictWriteConfig> getValidationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 

@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.validation.BeforeLoadValidation;
 import org.neo4j.gds.validation.GraphCreateConfigValidations;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,8 +50,8 @@ final class TriangleCountCompanion {
         return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());
     }
 
-    static <CONFIG extends TriangleCountBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
-        return new ValidationConfig<>() {
+    static <CONFIG extends TriangleCountBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(

@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResu
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -95,7 +95,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    public ValidationConfig<NodeClassificationStreamConfig> getValidationConfig() {
+    public ValidationConfiguration<NodeClassificationStreamConfig> getValidationConfig() {
         return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 

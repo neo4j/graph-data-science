@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.validation.AfterLoadValidation;
-import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +32,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class NodeClassificationCompanion {
 
-    static <CONFIG extends NodeClassificationPredictConfig> ValidationConfig<CONFIG> getValidationConfig(ModelCatalog modelCatalog) {
-        return new ValidationConfig<>() {
+    static <CONFIG extends NodeClassificationPredictConfig> ValidationConfiguration<CONFIG> getValidationConfig(ModelCatalog modelCatalog) {
+        return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
