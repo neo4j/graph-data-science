@@ -93,20 +93,15 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .addParameter("randomSeed", 42)
             .addParameter("writeRelationshipType", "SIMILAR")
             .addParameter("writeProperty", "score")
-            .yields(
-                "computeMillis",
-                "createMillis",
-                "nodesCompared ",
-                "relationshipsWritten",
-                "writeMillis",
-                "similarityDistribution",
-                "postProcessingMillis",
-                "configuration"
-            );
+            .yields();
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
             assertEquals(3, row.getNumber("relationshipsWritten").longValue());
+            assertEquals(37, row.getNumber("nodePairsConsidered").longValue());
+            assertEquals(true, row.getBoolean("didConverge"));
+            assertEquals(1, row.getNumber("ranIterations").longValue());
+
             assertUserInput(row, "writeRelationshipType", "SIMILAR");
             assertUserInput(row, "writeProperty", "score");
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
@@ -179,9 +174,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             .addParameter("writeProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("relationshipsWritten").longValue());
-        });
+        runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
     }
 
     @Test

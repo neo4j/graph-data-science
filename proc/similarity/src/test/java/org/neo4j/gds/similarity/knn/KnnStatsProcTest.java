@@ -59,19 +59,16 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
             .statsMode()
             .addParameter("sudo", true)
             .addParameter("nodeWeightProperty", "knn")
+            .addParameter("randomSeed", 42)
+            .addParameter("concurrency", 1)
             .addParameter("topK", 1)
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "postProcessingMillis",
-                "nodesCompared",
-                "similarityPairs",
-                "similarityDistribution",
-                "configuration"
-            );
+            .yields();
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
+            assertEquals(37, row.getNumber("nodePairsConsidered").longValue());
+            assertEquals(true, row.getBoolean("didConverge"));
+            assertEquals(1, row.getNumber("ranIterations").longValue());
             assertEquals(3, row.getNumber("similarityPairs").longValue());
 
             assertThat(row)

@@ -101,7 +101,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             }
 
             SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityStatsResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
+                SimilarityProc.withGraphsizeAndTimings(new SimilarityStatsResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {

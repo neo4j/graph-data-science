@@ -46,11 +46,11 @@ import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.gds.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityStatsResult, KnnStatsConfig> {
+public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.Result, KnnStatsConfig> {
 
     @Procedure(name = "gds.beta.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<SimilarityStatsResult> stats(
+    public Stream<Result> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -82,24 +82,27 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityStatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
+    protected AbstractResultBuilder<Result> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
     @Override
-    public Stream<SimilarityStatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
+    public Stream<Result> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             KnnStatsConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityStatsResult(
+                    new Result(
                         computationResult.createMillis(),
                         0,
                         0,
                         0,
                         0,
                         Collections.emptyMap(),
+                        true,
+                        0,
+                        0,
                         config.toMap()
                     )
                 );
@@ -108,8 +111,12 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
             var result = Objects.requireNonNull(computationResult.result());
 
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityStatsResult.Builder(), computationResult);
+            var resultBuilder = new Result.Builder()
+                .withRanIterations(result.ranIterations())
+                .withNodePairsConsidered(result.nodePairsConsidered())
+                .withDidConverge(result.didConverge());
+
+            SimilarityProc.resultBuilderWithTimings(resultBuilder, computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
@@ -136,5 +143,75 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
 
             return Stream.of(resultBuilder.build());
         });
+    }
+
+    public static class Result extends SimilarityStatsResult {
+        public final long ranIterations;
+        public final boolean didConverge;
+        public final long nodePairsConsidered;
+
+        public Result(
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long nodesCompared,
+            long nodePairs,
+            Map<String, Object> similarityDistribution,
+            boolean didConverge,
+            long ranIterations,
+            long nodePairsConsidered,
+            Map<String, Object> configuration
+        ) {
+            super(
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                nodesCompared,
+                nodePairs,
+                similarityDistribution,
+                configuration
+            );
+
+            this.nodePairsConsidered = nodePairsConsidered;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
+        }
+
+        public static class Builder extends SimilarityProc.SimilarityResultBuilder<Result> {
+            private long ranIterations;
+            private boolean didConverge;
+            private long nodePairsConsidered;
+
+            @Override
+            public Result build() {
+                return new Result(
+                    createMillis,
+                    computeMillis,
+                    postProcessingMillis,
+                    nodesCompared,
+                    relationshipsWritten,
+                    distribution(),
+                    didConverge,
+                    ranIterations,
+                    nodePairsConsidered,
+                    config.toMap()
+                );
+            }
+
+            public Builder withDidConverge(boolean didConverge) {
+                this.didConverge = didConverge;
+                return this;
+            }
+
+            public Builder withRanIterations(long ranIterations) {
+                this.ranIterations = ranIterations;
+                return this;
+            }
+
+            Builder withNodePairsConsidered(long nodePairsConsidered) {
+                this.nodePairsConsidered = nodePairsConsidered;
+                return this;
+            }
+        }
     }
 }

@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 
-import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
@@ -39,28 +38,20 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 public abstract class SimilarityWriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteRelationshipsProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
+    PROC_RESULT extends SimilarityWriteResult,
+    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteRelationshipsProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
 
     public abstract String procedureName();
 
+    protected abstract SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+
     @Override
-    protected Stream<SimilarityWriteResult> write(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected Stream<PROC_RESULT> write(AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             CONFIG config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
-                return Stream.of(
-                    new SimilarityWriteResult(
-                        computationResult.createMillis(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        Collections.emptyMap(),
-                        config.toMap()
-                    )
-                );
+                return Stream.of(resultBuilder(computationResult).withConfig(config).build());
             }
 
             var algorithm = computationResult.algorithm();
@@ -77,8 +68,9 @@ public abstract class SimilarityWriteProc<
                 ? similarityGraph
                 : computationResult.graphStore().nodes();
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityWriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
+            SimilarityProc.SimilarityResultBuilder<PROC_RESULT> resultBuilder = resultBuilder(computationResult);
+
+            SimilarityProc.withGraphsizeAndTimings(resultBuilder, computationResult, (ignore) -> similarityGraphResult);
 
             if (similarityGraph.relationshipCount() > 0) {
                 String writeRelationshipType = config.writeRelationshipType();

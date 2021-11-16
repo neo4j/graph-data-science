@@ -99,21 +99,18 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("sudo", true)
             .addParameter("nodeWeightProperty", "knn")
             .addParameter("topK", 1)
+            .addParameter("randomSeed", 42)
+            .addParameter("concurrency", 1)
             .addParameter("mutateRelationshipType", mutateRelationshipType())
             .addParameter("mutateProperty", mutateProperty())
-            .yields(
-                "computeMillis",
-                "createMillis",
-                "nodesCompared ",
-                "relationshipsWritten",
-                "mutateMillis",
-                "similarityDistribution",
-                "postProcessingMillis",
-                "configuration"
-            );
+            .yields();
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
+            assertEquals(37, row.getNumber("nodePairsConsidered").longValue());
+            assertEquals(true, row.getBoolean("didConverge"));
+            assertEquals(1, row.getNumber("ranIterations").longValue());
+
             assertEquals(3, row.getNumber("relationshipsWritten").longValue());
             assertUserInput(row, "mutateRelationshipType", "SIMILAR");
             assertUserInput(row, "mutateProperty", "score");
@@ -177,9 +174,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("mutateProperty", "score")
             .yields("relationshipsWritten");
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(3, row.getNumber("relationshipsWritten").longValue());
-        });
+        runQueryWithRowConsumer(query, row -> assertEquals(3, row.getNumber("relationshipsWritten").longValue()));
     }
 
     @Override

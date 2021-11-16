@@ -128,7 +128,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
             }
 
             SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
+                SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                 Relationships resultRelationships = getRelationships(
