@@ -36,9 +36,11 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -49,8 +51,6 @@ import org.neo4j.values.storable.NumberType;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
     static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
@@ -68,11 +68,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, LinkPredictionPredictPipelineMutateConfig config
-    ) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        validateIsUndirectedGraph(graphCreateConfig, config);
+    public ValidationConfig<LinkPredictionPredictPipelineMutateConfig> getValidationConfig() {
+        return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
     @Override

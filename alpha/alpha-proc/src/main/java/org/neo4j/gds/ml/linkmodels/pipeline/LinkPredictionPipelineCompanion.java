@@ -23,7 +23,11 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +59,15 @@ public final class LinkPredictionPipelineCompanion {
         assert model.customInfo() instanceof LinkPredictionPipeline;
 
         return (LinkPredictionPipeline) model.customInfo();
+    }
+
+    public static <CONFIG extends LinkPredictionPredictPipelineBaseConfig> ValidationConfig<CONFIG> getValidationConfig() {
+        return new ValidationConfig<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());
+            }
+        };
     }
 
     public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
