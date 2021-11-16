@@ -25,9 +25,11 @@ import org.neo4j.gds.LicenseState;
 @ServiceProvider
 public class OpenModelCatalogProvider implements ModelCatalogProvider {
 
+    private static final ModelCatalog INSTANCE = new OpenModelCatalog();
+
     @Override
     public ModelCatalog get(LicenseState licenseState) {
-        return OpenModelCatalog.INSTANCE;
+        return INSTANCE;
     }
 
     @Override
