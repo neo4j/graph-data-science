@@ -25,11 +25,11 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.validation.Validator;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.test.config.ConfigProcTestHelpers.GRAPH_NAME;
 
@@ -69,8 +69,8 @@ public final class NodeWeightConfigProcTest {
     ) {
         var graphStore = GdlFactory.of("(:A {a: 1})").build().graphStore();
         return DynamicTest.dynamicTest("validateNodeWeightProperty", () -> {
-            assertThatThrownBy(() -> proc
-                .validateConfigWithGraphStore(
+            var validator = new Validator<>(proc.getValidationConfig());
+            assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
                     proc.newConfig(GRAPH_NAME, config.withString("nodeWeightProperty", "notA"))
@@ -92,8 +92,8 @@ public final class NodeWeightConfigProcTest {
             .build()
             .graphStore();
         return DynamicTest.dynamicTest("validateNodeWeightPropertyFilteredGraph", () -> {
-            assertThatThrownBy(() -> proc
-                .validateConfigWithGraphStore(
+            var validator = new Validator<>(proc.getValidationConfig());
+            assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
                     proc.newConfig(GRAPH_NAME, config
@@ -160,7 +160,9 @@ public final class NodeWeightConfigProcTest {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "nw");
             var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
-            assertThatCode(() -> proc.validateConfigWithGraphStore(
+
+            var validator = new Validator<>(proc.getValidationConfig());
+            assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                 graphStore,
                 null,
                 algoConfig
