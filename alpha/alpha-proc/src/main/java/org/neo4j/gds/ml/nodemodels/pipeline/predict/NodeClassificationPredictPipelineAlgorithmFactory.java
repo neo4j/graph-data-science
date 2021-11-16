@@ -50,6 +50,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     private final BaseProc caller;
     private final NamedDatabaseId databaseId;
     private final NodeClassificationPredictAlgorithmFactory<NodeClassificationPredictConfig> innerFactory;
+    private final ModelCatalog modelCatalog;
 
     NodeClassificationPredictPipelineAlgorithmFactory(
         BaseProc caller,
@@ -60,13 +61,16 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         this.caller = caller;
         this.databaseId = databaseId;
         this.innerFactory = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
     protected Task progressTask(Graph graph, CONFIG config) {
         var trainingPipeline = getTrainedNCPipelineModel(
-                config.modelName(), config.username()
-            ).customInfo()
+            modelCatalog,
+            config.modelName(),
+            config.username()
+        ).customInfo()
             .trainingPipeline();
 
         return Tasks.task(
@@ -105,6 +109,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
                 "Node Classification Pipeline cannot be used with anonymous graphs. Please load the graph before"));
 
         var model = getTrainedNCPipelineModel(
+            modelCatalog,
             configuration.modelName(),
             configuration.username()
         );

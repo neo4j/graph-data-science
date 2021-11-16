@@ -29,7 +29,11 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 
 public class NodeClassificationPipelineCreate {
 
-    public static PipelineInfoResult create(ModelCatalog modelCatalog, String username, String pipelineName) {
+    public static PipelineInfoResult create(
+        ModelCatalog modelCatalog,
+        String username,
+        String pipelineName
+    ) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
         var model = Model.of(
@@ -41,6 +45,7 @@ public class NodeClassificationPipelineCreate {
             PipelineCreateConfig.of(username),
             new NodeClassificationPipeline()
         );
+
         modelCatalog.set(model);
 
         return new PipelineInfoResult(pipelineName, model.customInfo());
