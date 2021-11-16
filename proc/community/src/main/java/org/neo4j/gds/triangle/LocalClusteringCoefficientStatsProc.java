@@ -22,13 +22,13 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.ValidationConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig> {
@@ -65,14 +63,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
 
     @Override
     public ValidationConfig<LocalClusteringCoefficientStatsConfig> getValidationConfig() {
-        return new ValidationConfig<>() {
-            @Override
-            public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
-                validateIsUndirectedGraph(graphCreateConfig, config);
-                warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
-            }
-
-        };
+        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 
     @Override

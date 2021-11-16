@@ -34,27 +34,26 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphCreateConfigValidations {
 
-    public static <CONFIG extends AlgoBaseConfig> void validateIsUndirectedGraph(
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {
-        graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
-            @Override
-            public void visit(GraphCreateFromStoreConfig storeConfig) {
-                storeConfig.relationshipProjections().projections().entrySet().stream()
-                    .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
-                                     config.relationshipTypes().contains(entry.getKey().name()))
-                    .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
-                    .forEach(entry -> {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
-                            entry.getKey().name,
-                            entry.getValue().orientation()
-                        ));
-                    });
-
-            }
-        });
+    public static class UndirectedGraphValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
+        @Override
+        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
+            graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
+                @Override
+                public void visit(GraphCreateFromStoreConfig storeConfig) {
+                    storeConfig.relationshipProjections().projections().entrySet().stream()
+                        .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
+                                         config.relationshipTypes().contains(entry.getKey().name()))
+                        .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+                        .forEach(entry -> {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
+                                entry.getKey().name,
+                                entry.getValue().orientation()
+                            ));
+                        });
+                }
+            });
+        }
     }
 
     /**

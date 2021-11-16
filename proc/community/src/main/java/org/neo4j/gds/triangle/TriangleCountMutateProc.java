@@ -26,6 +26,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.nodePropertyTranslator;
 import static org.neo4j.procedure.Mode.READ;
@@ -60,8 +60,8 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountMutateConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
+    public ValidationConfig<TriangleCountMutateConfig> getValidationConfig() {
+        return TriangleCountCompanion.getValidationConfig();
     }
 
     @Override
