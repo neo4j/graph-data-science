@@ -34,6 +34,9 @@ public interface GraphStoreLoader {
     GraphCreateConfig graphCreateConfig();
     GraphStore graphStore();
     GraphDimensions graphDimensions();
+    // This is empty in the GraphStoreFromCatalogLoader case
+    // as we do not add the graph memory consumption to the
+    // estimation result in that case.
     Optional<MemoryEstimation> memoryEstimation();
 
     // The supplier arguments are necessary as the EstimationCLI will create
@@ -58,27 +61,19 @@ public interface GraphStoreLoader {
                 isGdsAdmin
             );
         } else if (config.implicitCreateConfig().isPresent()) {
-            return implicitGraphStoreLoader(config.implicitCreateConfig().get(), usernameSupplier, graphLoaderContextSupplier);
+            GraphCreateConfig graphCreateConfig = config.implicitCreateConfig().get();
+            if (graphCreateConfig.isFictitiousLoading()) {
+                return new FictitiousGraphStoreLoader(graphCreateConfig);
+            } else {
+                return new GraphStoreFromDatabaseLoader(
+                    graphCreateConfig,
+                    usernameSupplier.get(),
+                    graphLoaderContextSupplier.get()
+                );
+            }
         } else {
-            throw new IllegalStateException("There must be either a graph name or an implicit create config");
+            throw new IllegalStateException("There must be either a graph name or an anonymous graph projection config");
         }
     }
-
-    static GraphStoreLoader implicitGraphStoreLoader(
-        GraphCreateConfig graphCreateConfig,
-        Supplier<String> usernameSupplier,
-        Supplier<GraphLoaderContext> graphLoaderContextSupplier
-    ) {
-        if (graphCreateConfig.isFictitiousLoading()) {
-            return new FictitiousGraphStoreLoader(graphCreateConfig);
-        } else {
-            return new ImplicitGraphStoreLoader(
-                graphCreateConfig,
-                usernameSupplier.get(),
-                graphLoaderContextSupplier.get()
-            );
-        }
-    }
-}
 
 }

@@ -39,7 +39,7 @@ public class FictitiousGraphStoreLoader implements GraphStoreLoader {
 
     private final GraphCreateConfig graphCreateConfig;
 
-    FictitiousGraphStoreLoader(GraphCreateConfig graphCreateConfig) {
+    public FictitiousGraphStoreLoader(GraphCreateConfig graphCreateConfig) {
         this.graphCreateConfig = graphCreateConfig;
     }
 
