@@ -31,9 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
@@ -179,25 +177,6 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_REORDERED_ADJACENCY_LIST.isEnabled());
-    }
-
-    @Test
-    void toggleUseBitIdMap() {
-        var useBitIdMap = USE_BIT_ID_MAP.isEnabled();
-        runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", !useBitIdMap));
-        assertEquals(!useBitIdMap, USE_BIT_ID_MAP.isEnabled());
-        runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", useBitIdMap));
-        assertEquals(useBitIdMap, USE_BIT_ID_MAP.isEnabled());
-    }
-
-    @Test
-    void resetUseBitIdMap() {
-        USE_BIT_ID_MAP.reset();
-        assertCypherResult(
-            "CALL gds.features.useBitIdMap.reset()",
-            List.of(Map.of("enabled", true))
-        );
-        assertTrue(USE_BIT_ID_MAP.isEnabled());
     }
 
     @Test
