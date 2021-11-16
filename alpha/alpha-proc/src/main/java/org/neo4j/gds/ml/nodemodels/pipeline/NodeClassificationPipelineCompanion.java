@@ -36,11 +36,10 @@ public final class NodeClassificationPipelineCompanion {
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
         NodeLogisticRegressionTrainCoreConfig.defaultConfig().toMap()
     );
-    private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     private NodeClassificationPipelineCompanion() {}
 
-    public static NodeClassificationPipeline getNCPipeline(String pipelineName, String username) {
+    public static NodeClassificationPipeline getNCPipeline(ModelCatalog modelCatalog, String pipelineName, String username) {
         var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
 
         assert model != null;
@@ -58,9 +57,16 @@ public final class NodeClassificationPipelineCompanion {
     }
 
     public static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
+        ModelCatalog modelCatalog,
         String pipelineName,
         String username
     ) {
-        return modelCatalog.get(username, pipelineName, NodeLogisticRegressionData.class, NodeClassificationPipelineTrainConfig.class, NodeClassificationPipelineModelInfo.class);
+        return modelCatalog.get(
+            username,
+            pipelineName,
+            NodeLogisticRegressionData.class,
+            NodeClassificationPipelineTrainConfig.class,
+            NodeClassificationPipelineModelInfo.class
+        );
     }
 }

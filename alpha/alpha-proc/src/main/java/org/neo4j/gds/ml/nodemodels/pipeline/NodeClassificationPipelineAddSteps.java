@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -27,16 +28,16 @@ import java.util.Map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.getNCPipeline;
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 
-public class NodeClassificationPipelineAddSteps {
-
+public final class NodeClassificationPipelineAddSteps {
     public static PipelineInfoResult addNodeProperty(
+        ModelCatalog modelCatalog,
         String username,
         BaseProc caller,
         String pipelineName,
         String taskName,
         Map<String, Object> procedureConfig
     ) {
-        var pipeline = getNCPipeline(pipelineName, username);
+        var pipeline = getNCPipeline(modelCatalog, pipelineName, username);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(caller, taskName, procedureConfig));
 
@@ -44,11 +45,12 @@ public class NodeClassificationPipelineAddSteps {
     }
 
     public static PipelineInfoResult addFeatures(
+        ModelCatalog modelCatalog,
         String username,
         String pipelineName,
         Object nodeProperties
     ) {
-        var pipeline = getNCPipeline(pipelineName, username);
+        var pipeline = getNCPipeline(modelCatalog, pipelineName, username);
 
         if (nodeProperties instanceof String) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of((String) nodeProperties));

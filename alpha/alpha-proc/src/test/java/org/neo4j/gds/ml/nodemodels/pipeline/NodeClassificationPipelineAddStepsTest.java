@@ -63,6 +63,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddNodePropertyStep() {
         run(caller -> {
             var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -85,11 +86,13 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddFeatureSteps() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addFeatures(
+                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "test"
             );
             var result = NodeClassificationPipelineAddSteps.addFeatures(
+                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 List.of("pr", "pr2")
@@ -105,6 +108,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -121,6 +125,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void failOnDuplicateMutateProperty() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addNodeProperty(
+                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -128,6 +133,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 Map.of("mutateProperty", "pr")
             );
             assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -143,6 +149,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -157,6 +164,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddNodeAndFeatureSteps() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addNodeProperty(
+                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -164,11 +172,13 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 Map.of("mutateProperty", "pr")
             );
             NodeClassificationPipelineAddSteps.addFeatures(
+                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "pr"
             );
             var result = NodeClassificationPipelineAddSteps.addFeatures(
+                modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "pr2"
@@ -189,6 +199,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldAddTwoNodePropertySteps() {
         run(caller -> {
                 NodeClassificationPipelineAddSteps.addNodeProperty(
+                    modelCatalog,
                     getUsername(),
                     caller,
                     "myPipeline",
@@ -196,6 +207,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     Map.of("mutateProperty", "pr")
                 );
             var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+                modelCatalog,
                 getUsername(),
                 caller,
                 "myPipeline",
@@ -222,6 +234,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "ceci n'est pas une pipe",
@@ -235,6 +248,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
         assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addFeatures(
+            modelCatalog,
             getUsername(),
             "ceci n'est pas une pipe",
             "test"
@@ -246,6 +260,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -259,6 +274,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     @Test
     void failOnConfiguringReservedConfigFields() {
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "myPipeline",
@@ -285,6 +301,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
         modelCatalog.set(model1);
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+            modelCatalog,
             getUsername(),
             caller,
             "testModel1",
@@ -311,6 +328,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
         modelCatalog.set(model1);
         run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addFeatures(
+            modelCatalog,
             getUsername(),
             "testModel1",
             "something"
