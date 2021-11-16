@@ -80,3 +80,5 @@ public interface GraphStoreLoader {
         }
     }
 }
+
+}

@@ -29,14 +29,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Optional;
 
-public class ImplicitGraphStoreLoader implements GraphStoreLoader {
+public class GraphStoreFromDatabaseLoader implements GraphStoreLoader {
 
     private final GraphCreateConfig graphCreateConfig;
     private final String username;
     private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactory<?, ?> graphStoreFactory;
 
-    public ImplicitGraphStoreLoader(
+    public GraphStoreFromDatabaseLoader(
         GraphCreateConfig graphCreateConfig,
         String username,
         GraphLoaderContext graphLoaderContext

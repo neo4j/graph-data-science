@@ -20,8 +20,9 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.FictitiousGraphStoreLoader;
+import org.neo4j.gds.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.GraphStoreLoader;
-import org.neo4j.gds.ImplicitGraphStoreLoader;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipProjections;
@@ -274,7 +275,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphStore graphStore = new ImplicitGraphStoreLoader(config, username(), graphLoaderContext()).graphStore();
+            GraphStore graphStore = new GraphStoreFromDatabaseLoader(config, username(), graphLoaderContext()).graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
