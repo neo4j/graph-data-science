@@ -36,8 +36,6 @@ import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 
 public final class OpenModelCatalog implements ModelCatalog {
 
-    public static final ModelCatalog INSTANCE = new OpenModelCatalog();
-
     public OpenModelCatalog() {}
 
     private static final Map<String, OpenUserCatalog> userCatalogs = new ConcurrentHashMap<>();
