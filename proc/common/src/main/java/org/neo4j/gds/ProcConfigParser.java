@@ -38,12 +38,16 @@ import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 
 public abstract class ProcConfigParser<CONFIG extends AlgoBaseConfig> {
 
-    protected final String username;
+    private final String username;
     private Map<String, Class<?>> sharedConfigKeys;
 
     protected ProcConfigParser(String username) {
         this.username = username;
         this.sharedConfigKeys = new HashMap<>();
+    }
+
+    public String username() {
+        return this.username;
     }
 
     public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
@@ -106,7 +110,7 @@ public abstract class ProcConfigParser<CONFIG extends AlgoBaseConfig> {
         return algoConfig;
     }
 
-    protected abstract CONFIG newConfig(
+    public abstract CONFIG newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

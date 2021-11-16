@@ -148,9 +148,8 @@ abstract class AlphaSimilarityProc
     @Override
     public ProcConfigParser<CONFIG> configParser() {
         return new AlphaSimilarityProcConfigParser<>(
-            username(),
-            databaseId(),
-            this::newConfig
+            super.configParser(),
+            databaseId()
         );
     }
 

@@ -43,36 +43,26 @@ import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
 public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> extends ProcConfigParser<CONFIG> {
 
+    private final ProcConfigParser<CONFIG> configParser;
     private final NamedDatabaseId databaseId;
-    private final NewConfigFunction<CONFIG> newConfigFunction;
-
-    interface NewConfigFunction<CONFIG extends SimilarityConfig> {
-        CONFIG apply(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper config
-        );
-    }
 
     AlphaSimilarityProcConfigParser(
-        String username,
-        NamedDatabaseId databaseId,
-        NewConfigFunction<CONFIG> newConfigFunction
+        ProcConfigParser<CONFIG> configParser,
+        NamedDatabaseId databaseId
     ) {
-        super(username);
+        super(configParser.username());
+        this.configParser = configParser;
         this.databaseId = databaseId;
-        this.newConfigFunction = newConfigFunction;
     }
 
     @Override
-    protected CONFIG newConfig(
+    public CONFIG newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return this.newConfigFunction.apply(username, graphName, maybeImplicitCreate, config);
+        return this.configParser.newConfig(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
@@ -101,7 +91,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> ex
             // We put the fake graph store into the graph catalog
             GraphStoreCatalog.set(
                 ImmutableGraphCreateFromStoreConfig.of(
-                    username,
+                    username(),
                     graphNameOrConfig.toString(),
                     NodeProjections.ALL,
                     RelationshipProjections.ALL
@@ -113,7 +103,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> ex
         try {
             return super.processInput(graphNameOrConfig, configuration);
         } catch (RuntimeException e) {
-            removeGraph(this.username, this.databaseId);
+            removeGraph(username(), this.databaseId);
             throw e;
         }
     }

@@ -57,17 +57,7 @@ public abstract class AlgoBaseProc<
     }
 
     public ProcConfigParser<CONFIG> configParser() {
-        return new ProcConfigParser<>(username()) {
-            @Override
-            protected CONFIG newConfig(
-                String username,
-                Optional<String> graphName,
-                Optional<GraphCreateConfig> maybeImplicitCreate,
-                CypherMapWrapper config
-            ) {
-                return AlgoBaseProc.this.newConfig(username, graphName, maybeImplicitCreate, config);
-            }
-        };
+        return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {

@@ -25,16 +25,22 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
-import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
+public class DefaultProcConfigParser<CONFIG extends AlgoBaseConfig> extends ProcConfigParser<CONFIG> {
 
-public class MutateProcConfigParser<CONFIG extends AlgoBaseConfig> extends ProcConfigParser<CONFIG> {
+    private final NewConfigFunction<CONFIG> newConfigFunction;
 
-    private final ProcConfigParser<CONFIG> defaultParser;
+    interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
+        CONFIG apply(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper config
+        );
+    }
 
-    MutateProcConfigParser(ProcConfigParser<CONFIG> configParser) {
-        super(configParser.username());
-        this.defaultParser = configParser;
+    DefaultProcConfigParser(String username, NewConfigFunction<CONFIG> newConfigFunction) {
+        super(username);
+        this.newConfigFunction = newConfigFunction;
     }
 
     @Override
@@ -44,16 +50,6 @@ public class MutateProcConfigParser<CONFIG extends AlgoBaseConfig> extends ProcC
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return defaultParser.newConfig(username, graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        if (graphName.isEmpty() && !(config.containsKey(NODE_COUNT_KEY) || config.containsKey(RELATIONSHIP_COUNT_KEY))) {
-            throw new IllegalArgumentException(
-                "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
-            );
-        }
-        return super.newConfig(graphName, config);
+        return this.newConfigFunction.apply(username, graphName, maybeImplicitCreate, config);
     }
 }
