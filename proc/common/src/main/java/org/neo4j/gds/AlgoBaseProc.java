@@ -39,6 +39,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfig;
+import org.neo4j.gds.validation.Validator;
 
 import java.util.Collection;
 import java.util.HashMap;

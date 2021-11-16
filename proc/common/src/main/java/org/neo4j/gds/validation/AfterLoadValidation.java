@@ -17,36 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.validation;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 
-public class Validator<CONFIG extends AlgoBaseConfig> {
-
-    private final ValidationConfig<CONFIG> validationConfig;
-
-    public Validator(ValidationConfig<CONFIG> validationConfig) {this.validationConfig = validationConfig;}
-
-    public final void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {
-        validationConfig.validateConfigsBeforeLoad( graphCreateConfig, config);
-    }
-
-    public final void validateConfigWithGraphStore(
+public interface AfterLoadValidation<CONFIG extends AlgoBaseConfig> {
+    void validateConfigsAfterLoad(
         GraphStore graphStore,
         GraphCreateConfig graphCreateConfig,
         CONFIG config
-    ) {
-        config.graphStoreValidation(
-            graphStore,
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore)
-        );
-        GraphStoreValidation.validate(graphStore, config);
-        validationConfig.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-    }
+    );
 }
