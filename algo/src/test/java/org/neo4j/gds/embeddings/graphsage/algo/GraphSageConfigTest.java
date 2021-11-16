@@ -25,8 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -215,61 +213,5 @@ class GraphSageTrainConfigTest {
 
         @Inject
         private GraphStore graphStore;
-
-        @Test
-        void testMissingPropertyForSingleLabel() {
-            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
-                .modelName("singleLabel")
-                .addFeatureProperties("doesnotexist")
-                .addNodeLabel("Person")
-                .build();
-
-            assertThatIllegalArgumentException()
-                .isThrownBy(() -> singleLabelConfig.validateAgainstGraphStore(graphStore))
-                .withMessage(
-                    "The following node properties are not present for each label in the graph: [doesnotexist]." +
-                    " Properties that exist for each label are [weight, age, height]");
-        }
-
-        @Test
-        void testMissingPropertyForMultiLabel() {
-            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
-                .modelName("singleLabel")
-                .addFeatureProperties("doesnotexist")
-                .addNodeLabels("Person", "Instrument")
-                .projectedFeatureDimension(4)
-                .build();
-
-            assertThatIllegalArgumentException()
-                .isThrownBy(() -> singleLabelConfig.validateAgainstGraphStore(graphStore))
-                .withMessage("Each property set in `featureProperties` must exist for at least one label. Missing properties: [doesnotexist]");
-        }
-
-        @Test
-        void testValidConfiguration() {
-            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
-                .modelName("singleLabel")
-                .addFeatureProperties("age", "height", "weight")
-                .addNodeLabel("Person")
-                .addRelationshipType("KNOWS")
-                .build();
-
-            assertThatNoException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(graphStore)
-            );
-
-            var multiLabelConfig = ImmutableGraphSageTrainConfig.builder()
-                .from(singleLabelConfig)
-                .addFeatureProperties("cost")
-                .modelName("multiLabel")
-                .addNodeLabel("Instrument")
-                .addRelationshipType("KNOWS")
-                .projectedFeatureDimension(4)
-                .build();
-
-            assertThatNoException().isThrownBy(
-                () -> multiLabelConfig.validateAgainstGraphStore(graphStore)
-            );
-        }
     }
 }

@@ -35,4 +35,5 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':licensing')
     testImplementation project(':open-licensing')
+    testImplementation project(':test-utils')
 }
