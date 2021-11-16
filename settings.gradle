@@ -25,6 +25,7 @@ def registerSubModules(File file) {
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.4" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop05.0" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.4.0-alpha01" }
+            .filter { moduleDir -> moduleDir.getParentFile().name != "4.4" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
