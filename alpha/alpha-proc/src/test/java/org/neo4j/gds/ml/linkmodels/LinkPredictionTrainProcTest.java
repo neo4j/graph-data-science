@@ -21,9 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -33,6 +30,9 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionTrainProcTest extends BaseProcTest {
 
     // Five cliques of size 2, 3, or 4
@@ -105,7 +105,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         "(j)-[:TEST {label: 0}]->(o), " +
         "(k)-[:TEST {label: 0}]->(o)";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

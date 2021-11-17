@@ -27,11 +27,11 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionModelInfo;
@@ -46,7 +46,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrain.MODEL_TYPE;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
     abstract Class<? extends AlgoBaseProc<?, ?, ?>> getProcedureClazz();
@@ -63,7 +63,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

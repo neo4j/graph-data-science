@@ -38,14 +38,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipeline;
@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PIPELINE_MODEL_TYPE;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -110,7 +110,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

@@ -26,17 +26,17 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
@@ -46,7 +46,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "embeddingsGraph";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

@@ -30,9 +30,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     private static final String DB_CYPHER =
         "CREATE" +
@@ -80,7 +80,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     private static final String relationshipWeightProperty = "weight";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

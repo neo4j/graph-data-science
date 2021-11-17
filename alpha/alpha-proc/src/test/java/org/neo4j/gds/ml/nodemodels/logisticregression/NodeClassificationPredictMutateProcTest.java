@@ -22,15 +22,15 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationPredictMutateProcTest extends BaseProcTest {
 
     private static final String MODEL_NAME = "model";
@@ -53,7 +53,7 @@ class NodeClassificationPredictMutateProcTest extends BaseProcTest {
         ", (n4:N {a: -0.60765016, b:  1.0186564})" +
         ", (n5:N {a: -0.48403364, b: -0.49152604})";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

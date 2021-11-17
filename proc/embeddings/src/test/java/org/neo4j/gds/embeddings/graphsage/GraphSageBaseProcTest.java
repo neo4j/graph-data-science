@@ -34,10 +34,10 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 import org.neo4j.gds.model.catalog.ModelExistsProc;
 
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class GraphSageBaseProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
@@ -86,7 +86,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
 
     static String modelName = "graphSageModel";
 
-    @InjectModelCatalog
+    @Inject
     protected ModelCatalog modelCatalog;
 
     @BeforeEach

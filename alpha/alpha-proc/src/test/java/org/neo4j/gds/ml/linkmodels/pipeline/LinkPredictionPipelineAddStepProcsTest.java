@@ -23,10 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG = Map.of(
@@ -49,7 +49,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         0.1
     );
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

@@ -29,12 +29,12 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureParamsProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineConfigureSplitProc;
@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
     // Five cliques of size 2, 3, or 4
@@ -97,7 +97,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         "(m)-[:IGNORED { weight: 1.0 } ]->(b), " +
         "(m)-[:IGNORED { weight: 1.0 } ]->(c) ";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

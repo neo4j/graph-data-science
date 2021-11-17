@@ -21,22 +21,22 @@ package org.neo4j.gds.model.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.gds.compat.MapUtil.map;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class ModelExistsProcTest extends ModelProcBaseTest {
 
     private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

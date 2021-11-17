@@ -28,11 +28,11 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     private static final String GRAPH =
@@ -64,7 +64,7 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
         "(n:N {a: 400}), " +
         "(o:N {a: 400})";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

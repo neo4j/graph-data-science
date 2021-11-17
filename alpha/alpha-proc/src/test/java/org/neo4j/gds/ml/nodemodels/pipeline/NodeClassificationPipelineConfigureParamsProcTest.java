@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
 import java.util.Map;
@@ -32,10 +32,10 @@ import java.util.Map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG;
 
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach
