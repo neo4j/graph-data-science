@@ -29,13 +29,13 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -48,7 +48,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineExecutor.MODEL_TYPE;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationPipelineExecutorTest extends BaseProcTest {
     private static String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
@@ -75,7 +75,7 @@ class NodeClassificationPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    @InjectModelCatalog
+    @Inject
     ModelCatalog modelCatalog;
 
     @BeforeEach

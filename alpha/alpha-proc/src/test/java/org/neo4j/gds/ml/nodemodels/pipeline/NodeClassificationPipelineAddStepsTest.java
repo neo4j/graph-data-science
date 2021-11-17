@@ -26,10 +26,10 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
@@ -43,10 +43,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
-    @InjectModelCatalog
+    @Inject
     ModelCatalog modelCatalog;
 
     @BeforeEach

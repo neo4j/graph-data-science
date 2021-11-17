@@ -24,13 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.node2vec.Node2VecWriteProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.math.L2Norm.l2Norm;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class EmbeddingsIntegrationTest extends BaseProcTest {
 
     private static final String TEST_GRAPH = "testGraph";
@@ -69,7 +69,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         ", (i)-[:TYPE]->(l)" +
         ", (j)-[:TYPE]->(k)";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

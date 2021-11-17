@@ -21,22 +21,22 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.assertj.ConditionFactory.hasSize;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH =
@@ -68,7 +68,7 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
         ", (:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 2})" +
         ", (:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 2})";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

@@ -21,10 +21,10 @@ package org.neo4j.gds.model.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -34,10 +34,10 @@ import static org.hamcrest.core.Is.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class ModelDropProcTest extends ModelProcBaseTest {
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @BeforeEach

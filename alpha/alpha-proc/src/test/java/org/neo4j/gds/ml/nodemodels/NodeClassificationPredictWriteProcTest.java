@@ -42,12 +42,12 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
@@ -72,7 +72,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KE
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeClassificationResult> {
 
     private static final String DB_CYPHER =
@@ -86,7 +86,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     public static final String GRAPH_NAME = "g";
     public static final String MODEL_NAME = "model";
 
-    @InjectModelCatalog
+    @Inject
     private ModelCatalog modelCatalog;
 
     @TestFactory

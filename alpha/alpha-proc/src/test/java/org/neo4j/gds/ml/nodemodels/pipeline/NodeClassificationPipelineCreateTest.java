@@ -23,9 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
@@ -42,10 +42,10 @@ import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
-    @InjectModelCatalog
+    @Inject
     ModelCatalog modelCatalog;
 
     @BeforeEach
