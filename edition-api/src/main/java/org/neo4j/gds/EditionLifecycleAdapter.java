@@ -130,6 +130,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
         );
 
        modelCatalogProvider.register(globalProceduresRegistry, licenseState);
+       context.dependencySatisfier().satisfyDependency(modelCatalogProvider.get(licenseState));
     }
 
     private <T> T loadServiceByPriority(Class<T> serviceClass, Function<T, Integer> comparingFunction) {
