@@ -29,7 +29,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
-import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -68,7 +67,6 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         "(n:N {a: 400}), " +
         "(o:N {a: 400})";
 
-    @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
     @BeforeEach
