@@ -25,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.helpers.AnnotationHelper.findAnnotation;
@@ -41,19 +43,31 @@ public class EnableForNeo4jVersionCondition implements ExecutionCondition {
         AnnotatedElement element = context
             .getElement()
             .orElseThrow(IllegalStateException::new);
+
+        EnableForNeo4jVersion[] annotations;
+
+        var single = findAnnotation(element, EnableForNeo4jVersion.class);
+        if (single != null) {
+            annotations = new EnableForNeo4jVersion[]{single};
+        } else {
+            var repeated = findAnnotation(element, EnableForNeo4jVersions.class);
+            annotations = repeated != null ? repeated.value() : new EnableForNeo4jVersion[0];
+        }
+
         return shouldEnableForNeo4jVersion(
-            findAnnotation(element, EnableForNeo4jVersion.class),
+            Arrays.asList(annotations),
             element
         );
     }
 
     private ConditionEvaluationResult shouldEnableForNeo4jVersion(
-        EnableForNeo4jVersion annotation,
+        Iterable<EnableForNeo4jVersion> annotations,
         AnnotatedElement element
     ) {
-        if (annotation != null) {
+        var runningOnNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+
+        for (var annotation : annotations) {
             var enableForNeo4jVersion = annotation.value();
-            var runningOnNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
             if (runningOnNeo4jVersion != enableForNeo4jVersion) {
                 var message = annotation.message().isBlank() ?
                     formatWithLocale(

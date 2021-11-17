@@ -20,9 +20,7 @@
 package org.neo4j.gds.junit.annotation;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.gds.compat.Neo4jVersion;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -34,11 +32,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD, TYPE, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 @ExtendWith(EnableForNeo4jVersionCondition.class)
-@Repeatable(EnableForNeo4jVersions.class)
-public @interface EnableForNeo4jVersion {
+public @interface EnableForNeo4jVersions {
 
-    Neo4jVersion value();
-
-    String message() default "";
-
+    EnableForNeo4jVersion[] value();
 }
