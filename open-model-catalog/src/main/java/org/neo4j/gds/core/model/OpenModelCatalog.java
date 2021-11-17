@@ -36,9 +36,11 @@ import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 
 public final class OpenModelCatalog implements ModelCatalog {
 
-    public OpenModelCatalog() {}
+    private final Map<String, OpenUserCatalog> userCatalogs;
 
-    private static final Map<String, OpenUserCatalog> userCatalogs = new ConcurrentHashMap<>();
+    public OpenModelCatalog() {
+        this.userCatalogs = new ConcurrentHashMap<>();
+    }
 
     @Override
     public void set(Model<?, ?, ?> model) {
@@ -157,7 +159,7 @@ public final class OpenModelCatalog implements ModelCatalog {
         return getUserCatalog(username).drop(modelName, failOnMissing);
     }
 
-    private static OpenUserCatalog getUserCatalog(String username) {
+    private OpenUserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, new OpenUserCatalog());
     }
 
