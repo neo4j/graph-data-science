@@ -1,6 +1,5 @@
 [[algorithms-embeddings-fastrp]]
 = Fast Random Projection
-:stem: latexmath
 :entity: node
 :result: embedding
 :algorithm: FastRP
@@ -33,20 +32,18 @@ The FastRP algorithm initially assigns random vectors to all nodes using a techn
 Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described <<algorithms-embeddings-fastrp-extended,below>>.
 We will also use _projection of a node_ synonymously with the initial random vector of a node.
 
-Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ stem:[e^i_n] for each node stem:[n].
+Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
 More precisely,
-[stem]
-++++
-e^i_n = \text{avg}({e^{i-1}_m}),
-++++
-where stem:[m] ranges over neighbors of stem:[n] and stem:[e^0_n] is the node's initial random vector .
 
-The embedding stem:[e_n] of node stem:[n], which is the output of the algorithm, is a combination of the vectors and embeddings defined above:
-[stem]
-++++
-e_n = w_0 \cdot \text{normalize}(r_n) + \sum_{i=1}^{i=k}w_i \cdot \text{normalize}(e^i_n),
-++++
-where stem:[\text{normalize}] is the function which divides a vector with its https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 norm], the value of `nodeSelfInfluence` is stem:[w_0], and the values of `iterationWeights` are stem:[[w_1, w_2, \ldots, w_k]].
+image::equations/fastrp/fastrp2.svg[e n to the ith equals average of e m to the ith minus one,align="center"]
+
+where _m_ ranges over neighbors of _n_ and image:equations/fastrp/fastrp3.svg[e n to the zeroeth] is the node's initial random vector.
+
+The embedding image:equations/fastrp/fastrp4.svg[e n] of node _n_, which is the output of the algorithm, is a combination of the vectors and embeddings defined above:
+
+image::equations/fastrp/fastrp5.svg[e n equals w zero times normalise r n plus sum from i equals 1 to k of w i times normalise e n to the ith,align="center"]
+
+where `normalize` is the function which divides a vector with its https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 norm], the value of `nodeSelfInfluence` is image:equations/fastrp/fastrp6.svg[w zero], and the values of `iterationWeights` are image:equations/fastrp/fastrp7.svg[w 1 comma w 2 comma dot dot dot w k].
 We will return to <<algorithms-embeddings-fastrp-node-self-influence,Node Self Influence>> later on.
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
@@ -127,9 +124,9 @@ Of course, a greater number of iterations will also take more time to complete.
 
 Node Self Influence is a variation of the original FastRP algorithm.
 
-How much a node's embedding is affected by the intermediate embedding at iteration stem:[i] is controlled by the stem:[i]'th element of `iterationWeights`.
-This can also be seen as how much the initial random vectors, or projections, of nodes that can be reached in stem:[i] hops from a node affect the embedding of the node.
-Similarly, `nodeSelfInfluence` behaves like an iteration weight for a stem:[0]:th iteration, or the amount of influence the projection of a node has on the embedding of the same node.
+How much a node's embedding is affected by the intermediate embedding at iteration _i_ is controlled by the _i_'th element of `iterationWeights`.
+This can also be seen as how much the initial random vectors, or projections, of nodes that can be reached in _i_ hops from a node affect the embedding of the node.
+Similarly, `nodeSelfInfluence` behaves like an iteration weight for a _0_ th iteration, or the amount of influence the projection of a node has on the embedding of the same node.
 
 A reason for setting this parameter to a non-zero value is if your graph has low connectivity or a significant amount of isolated nodes.
 Isolated nodes combined with using `propertyRatio = 0.0` leads to embeddings that contain all zeros.
@@ -603,9 +600,9 @@ The dimension of the embedded properties, `propertyDimension` is thus 2.
 Assume we have a property `f1` of scalar type, and a property `f2` storing arrays of length 2.
 This means that there are 3 features which we order like `f1` followed by the two values of `f2`.
 For each of these three features we sample a two dimensional random vector.
-Lets say these are stem:[p1=[0.0, 2.4]], stem:[p2=[-2.4, 0.0]] and stem:[p3=[2.4, 0.0]].
-Consider now a node `(n {f1: 0.5, f2: [1.0, -1.0])`.
-The linear combination mentioned above, is in concrete terms stem:[0.5 * p1 + 1.0 * p2 - 1.0 * p3 = [-4.8, 1.2]] ].
+Lets say these are `p1=[0.0, 2.4]`, `p2=[-2.4, 0.0]` and `p3=[2.4, 0.0]`.
+Consider now a node `(n {f1: 0.5, f2: [1.0, -1.0]})`.
+The linear combination mentioned above, is in concrete terms `0.5 * p1 + 1.0 * p2 - 1.0 * p3 = [-4.8, 1.2]`.
 The initial random vector for the node `n` contains first 8 values sampled as in the original fastRP paper, and then our computed values `-4.8` and `1.2`, totalling 10 entries.
 
 [role=query-example]
