@@ -29,7 +29,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictMutateProc
-    extends MutatePropertyProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
+    extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
 
     @Context
     public ModelCatalog modelCatalog;
@@ -74,7 +74,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationMutateConfig> computeResult
+        ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
     }
@@ -124,7 +124,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected List<NodeProperty> nodePropertyList(
-        ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationMutateConfig> computationResult
+        ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationMutateConfig> computationResult
     ) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();

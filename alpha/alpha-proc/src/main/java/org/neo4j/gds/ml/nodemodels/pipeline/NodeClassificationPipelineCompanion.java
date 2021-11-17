@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 
 import java.util.List;
@@ -53,5 +55,12 @@ public final class NodeClassificationPipelineCompanion {
         assert model.customInfo() instanceof NodeClassificationPipeline;
 
         return (NodeClassificationPipeline) model.customInfo();
+    }
+
+    public static Model<NodeLogisticRegressionData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
+        String pipelineName,
+        String username
+    ) {
+        return modelCatalog.get(username, pipelineName, NodeLogisticRegressionData.class, NodeClassificationPipelineTrainConfig.class, NodeClassificationPipelineModelInfo.class);
     }
 }

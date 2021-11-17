@@ -29,8 +29,8 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -47,7 +47,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeClassificationPredictStreamProc
-    extends StreamProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
+    extends StreamProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
 
     @Context
     public ModelCatalog modelCatalog;
@@ -72,7 +72,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
@@ -125,7 +125,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig> computationResult) {
         return super.nodeProperties(computationResult);
     }
 

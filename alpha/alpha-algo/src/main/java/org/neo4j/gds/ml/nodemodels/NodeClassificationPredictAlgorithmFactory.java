@@ -41,7 +41,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     @Override
     protected String taskName() {
-        return "NodeLogisticRegressionPredict";
+        return "Node classification predict";
     }
 
     @Override

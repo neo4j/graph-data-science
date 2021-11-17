@@ -48,7 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -73,7 +73,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KE
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
 @ModelCatalogExtension
-class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
+class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeClassificationResult> {
 
     private static final String DB_CYPHER =
         "CREATE " +
@@ -121,7 +121,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public void applyOnProcedure(Consumer<? super AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig>> func) {
+    public void applyOnProcedure(Consumer<? super AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig>> func) {
         TestProcedureRunner.applyOnProcedure(
             graphDb(),
             getProcedureClazz(),
@@ -195,7 +195,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
         return NodeClassificationPredictWriteProc.class;
     }
 
@@ -215,7 +215,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public void assertResultEquals(NodeLogisticRegressionResult result1, NodeLogisticRegressionResult result2) {
+    public void assertResultEquals(NodeClassificationResult result1, NodeClassificationResult result2) {
         assertArrayEquals(result1.predictedClasses().toArray(), result2.predictedClasses().toArray());
         var probabilities1 = result1.predictedProbabilities();
         var probabilities2 = result2.predictedProbabilities();

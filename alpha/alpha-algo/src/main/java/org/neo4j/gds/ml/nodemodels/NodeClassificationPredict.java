@@ -29,16 +29,16 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 
 import java.util.List;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
-public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {
+public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeClassificationResult> {
 
     static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
         var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
@@ -79,7 +79,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     }
 
     @Override
-    public NodeLogisticRegressionResult compute() {
+    public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
@@ -95,7 +95,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
         progressTracker.endSubTask();
-        return NodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
+        return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
     }
 
     @Override
