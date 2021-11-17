@@ -21,10 +21,10 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
@@ -33,11 +33,11 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 
 import java.util.List;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class NodeClassificationDocTest extends DocTestBase {
 
-    @InjectModelCatalog
-    private ModelCatalog modelCatalog;
+    @Inject
+    ModelCatalog modelCatalog;
 
     @Override
     List<Class<?>> functions() {

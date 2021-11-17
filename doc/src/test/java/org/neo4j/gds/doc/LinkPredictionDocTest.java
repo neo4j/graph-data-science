@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictMutateProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictStreamProc;
@@ -33,11 +33,11 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
 import java.util.List;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class LinkPredictionDocTest extends DocTestBase {
 
-    @InjectModelCatalog
-    private ModelCatalog modelCatalog;
+    @Inject
+    ModelCatalog modelCatalog;
 
     @Override
     List<Class<?>> functions() {

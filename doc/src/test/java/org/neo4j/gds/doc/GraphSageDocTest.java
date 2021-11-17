@@ -20,8 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
@@ -29,14 +27,16 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
 
-@ModelCatalogExtension
+@Neo4jModelCatalogExtension
 class GraphSageDocTest extends DocTestBase {
 
-    @InjectModelCatalog
-    private ModelCatalog modelCatalog;
+    @Inject
+    ModelCatalog modelCatalog;
 
     @Override
     protected List<Class<?>> procedures() {
