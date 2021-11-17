@@ -213,7 +213,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThatThrownBy(executor::compute)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
-                    "Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");
+                    "Node properties [no-property, no-prop-2, other-no-property] defined in the feature steps do not exist in the graph or part of the pipeline");
         });
     }
 
