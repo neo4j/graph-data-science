@@ -25,8 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.InjectModelCatalog;
-import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
