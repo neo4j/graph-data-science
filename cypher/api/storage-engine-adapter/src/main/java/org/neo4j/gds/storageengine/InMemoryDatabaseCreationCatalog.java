@@ -19,22 +19,21 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.neo4j.configuration.helpers.NormalizedDatabaseName;
+import org.neo4j.gds.compat.Neo4jProxy;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class InMemoryDatabaseCreationCatalog {
-    private static final Map<NormalizedDatabaseName, String> CATALOG = new ConcurrentHashMap<>();
+    private static final Map<String, String> CATALOG = new ConcurrentHashMap<>();
 
     private InMemoryDatabaseCreationCatalog() {}
 
     public static void registerDbCreation(String databaseName, String graphName) {
-        var normalizedDatabaseName = new NormalizedDatabaseName(databaseName);
+        var normalizedDatabaseName = Neo4jProxy.validateExternalDatabaseName(databaseName);
         if (CATALOG.containsKey(normalizedDatabaseName)) {
             throw new IllegalArgumentException(formatWithLocale("An entry with key `%s` already exists", databaseName));
         }
@@ -42,7 +41,7 @@ public final class InMemoryDatabaseCreationCatalog {
     }
 
     public static String getRegisteredDbCreationGraphName(String databaseName) {
-        return CATALOG.get(new NormalizedDatabaseName(databaseName));
+        return CATALOG.get(Neo4jProxy.validateExternalDatabaseName(databaseName));
     }
 
     public static void removeAllRegisteredDbCreations() {
@@ -50,6 +49,6 @@ public final class InMemoryDatabaseCreationCatalog {
     }
 
     public static Set<String> databaseNamesRegisteredForCreation() {
-        return CATALOG.keySet().stream().map(NormalizedDatabaseName::name).collect(Collectors.toSet());
+        return CATALOG.keySet();
     }
 }

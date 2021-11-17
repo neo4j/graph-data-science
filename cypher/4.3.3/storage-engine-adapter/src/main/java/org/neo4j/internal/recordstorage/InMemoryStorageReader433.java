@@ -19,11 +19,13 @@
  */
 package org.neo4j.internal.recordstorage;
 
+import org.neo4j.common.EntityType;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.compat._433.InMemoryNodeCursor;
 import org.neo4j.gds.compat._433.InMemoryPropertyCursor;
 import org.neo4j.gds.compat._433.InMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.StorageNodeCursor;
@@ -31,6 +33,9 @@ import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class InMemoryStorageReader433 extends AbstractInMemoryStorageReader {
 
@@ -40,6 +45,15 @@ public class InMemoryStorageReader433 extends AbstractInMemoryStorageReader {
         CountsAccessor counts
     ) {
         super(graphStore, tokenHolders, counts);
+    }
+
+    @Override
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] labels,
+        int[] propertyKeyIds,
+        EntityType entityType
+    ) {
+        return Collections.emptyList();
     }
 
     @Override

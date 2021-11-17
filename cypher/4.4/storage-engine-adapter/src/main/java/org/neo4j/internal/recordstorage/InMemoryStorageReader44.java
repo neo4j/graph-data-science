@@ -21,10 +21,10 @@ package org.neo4j.internal.recordstorage;
 
 import org.neo4j.common.EntityType;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.gds.compat._44alpha01.InMemoryNodeCursor;
-import org.neo4j.gds.compat._44alpha01.InMemoryPropertyCursor;
-import org.neo4j.gds.compat._44alpha01.InMemoryRelationshipScanCursor;
-import org.neo4j.gds.compat._44alpha01.InMemoryRelationshipTraversalCursor;
+import org.neo4j.gds.compat._44.InMemoryNodeCursor;
+import org.neo4j.gds.compat._44.InMemoryPropertyCursor;
+import org.neo4j.gds.compat._44.InMemoryRelationshipScanCursor;
+import org.neo4j.gds.compat._44.InMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
@@ -42,9 +42,9 @@ import org.neo4j.token.TokenHolders;
 import java.util.Collection;
 import java.util.Collections;
 
-public class InMemoryStorageReader44alpha01 extends AbstractInMemoryStorageReader {
+public class InMemoryStorageReader44 extends AbstractInMemoryStorageReader {
 
-    public InMemoryStorageReader44alpha01(
+    public InMemoryStorageReader44(
         CypherGraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
@@ -54,8 +54,17 @@ public class InMemoryStorageReader44alpha01 extends AbstractInMemoryStorageReade
 
     @Override
     public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
-        long[] labels,
+        long[] labels, int propertyKeyId, EntityType entityType
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] changedLabels,
+        long[] unchangedLabels,
         int[] propertyKeyIds,
+        boolean propertyKeyListIsComplete,
         EntityType entityType
     ) {
         return Collections.emptyList();

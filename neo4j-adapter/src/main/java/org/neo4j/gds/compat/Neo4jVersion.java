@@ -29,6 +29,7 @@ public enum Neo4jVersion {
     V_4_1,
     V_4_2,
     V_4_3,
+    V_4_4,
     V_4_4_alpha01;
 
     @Override
@@ -40,6 +41,8 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
+            case V_4_4:
+                return "4.4";
             case V_4_4_alpha01:
                 return "4.4.0-alpha01";
             default:
@@ -76,6 +79,9 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
+        if (version.equals("4.4.0-alpha01")) {
+            return Neo4jVersion.V_4_4_alpha01;
+        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -88,7 +94,7 @@ public enum Neo4jVersion {
             case "4.3":
                 return Neo4jVersion.V_4_3;
             case "4.4":
-                return Neo4jVersion.V_4_4_alpha01;
+                return Neo4jVersion.V_4_4;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }
