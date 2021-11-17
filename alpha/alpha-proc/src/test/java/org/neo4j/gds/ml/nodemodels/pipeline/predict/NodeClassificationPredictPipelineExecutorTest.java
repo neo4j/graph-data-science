@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,10 +43,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationFeatureStep;
@@ -128,7 +123,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
 
             var weights=new double[]{-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            NodeLogisticRegressionData modelData = createModeldata(weights);
+            var modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -168,7 +163,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
             var weights=new double[]{1.0,1.0,-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            NodeLogisticRegressionData modelData = createModeldata(weights);
+            NodeLogisticRegressionData modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -190,23 +185,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         });
     }
 
-    @NotNull
-    private NodeLogisticRegressionData createModeldata(double[] weights) {
-        var idMap = new LocalIdMap();
-        idMap.toMapped(0);
-        idMap.toMapped(1);
-        var modelData = ImmutableNodeLogisticRegressionData.of(
-            new Weights<>(
-                new Matrix(
-                    weights,
-                    2,
-                    weights.length/2
-                )),
-            idMap
-        );
-        return modelData;
-    }
-
     @Test
     void progressTracking() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -224,7 +202,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("c"));
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
             var weights=new double[]{1.0,1.0,-2.0, -1.0, 3.0, 0.0,-1.5,-1.3,2.6,0.0};
-            NodeLogisticRegressionData modelData = createModeldata(weights);
+            NodeLogisticRegressionData modelData = NodeClassificationPipelinePredictProcTestUtil.createModeldata(weights);
 
             modelCatalog.set(Model.of(
                 getUsername(),
@@ -247,11 +225,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(
-                    modelCatalog,
-                    caller,
-                    db.databaseId()
-                ).progressTask(graphStore.getUnion(), config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller, db.databaseId())
+                    .progressTask(graphStore.getUnion(), config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

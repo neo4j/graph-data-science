@@ -41,7 +41,6 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.getTrainedNCPipelineModel;
 
-
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
     extends AlgorithmFactory<NodeClassificationPredictPipelineExecutor, CONFIG>
@@ -86,11 +85,14 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     }
 
     private NodeClassificationPredictConfig innerConfig(CONFIG configuration) {
+        configuration.includePredictedProbabilities();
         return new NodeClassificationPredictConfigImpl(
             configuration.graphName(),
             configuration.implicitCreateConfig(),
             configuration.username(),
-            CypherMapWrapper.create(configuration.toMap())
+            CypherMapWrapper.create(configuration.toMap()).
+                withEntry("includePredictedProbabilities",configuration.includePredictedProbabilities()).
+                withoutEntry("predictedProbabilityProperty")
             );
     }
 
