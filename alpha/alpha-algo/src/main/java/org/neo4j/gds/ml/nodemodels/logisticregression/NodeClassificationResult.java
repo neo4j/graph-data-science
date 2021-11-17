@@ -27,16 +27,16 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import java.util.Optional;
 
 @ValueClass
-public interface NodeLogisticRegressionResult {
+public interface NodeClassificationResult {
 
     HugeLongArray predictedClasses();
     Optional<HugeObjectArray<double[]>> predictedProbabilities();
 
-    static NodeLogisticRegressionResult of(
+    static NodeClassificationResult of(
         HugeLongArray classes,
         @Nullable HugeObjectArray<double[]> probabilities
     ) {
-        return ImmutableNodeLogisticRegressionResult.builder()
+        return ImmutableNodeClassificationResult.builder()
             .predictedProbabilities(Optional.ofNullable(probabilities))
             .predictedClasses(classes)
             .build();
