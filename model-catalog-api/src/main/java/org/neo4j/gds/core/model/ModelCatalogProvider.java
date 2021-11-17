@@ -21,9 +21,12 @@ package org.neo4j.gds.core.model;
 
 import org.neo4j.annotations.service.Service;
 import org.neo4j.gds.LicenseState;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 @Service
 public interface ModelCatalogProvider {
+
+    void register(GlobalProcedures globalProcedures, LicenseState licenseState);
 
     ModelCatalog get(LicenseState licenseState);
 
