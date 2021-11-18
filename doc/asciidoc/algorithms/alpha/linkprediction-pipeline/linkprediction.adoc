@@ -224,8 +224,8 @@ include::pipelineInfoResult.adoc[]
 === Supported feature types
 
 A feature step can use node properties that exist in the input graph or are added by the pipeline.
-For each node in each potential link, the values of `nodeProperties` are concatenated, in the configured order, into a vector stem:[f].
-That is, for each potential link the feature vector for the source node, stem:[s=\[s_1,s_2, \ldots,s_d\]], is combined with the one for the target node,  stem:[t=\[t_1,t_2, \ldots,t_d\]], into a single feature vector stem:[f].
+For each node in each potential link, the values of `nodeProperties` are concatenated, in the configured order, into a vector _f_.
+That is, for each potential link the feature vector for the source node, image:equations/linkprediction/linkprediction1.svg[s equals s1 comma s2 comma dot dot dot s d], is combined with the one for the target node, image:equations/linkprediction/linkprediction2.svg[s equals t1 comma t2 comma dot dot dot t d], into a single feature vector _f_.
 
 The supported types of features can then be described as follows:
 
@@ -233,9 +233,9 @@ The supported types of features can then be described as follows:
 [opts="header",cols="1,4"]
 |===
 | Feature Type           | Formula / Description
-| L2                     | stem:[f=\[(s_1 - t_1)^2 , (s_2 - t_2)^2, ..., (s_d - t_d)^2\]]
-| HADAMARD               | stem:[f=\[s_1 * t_1, s_2 * t_2, ..., s_d * t_d\]]
-| COSINE                 | stem:[f=\frac {\sum_{i=1}^{d}s_{i}t_{i}}{\sqrt {\sum _{i=1}^{d}s_{i}^{2}}\sqrt {\sum _{i=1}^{d}t_{i}^{2}}}]
+| L2                     | image:equations/linkprediction/linkprediction3.svg[f equals vector of s1 minus t1 squared comma s2 minus t2 squared comma dot dot dot comma s d minus t d squared]
+| HADAMARD               | image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d]
+| COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
 |===
 
 === Example
