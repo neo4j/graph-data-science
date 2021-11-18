@@ -28,8 +28,8 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class NodeClassificationPredictWriteProc
-    extends WriteProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
+    extends WriteProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
 
     @Context
     public ModelCatalog modelCatalog;
@@ -72,7 +72,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
+    protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig> computationResult) {
         var config = computationResult.config();
         var writeProperty = config.writeProperty();
         var result = computationResult.result();
@@ -132,7 +132,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computeResult) {
+    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig> computeResult) {
         return new Result.Builder();
     }
 

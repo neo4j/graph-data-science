@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatureStep, NodeLogisticRegressionTrainCoreConfig> {
     private NodeClassificationSplitConfig splitConfig;
 
-    NodeClassificationPipeline() {
+    public NodeClassificationPipeline() {
         super(List.of(NodeLogisticRegressionTrainCoreConfig.defaultConfig()));
         this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
     }
