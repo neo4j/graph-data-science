@@ -20,7 +20,9 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -65,12 +67,25 @@ class ProcedureRunnerTest extends BaseTest {
         assertThat(contextFieldTypes)
             .overridingErrorMessage(
                 formatWithLocale(
-                    "Expecting method %s to set all context injected fields on BaseProc.class but did not find parameters for types %s",
+                    "Expecting method %s to set all context injected fields on %s but did not find parameters for types %s",
                     instantiateProcedureMethodName,
+                    baseProcClass.getSimpleName(),
                     contextFieldTypes
                 )
             )
             .isEmpty();
+    }
+
+    @Test
+    void shouldInjectModelCatalog() {
+        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            var baseProc = new TestProc();
+            baseProc.api = db;
+            baseProc.procedureTransaction = tx;
+            var trainProcInstance = ProcedureRunner.instantiateProcedureFromCaller(baseProc, TrainTestProc.class);
+
+            assertThat(trainProcInstance.modelCatalog).isNotNull();
+        });
     }
 
     @Test
@@ -103,5 +118,11 @@ class ProcedureRunnerTest extends BaseTest {
                 }
             );
         }
+    }
+
+    public static class TrainTestProc extends BaseProc {
+
+        @Context
+        public ModelCatalog modelCatalog;
     }
 }
