@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.graphdb.Transaction;
@@ -28,6 +29,8 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public final class ProcedureRunner {
@@ -61,7 +64,7 @@ public final class ProcedureRunner {
         try {
             proc = procClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName());
+            throw new RuntimeException("Could not instantiate Procedure Class " + procClass.getSimpleName(), e);
         }
 
         proc.procedureTransaction = tx;
@@ -73,7 +76,22 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.username = username;
 
+        var maybeModelCatalogField = Arrays.stream(procClass.getFields())
+            .filter(field -> ModelCatalog.class.isAssignableFrom(field.getType()))
+            .findFirst();
+
+        maybeModelCatalogField.ifPresent(field -> injectModelCatalog(proc, field));
+
         return proc;
+    }
+
+    private static void injectModelCatalog(BaseProc procInstance, Field field) {
+        try {
+            var modelCatalog = GraphDatabaseApiProxy.resolveDependency(procInstance.api, ModelCatalog.class);
+            field.set(procInstance, modelCatalog);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static <P extends BaseProc> P applyOnProcedure(
