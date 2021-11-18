@@ -26,7 +26,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
