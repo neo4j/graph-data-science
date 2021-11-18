@@ -26,6 +26,7 @@ import org.neo4j.gds.concurrency.PoolSizesProvider;
 import org.neo4j.gds.concurrency.PoolSizesService;
 import org.neo4j.gds.core.IdMapBehaviorFactory;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
 import org.neo4j.gds.transaction.SecurityContextWrapperFactory;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -129,8 +130,14 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
             ModelCatalogProvider::priority
         );
 
-       modelCatalogProvider.register(globalProceduresRegistry, licenseState);
-       context.dependencySatisfier().satisfyDependency(modelCatalogProvider.get(licenseState));
+        var modelCatalog = modelCatalogProvider.get(licenseState);
+
+        globalProceduresRegistry.registerComponent(
+            ModelCatalog.class,
+            (context) -> modelCatalog,
+            true
+        );
+        context.dependencySatisfier().satisfyDependency(modelCatalog);
     }
 
     private <T> T loadServiceByPriority(Class<T> serviceClass, Function<T, Integer> comparingFunction) {
