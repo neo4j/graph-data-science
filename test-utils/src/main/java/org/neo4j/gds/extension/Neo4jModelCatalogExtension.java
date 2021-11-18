@@ -27,6 +27,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * JUnit-Extension that will resolve the ModelCatalog from the Neo4j database context.
+ * This allows an injection into a field of type {@link org.neo4j.gds.core.model.ModelCatalog} by using {@link Inject}.
+ *
+ * Further, the stored models are removed after each test.
+ */
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
