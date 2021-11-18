@@ -21,7 +21,6 @@ package org.neo4j.gds.core.model;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.LicenseState;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 @ServiceProvider
 public class OpenModelCatalogProvider implements ModelCatalogProvider {
@@ -29,13 +28,6 @@ public class OpenModelCatalogProvider implements ModelCatalogProvider {
     @Override
     public ModelCatalog get(LicenseState licenseState) {
         return OpenModelCatalog.INSTANCE;
-    }
-
-    @Override
-    public void register(
-        GlobalProcedures globalProcedures, LicenseState licenseState
-    ) {
-        globalProcedures.registerComponent(ModelCatalog.class, (context) -> get(licenseState), true);
     }
 
     @Override
