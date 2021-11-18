@@ -22,14 +22,14 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
 public class NodeClassificationPipelineCreate {
 
-    public static PipelineInfoResult create(String username, String pipelineName) {
+    public static PipelineInfoResult create(ModelCatalog modelCatalog, String username, String pipelineName) {
         StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
         var model = Model.of(
@@ -41,7 +41,7 @@ public class NodeClassificationPipelineCreate {
             PipelineCreateConfig.of(username),
             new NodeClassificationPipeline()
         );
-        OpenModelCatalog.INSTANCE.set(model);
+        modelCatalog.set(model);
 
         return new PipelineInfoResult(pipelineName, model.customInfo());
     }

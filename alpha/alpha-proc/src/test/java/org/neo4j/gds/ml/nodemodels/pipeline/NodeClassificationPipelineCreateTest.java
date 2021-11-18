@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCreateConfig;
 import org.neo4j.gds.model.catalog.ModelListProc;
 
@@ -41,23 +41,20 @@ import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PIPELINE_MODEL_TYPE;
 
+@ModelCatalogExtension
 public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(NodeClassificationPipelineCreateProc.class, ModelListProc.class);
     }
 
-    @AfterEach
-    void tearDown() {
-        modelCatalog.removeAllLoadedModels();
-    }
-
     @Test
     void createPipeline() {
-        var result = NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
+        var result = NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), "myPipeline");
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
         assertThat(result.featureSteps).isEqualTo(List.of());
@@ -91,14 +88,14 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
     @Test
     void failOnCreatingPipelineWithExistingName() {
-        NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
-        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), "myPipeline"))
+        NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), "myPipeline");
+        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), "myPipeline"))
             .hasMessageContaining("Model with name `myPipeline` already exists.");
     }
 
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), " "))
+        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), " "))
             .hasMessageContaining("`pipelineName` must not end or begin with whitespace characters, but got ` `.");
     }
 }
