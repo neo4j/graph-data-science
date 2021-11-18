@@ -32,9 +32,6 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -48,9 +45,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
@@ -288,31 +282,11 @@ public abstract class AlgoBaseProc<
 
     MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-        GraphDimensions estimateDimensions;
 
-        if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            var memoryTreeWithDimensions = estimateGraphCreate(createConfig);
-            estimateDimensions = memoryTreeWithDimensions.graphDimensions();
-            estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
-        } else {
-            String graphName = config.graphName().orElseThrow(IllegalStateException::new);
-            GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName, config);
-            GraphStore graphStore = graphStoreWithConfig.graphStore();
+        var graphStoreLoader = graphStoreLoader(config, config.graphName());
 
-            Graph filteredGraph = graphStore.getGraph(
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore),
-                Optional.empty()
-            );
-            long relCount = filteredGraph.relationshipCount();
-
-            estimateDimensions = ImmutableGraphDimensions.builder()
-                .nodeCount(filteredGraph.nodeCount())
-                .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
-                .maxRelCount(relCount)
-                .build();
-        }
+        GraphDimensions estimateDimensions = graphStoreLoader.graphDimensions();
+        graphStoreLoader.memoryEstimation().map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
 
         estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
 
@@ -346,45 +320,25 @@ public abstract class AlgoBaseProc<
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
-        GraphStoreWithConfig graphCandidate;
+        var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
-        if (maybeGraphName.isPresent()) {
-            graphCandidate = graphStoreFromCatalog(maybeGraphName.get(), config);
-            validateConfigsBeforeLoad(graphCandidate.config(), config);
-        } else if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            validateConfigsBeforeLoad(createConfig, config);
+        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
+        validateConfigsBeforeLoad(graphCreateConfig, config);
+        var graphStore = graphStoreLoader.graphStore();
+        validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
 
-            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty(), taskRegistryFactory);
-            GraphStore graphStore = loader.graphStore();
-
-            graphCandidate = GraphStoreWithConfig.of(graphStore, createConfig);
-        } else {
-            throw new IllegalStateException("There must be either a graph name or an implicit create config");
-        }
-
-        var graphStore = graphCandidate.graphStore();
-        validateConfigWithGraphStore(graphStore, graphCandidate.config(), config);
         return graphStore;
     }
 
-    private Map<RelationshipType, Long> filteredGraphRelationshipCounts(
-        CONFIG config,
-        GraphStore graphStore,
-        Graph filteredGraph
-    ) {
-        var relCount = filteredGraph.relationshipCount();
-        return Stream.concat(config.internalRelationshipTypes(graphStore).stream(), Stream.of(RelationshipType.ALL_RELATIONSHIPS))
-            .distinct()
-            .collect(Collectors.toMap(
-                Function.identity(),
-                key -> key == RelationshipType.ALL_RELATIONSHIPS
-                    ? relCount
-                    : filteredGraph
-                        .relationshipTypeFilteredGraph(Set.of(key))
-                        .relationshipCount()
-                )
-            );
+    private GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
+        return GraphStoreLoader.of(
+            config,
+            maybeGraphName,
+            this::databaseId,
+            this::username,
+            this::graphLoaderContext,
+            isGdsAdmin()
+        );
     }
 
     @ValueClass

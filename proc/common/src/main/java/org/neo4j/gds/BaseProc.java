@@ -21,30 +21,18 @@ package org.neo4j.gds;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
-import org.neo4j.gds.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
@@ -59,15 +47,10 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.function.Predicate.isEqual;
 import static org.neo4j.gds.MemoryValidation.validateMemoryUsage;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class BaseProc {
@@ -117,17 +100,7 @@ public abstract class BaseProc {
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
-        var request = catalogRequest(Optional.ofNullable(config.usernameOverride()), Optional.empty());
-        return GraphStoreCatalog.get(request, graphName);
-    }
-
-    protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
-        return ImmutableCatalogRequest.of(
-            databaseOverride.orElseGet(() -> databaseId().name()),
-            username(),
-            usernameOverride,
-            isGdsAdmin()
-        );
+        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(graphName, config, username(), databaseId(), isGdsAdmin());
     }
 
     protected boolean isGdsAdmin() {
@@ -138,38 +111,6 @@ public abstract class BaseProc {
         return GraphDatabaseApiProxy
             .resolveDependency(api, SecurityContextWrapper.class)
             .isAdmin(transaction.securityContext());
-    }
-
-    protected final GraphLoader newLoader(
-        GraphCreateConfig createConfig,
-        AllocationTracker allocationTracker,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
-        if (api == null) {
-            return newFictitiousLoader(createConfig);
-        }
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .transactionContext(TransactionContext.of(api, procedureTransaction))
-                .api(api)
-                .log(log)
-                .allocationTracker(allocationTracker)
-                .taskRegistryFactory(taskRegistryFactory)
-                .terminationFlag(TerminationFlag.wrap(transaction))
-                .build())
-            .username(username())
-            .createConfig(createConfig)
-            .build();
-    }
-
-    private GraphLoader newFictitiousLoader(GraphCreateConfig createConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(GraphLoaderContext.NULL_CONTEXT)
-            .username(username())
-            .createConfig(createConfig)
-            .build();
     }
 
     protected final void runWithExceptionLogging(String message, Runnable runnable) {
@@ -212,6 +153,17 @@ public abstract class BaseProc {
         return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }
 
+    protected GraphLoaderContext graphLoaderContext() {
+        return ImmutableGraphLoaderContext.builder()
+            .transactionContext(TransactionContext.of(api, procedureTransaction))
+            .api(api)
+            .log(log)
+            .allocationTracker(allocationTracker)
+            .taskRegistryFactory(taskRegistryFactory)
+            .terminationFlag(TerminationFlag.wrap(transaction))
+            .build();
+    }
+
     public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
@@ -237,43 +189,6 @@ public abstract class BaseProc {
         }
 
         return memoryTreeWithDimensions.memoryTree.memoryUsage();
-    }
-
-    protected MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {
-        GraphDimensions estimateDimensions;
-        GraphStoreFactory<?, ?> graphStoreFactory;
-
-        if (config.isFictitiousLoading()) {
-            var labelCount = 0;
-            if (config instanceof GraphCreateFromStoreConfig) {
-                var storeConfig = (GraphCreateFromStoreConfig) config;
-                Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
-                labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
-            }
-
-            estimateDimensions = ImmutableGraphDimensions.builder()
-                .nodeCount(config.nodeCount())
-                .highestPossibleNodeCount(config.nodeCount())
-                .estimationNodeLabelCount(labelCount)
-                .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
-                .maxRelCount(Math.max(config.relationshipCount(), 0))
-                .build();
-
-            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
-            graphStoreFactory = loader
-                .createConfig()
-                .graphStoreFactory()
-                .getWithDimension(loader.context(), estimateDimensions);
-        } else {
-            GraphLoader loader = newLoader(config, AllocationTracker.empty(), EmptyTaskRegistryFactory.INSTANCE);
-            graphStoreFactory = loader.graphStoreFactory();
-            estimateDimensions = graphStoreFactory.estimationDimensions();
-        }
-
-        return ImmutableMemoryEstimationWithDimensions.builder()
-            .memoryEstimation(graphStoreFactory.memoryEstimation())
-            .graphDimensions(estimateDimensions)
-            .build();
     }
 
     @FunctionalInterface

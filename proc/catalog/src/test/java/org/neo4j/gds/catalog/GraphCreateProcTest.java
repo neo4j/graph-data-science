@@ -37,11 +37,9 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -57,7 +55,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -92,7 +89,6 @@ import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.getCypherAggregation;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.genericMap;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
@@ -816,17 +812,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     void applyOnProcedure(Consumer<GraphCreateProc> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            GraphCreateProc proc = new GraphCreateProc();
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-
-            func.accept(proc);
-        }
+        TestProcedureRunner.applyOnProcedure(db, GraphCreateProc.class, func);
     }
 
     @Test

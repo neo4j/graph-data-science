@@ -25,6 +25,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
 import java.util.Optional;
 
@@ -35,6 +36,12 @@ public abstract class CatalogProc extends BaseProc {
     }
 
     GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
-        return GraphStoreCatalog.get(catalogRequest(Optional.empty(), Optional.empty()), graphName);
+        var catalogRequest = ImmutableCatalogRequest.of(
+            databaseId().name(),
+            username(),
+            Optional.empty(),
+            isGdsAdmin()
+        );
+        return GraphStoreCatalog.get(catalogRequest, graphName);
     }
 }
