@@ -29,10 +29,11 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.InjectModelCatalog;
+import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
@@ -47,6 +48,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineExecutor.MODEL_TYPE;
 
+@ModelCatalogExtension
 class NodeClassificationPipelineExecutorTest extends BaseProcTest {
     private static String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
@@ -73,7 +75,8 @@ class NodeClassificationPipelineExecutorTest extends BaseProcTest {
 
     private GraphStore graphStore;
 
-    private final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
+    @InjectModelCatalog
+    ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -104,7 +107,7 @@ class NodeClassificationPipelineExecutorTest extends BaseProcTest {
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
         var metricSpecification = MetricSpecification.parse("F1(class=1)");
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         pipeline.setTrainingParameterSpace(List.of(NodeLogisticRegressionTrainCoreConfig.of(
             Map.of("penalty", 1000, "maxEpochs", 1)
