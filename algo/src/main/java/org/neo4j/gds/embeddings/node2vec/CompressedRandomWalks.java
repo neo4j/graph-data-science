@@ -28,10 +28,10 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CompressedRandomWalks {
     private final HugeObjectArray<byte[]> compressedWalks;
@@ -136,7 +136,7 @@ public class CompressedRandomWalks {
         @Override
         public long[] next() {
             var compressedWalk = cursor.array[currentIndex];
-            var walkLength = walkLengths.get(currentIndex);
+            var walkLength = walkLengths.get(cursor.base + currentIndex);
             Arrays.fill(outputBuffer, -1L);
             ZigZagLongDecoding.zigZagUncompress(compressedWalk, walkLength, outputBuffer);
 
