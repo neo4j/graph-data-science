@@ -144,7 +144,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
-            assertThat(predictionResult.predictedProbabilities().get().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -183,7 +183,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var predictionResult = pipelineExecutor.compute();
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
-            assertThat(predictionResult.predictedProbabilities().get().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedProbabilities().orElseThrow().size()).isEqualTo(graphStore.nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -247,7 +247,11 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller, db.databaseId(), modelCatalog).progressTask(graphStore.getUnion(), config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(
+                    modelCatalog,
+                    caller,
+                    db.databaseId()
+                ).progressTask(graphStore.getUnion(), config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
