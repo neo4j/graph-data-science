@@ -43,6 +43,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+@EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+@EnableForNeo4jVersion(Neo4jVersion.V_Dev)
 class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph

@@ -63,6 +63,8 @@ class InMemoryNodeCursorTest extends CypherTest {
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldScanSingle() {
         nodeCursor.single(0);
         assertThat(nodeCursor.next()).isTrue();
@@ -71,6 +73,8 @@ class InMemoryNodeCursorTest extends CypherTest {
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldScanRange() {
         nodeCursor.scanRange(1, 2);
         nodeCursor.next();
@@ -82,6 +86,8 @@ class InMemoryNodeCursorTest extends CypherTest {
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldScanAll() {
         nodeCursor.scan();
         graphStore.nodes().forEachNode(nodeId -> {
@@ -94,6 +100,8 @@ class InMemoryNodeCursorTest extends CypherTest {
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void testLabels() {
         graphStore.nodes().forEachNode(nodeId -> {
             nodeCursor.single(nodeId);
@@ -115,6 +123,7 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
     @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldHavePropertiesDev() {
         nodeCursor.next();
@@ -124,6 +133,8 @@ class InMemoryNodeCursorTest extends CypherTest {
 
     @Test
     @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
         var propertyCursor = StorageEngineProxy.inMemoryNodePropertyCursor(graphStore, tokenHolders);
