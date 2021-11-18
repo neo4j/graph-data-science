@@ -37,7 +37,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -270,11 +269,18 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         var exception = assertThrows(
             IllegalArgumentException.class,
-            () -> proc.validateConfigsAfterLoad(
-                GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
-                config
-            )
+            () -> {
+                var validationConfig = proc.getValidationConfig();
+                validationConfig
+                    .afterLoadValidations()
+                    .forEach(validation ->
+                        validation.validateConfigsAfterLoad(
+                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                            GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
+                            config
+                        )
+                    );
+            }
         );
         assertThat(exception).hasMessage(
             "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
@@ -294,11 +300,18 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         var exception = assertThrows(
             IllegalArgumentException.class,
-            () -> proc.validateConfigsAfterLoad(
-                GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
-                config
-            )
+            () -> {
+                var validationConfig = proc.getValidationConfig();
+                validationConfig
+                    .afterLoadValidations()
+                    .forEach(validation ->
+                        validation.validateConfigsAfterLoad(
+                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                            GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
+                            config
+                        )
+                    );
+            }
         );
         assertThat(exception).hasMessage(
             "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
@@ -309,7 +322,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     void shouldValidateModelBeforeTraining() {
         var trainConfigParams = Map.of(
             "modelName", GraphSageBaseProcTest.modelName,
-            "featureProperties", List.of("foo"),
+            "featureProperties", List.of("age"),
             "sudo", true
         );
         var config = GraphSageTrainConfig.of(
