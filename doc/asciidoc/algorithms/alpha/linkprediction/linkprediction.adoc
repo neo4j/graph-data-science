@@ -41,18 +41,16 @@ If the value is `1` the relationship represents a positive example, meaning a re
 
 To obtain the feature vector for an example, the algorithm first forms node feature vectors for the source and target nodes of the example in question.
 This is done by concatenating the property values of the specified feature properties in order into a node feature vector.
-Thus, for each relationship we have one feature vector for the source node, stem:[s=\[s_1,s_2, \ldots,s_d\]], and one for the target node,  stem:[t=\[t_1,t_2, \ldots,t_d\]].
-Thereafter, the algorithm uses a _link feature combiner_ to combine the two node feature vectors into a single feature vector stem:[f] for the training example.
+    Thus, for each relationship we have one feature vector for the source node, image:equations/linkprediction/linkprediction1.svg[s equals s1 comma s2 comma dot dot dot s d], and one for the target node, image:equations/linkprediction/linkprediction2.svg[s equals t1 comma t2 comma dot dot dot t d].
+Thereafter, the algorithm uses a _link feature combiner_ to combine the two node feature vectors into a single feature vector _f_ for the training example.
 There are three supported link feature combiners:
 
 * `L2`
-** which gives a feature vector stem:[f=\[(s_1 - t_1)^2 , (s_2 - t_2)^2, ..., (s_d - t_d)^2\]].
+** which gives a feature vector image:equations/linkprediction/linkprediction3.svg[f equals vector of s1 minus t1 squared comma s2 minus t2 squared comma dot dot dot comma s d minus t d squared].
 * `HADAMARD`
-** which gives a feature vector stem:[f=\[s_1 * t_1, s_2 * t_2, ..., s_d * t_d\]].
+** which gives a feature vector image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d].
 * `COSINE`
-** which gives a single scalar feature, using the the link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] between stem:[s] and stem:[t] given by stem:[f=
-\frac {\sum_{i=1}^{d}s_{i}t_{i}}{\sqrt {\sum _{i=1}^{d}s_{i}^{2}}\sqrt {\sum _{i=1}^{d}t_{i}^{2}}}.
-]
+** which gives a single scalar feature, using the link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] between _s_ and _t_ given by image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared].
 
 The precise steps of the train mode are:
 
