@@ -33,9 +33,7 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import java.util.Comparator;
-import java.util.ServiceLoader;
-import java.util.function.Function;
+import static org.neo4j.gds.utils.PriorityServiceLoader.loadService;
 
 public class EditionLifecycleAdapter extends LifecycleAdapter {
 
@@ -66,7 +64,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private LicenseState registerLicenseState() {
-        var licensingServiceBuilder = loadServiceByPriority(
+        var licensingServiceBuilder = loadService(
             LicensingServiceBuilder.class,
             LicensingServiceBuilder::priority
         );
@@ -78,7 +76,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void registerSecurityContextService(LicenseState licenseState) {
-        var securityContextServiceFactory = loadServiceByPriority(
+        var securityContextServiceFactory = loadService(
             SecurityContextWrapperFactory.class,
             SecurityContextWrapperFactory::priority
         );
@@ -88,7 +86,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void setupProcedurePreconditions(LicenseState licenseState) {
-        var procedurePreconditionsFactory = loadServiceByPriority(
+        var procedurePreconditionsFactory = loadService(
             ProcedurePreconditionsFactory.class,
             ProcedurePreconditionsFactory::priority
         );
@@ -98,7 +96,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void setupIdMapBehavior(LicenseState licenseState) {
-        var idMapBehaviorFactory = loadServiceByPriority(
+        var idMapBehaviorFactory = loadService(
             IdMapBehaviorFactory.class,
             IdMapBehaviorFactory::priority
         );
@@ -107,7 +105,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void setupConcurrencyValidator(LicenseState licenseState) {
-        var concurrencyValidatorBuilder = loadServiceByPriority(
+        var concurrencyValidatorBuilder = loadService(
             ConcurrencyValidatorBuilder.class,
             ConcurrencyValidatorBuilder::priority
         );
@@ -116,7 +114,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void setupPoolSizes(LicenseState licenseState) {
-        var poolSizesProvider = loadServiceByPriority(
+        var poolSizesProvider = loadService(
             PoolSizesProvider.class,
             PoolSizesProvider::priority
         );
@@ -125,7 +123,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private void setupModelCatalog(LicenseState licenseState) {
-        var modelCatalogProvider = loadServiceByPriority(
+        var modelCatalogProvider = loadService(
             ModelCatalogProvider.class,
             ModelCatalogProvider::priority
         );
@@ -138,13 +136,5 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
             true
         );
         context.dependencySatisfier().satisfyDependency(modelCatalog);
-    }
-
-    private <T> T loadServiceByPriority(Class<T> serviceClass, Function<T, Integer> comparingFunction) {
-        return ServiceLoader.load(serviceClass)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .max(Comparator.comparing(comparingFunction))
-            .orElseThrow(() -> new LinkageError("Could not load " + serviceClass + " implementation"));
     }
 }
