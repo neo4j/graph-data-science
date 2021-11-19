@@ -122,34 +122,33 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
         assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
     }
 
-//    // FIXME: Enable in 4.4.0
-//    @ParameterizedTest
-//    @MethodSource("propertyFilterAndExpectedValues")
-//    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
-//    void shouldGetPropertyValues(Map<String, Double> expectedValues) {
-//        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
-//
-//        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
-//            relationshipCursor,
-//            idFunction.of("a"),
-//            relTypeToken
-//        );
-//
-//        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
-//
-//        assertThat(relationshipCursor.next()).isTrue();
-//        var propertyTokens = expectedValues
-//            .keySet()
-//            .stream()
-//            .mapToInt(propertyKey -> tokenHolders.propertyKeyTokens().getIdByName(propertyKey))
-//            .toArray();
-//        StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
-//
-//        expectedValues.forEach((propertyKey, expectedValue) -> {
-//            assertThat(propertyCursor.next()).isTrue();
-//            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
-//        });
-//    }
+    @ParameterizedTest
+    @MethodSource("propertyFilterAndExpectedValues")
+    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
+    void shouldGetPropertyValues(Map<String, Double> expectedValues) {
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
+        );
+
+        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+
+        assertThat(relationshipCursor.next()).isTrue();
+        var propertyTokens = expectedValues
+            .keySet()
+            .stream()
+            .mapToInt(propertyKey -> tokenHolders.propertyKeyTokens().getIdByName(propertyKey))
+            .toArray();
+        StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
+
+        expectedValues.forEach((propertyKey, expectedValue) -> {
+            assertThat(propertyCursor.next()).isTrue();
+            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
+        });
+    }
 
     @Test
     void shouldGetPropertyValues() {
