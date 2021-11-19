@@ -171,4 +171,33 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         assertError(query, "Node properties [c] defined in the feature steps do not exist in the graph or part of the pipeline");
     }
+
+    @Test
+    void failsOnExistingProbabilityProperty() {
+        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2, List.of("a","b"));
+
+        var firstQuery = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .addParameter("modelName", MODEL_NAME)
+            .yields();
+
+        runQuery(firstQuery);
+
+        var secondQuery = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
+            .mutateMode()
+            .addParameter("mutateProperty", "bar")
+            .addParameter("predictedProbabilityProperty", "foo")
+            .addParameter("modelName", MODEL_NAME)
+            .yields();
+
+
+        assertError(secondQuery, "Node property `foo` already exists in the in-memory graph.");
+    }
 }
