@@ -34,4 +34,9 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     public String latestStoreVersion() {
         return getClass().getSimpleName();
     }
+
+    @Override
+    public String formatFamilyName() {
+        return getClass().getSimpleName();
+    }
 }

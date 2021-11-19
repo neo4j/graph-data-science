@@ -170,17 +170,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
     }
 
     @Override
-    public List<SchemaRule> loadSchemaRules(
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        Config config,
-        DatabaseLayout databaseLayout,
-        CursorContext cursorContext
-    ) {
-        return List.of();
-    }
-
-    @Override
     public StorageFilesState checkStoreFileState(
         FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache
     ) {

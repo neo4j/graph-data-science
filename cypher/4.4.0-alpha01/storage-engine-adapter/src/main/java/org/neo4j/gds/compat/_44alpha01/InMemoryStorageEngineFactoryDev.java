@@ -30,6 +30,7 @@ import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader44alpha01;
 import org.neo4j.internal.schema.IndexConfigCompleter;
+import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -54,6 +55,7 @@ import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.token.TokenHolders;
 
+import java.util.List;
 import java.util.UUID;
 
 @ServiceProvider
@@ -167,5 +169,17 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
     @Override
     protected AbstractInMemoryMetaDataProvider metadataProvider() {
         return metadataProvider;
+    }
+
+
+    @Override
+    public List<SchemaRule> loadSchemaRules(
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        CursorContext cursorContext
+    ) {
+        return List.of();
     }
 }
