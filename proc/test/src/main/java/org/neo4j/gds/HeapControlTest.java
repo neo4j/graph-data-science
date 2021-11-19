@@ -41,7 +41,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
                 config,
-                Optional.empty()
+                Optional.of(heapGraphName())
             ));
             proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 10000000);
         });
@@ -54,7 +54,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
                 config,
-                Optional.empty()
+                Optional.of(heapGraphName())
             ));
             proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 21);
         })).isInstanceOf(IllegalStateException.class)
@@ -81,7 +81,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(configMap));
             var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
                 config,
-                Optional.empty()
+                Optional.of(heapGraphName())
             ));
             proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         });
@@ -98,7 +98,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             CONFIG config = proc.configParser().newConfig(Optional.empty(), createMinimalConfig(configMap));
             var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
                 config,
-                Optional.empty()
+                Optional.of(heapGraphName())
             ));
             proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         }));
