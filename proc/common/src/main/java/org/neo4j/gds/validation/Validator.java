@@ -28,12 +28,11 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
 
     private final ValidationConfiguration<CONFIG> validationConfiguration;
 
-    public Validator(ValidationConfiguration<CONFIG> validationConfiguration) {this.validationConfiguration = validationConfiguration;}
+    public Validator(ValidationConfiguration<CONFIG> validationConfiguration) {
+        this.validationConfiguration = validationConfiguration;
+    }
 
-    public void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig,
-        CONFIG config
-    ) {
+    public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
         validationConfiguration
             .beforeLoadValidations()
             .forEach(validation -> validation.validateConfigsBeforeLoad(graphCreateConfig, config));

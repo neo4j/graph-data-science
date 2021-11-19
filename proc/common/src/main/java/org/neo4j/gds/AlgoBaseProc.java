@@ -57,7 +57,7 @@ import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig> extends BaseProc  {
+    CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
     protected String procName() {
@@ -293,14 +293,14 @@ public abstract class AlgoBaseProc<
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
-    public ValidationConfiguration<CONFIG> getValidationConfig(){
+    public ValidationConfiguration<CONFIG> getValidationConfig() {
         return ValidationConfiguration.empty();
     }
 
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
-        Validator<CONFIG> validator =new Validator<>(getValidationConfig());
+        Validator<CONFIG> validator = new Validator<>(getValidationConfig());
         var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
