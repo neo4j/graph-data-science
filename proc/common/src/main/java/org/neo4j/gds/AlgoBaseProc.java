@@ -28,17 +28,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
-import org.neo4j.gds.validation.Validator;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -59,16 +53,6 @@ public abstract class AlgoBaseProc<
 
     public ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
         return new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory());
-    }
-
-    private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
-        if (transaction == null) {
-            return;
-        }
-        var metaData = transaction.getMetaData();
-        if (metaData instanceof AlgorithmMetaData) {
-            ((AlgorithmMetaData) metaData).set(algoConfig);
-        }
     }
 
     protected abstract CONFIG newConfig(
@@ -94,73 +78,23 @@ public abstract class AlgoBaseProc<
         boolean releaseAlgorithm,
         boolean releaseTopology
     ) {
-        ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
-        var allocationTracker = allocationTracker();
+        return procedureExecutor().compute(graphNameOrConfig, configuration, releaseAlgorithm, releaseTopology);
+    }
 
-        Pair<CONFIG, Optional<String>> input = configParser().processInput(graphNameOrConfig, configuration);
-        var config = input.getOne();
-        var maybeGraphName = input.getTwo();
-
-        setAlgorithmMetaDataToTransaction(config);
-
-        var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
-
-        var procedureMemoryEstimation = procedureMemoryEstimation(graphStoreLoader);
-        var memoryEstimationInBytes = memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
-
-        GraphStore graphStore;
-        Graph graph;
-
-        try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = getOrCreateGraphStore(config, graphStoreLoader);
-            graph = createGraph(graphStore, config);
-        }
-
-        if (graph.isEmpty()) {
-            return builder
-                .isGraphEmpty(true)
-                .graph(graph)
-                .graphStore(graphStore)
-                .config(config)
-                .computeMillis(0)
-                .result(null)
-                .algorithm(null)
-                .build();
-        }
-
-        ALGO algo = newAlgorithm(graph, config, allocationTracker);
-
-        algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
-
-        ALGO_RESULT result = runWithExceptionLogging(
-            "Computation failed",
-            () -> {
-                try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
-                    return algo.compute();
-                } catch (Throwable e) {
-                    algo.progressTracker.fail();
-                    throw e;
-                } finally {
-                    if (releaseAlgorithm) {
-                        algo.progressTracker.release();
-                        algo.release();
-                    }
-                    if (releaseTopology) {
-                        graph.releaseTopology();
-                    }
-                }
-            }
+    protected ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG> procedureExecutor() {
+        return new ProcedureExecutor<>(
+            configParser(),
+            memoryUsageValidator(),
+            this::graphStoreLoader,
+            getValidationConfig(),
+            algorithmFactory(),
+            transaction,
+            log,
+            taskRegistryFactory,
+            procName(),
+            this::runWithExceptionLogging,
+            allocationTracker()
         );
-
-        log.info(procName() + ": overall memory usage %s", allocationTracker.getUsageString());
-
-        return builder
-            .graph(graph)
-            .graphStore(graphStore)
-            .algorithm(algo)
-            .result(result)
-            .config(config)
-            .build();
     }
 
     /**
@@ -186,28 +120,6 @@ public abstract class AlgoBaseProc<
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
-    }
-
-    private ALGO newAlgorithm(
-        final Graph graph,
-        final CONFIG config,
-        final AllocationTracker allocationTracker
-    ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return algorithmFactory()
-            .build(graph, config, allocationTracker, log, taskRegistryFactory)
-            .withTerminationFlag(terminationFlag);
-    }
-
-    private Graph createGraph(GraphStore graphStore, CONFIG config) {
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
-        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
-
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
     public ValidationConfiguration<CONFIG> getValidationConfig() {
