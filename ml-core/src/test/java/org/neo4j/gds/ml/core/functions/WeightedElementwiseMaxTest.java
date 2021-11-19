@@ -20,16 +20,16 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.FiniteDifferenceTest;
-import org.neo4j.gds.ml.core.NeighborhoodFunction;
-import org.neo4j.gds.ml.core.subgraph.SubGraph;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.NeighborhoodFunction;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
         var userEmbeddings = Constant.matrix(new double[] {
             1, 1, 1, // u1
@@ -80,7 +80,6 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
 
         WeightedElementwiseMax weightedEmbeddings = new WeightedElementwiseMax(
             userEmbeddings,
-            graph::relationshipProperty,
             subGraph
         );
 
@@ -107,7 +106,7 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        SubGraph subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
         var weights = new Weights<>(new Matrix(new double[] {
             1, 1, 1, // u1
@@ -120,11 +119,7 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new WeightedElementwiseMax(
-                weights,
-                graph::relationshipProperty,
-                subGraph
-            )))
+            new ElementSum(List.of(new WeightedElementwiseMax(weights, subGraph)))
         );
     }
 }

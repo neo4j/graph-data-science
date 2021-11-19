@@ -52,20 +52,9 @@ public class MeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        Variable<Matrix> means = subGraph.maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
-            // Weighted with respect to the Relationship Weights
-            new WeightedMultiMean(
-                previousLayerRepresentations,
-                relationshipWeightsFunction,
-                subGraph
-            )
-        ).orElseGet(() ->
-            new MultiMean(
-                previousLayerRepresentations,
-                subGraph.adjacency,
-                subGraph.mappedBatchedNodeIds
-            )
-        );
+        Variable<Matrix> means = subGraph.isWeighted()
+            ? new WeightedMultiMean( previousLayerRepresentations, subGraph)
+            : new MultiMean(previousLayerRepresentations, subGraph.adjacency, subGraph.mappedBatchedNodeIds);
 
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
