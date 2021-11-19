@@ -38,7 +38,7 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     private final Map<String, OpenUserCatalog> userCatalogs;
 
-    OpenModelCatalog() {
+    public OpenModelCatalog() {
         this.userCatalogs = new ConcurrentHashMap<>();
     }
 
