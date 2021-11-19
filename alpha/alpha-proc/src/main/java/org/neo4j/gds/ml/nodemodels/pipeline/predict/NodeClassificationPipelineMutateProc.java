@@ -63,7 +63,7 @@ public class NodeClassificationPipelineMutateProc
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") String graphNameOrConfig,
+        @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return mutate(compute(graphNameOrConfig, configuration));
