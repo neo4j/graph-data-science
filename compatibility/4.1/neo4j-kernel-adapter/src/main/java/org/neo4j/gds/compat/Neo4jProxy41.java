@@ -414,7 +414,6 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
@@ -445,7 +444,7 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
             additionalInitialIds,
             dbConfig,
             recordFormats,
-            monitor,
+            ImportLogic.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),

@@ -42,9 +42,9 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
 import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
@@ -495,7 +495,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
@@ -530,7 +529,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             additionalInitialIds,
             dbConfig,
             recordFormats,
-            monitor,
+            Monitor.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),

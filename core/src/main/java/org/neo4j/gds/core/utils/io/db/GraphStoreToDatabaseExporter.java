@@ -20,15 +20,14 @@
 package org.neo4j.gds.core.utils.io.db;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -127,7 +126,6 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 AdditionalInitialIds.EMPTY,
                 databaseConfig,
                 RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
-                ImportLogic.NO_MONITOR,
                 jobScheduler,
                 Collector.EMPTY
             );

@@ -28,7 +28,6 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
 import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
@@ -359,7 +358,6 @@ public final class Neo4jProxy {
         AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
@@ -375,7 +373,6 @@ public final class Neo4jProxy {
             additionalInitialIds,
             dbConfig,
             recordFormats,
-            monitor,
             jobScheduler,
             badCollector
         );
