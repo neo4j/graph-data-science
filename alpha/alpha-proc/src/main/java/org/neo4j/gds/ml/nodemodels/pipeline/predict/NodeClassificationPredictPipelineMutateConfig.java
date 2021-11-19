@@ -32,12 +32,6 @@ import java.util.Optional;
 public interface NodeClassificationPredictPipelineMutateConfig
     extends NodeClassificationPredictPipelineBaseConfig, MutatePropertyConfig
 {
-    @Value.Default
-    @Override
-    default String mutateProperty() {
-        return "probability";
-    }
-
     @Override
     @Value.Derived
     @Configuration.Ignore
