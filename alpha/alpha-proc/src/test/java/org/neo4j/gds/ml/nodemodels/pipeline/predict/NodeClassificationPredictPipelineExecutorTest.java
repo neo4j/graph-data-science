@@ -57,10 +57,12 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.test.TestProc;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -245,7 +247,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(caller, db.databaseId()).progressTask(graphStore.getUnion(), config),
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(caller, db.databaseId(), modelCatalog).progressTask(graphStore.getUnion(), config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
