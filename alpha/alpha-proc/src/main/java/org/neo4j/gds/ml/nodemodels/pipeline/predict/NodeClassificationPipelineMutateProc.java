@@ -74,6 +74,9 @@ public class NodeClassificationPipelineMutateProc
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationPredictPipelineMutateConfig config
     ) {
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
+        config.predictedProbabilityProperty().ifPresent(property -> {
+            GraphStoreValidation.validateNodePropertyDoesNotExist(graphStore, config.nodeLabelIdentifiers(graphStore), property);
+        });
         config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (config.mutateProperty().equals(predictedProbabilityProperty)) {
                 throw new IllegalArgumentException(
