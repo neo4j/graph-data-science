@@ -115,6 +115,7 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.File;
@@ -689,6 +690,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
         return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    }
+
+    @Override
+    public String versionLongToString(long storeVersion) {
+        return StoreVersion.versionLongToString(storeVersion);
     }
 
     private static final class InputFromCompatInput implements Input {

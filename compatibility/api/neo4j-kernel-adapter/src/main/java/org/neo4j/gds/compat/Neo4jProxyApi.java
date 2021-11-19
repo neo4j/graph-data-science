@@ -304,4 +304,6 @@ public interface Neo4jProxyApi {
     long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
 
     long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
+
+    String versionLongToString(long storeVersion);
 }

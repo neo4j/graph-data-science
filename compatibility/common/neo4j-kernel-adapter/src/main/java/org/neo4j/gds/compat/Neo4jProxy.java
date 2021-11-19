@@ -490,6 +490,10 @@ public final class Neo4jProxy {
         return IMPL.getHighestPossibleRelationshipCount(read, idGeneratorFactory);
     }
 
+    public static String versionLongToString(long storeVersion) {
+        return IMPL.versionLongToString(storeVersion);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }
