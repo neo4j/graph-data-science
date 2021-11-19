@@ -126,7 +126,6 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @ParameterizedTest
     @MethodSource("propertyFilterAndExpectedValues")
-    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
     void shouldGetPropertyValues(Map<String, Double> expectedValues) {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 
