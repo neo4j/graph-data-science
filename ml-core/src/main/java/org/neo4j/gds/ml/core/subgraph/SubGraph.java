@@ -36,7 +36,7 @@ public class SubGraph {
     public final long[] originalNodeIds;
 
     public final int[][] adjacency;
-    public Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
+    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
 
     public SubGraph(
         int[][] adjacency,
@@ -106,6 +106,14 @@ public class SubGraph {
         }
 
         return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
+    }
+
+    public boolean isWeighted() {
+        return maybeRelationshipWeightsFunction.isPresent();
+    }
+
+    public double relWeight(int src, int trg) {
+        return maybeRelationshipWeightsFunction.orElseThrow().weight(originalNodeIds[src], originalNodeIds[trg]);
     }
 
     private static Optional<RelationshipWeights> relationshipWeightFunction(Graph graph, boolean useWeights) {
