@@ -99,7 +99,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             GraphCreateConfig graphCreateConfig,
             TRAIN_CONFIG config
         ) {
-            modelCatalog..verifyModelCanBeStored(
+            modelCatalog.verifyModelCanBeStored(
                 username,
                 config.modelName(),
                 modelType

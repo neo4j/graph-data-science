@@ -23,18 +23,18 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.validation.AfterLoadValidation;
 import org.neo4j.gds.validation.ValidationConfiguration;
 
 import java.util.List;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
-import org.neo4j.gds.utils.StringFormatting;
-
 import java.util.Map;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
@@ -65,13 +65,22 @@ public final class GraphSageCompanion {
         };
     }
 
-    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(
+        ModelCatalog catalog,
+        String username
+    ) {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphCreateConfig, graphSageConfig) ->
-                        GraphStoreValidation.validate(graphStore, graphSageConfig.model().trainConfig())
+                    (graphStore, graphCreateConfig, graphSageConfig) -> {
+                        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
+                            catalog,
+                            username,
+                            graphSageConfig.modelName()
+                        );
+                        GraphStoreValidation.validate(graphStore, model.trainConfig());
+                    }
                 );
             }
         };
