@@ -44,7 +44,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         this.relationshipWeights = relationshipWeights;
         this.subGraph = subGraph;
         this.adjacency = subGraph.adjacency;
-        this.selfAdjacency = subGraph.selfAdjacency;
+        this.selfAdjacency = subGraph.mappedBatchedNodeIds;
         this.rows = adjacency.length;
         this.cols = parent.dimension(Dimensions.COLUMNS_INDEX);
     }
@@ -57,7 +57,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         double[] means = new double[adjacency.length * cols];
         for (int sourceIndex = 0; sourceIndex < adjacency.length; sourceIndex++) {
             int sourceId = selfAdjacency[sourceIndex];
-            long originalSourceId = subGraph.nextNodes[sourceId];
+            long originalSourceId = subGraph.originalNodeIds[sourceId];
             int selfAdjacencyOfSourceOffset = sourceId * cols;
             int sourceOffset = sourceIndex * cols;
             int[] neighbors = adjacency[sourceIndex];
@@ -67,7 +67,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
             }
             for (int targetIndex : neighbors) {
                 int targetOffset = targetIndex * cols;
-                long originalTargetId = subGraph.nextNodes[targetIndex];
+                long originalTargetId = subGraph.originalNodeIds[targetIndex];
                 double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
                 for (int col = 0; col < cols; col++) {
                     means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
@@ -87,12 +87,12 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
                 int sourceId = selfAdjacency[row];
-                long originalSourceId = subGraph.nextNodes[sourceId];
+                long originalSourceId = subGraph.originalNodeIds[sourceId];
 
                 int degree = adjacency[row].length + 1;
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : adjacency[row]) {
-                    long originalTargetId = subGraph.nextNodes[neighbor];
+                    long originalTargetId = subGraph.originalNodeIds[neighbor];
                     double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId); //TODO normalize weights
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(

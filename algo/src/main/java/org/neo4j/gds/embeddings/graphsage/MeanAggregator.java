@@ -63,7 +63,7 @@ public class MeanAggregator implements Aggregator {
             new MultiMean(
                 previousLayerRepresentations,
                 subGraph.adjacency,
-                subGraph.selfAdjacency
+                subGraph.mappedBatchedNodeIds
             )
         );
 

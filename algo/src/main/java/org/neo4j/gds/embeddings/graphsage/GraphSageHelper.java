@@ -79,7 +79,7 @@ public final class GraphSageHelper {
 
         Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
             graph,
-            subGraphs.get(subGraphs.size() - 1).nextNodes,
+            subGraphs.get(subGraphs.size() - 1).originalNodeIds,
             features
         );
 

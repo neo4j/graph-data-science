@@ -19,26 +19,34 @@
  */
 package org.neo4j.gds.ml.core.subgraph;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.RelationshipWeights;
-import org.neo4j.gds.api.Graph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SubGraph {
+    // mapped node ids in the original input batch
+    public final int[] mappedBatchedNodeIds;
+
+    // this includes all nodes part of the subgraph
+    // long-based ids used in org.neo4j.gds.api.Graph
+    public final long[] originalNodeIds;
+
     public final int[][] adjacency;
-    public final int[] selfAdjacency;
-    public final long[] nextNodes;
     public Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
 
-    private SubGraph(int[][] adjacency, int[] selfAdjacency, long[] nextNodes, Optional<RelationshipWeights> maybeRelationshipWeightsFunction) {
+    public SubGraph(
+        int[][] adjacency,
+        int[] nodeIds,
+        long[] originalNodeIds,
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction
+    ) {
         this.adjacency = adjacency;
-        this.selfAdjacency = selfAdjacency;
-        this.nextNodes = nextNodes;
+        this.mappedBatchedNodeIds = nodeIds;
+        this.originalNodeIds = originalNodeIds;
         this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
     }
 
@@ -54,7 +62,7 @@ public class SubGraph {
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
             SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, useWeights);
             result.add(lastGraph);
-            previousNodes = lastGraph.nextNodes;
+            previousNodes = lastGraph.originalNodeIds;
         }
         return result;
     }
@@ -63,31 +71,47 @@ public class SubGraph {
         return buildSubGraph(nodeIds, neighborhoodFunction, graph, false);
     }
 
-    public static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, boolean useWeights) {
-        int[][] adjacency = new int[nodeIds.length][];
-        int[] selfAdjacency = new int[nodeIds.length];
+    public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, boolean useWeights) {
+        // given a list of nodes (nodeIds) and a function that produces neighbors based on given graph and a node
+        // result: a sampled graph
+
+        // adjacency list
+        int[][] adjacency = new int[batchNodeIds.length][];
+        // ??
+        int[] batchedNodeIds = new int[batchNodeIds.length];
+
+        // mapping original long-based nodeIds into consecutive int-based ids
         LocalIdMap idmap = new LocalIdMap();
-        for (long nodeId : nodeIds) {
+
+        // map the input node ids
+        // this assures they are in consecutive order
+        for (long nodeId : batchNodeIds) {
             idmap.toMapped(nodeId);
         }
 
-        AtomicInteger nodeOffset = new AtomicInteger(0);
-        Arrays.stream(nodeIds).forEach(nodeId -> {
-            int internalId = nodeOffset.getAndIncrement();
-            selfAdjacency[internalId] = idmap.toMapped(nodeId);
+        for (int nodeOffset = 0, nodeIdsLength = batchNodeIds.length; nodeOffset < nodeIdsLength; nodeOffset++) {
+            long nodeId = batchNodeIds[nodeOffset];
+
+            batchedNodeIds[nodeOffset] = idmap.toMapped(nodeId);
+
             var nodeNeighbors = neighborhoodFunction.apply(graph, nodeId);
+
+            // map sampled neighbors into local id space
+            // this also expands the id mapping as the neighbours could be not in the nodeIds[]
             int[] neighborInternalIds = nodeNeighbors
                 .mapToInt(idmap::toMapped)
                 .toArray();
-            adjacency[internalId] = neighborInternalIds;
-        });
-        return new SubGraph(adjacency, selfAdjacency, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
+
+            adjacency[nodeOffset] = neighborInternalIds;
+        }
+
+        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
     }
 
     private static Optional<RelationshipWeights> relationshipWeightFunction(Graph graph, boolean useWeights) {
-        return useWeights ?
-            Optional.of(graph::relationshipProperty) :
-            Optional.empty();
+        return useWeights
+            ? Optional.of(graph::relationshipProperty)
+            : Optional.empty();
     }
 
 }
