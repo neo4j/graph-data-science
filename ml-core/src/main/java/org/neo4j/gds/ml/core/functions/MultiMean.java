@@ -22,24 +22,25 @@ package org.neo4j.gds.ml.core.functions;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
-    private final int[][] adjacency;
+    private final BatchNeighbors batchNeighbors;
     private final int[] selfAdjacency;
     private final int rows;
     private final int cols;
 
     public MultiMean(
         Variable<?> parent,
-        int[][] adjacency,
+        BatchNeighbors batchNeighbors,
         int[] selfAdjacency
     ) {
-        super(parent, Dimensions.matrix(adjacency.length, parent.dimension(1)));
-        this.adjacency = adjacency;
+        super(parent, Dimensions.matrix(batchNeighbors.batchSize(), parent.dimension(1)));
+        this.batchNeighbors = batchNeighbors;
         this.selfAdjacency = selfAdjacency;
-        this.rows = adjacency.length;
+        this.rows = batchNeighbors.batchSize();
         this.cols = parent.dimension(1);
     }
 
@@ -48,11 +49,11 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
-        double[] means = new double[adjacency.length * cols];
-        for (int source = 0; source < adjacency.length; source++) {
+        double[] means = new double[batchNeighbors.batchSize() * cols];
+        for (int source = 0; source < batchNeighbors.batchSize(); source++) {
             int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
             int sourceOffset = source * cols;
-            int[] neighbors = adjacency[source];
+            int[] neighbors = batchNeighbors.neighbors(source);
             int numberOfNeighbors = neighbors.length;
             for (int col = 0; col < cols; col++) {
                 means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
@@ -76,9 +77,9 @@ public class MultiMean extends SingleParentVariable<Matrix> {
 
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
-                int degree = adjacency[row].length + 1;
+                int degree = batchNeighbors.neighbors(row).length + 1;
                 int gradientElementIndex = row * cols + col;
-                for (int neighbor : adjacency[row]) {
+                for (int neighbor : batchNeighbors.neighbors(row)) {
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,

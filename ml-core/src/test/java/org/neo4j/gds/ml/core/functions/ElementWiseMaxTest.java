@@ -48,7 +48,7 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         // Node 1 --> three neighbours
         adjacencyMatrix[1] = new int[]{0, 1, 2};
 
-        Variable<Matrix> max = new ElementWiseMax(parent, adjacencyMatrix);
+        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(adjacencyMatrix));
 
         var expected = new Matrix(new double[]{
             0, 0, 0,    // Node 0 --> no neighbours --> 0s
@@ -71,7 +71,8 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             new int[]{0, 1, 2},
             new int[]{}
         };
-        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, adjacencyMatrix)));
+
+        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }

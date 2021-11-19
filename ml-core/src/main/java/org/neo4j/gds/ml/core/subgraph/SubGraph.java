@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SubGraph {
+public class SubGraph implements BatchNeighbors {
     // mapped node ids in the original input batch
     public final int[] mappedBatchedNodeIds;
 
@@ -35,16 +35,18 @@ public class SubGraph {
     // long-based ids used in org.neo4j.gds.api.Graph
     public final long[] originalNodeIds;
 
-    public final int[][] adjacency;
+    // stores the sampled neighbors for each node in the input batch
+    final int[][] neighbors;
+
     private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
 
     public SubGraph(
-        int[][] adjacency,
+        int[][] neighborsPerBatchedNode,
         int[] nodeIds,
         long[] originalNodeIds,
         Optional<RelationshipWeights> maybeRelationshipWeightsFunction
     ) {
-        this.adjacency = adjacency;
+        this.neighbors = neighborsPerBatchedNode;
         this.mappedBatchedNodeIds = nodeIds;
         this.originalNodeIds = originalNodeIds;
         this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
@@ -106,6 +108,14 @@ public class SubGraph {
         }
 
         return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
+    }
+
+    public int batchSize() {
+        return mappedBatchedNodeIds.length;
+    }
+
+    public int[] neighbors(int nodeId) {
+        return neighbors[nodeId];
     }
 
     public boolean isWeighted() {

@@ -79,8 +79,8 @@ class SubGraphBuilderTest {
             idFunction.of("e")
         };
 
-        assertEquals(1, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdj, subGraph.adjacency[0]);
+        assertEquals(1, subGraph.batchSize());
+        assertArrayEquals(expectedAdj, subGraph.neighbors(0));
         assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
     }
 
@@ -96,8 +96,8 @@ class SubGraphBuilderTest {
             idFunction.of("d")
         };
 
-        assertEquals(1, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdj, subGraph.adjacency[0]);
+        assertEquals(1, subGraph.batchSize());
+        assertArrayEquals(expectedAdj, subGraph.neighbors(0));
         assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
     }
 
@@ -121,10 +121,10 @@ class SubGraphBuilderTest {
             idFunction.of("d"), idFunction.of("e"), idFunction.of("f")
         };
 
-        assertEquals(3, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdjA, subGraph.adjacency[0]);
-        assertArrayEquals(expectedAdjB, subGraph.adjacency[1]);
-        assertArrayEquals(expectedAdjC, subGraph.adjacency[2]);
+        assertEquals(3, subGraph.batchSize());
+        assertArrayEquals(expectedAdjA, subGraph.neighbors(0));
+        assertArrayEquals(expectedAdjB, subGraph.neighbors(1));
+        assertArrayEquals(expectedAdjC, subGraph.neighbors(2));
 
         assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
     }
@@ -149,10 +149,10 @@ class SubGraphBuilderTest {
             idFunction.of("e"), idFunction.of("f")
         };
 
-        assertEquals(3, subGraphs.get(0).adjacency.length);
-        assertArrayEquals(expectedAdjA, subGraphs.get(0).adjacency[0]);
-        assertArrayEquals(expectedAdjB, subGraphs.get(0).adjacency[1]);
-        assertArrayEquals(expectedAdjC, subGraphs.get(0).adjacency[2]);
+        assertEquals(3, subGraphs.get(0).batchSize());
+        assertArrayEquals(expectedAdjA, subGraphs.get(0).neighbors(0));
+        assertArrayEquals(expectedAdjB, subGraphs.get(0).neighbors(1));
+        assertArrayEquals(expectedAdjC, subGraphs.get(0).neighbors(2));
         assertArrayEquals(expectedNeighbors, subGraphs.get(0).originalNodeIds);
 
         // start a,b,c,d,e,f  : 0, 1, 2, 3,4,5
@@ -176,13 +176,13 @@ class SubGraphBuilderTest {
             LongStream.of(idFunction.of("g"), idFunction.of("h"), idFunction.of("i"))
         ).toArray();
 
-        assertEquals(6, subGraphs.get(1).adjacency.length);
-        assertArrayEquals(expectedAdj2A, subGraphs.get(1).adjacency[0]);
-        assertArrayEquals(expectedAdj2B, subGraphs.get(1).adjacency[1]);
-        assertArrayEquals(expectedAdj2C, subGraphs.get(1).adjacency[2]);
-        assertArrayEquals(expectedAdj2D, subGraphs.get(1).adjacency[3]);
-        assertArrayEquals(expectedAdj2E, subGraphs.get(1).adjacency[4]);
-        assertArrayEquals(expectedAdj2F, subGraphs.get(1).adjacency[5]);
+        assertEquals(6, subGraphs.get(1).batchSize());
+        assertArrayEquals(expectedAdj2A, subGraphs.get(1).neighbors(0));
+        assertArrayEquals(expectedAdj2B, subGraphs.get(1).neighbors(1));
+        assertArrayEquals(expectedAdj2C, subGraphs.get(1).neighbors(2));
+        assertArrayEquals(expectedAdj2D, subGraphs.get(1).neighbors(3));
+        assertArrayEquals(expectedAdj2E, subGraphs.get(1).neighbors(4));
+        assertArrayEquals(expectedAdj2F, subGraphs.get(1).neighbors(5));
         assertArrayEquals(expectedNeighbors, subGraphs.get(1).originalNodeIds);
     }
 
@@ -201,6 +201,6 @@ class SubGraphBuilderTest {
             graph
         );
 
-        assertEquals(6, subGraph.adjacency.length);
+        assertEquals(6, subGraph.neighbors.length);
     }
 }

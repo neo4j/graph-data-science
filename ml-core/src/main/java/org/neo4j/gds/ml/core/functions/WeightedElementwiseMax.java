@@ -30,16 +30,14 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
     private final SubGraph subGraph;
     private final int[] selfAdjacency;
-    private final int[][] adjacencyMatrix;
     private final int rows;
     private final int cols;
 
     public WeightedElementwiseMax(Variable<Matrix> parent, SubGraph subGraph) {
-        super(parent, Dimensions.matrix(subGraph.adjacency.length, parent.dimension(1)));
-        this.adjacencyMatrix = subGraph.adjacency;
+        super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
         this.selfAdjacency = subGraph.mappedBatchedNodeIds;
         this.subGraph = subGraph;
-        this.rows = adjacencyMatrix.length;
+        this.rows = subGraph.batchSize();
         this.cols = parent.dimension(1);
     }
 
@@ -50,7 +48,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
         double[] parentData = ctx.data(parent()).data();
         for (int source = 0; source < rows; source++) {
             int sourceId = selfAdjacency[source];
-            int[] neighbors = this.adjacencyMatrix[source];
+            int[] neighbors = this.subGraph.neighbors(source);
             for(int col = 0; col < cols; col++) {
                 int resultElementIndex = source * cols + col;
                 if (neighbors.length > 0) {
@@ -82,9 +80,11 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
         double[] thisGradient = ctx.gradient(this).data();
         double[] thisData = ctx.data(this).data();
 
-        for (int source = 0; source < this.adjacencyMatrix.length; source++) {
+        int batchSize = this.subGraph.batchSize();
+
+        for (int source = 0; source < batchSize; source++) {
             int sourceId = selfAdjacency[source];
-            int[] neighbors = this.adjacencyMatrix[source];
+            int[] neighbors = this.subGraph.neighbors(source);
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {
                     double relationshipWeight = subGraph.relWeight(sourceId, neighbor);
