@@ -57,9 +57,9 @@ import org.neo4j.token.TokenHolders;
 import java.util.UUID;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME_DEV = "in-memory-dev";
+    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-44";
 
     private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
 
@@ -127,7 +127,7 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
 
     @Override
     public String name() {
-        return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+        return IN_MEMORY_STORAGE_ENGINE_NAME;
     }
 
     @Override
