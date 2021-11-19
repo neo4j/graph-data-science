@@ -28,18 +28,18 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
     private final BatchNeighbors batchNeighbors;
-    private final int[] selfAdjacency;
+    private final int[] batchIds;
     private final int rows;
     private final int cols;
 
     public MultiMean(
         Variable<?> parent,
         BatchNeighbors batchNeighbors,
-        int[] selfAdjacency
+        int[] batchIds
     ) {
         super(parent, Dimensions.matrix(batchNeighbors.batchSize(), parent.dimension(1)));
         this.batchNeighbors = batchNeighbors;
-        this.selfAdjacency = selfAdjacency;
+        this.batchIds = batchIds;
         this.rows = batchNeighbors.batchSize();
         this.cols = parent.dimension(1);
     }
@@ -51,12 +51,12 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         double[] parentData = parentTensor.data();
         double[] means = new double[batchNeighbors.batchSize() * cols];
         for (int source = 0; source < batchNeighbors.batchSize(); source++) {
-            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
+            int batchIdRowOffset = batchIds[source] * cols;
             int sourceOffset = source * cols;
             int[] neighbors = batchNeighbors.neighbors(source);
             int numberOfNeighbors = neighbors.length;
             for (int col = 0; col < cols; col++) {
-                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
+                means[sourceOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
             }
             for (int target : neighbors) {
                 int targetOffset = target * cols;
@@ -87,7 +87,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
                     );
                 }
                 result.addDataAt(
-                    selfAdjacency[row] * cols + col,
+                    batchIds[row] * cols + col,
                     1d / degree * multiMeanGradient[gradientElementIndex]
                 );
             }

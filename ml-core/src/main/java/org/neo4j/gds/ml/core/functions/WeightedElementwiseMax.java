@@ -29,13 +29,13 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
     private final SubGraph subGraph;
-    private final int[] selfAdjacency;
+    private final int[] batchIds;
     private final int rows;
     private final int cols;
 
     public WeightedElementwiseMax(Variable<Matrix> parent, SubGraph subGraph) {
         super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
-        this.selfAdjacency = subGraph.mappedBatchedNodeIds;
+        this.batchIds = subGraph.mappedBatchNodeIds;
         this.subGraph = subGraph;
         this.rows = subGraph.batchSize();
         this.cols = parent.dimension(1);
@@ -47,7 +47,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
         double[] parentData = ctx.data(parent()).data();
         for (int source = 0; source < rows; source++) {
-            int sourceId = selfAdjacency[source];
+            int sourceId = batchIds[source];
             int[] neighbors = this.subGraph.neighbors(source);
             for(int col = 0; col < cols; col++) {
                 int resultElementIndex = source * cols + col;
@@ -83,7 +83,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
         int batchSize = this.subGraph.batchSize();
 
         for (int source = 0; source < batchSize; source++) {
-            int sourceId = selfAdjacency[source];
+            int sourceId = batchIds[source];
             int[] neighbors = this.subGraph.neighbors(source);
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {

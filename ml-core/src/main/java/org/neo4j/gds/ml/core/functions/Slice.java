@@ -27,15 +27,15 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class Slice extends SingleParentVariable<Matrix> {
 
-    private final int[] selfAdjacency;
+    private final int[] batchIds;
     private final int rows;
     private final int cols;
 
-    public Slice(Variable<Matrix> parent, int[] selfAdjacencyMatrix) {
-        super(parent, Dimensions.matrix(selfAdjacencyMatrix.length, parent.dimension(1)));
+    public Slice(Variable<Matrix> parent, int[] batchIds) {
+        super(parent, Dimensions.matrix(batchIds.length, parent.dimension(1)));
 
-        this.selfAdjacency = selfAdjacencyMatrix;
-        this.rows = selfAdjacencyMatrix.length;
+        this.batchIds = batchIds;
+        this.rows = batchIds.length;
         this.cols = parent.dimension(1);
     }
 
@@ -46,7 +46,7 @@ public class Slice extends SingleParentVariable<Matrix> {
         double[] result = new double[rows * cols];
 
         for (int row = 0; row < rows; row++) {
-            System.arraycopy(parentData, selfAdjacency[row] * cols, result, row * cols, cols);
+            System.arraycopy(parentData, batchIds[row] * cols, result, row * cols, cols);
         }
 
         return new Matrix(result, rows, cols);
@@ -58,7 +58,7 @@ public class Slice extends SingleParentVariable<Matrix> {
 
         double[] selfGradient = ctx.gradient(this).data();
         for (int row = 0; row < rows; row++) {
-            int childRow = selfAdjacency[row];
+            int childRow = batchIds[row];
             for (int col = 0; col < cols; col++) {
                 result.addDataAt(
                     childRow * cols + col,
