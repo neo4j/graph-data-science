@@ -70,13 +70,6 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, NodeClassificationPredictPipelineMutateConfig config
-    ) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-    }
-
-    @Override
     protected void validateConfigsAfterLoad(
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationPredictPipelineMutateConfig config
     ) {
