@@ -30,12 +30,9 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
@@ -58,6 +55,10 @@ public abstract class AlgoBaseProc<
 
     public ProcConfigParser<CONFIG> configParser() {
         return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
+    }
+
+    public ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
+        return new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory());
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
@@ -97,17 +98,21 @@ public abstract class AlgoBaseProc<
         var allocationTracker = allocationTracker();
 
         Pair<CONFIG, Optional<String>> input = configParser().processInput(graphNameOrConfig, configuration);
-        CONFIG config = input.getOne();
+        var config = input.getOne();
+        var maybeGraphName = input.getTwo();
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var memoryEstimationInBytes = tryValidateMemoryUsage(config, this::memoryEstimation);
+        var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
+
+        var procedureMemoryEstimation = procedureMemoryEstimation(graphStoreLoader);
+        var memoryEstimationInBytes = tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 
         GraphStore graphStore;
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = getOrCreateGraphStore(input);
+            graphStore = getOrCreateGraphStore(config, graphStoreLoader);
             graph = createGraph(graphStore, config);
         }
 
@@ -174,24 +179,13 @@ public abstract class AlgoBaseProc<
             configuration
         );
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = memoryEstimation(configAndGraphName.getOne());
+        var config = configAndGraphName.getOne();
+        var maybeGraphName = configAndGraphName.getTwo();
+
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader(config, maybeGraphName)).memoryEstimation(config);
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
-    }
-
-    MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-
-        var graphStoreLoader = graphStoreLoader(config, config.graphName());
-
-        GraphDimensions estimateDimensions = graphStoreLoader.graphDimensions();
-        graphStoreLoader.memoryEstimation().map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
-
-        estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
-
-        MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
-        return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
     }
 
     private ALGO newAlgorithm(
@@ -224,11 +218,8 @@ public abstract class AlgoBaseProc<
         return new Validator<>(getValidationConfig());
     }
 
-    protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
-        CONFIG config = configAndName.getOne();
-        Optional<String> maybeGraphName = configAndName.getTwo();
+    protected GraphStore getOrCreateGraphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
         Validator<CONFIG> validator = validator();
-        var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
         validator.validateConfigsBeforeLoad(graphCreateConfig, config);
@@ -238,7 +229,7 @@ public abstract class AlgoBaseProc<
         return graphStore;
     }
 
-    private GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
+    protected GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
         return GraphStoreLoader.of(
             config,
             maybeGraphName,

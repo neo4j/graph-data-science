@@ -39,7 +39,11 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 10000000);
+            var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
+                config,
+                Optional.empty()
+            ));
+            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 10000000);
         });
     }
 
@@ -48,7 +52,11 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         assertThatThrownBy(() -> applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 21);
+            var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
+                config,
+                Optional.empty()
+            ));
+            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 21);
         })).isInstanceOf(IllegalStateException.class)
             .hasMessageMatching(failOnInsufficientMemoryMessageTemplate());
     }
@@ -71,7 +79,11 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             loadGraph(heapGraphName());
             CypherMapWrapper configMap = CypherMapWrapper.empty().withBoolean(BaseConfig.SUDO_KEY, true);
             CONFIG config = proc.configParser().newConfig(Optional.of(heapGraphName()), createMinimalConfig(configMap));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+            var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
+                config,
+                Optional.empty()
+            ));
+            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         });
     }
 
@@ -84,7 +96,11 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 .withString("nodeProjection", "*")
                 .withString("relationshipProjection", "*");
             CONFIG config = proc.configParser().newConfig(Optional.empty(), createMinimalConfig(configMap));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+            var procedureMemoryEstimation = proc.procedureMemoryEstimation(proc.graphStoreLoader(
+                config,
+                Optional.empty()
+            ));
+            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         }));
     }
 }
