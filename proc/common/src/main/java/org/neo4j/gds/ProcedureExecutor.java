@@ -48,7 +48,7 @@ public class ProcedureExecutor<
     private final ProcConfigParser<CONFIG> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
     private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
-    private final ValidationConfiguration<CONFIG> validationConfiguration;
+    private final Validator<CONFIG> validator;
     private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
     private final KernelTransaction ktx;
     private final Log log;
@@ -73,7 +73,7 @@ public class ProcedureExecutor<
         this.configParser = configParser;
         this.memoryUsageValidator = memoryUsageValidator;
         this.graphStoreLoaderFn = graphStoreLoaderFn;
-        this.validationConfiguration = validationConfiguration;
+        this.validator = new Validator<>(validationConfiguration);
         this.algorithmFactory = algorithmFactory;
         this.ktx = ktx;
         this.log = log;
@@ -84,8 +84,6 @@ public class ProcedureExecutor<
     }
 
     public GraphStore getOrCreateGraphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
-        Validator<CONFIG> validator = new Validator<>(validationConfiguration);
-
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
         validator.validateConfigsBeforeLoad(graphCreateConfig, config);
         var graphStore = graphStoreLoader.graphStore();
@@ -108,10 +106,7 @@ public class ProcedureExecutor<
         setAlgorithmMetaDataToTransaction(config);
 
         var graphStoreLoader = graphStoreLoaderFn.apply(config, input.getTwo());
-        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(
-            graphStoreLoader,
-            algorithmFactory
-        );
+        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
         var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 
         GraphStore graphStore;
@@ -138,7 +133,27 @@ public class ProcedureExecutor<
 
         algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
-        ALGO_RESULT result = exceptionLoggingFunction.apply(
+        ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
+
+        log.info(procName + ": overall memory usage %s", allocationTracker.getUsageString());
+
+        return builder
+            .graph(graph)
+            .graphStore(graphStore)
+            .algorithm(algo)
+            .result(result)
+            .config(config)
+            .build();
+    }
+
+    private ALGO_RESULT executeAlgorithm(
+        boolean releaseAlgorithm,
+        boolean releaseTopology,
+        ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder,
+        Graph graph,
+        ALGO algo
+    ) {
+        return exceptionLoggingFunction.apply(
             "Computation failed",
             () -> {
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
@@ -157,16 +172,6 @@ public class ProcedureExecutor<
                 }
             }
         );
-
-        log.info(procName + ": overall memory usage %s", allocationTracker.getUsageString());
-
-        return builder
-            .graph(graph)
-            .graphStore(graphStore)
-            .algorithm(algo)
-            .result(result)
-            .config(config)
-            .build();
     }
 
     private ALGO newAlgorithm(
