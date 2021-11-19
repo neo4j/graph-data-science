@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -33,9 +35,12 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.neo4j.gds.AlgoBaseProcTest.TEST_USERNAME;
 import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
 
 @Neo4jModelCatalogExtension
@@ -97,7 +102,12 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "createMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
+
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), "g").graphStore().getUnion();
+        assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class"));
+        assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
     }
+
     @Test
     void mutateWithProbabilities(){
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
@@ -120,6 +130,13 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "createMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
+
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), "g").graphStore().getUnion();
+        assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class", "probabilities"));
+        assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
+        assertThat(mutatedGraph.nodeProperties("probabilities").size()).isEqualTo(5);
+        assertThat(mutatedGraph.nodeProperties("probabilities").doubleArrayValue(0))
+            .containsExactly(new double[]{0.012080865612605783, 0.9879191343873942}, Offset.offset(1e-6));
     }
 
     @Test
