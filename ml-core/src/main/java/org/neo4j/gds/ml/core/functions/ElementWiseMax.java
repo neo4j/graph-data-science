@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
+import org.neo4j.gds.core.utils.DoubleUtil;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.core.utils.DoubleUtil;
 
 
 /*
@@ -40,25 +41,25 @@ import org.neo4j.gds.core.utils.DoubleUtil;
  */
 public class ElementWiseMax extends SingleParentVariable<Matrix> {
     private final Variable<Matrix> parent;
-    private final int[][] adjacencyMatrix;
+    private final BatchNeighbors batchNeighbors;
 
-    public ElementWiseMax(Variable<Matrix> parent, int[][] adjacencyMatrix) {
-        super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(Dimensions.COLUMNS_INDEX)));
+    public ElementWiseMax(Variable<Matrix> parent, BatchNeighbors batchGraph) {
+        super(parent, Dimensions.matrix(batchGraph.batchSize(), parent.dimension(Dimensions.COLUMNS_INDEX)));
+        this.batchNeighbors = batchGraph;
         this.parent = parent;
-        this.adjacencyMatrix = adjacencyMatrix;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
         var parentData = ctx.data(parent);
 
-        var rows = adjacencyMatrix.length;
+        var rows = batchNeighbors.batchSize();
         var cols = parentData.cols();
 
         var max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         for (int row = 0; row < rows; row++) {
-            int[] neighbors = this.adjacencyMatrix[row];
+            int[] neighbors = this.batchNeighbors.neighbors(row);
             for(int col = 0; col < cols; col++) {
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
@@ -77,7 +78,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         var result = (Matrix) ctx.data(parent).createWithSameDimensions();
 
-        var rows = adjacencyMatrix.length;
+        var rows = this.batchNeighbors.batchSize();
         var cols = result.cols();
 
         var parentData = (Matrix) ctx.data(parent);
@@ -85,7 +86,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var thisData = ctx.data(this);
 
         for (int row = 0; row < rows; row++) {
-            int[] neighbors = this.adjacencyMatrix[row];
+            int[] neighbors = this.batchNeighbors.neighbors(row);
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {
                     if (DoubleUtil.compareWithDefaultThreshold(parentData.dataAt(neighbor, col), thisData.dataAt(row, col))) {
