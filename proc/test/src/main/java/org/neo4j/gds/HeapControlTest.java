@@ -43,7 +43,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 config,
                 Optional.empty()
             ));
-            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 10000000);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 10000000);
         });
     }
 
@@ -56,7 +56,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 config,
                 Optional.empty()
             ));
-            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 21);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 21);
         })).isInstanceOf(IllegalStateException.class)
             .hasMessageMatching(failOnInsufficientMemoryMessageTemplate());
     }
@@ -83,7 +83,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 config,
                 Optional.empty()
             ));
-            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         });
     }
 
@@ -100,7 +100,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 config,
                 Optional.empty()
             ));
-            proc.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation, () -> 42);
         }));
     }
 }

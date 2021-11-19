@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -30,12 +29,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
-import org.neo4j.gds.core.utils.mem.GcListenerExtension;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
@@ -47,10 +41,8 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.MemoryValidation.validateMemoryUsage;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class BaseProc {
@@ -149,10 +141,6 @@ public abstract class BaseProc {
         }
     }
 
-    protected <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
-        return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
-    }
-
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
             .transactionContext(TransactionContext.of(api, procedureTransaction))
@@ -164,31 +152,8 @@ public abstract class BaseProc {
             .build();
     }
 
-    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
-        C config,
-        Function<C, MemoryTreeWithDimensions> runEstimation,
-        FreeMemoryInspector inspector
-    ) {
-        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
-
-        try {
-            memoryTreeWithDimensions = runEstimation.apply(config);
-        } catch (MemoryEstimationNotImplementedException ignored) {
-        }
-
-        if (memoryTreeWithDimensions == null) {
-            return MemoryRange.empty();
-        }
-
-        if (config.sudo()) {
-            log.debug("Sudo mode: Won't check for available memory.");
-        } else {
-            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
-            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
-        }
-
-        return memoryTreeWithDimensions.memoryTree.memoryUsage();
+    public MemoryUsageValidator memoryUsageValidator() {
+        return new MemoryUsageValidator(log, api);
     }
 
     @FunctionalInterface

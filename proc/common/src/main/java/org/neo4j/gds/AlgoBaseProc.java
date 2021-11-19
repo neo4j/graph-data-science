@@ -106,7 +106,7 @@ public abstract class AlgoBaseProc<
         var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var procedureMemoryEstimation = procedureMemoryEstimation(graphStoreLoader);
-        var memoryEstimationInBytes = tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
+        var memoryEstimationInBytes = memoryUsageValidator().tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 
         GraphStore graphStore;
         Graph graph;
