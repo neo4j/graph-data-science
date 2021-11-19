@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationPipelineCompanion {
+public final class NodeClassificationPipelineCompanion {
     public static final String PIPELINE_MODEL_TYPE = "Node classification training pipeline";
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("holdoutFraction", 0.3, "validationFolds", 3);
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
@@ -38,8 +38,10 @@ public class NodeClassificationPipelineCompanion {
     );
     private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
+    private NodeClassificationPipelineCompanion() {}
+
     public static NodeClassificationPipeline getNCPipeline(String pipelineName, String username) {
-        var model = modelCatalog.getUntyped(username, pipelineName);
+        var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
 
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {

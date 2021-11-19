@@ -259,7 +259,7 @@ class GraphSageAlgorithmFactoryTest {
             .add(MemoryRange.of(resultFeaturesMemory))
             .add(MemoryRange.of(40L)); // GraphSage.class
 
-        var actualTree = new GraphSageAlgorithmFactory<>()
+        var actualTree = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(gsConfig).estimate(GraphDimensions.of(nodeCount), concurrency);
 
         MemoryRange actual = actualTree.memoryUsage();
@@ -295,7 +295,7 @@ class GraphSageAlgorithmFactoryTest {
             .modelName("modelName")
             .build();
 
-        var actualEstimation = new GraphSageAlgorithmFactory<>()
+        var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(gsConfig)
             .estimate(GraphDimensions.of(1337), 42);
 
@@ -352,7 +352,7 @@ class GraphSageAlgorithmFactoryTest {
             .mutateProperty("foo")
             .build();
 
-        var actualEstimation = new GraphSageAlgorithmFactory<>()
+        var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(gsConfig)
             .estimate(GraphDimensions.of(1337), 42);
 
@@ -580,7 +580,7 @@ class GraphSageAlgorithmFactoryTest {
             .mutateProperty("foo")
             .build();
 
-        var actualTree = new GraphSageAlgorithmFactory<>()
+        var actualTree = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(config).estimate(GraphDimensions.of(10000), 4);
 
         MemoryRange actual = actualTree.memoryUsage();

@@ -28,6 +28,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 
 public class NodeClassificationPipelineAddSteps {
+
     public static PipelineInfoResult addNodeProperty(
         String username,
         BaseProc caller,

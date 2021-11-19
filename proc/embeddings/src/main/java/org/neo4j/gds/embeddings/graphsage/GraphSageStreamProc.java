@@ -26,10 +26,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -44,8 +47,13 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualConfig;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 
 public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
@@ -53,6 +61,8 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+
         return stream(compute(graphNameOrConfig, configuration));
     }
 
@@ -62,6 +72,8 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
@@ -87,7 +99,8 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     protected void validateConfigsAfterLoad(
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageStreamConfig config
     ) {
-        GraphStoreValidation.validate(graphStore, config.model().trainConfig());
+        var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
+        GraphStoreValidation.validate(graphStore, model.trainConfig());
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
     }
 
@@ -108,7 +121,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     protected AlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
-        return new GraphSageAlgorithmFactory<>();
+        return new GraphSageAlgorithmFactory<>(modelCatalog);
     }
 
     @Override

@@ -33,12 +33,12 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.InjectModelCatalog;
 import org.neo4j.gds.core.ModelCatalogExtension;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 
 @ModelCatalogExtension
 class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
@@ -141,13 +141,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
         runQuery(train);
 
-        var model = modelCatalog.get(
-            getUsername(),
-            modelName,
-            ModelData.class,
-            GraphSageTrainConfig.class,
-            GraphSageModelTrainer.GraphSageTrainMetrics.class
-        );
+        var model = resolveModel(modelCatalog, getUsername(), modelName);
 
         var layers = model.data().layers();
         for (Layer layer : layers) {

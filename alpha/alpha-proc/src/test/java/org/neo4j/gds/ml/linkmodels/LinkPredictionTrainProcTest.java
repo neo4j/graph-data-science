@@ -202,7 +202,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         )));
 
         assertTrue(modelCatalog.exists(getUsername(), "model"));
-        var model = modelCatalog.list(getUsername(), "model");
+        var model = modelCatalog.getUntyped(getUsername(), "model");
         assertThat(model.algoType()).isEqualTo("Link Prediction");
         assertThat(model.customInfo().toMap()).containsKeys("metrics", "bestParameters");
     }

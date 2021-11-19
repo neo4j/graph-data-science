@@ -24,7 +24,9 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -39,6 +41,9 @@ import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIP
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, ExhaustiveLinkPredictionResult, LinkPredictionPredictStreamConfig> {
+
+    @Context
+    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(DESCRIPTION)
@@ -94,7 +99,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory<>();
+        return new LinkPredictionPredictFactory<>(modelCatalog);
     }
 
     @SuppressWarnings("unused")

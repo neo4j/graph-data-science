@@ -128,7 +128,7 @@ public class NodeClassificationPredictWriteProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationPredictWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>();
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 
     @Override

@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,9 +34,9 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     private final ModelCatalog modelCatalog;
 
-    public NodeClassificationPredictAlgorithmFactory() {
+    public NodeClassificationPredictAlgorithmFactory(ModelCatalog modelCatalog) {
         super();
-        this.modelCatalog = OpenModelCatalog.INSTANCE;
+        this.modelCatalog = modelCatalog;
     }
 
     @Override

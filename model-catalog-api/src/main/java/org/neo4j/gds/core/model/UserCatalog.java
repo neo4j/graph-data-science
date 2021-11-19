@@ -39,8 +39,6 @@ public interface UserCatalog {
 
     void set(Model<?, ?, ?> model);
 
-    void setUnsafe(Model<?, ?, ?> model);
-
     Collection<Model<?, ?, ?>> list();
 
     Model<?, ?, ?> list(String modelName);
@@ -57,5 +55,5 @@ public interface UserCatalog {
 
     void removeAllLoadedModels();
 
-    void checkStorable(String modelName, String modelType);
+    void verifyModelCanBeStored(String modelName, String modelType);
 }

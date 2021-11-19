@@ -24,14 +24,11 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface ModelCatalog {
 
     void set(Model<?, ?, ?> model);
-
-    void setUnsafe(Model<?, ?, ?> model);
 
     <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String username,
@@ -41,23 +38,19 @@ public interface ModelCatalog {
         Class<I> infoClass
     );
 
-    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName);
+    Model<?, ?, ?> getUntypedOrThrow(String username, String modelName);
 
-    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing);
+    @Nullable Model<?, ?, ?> getUntyped(String username, String modelName);
 
     Stream<Model<?, ?, ?>> getAllModels();
 
     boolean exists(String username, String modelName);
 
-    Optional<String> type(String username, String modelName);
+    Model<?, ?, ?> dropOrThrow(String username, String modelName);
 
-    Model<?, ?, ?> drop(String username, String modelName);
-
-    Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing);
+    @Nullable Model<?, ?, ?> drop(String username, String modelName);
 
     Collection<Model<?, ?, ?>> list(String username);
-
-    @Nullable Model<?, ?, ?> list(String username, String modelName);
 
     Model<?, ?, ?> publish(String username, String modelName);
 
@@ -65,5 +58,5 @@ public interface ModelCatalog {
 
     void removeAllLoadedModels();
 
-    void checkStorable(String username, String modelName, String modelType);
+    void verifyModelCanBeStored(String username, String modelName, String modelType);
 }

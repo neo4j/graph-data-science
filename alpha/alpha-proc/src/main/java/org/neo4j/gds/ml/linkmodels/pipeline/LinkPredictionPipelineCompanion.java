@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainConfig;
@@ -38,12 +37,11 @@ public final class LinkPredictionPipelineCompanion {
     static final List<Map<String, Object>> DEFAULT_PARAM_CONFIG = List.of(
         LinkLogisticRegressionTrainConfig.defaultConfig().toMap()
     );
-    private static final ModelCatalog modelCatalog = OpenModelCatalog.INSTANCE;
 
     private LinkPredictionPipelineCompanion() {}
 
-    public static LinkPredictionPipeline getLPPipeline(String pipelineName, String username) {
-       var model = modelCatalog.getUntyped(username, pipelineName);
+    public static LinkPredictionPipeline getLPPipeline(ModelCatalog modelCatalog, String pipelineName, String username) {
+       var model = modelCatalog.getUntypedOrThrow(username, pipelineName);
 
         assert model != null;
         if (!model.algoType().equals(PIPELINE_MODEL_TYPE)) {
@@ -60,6 +58,7 @@ public final class LinkPredictionPipelineCompanion {
     }
 
     public static Model<LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
+        ModelCatalog modelCatalog,
         String pipelineName,
         String username
     ) {

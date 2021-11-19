@@ -143,7 +143,7 @@ class LinkPredictionPredictTest {
             .build();
 
         var log = new TestLog();
-        var algo = new LinkPredictionPredictFactory<>().build(
+        var algo = new LinkPredictionPredictFactory<>(modelCatalog).build(
             graph,
             config,
             AllocationTracker.empty(),
@@ -166,7 +166,7 @@ class LinkPredictionPredictTest {
                 "LinkPrediction 100%",
                 "LinkPrediction :: Finished"
             );
-        modelCatalog.drop("", modelName);
+        modelCatalog.dropOrThrow("", modelName);
     }
 
     @Test

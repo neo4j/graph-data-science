@@ -60,12 +60,7 @@ class OpenUserCatalog implements UserCatalog {
 
     @Override
     public void set(Model<?, ?, ?> model) {
-        checkStorable(model.name(), model.algoType());
-        userModels.put(model.name(), model);
-    }
-
-    @Override
-    public void setUnsafe(Model<?, ?, ?> model) {
+        verifyModelCanBeStored(model.name(), model.algoType());
         userModels.put(model.name(), model);
     }
 
@@ -96,8 +91,7 @@ class OpenUserCatalog implements UserCatalog {
 
     @Override
     public Optional<String> type(String modelName) {
-        return Optional.ofNullable(userModels.get(modelName))
-            .map(Model::algoType);
+        return Optional.ofNullable(userModels.get(modelName)).map(Model::algoType);
     }
 
     @Override
@@ -121,7 +115,7 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public void checkStorable(String modelName, String modelType) {
+    public void verifyModelCanBeStored(String modelName, String modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.model.ModelConfig;
@@ -28,7 +29,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -38,10 +38,9 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     public static final ModelCatalog INSTANCE = new OpenModelCatalog();
 
-    private OpenModelCatalog() {}
+    public OpenModelCatalog() {}
 
     private static final Map<String, OpenUserCatalog> userCatalogs = new ConcurrentHashMap<>();
-    private static final OpenUserCatalog publicModels = new OpenUserCatalog();
 
     @Override
     public void set(Model<?, ?, ?> model) {
@@ -55,17 +54,6 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public void setUnsafe(Model<?, ?, ?> model) {
-        userCatalogs.compute(model.creator(), (user, userCatalog) -> {
-            if (userCatalog == null) {
-                userCatalog = new OpenUserCatalog();
-            }
-            userCatalog.setUnsafe(model);
-            return userCatalog;
-        });
-    }
-
-    @Override
     public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         String username,
         String modelName,
@@ -74,36 +62,8 @@ public final class OpenModelCatalog implements ModelCatalog {
         Class<I> infoClass
     ) {
         var userCatalog = getUserCatalog(username);
-        var userModel = userCatalog.get(modelName, dataClass, configClass, infoClass);
-        if (userModel != null) {
-            return userModel;
-        } else {
-            var publicModel = publicModels.get(modelName, dataClass, configClass, infoClass);
-            if (publicModel != null) {
-                return publicModel;
-            }
-        }
-        throw new NoSuchElementException(prettySuggestions(
-            formatWithLocale("Model with name `%s` does not exist.", modelName),
-            modelName,
-            userCatalog.availableModelNames()
-        ));
-    }
-
-    @Override
-    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
-        return getUntyped(username, modelName, true);
-    }
-
-    @Override
-    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
-        var userCatalog = getUserCatalog(username);
-        var model = userCatalog.getUntyped(modelName);
+        var model = userCatalog.get(modelName, dataClass, configClass, infoClass);
         if (model == null) {
-            model = publicModels.getUntyped(modelName);
-        }
-
-        if (model == null && failOnMissing) {
             throw new NoSuchElementException(prettySuggestions(
                 formatWithLocale("Model with name `%s` does not exist.", modelName),
                 modelName,
@@ -112,6 +72,16 @@ public final class OpenModelCatalog implements ModelCatalog {
         }
 
         return model;
+    }
+
+    @Override
+    public Model<?, ?, ?> getUntypedOrThrow(String username, String modelName) {
+        return getUntyped(username, modelName, true);
+    }
+
+    @Override
+    public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
+        return getUntyped(username, modelName, false);
     }
 
     @Override
@@ -124,43 +94,22 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     @Override
     public boolean exists(String username, String modelName) {
-        return getUserCatalog(username).exists(modelName) ||
-               publicModels.exists(modelName);
+        return getUserCatalog(username).exists(modelName);
     }
 
     @Override
-    public Optional<String> type(String username, String modelName) {
-        return getUserCatalog(username).type(modelName);
-    }
-
-    @Override
-    public Model<?, ?, ?> drop(String username, String modelName) {
+    public Model<?, ?, ?> dropOrThrow(String username, String modelName) {
         return drop(username, modelName, true);
     }
 
     @Override
-    public Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
-        if (publicModels.exists(modelName)) {
-            var model = publicModels.getUntyped(modelName);
-            if (model.creator().equals(username)) {
-                return publicModels.drop(modelName, failOnMissing);
-            }
-            throw new IllegalStateException(formatWithLocale("Only the creator of model %s can drop it.", modelName));
-        } else {
-            return getUserCatalog(username).drop(modelName, failOnMissing);
-        }
+    public @Nullable Model<?, ?, ?> drop(String username, String modelName) {
+        return drop(username, modelName, false);
     }
 
     @Override
     public Collection<Model<?, ?, ?>> list(String username) {
-        var models = new ArrayList<>(getUserCatalog(username).list());
-        models.addAll(publicModels.list());
-        return models;
-    }
-
-    @Override
-    public @Nullable Model<?, ?, ?> list(String username, String modelName) {
-        return getUntyped(username, modelName, false);
+        return new ArrayList<>(getUserCatalog(username).list());
     }
 
     @Override
@@ -183,12 +132,31 @@ public final class OpenModelCatalog implements ModelCatalog {
     @Override
     public void removeAllLoadedModels() {
         userCatalogs.clear();
-        publicModels.removeAllLoadedModels();
     }
 
     @Override
-    public void checkStorable(String username, String modelName, String modelType) {
-        getUserCatalog(username).checkStorable(modelName, modelType);
+    public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+        getUserCatalog(username).verifyModelCanBeStored(modelName, modelType);
+    }
+
+    @Contract(value = "_, _, true -> !null")
+    private @Nullable Model<?, ?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
+        var userCatalog = getUserCatalog(username);
+        var model = userCatalog.getUntyped(modelName);
+        if (model == null && failOnMissing) {
+            throw new NoSuchElementException(prettySuggestions(
+                formatWithLocale("Model with name `%s` does not exist.", modelName),
+                modelName,
+                userCatalog.availableModelNames()
+            ));
+        }
+
+        return model;
+    }
+
+    @Contract(value = "_, _, true -> !null")
+    private @Nullable Model<?, ?, ?> drop(String username, String modelName, boolean failOnMissing) {
+        return getUserCatalog(username).drop(modelName, failOnMissing);
     }
 
     private static OpenUserCatalog getUserCatalog(String username) {

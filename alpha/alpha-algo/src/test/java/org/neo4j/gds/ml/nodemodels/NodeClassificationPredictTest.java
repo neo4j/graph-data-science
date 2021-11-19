@@ -235,7 +235,7 @@ class NodeClassificationPredictTest {
         modelCatalog.set(model);
 
         var log = new TestLog();
-        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>().build(
+        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog).build(
             graph,
             ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
@@ -265,7 +265,7 @@ class NodeClassificationPredictTest {
                 "Node classification predict 100%",
                 "Node classification predict :: Finished"
             );
-        modelCatalog.drop("", modelName);
+        modelCatalog.dropOrThrow("", modelName);
     }
 
     @Test

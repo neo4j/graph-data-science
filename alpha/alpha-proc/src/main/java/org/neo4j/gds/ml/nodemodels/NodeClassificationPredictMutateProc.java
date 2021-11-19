@@ -119,7 +119,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>();
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 
     @Override

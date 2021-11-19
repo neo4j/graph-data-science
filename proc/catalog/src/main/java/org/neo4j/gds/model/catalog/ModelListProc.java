@@ -44,7 +44,7 @@ public class ModelListProc extends ModelCatalogProc {
             return models.stream().map(ModelCatalogResult::new);
         } else {
             validateModelName(modelName);
-            var model = modelCatalog.list(username(), modelName);
+            var model = modelCatalog.getUntyped(username(), modelName);
             return model == null
                 ? Stream.empty()
                 : Stream.of(new ModelCatalogResult(model));

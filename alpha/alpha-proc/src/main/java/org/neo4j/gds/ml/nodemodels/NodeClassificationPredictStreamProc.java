@@ -121,7 +121,7 @@ public class NodeClassificationPredictStreamProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>();
+        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 
     @Override

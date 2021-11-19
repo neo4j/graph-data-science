@@ -34,7 +34,6 @@ import org.neo4j.gds.model.catalog.TestTrainConfig;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -219,7 +218,7 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.checkStorable(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
+            () -> modelCatalog.verifyModelCanBeStored(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
         );
 
         assertEquals(
@@ -253,32 +252,17 @@ class OpenModelCatalogTest {
     }
 
     @Test
-    void getModelType() {
-        modelCatalog.set(TEST_MODEL);
-
-        Optional<String> testModel = modelCatalog.type(USERNAME, "testModel");
-        assertFalse(testModel.isEmpty());
-        assertEquals("testAlgo", testModel.get());
-    }
-
-    @Test
-    void getNonExistingModelType() {
-        Optional<String> bogusModel = modelCatalog.type(USERNAME, "bogusModel");
-        assertTrue(bogusModel.isEmpty());
-    }
-
-    @Test
     void shouldDropModel() {
         modelCatalog.set(TEST_MODEL);
 
         assertTrue(modelCatalog.exists(USERNAME, "testModel"));
-        modelCatalog.drop(USERNAME, "testModel");
+        modelCatalog.dropOrThrow(USERNAME, "testModel");
         assertFalse(modelCatalog.exists(USERNAME, "testModel"));
     }
 
     @Test
     void shouldNotThrowWhenListingNonExistentModel() {
-        assertDoesNotThrow(() -> modelCatalog.list(USERNAME, "nonExistentModel"));
+        assertDoesNotThrow(() -> modelCatalog.getUntyped(USERNAME, "nonExistentModel"));
     }
 
     @Test

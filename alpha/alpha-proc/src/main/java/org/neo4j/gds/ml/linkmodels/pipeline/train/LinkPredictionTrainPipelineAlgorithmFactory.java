@@ -24,6 +24,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,10 +39,12 @@ import java.util.List;
 public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final BaseProc caller;
     private final NamedDatabaseId databaseId;
+    private final ModelCatalog modelCatalog;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, NamedDatabaseId databaseId) {
+    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, NamedDatabaseId databaseId, ModelCatalog modelCatalog) {
         this.caller = caller;
         this.databaseId = databaseId;
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -58,7 +61,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
 
         var graphStore = GraphStoreCatalog.get(CatalogRequest.of(trainConfig.username(), databaseId), graphName).graphStore();
 
-        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(trainConfig.pipeline(), trainConfig.username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, trainConfig.pipeline(), trainConfig.username());
         pipeline.validate();
 
         return new LinkPredictionTrainPipelineExecutor(
@@ -78,7 +81,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
 
     @Override
     public Task progressTask(Graph graph, LinkPredictionTrainConfig config) {
-        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(config.pipeline(), config.username());
+        var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, config.pipeline(), config.username());
 
         return Tasks.task(
             taskName(),

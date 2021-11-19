@@ -64,7 +64,6 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     ) {
         var result = compute(graphNameOrConfig, configuration);
         var model = Objects.requireNonNull(result.result());
-        modelCatalog.checkStorable(username(), model.name(), model.algoType());
         modelCatalog.set(model);
         return Stream.of(resultConstructor.apply(model, result));
     }
@@ -72,7 +71,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @Override
     protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
         super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        modelCatalog.checkStorable(username(), config.modelName(), modelType());
+        modelCatalog.verifyModelCanBeStored(username(), config.modelName(), modelType());
     }
 
     @SuppressWarnings("unused")
