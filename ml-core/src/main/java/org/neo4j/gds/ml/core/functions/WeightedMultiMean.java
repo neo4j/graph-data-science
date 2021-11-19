@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     private final SubGraph subGraph;
-    private final int[] selfAdjacency;
     private final int rows;
     private final int cols;
 
@@ -38,26 +37,27 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     ) {
         super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
         this.subGraph = subGraph;
-        this.selfAdjacency = subGraph.mappedBatchedNodeIds;
         this.rows = subGraph.batchSize();
         this.cols = parent.dimension(Dimensions.COLUMNS_INDEX);
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Variable<?> parent = parent();
-        Tensor<?> parentTensor = ctx.data(parent);
+        Tensor<?> parentTensor = ctx.data(parent());
         double[] parentData = parentTensor.data();
-        int batchSize = this.subGraph.batchSize();
+
+        var batchIds = this.subGraph.mappedBatchNodeIds;
+        int batchSize = batchIds.length;
+
         double[] means = new double[batchSize * cols];
         for (int sourceIndex = 0; sourceIndex < batchSize; sourceIndex++) {
-            int sourceId = selfAdjacency[sourceIndex];
-            int selfAdjacencyOfSourceOffset = sourceId * cols;
+            int sourceId = batchIds[sourceIndex];
+            int batchIdRowOffset = sourceId * cols;
             int sourceOffset = sourceIndex * cols;
             int[] neighbors = this.subGraph.neighbors(sourceIndex);
             int numberOfNeighbors = neighbors.length;
             for (int col = 0; col < cols; col++) {
-                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
+                means[sourceOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
             }
             for (int targetIndex : neighbors) {
                 int targetOffset = targetIndex * cols;
@@ -75,11 +75,13 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
 
+        var batchIds = this.subGraph.mappedBatchNodeIds;
+
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
-                int sourceId = selfAdjacency[row];
+                int sourceId = batchIds[row];
 
                 int[] neighbors = this.subGraph.neighbors(row);
                 int degree = neighbors.length + 1;

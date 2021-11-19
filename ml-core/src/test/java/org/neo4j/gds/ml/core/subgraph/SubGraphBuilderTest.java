@@ -105,7 +105,7 @@ class SubGraphBuilderTest {
     void shouldBuildSubGraphMultipleNodes() {
         SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, graph);
 
-        assertThat(subGraph.mappedBatchedNodeIds).containsExactly(0, 1, 2);
+        assertThat(subGraph.mappedBatchNodeIds).containsExactly(0, 1, 2);
 
         // start a,b,c  : 0, 1, 2
         // neighbors d,e,f : 3,4,5

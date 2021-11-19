@@ -29,7 +29,7 @@ import java.util.Optional;
 
 public class SubGraph implements BatchNeighbors {
     // mapped node ids in the original input batch
-    public final int[] mappedBatchedNodeIds;
+    public final int[] mappedBatchNodeIds;
 
     // this includes all nodes part of the subgraph
     // long-based ids used in org.neo4j.gds.api.Graph
@@ -47,7 +47,7 @@ public class SubGraph implements BatchNeighbors {
         Optional<RelationshipWeights> maybeRelationshipWeightsFunction
     ) {
         this.neighbors = neighborsPerBatchedNode;
-        this.mappedBatchedNodeIds = nodeIds;
+        this.mappedBatchNodeIds = nodeIds;
         this.originalNodeIds = originalNodeIds;
         this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
     }
@@ -111,7 +111,7 @@ public class SubGraph implements BatchNeighbors {
     }
 
     public int batchSize() {
-        return mappedBatchedNodeIds.length;
+        return mappedBatchNodeIds.length;
     }
 
     public int[] neighbors(int nodeId) {

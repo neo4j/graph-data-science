@@ -77,7 +77,7 @@ public class MaxPoolingAggregator implements Aggregator {
             : new ElementWiseMax(neighborhoodActivations, subGraph);
 
 
-        Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.mappedBatchedNodeIds);
+        Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.mappedBatchNodeIds);
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
         Variable<Matrix> neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable<Matrix> sum = new MatrixSum(List.of(self, neighbors));
