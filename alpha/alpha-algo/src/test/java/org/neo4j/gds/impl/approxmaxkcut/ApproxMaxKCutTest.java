@@ -40,6 +40,8 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -192,6 +194,35 @@ final class ApproxMaxKCutTest {
                 }
             });
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void respectMinCommunitySizes(int concurrency) {
+        var configBuilder = ImmutableApproxMaxKCutConfig.builder()
+            .concurrency(concurrency)
+            .minCommunitySizes(LongStream.of(1, 6).boxed().collect(Collectors.toList()));
+        if (concurrency > 1) {
+            configBuilder.minBatchSize(1);
+        }
+        var config = configBuilder.build();
+
+        var approxMaxKCut = new ApproxMaxKCut(
+            maxGraph,
+            Pools.DEFAULT,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
+
+        var cardinalities = new long[2];
+        var solution = approxMaxKCut.compute().candidateSolution();
+        for (int i = 0; i < maxGraph.nodeCount(); i++) {
+            cardinalities[solution.get(i)]++;
+        }
+
+        assertThat(cardinalities[0] == 1 || cardinalities[0] == 6).isTrue();
+        assertThat(cardinalities[1] == 1 || cardinalities[1] == 6).isTrue();
     }
 
     @Test
