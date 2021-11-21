@@ -45,14 +45,14 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeClassificationPredictStreamProc
-    extends StreamProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
+    extends StreamProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamResult, NodeClassificationStreamConfig> {
 
     @Context
     public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
-    public Stream<StreamResult> mutate(
+    public Stream<NodeClassificationStreamResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -70,7 +70,11 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig> computationResult) {
+    protected Stream<NodeClassificationStreamResult> stream(
+        ComputationResult<
+        NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig
+        > computationResult
+    ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
@@ -81,7 +85,12 @@ public class NodeClassificationPredictStreamProc
                 .range(0, graph.nodeCount())
                 .boxed()
                 .map((nodeId) ->
-                    new StreamResult(graph.toOriginalNodeId(nodeId), predictedClasses.get(nodeId), nodePropertiesAsList(predictedProbabilities, nodeId)));
+                    new NodeClassificationStreamResult(
+                        graph.toOriginalNodeId(nodeId),
+                        predictedClasses.get(nodeId),
+                        nodePropertiesAsList(predictedProbabilities, nodeId)
+                    )
+                );
         });
     }
 
@@ -119,23 +128,9 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected StreamResult streamResult(
+    protected NodeClassificationStreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
         throw new UnsupportedOperationException("NodeClassification handles result building individually.");
-    }
-
-    @SuppressWarnings("unused")
-    public static final class StreamResult {
-
-        public long nodeId;
-        public long predictedClass;
-        public List<Double> predictedProbabilities;
-
-        StreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
-            this.nodeId = nodeId;
-            this.predictedClass = predictedClass;
-            this.predictedProbabilities = predictedProbabilities;
-        }
     }
 }
