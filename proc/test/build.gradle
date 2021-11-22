@@ -28,3 +28,11 @@ dependencies {
     api project(':test-utils')
     api project(':test-graph-loaders')
 }
+
+afterEvaluate {
+    if (ver.'neo4j' == neos.'dev') {
+        dependencies {
+            implementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: neos.dev
+        }
+    }
+}

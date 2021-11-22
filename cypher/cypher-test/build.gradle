@@ -26,3 +26,11 @@ dependencies {
     testImplementation project(":test-utils")
     testImplementation project(':edition-api')
 }
+
+afterEvaluate {
+    if (ver.'neo4j' == neos.'dev') {
+        dependencies {
+            testImplementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: neos.dev
+        }
+    }
+}
