@@ -14,7 +14,7 @@ dependencies {
     testCompileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
 
     neodeps.each {
-        testImplementation(group: 'org.neo4j', name: it, version: neos.'4.4') {
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j_at_least_43') {
             transitive = false
         }
     }
