@@ -34,6 +34,9 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
@@ -115,6 +118,32 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("max of model selection and best model evaluation", maxOfModelSelectionAndBestModelEvaluation)
             .build();
+    }
+
+    public static String taskName() {
+        return "NCTrain";
+    }
+
+    public static Task progressTask(int validationFolds, int paramsSize) {
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("ShuffleAndSplit"),
+            Tasks.iterativeFixed(
+                "SelectBestModel",
+                () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
+                        Tasks.task(
+                            "Split",
+                            Training.progressTask("Training"),
+                            Tasks.leaf("Evaluate")
+                        )
+                    ), validationFolds)
+                ),
+                paramsSize
+            ),
+            Training.progressTask("TrainSelectedOnRemainder"),
+            Tasks.leaf("EvaluateSelectedModel"),
+            Training.progressTask("RetrainSelectedModel")
+        );
     }
 
     @NotNull
