@@ -43,7 +43,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
