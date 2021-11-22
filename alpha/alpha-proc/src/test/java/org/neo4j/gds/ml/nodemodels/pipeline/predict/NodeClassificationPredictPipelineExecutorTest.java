@@ -48,9 +48,9 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipeline;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineExecutor;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.test.TestProc;
 
@@ -211,7 +211,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             modelCatalog.set(Model.of(
                 getUsername(),
                 "model",
-                NodeClassificationPipelineExecutor.MODEL_TYPE,
+                NodeClassificationTrainPipelineExecutor.MODEL_TYPE,
                 GraphSchema.empty(),
                 modelData,
                 NodeClassificationPipelineTrainConfig.builder()
@@ -221,7 +221,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .build(),
                 NodeClassificationPipelineModelInfo.builder()
                     .classes(modelData.classIdMap().originalIdsList())
-                    .bestParameters(NodeLogisticRegressionTrainConfig.of(List.of("foo","bar"),"foo",Map.of()))
+                    .bestParameters(NodeLogisticRegressionTrainConfig.of(List.of("foo", "bar"), "foo", Map.of()))
                     .metrics(Map.of())
                     .trainingPipeline(pipeline.copy())
                     .build()
