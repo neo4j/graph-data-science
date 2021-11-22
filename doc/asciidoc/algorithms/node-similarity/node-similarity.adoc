@@ -445,6 +445,13 @@ YIELD nodesCompared, relationshipsWritten
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
+[NOTE]
+====
+The relationships that are produced by the mutation are always directed, even if the input graph is undirected.
+If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both `a -> b` and `b -> a` are topN), it appears as though an undirected relationship is produced.
+However, they are just two directed relationships that have been independently produced.
+====
+
 
 [[algorithms-node-similarity-examples-write]]
 === Write
@@ -478,6 +485,13 @@ YIELD nodesCompared, relationshipsWritten
 --
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are written are always directed, even if the input graph is undirected.
+If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both `a -> b` and `b -> a` are topN), it appears as though an undirected relationship is written.
+However, they are just two directed relationships that have been independently written.
+====
 
 
 [[algorithms-node-similarity-examples-limits]]
