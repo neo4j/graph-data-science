@@ -1,0 +1,19 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures :: Sysinfo'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
+    compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.neo4j
+    compileOnly group: 'org.neo4j', name: 'neo4j-kernel', version: ver.neo4j
+
+    implementation project(':core')
+    implementation project(':memory-usage')
+    implementation project(':licensing')
+    implementation project(':proc-common')
+
+    testImplementation project(':test-utils')
+    testImplementation project(':test-graph-loaders')
+}
