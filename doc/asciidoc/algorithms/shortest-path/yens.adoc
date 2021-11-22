@@ -212,6 +212,11 @@ RETURN relationshipsWritten
 After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
 The new relationship will store a single property `totalCost`.
 
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====
+
 
 [[algorithms-yens-examples-write]]
 === Write
@@ -247,3 +252,8 @@ RETURN relationshipsWritten
 
 The above query will write a single relationship of type `PATH` back to Neo4j.
 The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+
+[NOTE]
+====
+The relationships written are always directed, even if the input graph is undirected.
+====
