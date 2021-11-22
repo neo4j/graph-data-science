@@ -117,7 +117,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                 .forEach(mutateMethod -> {
                     assertThatThrownBy(() -> mutateMethod.invoke(
                         procedure,
-                        Map.of("nodeProjection", "*", "relationshipProjection", "*", "mutateProperty", "foo"),
+                        createMinimalImplicitConfig(createMinimalConfig()).toMap(),
                         CypherMapWrapper.empty().toMap()
                     ))
                         .hasRootCauseInstanceOf(IllegalArgumentException.class)
