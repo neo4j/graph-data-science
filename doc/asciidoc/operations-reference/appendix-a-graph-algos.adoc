@@ -308,7 +308,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.ml.pipeline.linkPrediction.train`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.mutate`
 | `gds.alpha.ml.pipeline.linkPrediction.predict.stream`
-.9+<.^| Node Classification Pipeline
+.9+<.^| <<algorithms-ml-nodeclasification-pipelines, Node Classification Pipeline>>
 | `gds.alpha.ml.pipeline.nodeClassification.create`
 | `gds.alpha.ml.pipeline.nodeClassification.addNodeProperty`
 | `gds.alpha.ml.pipeline.nodeClassification.addFeatures`
