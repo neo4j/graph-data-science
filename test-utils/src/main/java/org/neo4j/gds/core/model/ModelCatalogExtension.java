@@ -27,6 +27,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Allows injection a new instance of {@link org.neo4j.gds.core.model.ModelCatalog}
+ * by annotating a field with {@link org.neo4j.gds.core.model.InjectModelCatalog}.
+ *
+ *
+ * Further, the stored models are removed after each test.
+ */
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
