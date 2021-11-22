@@ -285,6 +285,8 @@
             </d:tocentry>
             <d:tocentry linkend="algorithms-ml-nodeclassification"><?dbhtml filename="algorithms/ml-models/node-classification/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-nodeclassification-pipelines"><?dbhtml filename="algorithms/ml-models/nodeclassification-pipelines/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="algorithms-ml-linkprediction-pipelines"><?dbhtml filename="algorithms/ml-models/linkprediction-pipelines/index.html"?>

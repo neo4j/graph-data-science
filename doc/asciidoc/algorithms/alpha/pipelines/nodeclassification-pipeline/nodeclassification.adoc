@@ -1,0 +1,379 @@
+[[algorithms-ml-nodeclassification-pipelines]]
+= Node Classification Pipelines
+:entity: node
+:result: predicted property
+:modelType: Node classification pipeline
+
+
+[abstract]
+--
+This section describes Node Classification Pipelines in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-ml-nodeclassification-pipelines-intro]]
+== Introduction
+
+Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
+The GDS library also provides a standalone version of <<algorithms-ml-nodeclassification,Node Classification>>.
+Here we describe Node Classification Pipelines, which facilitate an end-to-end workflow, from features extraction to node classification.
+There are two kinds of pipelines: training pipelines and classification pipelines, both of which reside in the model catalog.
+When a training pipeline is executed, a classification pipeline is created and stored in the model catalog.
+
+A training pipeline is a sequence of two phases:
+[upperroman]
+. The graph is augmented with new node properties in a series of steps.
+. The augmented graph is used for training a node classification model.
+
+One can <<algorithms-ml-nodeclassification-adding-node-properties,configure>> which steps should be included above.
+The steps execute GDS algorithms that create new node properties.
+After configuring the node property steps, one can <<algorithms-ml-nodeclassification-adding-features,select>> a subset of node properties to be used as features.
+The training phase (II) proceeds in a manner akin to the standalone version of <<algorithms-ml-nodeclassification,Node Classification>>, where it can train multiple models, select the best one, and report relevant performance metrics.
+//and hence entails model selection, training and producing performance metrics.
+
+After training the pipeline, a classification pipeline is created.
+This new pipeline inherits the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes. Notice that the classification step can only be done with a classification pipeline (not with a training pipeline).
+
+
+The motivation for using pipelines:
+
+* easier to get splits right and prevent data leakage
+* ensuring that the same feature creation steps are applied at classification and train time
+* applying the trained model with a single procedure call
+* persisting the pipeline as a whole
+
+The rest of this page is divided as follows:
+
+* <<algorithms-ml-nodeclassification-creating-a-pipeline, Creating a pipeline>>
+* <<algorithms-ml-nodeclassification-adding-node-properties, Adding node properties>>
+* <<algorithms-ml-nodeclassification-adding-features, Adding features>>
+* <<algorithms-ml-nodeclassification-configure-splits, Configuring the node splits>>
+* <<algorithms-ml-nodeclassification-configure-model-parameters, Configuring the model parameters>>
+* <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>
+* <<algorithms-node-classification-pipelines-predict, Applying a classification pipeline to make predictions>>
+
+[[algorithms-ml-nodeclassification-creating-a-pipeline]]
+== Creating a pipeline
+
+The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.nodeClassification.create`.
+This stores a trainable model object in the model catalog of type `Node classificationn training pipeline`.
+This represents a configurable pipeline that can later be invoked for training, which in turn creates a classification pipeline.
+The latter is also a model which is stored in the catalog with type `Node classification pipeline`.
+
+=== Syntax
+
+[.pipeline-create-syntax]
+--
+.Create pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.create(
+  pipelineName: String
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of String,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type   | Description
+| pipelineName    | String  | The name of the created pipeline.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will create a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| "pipe"   | []                | []
+           | {validationFolds=3, holdoutFraction=0.3}
+           | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
+|===
+--
+
+This show that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+
+[[algorithms-ml-nodeclassification-adding-node-properties]]
+== Adding node properties
+
+A node classification pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
+Such steps producing node properties can be chained one after another and created properties can later be used as <<algorithms-ml-nodeclassification-adding-features, features>>.
+Moreover, the node property steps that are added to the trining pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
+
+The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
+
+For example, <<algorithms-ml-models-preprocessing, pre-processing algorithms>> can be used as node property steps.
+
+=== Syntax
+
+[.pipeline-add-node-property-syntax]
+--
+.Add node property syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty(
+  pipelineName: String,
+  procedureName: String,
+  procedureConfiguration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of String,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| pipelineName              | String  | The name of the pipeline.
+| procedureName             | String  | The name of the procedure to be added to the pipeline.
+| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will add a node property step to the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty('pipe', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42
+})
+YIELD name, nodePropertySteps
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name     | nodePropertySteps
+| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
+|===
+
+The `embedding` property can be later used as a feature.
+--
+
+
+[[algorithms-ml-nodeclassification-adding-features]]
+== Adding features
+
+A Node Classification Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
+When executing the pipeline, the selected `nodeProperties` must be either present in the input graph, or created by a previous node property step.
+For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
+
+=== Syntax
+
+[.pipeline-add-feature-syntax]
+--
+.Adding a feature to a pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures(
+  pipelineName: String,
+  nodeProperties: List or String
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of String,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type    | Description
+| pipelineName           | String  | The name of the pipeline.
+| nodeProperties          | List or String     | Configuration for splitting the relationships.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+
+[[algorithms-ml-nodeclassification-configure-splits]]
+== Configuring the node splits
+
+Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<algorithms-ml-nodeclassification-configure-model-parameters,parameter space>>.
+Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
+The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
+
+The node splits are used in the training process as follows:
+
+. The input graph is split into two parts: the train graph and the test graph.
+. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part.
+. Each model candidate is trained on each train part and evaluated on the respective validation part.
+. The model with the highest average score according to the primary metric will win the training.
+. The winning model will then be retrained on the entire train graph.
+. The winning model is evaluated on the train graph as well as the test graph.
+. The winning model is retrained on the entire original graph.
+
+=== Syntax
+
+[.pipeline-configure-split-syntax]
+--
+.Configure the relationship split syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Strings,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the pipeline.
+| configuration   | Map     | Configuration for splitting the relationships.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                  | Type    | Default | Description
+| validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
+| holdoutFraction          | Double  | 0.3     | Portion of the graph reserved for testing. Must be in the range (0, 1).
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will configure the splitting of the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('pipe', {
+ holdoutFraction: 0.3,
+  validationFolds: 7
+})
+YIELD splitConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| splitConfig
+| {validationFolds=7, holdoutFraction=0.3}
+|===
+
+We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-nodeclassification-pipelines-train, training>>.
+--
+
+[[algorithms-ml-nodeclassification-configure-model-parameters]]
+== Configuring the model parameters
+
+The `gds.alpha.ml.pipeline.nodeClassification.configureParams` mode is used to set up the train mode with a list of configurations of logistic regression models.
+The set of model configurations is called the _parameter space_ which parametrizes a set of model candidates.
+The parameter space can be configured by passing this procedure a list of maps, where each map configures the training of one logistic regression model.
+In <<algorithms-ml-nodeclassification-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
+
+The allowed model parameters are listed in the table <<nodeclassification-pipelines-model-configuration-table>>.
+
+If `configureParams` is not used, then a single model with defaults for all the model parameters is used.
+The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
+=== Syntax
+
+[.pipeline-configure-params-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.configureParams(
+  pipelineName: String,
+  parameterSpace: List of Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of String,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| parameterSpace  | List of Map | The parameter space used to select the best model from. Each Map corresponds to potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+[[nodeclassification-pipelines-model-configuration-table]]
+.Model configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                | Type    | Default         | Optional | Description
+| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
+| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
+| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
+| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
+| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will configure the parameter space of the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('pipe',
+  [{tolerance: 0.001}, {tolerance: 0.01}, {maxEpochs: 500}]
+) YIELD parameterSpace
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| parameterSpace
+| [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}, {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.01}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
+|===
+
+The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.
+Each specified model configuration will be tried out during the model selection in <<algorithms-ml-nodeclassification-pipelines-train, training>>.
+--
+
+//include::training.adoc[]
+
+//include::predict.adoc[]
