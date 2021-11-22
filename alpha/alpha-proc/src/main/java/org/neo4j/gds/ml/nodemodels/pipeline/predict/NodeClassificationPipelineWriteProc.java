@@ -20,20 +20,17 @@
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.validation.AfterLoadValidation;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -69,24 +66,27 @@ public class NodeClassificationPipelineWriteProc
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore,
-        GraphCreateConfig graphCreateConfig,
-        NodeClassificationPredictPipelineWriteConfig config
-    ) {
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
-            if (config.writeProperty().equals(predictedProbabilityProperty)) {
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
-                        "writeProperty",
-                        "predictedProbabilityProperty",
-                        predictedProbabilityProperty
-                    )
+    public ValidationConfiguration<NodeClassificationPredictPipelineWriteConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<AfterLoadValidation<NodeClassificationPredictPipelineWriteConfig>> afterLoadValidations() {
+                return List.of(
+                    (graphStore, graphCreateConfig, config) -> config.predictedProbabilityProperty()
+                        .ifPresent(predictedProbabilityProperty -> {
+                            if (config.writeProperty().equals(predictedProbabilityProperty)) {
+                                throw new IllegalArgumentException(
+                                    formatWithLocale(
+                                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
+                                        "writeProperty",
+                                        "predictedProbabilityProperty",
+                                        predictedProbabilityProperty
+                                    )
+                                );
+                            }
+                        })
                 );
             }
-        });
+        };
     }
 
     @Override
