@@ -92,7 +92,6 @@ public abstract class AlgoBaseProc<
             log,
             taskRegistryFactory,
             procName(),
-            this::runWithExceptionLogging,
             allocationTracker()
         );
     }

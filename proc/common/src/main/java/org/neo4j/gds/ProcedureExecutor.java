@@ -54,7 +54,6 @@ public class ProcedureExecutor<
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
     private final String procName;
-    private final BiFunction<String, Supplier<ALGO_RESULT>, ALGO_RESULT> exceptionLoggingFunction;
     private final AllocationTracker allocationTracker;
 
     ProcedureExecutor(
@@ -67,7 +66,6 @@ public class ProcedureExecutor<
         Log log,
         TaskRegistryFactory taskRegistryFactory,
         String procName,
-        BiFunction<String, Supplier<ALGO_RESULT>, ALGO_RESULT> exceptionLoggingFunction,
         AllocationTracker allocationTracker
     ) {
         this.configParser = configParser;
@@ -79,7 +77,6 @@ public class ProcedureExecutor<
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
         this.procName = procName;
-        this.exceptionLoggingFunction = exceptionLoggingFunction;
         this.allocationTracker = allocationTracker;
     }
 
@@ -102,10 +99,11 @@ public class ProcedureExecutor<
 
         Pair<CONFIG, Optional<String>> input = configParser.processInput(graphNameOrConfig, configuration);
         var config = input.getOne();
+        var maybeGraphName = input.getTwo();
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphStoreLoader = graphStoreLoaderFn.apply(config, input.getTwo());
+        var graphStoreLoader = graphStoreLoaderFn.apply(config, maybeGraphName);
         var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
         var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 
@@ -153,7 +151,7 @@ public class ProcedureExecutor<
         Graph graph,
         ALGO algo
     ) {
-        return exceptionLoggingFunction.apply(
+        return runWithExceptionLogging(
             "Computation failed",
             () -> {
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
@@ -203,6 +201,15 @@ public class ProcedureExecutor<
         var metaData = ktx.getMetaData();
         if (metaData instanceof AlgorithmMetaData) {
             ((AlgorithmMetaData) metaData).set(algoConfig);
+        }
+    }
+
+    private <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            log.warn(message, e);
+            throw e;
         }
     }
 }
