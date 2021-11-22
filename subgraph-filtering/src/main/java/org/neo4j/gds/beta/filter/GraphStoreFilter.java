@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class GraphStoreFilter {
 
     public static Task progressTask(GraphStore graphStore) {
@@ -134,14 +136,30 @@ public final class GraphStoreFilter {
         GraphStore graphStore,
         String nodeFilter,
         String relationshipFilter
-    ) throws ParseException, SemanticErrors {
-        var nodeExpression = ExpressionParser.parse(replaceStarWithTrue(nodeFilter));
-        var relationshipExpression = ExpressionParser.parse(replaceStarWithTrue(relationshipFilter));
+    ) throws IllegalArgumentException {
+        var nodeExpression = parseAndValidate(nodeFilter, ValidationContext.forNodes(graphStore), "nodeFilter");
 
-        nodeExpression.validate(ValidationContext.forNodes(graphStore)).validate();
-        relationshipExpression.validate(ValidationContext.forRelationships(graphStore)).validate();
+        var relationshipExpression = parseAndValidate(
+            relationshipFilter,
+            ValidationContext.forRelationships(graphStore),
+            "relationshipFilter"
+        );
 
         return ImmutableExpressions.of(nodeExpression, relationshipExpression);
+    }
+
+    private static Expression parseAndValidate(
+        String filter,
+        ValidationContext validationContext,
+        String parameterName
+    ) throws IllegalArgumentException {
+        try {
+            var expression = ExpressionParser.parse(replaceStarWithTrue(filter));
+            expression.validate(validationContext).validate();
+            return expression;
+        } catch (ParseException | SemanticErrors e) {
+            throw new IllegalArgumentException(formatWithLocale("Invalid `%s` expression.", parameterName), e);
+        }
     }
 
     private static String replaceStarWithTrue(String filter) {
