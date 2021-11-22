@@ -17,26 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.internal.recordstorage;
 
-import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
+import org.neo4j.kernel.KernelVersion;
+import org.neo4j.storageengine.api.CommandReader;
+import org.neo4j.storageengine.api.CommandReaderFactory;
 
-import java.util.Optional;
+public class InMemoryStorageCommandReaderFactory implements CommandReaderFactory {
 
-public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
-
-    @Override
-    public Optional<String> successorStoreVersion() {
-        return Optional.empty();
-    }
+    public static final CommandReaderFactory INSTANCE = new InMemoryStorageCommandReaderFactory();
 
     @Override
-    public String latestStoreVersion() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
-    public String formatFamilyName() {
-        return getClass().getSimpleName();
+    public CommandReader get(KernelVersion kernelVersion) {
+        switch (kernelVersion) {
+            case V4_2:
+                return LogCommandSerializationV4_2.INSTANCE;
+            case V4_3_D4:
+                return LogCommandSerializationV4_3_D3.INSTANCE;
+            default:
+                throw new IllegalArgumentException("Unsupported kernel version " + kernelVersion);
+        }
     }
 }

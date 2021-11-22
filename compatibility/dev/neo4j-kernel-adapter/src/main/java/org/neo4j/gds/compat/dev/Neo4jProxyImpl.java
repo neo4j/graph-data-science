@@ -42,9 +42,9 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
 import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
@@ -115,6 +115,7 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.File;
@@ -495,7 +496,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
@@ -530,7 +530,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             additionalInitialIds,
             dbConfig,
             recordFormats,
-            monitor,
+            Monitor.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
@@ -690,6 +690,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
         return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    }
+
+    @Override
+    public String versionLongToString(long storeVersion) {
+        return StoreVersion.versionLongToString(storeVersion);
     }
 
     private static final class InputFromCompatInput implements Input {

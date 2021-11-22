@@ -12,6 +12,7 @@ dependencies {
     annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.dev
 
     compileOnly project(':annotations')
-    compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.dev
+    compileOnly         group: 'org.immutables', name: 'value-annotations',     version: ver.'immutables'
+    compileOnly         group: 'org.neo4j',      name: 'neo4j',                 version: neos.dev
+    compileOnly         group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.dev
 }

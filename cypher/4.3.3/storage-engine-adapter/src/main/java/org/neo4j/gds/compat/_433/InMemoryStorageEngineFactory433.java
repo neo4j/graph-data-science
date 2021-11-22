@@ -28,12 +28,15 @@ import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory433;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader433;
 import org.neo4j.internal.schema.IndexConfigCompleter;
+import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
@@ -42,12 +45,15 @@ import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
+import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.token.TokenHolders;
+
+import java.util.List;
 
 @ServiceProvider
 public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngineFactory {
@@ -135,5 +141,23 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
     @Override
     protected AbstractInMemoryMetaDataProvider metadataProvider() {
         return metadataProvider;
+    }
+
+
+    @Override
+    public List<SchemaRule> loadSchemaRules(
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        CursorContext cursorContext
+    ) {
+        return List.of();
+    }
+
+
+    @Override
+    public CommandReaderFactory commandReaderFactory() {
+        return InMemoryStorageCommandReaderFactory433.INSTANCE;
     }
 }

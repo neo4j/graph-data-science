@@ -76,6 +76,7 @@ import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
+import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -414,7 +415,6 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
@@ -445,7 +445,7 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
             additionalInitialIds,
             dbConfig,
             recordFormats,
-            monitor,
+            ImportLogic.NO_MONITOR,
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
@@ -602,6 +602,11 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         return countByIdGenerator(idGeneratorFactory, org.neo4j.internal.id.IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
     }
 
+    @Override
+    public String versionLongToString(long storeVersion) {
+        return MetaDataStore.versionLongToString(storeVersion);
+    }
+
     private static final class InputFromCompatInput implements Input {
         private final CompatInput delegate;
 
@@ -638,4 +643,5 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
             ));
         }
     }
+
 }

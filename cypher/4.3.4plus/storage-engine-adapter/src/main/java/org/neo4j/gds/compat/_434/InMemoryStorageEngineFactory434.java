@@ -28,8 +28,10 @@ import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory434;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader434;
 import org.neo4j.internal.schema.IndexConfigCompleter;
+import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -44,6 +46,7 @@ import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
+import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
@@ -52,6 +55,7 @@ import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.token.TokenHolders;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @ServiceProvider
@@ -157,5 +161,21 @@ public class InMemoryStorageEngineFactory434 extends AbstractInMemoryStorageEngi
             databaseLayout.getDatabaseName(),
             cursorContext
         );
+    }
+
+    @Override
+    public List<SchemaRule> loadSchemaRules(
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        Config config,
+        DatabaseLayout databaseLayout,
+        CursorContext cursorContext
+    ) {
+        return List.of();
+    }
+
+    @Override
+    public CommandReaderFactory commandReaderFactory() {
+        return InMemoryStorageCommandReaderFactory434.INSTANCE;
     }
 }

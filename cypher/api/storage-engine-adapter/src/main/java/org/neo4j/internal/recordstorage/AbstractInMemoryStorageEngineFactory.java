@@ -30,7 +30,6 @@ import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
@@ -170,25 +169,9 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
     }
 
     @Override
-    public List<SchemaRule> loadSchemaRules(
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        Config config,
-        DatabaseLayout databaseLayout,
-        CursorContext cursorContext
-    ) {
-        return List.of();
-    }
-
-    @Override
     public StorageFilesState checkStoreFileState(
         FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache
     ) {
         return StorageFilesState.recoveredState();
-    }
-
-    @Override
-    public CommandReaderFactory commandReaderFactory() {
-        return InMemoryStorageCommandReaderFactory.INSTANCE;
     }
 }
