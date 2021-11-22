@@ -220,10 +220,14 @@ public abstract class AlgoBaseProc<
         return ValidationConfiguration.empty();
     }
 
+    public Validator<CONFIG> validator() {
+        return new Validator<>(getValidationConfig());
+    }
+
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
-        Validator<CONFIG> validator = new Validator<>(getValidationConfig());
+        Validator<CONFIG> validator = validator();
         var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();
