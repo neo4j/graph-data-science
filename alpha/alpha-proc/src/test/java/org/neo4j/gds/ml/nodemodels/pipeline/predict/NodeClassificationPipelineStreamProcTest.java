@@ -155,20 +155,4 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
             )
         ));
     }
-
-    @Test
-    void validateFeaturesExistOnGraph() {
-        // c is not in graph
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 3, List.of("a", "b", "c"));
-
-        var query = GdsCypher
-            .call()
-            .explicitCreation("g")
-            .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
-            .streamMode()
-            .addParameter("modelName", MODEL_NAME)
-            .yields();
-
-        assertError(query, "Node properties [c] defined in the feature steps do not exist in the graph or part of the pipeline");
-    }
 }
