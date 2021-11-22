@@ -26,6 +26,7 @@ import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -69,9 +70,8 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankStreamConfig config) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        PageRankProc.validateAlgoConfig(config, log);
+    public ValidationConfiguration<PageRankStreamConfig> getValidationConfig() {
+        return PageRankProc.getValidationConfig(log);
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
@@ -59,8 +59,8 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
+    public ValidationConfiguration<TriangleCountStatsConfig> getValidationConfig() {
+        return TriangleCountCompanion.getValidationConfig();
     }
 
     @Override

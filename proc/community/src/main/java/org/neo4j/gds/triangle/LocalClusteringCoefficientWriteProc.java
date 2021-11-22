@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,9 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -78,11 +77,8 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientWriteConfig config
-    ) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
-        warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
+    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> getValidationConfig() {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 
     @Override

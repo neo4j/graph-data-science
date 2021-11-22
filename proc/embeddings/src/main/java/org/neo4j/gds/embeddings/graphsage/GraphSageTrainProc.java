@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -29,11 +28,14 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.AfterLoadValidation;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -89,13 +91,21 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageTrainConfig config
-    ) {
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        config.validateAgainstGraphStore(graphStore);
-        if (graphStore.relationshipCount() == 0) {
-            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
-        }
+    public ValidationConfiguration<GraphSageTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<AfterLoadValidation<GraphSageTrainConfig>> afterLoadValidations() {
+                return List.of(
+                    new GraphSageTrainingConfigValidation(),
+                    (graphStore, graphCreateConfig, config) -> {
+                        if (graphStore.relationshipCount() == 0) {
+                            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
+                        }
+                    }
+                );
+            }
+        };
     }
+
 }
+

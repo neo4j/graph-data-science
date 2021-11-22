@@ -20,18 +20,22 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
@@ -49,20 +53,12 @@ final class LocalClusteringCoefficientCompanion {
         return computeResult.result().asNodeProperties();
     }
 
-    static void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientBaseConfig config, Log log) {
-        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
-            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-            storeConfig.relationshipProjections().projections().entrySet().stream()
-                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                 config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> entry.getValue().isMultiGraph())
-                .forEach(entry -> log.warn(
-                    "Procedure runs optimal with relationship aggregation." +
-                    " Projection for `%s` does not aggregate relationships." +
-                    " You might experience a slowdown in the procedure execution.",
-                    entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
-                ));
-        }
+    static void warnOnGraphWithParallelRelationships(
+        GraphCreateConfig graphCreateConfig,
+        LocalClusteringCoefficientBaseConfig config,
+        Log log
+    ) {
+
     }
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
@@ -74,6 +70,18 @@ final class LocalClusteringCoefficientCompanion {
 
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient());
+    }
+
+    static <CONFIG extends LocalClusteringCoefficientBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(
+                    new GraphCreateConfigValidations.UndirectedGraphValidation<>(),
+                    new WarnOnGraphsWithParallelRelationships<>(log)
+                );
+            }
+        };
     }
 
     abstract static class ResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -90,7 +98,6 @@ final class LocalClusteringCoefficientCompanion {
         }
     }
 
-
     private static final class EmptyResult implements LocalClusteringCoefficient.Result {
 
         static final EmptyResult EMPTY_RESULT = new EmptyResult();
@@ -105,6 +112,31 @@ final class LocalClusteringCoefficientCompanion {
         @Override
         public double averageClusteringCoefficient() {
             return 0;
+        }
+    }
+
+    private static final class WarnOnGraphsWithParallelRelationships<CONFIG extends LocalClusteringCoefficientBaseConfig> implements BeforeLoadValidation<CONFIG> {
+        private final Log log;
+
+        private WarnOnGraphsWithParallelRelationships(Log log) {
+            this.log = log;
+        }
+
+        @Override
+        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
+            if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+                GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+                storeConfig.relationshipProjections().projections().entrySet().stream()
+                    .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                     config.relationshipTypes().contains(entry.getKey().name()))
+                    .filter(entry -> entry.getValue().isMultiGraph())
+                    .forEach(entry -> log.warn(
+                        "Procedure runs optimal with relationship aggregation." +
+                        " Projection for `%s` does not aggregate relationships." +
+                        " You might experience a slowdown in the procedure execution.",
+                        entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
+                    ));
+            }
         }
     }
 }

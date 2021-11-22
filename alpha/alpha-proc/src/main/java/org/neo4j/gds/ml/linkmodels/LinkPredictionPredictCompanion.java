@@ -19,8 +19,23 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfiguration;
+
+import java.util.List;
+
 class LinkPredictionPredictCompanion {
     static final String DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
+
+    static <CONFIG extends LinkPredictionPredictBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());
+            }
+        };
+    }
 
     private LinkPredictionPredictCompanion() {}
 }

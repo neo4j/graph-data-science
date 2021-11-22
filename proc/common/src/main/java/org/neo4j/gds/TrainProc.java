@@ -28,11 +28,14 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,9 +72,39 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        modelCatalog.verifyModelCanBeStored(username(), config.modelName(), modelType());
+    public ValidationConfiguration<TRAIN_CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
+                return List.of(
+                   new TrainingConfigValidation<>(modelCatalog, username(), modelType())
+                );
+            }
+        };
+    }
+
+    static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
+        private final ModelCatalog modelCatalog;
+        private final String username;
+        private final String modelType;
+
+        TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
+            this.modelCatalog = modelCatalog;
+            this.username = username;
+            this.modelType = modelType;
+        }
+
+        @Override
+        public void validateConfigsBeforeLoad(
+            GraphCreateConfig graphCreateConfig,
+            TRAIN_CONFIG config
+        ) {
+            modelCatalog.verifyModelCanBeStored(
+                username,
+                config.modelName(),
+                modelType
+            );
+        }
     }
 
     @SuppressWarnings("unused")
@@ -147,6 +180,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @ValueClass
     interface GraphCreateResult {
         long nodeCount();
+
         long relationshipCount();
 
         default Map<String, Object> toMap() {
@@ -161,6 +195,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @SuppressWarnings("immutables:subtype")
     interface GraphCreateNativeResult extends GraphCreateResult {
         Map<String, Object> nodeProjection();
+
         Map<String, Object> relationshipProjection();
 
         static ImmutableGraphCreateNativeResult.Builder builder() {
@@ -181,6 +216,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     @SuppressWarnings("immutables:subtype")
     interface GraphCreateCypherResult extends GraphCreateResult {
         String nodeQuery();
+
         String relationshipQuery();
 
         static ImmutableGraphCreateCypherResult.Builder builder() {

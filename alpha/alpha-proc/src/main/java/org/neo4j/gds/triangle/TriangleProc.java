@@ -29,25 +29,23 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.triangle.TriangleStream;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> {
 
     private static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
-
-    @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
-    }
 
     @Procedure(name = "gds.alpha.triangles", mode = READ)
     @Description(DESCRIPTION)
@@ -80,6 +78,16 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         CypherMapWrapper config
     ) {
         return TriangleCountBaseConfig.of(graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    public ValidationConfiguration<TriangleCountBaseConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<TriangleCountBaseConfig>> beforeLoadValidations() {
+                return List.of(new GraphCreateConfigValidations.UndirectedGraphValidation<>());
+            }
+        };
     }
 
     @Override

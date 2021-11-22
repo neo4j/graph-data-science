@@ -20,18 +20,16 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -96,12 +94,8 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageStreamConfig config
-    ) {
-        var model = GraphSageModelResolver.resolveModel(modelCatalog, config.username(), config.modelName());
-        GraphStoreValidation.validate(graphStore, model.trainConfig());
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
+    public ValidationConfiguration<GraphSageStreamConfig> getValidationConfig() {
+        return GraphSageCompanion.getValidationConfig(modelCatalog, username());
     }
 
     @Override

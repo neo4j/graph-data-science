@@ -20,22 +20,23 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.gds.validation.AfterLoadValidation;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,20 +72,25 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationTrainConfig config
-    ) {
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
-        if (!graphStore.hasNodeProperty(filterLabels, config.targetProperty())) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "`%s`: `%s` not found in graph with node properties: %s",
-                "targetProperty",
-                config.targetProperty(),
-                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
-            ));
-        }
-        GraphStoreValidation.validate(graphStore, config);
+    public ValidationConfiguration<NodeClassificationTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<AfterLoadValidation<NodeClassificationTrainConfig>> afterLoadValidations() {
+                return List.of(
+                    (graphStore, graphCreateConfig, config) -> {
+                        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
+                        if (!graphStore.hasNodeProperty(filterLabels, config.targetProperty())) {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "`%s`: `%s` not found in graph with node properties: %s",
+                                "targetProperty",
+                                config.targetProperty(),
+                                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
+                            ));
+                        }
+                    }
+                );
+            }
+        };
     }
 
     @Override

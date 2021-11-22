@@ -22,8 +22,12 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 final class PageRankProc {
 
@@ -57,10 +61,19 @@ final class PageRankProc {
         return computeResult.result().scores().asNodeProperties();
     }
 
-    static <CONFIG extends PageRankConfig> void validateAlgoConfig(CONFIG config, Log log) {
-        if (config.cacheWeights()) {
-            log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
-        }
+    static <CONFIG extends PageRankConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(
+                    (graphCreateConfig, config) -> {
+                        if (config.cacheWeights()) {
+                            log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
+                        }
+                    }
+                );
+            }
+        };
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {

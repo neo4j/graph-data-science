@@ -26,6 +26,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,9 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientStreamProc
@@ -84,11 +83,8 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
-    ) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
-        warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
+    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> getValidationConfig() {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
     }
 
     @Override

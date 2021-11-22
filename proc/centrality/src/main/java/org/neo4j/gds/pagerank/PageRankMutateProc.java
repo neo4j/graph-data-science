@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -91,9 +92,8 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankMutateConfig config) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        PageRankProc.validateAlgoConfig(config, log);
+    public ValidationConfiguration<PageRankMutateConfig> getValidationConfig() {
+        return PageRankProc.getValidationConfig(log);
     }
 
     @SuppressWarnings("unused")

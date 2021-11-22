@@ -25,6 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.validation.Validator;
 
 import java.util.List;
 
@@ -104,7 +105,9 @@ public final class RelationshipWeightConfigProcTest {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "rw");
             var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("rw");
-            assertThatCode(() -> proc.validateConfigWithGraphStore(
+
+            var validator = new Validator<>(proc.getValidationConfig());
+            assertThatCode(() -> validator.validateConfigWithGraphStore(
                 graphStore,
                 null,
                 algoConfig
@@ -121,7 +124,9 @@ public final class RelationshipWeightConfigProcTest {
             var relationshipWeightConfig = config.withString("relationshipWeightProperty", "bar");
             var algoConfig = proc.newConfig(GRAPH_NAME, relationshipWeightConfig);
             assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("bar");
-            assertThatThrownBy(() -> proc.validateConfigWithGraphStore(
+
+            var validator = new Validator<>(proc.getValidationConfig());
+            assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                 graphStore,
                 null,
                 algoConfig

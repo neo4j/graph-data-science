@@ -20,19 +20,17 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -44,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictMutateProc
     extends MutatePropertyProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
@@ -80,31 +76,8 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected void validateConfigsAfterLoad(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationMutateConfig config
-    ) {
-        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
-            if (config.mutateProperty().equals(predictedProbabilityProperty)) {
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
-                        "mutateProperty",
-                        "predictedProbabilityProperty",
-                        predictedProbabilityProperty
-                    )
-                );
-            }
-        });
-
-        var trainConfig = modelCatalog.get(
-            config.username(),
-            config.modelName(),
-            NodeLogisticRegressionData.class,
-            NodeClassificationTrainConfig.class,
-            NodeClassificationModelInfo.class
-        ).trainConfig();
-        GraphStoreValidation.validate(graphStore, trainConfig);
+    public ValidationConfiguration<NodeClassificationMutateConfig> getValidationConfig() {
+        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
     }
 
     @Override

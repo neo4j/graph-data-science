@@ -26,6 +26,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -36,7 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -78,8 +78,8 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPredictStreamConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig, config);
+    public ValidationConfiguration<LinkPredictionPredictStreamConfig> getValidationConfig() {
+        return LinkPredictionPredictCompanion.getValidationConfig();
     }
 
     @Override

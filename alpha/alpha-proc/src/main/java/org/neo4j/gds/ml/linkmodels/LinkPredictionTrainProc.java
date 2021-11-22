@@ -27,6 +27,9 @@ import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.validation.BeforeLoadValidation;
+import org.neo4j.gds.validation.GraphCreateConfigValidations;
+import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -37,7 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrainProc extends
@@ -88,16 +90,21 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig,
-        LinkPredictionTrainConfig config
-    ) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        validateIsUndirectedGraph(graphCreateConfig, config);
-
-        if (config.params().isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale("No model candidates (params) specified, we require at least one"));
-        }
+    public ValidationConfiguration<LinkPredictionTrainConfig> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<LinkPredictionTrainConfig>> beforeLoadValidations() {
+                return List.of(
+                    new GraphCreateConfigValidations.UndirectedGraphValidation<>(),
+                    (graphCreateConfig, config) -> {
+                        if (config.params().isEmpty()) {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "No model candidates (params) specified, we require at least one"));
+                        }
+                    }
+                );
+            }
+        };
     }
 
     @Override
