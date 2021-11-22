@@ -97,10 +97,18 @@ public final class GraphStoreValidation {
     private static void validateMutateProperty(GraphStore graphStore, Collection<NodeLabel> filterLabels, MutatePropertyConfig mutateConfig) {
         String mutateProperty = mutateConfig.mutateProperty();
 
-        if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
+        validateNodePropertyDoesNotExist(graphStore, filterLabels, mutateProperty);
+    }
+
+    public static void validateNodePropertyDoesNotExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> filterLabels,
+        String nodeProperty
+    ) {
+        if (nodeProperty != null && graphStore.hasNodeProperty(filterLabels, nodeProperty)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Node property `%s` already exists in the in-memory graph.",
-                mutateProperty
+                nodeProperty
             ));
         }
     }

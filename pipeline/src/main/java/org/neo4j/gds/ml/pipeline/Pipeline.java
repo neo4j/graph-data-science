@@ -73,7 +73,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
 
         if (!invalidProperties.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Node properties %s defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline",
+                "Node properties %s defined in the feature steps do not exist in the graph or part of the pipeline",
                 invalidProperties
             ));
         }
