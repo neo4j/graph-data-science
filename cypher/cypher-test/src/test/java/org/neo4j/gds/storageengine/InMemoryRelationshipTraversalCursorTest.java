@@ -34,8 +34,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.values.storable.DoubleValue;
-import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
