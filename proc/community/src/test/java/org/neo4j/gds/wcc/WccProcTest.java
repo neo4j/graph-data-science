@@ -135,7 +135,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(3.14, wccConfig.threshold());
         });
     }
@@ -148,7 +148,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(3, wccConfig.threshold());
         });
     }
@@ -161,7 +161,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(consecutiveIds, wccConfig.consecutiveIds());
         });
     }
@@ -176,7 +176,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.of(GRAPH_NAME), config)
+                () -> proc.configParser().newConfig(Optional.of(GRAPH_NAME), config)
             );
 
             assertTrue(exception
@@ -193,7 +193,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.of(GRAPH_NAME), config)
+                () -> proc.configParser().newConfig(Optional.of(GRAPH_NAME), config)
             );
 
             assertTrue(exception

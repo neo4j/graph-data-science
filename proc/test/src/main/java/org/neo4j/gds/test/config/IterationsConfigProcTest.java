@@ -21,8 +21,8 @@ package org.neo4j.gds.test.config;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.IterationsConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 
@@ -56,10 +56,12 @@ public final class IterationsConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
             assertThatThrownBy(() -> proc
+                .configParser()
                 .newConfig(GRAPH_NAME, config.withNumber("maxIterations", 0)))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("0");
             assertThatThrownBy(() -> proc
+                .configParser()
                 .newConfig(GRAPH_NAME, config.withNumber("maxIterations", -10)))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("-10");
@@ -72,7 +74,7 @@ public final class IterationsConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validMaxIterations", () -> {
             var iterationsConfig = config.withNumber("maxIterations", 3);
-            var algoConfig = ((IterationsConfig) proc.newConfig(GRAPH_NAME, iterationsConfig));
+            var algoConfig = ((IterationsConfig) proc.configParser().newConfig(GRAPH_NAME, iterationsConfig));
             assertThat(algoConfig.maxIterations()).isEqualTo(3);
         });
     }

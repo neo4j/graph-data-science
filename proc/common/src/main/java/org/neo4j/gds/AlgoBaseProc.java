@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
@@ -43,16 +42,9 @@ import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
-import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
-import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
-import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -64,34 +56,8 @@ public abstract class AlgoBaseProc<
         return this.getClass().getSimpleName();
     }
 
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        Collection<String> allowedKeys = new HashSet<>();
-        // implicit loading
-        if (graphName.isEmpty()) {
-            // inherit concurrency from AlgoBaseConfig
-            if (!config.containsKey(READ_CONCURRENCY_KEY)) {
-                config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
-            }
-            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(username(), config);
-            maybeImplicitCreate = Optional.of(createConfig);
-            allowedKeys.addAll(createConfig.configKeys());
-            CypherMapWrapper configWithoutCreateKeys = config.withoutAny(allowedKeys);
-            // check if we have an explicit configured sudo key, as this one is
-            // shared between create and algo configs
-            for (var entry : allSharedConfigKeys().entrySet()) {
-                var value = config.getChecked(entry.getKey(), null, entry.getValue());
-                if (value != null) {
-                    configWithoutCreateKeys = configWithoutCreateKeys.withEntry(entry.getKey(), value);
-                }
-            }
-            config = configWithoutCreateKeys;
-        }
-        CONFIG algoConfig = newConfig(username(), graphName, maybeImplicitCreate, config);
-        setAlgorithmMetaDataToTransaction(algoConfig);
-        allowedKeys.addAll(algoConfig.configKeys());
-        validateConfig(config, allowedKeys);
-        return algoConfig;
+    public ProcConfigParser<CONFIG> configParser() {
+        return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
     }
 
     private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
@@ -104,19 +70,6 @@ public abstract class AlgoBaseProc<
         }
     }
 
-    private Map<String, Class<?>> allSharedConfigKeys() {
-        var configKeys = new HashMap<String, Class<?>>(sharedConfigKeys());
-        configKeys.put(SUDO_KEY, Boolean.class);
-        return configKeys;
-    }
-
-    /**
-     * If the algorithm config shares any configuration parameters with anonymous projections, these must be declared here.
-     */
-    protected Map<String, Class<?>> sharedConfigKeys() {
-        return Map.of();
-    }
-
     protected abstract CONFIG newConfig(
         String username,
         Optional<String> graphName,
@@ -125,38 +78,6 @@ public abstract class AlgoBaseProc<
     );
 
     protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
-
-    public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
-        CONFIG config;
-        Optional<String> graphName = Optional.empty();
-
-        if (graphNameOrConfig instanceof String) {
-            graphName = Optional.of((String) graphNameOrConfig);
-            CypherMapWrapper algoConfig = CypherMapWrapper.create(configuration);
-            config = newConfig(graphName, algoConfig);
-
-            //TODO: assert that algoConfig is empty or fail
-        } else if (graphNameOrConfig instanceof Map) {
-            if (!configuration.isEmpty()) {
-                throw new IllegalArgumentException(
-                    "The second parameter can only used when a graph name is given as first parameter");
-            }
-
-            Map<String, Object> implicitConfig = (Map<String, Object>) graphNameOrConfig;
-            CypherMapWrapper implicitAndAlgoConfig = CypherMapWrapper.create(implicitConfig);
-
-            config = newConfig(Optional.empty(), implicitAndAlgoConfig);
-
-            //TODO: assert that implicitAndAlgoConfig is empty or fail
-        } else {
-            throw new IllegalArgumentException(
-                "The first parameter must be a graph name or a configuration map, but was: " + graphNameOrConfig
-            );
-        }
-
-        return Tuples.pair(config, graphName);
-    }
-
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -175,8 +96,10 @@ public abstract class AlgoBaseProc<
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
         var allocationTracker = allocationTracker();
 
-        Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
+        Pair<CONFIG, Optional<String>> input = configParser().processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
+
+        setAlgorithmMetaDataToTransaction(config);
 
         var memoryEstimationInBytes = tryValidateMemoryUsage(config, this::memoryEstimation);
 
@@ -246,7 +169,7 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        Pair<CONFIG, Optional<String>> configAndGraphName = processInput(
+        Pair<CONFIG, Optional<String>> configAndGraphName = configParser().processInput(
             graphNameOrConfig,
             configuration
         );
@@ -297,10 +220,14 @@ public abstract class AlgoBaseProc<
         return ValidationConfiguration.empty();
     }
 
+    public Validator<CONFIG> validator() {
+        return new Validator<>(getValidationConfig());
+    }
+
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
-        Validator<CONFIG> validator = new Validator<>(getValidationConfig());
+        Validator<CONFIG> validator = validator();
         var graphStoreLoader = graphStoreLoader(config, maybeGraphName);
 
         var graphCreateConfig = graphStoreLoader.graphCreateConfig();

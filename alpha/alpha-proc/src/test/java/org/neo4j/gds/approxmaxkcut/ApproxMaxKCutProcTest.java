@@ -143,7 +143,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
     void testK() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("k", 18)));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(18, approxMaxKCutConfig.k());
         });
     }
@@ -152,7 +152,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
     void testIterations() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("iterations", 87)));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(87, approxMaxKCutConfig.iterations());
         });
     }
@@ -164,7 +164,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             31
         )));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(31, approxMaxKCutConfig.vnsMaxNeighborhoodOrder());
         });
     }
@@ -178,7 +178,7 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             1
         )));
         applyOnProcedure(proc -> {
-            CONFIG approxMaxKCutConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
+            CONFIG approxMaxKCutConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(42L, approxMaxKCutConfig.randomSeed().get());
         });
     }

@@ -62,7 +62,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     ) {
         ImmutableComputationResult.Builder<CollapsePath, Relationships, CollapsePathConfig> builder = ImmutableComputationResult.builder();
 
-        Pair<CollapsePathConfig, Optional<String>> input = processInput(
+        Pair<CollapsePathConfig, Optional<String>> input = configParser().processInput(
             graphNameOrConfig,
             configuration
         );

@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.validation.Validator;
 
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.config.GraphCreateConfig.NODE_COUNT_KEY;
-import static org.neo4j.gds.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -35,17 +34,12 @@ public abstract class MutateProc<
     PROC_RESULT,
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    @Override
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        if (graphName.isEmpty() && !(config.containsKey(NODE_COUNT_KEY) || config.containsKey(RELATIONSHIP_COUNT_KEY))) {
-            throw new IllegalArgumentException(
-                "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
-            );
-        }
-        return super.newConfig(graphName, config);
-    }
-
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
+
+    @Override
+    public Validator<CONFIG> validator() {
+        return new MutateValidator<>(getValidationConfig());
+    }
 
     protected Stream<PROC_RESULT> mutate(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
@@ -71,4 +65,25 @@ public abstract class MutateProc<
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     );
+
+    private static class MutateValidator<CONFIG extends AlgoBaseConfig> extends Validator<CONFIG> {
+
+        MutateValidator(ValidationConfiguration<CONFIG> validationConfiguration) {
+            super(validationConfiguration);
+        }
+
+        @Override
+        public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
+            validateMutateConfig(config);
+            super.validateConfigsBeforeLoad(graphCreateConfig, config);
+        }
+
+        private void validateMutateConfig(CONFIG config) {
+            if (config.implicitCreateConfig().isPresent() && config instanceof MutateConfig) {
+                throw new IllegalArgumentException(
+                    "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
+                );
+            }
+        }
+    }
 }

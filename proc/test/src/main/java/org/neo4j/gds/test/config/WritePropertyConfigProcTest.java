@@ -52,7 +52,7 @@ public final class WritePropertyConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedWriteProperty", () -> {
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withoutEntry("writeProperty")))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withoutEntry("writeProperty")))
                 .hasMessageContaining("writeProperty")
                 .hasMessageContaining("mandatory");
         });
@@ -63,7 +63,7 @@ public final class WritePropertyConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("nullWriteProperty", () -> {
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withString("writeProperty", null)))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withString("writeProperty", null)))
                 .hasMessageContaining("writeProperty")
                 .hasMessageContaining("null")
                 .hasMessageContaining("type")
@@ -76,7 +76,7 @@ public final class WritePropertyConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceWriteProperty", () -> {
-            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withString("writeProperty", "  ")))
+            assertThatThrownBy(() -> proc.configParser().newConfig(GRAPH_NAME, config.withString("writeProperty", "  ")))
                 .hasMessageContaining("writeProperty")
                 .hasMessageContaining("whitespace");
         });
@@ -88,7 +88,7 @@ public final class WritePropertyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validWriteProperty", () -> {
             var wpConfig = config.withString("writeProperty", "w");
-            var algoConfig = ((WritePropertyConfig) proc.newConfig(GRAPH_NAME, wpConfig));
+            var algoConfig = ((WritePropertyConfig) proc.configParser().newConfig(GRAPH_NAME, wpConfig));
             assertThat(algoConfig.writeProperty()).isEqualTo("w");
         });
     }
@@ -99,7 +99,7 @@ public final class WritePropertyConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validWriteConcurrency", () -> {
             var wpConfig = config.withNumber("writeConcurrency", 3L);
-            var algoConfig = ((WritePropertyConfig) proc.newConfig(GRAPH_NAME, wpConfig));
+            var algoConfig = ((WritePropertyConfig) proc.configParser().newConfig(GRAPH_NAME, wpConfig));
             assertThat(algoConfig.writeConcurrency()).isEqualTo(3);
         });
     }
