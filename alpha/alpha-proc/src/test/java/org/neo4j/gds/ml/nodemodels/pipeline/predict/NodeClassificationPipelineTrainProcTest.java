@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.Condition;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.hamcrest.Matchers.aMapWithSize;
 
 class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
@@ -127,26 +131,67 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         params.put("graphName", GRAPH_NAME);
         params.put("modelName", MODEL_NAME);
 
+        var soMap = InstanceOfAssertFactories.map(
+            String.class,
+            Object.class
+        );
+
+        var modelInfoCheck = new Condition<Object>(m -> {
+
+            var modelInfo = assertThat(m).asInstanceOf(soMap)
+                .containsEntry("modelName", MODEL_NAME)
+                .containsEntry("modelType", "Node classification pipeline")
+                .containsKey("bestParameters")
+                .containsEntry("classes", List.of(0L, 1L));
+
+            var metrics = modelInfo
+                .extractingByKey("metrics", soMap)
+                .extractingByKey("F1_class_1", soMap)
+                .containsKey("validation")
+                .containsKey("train");
+
+            metrics.extractingByKey("outerTrain", InstanceOfAssertFactories.DOUBLE)
+                .isCloseTo(0.66666666, within(1e-7));
+
+            metrics.extractingByKey("test", InstanceOfAssertFactories.DOUBLE)
+                .isCloseTo(0.9999999, within(1e-7));
+
+            var featurePipeline = modelInfo.extractingByKey("trainingPipeline", soMap)
+                .containsKey("splitConfig")
+                .containsKey("trainingParameterSpace")
+                .extractingByKey("featurePipeline", soMap);
+
+            featurePipeline
+                .extractingByKey("nodePropertySteps", InstanceOfAssertFactories.LIST)
+                .hasSize(1)
+                .element(0, soMap)
+                .containsEntry("name", "gds.pageRank.mutate")
+                .containsEntry("config", Map.of("mutateProperty", "pr"));
+
+            featurePipeline
+                .extractingByKey("featureSteps", InstanceOfAssertFactories.list(Map.class))
+                .extracting(map -> map.get("feature"))
+                .containsExactly("array", "scalar", "pr");
+
+            return true;
+        }, "a modelInfo map");
+
+
         assertCypherResult(
             "CALL gds.alpha.ml.pipeline.nodeClassification.train($graphName, " +
             "{ pipeline: $pipeline, modelName: $modelName, targetProperty: 't', metrics: ['F1(class=1)'], randomSeed: 1337 })",
             params,
             List.of(
                 Map.of(
-                    "modelInfo", Matchers.allOf(
-                        Matchers.hasEntry("modelName", MODEL_NAME),
-                        Matchers.hasEntry("modelType", "Node classification pipeline"),
-                        Matchers.hasKey("bestParameters"),
-                        Matchers.hasKey("metrics"),
-                        Matchers.hasKey("trainingPipeline")
-                    ),
+                    "modelInfo", modelInfoCheck,
                     "trainMillis", Matchers.greaterThan(-1L),
                     "configuration", Matchers.allOf(
                         Matchers.hasEntry("pipeline", PIPELINE_NAME),
                         Matchers.hasEntry("modelName", MODEL_NAME),
                         aMapWithSize(10)
                     )
-                ))
+                )
+            )
         );
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
