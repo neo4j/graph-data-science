@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.MemoryUsageValidator;
+import org.neo4j.gds.ProcedureExecutor;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.pipeline.ProcedurePipelineSpec;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
+public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig> {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
@@ -47,12 +47,25 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult = compute(
-            graphName,
-            configuration
+        var mutateSpec = new WccMutateSpec(callContext, allocationTracker(), log);
+        var pipelineSpec = new ProcedurePipelineSpec<Wcc, DisjointSetStruct, WccMutateConfig>(
+            username(),
+            this::graphStoreLoader,
+            new MemoryUsageValidator(log, api)
         );
 
-        return mutate(computationResult);
+        return new ProcedureExecutor<>(
+            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
+            mutateSpec.algorithmFactory(),
+            transaction,
+            log,
+            taskRegistryFactory,
+            this.getClass().getSimpleName(),
+            allocationTracker(),
+            pipelineSpec.graphCreationFactory(),
+            mutateSpec.validationConfig(),
+            mutateSpec.computationResultConsumer()
+        ).compute(graphNameOrConfig, configuration, true, true);
     }
 
     @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
@@ -71,22 +84,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
 
     @Override
     protected GraphAlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory() {
-        return WccProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodeProperties nodeProperties(
-        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
-    ) {
-        return WccProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
-    }
-
-    @Override
-    protected AbstractResultBuilder<WccMutateProc.MutateResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
-        return WccProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
-            computeResult
-        );
+        return null;
     }
 
     @SuppressWarnings("unused")
