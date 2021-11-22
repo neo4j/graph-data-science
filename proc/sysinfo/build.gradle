@@ -5,6 +5,12 @@ description = 'Neo4j Graph Data Science :: Procedures :: Sysinfo'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    compileOnly project(':annotations')
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+
     compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
     compileOnly group: 'org.neo4j', name: 'neo4j-configuration', version: ver.neo4j
     compileOnly group: 'org.neo4j', name: 'neo4j-kernel', version: ver.neo4j
