@@ -38,6 +38,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
@@ -59,13 +60,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
+import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
+    private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
     static String GDL = "CREATE " +
@@ -264,6 +268,31 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
+        });
+    }
+
+    @Test
+    void validateFeaturesExistOnGraph() {
+        addPipelineModelWithFeatures(modelCatalog, getUsername(), 3, List.of("a", "b", "d"));
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(
+                caller,
+                db.databaseId(),
+                modelCatalog
+            );
+            var streamConfig = NodeClassificationPredictPipelineStreamConfig.of(
+                "", Optional.of("g"), Optional.empty(), CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
+
+            var algo = factory.build(
+                null,
+                streamConfig,
+                AllocationTracker.empty(),
+                ProgressTracker.NULL_TRACKER
+            );
+            assertThatThrownBy(algo::compute)
+                .hasMessage(
+                    "Node properties [d] defined in the feature steps do not exist in the graph or part of the pipeline"
+                );
         });
     }
 }
