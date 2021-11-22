@@ -29,7 +29,9 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
@@ -42,7 +44,8 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
     private static final String MODEL_NAME = "model";
 
-    private  static final String DB_CYPHER =
+    @Neo4jGraph
+    private static final String DB_CYPHER =
         "CREATE " +
         "  (n0:Ignore {a: 42.0, b:  1337.0})" +
         ", (n1:N {a: -1.36753705, b:  1.46853155})" +
@@ -54,11 +57,12 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
     @Inject
     private ModelCatalog modelCatalog;
 
+    @Inject
+    private IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, NodeClassificationPipelineStreamProc.class);
-
-        runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call()
             .withNodeLabel("N")
@@ -90,23 +94,23 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
         assertCypherResult(query, List.of(
             // Use MapUtil because Map.of doesn't like nulls
             MapUtil.map(
-                "nodeId", 1L,
+                "nodeId", idFunction.of("n1"),
                 "predictedClass", 1L,
                 "predictedProbabilities", null
             ), MapUtil.map(
-                "nodeId", 2L,
+                "nodeId", idFunction.of("n2"),
                 "predictedClass", 0L,
                 "predictedProbabilities", null
             ), MapUtil.map(
-                "nodeId", 3L,
+                "nodeId", idFunction.of("n3"),
                 "predictedClass", 0L,
                 "predictedProbabilities", null
             ), MapUtil.map(
-                "nodeId", 4L,
+                "nodeId", idFunction.of("n4"),
                 "predictedClass", 1L,
                 "predictedProbabilities", null
             ), MapUtil.map(
-                "nodeId", 5L,
+                "nodeId", idFunction.of("n5"),
                 "predictedClass", 1L,
                 "predictedProbabilities", null
             )
