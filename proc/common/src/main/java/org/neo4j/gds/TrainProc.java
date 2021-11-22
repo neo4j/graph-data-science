@@ -83,12 +83,12 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         };
     }
 
-    static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
+    public static class TrainingConfigValidation<TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> implements BeforeLoadValidation<TRAIN_CONFIG> {
         private final ModelCatalog modelCatalog;
         private final String username;
         private final String modelType;
 
-        TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
+        public TrainingConfigValidation(ModelCatalog modelCatalog, String username, String modelType) {
             this.modelCatalog = modelCatalog;
             this.username = username;
             this.modelType = modelType;
