@@ -46,10 +46,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineExecutor.MODEL_TYPE;
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
-class NodeClassificationPipelineExecutorTest extends BaseProcTest {
+class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     private static String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
 
@@ -126,7 +126,7 @@ class NodeClassificationPipelineExecutorTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var ncPipeTrain = new NodeClassificationPipelineExecutor(
+            var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
                 pipeline,
                 config,
                 caller,
