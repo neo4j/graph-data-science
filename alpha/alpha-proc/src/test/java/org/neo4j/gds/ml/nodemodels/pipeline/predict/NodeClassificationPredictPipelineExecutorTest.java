@@ -225,7 +225,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller, db.databaseId(), modelCatalog)
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller, db.databaseId())
                     .progressTask(graphStore.getUnion(), config),
                 log,
                 1,

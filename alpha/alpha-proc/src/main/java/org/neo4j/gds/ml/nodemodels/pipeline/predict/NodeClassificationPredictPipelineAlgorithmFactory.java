@@ -54,8 +54,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     NodeClassificationPredictPipelineAlgorithmFactory(
         ModelCatalog modelCatalog,
         BaseProc caller,
-        NamedDatabaseId databaseId,
-        ModelCatalog modelCatalog
+        NamedDatabaseId databaseId
     ) {
         super();
         this.modelCatalog = modelCatalog;

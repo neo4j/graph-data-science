@@ -100,7 +100,7 @@ public final class GraphStoreValidation {
         validateNodePropertyDoesNotExist(graphStore, filterLabels, mutateProperty);
     }
 
-    public static void validateNodePropertyDoesNotExist(
+    private static void validateNodePropertyDoesNotExist(
         GraphStore graphStore,
         Collection<NodeLabel> filterLabels,
         String nodeProperty
