@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
@@ -41,6 +42,7 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -121,6 +123,17 @@ public abstract class BaseProc {
             log.warn(message, e);
             throw e;
         }
+    }
+
+    protected <CONFIG extends AlgoBaseConfig> GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
+        return GraphStoreLoader.of(
+            config,
+            maybeGraphName,
+            this::databaseId,
+            this::username,
+            this::graphLoaderContext,
+            isGdsAdmin()
+        );
     }
 
     protected final void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {

@@ -42,7 +42,7 @@ public class MemoryUsageValidator {
     private final Log log;
     private final GraphDatabaseAPI api;
 
-    MemoryUsageValidator(Log log, GraphDatabaseAPI api) {
+    public MemoryUsageValidator(Log log, GraphDatabaseAPI api) {
         this.log = log;
         this.api = api;
     }
