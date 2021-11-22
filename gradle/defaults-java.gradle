@@ -107,7 +107,18 @@ allprojects {
             finalizedBy jacocoTestReport
         }
 
+        sonarqube {
+            properties {
+                property 'sonar.coverage.jacoco.xmlReportPaths', "$projectDir/build/reports/jacoco/test/jacocoTestReport.xml"
+            }
+        }
+
         jacocoTestReport {
+            reports {
+                xml.required = true
+                html.required = false
+            }
+
             afterEvaluate {
                 classDirectories.setFrom(files(classDirectories.files.collect {
                     fileTree(dir: it, exclude: [
