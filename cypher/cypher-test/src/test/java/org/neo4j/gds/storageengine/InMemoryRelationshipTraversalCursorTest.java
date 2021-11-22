@@ -34,6 +34,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.values.storable.DoubleValue;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
@@ -148,12 +150,13 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
             .toArray();
         StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
 
-        expectedValues.forEach((propertyKey, expectedValue) -> {
+        expectedValues.forEach((ignore1, ignore2) -> {
             assertThat(propertyCursor.next()).isTrue();
-            var actualPropertyName = tokenHolders.propertyKeyGetName(propertyCursor.propertyKey());
-            assertThat(actualPropertyName).isEqualTo(propertyKey);
-            var actualPropertyValue = propertyCursor.propertyValue();
-            assertThat(actualPropertyValue).isEqualTo(Values.doubleValue(expectedValue));
+            var actualKey = tokenHolders.propertyKeyGetName(propertyCursor.propertyKey());
+            assertThat(expectedValues.keySet()).contains(actualKey);
+            var actualValue = propertyCursor.propertyValue();
+            var expectedValue = Values.doubleValue(expectedValues.get(actualKey));
+            assertThat(actualValue).isEqualTo(expectedValue);
         });
     }
 
