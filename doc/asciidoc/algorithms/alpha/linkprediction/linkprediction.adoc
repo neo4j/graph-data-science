@@ -588,6 +588,12 @@ CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Note that the predicted link between the Karin and Greg nodes does not reflect any particular direction between them.
 
+[NOTE]
+====
+The stream procedure yields at most one row per node pair.
+So for example if both `a -- b` and `b -- a` are among the `topN` predictions, then there will still only be one row pertaining the `a, b` node pair.
+====
+
 
 [[algorithms-ml-linkprediction-examples-mutate]]
 === Mutate
@@ -622,6 +628,14 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
+[NOTE]
+====
+The relationships that are produced by mutation are undirected, just like the input.
+However, no parallel relationships are produced.
+So for example if both `a -- b` and `b -- a` are among the `topN` predictions, then there will still only be one undirected relationship `a -- b` produced.
+====
+
+
 [[algorithms-ml-linkprediction-examples-write]]
 === Write
 
@@ -654,3 +668,10 @@ The end result looks like this:
 image::example-graphs/link-prediction-mutate.svg[align="center"]
 
 In yellow we highlight the predicted relationships.
+
+[NOTE]
+====
+The relationships that are written are undirected, just like the input.
+However, no parallel relationships are written.
+So for example if both `a -- b` and `b -- a` are among the `topN` predictions, then there will still only be one undirected relationship `a -- b` written.
+====
