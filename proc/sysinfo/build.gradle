@@ -1,4 +1,9 @@
 apply plugin: 'java-library'
+apply plugin: 'nebula.info-broker'
+apply plugin: 'nebula.info-props'
+apply plugin: 'nebula.info-basic'
+apply plugin: 'nebula.info-java'
+apply plugin: 'nebula.info-scm'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Sysinfo'
 
@@ -23,3 +28,26 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':test-graph-loaders')
 }
+
+// configure the keys that will be written to the info.properties file
+infoBroker {
+    includedManifestProperties = [
+        'Build-Date',
+        'Build-Java-Version',
+        'Created-By',
+        'Full-Change',
+        'Implementation-Version',
+        'X-Compile-Target-JDK',
+    ]
+}
+
+// write the info.properties file on classes
+task('processVersionResources', type: Copy, dependsOn: processResources) {
+    into project.sourceSets.main.output.resourcesDir
+    from(writeManifestProperties) {
+        rename { "info.properties" }
+        into "META-INF"
+    }
+}
+tasks.writeManifestProperties.outputs.upToDateWhen { false }
+classes.dependsOn(processVersionResources)
