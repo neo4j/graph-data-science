@@ -26,10 +26,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.Training;
-
-import java.util.List;
 
 public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> {
 
@@ -52,32 +48,11 @@ public class NodeClassificationTrainAlgorithmFactory extends AlgorithmFactory<No
 
     @Override
     protected String taskName() {
-        return "NCTrain";
+        return NodeClassificationTrain.taskName();
     }
 
     @Override
-    public Task progressTask(
-        Graph graph, NodeClassificationTrainConfig config
-    ) {
-
-        return Tasks.task(
-            taskName(),
-            Tasks.leaf("ShuffleAndSplit"),
-            Tasks.iterativeFixed(
-                "SelectBestModel",
-                () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
-                        Tasks.task(
-                            "Split",
-                            Training.progressTask("Training"),
-                            Tasks.leaf("Evaluate")
-                        )
-                    ), config.validationFolds())
-                ),
-                config.params().size()
-            ),
-            Training.progressTask("TrainSelectedOnRemainder"),
-            Tasks.leaf("EvaluateSelectedModel"),
-            Training.progressTask("RetrainSelectedModel")
-        );
+    public Task progressTask(Graph graph, NodeClassificationTrainConfig config) {
+        return NodeClassificationTrain.progressTask(config.validationFolds(), config.params().size());
     }
 }
