@@ -34,7 +34,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD, TYPE, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 @ExtendWith(EnableForNeo4jVersionCondition.class)
-@Repeatable(EnableForNeo4jVersions.class)
 public @interface EnableForNeo4jVersion {
 
     Neo4jVersion value();

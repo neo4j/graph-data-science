@@ -23,15 +23,10 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jVersion;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
-import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.helpers.AnnotationHelper.findAnnotation;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -46,43 +41,17 @@ public class EnableForNeo4jVersionCondition implements ExecutionCondition {
             .getElement()
             .orElseThrow(IllegalStateException::new);
 
-        List<Neo4jVersion> enabledForVersions;
-
-        var single = findAnnotation(element, EnableForNeo4jVersion.class);
-        if (single != null) {
-            enabledForVersions = List.of(single.value());
-        } else {
-            var repeated = findAnnotation(element, EnableForNeo4jVersions.class);
-            if (repeated == null) {
-                enabledForVersions = List.of();
-            } else {
-                enabledForVersions = Arrays
-                    .stream(repeated.value())
-                    .map(EnableForNeo4jVersion::value)
-                    .collect(Collectors.toList());
-            }
-        }
-
-        return shouldEnableForNeo4jVersion(
-            enabledForVersions
-        );
-    }
-
-    private ConditionEvaluationResult shouldEnableForNeo4jVersion(
-        List<Neo4jVersion> enabledVersions
-    ) {
         var runningNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
 
-        if (enabledVersions.isEmpty()) {
-            return ENABLED_BY_DEFAULT;
-        } else if (enabledVersions.contains(runningNeo4jVersion)) {
-            return enabled("");
+        var single = findAnnotation(element, EnableForNeo4jVersion.class);
+        if (single != null && single.value() != runningNeo4jVersion) {
+            return disabled(formatWithLocale(
+                "Not enabled for %s, only for Neo4j version %s",
+                runningNeo4jVersion,
+                single.value()
+            ));
         }
 
-        return disabled(formatWithLocale(
-            "Not enabled for %s, only for Neo4j versions %s",
-            runningNeo4jVersion,
-            enabledVersions
-        ));
+        return ENABLED_BY_DEFAULT;
     }
 }
