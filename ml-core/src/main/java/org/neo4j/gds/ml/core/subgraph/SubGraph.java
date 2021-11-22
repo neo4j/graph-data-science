@@ -74,12 +74,7 @@ public class SubGraph implements BatchNeighbors {
     }
 
     public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, boolean useWeights) {
-        // given a list of nodes (nodeIds) and a function that produces neighbors based on given graph and a node
-        // result: a sampled graph
-
-        // adjacency list
         int[][] adjacency = new int[batchNodeIds.length][];
-        // ??
         int[] batchedNodeIds = new int[batchNodeIds.length];
 
         // mapping original long-based nodeIds into consecutive int-based ids
