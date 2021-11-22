@@ -87,15 +87,6 @@ public class NodeClassificationPipelineWriteProc
                 );
             }
         });
-
-        var trainConfig = modelCatalog.get(
-            config.username(),
-            config.modelName(),
-            NodeLogisticRegressionData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
-        ).trainConfig();
-        GraphStoreValidation.validate(graphStore, trainConfig);
     }
 
     @Override
