@@ -75,14 +75,6 @@ public class NodeClassificationPipelineWriteProc
         NodeClassificationPredictPipelineWriteConfig config
     ) {
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        config.predictedProbabilityProperty()
-            .ifPresent(
-                property -> GraphStoreValidation.validateNodePropertyDoesNotExist(
-                    graphStore,
-                    config.nodeLabelIdentifiers(graphStore),
-                    property
-                )
-            );
         config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (config.writeProperty().equals(predictedProbabilityProperty)) {
                 throw new IllegalArgumentException(
