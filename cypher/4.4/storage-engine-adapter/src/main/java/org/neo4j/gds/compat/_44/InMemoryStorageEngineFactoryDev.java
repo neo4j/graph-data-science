@@ -28,6 +28,7 @@ import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader44;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
@@ -47,6 +48,7 @@ import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.monitoring.DatabaseHealth;
+import org.neo4j.storageengine.api.CommandReaderFactory;
 import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
@@ -180,5 +182,10 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
         CursorContext cursorContext
     ) {
         return List.of();
+    }
+
+    @Override
+    public CommandReaderFactory commandReaderFactory() {
+        return InMemoryStorageCommandReaderFactory.INSTANCE;
     }
 }
