@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+
 public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
     NodeClassificationPredictPipelineExecutor,
@@ -49,13 +51,11 @@ public class NodeClassificationPipelineMutateProc
     NodeClassificationPipelineMutateProc.MutateResult,
     NodeClassificationPredictPipelineMutateConfig>
 {
-    static final String DESCRIPTION = "Predicts classes for all nodes based on a previously trained pipeline model";
-
     @Context
     public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
-    @Description(DESCRIPTION)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels;
+package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
@@ -27,9 +27,8 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -44,36 +43,35 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class NodeClassificationPredictStreamProc
-    extends StreamProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamResult, NodeClassificationStreamConfig> {
+import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+
+public class NodeClassificationPipelineStreamProc
+    extends StreamProc<
+    NodeClassificationPredictPipelineExecutor,
+    NodeClassificationResult,
+    NodeClassificationStreamResult,
+    NodeClassificationPredictPipelineStreamConfig>
+{
 
     @Context
     public ModelCatalog modelCatalog;
 
-    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream", mode = Mode.READ)
-    @Description("Predicts classes for all nodes based on a previously trained model")
+    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<NodeClassificationStreamResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
-        return stream(result);
-    }
-
-    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream.estimate", mode = Mode.READ)
-    @Description("Predicts classes for all nodes based on a previously trained model")
-    public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Override
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
-        NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig
-        > computationResult
+            NodeClassificationPredictPipelineExecutor,
+            NodeClassificationResult,
+            NodeClassificationPredictPipelineStreamConfig
+            > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
@@ -102,35 +100,27 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    public ValidationConfiguration<NodeClassificationStreamConfig> getValidationConfig() {
-        return NodeClassificationCompanion.getValidationConfig(modelCatalog);
+    protected NodeClassificationStreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
+        throw new UnsupportedOperationException("NodeClassification handles result building individually.");
     }
 
-
     @Override
-    protected NodeClassificationStreamConfig newConfig(
+    protected NodeClassificationPredictPipelineStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeClassificationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeClassificationPredictPipelineStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationStreamConfig> algorithmFactory() {
-        return new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
-    }
-
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<NodeClassificationPredict, NodeClassificationResult, NodeClassificationStreamConfig> computationResult) {
-        return super.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected NodeClassificationStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        throw new UnsupportedOperationException("NodeClassification handles result building individually.");
+    protected AlgorithmFactory<
+        NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig
+        > algorithmFactory()
+    {
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this, databaseId());
     }
 }
