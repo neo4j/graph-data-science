@@ -20,119 +20,18 @@
 package org.neo4j.gds;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.neo4j.gds.config.BaseConfig.SUDO_KEY;
-import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
-import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
-import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
+public interface ProcConfigParser<CONFIG extends AlgoBaseConfig> {
+    String username();
 
-public abstract class ProcConfigParser<CONFIG extends AlgoBaseConfig> {
+    Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration);
 
-    private final String username;
-    private Map<String, Class<?>> sharedConfigKeys;
+    CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config);
 
-    protected ProcConfigParser(String username) {
-        this.username = username;
-        this.sharedConfigKeys = new HashMap<>();
-    }
-
-    public String username() {
-        return this.username;
-    }
-
-    public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
-        CONFIG config;
-        Optional<String> graphName = Optional.empty();
-
-        if (graphNameOrConfig instanceof String) {
-            graphName = Optional.of((String) graphNameOrConfig);
-            CypherMapWrapper algoConfig = CypherMapWrapper.create(configuration);
-            config = newConfig(graphName, algoConfig);
-
-            //TODO: assert that algoConfig is empty or fail
-        } else if (graphNameOrConfig instanceof Map) {
-            if (!configuration.isEmpty()) {
-                throw new IllegalArgumentException(
-                    "The second parameter can only used when a graph name is given as first parameter");
-            }
-
-            Map<String, Object> implicitConfig = (Map<String, Object>) graphNameOrConfig;
-            CypherMapWrapper implicitAndAlgoConfig = CypherMapWrapper.create(implicitConfig);
-
-            config = newConfig(Optional.empty(), implicitAndAlgoConfig);
-
-            //TODO: assert that implicitAndAlgoConfig is empty or fail
-        } else {
-            throw new IllegalArgumentException(
-                "The first parameter must be a graph name or a configuration map, but was: " + graphNameOrConfig
-            );
-        }
-
-        return Tuples.pair(config, graphName);
-    }
-
-    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
-        Collection<String> allowedKeys = new HashSet<>();
-        // implicit loading
-        if (graphName.isEmpty()) {
-            // inherit concurrency from AlgoBaseConfig
-            if (!config.containsKey(READ_CONCURRENCY_KEY)) {
-                config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
-            }
-            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(username, config);
-            maybeImplicitCreate = Optional.of(createConfig);
-            allowedKeys.addAll(createConfig.configKeys());
-            CypherMapWrapper configWithoutCreateKeys = config.withoutAny(allowedKeys);
-            // check if we have an explicit configured sudo key, as this one is
-            // shared between create and algo configs
-            for (var entry : allSharedConfigKeys().entrySet()) {
-                var value = config.getChecked(entry.getKey(), null, entry.getValue());
-                if (value != null) {
-                    configWithoutCreateKeys = configWithoutCreateKeys.withEntry(entry.getKey(), value);
-                }
-            }
-            config = configWithoutCreateKeys;
-        }
-        CONFIG algoConfig = newConfig(username, graphName, maybeImplicitCreate, config);
-        allowedKeys.addAll(algoConfig.configKeys());
-        validateConfig(config, allowedKeys);
-        return algoConfig;
-    }
-
-    public abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
-
-    /**
-     * If the algorithm config shares any configuration parameters with anonymous projections, these must be declared here.
-     */
-    public void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys) {
-        this.sharedConfigKeys = sharedConfigKeys;
-    }
-
-    private void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
-        cypherConfig.requireOnlyKeysFrom(allowedKeys);
-    }
-
-    private Map<String, Class<?>> allSharedConfigKeys() {
-        var configKeys = new HashMap<>(sharedConfigKeys);
-        configKeys.put(SUDO_KEY, Boolean.class);
-        return configKeys;
-    }
-
-
+    void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys);
 }

@@ -30,11 +30,6 @@ public abstract class MutateProc<
     PROC_RESULT,
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    @Override
-    public ProcConfigParser<CONFIG> configParser() {
-        return new MutateProcConfigParser<>(super.configParser());
-    }
-
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
     protected Stream<PROC_RESULT> mutate(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {

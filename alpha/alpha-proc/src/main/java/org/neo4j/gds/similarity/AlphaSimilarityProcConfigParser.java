@@ -23,7 +23,6 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -41,7 +40,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJE
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
-public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> extends ProcConfigParser<CONFIG> {
+public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG> {
 
     private final ProcConfigParser<CONFIG> configParser;
     private final NamedDatabaseId databaseId;
@@ -50,19 +49,23 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> ex
         ProcConfigParser<CONFIG> configParser,
         NamedDatabaseId databaseId
     ) {
-        super(configParser.username());
         this.configParser = configParser;
         this.databaseId = databaseId;
     }
 
     @Override
-    public CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return this.configParser.newConfig(username, graphName, maybeImplicitCreate, config);
+    public String username() {
+        return configParser.username();
+    }
+
+    @Override
+    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
+        return configParser.newConfig(graphName, config);
+    }
+
+    @Override
+    public void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys) {
+        configParser.withSharedConfigKeys(sharedConfigKeys);
     }
 
     @Override
@@ -101,7 +104,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> ex
         }
         // And finally we call super in named graph mode
         try {
-            return super.processInput(graphNameOrConfig, configuration);
+            return configParser.processInput(graphNameOrConfig, configuration);
         } catch (RuntimeException e) {
             removeGraph(username(), this.databaseId);
             throw e;

@@ -21,12 +21,12 @@ package org.neo4j.gds;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -117,7 +117,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                 .forEach(mutateMethod -> {
                     assertThatThrownBy(() -> mutateMethod.invoke(
                         procedure,
-                        Map.of("nodeProjection", "*"),
+                        Map.of("nodeProjection", "*", "relationshipProjection", "*", "mutateProperty", "foo"),
                         CypherMapWrapper.empty().toMap()
                     ))
                         .hasRootCauseInstanceOf(IllegalArgumentException.class)
