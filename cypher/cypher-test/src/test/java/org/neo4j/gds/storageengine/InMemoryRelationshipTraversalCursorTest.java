@@ -128,6 +128,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @ParameterizedTest
     @MethodSource("propertyFilterAndExpectedValues")
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     void shouldGetPropertyValues(Map<String, Double> expectedValues) {
         var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
 
@@ -149,7 +150,10 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
         expectedValues.forEach((propertyKey, expectedValue) -> {
             assertThat(propertyCursor.next()).isTrue();
-            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
+            var actualPropertyName = tokenHolders.propertyKeyGetName(propertyCursor.propertyKey());
+            assertThat(actualPropertyName).isEqualTo(propertyKey);
+            var actualPropertyValue = propertyCursor.propertyValue();
+            assertThat(actualPropertyValue).isEqualTo(Values.doubleValue(expectedValue));
         });
     }
 
