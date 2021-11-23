@@ -46,7 +46,7 @@ The training process follows this outline:
 
 Trained models may then be used to predict the value of the `target` property (class) of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
-The order of the probabilities match the order of the classes registered in the model.
+The order of the probabilities matches the order of the classes registered in the model.
 
 
 [[algorithms-ml-nodeclassification-metrics]]
@@ -187,7 +187,7 @@ CALL gds.alpha.ml.nodeClassification.predict.stream(
 ) YIELD
   nodeId: Integer,
   predictedClass: Integer,
-  predictedProbabilities: List[Float]
+  predictedProbabilities: List of Float
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -202,7 +202,7 @@ include::specific-stream-configuration.adoc[]
 | Name                   | Type        | Description
 | nodeId                 | Integer     | Node ID.
 | predictedClass         | Integer     | Predicted class for this node.
-| predictedProbabilities | List[Float] | Probabilities for all classes, for this node.
+| predictedProbabilities | List of Float | Probabilities for all classes, for this node.
 |===
 ======
 
@@ -237,7 +237,7 @@ include::specific-write-mutate-configuration.adoc[]
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten | Integer | Number of relationships created.
+| nodePropertiesWritten | Integer | Number of node properties written.
 | configuration         | Map     | Configuration used for running the algorithm.
 |===
 ======
