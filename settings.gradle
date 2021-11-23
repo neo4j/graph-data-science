@@ -9,47 +9,191 @@ pluginManagement {
 
 rootProject.name = 'open-gds'
 
-def registerSubModules(File file) {
-    def moduleDirectories = new LinkedList<File>()
+include('algo')
+project(':algo').projectDir = file('algo')
 
-    file.eachFileRecurse {f ->
-        if (f.name == "build.gradle") {
-            moduleDirectories.add(f.parentFile)
-        }
-    }
+include('algo-common')
+project(':algo-common').projectDir = file('algo-common')
 
-    moduleDirectories.stream()
-            .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
-            .filter { moduleDir -> moduleDir.name != 'pregel-bootstrap' }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop05.0" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.4.0-alpha01" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.4" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
-            .forEach { moduleDir ->
-                def parent = moduleDir.getParentFile();
-                def projectName = ":${moduleDir.name}";
-                if (parent.name == "proc") {
-                    projectName = ":proc-${moduleDir.name}";
-                } else if (parent.name == "api") {
-                    projectName = ":${moduleDir.name}-api";
-                } else if (parent.name == "4.0") {
-                    projectName = ":${moduleDir.name}-4.0";
-                } else if (parent.name == "4.1") {
-                    projectName = ":${moduleDir.name}-4.1";
-                } else if (parent.name == "4.2") {
-                    projectName = ":${moduleDir.name}-4.2";
-                } else if (parent.name == "4.3") {
-                    projectName = ":${moduleDir.name}-4.3";
-                } else if (parent.name == "unsupported") {
-                    projectName = ":${moduleDir.name}-unsupported";
-                } else if (parent.name == "4.3.3") {
-                    projectName = ":${moduleDir.name}-4.3.3";
-                } else if (parent.name == "4.3.4plus") {
-                    projectName = ":${moduleDir.name}-4.3.4plus";
-                }
-                include(projectName)
-                project(projectName).projectDir = moduleDir
-            }
-}
+include('alpha-algo')
+project(':alpha-algo').projectDir = file('alpha/alpha-algo')
 
-registerSubModules(new File("./"))
+include('alpha-core')
+project(':alpha-core').projectDir = file('alpha/alpha-core')
+
+include('alpha-proc')
+project(':alpha-proc').projectDir = file('alpha/alpha-proc')
+
+include('annotations')
+project(':annotations').projectDir = file('annotations')
+
+include('collections')
+project(':collections').projectDir = file('collections')
+
+include('collections-generator')
+project(':collections-generator').projectDir = file('collections-generator')
+
+include('collections-memory-estimation')
+project(':collections-memory-estimation').projectDir = file('collections-memory-estimation')
+
+include('concurrency-validation-api')
+project(':concurrency-validation-api').projectDir = file('concurrency-validation-api')
+
+include('config-api')
+project(':config-api').projectDir = file('config-api')
+
+include('config-generator')
+project(':config-generator').projectDir = file('config-generator')
+
+include('core')
+project(':core').projectDir = file('core')
+
+include('csv')
+project(':csv').projectDir = file('csv')
+
+include('cypher-core')
+project(':cypher-core').projectDir = file('cypher/cypher-core')
+
+include('cypher-test')
+project(':cypher-test').projectDir = file('cypher/cypher-test')
+
+include('doc')
+project(':doc').projectDir = file('doc')
+
+include('edition-api')
+project(':edition-api').projectDir = file('edition-api')
+
+include('graph-dimensions')
+project(':graph-dimensions').projectDir = file('graph-dimensions')
+
+include('graph-projection-api')
+project(':graph-projection-api').projectDir = file('graph-projection-api')
+
+include('graph-schema-api')
+project(':graph-schema-api').projectDir = file('graph-schema-api')
+
+include('licensing')
+project(':licensing').projectDir = file('licensing')
+
+include('memory-usage')
+project(':memory-usage').projectDir = file('memory-usage')
+
+include('ml-core')
+project(':ml-core').projectDir = file('ml-core')
+
+include('ml-test-utils')
+project(':ml-test-utils').projectDir = file('ml-test-utils')
+
+include('model-catalog-api')
+project(':model-catalog-api').projectDir = file('model-catalog-api')
+
+include('neo4j-adapter')
+project(':neo4j-adapter').projectDir = file('neo4j-adapter')
+
+include('neo4j-kernel-adapter')
+project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-4.1')
+project(':neo4j-kernel-adapter-4.1').projectDir = file('compatibility/4.1/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-4.2')
+project(':neo4j-kernel-adapter-4.2').projectDir = file('compatibility/4.2/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-4.3')
+project(':neo4j-kernel-adapter-4.3').projectDir = file('compatibility/4.3/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-api')
+project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
+
+include('open-licensing')
+project(':open-licensing').projectDir = file('open-licensing')
+
+include('open-model-catalog')
+project(':open-model-catalog').projectDir = file('open-model-catalog')
+
+include('open-packaging')
+project(':open-packaging').projectDir = file('open-packaging')
+
+include('pipeline')
+project(':pipeline').projectDir = file('pipeline')
+
+include('pregel')
+project(':pregel').projectDir = file('pregel')
+
+include('pregel-example')
+project(':pregel-example').projectDir = file('examples/pregel-example')
+
+include('pregel-proc-generator')
+project(':pregel-proc-generator').projectDir = file('pregel-proc-generator')
+
+include('proc')
+project(':proc').projectDir = file('proc')
+
+include('proc-beta')
+project(':proc-beta').projectDir = file('proc/beta')
+
+include('proc-catalog')
+project(':proc-catalog').projectDir = file('proc/catalog')
+
+include('proc-centrality')
+project(':proc-centrality').projectDir = file('proc/centrality')
+
+include('proc-common')
+project(':proc-common').projectDir = file('proc/common')
+
+include('proc-community')
+project(':proc-community').projectDir = file('proc/community')
+
+include('proc-embeddings')
+project(':proc-embeddings').projectDir = file('proc/embeddings')
+
+include('proc-misc')
+project(':proc-misc').projectDir = file('proc/misc')
+
+include('proc-path-finding')
+project(':proc-path-finding').projectDir = file('proc/path-finding')
+
+include('proc-pregel')
+project(':proc-pregel').projectDir = file('proc/pregel')
+
+include('proc-similarity')
+project(':proc-similarity').projectDir = file('proc/similarity')
+
+include('proc-sysinfo')
+project(':proc-sysinfo').projectDir = file('proc/sysinfo')
+
+include('proc-test')
+project(':proc-test').projectDir = file('proc/test')
+
+include('storage-engine-adapter')
+project(':storage-engine-adapter').projectDir = file('cypher/common/storage-engine-adapter')
+
+include('storage-engine-adapter-4.3.3')
+project(':storage-engine-adapter-4.3.3').projectDir = file('cypher/4.3.3/storage-engine-adapter')
+
+include('storage-engine-adapter-4.3.4plus')
+project(':storage-engine-adapter-4.3.4plus').projectDir = file('cypher/4.3.4plus/storage-engine-adapter')
+
+include('storage-engine-adapter-api')
+project(':storage-engine-adapter-api').projectDir = file('cypher/api/storage-engine-adapter')
+
+include('storage-engine-adapter-unsupported')
+project(':storage-engine-adapter-unsupported').projectDir = file('cypher/unsupported/storage-engine-adapter')
+
+include('string-formatting')
+project(':string-formatting').projectDir = file('string-formatting')
+
+include('subgraph-filtering')
+project(':subgraph-filtering').projectDir = file('subgraph-filtering')
+
+include('test-graph-loaders')
+project(':test-graph-loaders').projectDir = file('test-graph-loaders')
+
+include('test-utils')
+project(':test-utils').projectDir = file('test-utils')
+
+include('transaction')
+project(':transaction').projectDir = file('transaction')
+
+include('write-services')
+project(':write-services').projectDir = file('write-services')
