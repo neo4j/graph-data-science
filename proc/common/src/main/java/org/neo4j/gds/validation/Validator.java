@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphStoreValidation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.MutateConfig;
 
 public class Validator<CONFIG extends AlgoBaseConfig> {
 
@@ -34,7 +33,6 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
     }
 
     public void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        validateMutateConfig(config);
         validationConfiguration
             .beforeLoadValidations()
             .forEach(validation -> validation.validateConfigsBeforeLoad(graphCreateConfig, config));
@@ -55,13 +53,5 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
         validationConfiguration
             .afterLoadValidations()
             .forEach(validation -> validation.validateConfigsAfterLoad(graphStore, graphCreateConfig, config));
-    }
-
-    private void validateMutateConfig(CONFIG config) {
-        if (config.implicitCreateConfig().isPresent() && config instanceof MutateConfig) {
-            throw new IllegalArgumentException(
-                "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
-            );
-        }
     }
 }
