@@ -69,8 +69,13 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         var config = input.getOne();
 
         GraphStore graphStore;
+        var validator = validator();
+        var graphStoreLoader = graphStoreLoader(config, input.getTwo());
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = getOrCreateGraphStore(config, graphStoreLoader(config, input.getTwo()));
+            var graphCreateConfig = graphStoreLoader.graphCreateConfig();
+            validator.validateConfigsBeforeLoad(graphCreateConfig, config);
+            graphStore = graphStoreLoader.graphStore();
+            validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
         }
 
         Graph[] graphs = config.relationshipTypes()
