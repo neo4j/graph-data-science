@@ -212,7 +212,26 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             );
         });
     }
-
+    @Test
+    public void filteredLabelTest(){
+        runQuery("CREATE (alice:Person {name: 'Alice', age: 24})\n" +
+                 "        CREATE (bob:Foo {name: 'Bob', age: 73})\n" +
+                 "        CREATE (carol:Person {name: 'Carol', age: 24})\n" +
+                 "        CREATE (dave:Foo {name: 'Dave', age: 48})\n" +
+                 "        CREATE (eve:Person {name: 'Eve', age: 67})");
+        runQuery("CALL gds.graph.create(\n" +
+                 "        'cf-projection',\n" +
+                 "        ['Foo', 'Person'],\n" +
+                        "'*'," +
+                        "{nodeProperties:['age']}"+
+                    ");");
+        runQuery("CALL gds.beta.knn.write('cf-projection', {\n" +
+                 "        nodeLabels: ['Person'],\n" +
+                 "        nodeWeightProperty: 'age',\n" +
+                 "        writeRelationshipType: 'USERS_ALSO_LIKED',\n" +
+                 "        writeProperty: 'score'\n" +
+                 "    }) YIELD similarityDistribution",result -> {System.out.println(result.resultAsString()); return true;});
+    }
     @Override
     public String writeRelationshipType() {
         return "KNN_REL";
