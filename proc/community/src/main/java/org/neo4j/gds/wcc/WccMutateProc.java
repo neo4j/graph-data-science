@@ -54,17 +54,14 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
             new MemoryUsageValidator(log, api)
         );
 
-        return new ProcedureExecutor<>(
-            pipelineSpec.configParser(mutateSpec.newConfigFunction()),
-            mutateSpec.algorithmFactory(),
+        return ProcedureExecutor.fromSpecs(
+            mutateSpec,
+            pipelineSpec,
             transaction,
             log,
             taskRegistryFactory,
-            this.getClass().getSimpleName(),
-            allocationTracker(),
-            pipelineSpec.graphCreationFactory(),
-            mutateSpec.validationConfig(),
-            mutateSpec.computationResultConsumer()
+            procName(),
+            allocationTracker()
         ).compute(graphNameOrConfig, configuration, true, true);
     }
 
