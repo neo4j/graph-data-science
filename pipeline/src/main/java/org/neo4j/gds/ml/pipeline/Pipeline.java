@@ -100,7 +100,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
     private IllegalArgumentException missingNodePropertiesFromFeatureSteps(Set<String> invalidProperties) {
         return new IllegalArgumentException(formatWithLocale(
             "Node properties %s defined in the feature steps do not exist in the graph or part of the pipeline",
-            invalidProperties
+            invalidProperties.stream().sorted().collect(Collectors.toList())
         ));
     }
 
