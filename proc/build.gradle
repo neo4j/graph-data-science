@@ -22,8 +22,8 @@ dependencies {
     implementation project(':core')
     implementation project(':model-catalog-api')
     implementation project(':open-model-catalog')
+    implementation project(':proc-sysinfo')
     implementation project(':string-formatting')
-    implementation project(':sysinfo')
 
     api project(':proc-common')
     api project(':alpha-proc')

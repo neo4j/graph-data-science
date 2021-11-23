@@ -24,7 +24,7 @@ dependencies {
 
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
-    testImplementation project(':sysinfo')
+    testImplementation project(':proc-sysinfo')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }
