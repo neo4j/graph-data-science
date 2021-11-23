@@ -33,8 +33,10 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
@@ -72,58 +74,85 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
     public interface Result {
         HugeSparseDoubleArray communityConductances();
 
-        double globalConductance();
+        double globalAverageConductance();
 
         static Result of(
             HugeSparseDoubleArray communityConductances,
-            double globalConductance
+            double globalAverageConductance
         ) {
             return ImmutableResult
                 .builder()
                 .communityConductances(communityConductances)
-                .globalConductance(globalConductance)
+                .globalAverageConductance(globalAverageConductance)
                 .build();
         }
     }
 
     @Override
     public Result compute() {
-        var countTasks = PartitionUtils.degreePartition(
+        var relCountTasks = countRelationships();
+
+        long maxCommunity = maxCommunity(relCountTasks);
+        long communitiesPerBatch = maxCommunity / config.concurrency();
+        long communitiesRemainder = Math.floorMod(maxCommunity, config.concurrency());
+
+        var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunity, relCountTasks);
+
+        return computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunity, accumulatedCounts);
+    }
+
+    private List<CountRelationships> countRelationships() {
+        var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), countTasks, executor);
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
 
-        var maxCapacity = new MutableLong(0);
-        countTasks.forEach(countRelationships -> {
-            long maxLocalCapacity = Math.max(countRelationships.internalCounts().capacity(), countRelationships.externalCounts().capacity());
-            if (maxLocalCapacity > maxCapacity.longValue()) {
-                maxCapacity.setValue(maxLocalCapacity);
+        return tasks;
+    }
+
+    private long maxCommunity(List<CountRelationships> relCountTasks) {
+        var maxCommunity = new MutableLong(0);
+
+        relCountTasks.forEach(countRelationships -> {
+            long maxLocalCapacity = Math.max(
+                countRelationships.internalCounts().capacity(),
+                countRelationships.externalCounts().capacity()
+            );
+            if (maxLocalCapacity > maxCommunity.longValue()) {
+                maxCommunity.setValue(maxLocalCapacity);
             }
         });
-        long batchSize = maxCapacity.longValue() / config.concurrency();
-        long remainder = Math.floorMod(maxCapacity.longValue(), config.concurrency());
 
+        return maxCommunity.longValue();
+    }
+
+    private RelationshipCounts accumulateCounts(
+        long communitiesPerBatch,
+        long communitiesRemainder,
+        long maxCommunity,
+        List<CountRelationships> relCountTasks
+    ) {
         var internalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCapacity.longValue(),
+            maxCommunity,
             allocationTracker::add
         );
         var externalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCapacity.longValue(),
+            maxCommunity,
             allocationTracker::add
         );
 
-        var accumulateTasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
-            final long startOffset = index * batchSize;
+        var tasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
+            final long startOffset = index * communitiesPerBatch;
             final long endOffset = index == config.concurrency() - 1
-                ? startOffset + batchSize + remainder
-                : startOffset + batchSize;
+                ? startOffset + communitiesPerBatch + communitiesRemainder
+                : startOffset + communitiesPerBatch;
 
-            countTasks.forEach(countRelationships -> {
+            relCountTasks.forEach(countRelationships -> {
                 var localInternalCounts = countRelationships.internalCounts();
                 for (long community = startOffset; community < Math.min(endOffset, localInternalCounts.capacity()); community++) {
                     double localInternalCount = localInternalCounts.get(community);
@@ -145,20 +174,35 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
                 }
             });
         });
-        ParallelUtil.runWithConcurrency(config.concurrency(), accumulateTasks, Pools.DEFAULT);
 
-        var internalCounts = internalCountsBuilder.build();
-        var externalCounts = externalCountsBuilder.build();
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
 
-        var conductancesBuilder = HugeSparseDoubleArray.builder(Double.NaN, maxCapacity.longValue(), allocationTracker::add);
-        var globalConductance = new AtomicDoubleArray(1);
+        return ImmutableRelationshipCounts.of(internalCountsBuilder.build(), externalCountsBuilder.build());
+    }
 
-        var computeTasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
-            final long startOffset = index * batchSize;
+    private Result computeConductances(
+        long communitiesPerBatch,
+        long communitiesRemainder,
+        long maxCommunity,
+        RelationshipCounts relCounts
+    ) {
+        var conductancesBuilder = HugeSparseDoubleArray.builder(
+            Double.NaN,
+            maxCommunity,
+            allocationTracker::add
+        );
+        var globalConductanceSum = new AtomicDoubleArray(1);
+        var globalValidCommunities = new AtomicLong();
+        var internalCounts = relCounts.internalCounts();
+        var externalCounts = relCounts.externalCounts();
+
+        var tasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
+            final long startOffset = index * communitiesPerBatch;
             final long endOffset = index == config.concurrency() - 1
-                ? startOffset + batchSize + remainder
-                : startOffset + batchSize;
-            double threadGlobalConductance = 0.0;
+                ? startOffset + communitiesPerBatch + communitiesRemainder
+                : startOffset + communitiesPerBatch;
+            double conductanceSum = 0.0;
+            long validCommunities = 0;
 
             for (long community = startOffset; community < Math.min(endOffset, internalCounts.capacity()); community++) {
                 double internalCount = internalCounts.get(community);
@@ -169,14 +213,17 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
                 double localConductance = externalCount / (externalCount + internalCount);
                 conductancesBuilder.set(community, localConductance);
-                threadGlobalConductance += localConductance;
+                conductanceSum += localConductance;
+                validCommunities += 1;
             }
 
-            globalConductance.add(0, threadGlobalConductance);
+            globalConductanceSum.add(0, conductanceSum);
+            globalValidCommunities.addAndGet(validCommunities);
         });
-        ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, Pools.DEFAULT);
 
-        return Result.of(conductancesBuilder.build(), globalConductance.get(0));
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+
+        return Result.of(conductancesBuilder.build(), globalConductanceSum.get(0) / globalValidCommunities.longValue());
     }
 
     private final class CountRelationships implements Runnable {
@@ -229,8 +276,6 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
             internalCounts = internalCountsBuilder.build();
             externalCounts = externalCountsBuilder.build();
-
-            progressTracker.logProgress(partition.nodeCount());
         }
 
 
@@ -241,6 +286,13 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         public HugeSparseDoubleArray externalCounts() {
             return externalCounts;
         }
+    }
+
+    @ValueClass
+    interface RelationshipCounts {
+        HugeSparseDoubleArray internalCounts();
+
+        HugeSparseDoubleArray externalCounts();
     }
 
     @Override

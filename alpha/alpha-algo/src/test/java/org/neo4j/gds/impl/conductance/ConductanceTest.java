@@ -137,8 +137,8 @@ final class ConductanceTest {
         assertThat(computedConductances.get(0L)).isCloseTo(expectedConductances.get(0L), Offset.offset(0.0001));
         assertThat(computedConductances.get(1L)).isCloseTo(expectedConductances.get(1L), Offset.offset(0.0001));
 
-        assertThat(result.globalConductance()).isCloseTo(
-            computedConductances.get(0) + computedConductances.get(1),
+        assertThat(result.globalAverageConductance()).isCloseTo(
+            (computedConductances.get(0) + computedConductances.get(1)) / 2,
             Offset.offset(0.0001)
         );
     }
