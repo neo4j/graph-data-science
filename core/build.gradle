@@ -67,6 +67,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
     testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     testImplementation project(':test-graph-loaders')

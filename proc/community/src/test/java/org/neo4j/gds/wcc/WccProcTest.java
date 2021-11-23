@@ -31,7 +31,6 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
@@ -54,7 +53,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Wcc, CONFIG, DisjointSetStruct>,
-    SeedConfigTest<Wcc, CONFIG, DisjointSetStruct>,
     MemoryEstimateTest<Wcc, CONFIG, DisjointSetStruct>,
     HeapControlTest<Wcc, CONFIG, DisjointSetStruct> {
 
