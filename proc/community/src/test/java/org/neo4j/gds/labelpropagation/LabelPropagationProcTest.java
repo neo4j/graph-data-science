@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -61,8 +60,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
-    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
-    HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
+    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -60,8 +59,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
-    MemoryEstimateTest<Louvain, CONFIG, Louvain>,
-    HeapControlTest<Louvain, CONFIG, Louvain> {
+    MemoryEstimateTest<Louvain, CONFIG, Louvain> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

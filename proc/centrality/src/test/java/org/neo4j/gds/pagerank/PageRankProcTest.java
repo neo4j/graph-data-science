@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
@@ -67,8 +66,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcTest implements
     AlgoBaseProcTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
-    SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
-    HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
+    SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

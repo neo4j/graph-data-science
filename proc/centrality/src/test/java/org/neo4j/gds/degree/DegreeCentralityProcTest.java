@@ -25,7 +25,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -46,8 +45,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     extends BaseProcTest
     implements
     AlgoBaseProcTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
-    MemoryEstimateTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>,
-    HeapControlTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
+    MemoryEstimateTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
 {
 
     @TestFactory

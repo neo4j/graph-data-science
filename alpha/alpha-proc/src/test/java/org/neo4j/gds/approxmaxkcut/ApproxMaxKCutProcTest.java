@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -44,8 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends BaseProcTest implements
     AlgoBaseProcTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult>,
-    MemoryEstimateTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult>,
-    HeapControlTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
+    MemoryEstimateTest<ApproxMaxKCut, CONFIG, ApproxMaxKCut.CutResult> {
 
     static final String GRAPH_NAME = "myGraph";
 

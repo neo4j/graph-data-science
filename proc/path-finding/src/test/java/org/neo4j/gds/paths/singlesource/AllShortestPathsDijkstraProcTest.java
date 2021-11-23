@@ -28,7 +28,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -51,7 +50,6 @@ import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
-    HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
     SourceNodeConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {
     @TestFactory

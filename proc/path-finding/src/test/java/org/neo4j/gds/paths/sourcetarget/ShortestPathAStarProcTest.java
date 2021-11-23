@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -63,7 +62,6 @@ import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LONGI
 abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
     MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
-    HeapControlTest<AStar, CONFIG, DijkstraResult>,
     SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
     TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
