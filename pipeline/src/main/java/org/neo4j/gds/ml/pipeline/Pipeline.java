@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
@@ -27,7 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -63,20 +66,42 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
     protected abstract Map<String, Object> additionalEntries();
 
     public void validate(GraphStore graphStore, AlgoBaseConfig config) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+
+        if (!invalidProperties.isEmpty()) {
+            throw missingNodePropertiesFromFeatureSteps(invalidProperties);
+        }
+    }
+
+    public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+
+        this.nodePropertySteps.stream()
+            .flatMap(step -> Stream.ofNullable((String) step.config().get(MUTATE_PROPERTY_KEY)))
+            .forEach(invalidProperties::remove);
+
+        if (!invalidProperties.isEmpty()) {
+            throw missingNodePropertiesFromFeatureSteps(invalidProperties);
+        }
+    }
+
+    @NotNull
+    private Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, AlgoBaseConfig config) {
         var graphProperties = graphStore.nodePropertyKeys(config.nodeLabelIdentifiers(graphStore));
 
-        var invalidProperties = featureSteps()
+        return featureSteps()
             .stream()
             .flatMap(step -> step.inputNodeProperties().stream())
             .filter(property -> !graphProperties.contains(property))
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
+    }
 
-        if (!invalidProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node properties %s defined in the feature steps do not exist in the graph or part of the pipeline",
-                invalidProperties
-            ));
-        }
+    @NotNull
+    private IllegalArgumentException missingNodePropertiesFromFeatureSteps(Set<String> invalidProperties) {
+        return new IllegalArgumentException(formatWithLocale(
+            "Node properties %s defined in the feature steps do not exist in the graph or part of the pipeline",
+            invalidProperties.stream().sorted().collect(Collectors.toList())
+        ));
     }
 
     public void addNodePropertyStep(NodePropertyStep step) {

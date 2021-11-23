@@ -34,18 +34,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class NodeClassificationPipelineExecutor extends PipelineExecutor<
+public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipeline,
     Model<
         NodeLogisticRegressionData,
         NodeClassificationPipelineTrainConfig,
         NodeClassificationPipelineModelInfo>,
-    NodeClassificationPipelineExecutor>
-{
+    NodeClassificationTrainPipelineExecutor> {
     public static final String MODEL_TYPE = "Node classification pipeline";
 
-    public NodeClassificationPipelineExecutor(
+    public NodeClassificationTrainPipelineExecutor(
         NodeClassificationPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         BaseProc caller,
@@ -101,7 +100,7 @@ public class NodeClassificationPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public NodeClassificationPipelineExecutor me() {
+    public NodeClassificationTrainPipelineExecutor me() {
         return this;
     }
 
