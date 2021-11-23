@@ -20,7 +20,9 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
@@ -42,9 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
 @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
-@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
-@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop44)
-@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
 class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph
