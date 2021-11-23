@@ -70,7 +70,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
 
         GraphStore graphStore;
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = getOrCreateGraphStore(input);
+            graphStore = getOrCreateGraphStore(config, graphStoreLoader(config, input.getTwo()));
         }
 
         Graph[] graphs = config.relationshipTypes()

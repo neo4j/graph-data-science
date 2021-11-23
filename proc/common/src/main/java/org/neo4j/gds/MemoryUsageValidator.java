@@ -19,15 +19,64 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.configuration.Config;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.mem.GcListenerExtension;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
 
 import java.util.StringJoiner;
+import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class MemoryValidation {
+public class MemoryUsageValidator {
+
+    private final Log log;
+    private final GraphDatabaseAPI api;
+
+    MemoryUsageValidator(Log log, GraphDatabaseAPI api) {
+        this.log = log;
+        this.api = api;
+    }
+
+    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
+        return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
+    }
+
+    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
+        C config,
+        Function<C, MemoryTreeWithDimensions> runEstimation,
+        BaseProc.FreeMemoryInspector inspector
+    ) {
+        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
+
+        try {
+            memoryTreeWithDimensions = runEstimation.apply(config);
+        } catch (MemoryEstimationNotImplementedException ignored) {
+        }
+
+        if (memoryTreeWithDimensions == null) {
+            return MemoryRange.empty();
+        }
+
+        if (config.sudo()) {
+            log.debug("Sudo mode: Won't check for available memory.");
+        } else {
+            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+            var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
+        }
+
+        return memoryTreeWithDimensions.memoryTree.memoryUsage();
+    }
 
     static void validateMemoryUsage(
         MemoryTreeWithDimensions memoryTreeWithDimensions,
@@ -83,6 +132,4 @@ final class MemoryValidation {
             throw new IllegalStateException(errorMessage.toString());
         }
     }
-
-    private MemoryValidation() {}
 }

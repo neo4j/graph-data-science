@@ -755,7 +755,7 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_PROJECTION_KEY, "*",
                         RELATIONSHIP_PROJECTION_KEY, "*"))
                 );
-                proc.tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
+                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
             });
         }).isInstanceOf(IllegalStateException.class)
             .hasMessageMatching(
@@ -773,7 +773,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     SUDO_KEY, true
                 ))
             );
-            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
         });
     }
 
@@ -788,7 +788,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     SUDO_KEY, true
                 ))
             );
-            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
+            proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
         });
     }
 
@@ -804,7 +804,7 @@ class GraphCreateProcTest extends BaseProcTest {
                         "sudo", false
                     ))
                 );
-                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
+                proc.memoryUsageValidator().tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
             });
         }).isInstanceOf(IllegalStateException.class)
             .hasMessageMatching(

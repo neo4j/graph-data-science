@@ -61,7 +61,7 @@ class MemoryValidationTest {
         var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
-        assertDoesNotThrow(() -> MemoryValidation.validateMemoryUsage(
+        assertDoesNotThrow(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             10_000,
             useMaxMemoryUsage
@@ -74,7 +74,7 @@ class MemoryValidationTest {
         var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
-        assertThatThrownBy(() -> MemoryValidation.validateMemoryUsage(
+        assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             1,
             false
@@ -89,7 +89,7 @@ class MemoryValidationTest {
         var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
-        assertThatThrownBy(() -> MemoryValidation.validateMemoryUsage(
+        assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(
             memoryTreeWithDimensions,
             1,
             true
