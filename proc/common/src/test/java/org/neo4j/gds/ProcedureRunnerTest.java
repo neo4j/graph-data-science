@@ -20,11 +20,15 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -38,7 +42,11 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@Neo4jModelCatalogExtension
 class ProcedureRunnerTest extends BaseTest {
+
+    @Inject
+    ModelCatalog modelCatalog;
 
     @Test
     void shouldValidateThatAllContextFieldsAreSet() {
@@ -65,12 +73,25 @@ class ProcedureRunnerTest extends BaseTest {
         assertThat(contextFieldTypes)
             .overridingErrorMessage(
                 formatWithLocale(
-                    "Expecting method %s to set all context injected fields on BaseProc.class but did not find parameters for types %s",
+                    "Expecting method %s to set all context injected fields on %s but did not find parameters for types %s",
                     instantiateProcedureMethodName,
+                    baseProcClass.getSimpleName(),
                     contextFieldTypes
                 )
             )
             .isEmpty();
+    }
+
+    @Test
+    void shouldInjectModelCatalog() {
+        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            var baseProc = new TestProc();
+            baseProc.api = db;
+            baseProc.procedureTransaction = tx;
+            var trainProcInstance = ProcedureRunner.instantiateProcedureFromCaller(baseProc, TrainTestProc.class);
+
+            assertThat(trainProcInstance.modelCatalog).isEqualTo(modelCatalog);
+        });
     }
 
     @Test
@@ -103,5 +124,11 @@ class ProcedureRunnerTest extends BaseTest {
                 }
             );
         }
+    }
+
+    public static class TrainTestProc extends BaseProc {
+
+        @Context
+        public ModelCatalog modelCatalog;
     }
 }
