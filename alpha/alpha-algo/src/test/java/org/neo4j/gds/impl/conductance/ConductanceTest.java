@@ -131,10 +131,16 @@ final class ConductanceTest {
             AllocationTracker.empty()
         );
 
-        var computedConductances = conductance.compute().communityConductances();
+        var result = conductance.compute();
+        var computedConductances = result.communityConductances();
 
         assertThat(computedConductances.get(0L)).isCloseTo(expectedConductances.get(0L), Offset.offset(0.0001));
         assertThat(computedConductances.get(1L)).isCloseTo(expectedConductances.get(1L), Offset.offset(0.0001));
+
+        assertThat(result.globalConductance()).isCloseTo(
+            computedConductances.get(0) + computedConductances.get(1),
+            Offset.offset(0.0001)
+        );
     }
 
 }

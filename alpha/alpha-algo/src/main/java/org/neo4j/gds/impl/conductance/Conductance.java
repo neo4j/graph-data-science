@@ -57,7 +57,7 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         this.config = config;
         this.allocationTracker = allocationTracker;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
-        this.communityProperties= graph.nodeProperties(config.communityProperty());
+        this.communityProperties = graph.nodeProperties(config.communityProperty());
     }
 
     @FunctionalInterface
@@ -93,17 +93,27 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
 
-        var internalCountsBuilder = HugeSparseDoubleArray.builder(0.0D, allocationTracker::add);
-        var externalCountsBuilder = HugeSparseDoubleArray.builder(0.0D, allocationTracker::add);
+        var internalCountsBuilder = HugeSparseDoubleArray.builder(Double.NaN, allocationTracker::add);
+        var externalCountsBuilder = HugeSparseDoubleArray.builder(Double.NaN, allocationTracker::add);
 
         tasks.forEach(countRelationships -> {
             var localInternalCounts = countRelationships.internalCounts();
             for (long community = 0; community < localInternalCounts.capacity(); community++) {
+                double localInternalCount = localInternalCounts.get(community);
+                if (Double.isNaN(localInternalCount)) {
+                    continue;
+                }
+                internalCountsBuilder.setIfAbsent(community, 0.0D);
                 internalCountsBuilder.addTo(community, localInternalCounts.get(community));
             }
 
             var localExternalCounts = countRelationships.externalCounts();
             for (long community = 0; community < localExternalCounts.capacity(); community++) {
+                double localExternalCount = localExternalCounts.get(community);
+                if (Double.isNaN(localExternalCount)) {
+                    continue;
+                }
+                externalCountsBuilder.setIfAbsent(community, 0.0D);
                 externalCountsBuilder.addTo(community, localExternalCounts.get(community));
             }
         });
@@ -111,14 +121,22 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         var internalCounts = internalCountsBuilder.build();
         var externalCounts = externalCountsBuilder.build();
 
-        var conductancesBuilder = HugeSparseDoubleArray.builder(0.0D, allocationTracker::add);
+        var conductancesBuilder = HugeSparseDoubleArray.builder(Double.NaN, allocationTracker::add);
+        double globalConductance = 0.0;
 
         for (long community = 0; community < internalCounts.capacity(); community++) {
-            var externalCount = externalCounts.get(community);
-            conductancesBuilder.set(community, externalCount / (externalCount + internalCounts.get(community)));
+            double internalCount = internalCounts.get(community);
+            double externalCount = externalCounts.get(community);
+            if (Double.isNaN(internalCount) || Double.isNaN(externalCount)) {
+                continue;
+            }
+
+            double localConductance = externalCount / (externalCount + internalCount);
+            conductancesBuilder.set(community, localConductance);
+            globalConductance += localConductance;
         }
 
-        return Result.of(conductancesBuilder.build(), 0.0D);
+        return Result.of(conductancesBuilder.build(), globalConductance);
     }
 
     private final class CountRelationships implements Runnable {
@@ -126,8 +144,14 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         private final Graph graph;
         private HugeSparseDoubleArray internalCounts;
         private HugeSparseDoubleArray externalCounts;
-        private final HugeSparseDoubleArray.Builder internalCountsBuilder = HugeSparseDoubleArray.builder(0.0D, allocationTracker::add);
-        private final HugeSparseDoubleArray.Builder externalCountsBuilder = HugeSparseDoubleArray.builder(0.0D, allocationTracker::add);
+        private final HugeSparseDoubleArray.Builder internalCountsBuilder = HugeSparseDoubleArray.builder(
+            Double.NaN,
+            allocationTracker::add
+        );
+        private final HugeSparseDoubleArray.Builder externalCountsBuilder = HugeSparseDoubleArray.builder(
+            Double.NaN,
+            allocationTracker::add
+        );
         private final Partition partition;
 
         CountRelationships(
@@ -148,6 +172,9 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
                     DEFAULT_WEIGHT,
                     (sourceNodeId, targetNodeId, weight) -> {
                         long targetCommunity = communityProperties.longValue(targetNodeId);
+
+                        internalCountsBuilder.setIfAbsent(sourceCommunity, 0.0D);
+                        externalCountsBuilder.setIfAbsent(sourceCommunity, 0.0D);
 
                         if (sourceCommunity == targetCommunity) {
                             internalCountsBuilder.addTo(sourceCommunity, weightTransformer.accept(weight));
