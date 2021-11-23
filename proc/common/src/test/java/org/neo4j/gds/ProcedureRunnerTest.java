@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -40,7 +42,11 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@Neo4jModelCatalogExtension
 class ProcedureRunnerTest extends BaseTest {
+
+    @Inject
+    ModelCatalog modelCatalog;
 
     @Test
     void shouldValidateThatAllContextFieldsAreSet() {
@@ -84,7 +90,7 @@ class ProcedureRunnerTest extends BaseTest {
             baseProc.procedureTransaction = tx;
             var trainProcInstance = ProcedureRunner.instantiateProcedureFromCaller(baseProc, TrainTestProc.class);
 
-            assertThat(trainProcInstance.modelCatalog).isNotNull();
+            assertThat(trainProcInstance.modelCatalog).isEqualTo(modelCatalog);
         });
     }
 
