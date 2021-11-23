@@ -20,7 +20,9 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
@@ -31,7 +33,7 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
@@ -40,7 +42,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_2)
 class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph
@@ -120,34 +123,37 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
         assertThat(relationshipCursor.getType()).isEqualTo(tokenHolders.relationshipTypeTokens().getIdByName("REL"));
     }
 
-//    // FIXME: Enable in 4.4.0
-//    @ParameterizedTest
-//    @MethodSource("propertyFilterAndExpectedValues")
-//    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
-//    void shouldGetPropertyValues(Map<String, Double> expectedValues) {
-//        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
-//
-//        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
-//            relationshipCursor,
-//            idFunction.of("a"),
-//            relTypeToken
-//        );
-//
-//        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
-//
-//        assertThat(relationshipCursor.next()).isTrue();
-//        var propertyTokens = expectedValues
-//            .keySet()
-//            .stream()
-//            .mapToInt(propertyKey -> tokenHolders.propertyKeyTokens().getIdByName(propertyKey))
-//            .toArray();
-//        StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
-//
-//        expectedValues.forEach((propertyKey, expectedValue) -> {
-//            assertThat(propertyCursor.next()).isTrue();
-//            assertThat(propertyCursor.propertyValue()).isEqualTo(Values.doubleValue(expectedValues.get(tokenHolders.propertyKeyGetName(propertyCursor.propertyKey()))));
-//        });
-//    }
+    @ParameterizedTest
+    @MethodSource("propertyFilterAndExpectedValues")
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    void shouldGetPropertyValues(Map<String, Double> expectedValues) {
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
+        );
+
+        var propertyCursor = StorageEngineProxy.inMemoryRelationshipPropertyCursor(graphStore, tokenHolders);
+
+        assertThat(relationshipCursor.next()).isTrue();
+        var propertyTokens = expectedValues
+            .keySet()
+            .stream()
+            .mapToInt(propertyKey -> tokenHolders.propertyKeyTokens().getIdByName(propertyKey))
+            .toArray();
+        StorageEngineProxy.properties(relationshipCursor, propertyCursor, propertyTokens);
+
+        expectedValues.forEach((ignore1, ignore2) -> {
+            assertThat(propertyCursor.next()).isTrue();
+            var actualKey = tokenHolders.propertyKeyGetName(propertyCursor.propertyKey());
+            assertThat(expectedValues.keySet()).contains(actualKey);
+            var actualValue = propertyCursor.propertyValue();
+            var expectedValue = Values.doubleValue(expectedValues.get(actualKey));
+            assertThat(actualValue).isEqualTo(expectedValue);
+        });
+    }
 
     @Test
     void shouldGetPropertyValues() {

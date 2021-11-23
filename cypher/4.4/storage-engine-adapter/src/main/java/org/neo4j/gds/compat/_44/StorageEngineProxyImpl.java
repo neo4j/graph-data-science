@@ -101,7 +101,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         String dbName,
         Config config
     ) {
-        config.set(storage_engine, InMemoryStorageEngineFactoryDev.IN_MEMORY_STORAGE_ENGINE_NAME_DEV);
+        config.set(storage_engine, InMemoryStorageEngineFactory.IN_MEMORY_STORAGE_ENGINE_NAME);
         dbms.createDatabase(dbName, config);
     }
 
@@ -156,7 +156,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     public void properties(
         StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection
     ) {
-        storageCursor.properties(propertyCursor, PropertySelection.selection(propertySelection));
+        PropertySelection selection;
+        if (propertySelection.length == 0) {
+            selection = PropertySelection.ALL_PROPERTIES;
+        } else {
+            selection = PropertySelection.selection(propertySelection);
+        }
+        storageCursor.properties(propertyCursor, selection);
     }
 
     @Override

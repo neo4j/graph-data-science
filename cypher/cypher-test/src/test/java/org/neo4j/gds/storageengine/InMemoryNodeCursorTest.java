@@ -29,6 +29,7 @@ import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.LongValue;
@@ -62,7 +63,8 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     void shouldScanSingle() {
         nodeCursor.single(0);
         assertThat(nodeCursor.next()).isTrue();
@@ -70,7 +72,8 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     void shouldScanRange() {
         nodeCursor.scanRange(1, 2);
         nodeCursor.next();
@@ -81,7 +84,8 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     void shouldScanAll() {
         nodeCursor.scan();
         graphStore.nodes().forEachNode(nodeId -> {
@@ -93,7 +97,8 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     void testLabels() {
         graphStore.nodes().forEachNode(nodeId -> {
             nodeCursor.single(nodeId);
@@ -114,17 +119,19 @@ class InMemoryNodeCursorTest extends CypherTest {
         assertThat(nodeCursor.propertiesReference()).isEqualTo(0L);
     }
 
-//    FIXME: Enable for 4.4.0
-//    @Test
-//    @EnableForNeo4jVersion(Neo4jVersion.V_Dev)
-//    void shouldHavePropertiesDev() {
-//        nodeCursor.next();
-//        assertThat(nodeCursor.hasProperties()).isTrue();
-//        assertThat(nodeCursor.propertiesReference()).hasFieldOrPropertyWithValue("id", 0L);
-//    }
+    @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    void shouldHavePropertiesDev() {
+        nodeCursor.next();
+        assertThat(nodeCursor.hasProperties()).isTrue();
+        assertThat(nodeCursor.propertiesReference()).hasFieldOrPropertyWithValue("id", 0L);
+    }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
         var propertyCursor = StorageEngineProxy.inMemoryNodePropertyCursor(graphStore, tokenHolders);
