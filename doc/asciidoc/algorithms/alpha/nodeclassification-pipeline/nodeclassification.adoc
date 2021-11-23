@@ -376,4 +376,4 @@ Each specified model configuration will be tried out during the model selection 
 
 //include::training.adoc[]
 
-//include::predict.adoc[]
+include::predict.adoc[]
