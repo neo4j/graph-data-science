@@ -34,8 +34,6 @@ allprojects {
 allprojects {
     plugins.withType(JavaLibraryPlugin) {
 
-        project.apply plugin: "jacoco"
-
         repositories {
             mavenCentral()
             if (project.hasProperty('pipelineRepository')) {
@@ -96,35 +94,6 @@ allprojects {
                         println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
                     }
                 }
-            }
-        }
-
-        tasks.withType(Test).configureEach {
-            jacoco {
-                enabled = project.hasProperty("generateJacocoReport")
-            }
-
-            finalizedBy jacocoTestReport
-        }
-
-        sonarqube {
-            properties {
-                property 'sonar.coverage.jacoco.xmlReportPaths', "$projectDir/build/reports/jacoco/test/jacocoTestReport.xml"
-            }
-        }
-
-        jacocoTestReport {
-            reports {
-                xml.required = true
-                html.required = false
-            }
-
-            afterEvaluate {
-                classDirectories.setFrom(files(classDirectories.files.collect {
-                    fileTree(dir: it, exclude: [
-                        "**/*ConfigImpl*"
-                    ])
-                }))
             }
         }
 
