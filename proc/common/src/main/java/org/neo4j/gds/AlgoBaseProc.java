@@ -32,6 +32,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
+import org.neo4j.gds.validation.Validator;
 
 import java.util.Map;
 import java.util.Optional;
@@ -86,7 +87,7 @@ public abstract class AlgoBaseProc<
             configParser(),
             memoryUsageValidator(),
             this::graphStoreLoader,
-            getValidationConfig(),
+            validator(),
             algorithmFactory(),
             transaction,
             log,
@@ -127,17 +128,6 @@ public abstract class AlgoBaseProc<
 
     public Validator<CONFIG> validator() {
         return new Validator<>(getValidationConfig());
-    }
-
-    protected GraphStore getOrCreateGraphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
-        Validator<CONFIG> validator = validator();
-
-        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
-        validator.validateConfigsBeforeLoad(graphCreateConfig, config);
-        var graphStore = graphStoreLoader.graphStore();
-        validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
-
-        return graphStore;
     }
 
     protected GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {

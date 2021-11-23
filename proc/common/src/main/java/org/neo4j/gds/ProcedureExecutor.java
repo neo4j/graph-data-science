@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
@@ -60,7 +59,7 @@ public class ProcedureExecutor<
         ProcConfigParser<CONFIG> configParser,
         MemoryUsageValidator memoryUsageValidator,
         BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
-        ValidationConfiguration<CONFIG> validationConfiguration,
+        Validator<CONFIG> validator,
         AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
         KernelTransaction ktx,
         Log log,
@@ -71,7 +70,7 @@ public class ProcedureExecutor<
         this.configParser = configParser;
         this.memoryUsageValidator = memoryUsageValidator;
         this.graphStoreLoaderFn = graphStoreLoaderFn;
-        this.validator = new Validator<>(validationConfiguration);
+        this.validator = validator;
         this.algorithmFactory = algorithmFactory;
         this.ktx = ktx;
         this.log = log;
