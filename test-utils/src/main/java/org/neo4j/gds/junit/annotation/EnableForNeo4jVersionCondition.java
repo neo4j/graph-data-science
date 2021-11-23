@@ -33,38 +33,23 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class EnableForNeo4jVersionCondition implements ExecutionCondition {
 
     private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
-        ConditionEvaluationResult.enabled(
-            "@EnableForNeo4jVersion is not present");
+        ConditionEvaluationResult.enabled("@EnableForNeo4jVersion is not present");
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
         AnnotatedElement element = context
             .getElement()
             .orElseThrow(IllegalStateException::new);
-        return shouldEnableForNeo4jVersion(
-            findAnnotation(element, EnableForNeo4jVersion.class),
-            element
-        );
-    }
 
-    private ConditionEvaluationResult shouldEnableForNeo4jVersion(
-        EnableForNeo4jVersion annotation,
-        AnnotatedElement element
-    ) {
-        if (annotation != null) {
-            var enableForNeo4jVersion = annotation.value();
-            var runningOnNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-            if (runningOnNeo4jVersion != enableForNeo4jVersion) {
-                var message = annotation.message().isBlank() ?
-                    formatWithLocale(
-                        "%s should be disabled for Neo4j %s",
-                        element.toString(),
-                        runningOnNeo4jVersion.toString()
-                    ) :
-                    annotation.message();
+        var runningNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
 
-                return disabled(message);
-            }
+        var single = findAnnotation(element, EnableForNeo4jVersion.class);
+        if (single != null && single.value() != runningNeo4jVersion) {
+            return disabled(formatWithLocale(
+                "Not enabled for %s, only for Neo4j version %s",
+                runningNeo4jVersion,
+                single.value()
+            ));
         }
 
         return ENABLED_BY_DEFAULT;

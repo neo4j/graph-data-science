@@ -101,7 +101,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         String dbName,
         Config config
     ) {
-        config.set(storage_engine, InMemoryStorageEngineFactoryDev.IN_MEMORY_STORAGE_ENGINE_NAME_DEV);
+        config.set(storage_engine, InMemoryStorageEngineFactory.IN_MEMORY_STORAGE_ENGINE_NAME);
         dbms.createDatabase(dbName, config);
     }
 

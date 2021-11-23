@@ -95,9 +95,9 @@ import java.util.function.Function;
 import static org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker.readOnly;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME_DEV = "in-memory-dev";
+    public static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-dev";
 
     private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
 
@@ -222,7 +222,7 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
 
     @Override
     public String name() {
-        return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+        return IN_MEMORY_STORAGE_ENGINE_NAME;
     }
 
     @Override

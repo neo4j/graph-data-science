@@ -61,9 +61,9 @@ import java.util.List;
 import java.util.UUID;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME_DEV = "in-memory-dev";
+    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-44alpha01";
 
     private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
 
@@ -131,7 +131,7 @@ public class InMemoryStorageEngineFactoryDev extends AbstractInMemoryStorageEngi
 
     @Override
     public String name() {
-        return IN_MEMORY_STORAGE_ENGINE_NAME_DEV;
+        return IN_MEMORY_STORAGE_ENGINE_NAME;
     }
 
     @Override

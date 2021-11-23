@@ -28,13 +28,17 @@ import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnableForNeo4jVersion(Neo4jVersion.V_4_3)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop43)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop44)
+@DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop50)
 public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
     @Neo4jGraph
