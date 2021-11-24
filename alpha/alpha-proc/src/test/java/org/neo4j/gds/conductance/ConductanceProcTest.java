@@ -49,8 +49,7 @@ abstract class ConductanceProcTest<CONFIG extends ConductanceConfig> extends Bas
 
     @Neo4jGraph
     @Language("Cypher")
-    private static final
-    String DB_CYPHER =
+    private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Label1 { community: 0 })" +
         ", (b:Label1 { community: 0 })" +
@@ -108,7 +107,6 @@ abstract class ConductanceProcTest<CONFIG extends ConductanceConfig> extends Bas
         if (!mapWrapper.containsKey("communityProperty")) {
             mapWrapper = mapWrapper.withString("communityProperty", "community");
         }
-
 
         return mapWrapper;
     }
