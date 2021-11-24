@@ -30,7 +30,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -176,10 +175,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addModifiers(Modifier.PROTECTED)
             .addParameter(String.class, "username")
             .addParameter(ParameterizedTypeName.get(Optional.class, String.class), "graphName")
-            .addParameter(ParameterizedTypeName.get(Optional.class, GraphCreateConfig.class), "maybeImplicitCreate")
             .addParameter(CypherMapWrapper.class, "config")
             .returns(pregelSpec.configTypeName())
-            .addStatement("return $T.of(graphName, maybeImplicitCreate, config)", pregelSpec.configTypeName())
+            .addStatement("return $T.of(graphName, config)", pregelSpec.configTypeName())
             .build();
     }
 

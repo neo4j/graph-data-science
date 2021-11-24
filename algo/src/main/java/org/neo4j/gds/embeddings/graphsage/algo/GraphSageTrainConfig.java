@@ -26,7 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -190,12 +189,10 @@ public interface GraphSageTrainConfig extends
     static GraphSageTrainConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new GraphSageTrainConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             userInput
         );

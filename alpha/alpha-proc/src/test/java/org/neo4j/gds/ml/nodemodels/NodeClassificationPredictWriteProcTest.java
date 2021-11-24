@@ -196,7 +196,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @Override
     public NodeClassificationPredictWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeClassificationPredictWriteConfig.of(getUsername(), Optional.of(GRAPH_NAME), Optional.empty(), mapWrapper);
+        return NodeClassificationPredictWriteConfig.of(getUsername(), Optional.of(GRAPH_NAME), mapWrapper);
     }
 
     @Override

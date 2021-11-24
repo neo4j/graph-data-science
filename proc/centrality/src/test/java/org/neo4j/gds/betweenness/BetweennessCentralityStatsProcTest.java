@@ -41,11 +41,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
 
     @Override
     public BetweennessCentralityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStatsConfig.of("",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return BetweennessCentralityStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

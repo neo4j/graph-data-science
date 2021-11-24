@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -49,9 +48,8 @@ public interface PregelProcedureConfig extends
 
     static PregelProcedureConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PregelProcedureConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new PregelProcedureConfigImpl(graphName, userInput);
     }
 }

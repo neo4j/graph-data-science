@@ -22,7 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -137,10 +136,9 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     protected HarmonicCentralityConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return HarmonicCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), config);
+        return HarmonicCentralityConfig.of(graphName, config);
     }
 
     @Override

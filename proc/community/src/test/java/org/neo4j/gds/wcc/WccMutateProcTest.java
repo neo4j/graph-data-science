@@ -62,7 +62,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
     @Override
     public WccMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return WccMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

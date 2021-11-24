@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -78,10 +77,9 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     protected FastRPStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return FastRPStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPStreamConfig.of(graphName, config);
     }
 
     @Override

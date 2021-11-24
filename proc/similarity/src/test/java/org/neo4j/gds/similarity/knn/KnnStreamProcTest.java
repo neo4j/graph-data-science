@@ -47,7 +47,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     @Override
     public KnnStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return KnnStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

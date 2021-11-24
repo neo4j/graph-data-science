@@ -41,12 +41,7 @@ class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentr
 
     @Override
     public DegreeCentralityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityStatsConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return DegreeCentralityStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

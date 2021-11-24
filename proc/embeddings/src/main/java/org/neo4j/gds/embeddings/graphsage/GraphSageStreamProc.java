@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -102,13 +101,11 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     protected GraphSageStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return GraphSageStreamConfig.of(
             username,
             graphName,
-            maybeImplicitCreate,
             config
         );
     }

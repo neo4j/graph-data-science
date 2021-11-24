@@ -138,12 +138,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 
     @Override
     public PageRankWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankWriteConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return PageRankWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

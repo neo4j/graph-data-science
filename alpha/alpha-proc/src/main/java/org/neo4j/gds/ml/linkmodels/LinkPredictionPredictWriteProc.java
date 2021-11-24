@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteStreamOfRelationshipsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -73,13 +72,11 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     protected LinkPredictionPredictWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return LinkPredictionPredictWriteConfig.of(
             username,
             graphName,
-            maybeImplicitCreate,
             config
         );
     }

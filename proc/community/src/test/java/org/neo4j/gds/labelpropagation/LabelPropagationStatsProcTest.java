@@ -21,9 +21,9 @@ package org.neo4j.gds.labelpropagation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +47,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
 
     @Override
     public LabelPropagationStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return LabelPropagationStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

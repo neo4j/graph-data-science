@@ -22,10 +22,9 @@ package org.neo4j.gds.impl.closeness;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -49,9 +48,8 @@ public interface ClosenessCentralityConfig extends
 
     static ClosenessCentralityConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ClosenessCentralityConfigImpl(graphName, implicitCreateConfig, config);
+        return new ClosenessCentralityConfigImpl(graphName, config);
     }
 }

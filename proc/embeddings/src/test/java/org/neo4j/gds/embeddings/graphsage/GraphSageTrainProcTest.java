@@ -259,7 +259,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldValidateLabelsAndPropertiesWithFeatureDimension() {
         var proc = new GraphSageTrainProc();
-        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(), Optional.empty(),
+        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
@@ -291,7 +291,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldValidateLabelsAndPropertiesWithoutFeatureDimension() {
         var proc = new GraphSageTrainProc();
-        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(), Optional.empty(),
+        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
@@ -327,7 +327,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             "sudo", true
         );
         var config = GraphSageTrainConfig.of(
-            getUsername(), Optional.empty(), Optional.empty(),
+            getUsername(), Optional.empty(),
             CypherMapWrapper.create(trainConfigParams)
         );
         var model = Model.of(

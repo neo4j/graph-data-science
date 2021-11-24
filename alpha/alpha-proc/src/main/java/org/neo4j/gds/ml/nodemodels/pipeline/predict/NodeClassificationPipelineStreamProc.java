@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -110,10 +109,9 @@ public class NodeClassificationPipelineStreamProc
     protected NodeClassificationPredictPipelineStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeClassificationPredictPipelineStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeClassificationPredictPipelineStreamConfig.of(username, graphName, config);
     }
 
     @Override

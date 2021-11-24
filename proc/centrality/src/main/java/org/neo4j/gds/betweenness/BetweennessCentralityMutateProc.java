@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -65,10 +64,9 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     protected BetweennessCentralityMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityMutateConfig.of(graphName, config);
     }
 
     @Override

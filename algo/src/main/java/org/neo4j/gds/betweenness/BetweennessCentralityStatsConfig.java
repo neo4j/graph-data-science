@@ -22,7 +22,6 @@ package org.neo4j.gds.betweenness;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -32,11 +31,9 @@ import java.util.Optional;
 public interface BetweennessCentralityStatsConfig extends BetweennessCentralityBaseConfig {
 
     static BetweennessCentralityStatsConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new BetweennessCentralityStatsConfigImpl(graphName, implicitCreateConfig, config);
+        return new BetweennessCentralityStatsConfigImpl(graphName, config);
     }
 }

@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
@@ -74,10 +73,9 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     protected GraphSageTrainConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return GraphSageTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        return GraphSageTrainConfig.of(username, graphName, config);
     }
 
     @Override

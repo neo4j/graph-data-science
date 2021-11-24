@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
@@ -83,10 +82,9 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
     protected KnnWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnWriteConfig.of(graphName, maybeImplicitCreate, config);
+        return KnnWriteConfig.of(graphName, config);
     }
 
     @Override

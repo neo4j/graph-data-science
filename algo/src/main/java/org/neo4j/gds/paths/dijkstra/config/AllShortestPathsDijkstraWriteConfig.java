@@ -21,11 +21,10 @@ package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.WriteRelationshipConfig;
 
 import java.util.Optional;
 
@@ -36,12 +35,10 @@ public interface AllShortestPathsDijkstraWriteConfig extends AllShortestPathsBas
 
     static AllShortestPathsDijkstraWriteConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new AllShortestPathsDijkstraWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

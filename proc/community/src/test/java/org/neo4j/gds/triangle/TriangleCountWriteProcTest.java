@@ -125,7 +125,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Override
     public TriangleCountWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return TriangleCountWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

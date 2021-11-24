@@ -24,16 +24,16 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -62,7 +62,7 @@ class Node2VecMutateProcTest
 
     @Override
     public Node2VecMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return Node2VecMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return Node2VecMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

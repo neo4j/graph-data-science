@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.k1coloring;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -32,16 +31,10 @@ import java.util.Optional;
 public interface K1ColoringStatsConfig extends K1ColoringConfig {
 
     static K1ColoringStatsConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new K1ColoringStatsConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return new K1ColoringStatsConfigImpl(graphName, config);
     }
 
 }

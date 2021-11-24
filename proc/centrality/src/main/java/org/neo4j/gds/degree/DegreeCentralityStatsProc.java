@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -65,10 +64,9 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     protected DegreeCentralityStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return DegreeCentralityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return DegreeCentralityStatsConfig.of(graphName, config);
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -79,10 +78,9 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     protected BetweennessCentralityStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityStreamConfig.of(graphName, config);
     }
 
     @Override

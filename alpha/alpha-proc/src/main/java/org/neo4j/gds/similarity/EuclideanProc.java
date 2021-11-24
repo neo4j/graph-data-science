@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
@@ -72,10 +71,9 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
     protected EuclideanConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new EuclideanConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new EuclideanConfigImpl(graphName, userInput);
     }
 
     @Override

@@ -33,12 +33,10 @@ public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig
 
     static ShortestPathYensStreamConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new ShortestPathYensStreamConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
 import org.neo4j.gds.paths.astar.AStar;
@@ -64,10 +63,9 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
     protected ShortestPathAStarWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ShortestPathAStarWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ShortestPathAStarWriteConfig.of(graphName, config);
     }
 
     @Override

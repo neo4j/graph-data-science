@@ -22,7 +22,6 @@ package org.neo4j.gds.labelpropagation;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -32,14 +31,11 @@ import java.util.Optional;
 public interface LabelPropagationStatsConfig extends LabelPropagationBaseConfig {
 
     static LabelPropagationStatsConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new LabelPropagationStatsConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

@@ -24,15 +24,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Map;
@@ -83,7 +83,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
 
     @Override
     public FastRPMutateConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+        return FastRPMutateConfig.of(Optional.empty(), userInput);
     }
 
     @Override

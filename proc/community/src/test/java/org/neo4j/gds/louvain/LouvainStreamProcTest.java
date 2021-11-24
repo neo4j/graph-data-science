@@ -81,18 +81,13 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.empty()
-        );
+        LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(Optional.empty(), CypherMapWrapper.empty());
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
     }
 
     @Override
     public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return LouvainStreamConfig.of(Optional.empty(), mapWrapper);
     }
 }

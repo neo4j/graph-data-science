@@ -32,9 +32,8 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.StringIdentifierValidations;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -198,12 +197,10 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
 
         static HitsConfig of(
             Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitConfig,
             CypherMapWrapper userConfig
         ) {
             return new HitsConfigImpl(
                 graphName,
-                maybeImplicitConfig,
                 userConfig
             );
         }

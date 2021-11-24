@@ -70,7 +70,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
 
     @Override
     public Node2VecWriteConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+        return Node2VecWriteConfig.of(Optional.empty(), userInput);
     }
 
     @Test

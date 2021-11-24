@@ -22,7 +22,6 @@ package org.neo4j.gds.louvain;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -80,10 +79,9 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     protected LouvainWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LouvainWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LouvainWriteConfig.of(graphName, config);
     }
 
     @Override

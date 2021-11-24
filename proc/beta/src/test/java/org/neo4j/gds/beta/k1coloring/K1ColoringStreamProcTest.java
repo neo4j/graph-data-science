@@ -44,7 +44,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
 
     @Override
     public K1ColoringStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return K1ColoringStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return K1ColoringStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

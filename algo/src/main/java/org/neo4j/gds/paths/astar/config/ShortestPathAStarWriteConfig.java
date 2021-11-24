@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.paths.astar.config;
 
-import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 import java.util.Optional;
 
@@ -34,15 +33,9 @@ import java.util.Optional;
 public interface ShortestPathAStarWriteConfig extends ShortestPathAStarBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static ShortestPathAStarWriteConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ShortestPathAStarWriteConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new ShortestPathAStarWriteConfigImpl(graphName, userInput);
     }
 }

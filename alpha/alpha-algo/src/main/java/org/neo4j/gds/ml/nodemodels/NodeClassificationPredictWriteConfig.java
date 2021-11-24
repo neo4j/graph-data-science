@@ -22,9 +22,8 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -45,12 +44,10 @@ public interface NodeClassificationPredictWriteConfig extends NodeClassification
     static NodeClassificationPredictWriteConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new NodeClassificationPredictWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             userInput
         );

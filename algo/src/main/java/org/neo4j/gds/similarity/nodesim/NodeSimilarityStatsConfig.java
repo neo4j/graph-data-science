@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.nodesim;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -33,14 +32,9 @@ public interface NodeSimilarityStatsConfig extends NodeSimilarityBaseConfig {
 
     static NodeSimilarityStatsConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new NodeSimilarityStatsConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new NodeSimilarityStatsConfigImpl(graphName, userInput);
     }
 
 }

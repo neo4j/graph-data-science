@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.paths.dijkstra.config;
 
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
 
 import java.util.Optional;
 
@@ -35,12 +34,10 @@ public interface ShortestPathDijkstraMutateConfig extends ShortestPathBaseConfig
 
     static ShortestPathDijkstraMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new ShortestPathDijkstraMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

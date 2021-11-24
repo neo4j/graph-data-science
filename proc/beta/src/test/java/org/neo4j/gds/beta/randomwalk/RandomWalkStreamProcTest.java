@@ -183,7 +183,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Override
     public RandomWalkStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return RandomWalkStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return RandomWalkStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

@@ -60,12 +60,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 class LabelPropagationTest {
 
-    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(
-        "",
-        Optional.empty(),
-        Optional.empty(),
-        CypherMapWrapper.empty()
-    );
+    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(Optional.empty(), CypherMapWrapper.empty());
 
     @GdlGraph
     private static final String GRAPH =

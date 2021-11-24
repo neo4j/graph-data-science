@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -97,10 +96,9 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     protected GraphSageMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return GraphSageMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return GraphSageMutateConfig.of(username, graphName, config);
     }
 
     @Override

@@ -21,7 +21,6 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -33,13 +32,8 @@ interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
 
     static ScalePropertiesStreamConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ScalePropertiesStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new ScalePropertiesStreamConfigImpl(graphName, userInput);
     }
 }

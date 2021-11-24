@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -158,10 +157,9 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     protected SccConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return SccConfig.of(graphName, maybeImplicitCreate, config);
+        return SccConfig.of(graphName, config);
     }
 
     @Override

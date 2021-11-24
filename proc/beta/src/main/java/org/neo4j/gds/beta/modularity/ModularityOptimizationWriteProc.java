@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.modularity;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -64,10 +63,9 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     protected ModularityOptimizationWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ModularityOptimizationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ModularityOptimizationWriteConfig.of(graphName, config);
     }
 
     @Override

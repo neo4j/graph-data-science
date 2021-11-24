@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.IdMapping;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -95,10 +94,9 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
     protected RandomWalkStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomWalkStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return RandomWalkStreamConfig.of(graphName, config);
     }
 
     @Override

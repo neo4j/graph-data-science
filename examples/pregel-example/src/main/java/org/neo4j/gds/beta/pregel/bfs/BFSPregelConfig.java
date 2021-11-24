@@ -21,9 +21,8 @@ package org.neo4j.gds.beta.pregel.bfs;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -35,9 +34,8 @@ public interface BFSPregelConfig extends PregelProcedureConfig {
 
     static BFSPregelConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new BFSPregelConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new BFSPregelConfigImpl(graphName, userInput);
     }
 }

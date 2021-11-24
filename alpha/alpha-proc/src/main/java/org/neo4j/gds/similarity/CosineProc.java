@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.CosineAlgorithm;
@@ -72,10 +71,9 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
     protected CosineConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new CosineConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new CosineConfigImpl(graphName, userInput);
     }
 
     @Override

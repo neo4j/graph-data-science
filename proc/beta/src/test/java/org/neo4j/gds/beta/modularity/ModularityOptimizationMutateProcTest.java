@@ -22,9 +22,8 @@ package org.neo4j.gds.beta.modularity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -36,6 +35,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -190,7 +190,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
     @Override
     public ModularityOptimizationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ModularityOptimizationMutateConfig.of(getUsername(), Optional.empty(),Optional.empty(), mapWrapper);
+        return ModularityOptimizationMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

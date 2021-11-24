@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -33,9 +32,8 @@ public interface KnnStreamConfig extends KnnBaseConfig {
 
     static KnnStreamConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new KnnStreamConfigImpl(graphName, implicitCreateConfig, config);
+        return new KnnStreamConfigImpl(graphName, config);
     }
 }

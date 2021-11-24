@@ -22,7 +22,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
@@ -91,10 +90,9 @@ public class TriangleCountStreamProc
     protected TriangleCountStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return TriangleCountStreamConfig.of(graphName, config);
     }
 
     @Override

@@ -158,14 +158,9 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
         static SpeakerListenerLPAConfig of(
             Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitConfig,
             CypherMapWrapper userConfig
         ) {
-            return new SpeakerListenerLPAConfigImpl(
-                graphName,
-                maybeImplicitConfig,
-                userConfig
-            );
+            return new SpeakerListenerLPAConfigImpl(graphName, userConfig);
         }
 
         @Value.Derived

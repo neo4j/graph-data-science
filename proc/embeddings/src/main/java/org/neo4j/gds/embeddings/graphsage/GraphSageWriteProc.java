@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -82,10 +81,9 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     protected GraphSageWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return GraphSageWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return GraphSageWriteConfig.of(username, graphName, config);
     }
 
     @Override

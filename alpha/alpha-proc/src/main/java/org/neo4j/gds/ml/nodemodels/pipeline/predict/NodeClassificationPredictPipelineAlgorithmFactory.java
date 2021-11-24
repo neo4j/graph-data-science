@@ -86,7 +86,6 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     private NodeClassificationPredictConfig innerConfig(CONFIG configuration) {
         return new NodeClassificationPredictConfigImpl(
             configuration.graphName(),
-            configuration.implicitCreateConfig(),
             configuration.username(),
             CypherMapWrapper.create(configuration.toMap())
                 .withEntry("includePredictedProbabilities",configuration.includePredictedProbabilities())

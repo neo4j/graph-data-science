@@ -27,7 +27,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -112,10 +111,9 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     protected CollapsePathConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return CollapsePathConfig.of(graphName, maybeImplicitCreate, config);
+        return CollapsePathConfig.of(graphName, config);
     }
 
     @Override

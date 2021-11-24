@@ -20,7 +20,6 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -64,13 +63,12 @@ public class EigenvectorStatsProc extends PageRankStatsProc {
     protected PageRankStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         if (config.containsKey("dampingFactor")) {
             throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
         }
 
-        return super.newConfig(username, graphName, maybeImplicitCreate, config);
+        return super.newConfig(username, graphName, config);
     }
 }

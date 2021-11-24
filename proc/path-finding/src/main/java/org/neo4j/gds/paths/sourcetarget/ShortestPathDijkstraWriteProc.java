@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathWriteProc;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -65,10 +64,9 @@ public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Dijkstr
     protected ShortestPathDijkstraWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return of(graphName, maybeImplicitCreate, config);
+        return of(graphName, config);
     }
 
     @Override

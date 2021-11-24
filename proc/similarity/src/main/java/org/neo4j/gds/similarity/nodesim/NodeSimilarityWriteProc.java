@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -74,10 +73,9 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     protected NodeSimilarityWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityWriteConfig.of(graphName, maybeImplicitCreate, userInput);
+        return NodeSimilarityWriteConfig.of(graphName, userInput);
     }
 
     @Override

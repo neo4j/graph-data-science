@@ -22,7 +22,6 @@ package org.neo4j.gds.louvain;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -32,15 +31,9 @@ import java.util.Optional;
 public interface LouvainStreamConfig extends LouvainBaseConfig {
 
     static LouvainStreamConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new LouvainStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new LouvainStreamConfigImpl(graphName, userInput);
     }
 }

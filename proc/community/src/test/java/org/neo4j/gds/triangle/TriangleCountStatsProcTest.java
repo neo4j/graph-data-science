@@ -21,9 +21,9 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -80,7 +80,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Override
     public TriangleCountStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return TriangleCountStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
 }

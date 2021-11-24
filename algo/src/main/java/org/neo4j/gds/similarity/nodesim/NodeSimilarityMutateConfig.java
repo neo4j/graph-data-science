@@ -21,10 +21,9 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -35,12 +34,10 @@ public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig, Mu
 
     static NodeSimilarityMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
         config.validate();

@@ -130,6 +130,6 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
     @Override
     public LabelPropagationStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return LabelPropagationStreamConfig.of(Optional.empty(), mapWrapper);
     }
 }

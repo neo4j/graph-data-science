@@ -21,7 +21,6 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -33,15 +32,9 @@ import java.util.Optional;
 public interface PageRankMutateConfig extends PageRankConfig, MutatePropertyConfig {
 
     static PageRankMutateConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PageRankMutateConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new PageRankMutateConfigImpl(graphName, userInput);
     }
 }

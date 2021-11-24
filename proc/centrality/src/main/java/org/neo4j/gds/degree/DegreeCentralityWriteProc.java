@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -71,10 +70,9 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
     protected DegreeCentralityWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return DegreeCentralityWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return DegreeCentralityWriteConfig.of(graphName, config);
     }
 
     @Override

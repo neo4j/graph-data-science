@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.k1coloring;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -60,10 +59,9 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     protected K1ColoringStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringStreamConfig.of(graphName, config);
     }
 
     @Override

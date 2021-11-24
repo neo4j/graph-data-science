@@ -21,7 +21,6 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -70,10 +69,9 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     protected LabelPropagationStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LabelPropagationStatsConfig.of(graphName, config);
     }
 
     @Override

@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.approxmaxkcut.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -33,9 +32,8 @@ public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePr
 
     static ApproxMaxKCutMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ApproxMaxKCutMutateConfigImpl(graphName, implicitCreateConfig, config);
+        return new ApproxMaxKCutMutateConfigImpl(graphName, config);
     }
 }

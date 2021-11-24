@@ -26,7 +26,6 @@ import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.ProcedureConstants;
@@ -131,10 +130,9 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     protected LinkPredictionPredictPipelineMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LinkPredictionPredictPipelineMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LinkPredictionPredictPipelineMutateConfig.of(username, graphName, config);
     }
 
     @Override

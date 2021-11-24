@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,12 +44,7 @@ class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCent
 
     @Override
     public DegreeCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityMutateConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return DegreeCentralityMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

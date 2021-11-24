@@ -60,12 +60,10 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
 
     static SplitRelationshipsMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new SplitRelationshipsMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

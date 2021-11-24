@@ -57,7 +57,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
     @Override
     public KnnWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return KnnWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

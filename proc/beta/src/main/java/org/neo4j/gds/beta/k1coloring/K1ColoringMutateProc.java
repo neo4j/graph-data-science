@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.k1coloring;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -63,10 +62,9 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     protected K1ColoringMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringMutateConfig.of(graphName, config);
     }
 
     @Override

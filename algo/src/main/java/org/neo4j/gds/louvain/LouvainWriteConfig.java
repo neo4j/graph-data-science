@@ -21,10 +21,9 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.CommunitySizeConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -34,15 +33,9 @@ import java.util.Optional;
 public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static LouvainWriteConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new LouvainWriteConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new LouvainWriteConfigImpl(graphName, userInput);
     }
 }

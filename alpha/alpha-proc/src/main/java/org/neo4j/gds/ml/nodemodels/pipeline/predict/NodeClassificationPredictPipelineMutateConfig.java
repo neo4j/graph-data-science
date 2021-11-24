@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -44,12 +43,10 @@ public interface NodeClassificationPredictPipelineMutateConfig
     static NodeClassificationPredictPipelineMutateConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return new NodeClassificationPredictPipelineMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

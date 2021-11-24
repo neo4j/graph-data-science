@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityHelper;
+import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
@@ -50,7 +51,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Override
     public WccStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return WccStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @AfterEach

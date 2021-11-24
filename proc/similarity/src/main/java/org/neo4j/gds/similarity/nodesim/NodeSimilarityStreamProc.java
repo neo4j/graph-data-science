@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -78,10 +77,9 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     protected NodeSimilarityStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeSimilarityStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return NodeSimilarityStreamConfig.of(graphName, config);
     }
 
     @Override

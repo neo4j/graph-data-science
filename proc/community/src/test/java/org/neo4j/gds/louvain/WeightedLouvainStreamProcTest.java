@@ -23,7 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -34,6 +33,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 
@@ -274,6 +274,6 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
 
     @Override
     public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return LouvainStreamConfig.of(Optional.empty(), mapWrapper);
     }
 }

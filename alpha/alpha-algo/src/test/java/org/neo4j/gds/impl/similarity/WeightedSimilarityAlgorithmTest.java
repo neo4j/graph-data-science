@@ -20,10 +20,9 @@
 package org.neo4j.gds.impl.similarity;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.AlgoTestBase;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -92,11 +91,6 @@ class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
             @Override
             public String graph() {
                 return ProcedureConstants.CYPHER_QUERY_KEY;
-            }
-
-            @Override
-            public Optional<GraphCreateConfig> implicitCreateConfig() {
-                return Optional.empty();
             }
         };
     }

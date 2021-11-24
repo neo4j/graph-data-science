@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -80,10 +79,9 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     protected K1ColoringStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringStatsConfig.of(graphName, config);
     }
 
     @SuppressWarnings("unused")

@@ -22,7 +22,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -68,10 +67,9 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     protected TriangleCountWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountWriteConfig.of(graphName, maybeImplicitCreate, config);
+        return TriangleCountWriteConfig.of(graphName, config);
     }
 
     @Override

@@ -20,13 +20,13 @@
 package org.neo4j.gds.beta.node2vec;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -34,8 +34,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
 
@@ -59,7 +59,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
 
     @Override
     public Node2VecStreamConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+        return Node2VecStreamConfig.of(Optional.empty(), userInput);
     }
 
     @Test

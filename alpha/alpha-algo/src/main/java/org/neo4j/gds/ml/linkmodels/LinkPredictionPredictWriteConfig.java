@@ -22,10 +22,9 @@ package org.neo4j.gds.ml.linkmodels;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -51,12 +50,10 @@ public interface LinkPredictionPredictWriteConfig extends LinkPredictionPredictB
     static LinkPredictionPredictWriteConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return new LinkPredictionPredictWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

@@ -21,10 +21,10 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -129,6 +129,6 @@ class LocalClusteringCoefficientMutateProcTest
 
     @Override
     public LocalClusteringCoefficientMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return LocalClusteringCoefficientMutateConfig.of(Optional.empty(), mapWrapper);
     }
 }

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -66,10 +65,9 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     protected BetweennessCentralityStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityStatsConfig.of(graphName, config);
     }
 
     @Override

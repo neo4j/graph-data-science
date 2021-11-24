@@ -110,7 +110,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
 
     @Override
     public CollapsePathConfig createConfig(CypherMapWrapper mapWrapper) {
-        return CollapsePathConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return CollapsePathConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

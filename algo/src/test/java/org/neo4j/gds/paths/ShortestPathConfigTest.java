@@ -20,8 +20,8 @@
 package org.neo4j.gds.paths;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.Optional;
@@ -38,7 +38,7 @@ class ShortestPathConfigTest {
             .withEntry("sourceNode", new TestNode(42L))
             .withEntry("targetNode", new TestNode(1337L));
 
-        var config = new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper);
+        var config = new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
         assertThat(config.targetNode()).isEqualTo(1337L);
@@ -51,7 +51,7 @@ class ShortestPathConfigTest {
             .withEntry("sourceNode", 42L)
             .withEntry("targetNode", 1337L);
 
-        var config = new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper);
+        var config = new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
         assertThat(config.targetNode()).isEqualTo(1337L);
@@ -64,7 +64,7 @@ class ShortestPathConfigTest {
             .withEntry("sourceNode", "42")
             .withEntry("targetNode", false);
 
-        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), Optional.empty(), cypherMapWrapper))
+        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper))
             .hasMessageContaining("Expected a node or a node id for `sourceNode`. Got String")
             .hasMessageContaining("Expected a node or a node id for `targetNode`. Got Boolean");
     }

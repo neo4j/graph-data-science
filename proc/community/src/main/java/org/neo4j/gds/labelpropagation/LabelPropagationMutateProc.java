@@ -22,7 +22,6 @@ package org.neo4j.gds.labelpropagation;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -63,10 +62,9 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     protected LabelPropagationMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LabelPropagationMutateConfig.of(graphName, config);
     }
 
     @Override

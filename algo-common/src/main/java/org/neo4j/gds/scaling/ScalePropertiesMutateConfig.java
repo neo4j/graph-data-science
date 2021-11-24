@@ -21,7 +21,6 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -34,13 +33,8 @@ interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutateP
 
     static ScalePropertiesMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ScalePropertiesMutateConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new ScalePropertiesMutateConfigImpl(graphName, userInput);
     }
 }

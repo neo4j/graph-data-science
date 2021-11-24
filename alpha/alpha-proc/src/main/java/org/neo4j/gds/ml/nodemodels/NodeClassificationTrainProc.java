@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
@@ -97,12 +96,10 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     protected NodeClassificationTrainConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return NodeClassificationTrainConfig.of(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

@@ -21,10 +21,9 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -35,9 +34,8 @@ public interface KnnWriteConfig extends KnnBaseConfig, WritePropertyConfig, Writ
 
     static KnnWriteConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new KnnWriteConfigImpl(graphName, implicitCreateConfig, config);
+        return new KnnWriteConfigImpl(graphName, config);
     }
 }

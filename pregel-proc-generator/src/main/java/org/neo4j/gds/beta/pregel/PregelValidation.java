@@ -23,10 +23,9 @@ import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -171,32 +170,28 @@ final class PregelValidation {
 
         var stringType = elementUtils.getTypeElement(String.class.getName()).asType();
         var cypherMapWrapperType = elementUtils.getTypeElement(CypherMapWrapper.class.getName()).asType();
-        var graphCreateConfigType = elementUtils.getTypeElement(GraphCreateConfig.class.getName()).asType();
         var optionalType = elementUtils.getTypeElement(Optional.class.getTypeName());
         var graphNameType = typeUtils.getDeclaredType(optionalType, stringType);
-        var implicitCreateType = typeUtils.getDeclaredType(optionalType, graphCreateConfigType);
 
         var configElement = typeUtils.asElement(config);
         var maybeHasFactoryMethod = ElementFilter.methodsIn(configElement.getEnclosedElements()).stream()
             .filter(method -> method.getModifiers().contains(Modifier.STATIC))
             .filter(method -> method.getSimpleName().contentEquals("of"))
-            .filter(method -> method.getParameters().size() == 3)
+            .filter(method -> method.getParameters().size() == 2)
             .filter(method -> typeUtils.isSameType(method.getReturnType(), config))
             .map(ExecutableElement::getParameters)
             .anyMatch(parameters ->
                 typeUtils.isSameType(graphNameType, parameters.get(0).asType()) &&
-                typeUtils.isSameType(implicitCreateType, parameters.get(1).asType()) &&
-                typeUtils.isSameType(cypherMapWrapperType, parameters.get(2).asType())
+                typeUtils.isSameType(cypherMapWrapperType, parameters.get(1).asType())
             );
 
         if (!maybeHasFactoryMethod) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 formatWithLocale(
-                    "Missing method 'static %s of(%s graphName, %s maybeImplicitCreate, %s userConfig)' in %s.",
+                    "Missing method 'static %s of(%s graphName, %s userConfig)' in %s.",
                     configElement,
                     graphNameType,
-                    implicitCreateType,
                     cypherMapWrapperType,
                     configElement
                 ),

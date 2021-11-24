@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -92,10 +91,9 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     protected PageRankWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankWriteConfig.of(graphName, config);
     }
 
     @SuppressWarnings("unused")

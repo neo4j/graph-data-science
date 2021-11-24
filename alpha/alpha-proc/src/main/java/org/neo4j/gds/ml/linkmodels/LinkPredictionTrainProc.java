@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
@@ -70,10 +69,9 @@ public class LinkPredictionTrainProc extends
     protected LinkPredictionTrainConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        var lpConfig = LinkPredictionTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        var lpConfig = LinkPredictionTrainConfig.of(username, graphName, config);
         var trainType = lpConfig.trainRelationshipType();
         var testType = lpConfig.testRelationshipType();
         return ImmutableLinkPredictionTrainConfig

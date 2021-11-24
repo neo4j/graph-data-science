@@ -54,7 +54,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
             relationshipType,
             relationshipProperty,
             Optional.of(graphName),
-            Optional.empty(),
             config
         );
     }

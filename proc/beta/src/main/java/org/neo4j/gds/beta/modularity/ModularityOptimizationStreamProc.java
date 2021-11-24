@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.modularity;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -77,10 +76,9 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     protected ModularityOptimizationStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ModularityOptimizationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ModularityOptimizationStreamConfig.of(graphName, config);
     }
 
     @SuppressWarnings("unused")

@@ -60,7 +60,7 @@ class GraphSageTrainConfigTest {
     void shouldThrowIfNoPropertiesProvided() {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
         var expectedMessage = "GraphSage requires at least one property.";
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(expectedMessage);
     }
@@ -74,7 +74,7 @@ class GraphSageTrainConfigTest {
             "projectedFeatureDimension", projectedFeatureDimension
         ));
 
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Value for `projectedFeatureDimension` was `%d`", projectedFeatureDimension)
             .hasMessageContaining("must be within the range [1,");
@@ -89,7 +89,7 @@ class GraphSageTrainConfigTest {
             "epochs", projectedFeatureDimension
         ));
 
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Value for `epochs` was `%d`", projectedFeatureDimension)
             .hasMessageContaining("must be within the range [1,");
@@ -99,7 +99,7 @@ class GraphSageTrainConfigTest {
     @MethodSource("invalidActivationFunctions")
     void failOnInvalidActivationFunction(Object activationFunction, String errorMessage) {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo", "activationFunction", activationFunction));
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(errorMessage);
     }
@@ -108,7 +108,7 @@ class GraphSageTrainConfigTest {
     @MethodSource("invalidAggregator")
     void failOnInvalidAggregator(Object aggregator, String errorMessage) {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo","aggregator", aggregator));
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(errorMessage);
     }
@@ -117,7 +117,6 @@ class GraphSageTrainConfigTest {
     void shouldKnowIfMultiOrSingleLabel() {
         var multiLabelConfig = GraphSageTrainConfig.of(
             "",
-            Optional.empty(),
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
@@ -128,7 +127,6 @@ class GraphSageTrainConfigTest {
         assertTrue(multiLabelConfig.isMultiLabel());
         var singleLabelConfig = GraphSageTrainConfig.of(
             "",
-            Optional.empty(),
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
@@ -143,7 +141,6 @@ class GraphSageTrainConfigTest {
         assertThatThrownBy(() ->
             GraphSageTrainConfig.of(
                 "",
-                Optional.empty(),
                 Optional.empty(),
                 CypherMapWrapper.create(Map.of(
                     "modelName", "graphSageModel",
@@ -161,7 +158,6 @@ class GraphSageTrainConfigTest {
         assertThatThrownBy(() ->
             GraphSageTrainConfig.of(
                 "",
-                Optional.empty(),
                 Optional.empty(),
                 CypherMapWrapper.create(Map.of(
                     "modelName", "graphSageModel",

@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.common.CentralityStreamResult;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
@@ -78,10 +77,9 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     protected PageRankStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankStreamConfig.of(graphName, config);
     }
 
     @Override

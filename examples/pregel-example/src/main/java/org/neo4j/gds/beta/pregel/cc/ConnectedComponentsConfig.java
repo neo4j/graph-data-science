@@ -22,10 +22,9 @@ package org.neo4j.gds.beta.pregel.cc;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -42,9 +41,8 @@ public interface ConnectedComponentsConfig extends PregelProcedureConfig, SeedCo
 
     static ConnectedComponentsConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ConnectedComponentsConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new ConnectedComponentsConfigImpl(graphName, userInput);
     }
 }

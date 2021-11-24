@@ -76,7 +76,7 @@ class WriteProcTest {
 
             @Override
             protected AlgoBaseConfig newConfig(
-                String username, Optional graphName, Optional maybeImplicitCreate, CypherMapWrapper config
+                String username, Optional graphName, CypherMapWrapper config
             ) {
                 throw new UnsupportedOperationException("TODO");
             }

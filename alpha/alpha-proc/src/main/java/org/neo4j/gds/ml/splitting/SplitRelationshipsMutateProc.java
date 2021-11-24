@@ -62,10 +62,9 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     protected SplitRelationshipsMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return SplitRelationshipsMutateConfig.of(graphName, maybeImplicitCreate, config);
+        return SplitRelationshipsMutateConfig.of(graphName, config);
     }
 
     @Override

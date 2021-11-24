@@ -21,7 +21,6 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -73,10 +72,9 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     protected LouvainStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LouvainStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LouvainStatsConfig.of(graphName, config);
     }
 
     @Override

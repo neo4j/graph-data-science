@@ -21,7 +21,6 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -32,14 +31,11 @@ import java.util.Optional;
 public interface PageRankStreamConfig extends PageRankConfig {
 
     static PageRankStreamConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new PageRankStreamConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

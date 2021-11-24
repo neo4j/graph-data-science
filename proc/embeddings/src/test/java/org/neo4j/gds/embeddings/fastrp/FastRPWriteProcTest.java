@@ -62,7 +62,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
 
     @Override
     public FastRPWriteConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+        return FastRPWriteConfig.of(Optional.empty(), userInput);
     }
 
     @Override

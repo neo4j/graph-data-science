@@ -27,7 +27,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -59,7 +58,6 @@ public abstract class AlgoBaseProc<
     protected abstract CONFIG newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     );
 
@@ -145,6 +143,7 @@ public abstract class AlgoBaseProc<
         return GraphStoreLoader.of(
             config,
             maybeGraphName,
+            Optional.empty(),
             this::databaseId,
             this::username,
             this::graphLoaderContext,

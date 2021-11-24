@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -33,12 +32,10 @@ public interface WccStatsConfig extends WccBaseConfig {
 
     static WccStatsConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         WccStatsConfig wccStatsConfig = new WccStatsConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
 

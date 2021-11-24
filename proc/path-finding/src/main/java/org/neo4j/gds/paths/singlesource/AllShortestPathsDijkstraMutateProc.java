@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.MutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateProc;
@@ -63,10 +62,9 @@ public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<D
     protected AllShortestPathsDijkstraMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return AllShortestPathsDijkstraMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return AllShortestPathsDijkstraMutateConfig.of(graphName, config);
     }
 
     @Override

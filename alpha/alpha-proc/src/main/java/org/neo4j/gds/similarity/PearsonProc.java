@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.impl.similarity.PearsonAlgorithm;
@@ -74,10 +73,9 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
     protected PearsonConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PearsonConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new PearsonConfigImpl(graphName, userInput);
     }
 
     @Override

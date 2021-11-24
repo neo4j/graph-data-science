@@ -40,7 +40,7 @@ class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConf
 
     @Override
     public K1ColoringStatsConfig createConfig(CypherMapWrapper configMap) {
-        return K1ColoringStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), configMap);
+        return K1ColoringStatsConfig.of(Optional.empty(), configMap);
     }
     @Test
     void testStats() {

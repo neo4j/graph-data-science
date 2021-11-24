@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -34,12 +33,10 @@ public interface LinkPredictionPredictStreamConfig extends LinkPredictionPredict
     static LinkPredictionPredictStreamConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return new LinkPredictionPredictStreamConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

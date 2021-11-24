@@ -45,8 +45,6 @@ class BetweennessCentralityTest {
     private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
     private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(
-        "",
-        Optional.empty(),
         Optional.empty(),
         CypherMapWrapper.empty()
     );

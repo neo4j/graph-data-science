@@ -21,12 +21,12 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
@@ -145,6 +145,6 @@ class TriangleCountMutateProcTest
 
     @Override
     public TriangleCountMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountMutateConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return TriangleCountMutateConfig.of(Optional.empty(), mapWrapper);
     }
 }

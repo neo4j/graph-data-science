@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -74,10 +73,9 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
     protected KnnMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return KnnMutateConfig.of(graphName, maybeImplicitCreate, config);
+        return KnnMutateConfig.of(graphName, config);
     }
 
     @Override

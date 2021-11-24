@@ -22,10 +22,9 @@ package org.neo4j.gds.impl.walking;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,12 +43,10 @@ public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipCo
 
     static CollapsePathConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new CollapsePathConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

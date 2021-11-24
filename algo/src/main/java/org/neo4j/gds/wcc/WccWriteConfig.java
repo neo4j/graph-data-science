@@ -22,7 +22,6 @@ package org.neo4j.gds.wcc;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ComponentSizeConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -35,12 +34,10 @@ public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, Comp
 
     static WccWriteConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new WccWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

@@ -20,6 +20,8 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
@@ -27,8 +29,6 @@ import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
@@ -50,7 +50,7 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
 
     @Override
     public ShortestPathAStarStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathAStarStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathAStarStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

@@ -22,7 +22,6 @@ package org.neo4j.gds.shortestpath;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -53,9 +52,8 @@ public interface ShortestPathDeltaSteppingConfig extends AlgoBaseConfig, Relatio
 
     static ShortestPathDeltaSteppingConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ShortestPathDeltaSteppingConfigImpl(graphName, implicitCreateConfig, config);
+        return new ShortestPathDeltaSteppingConfigImpl(graphName, config);
     }
 }

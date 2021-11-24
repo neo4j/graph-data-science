@@ -94,7 +94,7 @@ class LocalClusteringCoefficientWriteProcTest
 
     @Override
     public LocalClusteringCoefficientWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientWriteConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return LocalClusteringCoefficientWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

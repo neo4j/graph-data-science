@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
 
     @Override
     public K1ColoringMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return K1ColoringMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return K1ColoringMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

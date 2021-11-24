@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -89,12 +88,9 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
     protected ApproximateNearestNeighborsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new ApproximateNearestNeighborsConfigImpl(
-            graphName, maybeImplicitCreate, config
-        );
+        return new ApproximateNearestNeighborsConfigImpl(graphName, config);
     }
 
     @Override

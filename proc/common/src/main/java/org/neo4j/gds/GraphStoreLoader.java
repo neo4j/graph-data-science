@@ -47,6 +47,7 @@ public interface GraphStoreLoader {
     static GraphStoreLoader of(
         AlgoBaseConfig config,
         Optional<String> maybeGraphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
         Supplier<NamedDatabaseId> databaseIdSupplier,
         Supplier<String> usernameSupplier,
         Supplier<GraphLoaderContext> graphLoaderContextSupplier,
@@ -60,8 +61,9 @@ public interface GraphStoreLoader {
                 databaseIdSupplier.get(),
                 isGdsAdmin
             );
-        } else if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig graphCreateConfig = config.implicitCreateConfig().get();
+        }
+        else if (implicitCreateConfig.isPresent()) {
+            GraphCreateConfig graphCreateConfig = implicitCreateConfig.get();
             return implicitGraphLoader(usernameSupplier, graphLoaderContextSupplier, graphCreateConfig);
         } else {
             throw new IllegalStateException("There must be either a graph name or an anonymous graph projection config");

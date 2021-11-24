@@ -85,7 +85,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
     @Override
     public LabelPropagationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return LabelPropagationMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

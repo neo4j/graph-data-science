@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -40,12 +39,10 @@ public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictio
     static LinkPredictionPredictPipelineMutateConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return new LinkPredictionPredictPipelineMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

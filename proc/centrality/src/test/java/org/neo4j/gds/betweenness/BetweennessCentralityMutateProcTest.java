@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Map;
@@ -70,11 +70,7 @@ public class BetweennessCentralityMutateProcTest
 
     @Override
     public BetweennessCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityMutateConfig.of("",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return BetweennessCentralityMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

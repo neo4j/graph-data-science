@@ -54,11 +54,7 @@ class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<B
 
     @Override
     public BetweennessCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityWriteConfig.of("",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return BetweennessCentralityWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

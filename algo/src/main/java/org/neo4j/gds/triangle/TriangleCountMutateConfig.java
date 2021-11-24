@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -34,12 +33,10 @@ public interface TriangleCountMutateConfig extends TriangleCountBaseConfig, Muta
 
     static TriangleCountMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new TriangleCountMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

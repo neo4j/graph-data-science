@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -64,10 +63,9 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
     protected DegreeCentralityMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return DegreeCentralityMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return DegreeCentralityMutateConfig.of(graphName, config);
     }
 
     @Override

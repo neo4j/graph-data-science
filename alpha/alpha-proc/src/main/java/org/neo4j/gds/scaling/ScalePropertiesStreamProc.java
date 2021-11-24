@@ -24,7 +24,6 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -64,10 +63,9 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     protected ScalePropertiesStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ScalePropertiesStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return ScalePropertiesStreamConfig.of(graphName, config);
     }
 
     @Override

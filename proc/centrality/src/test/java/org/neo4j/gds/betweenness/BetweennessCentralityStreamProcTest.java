@@ -36,11 +36,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
 
     @Override
     public BetweennessCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStreamConfig.of("",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return BetweennessCentralityStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

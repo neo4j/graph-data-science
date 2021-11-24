@@ -22,7 +22,6 @@ package org.neo4j.gds.influenceMaximization;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -90,10 +89,9 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     protected InfluenceMaximizationConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, config);
+        return new InfluenceMaximizationConfigImpl(graphName, config);
     }
 
     @Override

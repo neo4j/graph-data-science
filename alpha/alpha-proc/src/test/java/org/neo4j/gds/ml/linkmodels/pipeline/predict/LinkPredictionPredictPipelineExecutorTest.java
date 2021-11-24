@@ -116,7 +116,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 
@@ -160,7 +159,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 
@@ -203,7 +201,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 

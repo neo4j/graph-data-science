@@ -46,7 +46,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
 
     @Override
     public AllShortestPathsDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return AllShortestPathsDijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return AllShortestPathsDijkstraStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

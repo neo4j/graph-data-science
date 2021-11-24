@@ -24,7 +24,6 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
@@ -55,12 +54,10 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
     static LinkPredictionTrainConfig of(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return new LinkPredictionTrainConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

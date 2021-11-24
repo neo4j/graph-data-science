@@ -20,15 +20,15 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.TestLog;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
@@ -57,7 +57,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Override
     public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraStreamConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

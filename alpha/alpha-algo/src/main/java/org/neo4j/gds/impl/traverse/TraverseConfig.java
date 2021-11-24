@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -50,12 +49,10 @@ public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig
 
     static TraverseConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new TraverseConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

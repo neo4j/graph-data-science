@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -60,9 +59,8 @@ public interface PregelConfig extends
 
     static PregelConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PregelConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new PregelConfigImpl(graphName, userInput);
     }
 }

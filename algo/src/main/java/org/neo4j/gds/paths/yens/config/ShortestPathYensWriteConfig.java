@@ -35,12 +35,10 @@ public interface ShortestPathYensWriteConfig extends ShortestPathYensBaseConfig,
 
     static ShortestPathYensWriteConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new ShortestPathYensWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

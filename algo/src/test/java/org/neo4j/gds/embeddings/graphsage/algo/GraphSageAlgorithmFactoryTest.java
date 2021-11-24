@@ -387,7 +387,6 @@ class GraphSageAlgorithmFactoryTest {
         var multiLabelConfig = GraphSageTrainConfig.of(
             "",
             Optional.empty(),
-            Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
                 "featureProperties", List.of("a"),
@@ -406,7 +405,6 @@ class GraphSageAlgorithmFactoryTest {
 
         var singleLabelConfig = GraphSageTrainConfig.of(
             "",
-            Optional.empty(),
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",

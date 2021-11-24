@@ -23,7 +23,6 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
@@ -64,10 +63,9 @@ public class LocalClusteringCoefficientStreamProc
     protected LocalClusteringCoefficientStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LocalClusteringCoefficientStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return LocalClusteringCoefficientStreamConfig.of(graphName, config);
     }
 
     @Override

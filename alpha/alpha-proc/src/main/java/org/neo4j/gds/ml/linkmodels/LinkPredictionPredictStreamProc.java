@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -86,13 +85,11 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     protected LinkPredictionPredictStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
         return LinkPredictionPredictStreamConfig.of(
             username,
             graphName,
-            maybeImplicitCreate,
             config
         );
     }

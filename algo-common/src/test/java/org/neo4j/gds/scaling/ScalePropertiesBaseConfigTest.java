@@ -41,7 +41,6 @@ class ScalePropertiesBaseConfigTest {
     void parseValidScalers(ScalarScaler.Variant scaler) {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
-            Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -58,7 +57,6 @@ class ScalePropertiesBaseConfigTest {
     void supportNodePropertyMap() {
         var config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
-            Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -77,7 +75,6 @@ class ScalePropertiesBaseConfigTest {
             IllegalArgumentException.class,
             () -> new ScalePropertiesMutateConfigImpl(
                 Optional.of("graph"),
-                Optional.empty(),
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",
@@ -95,7 +92,6 @@ class ScalePropertiesBaseConfigTest {
     void failOnSpecifyingSamePropertyMultipleTimes() {
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
-            Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -112,7 +108,6 @@ class ScalePropertiesBaseConfigTest {
             IllegalArgumentException.class,
             () -> new ScalePropertiesMutateConfigImpl(
                 Optional.of("graph"),
-                Optional.empty(),
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",

@@ -41,7 +41,6 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -308,10 +307,9 @@ public class PregelProcTest extends BaseProcTest {
         protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, config);
         }
 
         @Override
@@ -378,10 +376,9 @@ public class PregelProcTest extends BaseProcTest {
         protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, config);
         }
 
         @Override
@@ -446,10 +443,9 @@ public class PregelProcTest extends BaseProcTest {
         protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(graphName, config);
         }
 
         @Override

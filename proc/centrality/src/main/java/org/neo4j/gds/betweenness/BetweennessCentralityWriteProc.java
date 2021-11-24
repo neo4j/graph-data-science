@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -66,10 +65,9 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     protected BetweennessCentralityWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityWriteConfig.of(graphName, config);
     }
 
     @Override

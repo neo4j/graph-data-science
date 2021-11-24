@@ -21,9 +21,9 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
@@ -48,7 +48,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
     @Override
     public WccStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStatsConfig.of(Optional.empty(), Optional.empty(), mapWrapper);
+        return WccStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

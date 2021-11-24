@@ -22,7 +22,6 @@ package org.neo4j.gds.scaling;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -54,10 +53,9 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
     protected ScalePropertiesMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ScalePropertiesMutateConfig.of(graphName, maybeImplicitCreate, config);
+        return ScalePropertiesMutateConfig.of(graphName, config);
     }
 
     @Override

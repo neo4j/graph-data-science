@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.modularity;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -32,15 +31,9 @@ import java.util.Optional;
 public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {
 
     static ModularityOptimizationStreamConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new ModularityOptimizationStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            config
-        );
+        return new ModularityOptimizationStreamConfigImpl(graphName, config);
     }
 }

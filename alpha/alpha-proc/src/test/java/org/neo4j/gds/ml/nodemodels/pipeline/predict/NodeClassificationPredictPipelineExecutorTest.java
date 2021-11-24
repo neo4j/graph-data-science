@@ -116,7 +116,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -155,7 +154,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -194,7 +192,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 Optional.of(GRAPH_NAME),
-                Optional.empty(),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -278,7 +275,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 db.databaseId()
             );
             var streamConfig = NodeClassificationPredictPipelineStreamConfig.of(
-                "", Optional.of("g"), Optional.empty(), CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
+                "", Optional.of("g"), CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
 
             var algo = factory.build(
                 null,

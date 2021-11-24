@@ -68,12 +68,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     @Override
     public LabelPropagationWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationWriteConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+        return LabelPropagationWriteConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Override

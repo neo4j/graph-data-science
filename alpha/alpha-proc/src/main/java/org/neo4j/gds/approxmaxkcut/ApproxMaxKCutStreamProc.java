@@ -22,7 +22,6 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
@@ -62,10 +61,9 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
     protected ApproxMaxKCutStreamConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ApproxMaxKCutStreamConfig.of(graphName, maybeImplicitCreate, config);
+        return ApproxMaxKCutStreamConfig.of(graphName, config);
     }
 
     @Override

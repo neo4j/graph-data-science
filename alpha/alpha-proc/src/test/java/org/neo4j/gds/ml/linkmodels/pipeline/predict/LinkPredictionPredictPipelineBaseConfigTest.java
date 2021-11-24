@@ -82,7 +82,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     void failOnRandomSeedWithHighConcurrency() {
         assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
-            Optional.empty(),
             "user",
             CypherMapWrapper.create(Map.of("modelName", "testModel", "randomSeed", 42L, "concurrency", 4))
         ))
@@ -96,7 +95,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     void failOnIllegalParameterCombinations(Map<String, Object> config, String expectedMessage) {
         assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of(" g"),
-            Optional.empty(),
             "user",
             CypherMapWrapper.create(config)
         ))
@@ -108,7 +106,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     void failOnDeriveKnnConfig() {
         var exhaustiveConfig = new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
-            Optional.empty(),
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
@@ -127,7 +124,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     void deriveKnnConfig() {
         var approximateConfig = new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
-            Optional.empty(),
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
@@ -151,7 +147,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     void failOnMissingTopN() {
         assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
             Optional.of("g"),
-            Optional.empty(),
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",

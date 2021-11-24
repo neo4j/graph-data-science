@@ -21,10 +21,9 @@ package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
 
 import java.util.Optional;
 
@@ -34,14 +33,11 @@ import java.util.Optional;
 public interface AllShortestPathsDijkstraMutateConfig extends AllShortestPathsBaseConfig, MutateRelationshipConfig {
 
     static AllShortestPathsDijkstraMutateConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new AllShortestPathsDijkstraMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

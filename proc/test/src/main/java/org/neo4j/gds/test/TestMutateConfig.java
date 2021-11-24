@@ -46,9 +46,8 @@ public interface TestMutateConfig extends AlgoBaseConfig, MutatePropertyConfig {
 
     static TestMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new TestMutateConfigImpl(graphName, maybeImplicitCreate, config);
+        return new TestMutateConfigImpl(graphName, config);
     }
 }

@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -42,13 +41,8 @@ public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
 
     static SccConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new SccConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new SccConfigImpl(graphName, userInput);
     }
 }

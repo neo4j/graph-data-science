@@ -52,7 +52,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
 
     @Override
     public K1ColoringWriteConfig createConfig(CypherMapWrapper configMap) {
-        return K1ColoringWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), configMap);
+        return K1ColoringWriteConfig.of(Optional.empty(), configMap);
     }
 
     @Test

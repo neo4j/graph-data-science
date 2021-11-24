@@ -22,12 +22,12 @@ package org.neo4j.gds.pagerank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -123,7 +123,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
     @Override
     public PageRankMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return PageRankMutateConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

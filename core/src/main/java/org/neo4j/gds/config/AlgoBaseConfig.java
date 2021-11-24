@@ -66,9 +66,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
             : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
     }
 
-    @Configuration.Parameter
-    Optional<GraphCreateConfig> implicitCreateConfig();
-
     @Configuration.GraphStoreValidation
     @Value.Auxiliary
     @Value.Default

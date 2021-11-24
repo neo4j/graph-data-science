@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
@@ -57,13 +56,11 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
 
     static NodeClassificationPipelineTrainConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         String username,
         CypherMapWrapper config
     ) {
         return new NodeClassificationPipelineTrainConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

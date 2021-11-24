@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.paths.dijkstra.config;
 
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 import java.util.Optional;
 
@@ -40,12 +39,10 @@ public interface ShortestPathDijkstraWriteConfig extends ShortestPathBaseConfig,
 
     static ShortestPathDijkstraWriteConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new ShortestPathDijkstraWriteConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
 

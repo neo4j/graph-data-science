@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.yens.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -34,12 +33,10 @@ public interface ShortestPathYensMutateConfig extends ShortestPathYensBaseConfig
 
     static ShortestPathYensMutateConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
         return new ShortestPathYensMutateConfigImpl(
             graphName,
-            maybeImplicitCreate,
             userInput
         );
     }

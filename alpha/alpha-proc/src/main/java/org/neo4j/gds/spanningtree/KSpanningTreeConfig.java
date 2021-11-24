@@ -21,7 +21,6 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 
@@ -37,10 +36,9 @@ public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
     static KSpanningTreeConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new KSpanningTreeConfigImpl(graphName, maybeImplicitCreate, userInput);
+        return new KSpanningTreeConfigImpl(graphName, userInput);
     }
 
 }

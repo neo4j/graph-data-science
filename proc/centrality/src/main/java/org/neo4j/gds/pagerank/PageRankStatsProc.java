@@ -22,7 +22,6 @@ package org.neo4j.gds.pagerank;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -80,10 +79,9 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     protected PageRankStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankStatsConfig.of(graphName, config);
     }
 
     @Override

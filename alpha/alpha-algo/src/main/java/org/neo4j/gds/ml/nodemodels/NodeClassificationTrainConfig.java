@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
@@ -89,13 +88,11 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     static NodeClassificationTrainConfig of(
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         String username,
         CypherMapWrapper config
     ) {
         return new NodeClassificationTrainConfigImpl(
             graphName,
-            maybeImplicitCreate,
             username,
             config
         );

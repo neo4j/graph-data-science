@@ -22,7 +22,6 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -71,10 +70,9 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     protected TestConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TestConfig.of(graphName, maybeImplicitCreate, config);
+        return TestConfig.of(graphName, config);
     }
 
     @Override

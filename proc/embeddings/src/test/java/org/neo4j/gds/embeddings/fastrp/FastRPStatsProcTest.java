@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
 
     @Override
     public FastRPStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return FastRPStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+        return FastRPStatsConfig.of(Optional.empty(), mapWrapper);
     }
 
     @Test

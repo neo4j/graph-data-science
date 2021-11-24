@@ -21,9 +21,8 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -33,15 +32,9 @@ import java.util.Optional;
 public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutatePropertyConfig {
 
     static Node2VecMutateConfig of(
-        String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new Node2VecMutateConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            userInput
-        );
+        return new Node2VecMutateConfigImpl(graphName, userInput);
     }
 }

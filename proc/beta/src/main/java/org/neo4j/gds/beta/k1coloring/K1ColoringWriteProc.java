@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.k1coloring;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -83,10 +82,9 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     protected K1ColoringWriteConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringWriteConfig.of(graphName, config);
     }
 
     @SuppressWarnings("unused")

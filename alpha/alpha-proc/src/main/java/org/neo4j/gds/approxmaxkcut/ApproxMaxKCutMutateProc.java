@@ -22,7 +22,6 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
@@ -64,10 +63,9 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
     protected ApproxMaxKCutMutateConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ApproxMaxKCutMutateConfig.of(graphName, maybeImplicitCreate, config);
+        return ApproxMaxKCutMutateConfig.of(graphName, config);
     }
 
     @Override

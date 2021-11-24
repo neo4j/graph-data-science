@@ -21,7 +21,6 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -65,10 +64,9 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     protected NodeSimilarityStatsConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeSimilarityStatsConfig.of(graphName, maybeImplicitCreate, config);
+        return NodeSimilarityStatsConfig.of(graphName, config);
     }
 
     @Override
