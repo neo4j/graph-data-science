@@ -35,6 +35,9 @@ import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureP
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineMutateProc;
+import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineStreamProc;
+import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineTrainProc;
+import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineWriteProc;
 
 import java.util.List;
 
@@ -50,8 +53,9 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
         return List.of(
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineMutateProc.class,
-//            NodeClassificationPipelineStreamProc.class,
-//            NodeClassificationPipelineTrainProc.class,
+            NodeClassificationPipelineWriteProc.class,
+            NodeClassificationPipelineStreamProc.class,
+            NodeClassificationPipelineTrainProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineConfigureSplitProc.class,
             NodeClassificationPipelineConfigureParamsProc.class,
@@ -62,7 +66,7 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/pipelines/nodeclassification-pipeline/nodeclassification.adoc";
+        return "algorithms/alpha/nodeclassification-pipeline/nodeclassification.adoc";
     }
 
 }
