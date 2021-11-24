@@ -49,7 +49,8 @@ public abstract class DocTestBase extends BaseProcTest {
     @TempDir
     File workDir;
 
-    private static final Path ASCIIDOC_PATH = Paths.get("../doc/asciidoc");
+    private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/asciidoc");
+
     private List<String> beforeEachQueries;
     private List<String> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
@@ -58,7 +59,7 @@ public abstract class DocTestBase extends BaseProcTest {
 
     protected abstract List<Class<?>> procedures();
 
-    protected Path adocPath() {
+    Path adocPath() {
         return ASCIIDOC_PATH;
     }
 
