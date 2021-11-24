@@ -20,14 +20,18 @@
 package org.neo4j.gds.impl.conductance;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -37,6 +41,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 final class ConductanceTest {
@@ -143,4 +149,43 @@ final class ConductanceTest {
         );
     }
 
+    @Test
+    void logProgress() {
+        var config = ImmutableConductanceConfig.builder()
+            .communityProperty("community")
+            .concurrency(1)
+            .build();
+
+        var factory = new ConductanceFactory<>();
+
+        var progressTask = factory.progressTask(naturalGraph, config);
+        var log = new TestLog();
+        var progressTracker = new TaskProgressTracker(
+            progressTask,
+            log,
+            config.concurrency(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        factory
+            .build(naturalGraph, config, AllocationTracker.empty(), progressTracker)
+            .compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Conductance :: Start",
+                "Conductance :: count relationships :: Start",
+                "Conductance :: count relationships 100%",
+                "Conductance :: count relationships :: Finished",
+                "Conductance :: accumulate counts :: Start",
+                "Conductance :: accumulate counts 100%",
+                "Conductance :: accumulate counts :: Finished",
+                "Conductance :: perform conductance computations :: Start",
+                "Conductance :: perform conductance computations 100%",
+                "Conductance :: perform conductance computations :: Finished",
+                "Conductance :: Finished"
+            );
+    }
 }
