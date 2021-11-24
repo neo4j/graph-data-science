@@ -59,7 +59,7 @@ class MemoryUsageValidatorTest extends BaseTest {
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
                 () -> 21
         )).isInstanceOf(IllegalStateException.class)
-          .hasMessageMatching("Procedure was blocked since minimum estimated memory 42 Bytes exceeds current free memory.");
+          .hasMessageMatching("Procedure was blocked since minimum estimated memory \\(42 Bytes\\) exceeds current free memory \\(21 Bytes\\).");
     }
 
     @Test
