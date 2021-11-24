@@ -51,6 +51,8 @@ class ListProcTest extends BaseProcTest {
 
         "gds.alpha.collapsePath.mutate",
 
+        "gds.alpha.conductance.stream",
+
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
         "gds.alpha.closeness.harmonic.write",
