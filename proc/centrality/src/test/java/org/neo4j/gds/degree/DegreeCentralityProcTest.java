@@ -34,7 +34,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -53,7 +52,6 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     @TestFactory
     final Stream<DynamicTest> configTests() {
         return Stream.concat(modeSpecificConfigTests(), Stream.of(
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
             ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream));
     }
