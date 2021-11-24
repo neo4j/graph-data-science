@@ -34,7 +34,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
@@ -62,7 +61,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
-    SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
     HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
 

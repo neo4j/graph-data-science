@@ -35,7 +35,6 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.SeedConfigTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
@@ -61,7 +60,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
-    SeedConfigTest<Louvain, CONFIG, Louvain>,
     MemoryEstimateTest<Louvain, CONFIG, Louvain>,
     HeapControlTest<Louvain, CONFIG, Louvain> {
 

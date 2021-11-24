@@ -27,8 +27,11 @@ import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 public interface SeedConfig {
+    String SEED_PROPERTY_KEY = "seedProperty";
+
     @Value.Default
     @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {
         return null;
     }
@@ -39,6 +42,6 @@ public interface SeedConfig {
     }
 
     static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "seedProperty");
+        return validateNoWhiteCharacter(emptyToNull(input), SEED_PROPERTY_KEY);
     }
 }
