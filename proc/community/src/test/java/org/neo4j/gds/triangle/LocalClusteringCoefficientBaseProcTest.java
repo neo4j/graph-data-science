@@ -45,8 +45,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
@@ -124,17 +122,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
         LocalClusteringCoefficient.Result result1, LocalClusteringCoefficient.Result result2
     ) {
 
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
-        if (mapWrapper.containsKey(RELATIONSHIP_PROJECTION_KEY) || mapWrapper.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
-        }
-
-        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper
-            .withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
-            .toMap())));
     }
 
     @Override

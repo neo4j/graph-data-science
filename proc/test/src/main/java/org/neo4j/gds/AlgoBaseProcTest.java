@@ -22,9 +22,6 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -32,8 +29,6 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.config.GraphCreateFromCypherConfig;
-import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -57,10 +52,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -69,22 +62,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
-import static org.neo4j.gds.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
-import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.config.AlgoBaseConfig.GRAPH_NAME_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -117,10 +99,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return null;
     }
 
-    default boolean supportsImplicitGraphCreate() {
-        return true;
-    }
-
     GraphDatabaseAPI graphDb();
 
     default NamedDatabaseId namedDatabaseId() {
@@ -143,10 +121,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
-    }
-
-    default CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
-        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> func) {
@@ -181,72 +155,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 func.accept(proc);
             }
         );
-    }
-
-    @Test
-    default void testImplicitGraphCreateFromStoreConfig() {
-        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            NODE_PROJECTION_KEY, Collections.singletonList("*"),
-            RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
-        )));
-        applyOnProcedure(proc -> {
-            CONFIG config = proc.configParser().newConfig(Optional.empty(), wrapper);
-            assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
-            Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
-            assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
-            GraphCreateConfig actual = maybeGraphCreateConfig.get();
-            assertTrue(
-                actual instanceof GraphCreateFromStoreConfig,
-                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName())
-            );
-
-            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) actual;
-
-            NodeProjections expectedNodeProjections = expectedNodeProjections();
-            RelationshipProjections expectedRelationshipProjections = relationshipProjections();
-
-            assertEquals(expectedNodeProjections, storeConfig.nodeProjections());
-            assertEquals(expectedRelationshipProjections, storeConfig.relationshipProjections());
-            assertEquals(IMPLICIT_GRAPH_NAME, storeConfig.graphName());
-            assertEquals(TEST_USERNAME, storeConfig.username());
-        });
-    }
-
-    default NodeProjections expectedNodeProjections() {
-        return NodeProjections
-            .builder()
-            .putProjection(ALL_NODES, NodeProjection.all())
-            .build();
-    }
-
-    @Test
-    default void testImplicitGraphCreateFromCypherConfig() {
-        long concurrency = 2;
-        Map<String, Object> tempConfig = MapUtil.map(
-            NODE_QUERY_KEY, ALL_NODES_QUERY,
-            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
-            "concurrency", concurrency
-        );
-        CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(tempConfig));
-
-        applyOnProcedure(proc -> {
-            CONFIG config = proc.configParser().newConfig(Optional.empty(), wrapper);
-            assertEquals(Optional.empty(), config.graphName(), "Graph name should be empty.");
-            Optional<GraphCreateConfig> maybeGraphCreateConfig = config.implicitCreateConfig();
-            assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
-            assertTrue(
-                maybeGraphCreateConfig.get() instanceof GraphCreateFromCypherConfig,
-                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName())
-            );
-
-            GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
-
-            assertEquals(ALL_NODES_QUERY, actualConfig.nodeQuery());
-            assertEquals(ALL_RELATIONSHIPS_QUERY, actualConfig.relationshipQuery());
-            assertEquals(IMPLICIT_GRAPH_NAME, actualConfig.graphName());
-            assertEquals(TEST_USERNAME, actualConfig.username());
-            assertEquals(concurrency, actualConfig.readConcurrency());
-        });
     }
 
     default void assertMissingProperty(String error, Runnable runnable) {
@@ -314,93 +222,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    default void testRunOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
-        // FIXME rethink this test for mutate
-        if (supportsImplicitGraphCreate()) {
-            String loadedGraphName = "loadedGraph";
-            GraphCreateConfig graphCreateConfig = factoryType == CYPHER
-                ? withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery())
-                : withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
-
-            applyOnProcedure((proc) -> {
-                GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-                GraphStoreCatalog.set(
-                    graphCreateConfig,
-                    graphStore
-                );
-                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
-                    loadedGraphName,
-                    configMap,
-                    releaseAlgorithm(),
-                    true
-                );
-
-                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
-                AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
-                    implicitConfigMap,
-                    Collections.emptyMap(),
-                    releaseAlgorithm(),
-                    true
-                );
-
-                assertResultEquals(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
-            });
-        }
-    }
-
-    @Test
-    default void testRunOnImplicitlyLoadedGraph() {
-        Map<String, Object> cypherConfig = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
-            NODE_QUERY_KEY, ALL_NODES_QUERY,
-            RELATIONSHIP_QUERY_KEY, relationshipQuery()
-        ))).toMap();
-
-        Map<String, Object> storeConfig = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
-            NODE_PROJECTION_KEY, Collections.singletonList("*"),
-            RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
-        ))).toMap();
-
-        applyOnProcedure((proc) -> {
-
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromCypher = proc.compute(
-                cypherConfig,
-                Collections.emptyMap(),
-                releaseAlgorithm(),
-                true
-            );
-
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraphFromStore = proc.compute(
-                storeConfig,
-                Collections.emptyMap(),
-                releaseAlgorithm(),
-                true
-            );
-
-            assertResultEquals(resultOnImplicitGraphFromCypher.result(), resultOnImplicitGraphFromStore.result());
-        });
-    }
-
-    @Test
-    default void useReadConcurrencyWhenSetOnImplicitlyLoadedGraph() {
-        CypherMapWrapper config = createMinimalConfig(
-            CypherMapWrapper.create(
-                Map.of(
-                    NODE_PROJECTION_KEY, NodeProjections.ALL,
-                    RELATIONSHIP_PROJECTION_KEY, relationshipProjections(),
-                    READ_CONCURRENCY_KEY, 2
-                )
-            )
-        );
-
-        applyOnProcedure((proc) -> {
-            CONFIG algoConfig = proc.configParser().newConfig(Optional.empty(), config);
-            assertTrue(algoConfig.implicitCreateConfig().isPresent());
-            assertEquals(2, algoConfig.implicitCreateConfig().get().readConcurrency());
-        });
-    }
-
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.ALL;
     }
@@ -448,9 +269,16 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
 
         applyOnProcedure((proc) -> {
+            var graphLoader = new StoreLoaderBuilder()
+                .api(proc.api)
+                .graphName("g")
+                .build();
+            GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
-                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    configMap.put(GRAPH_NAME_KEY, "g");
+
                     configMap.remove(NODE_PROPERTIES_KEY);
                     configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
                     configMap.remove("relationshipWeightProperty");
@@ -499,41 +327,19 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     @Test
-    default void testFailOnMissingNodeLabel() {
-        applyOnProcedure((proc) -> {
-            getWriteAndStreamProcedures(proc)
-                .forEach(method -> {
-                    String missingLabel = "___THIS_LABEL_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = MapUtil.map(
-                        NODE_PROJECTION_KEY,
-                        Collections.singletonList(missingLabel)
-                    );
-
-                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
-
-                    Exception ex = assertThrows(
-                        Exception.class,
-                        () -> method.invoke(proc, configMap, Collections.emptyMap())
-                    );
-                    assertThat(ex)
-                        .getRootCause()
-                        .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessageContaining(formatWithLocale(
-                            "Invalid node projection, one or more labels not found: '%s'",
-                            missingLabel
-                        ));
-                });
-        });
-    }
-
-    @Test
     default void shouldThrowWhenTooManyCoresOnLimited() {
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
-                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
+                var graphLoader = new StoreLoaderBuilder()
+                    .api(proc.api)
+                    .graphName("g")
+                    .build();
+                GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
+                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
                     "concurrency",
                     10
                 ))).toMap();
+                configMap.put(GRAPH_NAME_KEY, "g");
 
                 InvocationTargetException ex = assertThrows(
                     InvocationTargetException.class,
@@ -546,152 +352,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         "Community users cannot exceed readConcurrency=4 (you configured readConcurrency=10), see https://neo4j.com/docs/graph-data-science/");
             })
         );
-    }
-
-    @Test
-    default void testFailOnMissingRelationshipType() {
-        applyOnProcedure((proc) -> {
-            getWriteAndStreamProcedures(proc)
-                .forEach(method -> {
-                    String missingRelType = "___THIS_REL_TYPE_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = Map.of(
-                        RELATIONSHIP_PROJECTION_KEY,
-                        relationshipProjectionForType(missingRelType)
-                    );
-
-                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
-
-                    Exception ex = assertThrows(
-                        Exception.class,
-                        () -> method.invoke(proc, configMap, Collections.emptyMap())
-                    );
-                    assertThat(ex)
-                        .getRootCause()
-                        .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessageContaining(formatWithLocale(
-                            "Invalid relationship projection, one or more relationship types not found: '%s'",
-                            missingRelType
-                        ));
-                });
-        });
-    }
-
-    private Object relationshipProjectionForType(String type) {
-        return this instanceof OnlyUndirectedTest<?, ?, ?>
-            ? Map.of(type, Map.of(TYPE_KEY, type, ORIENTATION_KEY, Orientation.UNDIRECTED.name()))
-            : List.of(type);
-    }
-
-    @Test
-    default void failOnImplicitLoadingWithAlteringNodeQuery() {
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            NODE_QUERY_KEY, "MATCH (n) SET n.name='foo' RETURN id(n) AS id",
-            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
-        ))).toMap();
-
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> applyOnProcedure((proc) -> proc.compute(
-                config,
-                Collections.emptyMap(),
-                releaseAlgorithm(),
-                true
-            ))
-        );
-
-        assertThat(ex)
-            .hasMessageContaining("Query must be read only. Query: ");
-    }
-
-    // NOTE: this test needs at least one relationship in order to pass
-    @Test
-    default void failOnImplicitLoadingWithAlteringRelationshipQuery() {
-        Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
-            NODE_QUERY_KEY, ALL_NODES_QUERY,
-            RELATIONSHIP_QUERY_KEY, "MATCH (s)-->(t) SET s.foo=false RETURN id(s) AS source, id(t) as target"
-        ))).toMap();
-
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> applyOnProcedure((proc) -> proc.compute(
-                config,
-                Collections.emptyMap(),
-                releaseAlgorithm(),
-                true
-            ))
-        );
-        assertThat(ex)
-            .hasMessageContaining("Query must be read only. Query: ");
-    }
-
-    String FAIL_ANY_CONFIG = formatWithLocale(
-        "`%s` and `%s` or `%s` and `%s`",
-        NODE_PROJECTION_KEY,
-        RELATIONSHIP_PROJECTION_KEY,
-        NODE_QUERY_KEY,
-        RELATIONSHIP_QUERY_KEY
-    );
-
-    // No value specified for the mandatory configuration parameter `relationshipProjection`
-    static Stream<Arguments> failingConfigurationMaps() {
-        return Stream.of(
-            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map()),
-            Arguments.of(
-                "No value specified for the mandatory configuration parameter `relationshipProjection`",
-                MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name)
-            ),
-            Arguments.of(
-                "No value specified for the mandatory configuration parameter `nodeProjection`",
-                MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name)
-            ),
-            Arguments.of(
-                "No value specified for the mandatory configuration parameter `relationshipQuery`",
-                MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)
-            ),
-            Arguments.of(
-                "No value specified for the mandatory configuration parameter `nodeQuery`",
-                MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
-            ),
-            Arguments.of(
-                FAIL_ANY_CONFIG,
-                MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
-            ),
-            Arguments.of(
-                FAIL_ANY_CONFIG,
-                MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name, NODE_QUERY_KEY, ALL_NODES_QUERY)
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("failingConfigurationMaps")
-    default void failOnImplicitLoadingWithoutProjectionsOrQueries(
-        String expectedMessage,
-        Map<String, Object> configurationMap
-    ) {
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(configurationMap)).toMap();
-        config.remove("nodeWeightProperty");
-
-        applyOnProcedure((proc) -> {
-            IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> proc.compute(
-                    config,
-                    Collections.emptyMap(),
-                    releaseAlgorithm(),
-                    true
-                )
-            );
-            String message = ex.getMessage();
-            assertTrue(
-                message.contains("Missing information"),
-                formatWithLocale("Does not start with 'Missing information': %s", message)
-            );
-            assertTrue(
-                message.contains(expectedMessage),
-                formatWithLocale("Does not contain '%s': %s", expectedMessage, message)
-            );
-        });
     }
 
     @Test

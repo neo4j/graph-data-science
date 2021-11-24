@@ -61,9 +61,6 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
 @Neo4jModelCatalogExtension
@@ -169,17 +166,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     }
 
     @Override
-    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper input) {
-        CypherMapWrapper updatedMap = AlgoBaseProcTest.super.createMinimalImplicitConfig(input);
-        if (updatedMap.containsKey(NODE_PROJECTION_KEY) && !updatedMap.containsKey(NODE_QUERY_KEY)) {
-            updatedMap = updatedMap.withEntry(NODE_PROPERTIES_KEY, List.of("a", "b"));
-        } else if (!updatedMap.containsKey(NODE_PROJECTION_KEY) && updatedMap.containsKey(NODE_QUERY_KEY)) {
-            updatedMap = updatedMap.withString(NODE_QUERY_KEY, "MATCH (n) RETURN id(n) AS id, n.a AS a, n.b AS b");
-        }
-        return updatedMap;
-    }
-
-    @Override
     public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeClassificationResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
         return NodeClassificationPredictWriteProc.class;
     }
@@ -187,11 +173,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     @Override
     public GraphDatabaseAPI graphDb() {
         return db;
-    }
-
-    @Override
-    public boolean supportsImplicitGraphCreate() {
-        return false;
     }
 
     @Override

@@ -50,11 +50,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         return Optional.empty();
     }
 
-    @Override
-    default boolean supportsImplicitGraphCreate() {
-        return false;
-    }
-
     @Test
     void testGraphMutation();
 
@@ -108,54 +103,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
-
-    @Test
-    default void failOnImplicitGraph() {
-        applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
-                .forEach(mutateMethod -> {
-                    assertThatThrownBy(() -> mutateMethod.invoke(
-                        procedure,
-                        createMinimalImplicitConfig(createMinimalConfig()).toMap(),
-                        CypherMapWrapper.empty().toMap()
-                    ))
-                        .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                        .hasRootCauseMessage(
-                            "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
-                        );
-                }));
-    }
-
-    @Override
-    @Test
-    default void testImplicitGraphCreateFromCypherConfig() {}
-
-    @Override
-    @Test
-    default void failOnImplicitLoadingWithAlteringNodeQuery() {}
-
-    @Override
-    @Test
-    default void useReadConcurrencyWhenSetOnImplicitlyLoadedGraph() {}
-
-    @Override
-    @Test
-    default void testRunOnImplicitlyLoadedGraph() {}
-
-    @Override
-    @Test
-    default void failOnImplicitLoadingWithAlteringRelationshipQuery() {}
-
-    @Override
-    @Test
-    default void testImplicitGraphCreateFromStoreConfig() {}
-
-    @Override
-    default void failOnImplicitLoadingWithoutProjectionsOrQueries(
-        String expectedMessage,
-        Map<String, Object> configurationMap
-    ) {}
 
 
     @NotNull

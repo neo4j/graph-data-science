@@ -28,15 +28,11 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.SourceNodeConfigTest;
 import org.neo4j.gds.TargetNodeConfigTest;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
@@ -52,8 +48,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
@@ -209,22 +203,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     }
 
     @Override
-    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper baseMap) {
-        baseMap = MemoryEstimateTest.super.createMinimalImplicitConfig(baseMap);
-        if (baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
-            baseMap = baseMap
-                .withEntry(NODE_PROJECTION_KEY, NodeProjections.builder()
-                    .putProjection(NodeLabel.ALL_NODES, NodeProjection.of("*", PropertyMappings.of(
-                        PropertyMapping.of(LONGITUDE_PROPERTY, DefaultValue.forDouble()),
-                        PropertyMapping.of(LATITUDE_PROPERTY, DefaultValue.forDouble())
-                    ))).build());
-        } else if (!baseMap.containsKey(NODE_PROJECTION_KEY) && baseMap.containsKey(NODE_QUERY_KEY)) {
-            baseMap = baseMap.withString(NODE_QUERY_KEY, NODE_QUERY);
-        }
-        return createMinimalConfig(baseMap);
-    }
-
-    @Override
     public boolean releaseAlgorithm() {
         return false;
     }
@@ -234,14 +212,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     @Override
     public void testMemoryEstimateOnExplicitDimensions() {
         // test assumes one node property, we load two
-    }
-
-    @Test
-    @Disabled
-    @Override
-    public void testFailOnMissingNodeLabel() {
-        // test adds a node projection to the minimal config input
-        // we override this with our own node projection
     }
 
     @Test

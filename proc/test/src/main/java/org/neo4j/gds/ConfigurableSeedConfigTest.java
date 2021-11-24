@@ -30,7 +30,6 @@ import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -135,14 +134,6 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
                 loadedGraphName,
                 configMap
             ));
-
-            if (supportsImplicitGraphCreate()) {
-                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-                assertMissingProperty(error, () -> proc.compute(
-                    implicitConfigMap,
-                    Collections.emptyMap()
-                ));
-            }
         });
     }
 

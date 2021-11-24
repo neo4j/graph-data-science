@@ -53,9 +53,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
@@ -158,17 +155,6 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
                 .graphCreate(graphName)
                 .yields()
         );
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper baseMap) {
-        CypherMapWrapper updatedMap = MemoryEstimateTest.super.createMinimalImplicitConfig(baseMap);
-        if (updatedMap.containsKey(NODE_PROJECTION_KEY) && !updatedMap.containsKey(NODE_QUERY_KEY)) {
-            updatedMap = updatedMap.withString(NODE_PROPERTIES_KEY, "knn");
-        } else if (!updatedMap.containsKey(NODE_PROJECTION_KEY) && updatedMap.containsKey(NODE_QUERY_KEY)) {
-            updatedMap = updatedMap.withString(NODE_QUERY_KEY, "MATCH (n) RETURN id(n) AS id, n.knn AS knn");
-        }
-        return createMinimalConfig(updatedMap);
     }
 
     @Override

@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
 
+    String GRAPH_NAME_KEY = "graphName";
     String NODE_LABELS_KEY = "nodeLabels";
     String RELATIONSHIP_TYPES_KEY = "relationshipTypes";
 

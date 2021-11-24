@@ -43,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
@@ -93,18 +91,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     @Override
     public RelationshipProjections relationshipProjections() {
         return AbstractRelationshipProjections.ALL_UNDIRECTED;
-    }
-
-
-    @Override
-    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
-        if (mapWrapper.containsKey(RELATIONSHIP_PROJECTION_KEY) || mapWrapper.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
-        }
-
-        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper
-            .withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
-            .toMap())));
     }
 
     @Override
