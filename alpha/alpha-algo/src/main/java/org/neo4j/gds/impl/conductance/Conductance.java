@@ -90,17 +90,25 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
     @Override
     public Result compute() {
+        Result result = null;
+
         progressTracker.beginSubTask();
 
-        var relCountTasks = countRelationships();
+        if (communityProperties == null) {
+            // TODO: When AlgoBaseProc refactor done, add procedure level check that makes sure this never happens in practice.
+            // If no nodes have the requisite property there's nothing to do.
+            result = Result.of(HugeSparseDoubleArray.builder(0.0D, 0, allocationTracker::add).build(), 0.0D);
+        } else {
+            var relCountTasks = countRelationships();
 
-        long maxCommunityId = maxCommunityId(relCountTasks);
-        long communitiesPerBatch = maxCommunityId / config.concurrency();
-        long communitiesRemainder = Math.floorMod(maxCommunityId, config.concurrency());
+            long maxCommunityId = maxCommunityId(relCountTasks);
+            long communitiesPerBatch = maxCommunityId / config.concurrency();
+            long communitiesRemainder = Math.floorMod(maxCommunityId, config.concurrency());
 
-        var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunityId, relCountTasks);
+            var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunityId, relCountTasks);
 
-        var result = computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunityId, accumulatedCounts);
+            result = computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunityId, accumulatedCounts);
+        }
 
         progressTracker.endSubTask();
 
