@@ -9,6 +9,8 @@ apply from: '../gradle/licensing.gradle'
 dependencies {
     implementation project(':proc')
     implementation project(':write-services')
+
+    testImplementation project(':proc-test')
 }
 
 task licenseFile {
