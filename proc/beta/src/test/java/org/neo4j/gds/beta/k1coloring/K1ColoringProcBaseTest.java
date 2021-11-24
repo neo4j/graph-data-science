@@ -26,7 +26,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -43,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends BaseProcTest implements
     AlgoBaseProcTest<K1Coloring, CONFIG, HugeLongArray>,
-    MemoryEstimateTest<K1Coloring, CONFIG, HugeLongArray>,
-    HeapControlTest<K1Coloring, CONFIG, HugeLongArray> {
+    MemoryEstimateTest<K1Coloring, CONFIG, HugeLongArray> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

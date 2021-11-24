@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -68,8 +67,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
-    MemoryEstimateTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
-    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
+    MemoryEstimateTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {

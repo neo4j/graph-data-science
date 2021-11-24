@@ -26,7 +26,6 @@ import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
@@ -51,8 +50,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
-    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
-    HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
+    MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +

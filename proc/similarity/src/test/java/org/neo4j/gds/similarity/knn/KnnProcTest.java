@@ -28,7 +28,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -61,8 +60,7 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KE
 import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
-    MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
-    HeapControlTest<Knn, CONFIG, Knn.Result> {
+    MemoryEstimateTest<Knn, CONFIG, Knn.Result> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

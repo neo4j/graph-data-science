@@ -24,7 +24,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.HeapControlTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -43,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends
     BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
-    MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
-    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
+    MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
