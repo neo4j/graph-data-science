@@ -36,7 +36,9 @@ dependencies {
     implementation project(':string-formatting')
 
     // TEST DEPENDENCIES
-
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':edition-api')

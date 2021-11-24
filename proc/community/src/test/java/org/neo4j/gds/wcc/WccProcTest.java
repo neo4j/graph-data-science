@@ -23,28 +23,22 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
@@ -112,81 +106,5 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         for (long i = 0; i < nodeCount; i++) {
             assertEquals(result1.setIdOf(i), result2.setIdOf(i), formatWithLocale("Node %d has different set ids", i));
         }
-    }
-
-    @Test
-    void testThreshold() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            "threshold", 3.14,
-            "relationshipWeightProperty", "threshold"
-        )));
-
-        applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
-            assertEquals(3.14, wccConfig.threshold());
-        });
-    }
-
-    @Test
-    void testIntegerThreshold() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            "threshold", 3,
-            "relationshipWeightProperty", "threshold"
-        )));
-
-        applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
-            assertEquals(3, wccConfig.threshold());
-        });
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testConsecutiveIds(boolean consecutiveIds) {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            "consecutiveIds", consecutiveIds
-        )));
-
-        applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.configParser().newConfig(Optional.of(GRAPH_NAME), config);
-            assertEquals(consecutiveIds, wccConfig.consecutiveIds());
-        });
-    }
-
-    @Test
-    void testFailSeedingAndConsecutiveIds() {
-        loadGraph(GRAPH_NAME);
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            "consecutiveIds", true,
-            "seedProperty", "seed"
-        )));
-
-        applyOnProcedure(proc -> {
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.configParser().newConfig(Optional.of(GRAPH_NAME), config)
-            );
-
-            assertTrue(exception
-                .getMessage()
-                .contains("Seeding and the `consecutiveIds` option cannot be used at the same time.")
-            );
-        });
-    }
-
-    @Test
-    void testFailThresholdWithoutRelationshipWeight() {
-        loadGraph(GRAPH_NAME);
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty().withNumber("threshold", 3.14));
-
-        applyOnProcedure(proc -> {
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.configParser().newConfig(Optional.of(GRAPH_NAME), config)
-            );
-
-            assertTrue(exception
-                .getMessage()
-                .contains("Specifying a threshold requires `relationshipWeightProperty` to be set")
-            );
-        });
     }
 }
