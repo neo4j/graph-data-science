@@ -4,6 +4,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 description = 'Neo4j Graph Data Science :: Open Packaging'
 group = 'org.neo4j.gds'
 
+apply from: '../gradle/licensing.gradle'
+
 dependencies {
     implementation project(':proc')
     implementation project(':write-services')
