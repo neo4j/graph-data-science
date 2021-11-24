@@ -57,18 +57,21 @@ final class ConductanceTest {
         ", (e:Label1 { community: 1 })" +
         ", (f:Label1 { community: 1 })" +
         ", (g:Label1 { community: 1 })" +
+        ", (h:Label1 { community: -1 })" +
 
         ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
         ", (a)-[:TYPE1 {weight: 7.0}]->(d)" +
         ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
         ", (b)-[:TYPE1 {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE1 {weight: 3.0}]->(h)" +
         ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
         ", (c)-[:TYPE1 {weight: 3.0}]->(e)" +
         ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
         ", (e)-[:TYPE1 {weight: 1.0}]->(b)" +
         ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
         ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
-        ", (g)-[:TYPE1 {weight: 999.0}]->(g)";
+        ", (g)-[:TYPE1 {weight: 999.0}]->(g)" +
+        ", (h)-[:TYPE1 {weight: 2.0}]->(a)";
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "undirected")
     private static final String UNDIRECTED = TEST_GRAPH;
@@ -85,22 +88,22 @@ final class ConductanceTest {
                 Arguments.of(
                     false,
                     Orientation.NATURAL,
-                    Map.of(0L, 4.0 / (4.0 + 2.0), 1L, 4.0 / (4.0 + 1.0))
+                    Map.of(0L, 5.0 / (5.0 + 2.0), 1L, 4.0 / (4.0 + 1.0))
                 ),
                 Arguments.of(
                     true,
                     Orientation.NATURAL,
-                    Map.of(0L, 12.0 / (12.0 + 126.0), 1L, 11.0 / (11.0 + 999.0))
+                    Map.of(0L, 15.0 / (15.0 + 126.0), 1L, 11.0 / (11.0 + 999.0))
                 ),
                 Arguments.of(
                     false,
                     Orientation.UNDIRECTED,
-                    Map.of(0L, 8.0 / (8.0 + 4.0), 1L, 8.0 / (8.0 + 2.0))
+                    Map.of(0L, 10.0 / (10.0 + 4.0), 1L, 8.0 / (8.0 + 2.0))
                 ),
                 Arguments.of(
                     true,
                     Orientation.UNDIRECTED,
-                    Map.of(0L, 23.0 / (23.0 + 252.0), 1L, 23.0 / (23.0 + 1998.0))
+                    Map.of(0L, 28.0 / (28.0 + 252.0), 1L, 23.0 / (23.0 + 1998.0))
                 )
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(4))  // concurrency
