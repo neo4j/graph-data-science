@@ -8,6 +8,7 @@ apply from: '../gradle/licensing.gradle'
 
 dependencies {
     implementation project(':proc')
+    implementation project(':proc-sysinfo')
     implementation project(':write-services')
 
     testImplementation project(':proc-test')
