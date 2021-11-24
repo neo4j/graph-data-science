@@ -312,6 +312,10 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         public void run() {
             partition.consume(nodeId -> {
                 long sourceCommunity = communityProperties.longValue(nodeId);
+                if (sourceCommunity < 0) {
+                    // Only non-negative numbers represent valid communities.
+                    return;
+                }
 
                 graph.forEachRelationship(
                     nodeId,
