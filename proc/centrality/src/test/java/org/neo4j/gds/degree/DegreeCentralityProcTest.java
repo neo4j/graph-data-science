@@ -32,10 +32,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,9 +47,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
-        return Stream.concat(modeSpecificConfigTests(), Stream.of(
-            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream));
+        return modeSpecificConfigTests();
     }
 
     Stream<DynamicTest> modeSpecificConfigTests() {

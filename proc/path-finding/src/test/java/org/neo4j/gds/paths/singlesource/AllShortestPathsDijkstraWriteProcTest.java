@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -30,13 +29,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -49,13 +45,6 @@ import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraWriteConfig> {
-
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream
-            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
-            .flatMap(Collection::stream);
-    }
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>> getProcedureClazz() {

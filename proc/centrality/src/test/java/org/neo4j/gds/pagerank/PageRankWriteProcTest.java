@@ -27,7 +27,6 @@ import org.neo4j.gds.GdsCypher.ModeBuildStage;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
 import java.util.Collection;
@@ -48,8 +47,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     @Override
     Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

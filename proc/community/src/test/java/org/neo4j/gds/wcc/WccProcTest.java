@@ -37,10 +37,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -55,12 +53,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
-        return Stream.concat(
-            modeSpecificConfigTests(),
-            Stream.of(
-                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-            ).flatMap(Collection::stream)
-        );
+        return modeSpecificConfigTests();
     }
 
     Stream<DynamicTest> modeSpecificConfigTests() {

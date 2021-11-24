@@ -30,7 +30,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -58,8 +57,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
     @Override
     Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

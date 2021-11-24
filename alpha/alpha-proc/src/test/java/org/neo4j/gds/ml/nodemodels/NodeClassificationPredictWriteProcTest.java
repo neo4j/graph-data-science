@@ -24,9 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
@@ -49,17 +47,13 @@ import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationResult;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,15 +82,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @Inject
     private ModelCatalog modelCatalog;
-
-    @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
-    }
 
     @BeforeEach
     void setup() throws Exception {
