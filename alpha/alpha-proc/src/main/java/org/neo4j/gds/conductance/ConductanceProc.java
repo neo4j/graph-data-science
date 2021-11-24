@@ -26,7 +26,7 @@ import org.neo4j.gds.impl.conductance.ConductanceFactory;
 
 public final class ConductanceProc {
 
-    static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on if relationships cross community boundaries or not.";
+    static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on the proportion of relationships that cross community boundaries.";
 
     private ConductanceProc() {}
 

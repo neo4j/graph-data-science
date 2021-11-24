@@ -45,7 +45,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Conductance, Conductance.Result, ConductanceStreamConfig> result = compute(
+        var result = compute(
             graphNameOrConfig,
             configuration
         );
@@ -76,9 +76,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     }
 
     @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
+    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
         throw new UnsupportedOperationException("Conductance handles result building individually.");
     }
 

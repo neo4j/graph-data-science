@@ -60,6 +60,6 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends Algori
                 Tasks.leaf("perform conductance computations")
             ),
             1
-            );
+        );
     }
 }

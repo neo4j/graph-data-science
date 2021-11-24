@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class Conductance extends Algorithm<Conductance, Conductance.Result> {
@@ -77,10 +78,7 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
         double conductance();
 
-        static CommunityResult of(
-            long community,
-            double conductance
-        ) {
+        static CommunityResult of(long community, double conductance) {
             return ImmutableCommunityResult
                 .builder()
                 .community(community)
@@ -107,13 +105,12 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         }
 
         default Stream<CommunityResult> streamCommunityResults() {
-            var community = new MutableLong(0);
+            var condunctances = communityConductances();
 
-            return Stream.generate(() -> CommunityResult.of(
-                    community.longValue(),
-                    communityConductances().get(community.getAndIncrement())
-                )).limit(communityConductances().capacity())
-                .filter(res -> !Double.isNaN(res.conductance()));
+            return LongStream
+                .range(0, condunctances.capacity())
+                .filter(c -> !Double.isNaN(condunctances.get(c)))
+                .mapToObj(c -> CommunityResult.of(c, condunctances.get(c)));
         }
     }
 
