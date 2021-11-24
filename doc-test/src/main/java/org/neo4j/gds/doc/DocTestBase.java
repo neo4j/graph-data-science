@@ -49,7 +49,7 @@ public abstract class DocTestBase extends BaseProcTest {
     @TempDir
     File workDir;
 
-    private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
+    private static final Path ASCIIDOC_PATH = Paths.get("../doc/asciidoc");
     private List<String> beforeEachQueries;
     private List<String> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
@@ -57,6 +57,10 @@ public abstract class DocTestBase extends BaseProcTest {
     protected abstract String adocFile();
 
     protected abstract List<Class<?>> procedures();
+
+    protected Path adocPath() {
+        return ASCIIDOC_PATH;
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -67,7 +71,7 @@ public abstract class DocTestBase extends BaseProcTest {
         var treeProcessor = new QueryCollectingTreeProcessor();
         asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
 
-        var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
+        var docFile = adocPath().resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
 
         var options = OptionsBuilder.options()

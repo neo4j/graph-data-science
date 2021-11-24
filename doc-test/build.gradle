@@ -1,0 +1,30 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Docs'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    implementation     project(':annotations')
+    implementation     project(':config-api')
+    implementation     project(':core')
+    implementation     project(':model-catalog-api')
+    implementation     project(':open-model-catalog')
+    implementation     project(':proc-pregel')
+    implementation     project(':string-formatting')
+    implementation     project(':test-utils')
+
+    implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
+    implementation     group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
+
+    testImplementation project(':proc')
+    testImplementation project(':pregel-example')
+    testImplementation project(':proc-sysinfo')
+
+    testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+}
