@@ -40,7 +40,10 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends Algori
 
     @Override
     protected Conductance build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         return new Conductance(graph, Pools.DEFAULT, configuration, progressTracker, allocationTracker);
     }
