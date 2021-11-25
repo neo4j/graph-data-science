@@ -219,27 +219,24 @@ CALL gds.alpha.ml.pipeline.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],
   modelName: 'nc-pipeline-model',
   targetProperty: 'class',
-  randomSeed: 2,
+  randomSeed: 42,
   concurrency:1,
-  metrics: [ 'F1_WEIGHTED' ]
+  metrics: ['F1_WEIGHTED']
 }) YIELD modelInfo
 RETURN
-  modelInfo.bestParameters AS winningModel
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.F1_WEIGHTED.outerTrain AS trainGraphScore,
+  modelInfo.metrics.F1_WEIGHTED.test AS testGraphScore
 ----
-//  TODO: We removed these fields:
-//
-//  modelInfo.metrics.F1_WEIGHTED.outerTrain AS trainGraphScore,
-//  modelInfo.metrics.F1_WEIGHTED.test AS testGraphScore
-// from the RETURN because results were not deterministic. FIX THIS!!!
+
 .Results
 [opts="header"]
 |===
-| winningModel
-| {maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, batchSize=100, tolerance=0.001}
+| winningModel                                                                             | trainGraphScore    | testGraphScore
+| {maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, batchSize=100, tolerance=0.001} | 0.9999999912121211 | 0.9999999850000002
 |===
 
-Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph. On the test graph, the model scores a bit lower at about 64%.
-//TODO correct scores in this paragraph
+Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
 This indicates that the model reacted very well to the train graph, and was able to generalize fairly well to unseen data.
 Notice that this is just a toy example on a very small graph. In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 --
