@@ -52,7 +52,7 @@ class SysInfoProcTest extends BaseProcTest {
         builder
             // add another unrestricted to test string concatenation in debug output
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
-            .setConfig(Settings.pagecacheMemory(), "42M")
+            .setConfig(Settings.pageCacheMemory(), Settings.pageCacheMemoryValue("42M"))
             .setConfig(
                 Settings.transactionStateAllocation(),
                 GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
@@ -115,7 +115,7 @@ class SysInfoProcTest extends BaseProcTest {
             .hasEntrySatisfying("vmCompiler", isNotNull)
             .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
-            .containsEntry("dbms.memory.pagecache.size", "42M")
+            .containsEntry("dbms.memory.pagecache.size", Settings.pageCacheMemoryValue("42M"))
             .containsEntry("dbms.tx_state.memory_allocation", "ON_HEAP")
             .hasEntrySatisfying(anyOf(maxOffHeap40, maxOffHeap41), is1337);
     }

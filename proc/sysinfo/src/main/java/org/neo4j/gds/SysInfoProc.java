@@ -239,7 +239,7 @@ public class SysInfoProc {
 
     private static void configInfo(Config config, Stream.Builder<DebugValue> builder) {
         builder.accept(configVal(config, Settings.procedureUnrestricted(), s -> String.join(",", s)));
-        builder.accept(configVal(config, Settings.pagecacheMemory()));
+        builder.accept(configVal(config, Settings.pageCacheMemory()));
         builder.accept(configVal(config, Settings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available

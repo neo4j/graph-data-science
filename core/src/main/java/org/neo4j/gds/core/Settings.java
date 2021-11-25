@@ -25,6 +25,7 @@ import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.config.Setting;
 
@@ -72,8 +73,19 @@ public final class Settings {
         return newBuilder("dbms.udc.enabled", SettingValueParsers.BOOL, true).build();
     }
 
-    public static Setting<String> pagecacheMemory() {
-        return GraphDatabaseSettings.pagecache_memory;
+    @ValueClass
+    public interface PageCacheMemorySetting<T> {
+        Setting<T> setting();
+
+        T value();
+    }
+
+    public static <T> Setting<T> pageCacheMemory() {
+        return Neo4jProxy.pageCacheMemory();
+    }
+
+    public static <T> T pageCacheMemoryValue(String value) {
+        return Neo4jProxy.pageCacheMemoryValue(value);
     }
 
     public static Setting<GraphDatabaseSettings.TransactionStateMemoryAllocation> transactionStateAllocation() {

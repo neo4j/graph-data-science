@@ -578,6 +578,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public Setting<String> pageCacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
+
+    @Override
+    public String pageCacheMemoryValue(String value) {
+        return value;
+    }
+
+    @Override
     public Setting<Long> memoryTransactionMaxSize() {
         return GraphDatabaseSettings.memory_transaction_max_size;
     }

@@ -25,6 +25,7 @@ import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
@@ -421,7 +422,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek((QueryContext) dataRead, index, cursor, indexQueryConstraints, ((CompatIndexQueryImpl) query).indexQuery);
+        dataRead.nodeIndexSeek(
+            (QueryContext) dataRead,
+            index,
+            cursor,
+            indexQueryConstraints,
+            ((CompatIndexQueryImpl) query).indexQuery
+        );
     }
 
     @Override
@@ -603,6 +610,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Setting<String> additionalJvm() {
         return BootloaderSettings.additional_jvm;
+    }
+
+    @Override
+    public Setting<Long> pageCacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
+
+    @Override
+    public Long pageCacheMemoryValue(String value) {
+        return SettingValueParsers.BYTES.parse(value);
     }
 
     @Override
