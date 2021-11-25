@@ -143,6 +143,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
+                graph,
                 config.concurrency(),
                 executorService,
                 allocationTracker

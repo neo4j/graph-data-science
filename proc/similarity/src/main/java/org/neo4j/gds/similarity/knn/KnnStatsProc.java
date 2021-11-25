@@ -115,6 +115,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilaritySta
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                     SimilarityGraphResult similarityGraphResult = computeToGraph(
                         computationResult.graph(),
+                        computationResult.graphStore(),
                         algorithm.nodeCount(),
                         config.concurrency(),
                         result,

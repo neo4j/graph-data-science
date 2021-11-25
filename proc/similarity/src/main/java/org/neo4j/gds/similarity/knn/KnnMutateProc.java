@@ -118,6 +118,7 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, Similarit
             try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
                 similarityGraphResult = computeToGraph(
                     computationResult.graph(),
+                    computationResult.graphStore(),
                     algorithm.nodeCount(),
                     config.concurrency(),
                     Objects.requireNonNull(computationResult.result()),

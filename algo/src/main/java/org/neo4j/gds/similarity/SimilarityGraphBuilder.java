@@ -71,16 +71,19 @@ public class SimilarityGraphBuilder {
     }
 
     private final NodeMapping nodeMapping;
+    private final NodeMapping rootNodeMapping;
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
     public SimilarityGraphBuilder(
         NodeMapping nodeMapping,
+        NodeMapping rootNodeMapping,
         int concurrency,
         ExecutorService executorService,
         AllocationTracker allocationTracker
     ) {
+        this.rootNodeMapping = rootNodeMapping;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.allocationTracker = allocationTracker;
@@ -100,7 +103,7 @@ public class SimilarityGraphBuilder {
         ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
 
         return GraphFactory.create(
-            nodeMapping,
+            rootNodeMapping,
             relationshipsBuilder.build(),
             allocationTracker
         );
