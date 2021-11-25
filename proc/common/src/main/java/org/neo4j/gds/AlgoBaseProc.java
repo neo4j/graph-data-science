@@ -116,7 +116,18 @@ public abstract class AlgoBaseProc<
         var config = configAndGraphName.getOne();
         var maybeGraphName = configAndGraphName.getTwo();
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader(config, maybeGraphName)).memoryEstimation(config);
+        GraphStoreLoader graphStoreLoader;
+
+        if (maybeGraphName.isEmpty()) {
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
+            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig, configuration);
+
+            graphStoreLoader = new FictitiousGraphStoreLoader(graphCreateConfig);
+        } else {
+            graphStoreLoader = new GraphStoreFromCatalogLoader(maybeGraphName.get(), config, username(), databaseId(), isGdsAdmin());
+        }
+
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader).memoryEstimation(config);
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
