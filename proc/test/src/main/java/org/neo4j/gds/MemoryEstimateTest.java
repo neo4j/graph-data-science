@@ -20,9 +20,10 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -87,7 +88,9 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
-                    Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.empty()
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()
+                        .withEntry(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
+                        .withEntry(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
                         .withNumber("nodeCount", 100_000_000L)
                         .withNumber("relationshipCount", 20_000_000_000L))
                         .withoutEntry("nodeProperties")
