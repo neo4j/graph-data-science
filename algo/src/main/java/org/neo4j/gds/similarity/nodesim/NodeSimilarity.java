@@ -143,7 +143,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
-                graph,
                 config.concurrency(),
                 executorService,
                 allocationTracker
@@ -210,17 +209,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
         var similarityResultStream = loggableAndTerminatableNodeStream()
             .boxed()
-            .flatMap(node1 -> {
-                long[] vector1 = vectors.get(node1);
-                return nodeStream(node1 + 1)
-                    .mapToObj(node2 -> {
-                        double similarity = weighted
-                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                            : jaccard(vector1, vectors.get(node2));
-                        return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
-                    })
-                    .filter(Objects::nonNull);
-            });
+            .flatMap(this::computeSimilaritiesForNode);
         progressTracker.endSubTask();
         return similarityResultStream;
     }
@@ -229,17 +218,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         return ParallelUtil.parallelStream(
             loggableAndTerminatableNodeStream(), config.concurrency(), stream -> stream
                 .boxed()
-                .flatMap(node1 -> {
-                    long[] vector1 = vectors.get(node1);
-                    return nodeStream(node1 + 1)
-                        .mapToObj(node2 -> {
-                            double similarity = weighted
-                                ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
-                                : jaccard(vector1, vectors.get(node2));
-                            return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
-                        })
-                        .filter(Objects::nonNull);
-                })
+                .flatMap(this::computeSimilaritiesForNode)
         );
     }
 
@@ -367,7 +346,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 }
                 offset1++;
                 offset2++;
-            } else if (target1 < target2){
+            } else if (target1 < target2) {
                 max += weights1[offset1];
                 offset1++;
             } else {
@@ -412,6 +391,22 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             workload = workload / 2;
         }
         return workload;
+    }
+
+    private Stream<SimilarityResult> computeSimilaritiesForNode(long node1) {
+        long[] vector1 = vectors.get(node1);
+        return nodeStream(node1 + 1)
+            .mapToObj(node2 -> {
+                double similarity = weighted
+                    ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                    : jaccard(vector1, vectors.get(node2));
+                return Double.isNaN(similarity) ? null : new SimilarityResult(
+                    node1,
+                    node2,
+                    similarity
+                );
+            })
+            .filter(Objects::nonNull);
     }
 
     private static final class DegreeComputer implements RelationshipConsumer {
