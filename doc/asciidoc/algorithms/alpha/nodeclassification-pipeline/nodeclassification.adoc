@@ -29,7 +29,6 @@ One can <<algorithms-ml-nodeclassification-adding-node-properties,configure>> wh
 The steps execute GDS algorithms that create new node properties.
 After configuring the node property steps, one can <<algorithms-ml-nodeclassification-adding-features,select>> a subset of node properties to be used as features.
 The training phase (II) proceeds in a manner akin to the standalone version of <<algorithms-ml-nodeclassification,Node Classification>>, where it can train multiple models, select the best one, and report relevant performance metrics.
-//and hence entails model selection, training and producing performance metrics.
 
 After training the pipeline, a classification pipeline is created.
 This new pipeline inherits the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes. Notice that the classification step can only be done with a classification pipeline (not with a training pipeline).
