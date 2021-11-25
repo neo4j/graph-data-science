@@ -71,19 +71,16 @@ public class SimilarityGraphBuilder {
     }
 
     private final NodeMapping nodeMapping;
-    private final NodeMapping rootNodeMapping;
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
     public SimilarityGraphBuilder(
         NodeMapping nodeMapping,
-        NodeMapping rootNodeMapping,
         int concurrency,
         ExecutorService executorService,
         AllocationTracker allocationTracker
     ) {
-        this.rootNodeMapping = rootNodeMapping;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.allocationTracker = allocationTracker;
@@ -92,7 +89,7 @@ public class SimilarityGraphBuilder {
 
     public Graph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(nodeMapping)
+            .nodes(nodeMapping.rootNodeMapping())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
@@ -100,10 +97,18 @@ public class SimilarityGraphBuilder {
             .allocationTracker(allocationTracker)
             .build();
 
-        ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
+        ParallelUtil.parallelStreamConsume(
+            stream,
+            concurrency,
+            similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
+                nodeMapping.toRootNodeId(similarityResult.sourceNodeId()),
+                nodeMapping.toRootNodeId(similarityResult.targetNodeId()),
+                similarityResult.similarity
+            ))
+        );
 
         return GraphFactory.create(
-            rootNodeMapping,
+            nodeMapping.rootNodeMapping(),
             relationshipsBuilder.build(),
             allocationTracker
         );

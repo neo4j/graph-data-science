@@ -25,6 +25,7 @@ import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.config.GraphCreateConfig;
@@ -170,11 +171,13 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
                 .allocationTracker(allocationTracker())
                 .build();
 
+            NodeMapping nodeMapping = computationResult.graph();
+
             if (shouldComputeHistogram(callContext)) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                        relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);
+                        relationshipsBuilder.addFromInternal(nodeMapping.toRootNodeId(sourceNodeId), nodeMapping.toRootNodeId(targetNodeId), property);
                         histogram.recordValue(property);
                         return true;
                     });
@@ -184,7 +187,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
             } else {
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                        relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);
+                        relationshipsBuilder.addFromInternal(nodeMapping.toRootNodeId(sourceNodeId), nodeMapping.toRootNodeId(targetNodeId), property);
                         return true;
                     });
                     return true;

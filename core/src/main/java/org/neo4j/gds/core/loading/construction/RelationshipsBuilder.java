@@ -122,21 +122,21 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target) {
-        threadLocalBuilders.get().addRelationship(idMapping.toRootNodeId(source), idMapping.toRootNodeId(target));
+        threadLocalBuilders.get().addRelationship(source, target);
     }
 
     public void addFromInternal(long source, long target, double relationshipPropertyValue) {
         threadLocalBuilders.get().addRelationship(
-            idMapping.toRootNodeId(source),
-            idMapping.toRootNodeId(target),
+            source,
+            target,
             relationshipPropertyValue
         );
     }
 
     public void addFromInternal(long source, long target, double[] relationshipPropertyValues) {
         threadLocalBuilders.get().addRelationship(
-            idMapping.toRootNodeId(source),
-            idMapping.toRootNodeId(target),
+            source,
+            target,
             relationshipPropertyValues
         );
     }
