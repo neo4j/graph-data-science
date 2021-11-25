@@ -62,17 +62,25 @@ public interface GraphStoreLoader {
             );
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig graphCreateConfig = config.implicitCreateConfig().get();
-            if (graphCreateConfig.isFictitiousLoading()) {
-                return new FictitiousGraphStoreLoader(graphCreateConfig);
-            } else {
-                return new GraphStoreFromDatabaseLoader(
-                    graphCreateConfig,
-                    usernameSupplier.get(),
-                    graphLoaderContextSupplier.get()
-                );
-            }
+            return implicitGraphLoader(usernameSupplier, graphLoaderContextSupplier, graphCreateConfig);
         } else {
             throw new IllegalStateException("There must be either a graph name or an anonymous graph projection config");
+        }
+    }
+
+    static GraphStoreLoader implicitGraphLoader(
+        Supplier<String> usernameSupplier,
+        Supplier<GraphLoaderContext> graphLoaderContextSupplier,
+        GraphCreateConfig graphCreateConfig
+    ) {
+        if (graphCreateConfig.isFictitiousLoading()) {
+            return new FictitiousGraphStoreLoader(graphCreateConfig);
+        } else {
+            return new GraphStoreFromDatabaseLoader(
+                graphCreateConfig,
+                usernameSupplier.get(),
+                graphLoaderContextSupplier.get()
+            );
         }
     }
 

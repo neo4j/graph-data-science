@@ -122,7 +122,7 @@ public abstract class AlgoBaseProc<
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig, configuration);
 
-            graphStoreLoader = new FictitiousGraphStoreLoader(graphCreateConfig);
+            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(this::username, this::graphLoaderContext, graphCreateConfig);
         } else {
             graphStoreLoader = new GraphStoreFromCatalogLoader(maybeGraphName.get(), config, username(), databaseId(), isGdsAdmin());
         }

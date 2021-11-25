@@ -45,15 +45,7 @@ public class MemoryEstimationGraphConfigParser implements ProcConfigParser<Graph
         if (graphNameOrConfig instanceof Map) {
             var createConfigMap = (Map<String, Object>) graphNameOrConfig;
             var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            var graphCreateConfig = GraphCreateConfig.createImplicit(username(), createConfigMapWrapper);
-            if (!graphCreateConfig.isFictitiousLoading()) {
-                throw new IllegalStateException(formatWithLocale(
-                    "Missing graph dimension information. Please provide node and relationship counts using the `%s` and `%s` configuration keys",
-                    GraphCreateConfig.NODE_COUNT_KEY,
-                    GraphCreateConfig.RELATIONSHIP_COUNT_KEY
-                ));
-            }
-            return graphCreateConfig;
+            return GraphCreateConfig.createImplicit(username(), createConfigMapWrapper);
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Could not parse input. Expected a configuration map, but got %s.",
