@@ -24,14 +24,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.WriteRelationshipWithPropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.WriteRelationshipWithPropertyTest;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,10 +47,10 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeSimilarityWriteProcTest
     extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>
@@ -233,6 +238,62 @@ public class NodeSimilarityWriteProcTest
         });
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void shouldWriteWithFilteredNodes(int topN) {
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("CREATE (alice:Person {name: 'Alice'})" +
+                 "CREATE (carol:Person {name: 'Carol'})" +
+                 "CREATE (eve:Person {name: 'Eve'})" +
+                 "CREATE (dave:Foo {name: 'Dave'})" +
+                 "CREATE (bob:Foo {name: 'Bob'})" +
+                 "CREATE (a:Bar)" +
+                 "CREATE (dave)-[:KNOWS]->(a)" +
+                 "CREATE (bob)-[:KNOWS]->(a)");
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeLabel("Bar")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.nodeSimilarity")
+            .writeMode()
+            .addParameter("nodeLabels", List.of("Foo", "Bar"))
+            .addParameter("writeRelationshipType", relationshipType)
+            .addParameter("topN", topN)
+            .addParameter("writeProperty", relationshipProperty).yields();
+        runQuery(algoQuery);
+
+        Graph knnGraph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Person")
+            .addNodeLabel("Foo")
+            .addRelationshipType(relationshipType)
+            .addRelationshipProperty(relationshipProperty, relationshipProperty, DefaultValue.DEFAULT, Aggregation.NONE)
+            .build()
+            .graph();
+
+        assertGraphEquals(
+            fromGdl("(alice:Person)" +
+                    "(carol:Person)" +
+                    "(eve:Person)" +
+                    "(dave:Foo)" +
+                    "(bob:Foo)" +
+                    "(dave)-[{score: 1.0}]->(bob)" +
+                    "(bob)-[{score: 1.0}]->(dave)"
+            ),
+            knnGraph
+        );
+    }
 
     @Override
     public String writeRelationshipType() {
