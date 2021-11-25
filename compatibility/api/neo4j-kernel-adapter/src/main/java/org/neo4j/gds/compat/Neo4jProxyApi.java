@@ -267,6 +267,8 @@ public interface Neo4jProxyApi {
 
     Setting<String> additionalJvm();
 
+    Setting<String> pagecacheMemory();
+
     Setting<Long> memoryTransactionMaxSize();
 
     JobRunner runnerFromScheduler(JobScheduler scheduler, Group group);

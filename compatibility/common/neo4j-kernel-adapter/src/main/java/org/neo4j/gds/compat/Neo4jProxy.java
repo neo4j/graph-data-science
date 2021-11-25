@@ -414,6 +414,10 @@ public final class Neo4jProxy {
         return IMPL.additionalJvm();
     }
 
+    public static Setting<String> pagecacheMemory() {
+        return IMPL.pagecacheMemory();
+    }
+
     public static Setting<Long> memoryTransactionMaxSize() {
         return IMPL.memoryTransactionMaxSize();
     }

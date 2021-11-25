@@ -73,7 +73,7 @@ public final class Settings {
     }
 
     public static Setting<String> pagecacheMemory() {
-        return GraphDatabaseSettings.pagecache_memory;
+        return Neo4jProxy.pagecacheMemory();
     }
 
     public static Setting<GraphDatabaseSettings.TransactionStateMemoryAllocation> transactionStateAllocation() {
