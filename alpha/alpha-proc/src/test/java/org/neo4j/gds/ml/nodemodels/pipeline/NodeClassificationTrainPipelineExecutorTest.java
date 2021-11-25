@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -44,6 +45,7 @@ import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor.MODEL_TYPE;
@@ -145,6 +147,52 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(customInfo.trainingPipeline()).isNotEqualTo(pipeline);
             assertThat(customInfo.trainingPipeline()).usingRecursiveComparison().isEqualTo(pipeline);
             assertThat(customInfo.trainingPipeline().toMap()).isEqualTo(pipeline.toMap());
+        });
+    }
+
+    @Test
+    void passesAllParameters() {
+        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+            .pipeline(PIPELINE_NAME)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .addRelationshipType("SOME_REL")
+            .addNodeLabel("SOME_LABEL")
+            .minBatchSize(1)
+            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .build();
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
+                new NodeClassificationPipeline(),
+                config,
+                caller,
+                graphStore,
+                "g",
+                ProgressTracker.NULL_TRACKER
+            );
+
+            NodeClassificationTrainConfig actualConfig = executor.innerConfig();
+
+            assertThat(actualConfig)
+                .matches(innerConfig -> innerConfig.modelName().equals("myModel"))
+                .matches(innerConfig -> innerConfig.concurrency() == 1 )
+                .matches(innerConfig -> innerConfig.randomSeed().orElseThrow().equals(42L) )
+                .matches(innerConfig -> innerConfig.targetProperty().equals("t") )
+                .matches(
+                    innerConfig -> innerConfig.relationshipTypes().equals(List.of("SOME_REL")),
+                    actualConfig.relationshipTypes().toString()
+                )
+                .matches(innerConfig -> innerConfig.nodeLabels().equals(List.of("SOME_LABEL")) )
+                .matches(innerConfig -> innerConfig.minBatchSize() == 1 )
+                .matches(innerConfig -> {
+                    List<String> metricNames = innerConfig.metrics().stream()
+                        .map(MetricSpecification::asString)
+                        .collect(Collectors.toList());
+                    return metricNames.equals(List.of("F1_WEIGHTED"));
+                });
         });
     }
 
