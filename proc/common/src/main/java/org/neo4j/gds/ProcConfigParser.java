@@ -19,17 +19,15 @@
  */
 package org.neo4j.gds;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 import java.util.Optional;
 
-public interface ProcConfigParser<CONFIG extends AlgoBaseConfig> {
+public interface ProcConfigParser<CONFIG, RESULT> {
     String username();
 
-    Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration);
+    RESULT processInput(Object graphNameOrConfig, Map<String, Object> configuration);
 
     CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config);
 

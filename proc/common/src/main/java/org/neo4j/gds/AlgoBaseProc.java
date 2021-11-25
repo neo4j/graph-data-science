@@ -48,7 +48,7 @@ public abstract class AlgoBaseProc<
         return this.getClass().getSimpleName();
     }
 
-    public ProcConfigParser<CONFIG> configParser() {
+    public ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser() {
         return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
     }
 
