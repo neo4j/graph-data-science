@@ -20,32 +20,70 @@
 package org.neo4j.gds.conductance;
 
 import org.assertj.core.data.Offset;
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.impl.conductance.Conductance;
-import org.neo4j.gds.impl.conductance.ConductanceStreamConfig;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ConductanceStreamProcTest extends ConductanceProcTest<ConductanceStreamConfig> {
+class ConductanceStreamProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<Conductance, Conductance.Result, ConductanceStreamConfig>> getProcedureClazz() {
-        return ConductanceStreamProc.class;
+    static final String GRAPH_NAME = "myGraph";
+
+    @Neo4jGraph
+    @Language("Cypher")
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label1 { community: 0 })" +
+        ", (b:Label1 { community: 0 })" +
+        ", (c:Label1 { community: 0 })" +
+        ", (d:Label1 { community: 1 })" +
+        ", (e:Label1 { community: 1 })" +
+        ", (f:Label1 { community: 1 })" +
+        ", (g:Label1 { community: 1 })" +
+        ", (h:Label1 { community: -1 })" +
+
+        ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
+        ", (a)-[:TYPE1 {weight: 7.0}]->(d)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE1 {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE1 {weight: 3.0}]->(h)" +
+        ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
+        ", (c)-[:TYPE1 {weight: 3.0}]->(e)" +
+        ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
+        ", (e)-[:TYPE1 {weight: 1.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
+        ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
+        ", (g)-[:TYPE1 {weight: 999.0}]->(g)" +
+        ", (h)-[:TYPE1 {weight: 2.0}]->(a)";
+
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            ConductanceStreamProc.class,
+            GraphCreateProc.class
+        );
+
+        String createQuery = GdsCypher.call()
+            .withNodeProperty("community")
+            .loadEverything()
+            .graphCreate(GRAPH_NAME)
+            .yields();
+
+        runQuery(createQuery);
     }
 
-    @Override
-    public ConductanceStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ConductanceStreamConfig.of(
-            Optional.empty(),
-            Optional.empty(),
-            mapWrapper
-        );
+    @AfterEach
+    void clearStore() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -58,7 +96,7 @@ class ConductanceStreamProcTest extends ConductanceProcTest<ConductanceStreamCon
             .yields();
 
         var expected = Map.of(
-            0L, 4.0 / (4.0 + 2.0),
+            0L, 5.0 / (5.0 + 2.0),
             1L, 4.0 / (4.0 + 1.0)
         );
         runQueryWithRowConsumer(streamQuery, row -> {
