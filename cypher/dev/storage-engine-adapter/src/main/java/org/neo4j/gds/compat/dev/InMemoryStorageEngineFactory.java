@@ -75,6 +75,7 @@ import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
+import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
 import org.neo4j.token.TokenHolders;
@@ -85,6 +86,7 @@ import org.neo4j.token.api.TokensLoader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -267,6 +269,31 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     @Override
     protected AbstractInMemoryMetaDataProvider metadataProvider() {
         return metadataProvider;
+    }
+
+    @Override
+    protected SchemaRuleMigrationAccess schemaRuleMigrationAccess() {
+        return new SchemaRuleMigrationAccess() {
+            @Override
+            public Iterable<SchemaRule> getAll() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void writeSchemaRule(SchemaRule rule) {
+
+            }
+
+            @Override
+            public long nextId() {
+                return 0;
+            }
+
+            @Override
+            public void close() {
+
+            }
+        };
     }
 
     @Override

@@ -20,7 +20,6 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -106,23 +105,10 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         CursorContext cursorContext,
         MemoryTracker memoryTracker
     ) {
-        return new SchemaRuleMigrationAccess() {
-            @Override
-            public Iterable<SchemaRule> getAll() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public void writeSchemaRule(SchemaRule rule) {
-
-            }
-
-            @Override
-            public void close() {
-
-            }
-        };
+        return schemaRuleMigrationAccess();
     }
+
+    protected abstract SchemaRuleMigrationAccess schemaRuleMigrationAccess();
 
     @Override
     public RollingUpgradeCompatibility rollingUpgradeCompatibility() {
