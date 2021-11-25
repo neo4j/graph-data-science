@@ -78,21 +78,22 @@ public abstract class PipelineExecutor<
         progressTracker.beginSubTask();
 
         var dataSplits = splitDataset();
+        try {
+            var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
 
-        var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+            progressTracker.beginSubTask("execute node property steps");
+            executeNodePropertySteps(featureInputGraphFilter);
+            progressTracker.endSubTask("execute node property steps");
 
-        progressTracker.beginSubTask("execute node property steps");
-        executeNodePropertySteps(featureInputGraphFilter);
-        progressTracker.endSubTask("execute node property steps");
+            this.pipeline.validate(graphStore, config);
 
-        this.pipeline.validate(graphStore, config);
+            var result = execute(dataSplits);
 
-        var result = execute(dataSplits);
-
-        cleanUpGraphStore(dataSplits);
-
-        progressTracker.endSubTask();
-        return result;
+            progressTracker.endSubTask();
+            return result;
+        } finally {
+            cleanUpGraphStore(dataSplits);
+        }
     }
 
     @Override
