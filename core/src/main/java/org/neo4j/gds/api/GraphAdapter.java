@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public abstract class GraphAdapter implements Graph {
 
-    protected final Graph graph;
+    protected Graph graph;
 
     public GraphAdapter(Graph graph) {
         this.graph = graph;
@@ -90,6 +90,11 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public long toRootNodeId(long nodeId) {
         return graph.toRootNodeId(nodeId);
+    }
+
+    @Override
+    public NodeMapping rootNodeMapping() {
+        return graph.rootNodeMapping();
     }
 
     @Override

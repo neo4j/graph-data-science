@@ -185,6 +185,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public NodeMapping rootNodeMapping() {
+        return idMapping.rootNodeMapping();
+    }
+
+    @Override
     public GraphSchema schema() {
         return schema;
     }
