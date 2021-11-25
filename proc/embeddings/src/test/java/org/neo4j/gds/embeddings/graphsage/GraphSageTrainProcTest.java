@@ -23,16 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.GraphCreateFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -48,14 +44,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
@@ -160,81 +152,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertNotNull(trainConfig);
         assertEquals(List.of("a1", "a2", "b1", "b2"), trainConfig.featureProperties());
         assertEquals(64, trainConfig.embeddingDimension());
-    }
-
-    @Test
-    void runsTrainingOnAnonymousNativeGraph() {
-        String train = GdsCypher.call().implicitCreation(
-                ImmutableGraphCreateFromStoreConfig.builder()
-                    .graphName("implicitWeightedGraph")
-                    .nodeProjections(NodeProjections
-                        .builder()
-                        .putProjection(
-                            NodeLabel.of("King"),
-                            NodeProjection.of(
-                                "King",
-                                PropertyMappings.of(
-                                    PropertyMapping.of("age", 1.0D),
-                                    PropertyMapping.of("birth_year", 1.0D),
-                                    PropertyMapping.of("death_year", 1.0D)
-                                )
-                            )
-                        )
-                        .build())
-                    .relationshipProjections(RelationshipProjections.fromString("REL")
-                    ).build()
-            )
-            .algo("gds.beta.graphSage")
-            .trainMode()
-            .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
-            .addParameter("modelName", modelName)
-            .yields();
-
-        assertCypherResult(
-            train,
-            List.of(
-                map(
-                    "graphName", null,
-                    "modelInfo", aMapWithSize(3),
-                    "graphCreateConfig", aMapWithSize(4),
-                    "configuration", isA(Map.class),
-                    "trainMillis", greaterThan(0L)
-                )
-            )
-        );
-    }
-
-    @Test
-    void runsTrainingOnAnonymousCypherGraph() {
-        var nodeQuery = "MATCH (n:King) RETURN id(n) AS id, n.age AS age, n.birth_year AS birth_year, n.death_year AS death_year";
-        var relationshipQuery = "MATCH (n:King)-[:REL]-(k:King) RETURN id(n) AS source, id(k) AS target";
-
-        var train =
-            "CALL gds.beta.graphSage.train({" +
-            "   modelName: $modelName," +
-            "   nodeQuery: $nodeQuery," +
-            "   relationshipQuery: $relationshipQuery," +
-            "   featureProperties: ['age', 'birth_year', 'death_year']" +
-            "})";
-
-
-        assertCypherResult(
-            train,
-            Map.of(
-                "modelName", modelName,
-                "nodeQuery", nodeQuery,
-                "relationshipQuery", relationshipQuery
-            ),
-            List.of(
-                map(
-                    "graphName", null,
-                    "modelInfo", aMapWithSize(3),
-                    "graphCreateConfig", aMapWithSize(4),
-                    "configuration", isA(Map.class),
-                    "trainMillis", greaterThan(0L)
-                )
-            )
-        );
     }
 
     @Test

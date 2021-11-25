@@ -56,7 +56,6 @@ include::specific-train-configuration.adoc[]
 |===
 | Name              | Type    | Description
 | graphName         | String  | The name of the in-memory graph used during training.
-| graphCreateConfig | Map     | Configuration used to create in-memory graph. Only has value if `anonymous graph` was used.
 | modelInfo         | Map     | Details of the trained model.
 | configuration     | Map     | The configuration used to run the procedure.
 | trainMillis       | Integer | Milliseconds to train the model.
