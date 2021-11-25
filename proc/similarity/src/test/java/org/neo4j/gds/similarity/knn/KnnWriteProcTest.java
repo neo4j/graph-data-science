@@ -215,10 +215,11 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
     @Test
     public void filteredLabelTest(){
         runQuery("CREATE (alice:Person {name: 'Alice', age: 24})\n" +
-                 "        CREATE (bob:Foo {name: 'Bob', age: 73})\n" +
                  "        CREATE (carol:Person {name: 'Carol', age: 24})\n" +
+                 "        CREATE (eve:Person {name: 'Eve', age: 67})"+
                  "        CREATE (dave:Foo {name: 'Dave', age: 48})\n" +
-                 "        CREATE (eve:Person {name: 'Eve', age: 67})");
+                 "        CREATE (bob:Foo {name: 'Bob', age: 48})\n" );
+
         runQuery("CALL gds.graph.create(\n" +
                  "        'cf-projection',\n" +
                  "        ['Foo', 'Person'],\n" +
@@ -226,7 +227,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
                         "{nodeProperties:['age']}"+
                     ");");
         runQuery("CALL gds.beta.knn.write('cf-projection', {\n" +
-                 "        nodeLabels: ['Person'],\n" +
+                 "        nodeLabels: ['Foo'],\n" +
                  "        nodeWeightProperty: 'age',\n" +
                  "        writeRelationshipType: 'USERS_ALSO_LIKED',\n" +
                  "        writeProperty: 'score'\n" +
