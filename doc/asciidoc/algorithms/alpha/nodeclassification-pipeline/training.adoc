@@ -111,38 +111,38 @@ The structure of `modelInfo` is:
     trainingPipeline: Map       // <2>
     classes: List of Integer,   // <3>
     metrics: {                  // <4>
-    <METRIC_NAME>: {        // <5>
-    test: Float,        // <6>
-    outerTrain: Float,  // <7>
-    train: [{           // <8>
-    avg: Float,
-    max: Float,
-    min: Float,
-    params: Map
-    },
-    {
-    avg: Float,
-    max: Float,
-    min: Float,
-    params: Map
-    },
-    ...
-    ],
-    validation: [{      // <9>
-    avg: Float,
-    max: Float,
-    min: Float,
-    params: Map
-    },
-    {
-    avg: Float,
-    max: Float,
-    min: Float,
-    params: Map
-    },
-    ...
-    ]
-    }
+        <METRIC_NAME>: {        // <5>
+            test: Float,        // <6>
+            outerTrain: Float,  // <7>
+            train: [{           // <8>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            {
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            ...
+            ],
+            validation: [{      // <9>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            {
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            ...
+            ]
+        }
     }
 }
 ----

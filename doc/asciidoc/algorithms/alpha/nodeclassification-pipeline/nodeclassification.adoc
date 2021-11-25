@@ -168,7 +168,7 @@ YIELD name, nodePropertySteps
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header",cols="1,9"]
 |===
 | name     | nodePropertySteps
 | "pipe"   | [{name=gds.alpha.scaleProperties.mutate, config={scaler=L1Norm, mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
@@ -215,7 +215,7 @@ YIELD
 include::pipelineInfoResult.adoc[]
 --
 
-== Example
+=== Example
 
 [role=query-example,group=nc]
 --
