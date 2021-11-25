@@ -115,8 +115,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends AlgorithmFa
             NodeClassificationTrain.progressTask(
                 pipeline.splitConfig().validationFolds(),
                 pipeline.trainingParameterSpace().size()
-            ),
-            Tasks.leaf("clean up graph store")
+            )
         );
     }
 }

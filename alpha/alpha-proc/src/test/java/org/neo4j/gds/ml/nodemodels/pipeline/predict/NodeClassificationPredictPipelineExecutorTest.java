@@ -258,9 +258,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "Node Classification Predict Pipeline :: Node classification predict :: Start",
                 "Node Classification Predict Pipeline :: Node classification predict 100%",
                 "Node Classification Predict Pipeline :: Node classification predict :: Finished",
-                "Node Classification Predict Pipeline :: clean up graph store :: Start",
-                "Node Classification Predict Pipeline :: clean up graph store 100%",
-                "Node Classification Predict Pipeline :: clean up graph store :: Finished",
                 "Node Classification Predict Pipeline :: Finished"
             ));
 

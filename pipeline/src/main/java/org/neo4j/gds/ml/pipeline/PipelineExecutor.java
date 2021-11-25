@@ -89,9 +89,7 @@ public abstract class PipelineExecutor<
 
         var result = execute(dataSplits);
 
-        progressTracker.beginSubTask("clean up graph store");
         cleanUpGraphStore(dataSplits);
-        progressTracker.endSubTask("clean up graph store");
 
         progressTracker.endSubTask();
         return result;
