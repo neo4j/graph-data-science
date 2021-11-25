@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 
@@ -50,11 +49,6 @@ class GraphStoreValidationTest {
         interface TestSeedConfig extends AlgoBaseConfig, SeedConfig {
             @Override
             default Optional<String> graphName() {
-                return Optional.empty();
-            }
-
-            @Override
-            default Optional<GraphCreateConfig> implicitCreateConfig() {
                 return Optional.empty();
             }
         }

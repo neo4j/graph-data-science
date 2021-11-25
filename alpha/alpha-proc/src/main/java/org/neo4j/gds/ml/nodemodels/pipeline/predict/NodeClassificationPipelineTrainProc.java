@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.TrainProc;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.MLTrainResult;
@@ -65,10 +64,9 @@ public class NodeClassificationPipelineTrainProc
     protected NodeClassificationPipelineTrainConfig newConfig(
         String username,
         Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeClassificationPipelineTrainConfig.of(graphName, maybeImplicitCreate, username, config);
+        return NodeClassificationPipelineTrainConfig.of(graphName, username, config);
     }
 
     @Override

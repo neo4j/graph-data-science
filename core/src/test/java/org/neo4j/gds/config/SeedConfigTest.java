@@ -34,21 +34,21 @@ class SeedConfigTest {
     @Test
     void testDefaultSeedPropertyIsNull() {
         var mapWrapper = CypherMapWrapper.empty();
-        var config = new TestSeedConfigImpl(Optional.empty(), Optional.empty(), mapWrapper);
+        var config = new TestSeedConfigImpl(Optional.empty(), mapWrapper);
         assertThat(config.seedProperty()).isNull();
     }
 
     @Test
     void testEmptySeedPropertyValues() {
         var mapWrapper = CypherMapWrapper.empty().withString(SEED_PROPERTY_KEY, "");
-        var config = new TestSeedConfigImpl(Optional.empty(), Optional.empty(), mapWrapper);
+        var config = new TestSeedConfigImpl(Optional.empty(), mapWrapper);
         assertThat(config.seedProperty()).isNull();
     }
 
     @Test
     void failOnBlankPropertyName() {
         var mapWrapper = CypherMapWrapper.empty().withString(SEED_PROPERTY_KEY, "  ");
-        assertThatThrownBy(() -> new TestSeedConfigImpl(Optional.empty(), Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> new TestSeedConfigImpl(Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("not end or begin with whitespace characters");
     }

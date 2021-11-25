@@ -78,11 +78,11 @@ class MemoryUsageValidatorTest extends BaseTest {
     @Configuration
     interface TestConfig extends AlgoBaseConfig {
         static TestConfig empty() {
-            return new TestConfigImpl(Optional.empty(), Optional.empty(), CypherMapWrapper.empty());
+            return new TestConfigImpl(Optional.empty(), CypherMapWrapper.empty());
         }
 
         static TestConfig of(CypherMapWrapper map) {
-            return new TestConfigImpl(Optional.empty(), Optional.empty(), map);
+            return new TestConfigImpl(Optional.empty(), map);
         }
     }
 
