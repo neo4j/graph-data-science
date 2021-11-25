@@ -267,7 +267,9 @@ public interface Neo4jProxyApi {
 
     Setting<String> additionalJvm();
 
-    Setting<String> pagecacheMemory();
+    Setting<?> pageCacheMemory();
+
+    Object pageCacheMemoryValue(String value);
 
     Setting<Long> memoryTransactionMaxSize();
 

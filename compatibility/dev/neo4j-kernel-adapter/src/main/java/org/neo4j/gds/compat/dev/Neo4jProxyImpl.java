@@ -25,7 +25,6 @@ import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.configuration.SettingImpl;
 import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -614,16 +613,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public Setting<String> pagecacheMemory() {
-        var longSetting = GraphDatabaseSettings.pagecache_memory;
+    public Setting<Long> pageCacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
 
-        var defaultValue = longSetting.defaultValue() != null
-            ? Long.toString(longSetting.defaultValue())
-            : null;
-
-        return SettingImpl
-            .newBuilder(longSetting.name(), SettingValueParsers.STRING, defaultValue)
-            .build();
+    @Override
+    public Long pageCacheMemoryValue(String value) {
+        return SettingValueParsers.BYTES.parse(value);
     }
 
     @Override
