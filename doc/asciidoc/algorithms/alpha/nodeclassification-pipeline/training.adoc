@@ -2,7 +2,7 @@
 == Training the pipeline
 
 The train mode, `gds.alpha.ml.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
-Running this mode results in a classification pipeline of type `Node classification pipeline`, which is then stored in the model catalog.
+Running this mode results in a classification pipeline of type `Node classification pipeline`, which is then stored in the <<model-catalog-ops, model catalog>>.
 The classification pipeline can be <<algorithms-node-classification-pipelines-predict, applied>> to a possibly different graph which classifies nodes.
 
 More precisely, the training proceeds as follows:
