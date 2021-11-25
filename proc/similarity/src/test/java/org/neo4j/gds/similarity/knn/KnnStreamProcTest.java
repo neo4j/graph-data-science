@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityResult;
 
@@ -60,6 +61,40 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
             Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
             Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),
             Map.of("node1", 2L, "node2", 1L, "similarity", 0.25)
+        ));
+    }
+
+    @Test
+    void shouldStreamWithFilteredNodes() {
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {age: 24})" +
+            " ,(carol:Person {age: 24})" +
+            " ,(eve:Person {age: 67})" +
+            " ,(dave:Foo {age: 48})" +
+            " ,(bob:Foo {age: 48})";
+
+        runQuery(nodeCreateQuery);
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeProperty("age")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.beta.knn")
+            .streamMode()
+            .addParameter("nodeLabels", List.of("Foo"))
+            .addParameter("nodeWeightProperty", "age")
+            .yields("node1", "node2", "similarity");
+        assertCypherResult(algoQuery, List.of(
+            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),
+            Map.of("node1", 7L, "node2", 6L, "similarity", 1.0)
         ));
     }
 }
