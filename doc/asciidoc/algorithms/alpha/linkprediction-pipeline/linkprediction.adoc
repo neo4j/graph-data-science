@@ -97,7 +97,7 @@ CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe')
 |===
 --
 
-This show that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
 [[algorithms-ml-linkprediction-adding-node-properties]]
 == Adding node properties
@@ -329,8 +329,8 @@ YIELD
 |===
 | Name                  | Type    | Default | Description
 | validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-linkprediction-pipelines-train,model selection>>.
-| testFraction          | Double  | 0.1     | Portion of the graph reserved for testing. Must be in the range (0, 1).
-| trainFraction         | Double  | 0.1     | Portion of the graph reserved for training. Must be in the range (0, 1).
+| testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
+| trainFraction         | Double  | 0.1     | Fraction of the graph reserved for training. Must be in the range (0, 1).
 | negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set.
 |===
 

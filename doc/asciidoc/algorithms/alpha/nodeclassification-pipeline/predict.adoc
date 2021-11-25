@@ -84,7 +84,7 @@ include::specific-write-mutate-configuration.adoc[]
 | computeMillis           | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis    | Integer | Milliseconds for computing the global metrics.
 | mutateMillis            | Integer | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten    | Integer | Number of node properties written.
+| nodePropertiesWritten   | Integer | Number of node properties written.
 | configuration           | Map     | Configuration used for running the algorithm.
 |===
 ======

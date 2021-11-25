@@ -80,7 +80,7 @@ YIELD
 .Parameters
 [opts="header",cols="1,1,4"]
 |===
-| Name            | Type   | Description
+| Name            | Type    | Description
 | pipelineName    | String  | The name of the created pipeline.
 |===
 
@@ -107,7 +107,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
 |===
 --
 
-This show that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
 [[algorithms-ml-nodeclassification-adding-node-properties]]
 == Adding node properties
@@ -207,9 +207,9 @@ YIELD
 .Parameters
 [opts="header",cols="1,1,4"]
 |===
-| Name                   | Type    | Description
-| pipelineName           | String  | The name of the pipeline.
-| nodeProperties          | List or String     | Configuration for splitting the relationships.
+| Name                   | Type            | Description
+| pipelineName           | String          | The name of the pipeline.
+| nodeProperties         | List or String  | Configuration for splitting the relationships.
 |===
 
 include::pipelineInfoResult.adoc[]
@@ -219,7 +219,7 @@ include::pipelineInfoResult.adoc[]
 
 [role=query-example,group=nc]
 --
-.The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
+.The following will add a feature to the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures('pipe', ['scaledSizes', 'sizePerStory'])
@@ -283,7 +283,7 @@ YIELD
 |===
 | Name                  | Type    | Default | Description
 | validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
-| holdoutFraction          | Double  | 0.3     | Portion of the graph reserved for testing. Must be in the range (0, 1).
+| holdoutFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
 |===
 
 include::pipelineInfoResult.adoc[]

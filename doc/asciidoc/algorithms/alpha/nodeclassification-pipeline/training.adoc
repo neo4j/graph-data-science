@@ -69,14 +69,14 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                  | Type         | Default | Optional | Description
+| Name                                                          | Type              | Default | Optional | Description
 | pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
 | <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
-| targetProperty        | String       | n/a     | no       | The class of the node. Must be of type Integer.
-| metrics               | List of String | n/a     | no       | <<algorithms-ml-nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
-| randomSeed            | Integer      | n/a     | yes      | Seed for the random number generator used during training.
+| targetProperty                                                | String            | n/a     | no       | The class of the node. Must be of type Integer.
+| metrics                                                       | List of String    | n/a     | no       | <<algorithms-ml-nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
+| randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
 | modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
 |===
 
@@ -95,11 +95,11 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Model info fields
 [opts="header",cols="1,1,6"]
 |===
-| Name                    | Type          | Description
-| classes        | List of Integer | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
-| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics                 | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
-| trainingPipeline        | Map           | The pipeline used for the training.
+| Name                    | Type            | Description
+| classes                 | List of Integer | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
+| bestParameters          | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics                 | Map             | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+| trainingPipeline        | Map             | The pipeline used for the training.
 |===
 
 The structure of `modelInfo` is:
