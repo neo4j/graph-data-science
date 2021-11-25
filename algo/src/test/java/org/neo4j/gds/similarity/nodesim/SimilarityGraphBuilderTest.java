@@ -20,8 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -31,6 +29,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
@@ -69,6 +69,7 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
+            unlabelledGraph,
             1,
             Pools.DEFAULT,
             AllocationTracker.empty()
@@ -91,6 +92,7 @@ class SimilarityGraphBuilderTest {
         assertEquals(UnionGraph.class, graph.innerGraph().getClass());
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
+            graph,
             graph,
             1,
             Pools.DEFAULT,

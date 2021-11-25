@@ -30,6 +30,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
@@ -38,6 +40,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -195,7 +198,10 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
             var taskStore = new GlobalTaskStore();
 
-            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(
+                getUsername(),
+                taskStore
+            ));
 
             pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
 
@@ -205,27 +211,59 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             );
         });
     }
-    @Test
-    public void filteredLabelTest(){
-        runQuery("CREATE (alice:Person {name: 'Alice', age: 24})\n" +
-                 "        CREATE (carol:Person {name: 'Carol', age: 24})\n" +
-                 "        CREATE (eve:Person {name: 'Eve', age: 67})"+
-                 "        CREATE (dave:Foo {name: 'Dave', age: 48})\n" +
-                 "        CREATE (bob:Foo {name: 'Bob', age: 48})\n" );
 
-        runQuery("CALL gds.graph.create(\n" +
-                 "        'cf-projection',\n" +
-                 "        ['Foo', 'Person'],\n" +
-                        "'*'," +
-                        "{nodeProperties:['age']}"+
-                    ");");
-        runQuery("CALL gds.beta.knn.write('cf-projection', {\n" +
-                 "        nodeLabels: ['Foo'],\n" +
-                 "        nodeWeightProperty: 'age',\n" +
-                 "        writeRelationshipType: 'USERS_ALSO_LIKED',\n" +
-                 "        writeProperty: 'score'\n" +
-                 "    }) YIELD similarityDistribution",result -> {System.out.println(result.resultAsString()); return true;});
+    @Test
+    void shouldWriteWithFilteredNodes() {
+        runQuery("CREATE (alice:Person {name: 'Alice', age: 24})" +
+                 "CREATE (carol:Person {name: 'Carol', age: 24})" +
+                 "CREATE (eve:Person {name: 'Eve', age: 67})" +
+                 "CREATE (dave:Foo {name: 'Dave', age: 48})" +
+                 "CREATE (bob:Foo {name: 'Bob', age: 48})");
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeProperty("age")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.beta.knn")
+            .writeMode()
+            .addParameter("nodeLabels", List.of("Foo"))
+            .addParameter("nodeWeightProperty", "age")
+            .addParameter("writeRelationshipType", relationshipType)
+            .addParameter("writeProperty", relationshipProperty).yields();
+        runQuery(algoQuery);
+
+        Graph knnGraph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Person")
+            .addNodeLabel("Foo")
+            .addRelationshipType(relationshipType)
+            .addRelationshipProperty(relationshipProperty, relationshipProperty, DefaultValue.DEFAULT, Aggregation.NONE)
+            .build()
+            .graph();
+
+        assertGraphEquals(
+            fromGdl("(alice:Person)" +
+                    "(carol:Person)" +
+                    "(eve:Person)" +
+                    "(dave:Foo)" +
+                    "(bob:Foo)" +
+                    "(dave)-[{score: 1.0}]->(bob)" +
+                    "(bob)-[{score: 1.0}]->(dave)"
+            ),
+            knnGraph
+        );
     }
+
     @Override
     public String writeRelationshipType() {
         return "KNN_REL";
