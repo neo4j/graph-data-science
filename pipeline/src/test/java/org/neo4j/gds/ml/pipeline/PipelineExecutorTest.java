@@ -31,6 +31,7 @@ import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -61,49 +62,26 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreOnFailureWhenExecuting() {
+        var pipelineExecutor = new FailingPipelineExecutor(
+            new BogusNodePropertyPipeline(),
+            new PipelineExecutorTestConfig(),
+            ProgressTracker.NULL_TRACKER
+        );
 
-        var pipelineStub = new BogusNodePropertyPipeline();
-
-        var config = new PipelineExecutorTestConfig();
-
-        var pipelineExecutor = new FailingPipelineExecutor(pipelineStub, config, ProgressTracker.NULL_TRACKER);
-
-        assertThatThrownBy(pipelineExecutor::compute)
-            .isExactlyInstanceOf(PipelineExecutionTestFailure.class);
-
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY))
-            .isFalse();
+        assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
     }
 
     @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
-
-        var pipelineStub = new BogusNodePropertyPipeline();
-
-        var config = new PipelineExecutorTestConfig();
-
         var log = new TestLog();
-
-        var task = Tasks.task(
-            "FailingPipelineExecutor",
-            Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
-                1
-            )
-        );
-        var progressTracker = new TestProgressTracker(
-            task,
-            log,
-            1,
-            EmptyTaskRegistryFactory.INSTANCE
+        var pipelineExecutor = new FailingPipelineExecutor(
+            new BogusNodePropertyPipeline(),
+            new PipelineExecutorTestConfig(),
+            new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
         );
 
-        var pipelineExecutor = new FailingPipelineExecutor(pipelineStub, config, progressTracker);
-
-        assertThatThrownBy(pipelineExecutor::compute)
-            .isExactlyInstanceOf(PipelineExecutionTestFailure.class);
-
+        assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly(
@@ -115,6 +93,17 @@ class PipelineExecutorTest {
                 "FailingPipelineExecutor :: execute node property steps :: Finished",
                 "FailingPipelineExecutor :: Finished"
             );
+    }
+
+    private Task taskTree() {
+        return Tasks.task(
+            "FailingPipelineExecutor",
+            Tasks.iterativeFixed(
+                "execute node property steps",
+                () -> List.of(Tasks.leaf("step")),
+                1
+            )
+        );
     }
 
     private static final class PipelineExecutionTestFailure extends RuntimeException {}
