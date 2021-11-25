@@ -21,6 +21,7 @@ package org.neo4j.gds.assertj;
 
 import org.assertj.core.api.Condition;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,5 +49,12 @@ public final class ConditionFactory {
             assertThat(array).hasSize(size);
             return true;
         }, "a double array of size %s", size);
+    }
+
+    public static Condition<List<?>> listOfSize(int size) {
+        return new Condition<>(list -> {
+            assertThat(list).hasSize(size);
+            return true;
+        }, "a list of size %s", size);
     }
 }
