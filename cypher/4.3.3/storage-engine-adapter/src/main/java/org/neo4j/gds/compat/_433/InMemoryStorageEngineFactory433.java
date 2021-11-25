@@ -51,8 +51,10 @@ import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
+import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Collections;
 import java.util.List;
 
 @ServiceProvider
@@ -141,6 +143,26 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
     @Override
     protected AbstractInMemoryMetaDataProvider metadataProvider() {
         return metadataProvider;
+    }
+
+    @Override
+    protected SchemaRuleMigrationAccess schemaRuleMigrationAccess() {
+        return new SchemaRuleMigrationAccess() {
+            @Override
+            public Iterable<SchemaRule> getAll() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void writeSchemaRule(SchemaRule rule) {
+
+            }
+
+            @Override
+            public void close() {
+
+            }
+        };
     }
 
 
