@@ -90,18 +90,26 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
     @Override
     public Result compute() {
+        progressTracker.beginSubTask();
+
         var relCountTasks = countRelationships();
 
-        long maxCommunity = maxCommunity(relCountTasks);
-        long communitiesPerBatch = maxCommunity / config.concurrency();
-        long communitiesRemainder = Math.floorMod(maxCommunity, config.concurrency());
+        long maxCommunityId = maxCommunityId(relCountTasks);
+        long communitiesPerBatch = maxCommunityId / config.concurrency();
+        long communitiesRemainder = Math.floorMod(maxCommunityId, config.concurrency());
 
-        var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunity, relCountTasks);
+        var accumulatedCounts = accumulateCounts(communitiesPerBatch, communitiesRemainder, maxCommunityId, relCountTasks);
 
-        return computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunity, accumulatedCounts);
+        var result = computeConductances(communitiesPerBatch, communitiesRemainder, maxCommunityId, accumulatedCounts);
+
+        progressTracker.endSubTask();
+
+        return result;
     }
 
     private List<CountRelationships> countRelationships() {
+        progressTracker.beginSubTask();
+
         var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
@@ -110,39 +118,43 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
 
+        progressTracker.endSubTask();
+
         return tasks;
     }
 
-    private long maxCommunity(List<CountRelationships> relCountTasks) {
-        var maxCommunity = new MutableLong(0);
+    private long maxCommunityId(List<CountRelationships> relCountTasks) {
+        var maxCommunityId = new MutableLong(0);
 
         relCountTasks.forEach(countRelationships -> {
             long maxLocalCapacity = Math.max(
                 countRelationships.internalCounts().capacity(),
                 countRelationships.externalCounts().capacity()
             );
-            if (maxLocalCapacity > maxCommunity.longValue()) {
-                maxCommunity.setValue(maxLocalCapacity);
+            if (maxLocalCapacity > maxCommunityId.longValue()) {
+                maxCommunityId.setValue(maxLocalCapacity);
             }
         });
 
-        return maxCommunity.longValue();
+        return maxCommunityId.longValue();
     }
 
     private RelationshipCounts accumulateCounts(
         long communitiesPerBatch,
         long communitiesRemainder,
-        long maxCommunity,
+        long maxCommunityId,
         List<CountRelationships> relCountTasks
     ) {
+        progressTracker.beginSubTask(maxCommunityId);
+
         var internalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunity,
+            maxCommunityId,
             allocationTracker::add
         );
         var externalCountsBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunity,
+            maxCommunityId,
             allocationTracker::add
         );
 
@@ -173,9 +185,13 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
                     externalCountsBuilder.addTo(community, localExternalCounts.get(community));
                 }
             });
+
+            progressTracker.logProgress(endOffset - startOffset);
         });
 
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+
+        progressTracker.endSubTask();
 
         return ImmutableRelationshipCounts.of(internalCountsBuilder.build(), externalCountsBuilder.build());
     }
@@ -183,12 +199,14 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
     private Result computeConductances(
         long communitiesPerBatch,
         long communitiesRemainder,
-        long maxCommunity,
+        long maxCommunityId,
         RelationshipCounts relCounts
     ) {
+        progressTracker.beginSubTask(maxCommunityId);
+
         var conductancesBuilder = HugeSparseDoubleArray.builder(
             Double.NaN,
-            maxCommunity,
+            maxCommunityId,
             allocationTracker::add
         );
         var globalConductanceSum = new AtomicDoubleArray(1);
@@ -219,9 +237,13 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
             globalConductanceSum.add(0, conductanceSum);
             globalValidCommunities.addAndGet(validCommunities);
+
+            progressTracker.logProgress(endOffset - startOffset);
         });
 
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+
+        progressTracker.endSubTask();
 
         return Result.of(conductancesBuilder.build(), globalConductanceSum.get(0) / globalValidCommunities.longValue());
     }
@@ -276,6 +298,8 @@ public class Conductance extends Algorithm<Conductance, Conductance.Result> {
 
             internalCounts = internalCountsBuilder.build();
             externalCounts = externalCountsBuilder.build();
+
+            progressTracker.logProgress(partition.nodeCount());
         }
 
 
