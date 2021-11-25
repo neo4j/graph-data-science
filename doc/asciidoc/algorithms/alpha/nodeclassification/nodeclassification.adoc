@@ -452,7 +452,7 @@ RETURN
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
-Additionally, we see that the model is confident in these predictions, as the highest class probability is >=80% in all cases.
+Additionally, we see that the model is confident in these predictions, as the confidence is >=79% in all cases.
 
 
 [[algorithms-ml-nodeclassification-examples-mutate]]

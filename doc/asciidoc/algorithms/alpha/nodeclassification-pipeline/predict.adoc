@@ -166,7 +166,7 @@ RETURN
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
-Additionally, we see that the model is confident in these predictions, as the highest class probability is >=80% in all cases.
+Additionally, we see that the model is confident in these predictions, as the confidence is >=79% in all cases.
 --
 
 [[algorithms-ml-nodeclassification-pipeline-examples-mutate]]
@@ -199,37 +199,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate('myGraph', {
 |===
 --
 
-
-Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
-In order to analyse our predicted classes we stream the properties from the in-memory graph:
-
-[role=query-example, no-result=true, group=nc]
---
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamNodeProperties(
-  'myGraph', ['predictedProbabilities', 'predictedClass'], ['UnknownHouse']
-) YIELD nodeId, nodeProperty, propertyValue
-RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyValue
-  ORDER BY classifiedHouse, nodeProperty
-----
-
-.Results
-[opts="header"]
-|===
-| classifiedHouse | nodeProperty             | propertyValue
-| "Pink"          | "predictedClass"         | 0
-| "Pink"          | "predictedProbabilities" | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
-| "Tan"           | "predictedClass"         | 1
-| "Tan"           | "predictedProbabilities" | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
-| "Yellow"        | "predictedClass"         | 2
-| "Yellow"        | "predictedProbabilities" | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
-|===
---
-
-As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
-This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
-Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
+Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.
 
 
 [[algorithms-ml-nodeclassification-pipeline-examples-write]]
@@ -262,28 +232,4 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.write('myGraph', {
 |===
 --
 
-Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
-In order to analyse our predicted classes we stream the properties from the in-memory graph:
-
-[role=query-example, no-result=true, group=nc]
---
-[source, cypher, role=noplay]
-----
-MATCH (house:UnknownHouse)
-RETURN house.color AS classifiedHouse, house.predictedClass AS predictedClass, house.predictedProbabilities AS predictedProbabilities
-----
-
-.Results
-[opts="header"]
-|===
-| classifiedHouse | predictedClass | predictedProbabilities
-| "Pink"          |              0 | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
-| "Tan"           |              1 | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
-| "Yellow"        |              2 | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
-|===
---
-
-
-As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
-This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
-Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
+Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.
