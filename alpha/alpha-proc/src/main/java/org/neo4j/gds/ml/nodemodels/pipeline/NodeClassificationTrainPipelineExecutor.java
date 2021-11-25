@@ -104,7 +104,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         return this;
     }
 
-    public NodeClassificationTrainConfig innerConfig() {
+    NodeClassificationTrainConfig innerConfig() {
         var params = pipeline.trainingParameterSpace().stream()
             .map(NodeLogisticRegressionTrainCoreConfig::toMap).collect(Collectors.toList());
         return NodeClassificationTrainConfig.builder()
@@ -114,8 +114,12 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             .targetProperty(config.targetProperty())
             .featureProperties(pipeline.featureProperties())
             .params(params)
+            .randomSeed(config.randomSeed())
             .holdoutFraction(pipeline.splitConfig().holdoutFraction())
             .validationFolds(pipeline.splitConfig().validationFolds())
+            .nodeLabels(config.nodeLabels())
+            .relationshipTypes(config.relationshipTypes())
+            .minBatchSize(config.minBatchSize())
             .build();
     }
 }
