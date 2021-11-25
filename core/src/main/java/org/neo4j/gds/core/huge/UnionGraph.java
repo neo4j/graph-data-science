@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
@@ -135,6 +136,11 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public long toRootNodeId(long nodeId) {
         return first.toRootNodeId(nodeId);
+    }
+
+    @Override
+    public NodeMapping rootNodeMapping() {
+        return first.rootNodeMapping();
     }
 
     @Override
