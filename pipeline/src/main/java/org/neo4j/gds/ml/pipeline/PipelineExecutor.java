@@ -87,12 +87,10 @@ public abstract class PipelineExecutor<
 
             this.pipeline.validate(graphStore, config);
 
-            var result = execute(dataSplits);
-
-            progressTracker.endSubTask();
-            return result;
+            return execute(dataSplits);
         } finally {
             cleanUpGraphStore(dataSplits);
+            progressTracker.endSubTask();
         }
     }
 

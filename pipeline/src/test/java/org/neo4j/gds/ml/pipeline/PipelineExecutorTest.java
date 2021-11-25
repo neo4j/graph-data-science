@@ -23,11 +23,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -41,6 +45,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 @GdlExtension
@@ -55,28 +60,13 @@ class PipelineExecutorTest {
     private GraphStore graphStore;
 
     @Test
-    void shouldCleanGraphStoreOnFailure() {
+    void shouldCleanGraphStoreOnFailureWhenExecuting() {
 
         var pipelineStub = new BogusNodePropertyPipeline();
 
-        var config = new AlgoBaseConfig() {
-            @Override
-            public Optional<String> graphName() {
-                return Optional.empty();
-            }
+        var config = new PipelineExecutorTestConfig();
 
-            @Override
-            public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-                return List.of(NODE_LABEL_N);
-            }
-
-            @Override
-            public Optional<GraphCreateConfig> implicitCreateConfig() {
-                return Optional.empty();
-            }
-        };
-
-        var pipelineExecutor = new FailingPipelineExecutor(pipelineStub, config);
+        var pipelineExecutor = new FailingPipelineExecutor(pipelineStub, config, ProgressTracker.NULL_TRACKER);
 
         assertThatThrownBy(pipelineExecutor::compute)
             .isExactlyInstanceOf(PipelineExecutionTestFailure.class);
@@ -85,17 +75,80 @@ class PipelineExecutorTest {
             .isFalse();
     }
 
+    @Test
+    void shouldHaveCorrectProgressLoggingOnFailure() {
+
+        var pipelineStub = new BogusNodePropertyPipeline();
+
+        var config = new PipelineExecutorTestConfig();
+
+        var log = new TestLog();
+
+        var task = Tasks.task(
+            "FailingPipelineExecutor",
+            Tasks.iterativeFixed(
+                "execute node property steps",
+                () -> List.of(Tasks.leaf("step")),
+                1
+            )
+        );
+        var progressTracker = new TestProgressTracker(
+            task,
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        var pipelineExecutor = new FailingPipelineExecutor(pipelineStub, config, progressTracker);
+
+        assertThatThrownBy(pipelineExecutor::compute)
+            .isExactlyInstanceOf(PipelineExecutionTestFailure.class);
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "FailingPipelineExecutor :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: execute node property steps :: Finished",
+                "FailingPipelineExecutor :: Finished"
+            );
+    }
+
     private static final class PipelineExecutionTestFailure extends RuntimeException {}
 
+    private static class PipelineExecutorTestConfig implements AlgoBaseConfig {
+        @Override
+        public Optional<String> graphName() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
+            return List.of(NODE_LABEL_N);
+        }
+
+        @Override
+        public Optional<GraphCreateConfig> implicitCreateConfig() {
+            return Optional.empty();
+        }
+    }
+
     private class FailingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, Object, FailingPipelineExecutor> {
-        FailingPipelineExecutor(Pipeline<FeatureStep, ToMapConvertible> pipelineMock, AlgoBaseConfig config) {
+        FailingPipelineExecutor(
+            Pipeline<FeatureStep, ToMapConvertible> pipelineMock,
+            AlgoBaseConfig config,
+            ProgressTracker progressTracker
+        ) {
             super(
                 pipelineMock,
                 config,
                 null,
                 PipelineExecutorTest.this.graphStore,
                 "graph",
-                TestProgressTracker.NULL_TRACKER
+                progressTracker
             );
         }
 
