@@ -103,7 +103,7 @@ public abstract class PipelineExecutor<
     }
 
     private void executeNodePropertySteps(GraphFilter graphFilter) {
-        for (NodePropertyStep step : pipeline.nodePropertySteps()) {
+        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(caller, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
             progressTracker.endSubTask();
