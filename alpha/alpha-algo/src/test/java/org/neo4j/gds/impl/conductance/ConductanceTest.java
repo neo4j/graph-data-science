@@ -179,15 +179,15 @@ final class ConductanceTest {
             .extracting(replaceTimings())
             .containsExactly(
                 "Conductance :: Start",
-                "Conductance :: count relationships 1 of 1 :: Start",
-                "Conductance :: count relationships 1 of 1 100%",
-                "Conductance :: count relationships 1 of 1 :: Finished",
-                "Conductance :: accumulate counts 1 of 1 :: Start",
-                "Conductance :: accumulate counts 1 of 1 100%",
-                "Conductance :: accumulate counts 1 of 1 :: Finished",
-                "Conductance :: perform conductance computations 1 of 1 :: Start",
-                "Conductance :: perform conductance computations 1 of 1 100%",
-                "Conductance :: perform conductance computations 1 of 1 :: Finished",
+                "Conductance :: count relationships :: Start",
+                "Conductance :: count relationships 100%",
+                "Conductance :: count relationships :: Finished",
+                "Conductance :: accumulate counts :: Start",
+                "Conductance :: accumulate counts 100%",
+                "Conductance :: accumulate counts :: Finished",
+                "Conductance :: perform conductance computations :: Start",
+                "Conductance :: perform conductance computations 100%",
+                "Conductance :: perform conductance computations :: Finished",
                 "Conductance :: Finished"
             );
     }

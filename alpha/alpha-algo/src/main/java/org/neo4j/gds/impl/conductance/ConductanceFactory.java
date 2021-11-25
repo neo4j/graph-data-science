@@ -27,8 +27,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-import java.util.List;
-
 public class ConductanceFactory<CONFIG extends ConductanceConfig> extends AlgorithmFactory<Conductance, CONFIG> {
 
     public ConductanceFactory() {
@@ -52,14 +50,11 @@ public class ConductanceFactory<CONFIG extends ConductanceConfig> extends Algori
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.iterativeDynamic(
+        return Tasks.task(
             taskName(),
-            () -> List.of(
-                Tasks.leaf("count relationships", graph.nodeCount()),
-                Tasks.leaf("accumulate counts"),
-                Tasks.leaf("perform conductance computations")
-            ),
-            1
+            Tasks.leaf("count relationships", graph.nodeCount()),
+            Tasks.leaf("accumulate counts"),
+            Tasks.leaf("perform conductance computations")
         );
     }
 }
