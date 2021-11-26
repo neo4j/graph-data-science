@@ -42,7 +42,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -67,7 +66,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
             NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig()),
-            RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
             ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream));
     }

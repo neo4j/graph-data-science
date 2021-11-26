@@ -39,7 +39,6 @@ import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -60,7 +59,6 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
         return Stream.concat(
             modeSpecificConfigTests(),
             Stream.of(
-                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
                 ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
             ).flatMap(Collection::stream)
         );

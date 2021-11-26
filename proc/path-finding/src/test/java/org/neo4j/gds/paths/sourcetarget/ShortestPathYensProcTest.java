@@ -40,7 +40,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -62,7 +61,6 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
         return Stream.concat(
             modeSpecificConfigTests(),
             Stream.of(
-                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
                 ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
             ).flatMap(Collection::stream)
         );

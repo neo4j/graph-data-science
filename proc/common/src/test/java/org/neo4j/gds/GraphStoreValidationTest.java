@@ -36,7 +36,6 @@ class GraphStoreValidationTest {
     @SuppressWarnings("JUnit5MalformedNestedClass")
     @Nested
     static class SeedConfigTests {
-
         @Test
         void shouldFailWithInvalidSeedProperty() {
             var graphStore = GdlFactory.of("(a {bar: 42})").build().graphStore();

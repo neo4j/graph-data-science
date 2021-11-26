@@ -45,7 +45,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
-import org.neo4j.gds.test.config.RelationshipWeightConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -73,7 +72,6 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     final Stream<DynamicTest> configTests() {
         return Stream.concat(
             modeSpecificConfigTests(), Stream.of(
-                RelationshipWeightConfigProcTest.allTheTests(proc(), createMinimalConfig()),
                 ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
             ).flatMap(Collection::stream)
         );
