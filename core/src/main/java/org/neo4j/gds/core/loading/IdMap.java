@@ -109,6 +109,11 @@ public class IdMap implements NodeMapping {
     }
 
     @Override
+    public NodeMapping rootNodeMapping() {
+        return this;
+    }
+
+    @Override
     public boolean contains(final long nodeId) {
         return nodeToGraphIds.contains(nodeId);
     }
@@ -203,7 +208,7 @@ public class IdMap implements NodeMapping {
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
 
         return new FilteredIdMap(
-            rootNodeCount(),
+            this,
             newGraphIds,
             newNodeToGraphIds,
             newLabelInformation,
@@ -215,10 +220,10 @@ public class IdMap implements NodeMapping {
 
     private static class FilteredIdMap extends IdMap {
 
-        private final long rootNodeCount;
+        private final NodeMapping rootNodeMapping;
 
         FilteredIdMap(
-            long rootNodeCount,
+            NodeMapping rootNodeMapping,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             LabelInformation filteredLabelInformation,
@@ -227,7 +232,7 @@ public class IdMap implements NodeMapping {
             AllocationTracker allocationTracker
         ) {
             super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
-            this.rootNodeCount = rootNodeCount;
+            this.rootNodeMapping = rootNodeMapping;
         }
 
         @Override
@@ -242,12 +247,17 @@ public class IdMap implements NodeMapping {
 
         @Override
         public long rootNodeCount() {
-            return rootNodeCount;
+            return rootNodeMapping.rootNodeCount();
         }
 
         @Override
         public long toRootNodeId(long nodeId) {
             return super.toRootNodeId(toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public NodeMapping rootNodeMapping() {
+            return rootNodeMapping.rootNodeMapping();
         }
 
         @Override

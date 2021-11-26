@@ -24,25 +24,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.catalog.GraphDropProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.catalog.GraphDropProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.Orientation.REVERSE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 
@@ -285,5 +288,45 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
             assertEquals(expected, result);
         }
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void shouldStreamWithFilteredNodes(int topN) {
+        runQuery("MATCH (n) DETACH DELETE n");
+        String graphCreateQuery =
+            "CREATE (alice:Person)" +
+            ", (carol:Person)" +
+            ", (eve:Person)" +
+            ", (dave:Foo)" +
+            ", (bob:Foo)" +
+            ", (a:Bar)" +
+            ", (dave)-[:KNOWS]->(a)" +
+            ", (bob)-[:KNOWS]->(a)";
+        runQuery(graphCreateQuery);
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeLabel("Bar")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.nodeSimilarity")
+            .streamMode()
+            .addParameter("nodeLabels", List.of("Foo", "Bar"))
+            .addParameter("topN", topN)
+            .yields("node1", "node2", "similarity");
+
+        runQueryWithRowConsumer(algoQuery, row -> {
+            assertThat(row.getNumber("node1")).isIn(11L, 12L);
+            assertThat(row.getNumber("node2")).isIn(11L, 12L);
+            assertThat(row.getNumber("similarity")).isEqualTo(1.0);
+        });
     }
 }

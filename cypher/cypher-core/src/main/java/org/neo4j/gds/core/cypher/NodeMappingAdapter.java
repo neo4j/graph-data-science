@@ -59,6 +59,11 @@ public abstract class NodeMappingAdapter implements NodeMapping {
     }
 
     @Override
+    public NodeMapping rootNodeMapping() {
+        return nodeMapping.rootNodeMapping();
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return nodeMapping.contains(nodeId);
     }

@@ -24,12 +24,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.MutateRelationshipWithPropertyTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,6 +40,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityMutateProcTest
@@ -194,5 +199,55 @@ class NodeSimilarityMutateProcTest
         runQueryWithRowConsumer(query, row -> {
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void shouldMutateWithFilteredNodes(int topN) {
+        runQuery("MATCH (n) DETACH DELETE n");
+        String graphCreateQuery =
+            "CREATE (alice:Person)" +
+            ", (carol:Person)" +
+            ", (eve:Person)" +
+            ", (dave:Foo)" +
+            ", (bob:Foo)" +
+            ", (a:Bar)" +
+            ", (dave)-[:KNOWS]->(a)" +
+            ", (bob)-[:KNOWS]->(a)";
+        runQuery(graphCreateQuery);
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeLabel("Bar")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.nodeSimilarity")
+            .mutateMode()
+            .addParameter("nodeLabels", List.of("Foo", "Bar"))
+            .addParameter("mutateRelationshipType", relationshipType)
+            .addParameter("mutateProperty", relationshipProperty)
+            .addParameter("topN", topN)
+            .yields();
+        runQuery(algoQuery);
+
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+
+        assertGraphEquals(
+            fromGdl(
+                graphCreateQuery +
+                ", (dave)-[{score: 1.0}]->(bob)" +
+                ", (bob)-[{score: 1.0}]->(dave)"
+            ),
+            mutatedGraph
+        );
     }
 }

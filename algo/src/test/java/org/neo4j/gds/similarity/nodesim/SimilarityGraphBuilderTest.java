@@ -20,17 +20,20 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
@@ -108,4 +111,38 @@ class SimilarityGraphBuilderTest {
 
         assertGraphEquals(fromGdl("(a:Person)-[{w: 0.42000D}]->(b:Person), (i1:Item), (i2:Item)"), simGraph);
     }
+
+    @Test
+    void testConstructFromFilteredGraph() {
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
+            .concurrency(4)
+            .hasLabelInformation(true)
+            .maxOriginalId(3)
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+
+        nodesBuilder.addNode(0, NodeLabel.of("A"));
+        nodesBuilder.addNode(1, NodeLabel.of("A"));
+        nodesBuilder.addNode(2, NodeLabel.of("B"));
+        nodesBuilder.addNode(3, NodeLabel.of("B"));
+
+        var inputMapping = nodesBuilder.build().nodeMapping();
+        var filteredNodeMapping = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4);
+
+        SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
+            filteredNodeMapping,
+            1,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
+            0, 1, 0.42
+        )));
+
+        assertGraphEquals(fromGdl("(a:A), (b:A), (c:B), (d:B), (c)-[{similarity: 0.42}]->(d)"), simGraph);
+    }
+
+
+
 }

@@ -89,7 +89,7 @@ public class SimilarityGraphBuilder {
 
     public Graph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(nodeMapping)
+            .nodes(nodeMapping.rootNodeMapping())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
@@ -97,10 +97,18 @@ public class SimilarityGraphBuilder {
             .allocationTracker(allocationTracker)
             .build();
 
-        ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
+        ParallelUtil.parallelStreamConsume(
+            stream,
+            concurrency,
+            similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
+                nodeMapping.toRootNodeId(similarityResult.sourceNodeId()),
+                nodeMapping.toRootNodeId(similarityResult.targetNodeId()),
+                similarityResult.similarity
+            ))
+        );
 
         return GraphFactory.create(
-            nodeMapping,
+            nodeMapping.rootNodeMapping(),
             relationshipsBuilder.build(),
             allocationTracker
         );

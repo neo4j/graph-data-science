@@ -28,9 +28,12 @@ import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,6 +41,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     implements MutateRelationshipWithPropertyTest<Knn, KnnMutateConfig, Knn.Result> {
@@ -146,7 +151,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     @Override
     @Test
     @Disabled("This test does not work for KNN")
-    public void testGraphMutationOnFilteredGraph() { }
+    public void testGraphMutationOnFilteredGraph() {}
 
     @Test
     void shouldMutateUniqueRelationships() {
@@ -194,5 +199,51 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
                     .build()
             );
         }
+    }
+
+    @Test
+    void shouldMutateWithFilteredNodes() {
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {age: 24})" +
+            " ,(carol:Person {age: 24})" +
+            " ,(eve:Person {age: 67})" +
+            " ,(dave:Foo {age: 48})" +
+            " ,(bob:Foo {age: 48})";
+
+        runQuery(nodeCreateQuery);
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeLabel("Foo")
+            .withNodeProperty("age")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.beta.knn")
+            .mutateMode()
+            .addParameter("nodeLabels", List.of("Foo"))
+            .addParameter("nodeWeightProperty", "age")
+            .addParameter("mutateRelationshipType", relationshipType)
+            .addParameter("mutateProperty", relationshipProperty).yields();
+        runQuery(algoQuery);
+
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+
+        assertGraphEquals(
+            fromGdl(
+                nodeCreateQuery +
+                "(dave)-[{score: 1.0}]->(bob)" +
+                "(bob)-[{score: 1.0}]->(dave)"
+            ),
+            mutatedGraph
+        );
     }
 }

@@ -93,6 +93,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public NodeMapping rootNodeMapping() {
+        return graph.rootNodeMapping();
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return graph.contains(nodeId);
     }
