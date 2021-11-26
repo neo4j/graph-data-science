@@ -35,27 +35,6 @@ RETURN nodeCount
 |===
 --
 
-The situation is the same when using an anonymous projection with an algorithm procedure:
-
-[role=query-example]
---
-[source, cypher, role=noplay]
-----
-CREATE (n:MyWccLabel) // the new node is part of Cypher transaction state
-WITH *
-CALL gds.wcc.stats({nodeProjection: 'MyWccLabel', relationshipProjection:'*'})
-YIELD componentCount
-RETURN componentCount
-----
-
-.Results
-[opts="header"]
-|===
-| componentCount
-| 0
-|===
---
-
 
 [[tx-results-writing]]
 == During results writing

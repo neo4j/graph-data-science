@@ -567,22 +567,29 @@ CREATE (l)-[:TYPE]->(n)
 CREATE (m)-[:TYPE]->(n);
 ----
 
-[role=query-example]
---
-.The following will load the example graph, run the algorithm and stream results including the intermediate communities:
-[source, cypher, role=noplay]
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.louvain.stream({
-    nodeProjection: 'Node',
-    relationshipProjection: {
+CALL gds.graph.create(
+    'myGraph2',
+    'Node',
+    {
         TYPE: {
             type: 'TYPE',
             orientation: 'undirected',
             aggregation: 'NONE'
         }
-    },
-    includeIntermediateCommunities: true
-}) YIELD nodeId, communityId, intermediateCommunityIds
+    }
+)
+----
+
+[role=query-example]
+--
+.The following run the algorithm and stream results including the intermediate communities:
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.stream('myGraph2', { includeIntermediateCommunities: true })
+YIELD nodeId, communityId, intermediateCommunityIds
 RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
