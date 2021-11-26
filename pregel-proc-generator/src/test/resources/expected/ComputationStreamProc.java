@@ -29,7 +29,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -72,8 +71,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
     }
 
     @Override
-    protected PregelProcedureConfig newConfig(String username, Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate, CypherMapWrapper config) {
+    protected PregelProcedureConfig newConfig(String username, Optional<String> graphName, CypherMapWrapper config) {
         return PregelProcedureConfig.of(graphName, config);
     }
 

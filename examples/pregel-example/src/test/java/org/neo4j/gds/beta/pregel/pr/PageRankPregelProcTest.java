@@ -21,9 +21,9 @@ package org.neo4j.gds.beta.pregel.pr;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -91,8 +91,9 @@ class PageRankPregelProcTest extends BaseProcTest {
 
     @Test
     void stream() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "pr")
             .streamMode()
             .addParameter("maxIterations", 10)

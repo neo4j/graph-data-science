@@ -131,7 +131,6 @@ class PregelProcessorTest {
                 "of" +
                 "(" +
                 "java.util.Optional<java.lang.String> graphName, " +
-                "java.util.Optional<org.neo4j.gds.config.GraphCreateConfig> maybeImplicitCreate, " +
                 "org.neo4j.gds.core.CypherMapWrapper userConfig" +
                 ")' " +
                 "in ConfigurationHasNoFactoryMethod.ComputationConfig.",

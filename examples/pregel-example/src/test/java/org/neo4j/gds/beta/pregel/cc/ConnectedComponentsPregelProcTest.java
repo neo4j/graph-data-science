@@ -105,8 +105,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void stream() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
@@ -125,8 +126,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void streamEstimate() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamEstimation()
             .addParameter("maxIterations", 10)
@@ -135,16 +137,22 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, r -> {
             assertEquals(10, r.getNumber("nodeCount").longValue());
             assertEquals(9, r.getNumber("relationshipCount").longValue());
-            assertEquals(296_232, r.getNumber("bytesMin").longValue());
-            assertEquals(296_232, r.getNumber("bytesMax").longValue());
+            assertEquals(744, r.getNumber("bytesMin").longValue());
+            assertEquals(744, r.getNumber("bytesMax").longValue());
         });
     }
 
     @Test
     void streamSeeded() {
-        var query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withNodeProperty("seedProperty")
             .loadEverything()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
@@ -164,8 +172,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void write() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .writeMode()
             .addParameter("maxIterations", 10)
@@ -191,18 +200,16 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
-        var graphName = "myGraph";
-
         var createQuery = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .graphCreate(graphName)
+            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
 
         var mutateQuery = GdsCypher.call()
-            .explicitCreation(graphName)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .mutateMode()
             .addParameter("maxIterations", 10)
@@ -218,7 +225,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertTrue(row.getBoolean("didConverge"));
         });
 
-        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value_" + COMPONENT + "') " +
+        var streamQuery = "CALL gds.graph.streamNodeProperty('" + DEFAULT_GRAPH_NAME + "', 'value_" + COMPONENT + "') " +
                           "YIELD nodeId, propertyValue " +
                           "RETURN nodeId, propertyValue AS value";
 
@@ -232,8 +239,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void stats() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .statsMode()
             .addParameter("maxIterations", 10)

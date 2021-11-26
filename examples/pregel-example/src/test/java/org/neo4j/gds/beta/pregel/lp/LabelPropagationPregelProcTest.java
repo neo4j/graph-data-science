@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,13 +56,14 @@ class LabelPropagationPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(LabelPropagationPregelStreamProc.class);
+        registerProcedures(LabelPropagationPregelStreamProc.class, GraphCreateProc.class);
     }
 
     @Test
     void stream() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         var query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "lp")
             .streamMode()
             .addParameter("maxIterations", 10)

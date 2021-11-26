@@ -42,9 +42,10 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         long dimensions = 42;
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
@@ -78,8 +79,9 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         long nodeCount = runQuery("MATCH (n) RETURN count(n) AS count", result ->
             result.<Long>columnAs("count").stream().findFirst().orElse(-1L)
         );
+        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
