@@ -21,13 +21,15 @@ package org.neo4j.gds.similarity;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.functions.IsFiniteFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 class PearsonDocTest extends BaseProcTest {
     @Language("Cypher")
     private static final String DB_CYPHER =

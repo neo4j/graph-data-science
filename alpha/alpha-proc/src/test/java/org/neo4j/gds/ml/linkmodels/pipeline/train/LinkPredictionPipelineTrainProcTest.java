@@ -181,19 +181,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     }
 
     @Test
-    void failOnAnonymousGraph() {
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe3')");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe3', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe3', 'L2', {nodeProperties: ['pr']})");
-
-        assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
-                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe3', modelName: 'trainedModel3', negativeClassWeight: 1.0, randomSeed: 1337 }" +
-                    ")",
-            "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
-        );
-    }
-
-    @Test
     void trainOnNodeLabelFilteredGraph() {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.create('pipe4')");
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addNodeProperty('pipe4', 'pageRank', {mutateProperty: 'pr'})");

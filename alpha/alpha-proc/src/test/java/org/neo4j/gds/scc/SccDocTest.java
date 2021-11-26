@@ -20,6 +20,7 @@
 package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -27,6 +28,7 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 class SccDocTest extends BaseProcTest {
 
     private static final String DB_CYPHER =

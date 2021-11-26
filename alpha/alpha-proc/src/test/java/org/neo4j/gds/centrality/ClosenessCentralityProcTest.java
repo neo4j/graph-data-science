@@ -139,6 +139,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         TestProcedureRunner.applyOnProcedure(db, ClosenessCentralityProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 

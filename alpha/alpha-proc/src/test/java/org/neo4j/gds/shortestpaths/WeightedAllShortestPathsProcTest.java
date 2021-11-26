@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +83,7 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(AllShortestPathsProc.class);
+        registerProcedures(AllShortestPathsProc.class, GraphCreateProc.class);
         runInTransaction(db, tx -> {
             startNodeId = tx.findNode(Label.label("Node"), "name", "s").getId();
             targetNodeId = tx.findNode(Label.label("Node"), "name", "x").getId();
@@ -93,8 +94,9 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     void testMSBFSASP() {
         final Consumer consumer = mock(Consumer.class);
 
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .yields();
@@ -119,8 +121,9 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     void testMSBFSASPIncoming() {
         final Consumer consumer = mock(Consumer.class);
 
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.REVERSE);
         String query = GdsCypher.call()
-            .loadEverything(Orientation.REVERSE)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .yields();
@@ -144,9 +147,15 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     void testWeightedASP() {
         final Consumer consumer = mock(Consumer.class);
 
-        String query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withRelationshipProperty("cost")
             .loadEverything()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .addParameter("relationshipWeightProperty", "cost")

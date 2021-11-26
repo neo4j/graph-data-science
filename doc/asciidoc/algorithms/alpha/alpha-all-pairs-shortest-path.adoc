@@ -83,17 +83,26 @@ CREATE (a:Loc {name: 'A'}),
 
 ----
 
-.The following will run the algorithm and stream results:
+.The following will create and store a graph using native projection:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.allShortestPaths.stream({
-  nodeProjection: 'Loc',
-  relationshipProjection: {
+CALL gds.graph.create(
+  'nativeGraph',
+  'Loc',
+  {
     ROAD: {
       type: 'ROAD',
       properties: 'cost'
     }
-  },
+  }
+)
+YIELD *
+----
+
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.allShortestPaths.stream('nativeGraph', {
   relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance
@@ -135,12 +144,21 @@ We do not have to save this reversed relationship, we can project it using *Cyph
 Note that relationship query does not specify direction of the relationship.
 This is applicable to all other algorithms that use Cypher loading.
 
+.The following will create and store an undirected graph using cypher projection:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'cypherGraph',
+  'MATCH (n:Loc) RETURN id(n) AS id',
+  'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'
+)
+YIELD *
+----
+
 .The following will run the algorithm, treating the graph as undirected:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.allShortestPaths.stream({
-  nodeQuery: 'MATCH (n:Loc) RETURN id(n) AS id',
-  relationshipQuery: 'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost',
+CALL gds.alpha.allShortestPaths.stream('cypherGraph', {
   relationshipWeightProperty: 'cost'
 })
 YIELD sourceNodeId, targetNodeId, distance

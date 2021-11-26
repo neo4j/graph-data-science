@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.graphdb.Result;
@@ -48,21 +49,26 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(AllShortestPathsProc.class);
+        registerProcedures(AllShortestPathsProc.class, GraphCreateProc.class);
         registerFunctions(IsFiniteFunc.class);
         runQuery(DB_CYPHER);
     }
 
     @Test
     void shouldStream() {
-        String query = " CALL gds.alpha.allShortestPaths.stream({" +
-                       "   nodeProjection: 'Loc'," +
-                       "   relationshipProjection: {" +
-                       "     ROAD: {" +
-                       "       type: 'ROAD'," +
-                       "       properties: 'cost'" +
-                       "     }" +
-                       "   }," +
+        var createQuery = "CALL gds.graph.create(" +
+                          "  'nativeGraph', " +
+                          "  'Loc', " +
+                          "  {" +
+                          "    ROAD: {" +
+                          "      type: 'ROAD'," +
+                          "      properties: 'cost'" +
+                          "    }" +
+                          "  }" +
+                          ")" +
+                          "YIELD *";
+        runQuery(createQuery);
+        String query = " CALL gds.alpha.allShortestPaths.stream('nativeGraph', {" +
                        "   relationshipWeightProperty: 'cost'" +
                        " })" +
                        " YIELD sourceNodeId, targetNodeId, distance" +
@@ -99,9 +105,14 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithCypherProjection() {
-        String query = " CALL gds.alpha.allShortestPaths.stream({" +
-                       "   nodeQuery: 'MATCH (n:Loc) RETURN id(n) AS id'," +
-                       "   relationshipQuery: 'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'," +
+        var createQuery = "CALL gds.graph.create.cypher(" +
+                          "  'cypherGraph'," +
+                          "  'MATCH (n:Loc) RETURN id(n) AS id', " +
+                          "  'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'" +
+                          ") " +
+                          "YIELD *";
+        runQuery(createQuery);
+        String query = " CALL gds.alpha.allShortestPaths.stream('cypherGraph', {" +
                        "   relationshipWeightProperty: 'cost'" +
                        " })" +
                        " YIELD sourceNodeId, targetNodeId, distance" +

@@ -22,6 +22,9 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.HashSet;
 
@@ -60,7 +63,7 @@ class TriangleProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(TriangleProc.class);
+        registerProcedures(TriangleProc.class, GraphCreateProc.class);
         runQuery(dbCypher());
         idToName = new String[9];
 
@@ -89,14 +92,14 @@ class TriangleProcTest extends BaseProcTest {
         HashSet<Integer> sums = new HashSet<>();
         TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
 
-        String query = "CALL gds.alpha.triangles({" +
-        "  nodeProjection: 'Node'," +
-        "  relationshipProjection: {" +
-        "    TYPE: {" +
-        "      orientation: 'UNDIRECTED'" +
-        "    }" +
-        "  }" +
-        "})" +
+        var createQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = "CALL gds.alpha.triangles('" + DEFAULT_GRAPH_NAME + "', {})" +
         "YIELD nodeA, nodeB, nodeC";
 
 

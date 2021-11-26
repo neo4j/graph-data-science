@@ -27,6 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -70,15 +71,15 @@ class SccProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccProc.class);
+        registerProcedures(SccProc.class, GraphCreateProc.class);
     }
 
     @Test
     void testWriteWithDefaultWriteProperty() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .yields();
@@ -109,10 +110,10 @@ class SccProcTest extends BaseProcTest {
 
     @Test
     void testWriteWithExplicitWriteProperty() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .addParameter("writeProperty", "scc")
@@ -144,6 +145,7 @@ class SccProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         TestProcedureRunner.applyOnProcedure(db, SccProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
@@ -153,16 +155,11 @@ class SccProcTest extends BaseProcTest {
             );
 
             proc.write(
-                Map.of(
-                    "nodeProjection", "*",
-                    "relationshipProjection", "*",
-                    "writeProperty", "myProp"
-                ),
-                Map.of()
+                DEFAULT_GRAPH_NAME,
+                Map.of("writeProperty", "myProp")
             );
 
             assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "Loading",
                 "Scc",
                 "Scc :: WriteNodeProperties"
             );
@@ -173,10 +170,10 @@ class SccProcTest extends BaseProcTest {
     void testStream() {
         final IntIntScatterMap testMap = new IntIntScatterMap();
 
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .streamMode()
             .yields();

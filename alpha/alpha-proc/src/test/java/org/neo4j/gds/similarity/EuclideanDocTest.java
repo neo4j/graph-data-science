@@ -21,14 +21,16 @@ package org.neo4j.gds.similarity;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 public class EuclideanDocTest extends BaseProcTest {
 
     public final String DB_CYPHER = " MERGE (french:Cuisine {name:'French'})" +

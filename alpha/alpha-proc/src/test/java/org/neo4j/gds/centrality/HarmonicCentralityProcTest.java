@@ -25,10 +25,12 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HarmonicCentralityProcTest extends BaseProcTest {
 
+    @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE (a:Node {name:'a'})" +
         ",      (b:Node {name:'b'})" +
@@ -52,15 +55,14 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        runQuery(DB_CYPHER);
-        registerProcedures(HarmonicCentralityProc.class);
+        registerProcedures(HarmonicCentralityProc.class, GraphCreateProc.class);
     }
 
     @Test
     void testStream() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields("nodeId", "centrality");
@@ -78,14 +80,13 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @Test
     void testWrite() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .addParameter("writeProperty", "centralityScore")
             .yields();
-
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(5L, row.getNumber("nodes").longValue());
@@ -111,6 +112,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
@@ -120,16 +122,11 @@ class HarmonicCentralityProcTest extends BaseProcTest {
             );
 
             proc.write(
-                Map.of(
-                    "nodeProjection", "*",
-                    "relationshipProjection", "*",
-                    "writeProperty", "myProp"
-                ),
-                Map.of()
+                DEFAULT_GRAPH_NAME,
+                Map.of("writeProperty", "myProp")
             );
 
             assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "Loading",
                 "HarmonicCentrality",
                 "HarmonicCentrality :: WriteNodeProperties"
             );
@@ -137,10 +134,10 @@ class HarmonicCentralityProcTest extends BaseProcTest {
     }
 
     private void validateResult(Map<Long, Double> resultMap) {
-        assertEquals(0.375, resultMap.get(0L), 0.1);
-        assertEquals(0.5, resultMap.get(1L), 0.1);
-        assertEquals(0.375, resultMap.get(2L), 0.1);
-        assertEquals(0.25, resultMap.get(3L), 0.1);
-        assertEquals(0.25, resultMap.get(4L), 0.1);
+        assertEquals(0.375, resultMap.get(idFunction.of("a")), 0.1);
+        assertEquals(0.5, resultMap.get(idFunction.of("b")), 0.1);
+        assertEquals(0.375, resultMap.get(idFunction.of("c")), 0.1);
+        assertEquals(0.25, resultMap.get(idFunction.of("d")), 0.1);
+        assertEquals(0.25, resultMap.get(idFunction.of("e")), 0.1);
     }
 }

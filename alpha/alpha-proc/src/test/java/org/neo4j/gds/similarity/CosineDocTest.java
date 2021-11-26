@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -30,6 +31,7 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 class CosineDocTest extends BaseProcTest {
 
     @BeforeEach
