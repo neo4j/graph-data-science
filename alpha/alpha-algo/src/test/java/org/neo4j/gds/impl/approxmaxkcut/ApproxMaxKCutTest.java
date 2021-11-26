@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -231,6 +232,19 @@ final class ApproxMaxKCutTest {
             .concurrency(4)
             .randomSeed(1337L);
         assertThrows(IllegalArgumentException.class, configBuilder::build);
+    }
+
+    @Test
+    void invalidMinCommunitySizes() {
+        var minConfigBuilder = ImmutableApproxMaxKCutConfig.builder()
+            .minimize(true)
+            .minCommunitySizes(List.of(0L, 1L));
+        assertThrows(IllegalArgumentException.class, minConfigBuilder::build);
+
+        var maxConfigBuilder = ImmutableApproxMaxKCutConfig.builder()
+            .minimize(false)
+            .minCommunitySizes(List.of(-1L, 1L));
+        assertThrows(IllegalArgumentException.class, maxConfigBuilder::build);
     }
 
     @ParameterizedTest
