@@ -105,7 +105,10 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
 
         int[] batchIds = {1, 2, 0};
 
-        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adjacencyMatrix))));
+        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(
+            weights,
+            new TestBatchNeighbors(batchIds, adjacencyMatrix)
+        )));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
@@ -130,8 +133,8 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         ctx.backward(loss);
 
         var expected = new Matrix(
-            new double[] { 2.0 , 0.0},
-            2,1
+            new double[]{2.0, 0.0},
+            2, 1
         );
 
         assertThat(ctx.gradient(weights)).isEqualTo(expected);
@@ -142,8 +145,8 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         double[] matrix = {1, 4, 3};
 
         int[][] adj = new int[2][];
-        adj[0] = new int[] {2};
-        adj[1] = new int[] {0, 1};
+        adj[0] = new int[]{2};
+        adj[1] = new int[]{0, 1};
         int[] batchIds = {1};
 
         Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 1));
@@ -156,8 +159,8 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         ctx.backward(loss);
 
         var expected = new Matrix(
-            new double[] { 0.0 , 1.0, 0.0},
-            3,1
+            new double[]{0.0, 1.0, 0.0},
+            3, 1
         );
 
         assertThat(ctx.gradient(weights)).isEqualTo(expected);
@@ -176,7 +179,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             .mapToLong(RelationshipCursor::targetId);
         var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
-        var userEmbeddings = Constant.matrix(new double[] {
+        var userEmbeddings = Constant.matrix(new double[]{
             1, 1, 1, // u1
             1, 1, 1, // u2
             1, 1, 1, // d1
@@ -190,7 +193,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             subGraph
         );
 
-        var expected = new Matrix(new double[] {
+        var expected = new Matrix(new double[]{
             5.0, 5.0, 5.0, // d1
             2.0, 2.0, 2.0, // d2
             2.0, 2.0, 2.0, // d3
@@ -215,7 +218,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             .mapToLong(RelationshipCursor::targetId);
         var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
-        var weights = new Weights<>(new Matrix(new double[] {
+        var weights = new Weights<>(new Matrix(new double[]{
             1, 1, 1, // u1
             2, 2, 2, // u2
             3, 3, 3, // d1
