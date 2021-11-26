@@ -246,4 +246,42 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             mutatedGraph
         );
     }
+
+    @Test
+    void shouldMutateWithSimilarityThreshold() {
+        String relationshipType = "SIMILAR";
+        String relationshipProperty = "score";
+
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {age: 23})" +
+            " ,(carol:Person {age: 24})" +
+            " ,(eve:Person {age: 34})" +
+            " ,(bob:Person {age: 30})";
+
+        runQuery(nodeCreateQuery);
+
+        String createQuery = GdsCypher.call()
+            .withNodeLabel("Person")
+            .withNodeProperty("age")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String algoQuery = GdsCypher.call()
+            .explicitCreation("graph")
+            .algo("gds.beta.knn")
+            .mutateMode()
+            .addParameter("nodeWeightProperty", "age")
+            .addParameter("similarityThreshold", 0.14)
+            .addParameter("mutateRelationshipType", relationshipType)
+            .addParameter("mutateProperty", relationshipProperty).yields();
+        runQuery(algoQuery);
+
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+
+        assertEquals(6, mutatedGraph.relationshipCount());
+
+    }
 }

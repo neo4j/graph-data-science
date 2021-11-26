@@ -53,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
@@ -131,35 +132,60 @@ class KnnTest {
             .doesNotContain(nodeId)
             .containsAnyOf(expectedNeighbors)
             .doesNotHaveDuplicates()
-            .isSortedAccordingTo(Comparator.naturalOrder())
+            .isSortedAccordingTo(Comparator.naturalOrder()) //why are we testing this? if we switch the order of the nodes in the example this fails
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
     }
 
+    //TODO Should we move this test to a separate file?
     @Test
-    void shouldFilterResultsOfLowSimilarity(){
+    void shouldFilterResultsOfLowSimilarity() {
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {age: 23})" +
+            " ,(carol:Person {age: 24})" +
+            " ,(eve:Person {age: 34})" +
+            " ,(bob:Person {age: 30})";
+
+        var simThresholdGraph = fromGdl(nodeCreateQuery);
+
         double threshold = 0.8;
         var knnConfig = ImmutableKnnBaseConfig.builder()
-            .nodeWeightProperty("knn")
+            .nodeWeightProperty("age")
             .concurrency(1)
             .randomSeed(19L)
-            .similarityThreshold(0.8)
+            .similarityThreshold(0.14)
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = new Knn(graph, knnConfig, knnContext);
+        var knn = new Knn(simThresholdGraph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(3);
+        assertThat(result.size()).isEqualTo(4);
 
-        long nodeAId = idFunction.of("a");
-        long nodeBId = idFunction.of("b");
-        long nodeCId = idFunction.of("c");
+        long nodeAliceId = simThresholdGraph.toMappedNodeId("alice");
+        long nodeBobId = simThresholdGraph.toMappedNodeId("bob");
+        long nodeEveId = simThresholdGraph.toMappedNodeId("eve");
+        long nodeCarolId = simThresholdGraph.toMappedNodeId("carol");
 
-        assertCorrectNeighborList(result, nodeAId, nodeBId);
-        assertCorrectNeighborList(result, nodeBId, nodeAId);
-        assertEmptyNeighborList(result, nodeCId);
+        assertContainsAllExpectedNeighbours(result, nodeAliceId, nodeCarolId);
+        assertContainsAllExpectedNeighbours(result, nodeCarolId, nodeAliceId, nodeBobId);
+        assertContainsAllExpectedNeighbours(result, nodeBobId, nodeEveId, nodeCarolId);
+        assertContainsAllExpectedNeighbours(result, nodeEveId, nodeBobId);
+    }
+
+    //We created this additional assertion because the assertCorrectNeighborList is requiring
+    //a particular ordering in the nodeIds which we don't need in all examples.
+    private void assertContainsAllExpectedNeighbours(
+        Knn.Result result,
+        long nodeId,
+        long... expectedNeighbors
+    ) {
+        var actualNeighbors = result.neighborsOf(nodeId).toArray();
+        assertThat(actualNeighbors)
+            .doesNotContain(nodeId)
+            .containsExactlyInAnyOrder(expectedNeighbors);
     }
 
     private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
