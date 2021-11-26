@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
+import org.neo4j.gds.impl.approxmaxkcut.localsearch.LocalSearch;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -131,7 +132,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     }
 
     @FunctionalInterface
-    interface Comparator {
+    public interface Comparator {
         boolean accept(double lhs, double rhs);
     }
 
