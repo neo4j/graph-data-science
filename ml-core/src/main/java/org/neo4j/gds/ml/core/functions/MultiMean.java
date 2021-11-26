@@ -27,14 +27,14 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
-    private final BatchNeighbors batchNeighbors;
+    private final BatchNeighbors subGraph;
 
     public MultiMean(
-        Variable<?> parent,
-        BatchNeighbors batchNeighbors
+        Variable<Matrix> parent,
+        BatchNeighbors subGraph
     ) {
-        super(parent, Dimensions.matrix(batchNeighbors.batchSize(), parent.dimension(1)));
-        this.batchNeighbors = batchNeighbors;
+        super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
+        this.subGraph = subGraph;
     }
 
     @Override
@@ -42,56 +42,61 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
-        int[] batchIds = batchNeighbors.batchIds();
+        int[] batchIds = subGraph.batchIds();
+        int batchSize = batchIds.length;
 
         int cols = parent.dimension(1);
 
-        double[] means = new double[batchIds.length * cols];
-        for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
+        double[] means = new double[batchSize * cols];
+        for (int batchIdx = 0; batchIdx < batchSize; batchIdx++) {
             int sourceId = batchIds[batchIdx];
             int batchIdRowOffset = sourceId * cols;
             int batchIdxOffset = batchIdx * cols;
-            int[] neighbors = batchNeighbors.neighbors(sourceId);
+            int[] neighbors = subGraph.neighbors(sourceId);
             int numberOfNeighbors = neighbors.length;
 
             for (int col = 0; col < cols; col++) {
                 means[batchIdxOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
             }
-            for (int target : neighbors) {
-                int targetOffset = target * cols;
+            for (int targetIndex : neighbors) {
+                int targetOffset = targetIndex * cols;
+                double relationshipWeight = subGraph.relationshipWeight(sourceId, targetIndex);
                 for (int col = 0; col < cols; col++) {
-                    means[batchIdxOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
+                    means[batchIdxOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
             }
         }
 
-        return new Matrix(means, batchIds.length, cols);
+        return new Matrix(means, batchSize, cols);
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
-        var batchIds = this.batchNeighbors.batchIds();
+
+        var batchIds = this.subGraph.batchIds();
 
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
         int cols = parent.dimension(1);
 
         for (int col = 0; col < cols; col++) {
-            for (int row = 0; row < batchIds.length; row++) {
-                var sourceId = batchIds[row];
-                int degree = batchNeighbors.neighbors(sourceId).length + 1;
-                int gradientElementIndex = row * cols + col;
-                for (int neighbor : batchNeighbors.neighbors(sourceId)) {
+            for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
+                var sourceId = batchIds[batchIdx];
+                int[] neighbors = subGraph.neighbors(sourceId);
+                int degree = neighbors.length + 1;
+                int gradientElementIndex = batchIdx * cols + col;
+                for (int neighbor : neighbors) {
+                    double relationshipWeight = subGraph.relationshipWeight(sourceId, neighbor); //TODO normalize weights
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
-                        1d / degree * multiMeanGradient[gradientElementIndex]
+                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * relationshipWeight)
                     );
                 }
                 result.addDataAt(
                     sourceId * cols + col,
-                    1d / degree * multiMeanGradient[gradientElementIndex]
+                    (1d / degree) * multiMeanGradient[gradientElementIndex]
                 );
             }
         }

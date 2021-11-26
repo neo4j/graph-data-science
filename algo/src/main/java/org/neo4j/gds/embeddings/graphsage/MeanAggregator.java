@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.MultiMean;
-import org.neo4j.gds.ml.core.functions.WeightedMultiMean;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -52,9 +51,7 @@ public class MeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        Variable<Matrix> means = subGraph.isWeighted()
-            ? new WeightedMultiMean( previousLayerRepresentations, subGraph)
-            : new MultiMean(previousLayerRepresentations, subGraph);
+        Variable<Matrix> means = new MultiMean( previousLayerRepresentations, subGraph);
 
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
