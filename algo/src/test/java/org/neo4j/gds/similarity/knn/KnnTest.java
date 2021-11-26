@@ -135,6 +135,37 @@ class KnnTest {
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
     }
 
+    @Test
+    void shouldFilterResultsOfLowSimilarity(){
+        double threshold = 0.8;
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("knn")
+            .concurrency(1)
+            .randomSeed(19L)
+            .similarityThreshold(0.8)
+            .topK(2)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        var knn = new Knn(graph, knnConfig, knnContext);
+        var result = knn.compute();
+
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isEqualTo(3);
+
+        long nodeAId = idFunction.of("a");
+        long nodeBId = idFunction.of("b");
+        long nodeCId = idFunction.of("c");
+
+        assertCorrectNeighborList(result, nodeAId, nodeBId);
+        assertCorrectNeighborList(result, nodeBId, nodeAId);
+        assertEmptyNeighborList(result, nodeCId);
+    }
+
+    private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
+        var actualNeighbors = result.neighborsOf(nodeId).toArray();
+        assertThat(actualNeighbors).isEmpty();
+    }
     @ParameterizedTest
     @MethodSource("emptyProperties")
     void testNonExistingProperties(NodeProperties nodeProperties) {
