@@ -63,6 +63,32 @@ For more information on this algorithm see:
 * https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
 * https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
+=== Node properties
+//=== Extended Algorithm: Using Node Properties
+
+Most real-world graphs contain node properties which store information about the nodes and what they represent.
+The FastRP algorithm in the GDS library extends the original FastRP algorithm with a capability to take node properties into account.
+The resulting embeddings can therefore represent the graph more accurately.
+
+The node property aware aspect of the algorithm is configured via the parameters `featureProperties` and `propertyRatio`.
+Each node property in `featureProperties` is associated with a randomly generated vector of dimension `propertyDimension`, where `propertyDimension = embeddingDimension * propertyRatio`.
+Each node is then initialized with a vector of size `embeddingDimension` formed by concatenation of two parts:
+
+. The first part is formed like in the standard FastRP algorithm,
+. The second one is a linear combination of the property vectors, using the property values of the node as weights.
+
+The algorithm then proceeds with the same logic as the FastRP algorithm.
+Therefore, the algorithm will output arrays of size `embeddingDimension`.
+The last `propertyDimension` coordinates in the embedding captures information about property values of nearby nodes (the "property part" below), and the remaining coordinates (`embeddingDimension` - `propertyDimension` of them; "topology part") captures information about nearby presence of nodes.
+
+----
+[0, 1, ...        | ...,   N - 1, N]
+ ^^^^^^^^^^^^^^^^ | ^^^^^^^^^^^^^^^
+  topology part   |  property part
+                  ^
+           property ratio
+----
+
 
 [[algorithms-embeddings-fastrp-parameter-tuning]]
 == Tuning algorithm parameters
@@ -580,30 +606,21 @@ YIELD nodeId, embedding
 
 Since the initial state of the algorithm is randomised, it isn't possible to intuitively analyse the effect of the relationship weights.
 
-[[algorithms-embeddings-fastrp-extended]]
-== Extended Algorithm: Using Node Properties
 
-Most real-world graphs contain node properties which store information about the nodes and what they represent.
-The FastRP algorithm in the GDS library extends the original FastRP algorithm with a capability to take node properties into account.
-The resulting embeddings can therefore represent the graph more accurately.
-
-The node property aware aspect of the algorithm is configured via the parameters `featureProperties` and `propertyRatio`.
-Each node property in `featureProperties` is associated with a randomly generated vector of dimension `propertyDimension`, where `propertyDimension = embeddingDimension * propertyRatio`.
-Each node is then initialized with a vector of size `embeddingDimension` formed by concatenation of two parts:
-The first part is formed like in the FastRP algorithm, and the second one is a linear combination of the property vectors, using the property values of the node as weights.
-The algorithm then proceeds with the same logic as the FastRP algorithm.
-Therefore, the algorithm will output arrays of size `embeddingDimension`.
-The last `propertyDimension` coordinates in the embedding captures information about property values of nearby nodes, and the remaining coordinates (`embeddingDimension` - `propertyDimension` of them) captures information about nearby presence of nodes.
+[[algorithms-embeddings-fastrp-examples-properties]]
+=== Using node properties as features
 
 To explain the novel initialization using node properties, let us consider an example where `embeddingDimension` is 10, `propertyRatio` is 0.2.
 The dimension of the embedded properties, `propertyDimension` is thus 2.
 Assume we have a property `f1` of scalar type, and a property `f2` storing arrays of length 2.
 This means that there are 3 features which we order like `f1` followed by the two values of `f2`.
 For each of these three features we sample a two dimensional random vector.
-Lets say these are `p1=[0.0, 2.4]`, `p2=[-2.4, 0.0]` and `p3=[2.4, 0.0]`.
+Let's say these are `p1=[0.0, 2.4]`, `p2=[-2.4, 0.0]` and `p3=[2.4, 0.0]`.
 Consider now a node `(n {f1: 0.5, f2: [1.0, -1.0]})`.
 The linear combination mentioned above, is in concrete terms `0.5 * p1 + 1.0 * p2 - 1.0 * p3 = [-4.8, 1.2]`.
-The initial random vector for the node `n` contains first 8 values sampled as in the original fastRP paper, and then our computed values `-4.8` and `1.2`, totalling 10 entries.
+The initial random vector for the node `n` contains first 8 values sampled as in the original FastRP paper, and then our computed values `-4.8` and `1.2`, totalling 10 entries.
+
+In the example below, we again set the embedding dimension to 2, but we set `propertyRatio` to 1, which means the embedding is computed from node properties only.
 
 [role=query-example]
 --
