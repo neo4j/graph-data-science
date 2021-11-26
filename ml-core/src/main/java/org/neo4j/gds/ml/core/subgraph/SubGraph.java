@@ -25,45 +25,45 @@ import org.neo4j.gds.ml.core.RelationshipWeights;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-public class SubGraph implements BatchNeighbors {
+public final class SubGraph implements BatchNeighbors {
     // mapped node ids in the original input batch
     private final int[] mappedBatchNodeIds;
 
     // this includes all nodes part of the subgraph
     // long-based ids used in org.neo4j.gds.api.Graph
-    public final long[] originalNodeIds;
+    private final long[] originalNodeIds;
 
     // stores the sampled neighbors for each node in the input batch
     final int[][] neighbors;
 
-    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
+    private final RelationshipWeights relationshipWeightsFunction;
 
-    public SubGraph(
+    private SubGraph(
         int[][] neighborsPerBatchedNode,
         int[] nodeIds,
         long[] originalNodeIds,
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction
+        RelationshipWeights relationshipWeightsFunction
     ) {
         this.neighbors = neighborsPerBatchedNode;
         this.mappedBatchNodeIds = nodeIds;
         this.originalNodeIds = originalNodeIds;
-        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
     }
 
     public static List<SubGraph> buildSubGraphs(
-        long[] nodeIds,
+        long[] batchNodeIds,
         List<NeighborhoodFunction> neighborhoodFunctions,
         Graph graph,
         boolean useWeights
     ) {
         List<SubGraph> result = new ArrayList<>();
-        long[] previousNodes = nodeIds;
+        long[] previousNodes = batchNodeIds;
 
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
             SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, useWeights);
             result.add(lastGraph);
+            // the next Subgraph needs to consider all nodes included in the last subgraph
             previousNodes = lastGraph.originalNodeIds;
         }
         return result;
@@ -110,22 +110,26 @@ public class SubGraph implements BatchNeighbors {
         return mappedBatchNodeIds;
     }
 
+    public long[] originalNodeIds() {
+        return originalNodeIds;
+    }
+
+    @Override
     public int[] neighbors(int nodeId) {
         return neighbors[nodeId];
     }
 
     public boolean isWeighted() {
-        return maybeRelationshipWeightsFunction.isPresent();
+        return relationshipWeightsFunction != RelationshipWeights.UNWEIGHTED;
     }
 
-    public double relWeight(int src, int trg) {
-        return maybeRelationshipWeightsFunction.orElseThrow().weight(originalNodeIds[src], originalNodeIds[trg]);
+    @Override
+    public double relationshipWeight(int src, int trg) {
+        return relationshipWeightsFunction.weight(originalNodeIds[src], originalNodeIds[trg]);
     }
 
-    private static Optional<RelationshipWeights> relationshipWeightFunction(Graph graph, boolean useWeights) {
-        return useWeights
-            ? Optional.of(graph::relationshipProperty)
-            : Optional.empty();
+    private static RelationshipWeights relationshipWeightFunction(Graph graph, boolean useWeights) {
+        return useWeights ? graph::relationshipProperty : RelationshipWeights.UNWEIGHTED;
     }
 
 }

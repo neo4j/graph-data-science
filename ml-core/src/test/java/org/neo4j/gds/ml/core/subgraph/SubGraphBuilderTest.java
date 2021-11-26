@@ -81,7 +81,7 @@ class SubGraphBuilderTest {
 
         assertEquals(1, subGraph.batchSize());
         assertArrayEquals(expectedAdj, subGraph.neighbors(0));
-        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
@@ -98,7 +98,7 @@ class SubGraphBuilderTest {
 
         assertEquals(1, subGraph.batchSize());
         assertArrayEquals(expectedAdj, subGraph.neighbors(0));
-        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
@@ -126,7 +126,7 @@ class SubGraphBuilderTest {
         assertArrayEquals(expectedAdjB, subGraph.neighbors(1));
         assertArrayEquals(expectedAdjC, subGraph.neighbors(2));
 
-        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds);
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
@@ -153,7 +153,7 @@ class SubGraphBuilderTest {
         assertArrayEquals(expectedAdjA, subGraphs.get(0).neighbors(0));
         assertArrayEquals(expectedAdjB, subGraphs.get(0).neighbors(1));
         assertArrayEquals(expectedAdjC, subGraphs.get(0).neighbors(2));
-        assertArrayEquals(expectedNeighbors, subGraphs.get(0).originalNodeIds);
+        assertArrayEquals(expectedNeighbors, subGraphs.get(0).originalNodeIds());
 
         // start a,b,c,d,e,f  : 0, 1, 2, 3,4,5
         // neighbors g,h,i : 6,7,8
@@ -183,7 +183,7 @@ class SubGraphBuilderTest {
         assertArrayEquals(expectedAdj2D, subGraphs.get(1).neighbors(3));
         assertArrayEquals(expectedAdj2E, subGraphs.get(1).neighbors(4));
         assertArrayEquals(expectedAdj2F, subGraphs.get(1).neighbors(5));
-        assertArrayEquals(expectedNeighbors, subGraphs.get(1).originalNodeIds);
+        assertArrayEquals(expectedNeighbors, subGraphs.get(1).originalNodeIds());
     }
 
     @Test

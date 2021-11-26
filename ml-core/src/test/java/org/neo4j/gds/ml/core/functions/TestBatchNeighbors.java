@@ -43,6 +43,11 @@ class TestBatchNeighbors implements BatchNeighbors {
     }
 
     @Override
+    public double relationshipWeight(int src, int trg) {
+        return 1;
+    }
+
+    @Override
     public int[] batchIds() {
         return batchIds;
     }

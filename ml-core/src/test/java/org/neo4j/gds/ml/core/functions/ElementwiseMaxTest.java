@@ -20,9 +20,17 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 
@@ -30,10 +38,30 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
+@GdlExtension
+class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (u1:User { id: 0 })" +
+        ", (u2:User { id: 1 })" +
+        ", (d1:Dish { id: 2 })" +
+        ", (d2:Dish { id: 3 })" +
+        ", (d3:Dish { id: 4 })" +
+        ", (d4:Dish { id: 5 })" +
+        ", (u1)-[:ORDERED {times: 5}]->(d1)" +
+        ", (u1)-[:ORDERED {times: 2}]->(d2)" +
+        ", (u1)-[:ORDERED {times: 1}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 2}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 3}]->(d4)";
+
+    @Inject
+    TestGraph graph;
+
 
     @Test
-    void testApply() {
+    void testApplyUnweighted() {
         var parent = new Weights<>(new Matrix(new double[]{
             1, 2, 3,
             5, 2, 1,
@@ -62,7 +90,7 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
     }
 
     @Test
-    void shouldApproximateGradient() {
+    void shouldApproximateGradientUnweighted() {
         var weights = new Weights<>(new Matrix(new double[]{
             1, 2, 3,
             3, 2, 1,
@@ -110,7 +138,7 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
     }
 
     @Test
-    void testGradientWithUnorderedBatchIds() {
+    void testUnweightedGradientWithUnorderedBatchIds() {
         double[] matrix = {1, 4, 3};
 
         int[][] adj = new int[2][];
@@ -133,5 +161,72 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         );
 
         assertThat(ctx.gradient(weights)).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldApplyWeightsToEmbeddings() {
+        long[] ids = new long[]{
+            graph.toMappedNodeId("d1"),
+            graph.toMappedNodeId("d2"),
+            graph.toMappedNodeId("d3"),
+            graph.toMappedNodeId("d4"),
+        };
+        NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
+            .streamRelationships(nodeId, 0.0D)
+            .mapToLong(RelationshipCursor::targetId);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
+
+        var userEmbeddings = Constant.matrix(new double[] {
+            1, 1, 1, // u1
+            1, 1, 1, // u2
+            1, 1, 1, // d1
+            3, 3, 3, // d2
+            1, 1, 1, // d3
+            1, 1, 1 // d4
+        }, 6, 3);
+
+        var weightedEmbeddings = new ElementWiseMax(
+            userEmbeddings,
+            subGraph
+        );
+
+        var expected = new Matrix(new double[] {
+            5.0, 5.0, 5.0, // d1
+            2.0, 2.0, 2.0, // d2
+            2.0, 2.0, 2.0, // d3
+            3.0, 3.0, 3.0, // d4
+        }, 4, 3);
+
+        // Add userEmbeddings to context's data
+        ctx.forward(userEmbeddings);
+        assertThat(weightedEmbeddings.apply(ctx)).isEqualTo(expected);
+    }
+
+    @Test
+    void testWeightedGradient() {
+        long[] ids = new long[]{
+            graph.toMappedNodeId("d1"),
+            graph.toMappedNodeId("d2"),
+            graph.toMappedNodeId("d3"),
+            graph.toMappedNodeId("d4"),
+        };
+        NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
+            .streamRelationships(nodeId, 0.0D)
+            .mapToLong(RelationshipCursor::targetId);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
+
+        var weights = new Weights<>(new Matrix(new double[] {
+            1, 1, 1, // u1
+            2, 2, 2, // u2
+            3, 3, 3, // d1
+            4, 4, 4, // d2
+            5, 5, 5, // d3
+            6, 6, 6 // d4
+        }, 6, 3));
+
+        finiteDifferenceShouldApproximateGradient(
+            weights,
+            new ElementSum(List.of(new ElementWiseMax(weights, subGraph)))
+        );
     }
 }

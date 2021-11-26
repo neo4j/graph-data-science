@@ -64,7 +64,8 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
             for(int col = 0; col < cols; col++) {
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
-                        max.setDataAt(row, col, Math.max(parentData.dataAt(neighbor, col), max.dataAt(row, col)));
+                        double relationshipWeight = batchNeighbors.relationshipWeight(sourceId, neighbor);
+                        max.setDataAt(row, col, Math.max(parentData.dataAt(neighbor, col) * relationshipWeight, max.dataAt(row, col)));
                     }
                 } else {
                     max.setDataAt(row, col, 0);
@@ -95,13 +96,16 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
 
                 var minDiffToCellData = Double.MAX_VALUE;
                 var maxNeighbor = -1;
+                var maxNeighborWeight = Double.NaN;
 
                 for (int neighbor : neighbors) {
-                    var diffToCellData = Math.abs(thisCellData - (parentData.dataAt(neighbor, col)));
+                    double relationshipWeight = batchNeighbors.relationshipWeight(sourceId, neighbor);
+                    var diffToCellData = Math.abs(thisCellData - (parentData.dataAt(neighbor, col) * relationshipWeight));
 
                     if (diffToCellData < minDiffToCellData) {
                         minDiffToCellData = diffToCellData;
                         maxNeighbor = neighbor;
+                        maxNeighborWeight = relationshipWeight;
                     }
                 }
 
@@ -110,7 +114,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
                     continue;
                 }
 
-                result.addDataAt(maxNeighbor, col, thisGradient.dataAt(row, col));
+                result.addDataAt(maxNeighbor, col, thisGradient.dataAt(row, col) * maxNeighborWeight);
             }
         }
 
