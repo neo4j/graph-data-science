@@ -20,12 +20,16 @@
 package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,6 +87,24 @@ public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightC
                 "Configuration parameter 'minCommunitySizes' must only have entries at least as large as %d when %s",
                 minMinSize,
                 minimize() ? "minimizing" : "maximizing"
+            ));
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateMinCommunitySizesSum(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        long minCommunitySizesSum = minCommunitySizes().stream().mapToLong(Long::valueOf).sum();
+        long halfNodeCount = graphStore.nodeCount() / 2;
+        if (minCommunitySizesSum > halfNodeCount) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The sum of min community sizes is larger than half of the number of nodes in the graph: %d > %d",
+                minCommunitySizesSum,
+                halfNodeCount
             ));
         }
     }
