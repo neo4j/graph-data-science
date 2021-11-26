@@ -90,9 +90,9 @@ public abstract class PipelineExecutor<
             var result = execute(dataSplits);
             progressTracker.endSubTask();
             return result;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             progressTracker.fail();
-            throw t;
+            throw e;
         } finally {
             cleanUpGraphStore(dataSplits);
         }
