@@ -78,23 +78,24 @@ public abstract class PipelineExecutor<
         progressTracker.beginSubTask();
 
         var dataSplits = splitDataset();
+        try {
+            var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
 
-        var featureInputGraphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+            progressTracker.beginSubTask("execute node property steps");
+            executeNodePropertySteps(featureInputGraphFilter);
+            progressTracker.endSubTask("execute node property steps");
 
-        progressTracker.beginSubTask("execute node property steps");
-        executeNodePropertySteps(featureInputGraphFilter);
-        progressTracker.endSubTask("execute node property steps");
+            this.pipeline.validate(graphStore, config);
 
-        this.pipeline.validate(graphStore, config);
-
-        var result = execute(dataSplits);
-
-        progressTracker.beginSubTask("clean up graph store");
-        cleanUpGraphStore(dataSplits);
-        progressTracker.endSubTask("clean up graph store");
-
-        progressTracker.endSubTask();
-        return result;
+            var result = execute(dataSplits);
+            progressTracker.endSubTask();
+            return result;
+        } catch (Exception e) {
+            progressTracker.fail();
+            throw e;
+        } finally {
+            cleanUpGraphStore(dataSplits);
+        }
     }
 
     @Override
@@ -103,7 +104,7 @@ public abstract class PipelineExecutor<
     }
 
     private void executeNodePropertySteps(GraphFilter graphFilter) {
-        for (NodePropertyStep step : pipeline.nodePropertySteps()) {
+        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
             progressTracker.beginSubTask();
             step.execute(caller, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
             progressTracker.endSubTask();

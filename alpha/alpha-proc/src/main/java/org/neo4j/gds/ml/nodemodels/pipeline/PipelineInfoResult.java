@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class PipelineInfoResult {
         this.nodePropertySteps = info
             .nodePropertySteps()
             .stream()
-            .map(NodePropertyStep::toMap)
+            .map(ExecutableNodePropertyStep::toMap)
             .collect(Collectors.toList());
         this.featureSteps = info.featureProperties();
         this.splitConfig = info.splitConfig().toMap();

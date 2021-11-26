@@ -91,8 +91,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
                 () -> List.of(Tasks.leaf("step")),
                 pipeline.nodePropertySteps().size()
             ),
-            LinkPredictionTrain.progressTask(),
-            Tasks.leaf("clean up graph store")
+            LinkPredictionTrain.progressTask()
         );
     }
 

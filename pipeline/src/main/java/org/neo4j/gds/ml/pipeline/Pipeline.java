@@ -37,7 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG extends ToMapConvertible> implements ToMapConvertible {
 
-    protected final List<NodePropertyStep> nodePropertySteps;
+    protected final List<ExecutableNodePropertyStep> nodePropertySteps;
     protected final List<FEATURE_STEP> featureSteps;
 
     protected List<TRAINING_CONFIG> trainingParameterSpace;
@@ -113,7 +113,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         this.featureSteps.add(featureStep);
     }
 
-    public List<NodePropertyStep> nodePropertySteps() {
+    public List<ExecutableNodePropertyStep> nodePropertySteps() {
         return this.nodePropertySteps;
     }
 

@@ -79,8 +79,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
                 () -> List.of(Tasks.leaf("step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
-            innerFactory.progressTask(graph,innerConfig(config)),
-            Tasks.leaf("clean up graph store")
+            innerFactory.progressTask(graph,innerConfig(config))
         );
     }
 

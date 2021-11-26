@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class PipelineInfoResult {
         this.nodePropertySteps = info
             .nodePropertySteps()
             .stream()
-            .map(NodePropertyStep::toMap)
+            .map(ExecutableNodePropertyStep::toMap)
             .collect(Collectors.toList());
         this.featureSteps = info.featureSteps().stream().map(LinkFeatureStep::toMap).collect(Collectors.toList());
         this.splitConfig = info.splitConfig().toMap();

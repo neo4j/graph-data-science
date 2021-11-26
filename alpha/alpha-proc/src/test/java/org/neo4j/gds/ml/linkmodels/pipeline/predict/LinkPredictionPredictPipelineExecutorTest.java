@@ -265,9 +265,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "Link Prediction Predict Pipeline :: exhaustive link prediction :: Start",
                 "Link Prediction Predict Pipeline :: exhaustive link prediction 100%",
                 "Link Prediction Predict Pipeline :: exhaustive link prediction :: Finished",
-                "Link Prediction Predict Pipeline :: clean up graph store :: Start",
-                "Link Prediction Predict Pipeline :: clean up graph store 100%",
-                "Link Prediction Predict Pipeline :: clean up graph store :: Finished",
                 "Link Prediction Predict Pipeline :: Finished"
             ));
 
