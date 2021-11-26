@@ -30,7 +30,7 @@ import static org.neo4j.gds.GdsCypher.ExecutionModes.STREAM;
 
 class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTest {
 
-    private static final String GRAPH_NAME = "graph";
+    private static final String GRAPH_NAME = "custom-graph";
 
     @BeforeEach
     void graphSetup() {

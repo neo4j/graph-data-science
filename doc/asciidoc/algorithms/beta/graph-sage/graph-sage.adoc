@@ -39,7 +39,6 @@ CALL gds.beta.graphSage.train(
   configuration: Map
 ) YIELD
   graphName: String,
-  graphCreateConfig: Map,
   modelInfo: Map,
   configuration: Map,
   trainMillis: Integer

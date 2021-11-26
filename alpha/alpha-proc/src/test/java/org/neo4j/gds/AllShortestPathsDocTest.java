@@ -66,7 +66,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                           "    }" +
                           "  }" +
                           ")" +
-                          "YIELD *";
+                          "YIELD graphName";
         runQuery(createQuery);
         String query = " CALL gds.alpha.allShortestPaths.stream('nativeGraph', {" +
                        "   relationshipWeightProperty: 'cost'" +
@@ -105,12 +105,12 @@ public class AllShortestPathsDocTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithCypherProjection() {
-        var createQuery = "CALL gds.graph.create.cypher(" +
-                          "  'cypherGraph'," +
-                          "  'MATCH (n:Loc) RETURN id(n) AS id', " +
-                          "  'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'" +
-                          ") " +
-                          "YIELD *";
+        var createQuery = " CALL gds.graph.create.cypher(" +
+                          "   'cypherGraph'," +
+                          "   'MATCH (n:Loc) RETURN id(n) AS id', " +
+                          "   'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'" +
+                          " ) " +
+                          " YIELD graphName";
         runQuery(createQuery);
         String query = " CALL gds.alpha.allShortestPaths.stream('cypherGraph', {" +
                        "   relationshipWeightProperty: 'cost'" +

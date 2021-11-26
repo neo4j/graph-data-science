@@ -96,7 +96,7 @@ CALL gds.graph.create(
     }
   }
 )
-YIELD *
+YIELD graphName
 ----
 
 .The following will run the algorithm and stream results:
@@ -152,7 +152,7 @@ CALL gds.graph.create.cypher(
   'MATCH (n:Loc) RETURN id(n) AS id',
   'MATCH (n:Loc)-[r:ROAD]-(p:Loc) RETURN id(n) AS source, id(p) AS target, r.cost AS cost'
 )
-YIELD *
+YIELD graphName
 ----
 
 .The following will run the algorithm, treating the graph as undirected:
