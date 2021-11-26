@@ -32,8 +32,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-import static org.neo4j.gds.impl.approxmaxkcut.PlaceNodesRandomly.randomNonNegativeLong;
-
 /*
  * Implements a parallelized version of a GRASP (optionally with VNS) maximum k-cut approximation algorithm.
  *
@@ -51,15 +49,15 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private Graph graph;
     private final Random random;
     private final ApproxMaxKCutConfig config;
-    private final AllocationTracker allocationTracker;
     private final Comparator comparator;
     private final PlaceNodesRandomly placeNodesRandomly;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDoubleArray[] costs;
+    private final ProgressTracker progressTracker;
+    private final AllocationTracker allocationTracker;
+    private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currCardinalities;
-    private HugeByteArray neighborSolution;
-    private AtomicLongArray neighborCardinalities;
 
     public ApproxMaxKCut(
         Graph graph,
@@ -69,11 +67,12 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         AllocationTracker allocationTracker
     ) {
         super(progressTracker);
-        this.graph = graph;
         this.random = new Random(config.randomSeed().orElseGet(() -> new Random().nextLong()));
+        this.graph = graph;
         this.config = config;
-        this.allocationTracker = allocationTracker;
         this.comparator = config.minimize() ? (lhs, rhs) -> lhs < rhs : (lhs, rhs) -> lhs > rhs;
+        this.progressTracker = progressTracker;
+        this.allocationTracker = allocationTracker;
 
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
         this.candidateSolutions = new HugeByteArray[]{
@@ -143,8 +142,17 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         progressTracker.beginSubTask();
 
         if (config.vnsMaxNeighborhoodOrder() > 0) {
-            neighborSolution = HugeByteArray.newArray(graph.nodeCount(), allocationTracker);
-            neighborCardinalities = new AtomicLongArray(config.k());
+            this.variableNeighborhoodSearch = new VariableNeighborhoodSearch(
+                graph,
+                random,
+                comparator,
+                config,
+                localSearch,
+                candidateSolutions,
+                costs,
+                progressTracker,
+                allocationTracker
+            );
         }
 
         for (int i = 1; (i <= config.iterations()) && running(); i++) {
@@ -156,7 +164,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             if (!running()) break;
 
             if (config.vnsMaxNeighborhoodOrder() > 0) {
-                variableNeighborhoodSearch(currIdx);
+                currCardinalities = variableNeighborhoodSearch.compute(currIdx, currCardinalities, this::running);
             } else {
                 localSearch.compute(currCandidateSolution, currCost, currCardinalities, this::running);
             }
@@ -173,103 +181,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         progressTracker.endSubTask();
 
         return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get(0));
-    }
-
-    private boolean perturbSolution(
-        HugeByteArray solution,
-        AtomicLongArray cardinalities
-    ) {
-        final int MAX_RETRIES = 100;
-        int retries = 0;
-
-        while (retries < MAX_RETRIES) {
-            long nodeToFlip = randomNonNegativeLong(random, 0, graph.nodeCount());
-            byte currCommunity = solution.get(nodeToFlip);
-
-            if (cardinalities.get(currCommunity) <= config.minCommunitySizes().get(currCommunity)) {
-                // Flipping this node will invalidate the solution in terms on min community sizes.
-                retries++;
-                continue;
-            }
-
-            // For `nodeToFlip`, move to a new random community not equal to its current community in
-            // `neighboringSolution`.
-            byte rndNewCommunity = (byte) ((solution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1))
-                                           % config.k());
-
-            solution.set(nodeToFlip, rndNewCommunity);
-            cardinalities.decrementAndGet(currCommunity);
-            cardinalities.incrementAndGet(rndNewCommunity);
-
-            break;
-        }
-
-        return retries != MAX_RETRIES;
-    }
-
-    private void copyCardinalities(AtomicLongArray source, AtomicLongArray target) {
-        assert target.length() >= source.length();
-
-        for (int i = 0; i < source.length(); i++) {
-            target.setPlain(i, source.getPlain(i));
-        }
-    }
-
-    private void variableNeighborhoodSearch(int candidateIdx) {
-        var bestCandidateSolution = candidateSolutions[candidateIdx];
-        var bestCardinalities = currCardinalities;
-        var bestCost = costs[candidateIdx];
-        var neighborCost = new AtomicDoubleArray(1);
-        boolean perturbSuccess = true;
-        var order = 0;
-
-        progressTracker.beginSubTask();
-
-        while ((order < config.vnsMaxNeighborhoodOrder()) && running()) {
-            bestCandidateSolution.copyTo(neighborSolution, graph.nodeCount());
-            copyCardinalities(bestCardinalities, neighborCardinalities);
-
-            // Generate a neighboring candidate solution of the current order.
-            for (int i = 0; i < order; i++) {
-                perturbSuccess = perturbSolution(neighborSolution, neighborCardinalities);
-                if (!perturbSuccess) {
-                    break;
-                }
-            }
-
-            localSearch.compute(neighborSolution, neighborCost, neighborCardinalities, this::running);
-
-            if (comparator.accept(neighborCost.get(0), bestCost.get(0))) {
-                var tmpCandidateSolution = bestCandidateSolution;
-                bestCandidateSolution = neighborSolution;
-                neighborSolution = tmpCandidateSolution;
-
-                var tmpCardinalities = bestCardinalities;
-                bestCardinalities = neighborCardinalities;
-                neighborCardinalities = tmpCardinalities;
-
-                bestCost.set(0, neighborCost.get(0));
-
-                // Start from scratch with the new candidate.
-                order = 0;
-            } else {
-                order += 1;
-            }
-
-            if (!perturbSuccess) {
-                // We were not able to perturb this solution further, so let's stop.
-                break;
-            }
-        }
-
-        // If we obtained a better candidate solution from VNS, swap with that with the one we started with.
-        if (bestCandidateSolution != candidateSolutions[candidateIdx]) {
-            neighborSolution = candidateSolutions[candidateIdx];
-            candidateSolutions[candidateIdx] = bestCandidateSolution;
-            currCardinalities = bestCardinalities;
-        }
-
-        progressTracker.endSubTask();
     }
 
     @Override
