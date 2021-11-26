@@ -20,8 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
@@ -56,10 +54,10 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
     @Test
     void yields() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("louvain")
             .statsMode()
             .yields();
@@ -99,10 +97,16 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+        var createQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("louvain")
             .statsMode()
             .yields("communityCount");
@@ -110,10 +114,10 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
-    void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
-        String query = queryBuilder
+    @Test
+    void statsShouldNotHaveWriteProperties() {
+        String query = GdsCypher.call()
+            .explicitCreation("myGraph")
             .algo("louvain")
             .statsMode()
             .yields();

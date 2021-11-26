@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.centrality.ClosenessCentralityProc;
 import org.neo4j.gds.centrality.HarmonicCentralityProc;
 import org.neo4j.gds.influenceMaximization.CELFProc;
@@ -38,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class EmptyGraphProcTest extends BaseProcTest {
 
+    private static final String GRAPH_NAME = "graph";
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -50,15 +53,21 @@ class EmptyGraphProcTest extends BaseProcTest {
             SccProc.class,
             TriangleProc.class,
             GreedyProc.class,
-            CELFProc.class
+            CELFProc.class,
+            GraphCreateProc.class
         );
+
+        var createQuery = GdsCypher.call()
+            .loadEverything()
+            .graphCreate(GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
     }
 
     @Test
     void testSccStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.scc")
             .streamMode()
             .yields();
@@ -68,8 +77,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSccWrite() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .yields();
@@ -79,8 +87,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testAllShortestPathsStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.allShortestPaths")
             .streamMode()
             .yields();
@@ -90,8 +97,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testClosenessCentralityStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.closeness")
             .streamMode()
             .yields();
@@ -101,8 +107,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testClosenessCentralityWrite() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.closeness")
             .writeMode()
             .yields();
@@ -112,8 +117,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testHarmonicCentralityStream() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields();
@@ -123,8 +127,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testHarmonicCentralityWrite() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .yields();
@@ -133,24 +136,20 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testTriangleStream() {
-        String query =
-            "CALL gds.alpha.triangles({" +
-            "  nodeProjection: '*'," +
-            "  relationshipProjection: {" +
-            "    TYPE: {" +
-            "      type: '*'," +
-            "      orientation: 'UNDIRECTED'" +
-            "    }" +
-            "  }" +
-            "})";
+        var createQuery = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate("undirectedGraph")
+            .yields();
+        runQuery(createQuery);
 
+        String query = "CALL gds.alpha.triangles('undirectedGraph', {})";
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
     @Test
     void testKSpanningTreeKMax() {
         String query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -162,8 +161,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testKSpanningTreeKMin() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -175,8 +173,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSpanningTree() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -188,8 +185,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSpanningTreeMinimum() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.minimum")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -201,8 +197,7 @@ class EmptyGraphProcTest extends BaseProcTest {
     @Test
     void testSpanningTreeMaximum() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
             .addParameter("startNodeId", 0)

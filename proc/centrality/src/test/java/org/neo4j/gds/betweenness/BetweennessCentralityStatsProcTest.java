@@ -46,10 +46,10 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
 
     @Test
     void testStats() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
             .yields("centralityDistribution", "createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
@@ -70,10 +70,10 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
 
     @Test
     void testStatsWithDeprecatedFields() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .statsMode()
             .yields("createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");

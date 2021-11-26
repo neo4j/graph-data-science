@@ -22,6 +22,7 @@ package org.neo4j.gds.testproc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,12 +34,13 @@ public class ProcedureFailTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(ProcedureThatFailsDuringTask.class);
+        registerProcedures(ProcedureThatFailsDuringTask.class, GraphCreateProc.class);
     }
 
     @Test
     void shouldFailWithIllegalStateException() {
-        assertThatThrownBy(() -> runQuery("CALL very.strange.procedure({nodeProjection: '*', relationshipProjection: '*'})"))
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        assertThatThrownBy(() -> runQuery("CALL very.strange.procedure('" + DEFAULT_GRAPH_NAME + "', {})"))
             .getRootCause()
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Oops");

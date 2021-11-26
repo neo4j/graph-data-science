@@ -71,7 +71,7 @@ class TriangleCountMutateProcTest
     void testMutateYields() {
         String query = GdsCypher
             .call()
-            .explicitCreation(TEST_GRAPH_NAME)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())

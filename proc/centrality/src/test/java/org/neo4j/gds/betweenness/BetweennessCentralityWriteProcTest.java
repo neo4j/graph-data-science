@@ -67,10 +67,10 @@ class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<B
 
     @Test
     void testWrite() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .writeMode()
             .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)

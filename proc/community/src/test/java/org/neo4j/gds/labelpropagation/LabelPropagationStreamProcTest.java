@@ -21,8 +21,6 @@ package org.neo4j.gds.labelpropagation;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
@@ -45,14 +43,12 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         return LabelPropagationStreamProc.class;
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
+    @Test
     void testStream(
-        GdsCypher.QueryBuilder queryBuilder,
-        String desc
     ) {
 
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .streamMode()
             .yields();

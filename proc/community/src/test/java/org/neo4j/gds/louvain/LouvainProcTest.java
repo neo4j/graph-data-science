@@ -23,20 +23,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -53,7 +47,6 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
@@ -165,35 +158,6 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     @AfterEach
     void clearCommunities() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    static Stream<Arguments> graphVariations() {
-        return Stream.of(
-            arguments(
-                GdsCypher.call().explicitCreation("myGraph"),
-                "explicit graph"
-            ),
-            arguments(
-                GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
-                    .builder()
-                    .graphName("")
-                    .nodeProjections(NodeProjections.fromString("Node"))
-                    .nodeProperties(PropertyMappings.fromObject("seed"))
-                    .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(
-                            RelationshipType.of("TYPE"),
-                            RelationshipProjection.builder()
-                                .type("TYPE")
-                                .orientation(Orientation.UNDIRECTED)
-                                .build()
-                        )
-                        .build()
-                    )
-                    .build()
-                ),
-                "implicit graph"
-            )
-        );
     }
 
     @Override

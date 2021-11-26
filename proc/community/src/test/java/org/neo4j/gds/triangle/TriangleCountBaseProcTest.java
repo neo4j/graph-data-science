@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
@@ -33,7 +31,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -56,8 +53,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
            "(b)-[:T]->(c:A), " +
            "(c)-[:T]->(a)";
 
-    protected static final String TEST_GRAPH_NAME = "g";
-
 
     @BeforeEach
     void setup() throws Exception {
@@ -67,12 +62,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             getProcedureClazz()
         );
 
-        runQuery(formatWithLocale("CALL gds.graph.create('%s', 'A', {T: { orientation: 'UNDIRECTED'}})", TEST_GRAPH_NAME));
-    }
-
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
+        runQuery(formatWithLocale("CALL gds.graph.create('%s', 'A', {T: { orientation: 'UNDIRECTED'}})", DEFAULT_GRAPH_NAME));
     }
 
     @Override
@@ -115,12 +105,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     @Override
     public void loadGraph(String graphName){
-        String graphCreateQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withRelationshipType("T", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
-            .yields();
-
-        runQuery(graphCreateQuery);
+        loadGraph(graphName, Orientation.UNDIRECTED);
     }
 }

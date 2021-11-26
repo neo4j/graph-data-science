@@ -21,18 +21,13 @@ package org.neo4j.gds.louvain;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
 
@@ -52,11 +47,11 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("graphVariations")
-    void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+    @Test
+    void testStream() {
         runQueryWithRowConsumer(
-            queryBuilder
+            GdsCypher.call()
+                .explicitCreation("myGraph")
                 .algo("louvain")
                 .streamMode()
                 .addParameter("concurrency", 1)
@@ -69,21 +64,6 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
                 assertEquals(0, row.getNumber("nodeId").intValue());
                 assertEquals(0, row.getNumber("communityId").intValue());
             }
-        );
-    }
-
-    static Stream<Arguments> graphVariations() {
-        return Stream.of(
-            arguments(
-                GdsCypher.call().explicitCreation("myGraph"),
-                "explicit graph"
-            ),
-            arguments(
-                GdsCypher.call()
-                    .withNodeLabel("Node")
-                    .withAnyRelationshipType(),
-                "implicit graph"
-            )
         );
     }
 }

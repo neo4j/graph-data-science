@@ -51,6 +51,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Neo4jGraphExtension
 public abstract class BaseTest {
 
+    protected static final String DEFAULT_GRAPH_NAME = "graph";
+
     @Inject
     public GraphDatabaseAPI db;
 

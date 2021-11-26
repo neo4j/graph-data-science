@@ -136,19 +136,6 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
                 GdsCypher.call().explicitCreation(name),
                 orientation,
                 "explicit graph - " + orientation
-            ),
-            arguments(
-                GdsCypher
-                    .call()
-                    .withNodeLabels("Person", "Item")
-                    .withRelationshipType("LIKES", RelationshipProjection
-                        .builder()
-                        .type("LIKES")
-                        .orientation(orientation)
-                        .build()
-                    ),
-                orientation,
-                "implicit graph - " + orientation
             )
         );
     }

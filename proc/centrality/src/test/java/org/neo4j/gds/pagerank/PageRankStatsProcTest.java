@@ -21,8 +21,6 @@ package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphCreateProc;
@@ -60,10 +58,10 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
 
     @Test
     void testStatsYields() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("pageRank")
             .statsMode()
             .addParameter("tolerance", 0.1)
@@ -80,10 +78,9 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
         )));
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void statsShouldNotHaveWriteProperties(GdsCypher.ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
+    @Test
+    void statsShouldNotHaveWriteProperties() {
+        String query = GdsCypher.call().explicitCreation("graphLabel1").algo("pageRank")
             .statsMode()
             .yields();
 

@@ -46,10 +46,10 @@ class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentr
 
     @Test
     void testStats() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("degree")
             .statsMode()
             .yields("centralityDistribution", "createMillis", "computeMillis", "postProcessingMillis");

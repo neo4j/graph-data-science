@@ -21,8 +21,6 @@ package org.neo4j.gds.louvain;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -43,10 +41,10 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         return LouvainStreamProc.class;
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
-    void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
-        @Language("Cypher") String query = queryBuilder
+    @Test
+    void testStream() {
+        @Language("Cypher") String query = GdsCypher.call()
+            .explicitCreation("myGraph")
             .algo("louvain")
             .streamMode()
             .yields("nodeId", "communityId", "intermediateCommunityIds");
@@ -61,10 +59,10 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         assertCommunities(actualCommunities, RESULT);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
-    void testStreamCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
-        @Language("Cypher") String query = queryBuilder
+    @Test
+    void testStreamCommunities() {
+        @Language("Cypher") String query = GdsCypher.call()
+            .explicitCreation("myGraph")
             .algo("louvain")
             .streamMode()
             .addParameter("includeIntermediateCommunities", true)

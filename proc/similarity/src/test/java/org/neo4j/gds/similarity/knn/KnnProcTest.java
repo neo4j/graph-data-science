@@ -22,10 +22,10 @@ package org.neo4j.gds.similarity.knn;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
@@ -52,7 +52,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
@@ -195,20 +194,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             .withMessageContainingAll("`sampleRate`", "0.00", "(0.00, 1.00]"));
     }
 
-    static Stream<Arguments> allGraphVariations() {
-        return Stream.of(
-            arguments(
-                GdsCypher.call().explicitCreation(GRAPH_NAME),
-                "explicit graph"
-            ),
-            arguments(
-                GdsCypher
-                    .call()
-                    .withNodeProperty("knn")
-                    .withAnyLabel()
-                    .withAnyRelationshipType(),
-                "implicit graph"
-            )
-        );
-    }
+    @Disabled
+    @Override
+    public void testRunOnEmptyGraph() {}
 }

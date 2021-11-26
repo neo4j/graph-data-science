@@ -67,10 +67,10 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteYields() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -120,10 +120,10 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWrite() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -167,10 +167,16 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithLabel() {
-        String query = GdsCypher
-            .call()
+        var createQuery = GdsCypher.call()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -183,10 +189,16 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeed() {
-        String query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withAnyLabel()
             .withNodeProperty("seedId")
             .withAnyRelationshipType()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -198,10 +210,16 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeedAndSameWriteProperty() {
-        String query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withAnyLabel()
-            .withAnyRelationshipType()
             .withNodeProperty("seedId")
+            .withAnyRelationshipType()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", SEED_PROPERTY)
@@ -246,11 +264,16 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @ParameterizedTest
     @MethodSource("componentSizeInputs")
     void testWriteWithMinComponentSize(Map<String, Object> parameters, Long[] expectedComponentIds) {
-        var query = GdsCypher
-            .call()
+        var createQuery = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty(SEED_PROPERTY)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        var query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -298,10 +321,10 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithConsecutiveIds() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -322,10 +345,16 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+
+        var createQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        String query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "foo")

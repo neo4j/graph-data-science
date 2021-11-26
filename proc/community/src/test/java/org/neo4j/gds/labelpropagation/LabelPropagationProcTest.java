@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -52,7 +51,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -153,19 +151,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
                 )
                 .build()
              );
-    }
-
-    static Stream<Arguments> gdsGraphVariations() {
-        return Stream.of(
-            arguments(
-                GdsCypher.call().explicitCreation(TEST_GRAPH_NAME),
-                "explicit graph"
-            ),
-            arguments(
-                graphCreateQuery(Orientation.NATURAL),
-                "implicit graph"
-            )
-        );
     }
 
     @Override

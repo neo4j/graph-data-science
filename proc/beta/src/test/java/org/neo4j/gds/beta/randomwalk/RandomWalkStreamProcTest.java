@@ -69,15 +69,20 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(RandomWalkStreamProc.class);
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(RandomWalkStreamProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
+
+        var createQuery = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
     }
 
     @Test
     void shouldRunSimpleConfig() {
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -101,7 +106,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @Test
     void shouldReturnPath() {
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -128,7 +133,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @Test
     void shouldThrowOnUnknownStartNode() {
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -142,7 +147,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @Test
     void shouldThrowOnUnselectedStartNode() {
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)

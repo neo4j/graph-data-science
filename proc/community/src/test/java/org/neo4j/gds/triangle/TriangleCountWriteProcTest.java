@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
@@ -63,7 +62,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
     @Test
     void testWrite() {
         var query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")
@@ -94,7 +93,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
     @Test
     void testWriteWithMaxDegree() {
         var query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")

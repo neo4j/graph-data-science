@@ -29,6 +29,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -92,7 +93,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
 
-        registerProcedures(ClosenessCentralityProc.class);
+        registerProcedures(ClosenessCentralityProc.class, GraphCreateProc.class);
     }
 
     @Test
@@ -147,16 +148,11 @@ class ClosenessCentralityProcTest extends BaseProcTest {
             );
 
             proc.write(
-                Map.of(
-                    "nodeProjection", "*",
-                    "relationshipProjection", "*",
-                    "writeProperty", "myProp"
-                ),
-                Map.of()
+                DEFAULT_GRAPH_NAME,
+                Map.of("writeProperty", "myProp")
             );
 
             assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "Loading",
                 "ClosenessCentrality",
                 "ClosenessCentrality :: WriteNodeProperties"
             );
@@ -164,9 +160,14 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {
-        return GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        return GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness");
     }
 

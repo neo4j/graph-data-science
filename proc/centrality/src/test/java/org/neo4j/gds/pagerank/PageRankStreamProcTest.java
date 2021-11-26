@@ -20,10 +20,8 @@
 package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher.ModeBuildStage;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLog;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -49,10 +47,11 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         return PageRankStreamConfig.of(Optional.empty(), mapWrapper);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsLabel3")
-    void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
+    @Test
+    void testWeightedPageRankFromLoadedGraphWithDirectionBoth() {
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "equalWeight")
             .addParameter("maxIterations", 1)
@@ -66,10 +65,11 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         assertEquals(1, distinctValues);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
+    @Test
+    void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist() {
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "does_not_exist")
             .yields("nodeId", "score");
@@ -81,22 +81,22 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .hasMessageContaining("Properties existing on all relationship types: ['equalWeight', 'weight']");
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void testPageRank(ModeBuildStage queryBuilder, String testCaseName) {
-        final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder
+    @Test
+    void testPageRank() {
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .streamMode()
             .yields("nodeId", "score");
 
         assertCypherResult(query, expected);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsWeight")
-    void testWeightedPageRank(ModeBuildStage queryBuilder, String testCaseName) {
-        final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder
+    @Test
+    void testWeightedPageRank() {
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "score");
@@ -106,9 +106,8 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Test
     void testCacheWeightsDeprecation() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         var config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
-            "nodeProjection", "*",
-            "relationshipProjection", "*",
             "tolerance", 3.14,
             "cacheWeights", true
         )));
@@ -117,18 +116,19 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
         applyOnProcedure(proc -> {
             proc.log = log;
-            ((PageRankStreamProc) proc).stream(config.toMap(), Map.of());
+            ((PageRankStreamProc) proc).stream(DEFAULT_GRAPH_NAME, config.toMap());
         });
 
         assertThat(log.getMessages(TestLog.WARN)).anyMatch(message -> message.contains("deprecated"));
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void streamWithSourceNodes(ModeBuildStage queryBuilder, String testCaseName) {
+    @Test
+    void streamWithSourceNodes() {
         var sourceNodes = allNodesWithLabel("Label1");
 
-        String queryWithSourceNodes = queryBuilder
+        String queryWithSourceNodes = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
             .yields();

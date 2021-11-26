@@ -20,10 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher.ModeBuildStage;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.ScalarScaler;
@@ -56,11 +55,12 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
         return PageRankWriteProc.class;
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void testPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+    @Test
+    void testPageRankWriteBack() {
         String writeProperty = "myFancyScore";
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .writeMode()
             .addPlaceholder("writeProperty", "writeProp")
             .yields("writeMillis", "configuration");
@@ -75,11 +75,12 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
         assertWriteResult(writeProperty, expected);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariationsWeight")
-    void testWeightedPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+    @Test
+    void testWeightedPageRankWriteBack() {
         var writeProperty = "pagerank";
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
             .addParameter("relationshipWeightProperty", "weight")
@@ -96,11 +97,12 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
         assertWriteResult(writeProperty, weightedExpected);
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void testWriteYields(ModeBuildStage queryBuilder, String testCaseName) {
+    @Test
+    void testWriteYields() {
         var writeProp = "writeProp";
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .writeMode()
             .addParameter("writeProperty", writeProp)
             .addParameter("tolerance", 0.0001)
@@ -119,11 +121,12 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
         )));
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.pagerank.PageRankProcTest#graphVariations")
-    void shouldNotComputeCentralityDistributionOnLogScaler(ModeBuildStage queryBuilder, String testCaseName) {
+    @Test
+    void shouldNotComputeCentralityDistributionOnLogScaler() {
         var writeProp = "writeProp";
-        var query = queryBuilder
+        var query = GdsCypher.call()
+            .explicitCreation("graphLabel1")
+            .algo("pageRank")
             .writeMode()
             .addParameter("scaler", ScalarScaler.Variant.LOG)
             .addParameter("writeProperty", writeProp)

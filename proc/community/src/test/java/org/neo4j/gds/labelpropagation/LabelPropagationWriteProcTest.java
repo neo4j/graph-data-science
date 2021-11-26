@@ -80,11 +80,11 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         return mapWrapper;
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
-    void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+    @Test
+    void testWrite() {
         String writeProperty = "myFancyCommunity";
-        @Language("Cypher") String query = queryBuilder
+        @Language("Cypher") String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
@@ -117,10 +117,10 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         });
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
-    void respectsMaxIterations(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
-        @Language("Cypher") String query = queryBuilder
+    @Test
+    void respectsMaxIterations() {
+        @Language("Cypher") String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .writeMode()
             .addParameter("writeProperty", "label")
@@ -150,18 +150,17 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     }
 
-    static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
+    static Stream<Arguments> concurrencies() {
         return TestSupport.crossArguments(
-            () -> Stream.of(1, 2, 4).map(Arguments::of),
-            LabelPropagationProcTest::gdsGraphVariations
+            () -> Stream.of(1, 2, 4).map(Arguments::of)
         );
     }
 
-    @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
-    void shouldRunLabelPropagationNatural(GdsCypher.QueryBuilder queryBuilder, String desc) {
+    @Test
+    void shouldRunLabelPropagationNatural() {
 
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("writeProperty", "community")
@@ -244,7 +243,12 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     void shouldRunLabelPropagationReverse() {
         String writeProperty = "community";
 
-        String query = graphCreateQuery(Orientation.REVERSE)
+        var createQuery = graphCreateQuery(Orientation.REVERSE)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
@@ -281,15 +285,12 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         ));
     }
 
-    @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("concurrenciesExplicitAndImplicitCreate")
-    void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(
-        int concurrency,
-        GdsCypher.QueryBuilder queryBuilder,
-        String desc
-    ) {
+    @ParameterizedTest(name = "concurrency = {0}")
+    @MethodSource("concurrencies")
+    void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(int concurrency) {
 
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("concurrency", concurrency)
@@ -328,15 +329,12 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQueryWithRowConsumer(check, row -> assertEquals(2, row.getNumber("community").intValue()));
     }
 
-    @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("concurrenciesExplicitAndImplicitCreate")
-    void shouldRunLabelPropagationWithoutInitialSeed(
-        int concurrency,
-        GdsCypher.QueryBuilder queryBuilder,
-        String desc
-    ) {
+    @ParameterizedTest(name = "concurrency = {0}")
+    @MethodSource("concurrencies")
+    void shouldRunLabelPropagationWithoutInitialSeed(int concurrency) {
 
-        String query = queryBuilder
+        String query = GdsCypher.call()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .writeMode()
             .addParameter("concurrency", concurrency)
@@ -377,11 +375,17 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     @MethodSource("communitySizeInputs")
     void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
         String writeProp = "writeProp";
-        var query = GdsCypher
-            .call()
+        var createQuery = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty("seed")
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("labelPropagation")
             .writeMode()
             .addParameter("writeProperty", writeProp)
@@ -424,10 +428,17 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+
+        var createQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("labelPropagation")
             .writeMode()
             .addParameter("writeProperty", "foo")

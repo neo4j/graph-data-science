@@ -111,7 +111,10 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
     void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
         train(42, "mean", ActivationFunction.SIGMOID);
 
-        String query = GdsCypher.call().implicitCreation(config)
+        runQuery(GdsCypher.call().implicitCreation(config).graphCreate(DEFAULT_GRAPH_NAME).yields());
+
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)

@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.assertj.core.api.HamcrestCondition;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
@@ -44,30 +45,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
+
+    @AfterEach
+    void cleanupGraphStoreCatalog() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
 
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setConfig(Settings.procedureUnrestricted(), singletonList("gds.*"));
-    }
-
-    protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {
-        if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
-            baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL);
-        }
-        if (!baseMap.containsKey(RELATIONSHIP_PROJECTION_KEY) && !baseMap.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            baseMap.put(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL);
-        }
-        return baseMap;
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws Exception {
@@ -150,6 +141,18 @@ public class BaseProcTest extends BaseTest {
     @SuppressWarnings("unchecked")
     private Map<String, Object> extractUserInput(Result.ResultRow row) {
         return ((Map<String, Object>) row.get("configuration"));
+    }
+
+    protected void loadCompleteGraph(String graphName) {
+        loadCompleteGraph(graphName, Orientation.NATURAL);
+    }
+
+    protected void loadCompleteGraph(String graphName, Orientation orientation) {
+        var createQuery = GdsCypher.call()
+            .loadEverything(orientation)
+            .graphCreate(graphName)
+            .yields();
+        runQuery(createQuery);
     }
 
     protected void assertGraphExists(String graphName) {

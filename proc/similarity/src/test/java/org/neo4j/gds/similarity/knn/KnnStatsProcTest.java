@@ -51,10 +51,16 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Test
     void testStatsYields() {
-        String query = GdsCypher
-            .call()
+        var createQuery = GdsCypher.call()
             .withNodeProperty("knn")
             .loadEverything()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .statsMode()
             .addParameter("sudo", true)
@@ -104,10 +110,10 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         });
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.gds.similarity.knn.KnnProcTest#allGraphVariations")
-    void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
-        String query = queryBuilder
+    @Test
+    void statsShouldNotHaveWriteProperties() {
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .statsMode()
             .addParameter("nodeWeightProperty", "knn")

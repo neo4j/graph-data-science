@@ -24,6 +24,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
     @Test
     void testStats() {
         var query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .statsMode()
             .yields();
@@ -60,8 +61,11 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
                  "WITH n LIMIT 1 " +
                  "CREATE (d)-[:REL]->(n)");
 
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
+
         var query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .statsMode()
             .addParameter("maxDegree", 2)

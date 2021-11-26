@@ -42,9 +42,9 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
 
     @Test
     void testStatsYields() {
-        String query = GdsCypher
-            .call()
-            .loadEverything()
+        loadGraph(DEFAULT_GRAPH_NAME);
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("nodeSimilarity")
             .statsMode()
             .addParameter("similarityCutoff", 0.0)

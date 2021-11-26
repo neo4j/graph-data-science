@@ -33,8 +33,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
@@ -76,7 +76,10 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
     void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
         train(42, "mean", ActivationFunction.SIGMOID);
 
-        String query = GdsCypher.call().implicitCreation(config)
+        runQuery(GdsCypher.call().implicitCreation(config).graphCreate(DEFAULT_GRAPH_NAME).yields());
+
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .writeMode()
             .addParameter("concurrency", 1)

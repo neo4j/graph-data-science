@@ -28,6 +28,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ConfigKeyValidationTest extends BaseProcTest {
 
@@ -164,9 +165,10 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
     @Test
     void returnMultipleErrorsInConfigConstructionAtOnce() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME);
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test({nodeProjection: '*', relationshipProjection: '*', maxIterations: [1]})")
+            () -> runQuery(formatWithLocale("CALL gds.testProc.test('%s', {maxIterations: [1]})", DEFAULT_GRAPH_NAME))
         );
 
         String expectedMsg = "Multiple errors in configuration arguments:\n" +

@@ -33,7 +33,7 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
     @Test
     void testStreaming() {
 
-        var query = "CALL gds.triangleCount.stream('g')";
+        var query = "CALL gds.triangleCount.stream('" + DEFAULT_GRAPH_NAME + "')";
 
         var rowCount = new AtomicInteger();
 

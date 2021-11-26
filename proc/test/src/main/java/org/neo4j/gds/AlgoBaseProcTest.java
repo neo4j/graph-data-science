@@ -51,7 +51,6 @@ import org.neo4j.procedure.Procedure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -64,7 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.config.AlgoBaseConfig.GRAPH_NAME_KEY;
 import static org.neo4j.gds.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
@@ -269,15 +267,18 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
 
         applyOnProcedure((proc) -> {
-            var graphLoader = new StoreLoaderBuilder()
-                .api(proc.api)
-                .graphName("g")
-                .build();
-            GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            var loadedGraphName = "graph";
+            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+                "",
+                loadedGraphName,
+                relationshipProjections()
+            );
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                    configMap.put(GRAPH_NAME_KEY, "g");
 
                     configMap.remove(NODE_PROPERTIES_KEY);
                     configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
@@ -301,7 +302,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     }
 
                     try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, configMap, Collections.emptyMap());
+                        Stream<?> result = (Stream<?>) method.invoke(proc, loadedGraphName, configMap);
 
                         if (getProcedureMethodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");
@@ -317,10 +318,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     default void loadGraph(String graphName) {
+        loadGraph(graphName, Orientation.NATURAL);
+    }
+
+    default void loadGraph(String graphName, Orientation orientation) {
         runQuery(
             graphDb(),
             GdsCypher.call()
-                .loadEverything()
+                .loadEverything(orientation)
                 .graphCreate(graphName)
                 .yields()
         );
@@ -328,30 +333,33 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @Test
     default void shouldThrowWhenTooManyCoresOnLimited() {
-        applyOnProcedure((proc) ->
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        var loadedGraphName = "graph";
+        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+            "",
+            loadedGraphName,
+            relationshipProjections()
+        );
+        GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        applyOnProcedure((proc) -> {
             getWriteAndStreamProcedures(proc).forEach(method -> {
-                var graphLoader = new StoreLoaderBuilder()
-                    .api(proc.api)
-                    .graphName("g")
-                    .build();
-                GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
                 Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
                     "concurrency",
                     10
                 ))).toMap();
-                configMap.put(GRAPH_NAME_KEY, "g");
 
                 InvocationTargetException ex = assertThrows(
                     InvocationTargetException.class,
-                    () -> method.invoke(proc, configMap, Collections.emptyMap())
+                    () -> method.invoke(proc, loadedGraphName, configMap)
                 );
                 assertThat(ex)
                     .getRootCause()
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining(
-                        "Community users cannot exceed readConcurrency=4 (you configured readConcurrency=10), see https://neo4j.com/docs/graph-data-science/");
-            })
-        );
+                        "Community users cannot exceed concurrency=4 (you configured concurrency=10), see https://neo4j.com/docs/graph-data-science/");
+            });
+        });
     }
 
     @Test

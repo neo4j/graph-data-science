@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -85,7 +86,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(ShortestPathDeltaSteppingProc.class);
+        registerProcedures(ShortestPathDeltaSteppingProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -93,12 +94,16 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
+        var createQuery = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
         final String cypher =
                 "MATCH(n:Node {name:'s'}) " +
-                "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
-                "   nodeProjection: '*', " +
-                "   relationshipProjection: '*', " +
-                "   relationshipProperties: 'cost', " +
+                "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream('graph', {" +
                 "   startNode: n, " +
                 "   delta: 3.0," +
                 "   relationshipWeightProperty: 'cost'" +
@@ -118,17 +123,17 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testIncomingResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
+        var createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipProperty("cost")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
         final String cypher =
             "MATCH(n:Node {name: 's'}) " +
-            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
-            "   nodeProjection: '*', " +
-            "   relationshipProjection: {" +
-            "       TYPE: {" +
-            "         type: 'TYPE'," +
-            "         orientation: 'REVERSE'," +
-            "         properties: 'cost'" +
-            "       }" +
-            "   }," +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream('graph', {" +
             "   startNode: n, " +
             "   delta: 3.0," +
             "   relationshipWeightProperty: 'cost'" +
@@ -148,17 +153,17 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testBothResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
+        var createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipProperty("cost")
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
         final String cypher =
             "MATCH(n:Node {name: 's'}) " +
-            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
-            "   nodeProjection: '*', " +
-            "   relationshipProjection: {" +
-            "       TYPE: {" +
-            "         type: 'TYPE'," +
-            "         orientation: 'UNDIRECTED'," +
-            "         properties: 'cost'" +
-            "       }" +
-            "   }," +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream('graph', {" +
             "   startNode: n, " +
             "   delta: 3.0," +
             "   relationshipWeightProperty: 'cost'" +
@@ -176,12 +181,15 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @Test
     void testWriteBack() {
+        var createQuery = GdsCypher.call()
+            .withRelationshipProperty("cost")
+            .loadEverything()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
         final String cypher =
             "MATCH(n:Node {name:'s'}) " +
-            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write({" +
-            "   nodeProjection: '*'," +
-            "   relationshipProjection: '*'," +
-            "   relationshipProperties: 'cost', " +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write('graph', {" +
             "   startNode: n, " +
             "   delta: 3.0," +
             "   relationshipWeightProperty: 'cost'," +
@@ -209,6 +217,12 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
+        var createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
         TestProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
@@ -218,18 +232,15 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
             );
 
             proc.deltaStepping(
+                "graph",
                 Map.of(
-                    "nodeProjection", "*",
-                    "relationshipProjection", "*",
                     "writeProperty", "myProp",
                     "startNode", new VirtualNode(0, db),
                     "delta", 0.1
-                ),
-                Map.of()
+                )
             );
 
             assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "Loading",
                 "ShortestPathDeltaStepping",
                 "ShortestPathDeltaStepping :: WriteNodeProperties"
             );
@@ -240,11 +251,16 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void failOnInvalidStartNode() {
         runQuery("CREATE (:Invalid)");
 
+        var createQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withAnyRelationshipType()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
         final String query =
             "MATCH(n:Invalid) " +
-            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write({" +
-            "   nodeProjection: 'Node'," +
-            "   relationshipProjection: '*'," +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write('graph', {" +
             "   startNode: n, " +
             "   delta: 3.0," +
             "   writeProperty: 'sp'" +

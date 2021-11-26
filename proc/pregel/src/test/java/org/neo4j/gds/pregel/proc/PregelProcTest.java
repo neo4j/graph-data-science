@@ -77,13 +77,13 @@ public class PregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery("CREATE (:OffsetId), (:RealNode)");
         registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
+        runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(DEFAULT_GRAPH_NAME).yields());
     }
 
     @Test
     void stream() {
         var query = GdsCypher.call()
-            .withNodeLabel("RealNode")
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -104,8 +104,7 @@ public class PregelProcTest extends BaseProcTest {
     @EnumSource(Partitioning.class)
     void streamWithPartitioning(Partitioning partitioningScheme) {
         var query = GdsCypher.call()
-            .withNodeLabel("RealNode")
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -126,8 +125,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void streamWithInvalidPartitioning() {
         var query = GdsCypher.call()
-            .withNodeLabel("RealNode")
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -145,8 +143,7 @@ public class PregelProcTest extends BaseProcTest {
     void write() {
         var writePrefix = "test_";
         var query = GdsCypher.call()
-            .withNodeLabel("RealNode")
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .writeMode()
             .addParameter("maxIterations", 20)
@@ -178,19 +175,10 @@ public class PregelProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
-        var graphName = "testGraph";
         var mutatePrefix = "test_";
 
-        var loadQuery = GdsCypher.call()
-            .withNodeLabel("RealNode")
-            .withAnyRelationshipType()
-            .graphCreate(graphName)
-            .yields();
-
-        runQuery(loadQuery);
-
         var query = GdsCypher.call()
-            .explicitCreation(graphName)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .mutateMode()
             .addParameter("maxIterations", 20)
@@ -199,7 +187,7 @@ public class PregelProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        var graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore().getUnion();
+        var graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), DEFAULT_GRAPH_NAME).graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(
@@ -220,16 +208,14 @@ public class PregelProcTest extends BaseProcTest {
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
             Map<String, Object> config = Map.of(
-                "nodeProjection", "RealNode",
-                "relationshipProjection", "*",
                 "maxIterations", 20,
                 "throwInCompute", true
             );
 
-            assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
+            assertThatThrownBy(() -> proc.stream(DEFAULT_GRAPH_NAME, config)).isNotNull();
             assertThat(taskStore.tasks()).isEmpty();
             assertThat(taskStore.tasksSeen())
-                .containsExactlyInAnyOrder("Loading", "TestPregelImpl");
+                .containsExactlyInAnyOrder("TestPregelImpl");
         }
     }
 
@@ -245,23 +231,18 @@ public class PregelProcTest extends BaseProcTest {
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
             Map<String, Object> config = Map.of(
-                "nodeProjection", "RealNode",
-                "relationshipProjection", "*",
                 "maxIterations", 20,
                 "throwInCompute", true
             );
 
-            assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
+            assertThatThrownBy(() -> proc.write(DEFAULT_GRAPH_NAME, config)).isNotNull();
             assertThat(taskStore.tasks()).isEmpty();
-            assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("Loading", "TestPregelImpl");
+            assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("TestPregelImpl");
         }
     }
 
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInMutateMode() {
-        var graphName = "testGraph";
-        runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
-
         var taskStore = new TestTaskStore();
         var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
         try (var transactions = newKernelTransaction(db)) {
@@ -276,7 +257,7 @@ public class PregelProcTest extends BaseProcTest {
                 "throwInCompute", true
             );
 
-            assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
+            assertThatThrownBy(() -> proc.mutate(DEFAULT_GRAPH_NAME, config)).isNotNull();
             assertThat(taskStore.tasks()).isEmpty();
             assertThat(taskStore.tasksSeen()).containsExactlyInAnyOrder("TestPregelImpl");
         }

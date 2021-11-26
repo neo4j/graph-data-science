@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.modularity;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -28,6 +29,19 @@ import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.STREAM;
 
 class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTest {
+
+    private static final String GRAPH_NAME = "graph";
+
+    @BeforeEach
+    void graphSetup() {
+        var createQuery = GdsCypher.call()
+            .withRelationshipProperty("weight")
+            .withNodeProperty("seed1")
+            .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate(GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+    }
 
     @Test
     void testStreaming() {
@@ -47,8 +61,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
     @Test
     void testStreamingWeighted() {
         String query = GdsCypher.call()
-            .withRelationshipProperty("weight")
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -66,8 +79,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
     @Test
     void testStreamingSeeded() {
         String query = GdsCypher.call()
-            .withNodeProperty("seed1")
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("seedProperty", "seed1")
@@ -86,7 +98,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
     @Test
     void testStreamingEstimate() {
         String query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .estimationMode(STREAM)
             .yields();

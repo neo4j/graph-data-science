@@ -61,9 +61,9 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Test
     void testStreamWithDefaults() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .streamMode()
             .yields("nodeId", "componentId");

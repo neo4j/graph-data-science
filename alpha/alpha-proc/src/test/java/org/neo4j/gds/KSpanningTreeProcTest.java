@@ -21,11 +21,14 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -39,41 +42,43 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class KSpanningTreeProcTest extends BaseProcTest {
 
+    private static String GRAPH_NAME = "graph";
+
+    @Neo4jGraph
+    static final String DB_CYPHER =
+        "CREATE (a:Node {name:'a'})\n" +
+        "CREATE (b:Node {name:'b'})\n" +
+        "CREATE (c:Node {name:'c'})\n" +
+        "CREATE (d:Node {name:'d'})\n" +
+
+        "CREATE" +
+        " (a)-[:TYPE {w:3.0}]->(b),\n" +
+        " (a)-[:TYPE {w:2.0}]->(c),\n" +
+        " (a)-[:TYPE {w:1.0}]->(d),\n" +
+        " (b)-[:TYPE {w:1.0}]->(c),\n" +
+        " (d)-[:TYPE {w:3.0}]->(c)";
+
+    @Inject
+    IdFunction idFunction;
+
     @BeforeEach
     void setupGraph() throws Exception {
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-
-                "CREATE" +
-                " (a)-[:TYPE {w:3.0}]->(b),\n" +
-                " (a)-[:TYPE {w:2.0}]->(c),\n" +
-                " (a)-[:TYPE {w:1.0}]->(d),\n" +
-                " (b)-[:TYPE {w:1.0}]->(c),\n" +
-                " (d)-[:TYPE {w:3.0}]->(c)";
-
-        registerProcedures(KSpanningTreeProc.class);
-        runQuery(cypher);
-    }
-
-    private long id(String name) {
-        return runQuery(
-            "MATCH (n:Node) WHERE n.name = $name RETURN id(n) AS id",
-            MapUtil.map("name", name),
-            result -> result.<Long>columnAs("id").next()
-        );
+        registerProcedures(KSpanningTreeProc.class, GraphCreateProc.class);
+        var createQuery = GdsCypher.call()
+            .withRelationshipProperty("w")
+            .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate(GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
     }
 
     @Test
     void testMax() {
         String query = GdsCypher.call()
-            .withRelationshipProperty("w")
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
-            .addParameter("startNodeId", id("a"))
+            .addParameter("startNodeId", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("createMillis", "computeMillis", "writeMillis");
@@ -100,12 +105,10 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMin() {
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withRelationshipType("ALL", RelationshipProjection.of("*", Orientation.UNDIRECTED))
-            .withRelationshipProperty("w")
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
-            .addParameter("startNodeId", id("a"))
+            .addParameter("startNodeId", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("createMillis", "computeMillis", "writeMillis");
@@ -132,7 +135,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @Test
     void failOnInvalidStartNode() {
         String query = GdsCypher.call()
-            .loadEverything()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", 42)
@@ -153,14 +156,12 @@ class KSpanningTreeProcTest extends BaseProcTest {
             );
 
             proc.kmax( // kmin or kmax doesn't matter
+                GRAPH_NAME,
                 Map.of(
-                    "nodeProjection", "*",
-                    "relationshipProjection", "*",
                     "writeProperty", "myProp",
                     "k", 1L,
                     "startNodeId", 0L
-                ),
-                Map.of()
+                )
             );
 
             assertThat(taskStore.taskStream().map(Task::description)).contains(

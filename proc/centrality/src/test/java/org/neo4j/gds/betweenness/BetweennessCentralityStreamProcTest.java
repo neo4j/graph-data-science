@@ -41,9 +41,9 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
 
     @Test
     void testStream() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.betweenness")
             .streamMode()
             .yields();

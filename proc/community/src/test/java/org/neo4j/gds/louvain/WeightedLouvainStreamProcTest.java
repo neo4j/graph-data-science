@@ -19,19 +19,16 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -131,9 +128,17 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
             db, query, row -> assertLouvainResultRow(row, expectedUnweightedResult));
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("weightedGraphQueries")
-    void weightedLouvainTest(String query, String graphMode) {
+    @Test
+    void weightedLouvainTest() {
+        var query = GdsCypher
+            .call()
+            .explicitCreation("weightedLouvainGraph")
+            .algo("louvain")
+            .streamMode()
+            .addParameter("relationshipWeightProperty", "weight")
+            .yields("nodeId", "communityId", "intermediateCommunityIds")
+            .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
+            .concat(" ORDER BY name ASC");
         QueryRunner.runQueryWithRowConsumer(db, query, row -> assertLouvainResultRow(row, expectedWeightedResult));
     }
 
@@ -160,101 +165,6 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                     .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "explicit graph created with weights"
-            ),
-            arguments(
-                GdsCypher
-                    .call()
-                    .implicitCreation(
-                        ImmutableGraphCreateFromStoreConfig.builder()
-                            .graphName("implicitWeightedGraph")
-                            .nodeProjections(NodeProjections.fromString("User"))
-                            .relationshipProjections(RelationshipProjections.builder()
-                                .putProjection(
-                                    RelationshipType.of("LINK"),
-                                    RelationshipProjection.builder()
-                                        .type("LINK")
-                                        .orientation(Orientation.UNDIRECTED)
-                                        .aggregation(Aggregation.NONE)
-                                        .build()
-                                ).build()
-                            ).build()
-                    )
-                    .algo("louvain")
-                    .streamMode()
-                    .yields("nodeId", "communityId", "intermediateCommunityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
-                    .concat(" ORDER BY name ASC"),
-                "implicit graph created without weights"
-            ),
-            arguments(
-                GdsCypher
-                    .call()
-                    .implicitCreation(
-                        ImmutableGraphCreateFromStoreConfig.builder()
-                            .graphName("implicitWeightedGraph")
-                            .nodeProjections(NodeProjections.fromString("User"))
-                            .relationshipProjections(RelationshipProjections.builder()
-                                .putProjection(
-                                    RelationshipType.of("LINK"),
-                                    RelationshipProjection.builder()
-                                        .type("LINK")
-                                        .orientation(Orientation.UNDIRECTED)
-                                        .aggregation(Aggregation.NONE)
-                                        .addProperty(PropertyMapping.of("weight", 0.0d))
-                                        .build()
-                                ).build()
-                            ).build()
-                    )
-                    .algo("louvain")
-                    .streamMode()
-                    .yields("nodeId", "communityId", "intermediateCommunityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
-                    .concat(" ORDER BY name ASC"),
-                "implicit graph created with weights"
-            )
-        );
-    }
-
-    static Stream<Arguments> weightedGraphQueries() {
-        return Stream.of(
-            arguments(
-                GdsCypher
-                    .call()
-                    .explicitCreation("weightedLouvainGraph")
-                    .algo("louvain")
-                    .streamMode()
-                    .addParameter("relationshipWeightProperty", "weight")
-                    .yields("nodeId", "communityId", "intermediateCommunityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
-                    .concat(" ORDER BY name ASC"),
-                "explicit graph"
-            ),
-            arguments(
-                GdsCypher
-                    .call()
-                    .implicitCreation(
-                        ImmutableGraphCreateFromStoreConfig.builder()
-                            .graphName("implicitWeightedGraph")
-                            .nodeProjections(NodeProjections.fromString("User"))
-                            .relationshipProjections(RelationshipProjections.builder()
-                                .putProjection(
-                                    RelationshipType.of("LINK"),
-                                    RelationshipProjection.builder()
-                                        .type("LINK")
-                                        .orientation(Orientation.UNDIRECTED)
-                                        .aggregation(Aggregation.NONE)
-                                        .addProperty(PropertyMapping.of("weight", 0.0d))
-                                        .build()
-                                ).build()
-                            ).build()
-                    )
-                    .algo("louvain")
-                    .streamMode()
-                    .addParameter("relationshipWeightProperty", "weight")
-                    .yields("nodeId", "communityId", "intermediateCommunityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
-                    .concat(" ORDER BY name ASC"),
-                "implicit graph"
             )
         );
     }
