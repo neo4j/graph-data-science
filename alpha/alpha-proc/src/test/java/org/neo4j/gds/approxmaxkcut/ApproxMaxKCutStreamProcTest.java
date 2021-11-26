@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -80,6 +81,8 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
         });
     }
 
+    // Min k-cut capabilities not exposed in API yet.
+    @Disabled
     @Test
     void testIllegalMinCommunitySizesSum() {
         String streamQuery = GdsCypher.call()

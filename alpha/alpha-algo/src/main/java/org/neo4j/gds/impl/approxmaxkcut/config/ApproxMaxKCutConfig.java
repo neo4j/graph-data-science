@@ -58,11 +58,15 @@ public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightC
         return 0;
     }
 
+    // Min k-cut capabilities not exposed in API yet.
+    @Configuration.Ignore
     @Value.Default
     default boolean minimize() {
         return false;
     }
 
+    // Min k-cut capabilities not exposed in API yet.
+    @Configuration.Ignore
     @Value.Default
     default List<Long> minCommunitySizes() {
         if (minimize()) {
