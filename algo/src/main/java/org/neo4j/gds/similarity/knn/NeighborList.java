@@ -207,4 +207,23 @@ class NeighborList {
                 return new SimilarityResult(nodeId, neighborId, neighborSimilarity);
             });
     }
+
+    /**
+     * filterHighSimilarityResults will override the original array in
+     * priorityElementPairs keeping only the results with similarity>=threshold.
+     * It will write all high similarity elements
+     * at the beginning of the array and re-define elementCount.
+     * @param threshold we keep all results with similarity >=threshold.
+     */
+    public void filterHighSimilarityResults(double threshold) {
+        int nextAvailablePosition = 0;
+        for (int i = 0; i < elementCount; i++) {
+            if (Double.longBitsToDouble(priorityElementPairs[2 * i]) >= threshold) {
+                priorityElementPairs[nextAvailablePosition++] = priorityElementPairs[2 * i];
+                priorityElementPairs[nextAvailablePosition++] = priorityElementPairs[2 * i + 1];
+            }
+        }
+        elementCount = nextAvailablePosition / 2;
+        //TODO should we do something about the unused memory at the end of the array?
+    }
 }
