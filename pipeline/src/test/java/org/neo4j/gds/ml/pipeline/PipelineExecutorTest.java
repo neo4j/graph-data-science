@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.NodeLabel;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
@@ -61,6 +63,18 @@ class PipelineExecutorTest {
     private GraphStore graphStore;
 
     @Test
+    void shouldCleanGraphStoreWhenComputationIsComplete() {
+        var pipelineExecutor = new SucceedingPipelineExecutor(
+            new BogusNodePropertyPipeline(),
+            new PipelineExecutorTestConfig(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatNoException().isThrownBy(pipelineExecutor::compute);
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
+    }
+
+    @Test
     void shouldCleanGraphStoreOnFailureWhenExecuting() {
         var pipelineExecutor = new FailingPipelineExecutor(
             new BogusNodePropertyPipeline(),
@@ -70,6 +84,29 @@ class PipelineExecutorTest {
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
         assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
+    }
+
+    @Test
+    void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
+        var log = new TestLog();
+        var pipelineExecutor = new SucceedingPipelineExecutor(
+            new BogusNodePropertyPipeline(),
+            new PipelineExecutorTestConfig(),
+            new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
+        );
+
+        assertThatNoException().isThrownBy(pipelineExecutor::compute);
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "FailingPipelineExecutor :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
+                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: execute node property steps :: Finished",
+                "FailingPipelineExecutor :: Finished"
+            );
     }
 
     @Test
@@ -86,6 +123,7 @@ class PipelineExecutorTest {
     }
 
     @Test
+    @Disabled("ProgressTracker doesn't log when task is failed")
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = new TestLog();
         var pipelineExecutor = new FailingPipelineExecutor(
@@ -103,9 +141,8 @@ class PipelineExecutorTest {
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
                 "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
-                "FailingPipelineExecutor :: execute node property steps :: Finished"
-                // TODO: Figure out why is this not logged!?
-                // "FailingPipelineExecutor :: Failed"
+                "FailingPipelineExecutor :: execute node property steps :: Finished",
+                "FailingPipelineExecutor :: Failed"
             );
     }
 
