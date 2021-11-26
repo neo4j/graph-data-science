@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 
 import java.util.List;
 

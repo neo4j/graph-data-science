@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;

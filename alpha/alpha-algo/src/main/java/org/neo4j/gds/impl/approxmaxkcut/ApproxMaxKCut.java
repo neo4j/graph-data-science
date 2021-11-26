@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.AtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;

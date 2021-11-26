@@ -28,7 +28,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 
 import java.util.Optional;
 

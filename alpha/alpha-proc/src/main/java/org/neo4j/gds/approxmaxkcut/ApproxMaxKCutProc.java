@@ -23,8 +23,8 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutConfig;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutFactory;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 
 public final class ApproxMaxKCutProc {
 

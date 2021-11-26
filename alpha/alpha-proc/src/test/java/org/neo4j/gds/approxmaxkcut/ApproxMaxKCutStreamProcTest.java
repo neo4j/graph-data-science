@@ -25,7 +25,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
