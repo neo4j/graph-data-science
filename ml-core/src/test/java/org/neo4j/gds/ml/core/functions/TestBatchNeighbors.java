@@ -21,14 +21,21 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 
+import java.util.stream.IntStream;
+
 class TestBatchNeighbors implements BatchNeighbors {
 
     private final int[][] neighbors;
+    private final int[] batchIds;
 
-    TestBatchNeighbors(int[][] neighbors) {
+    TestBatchNeighbors(int[] batchIds, int[][] neighbors) {
         this.neighbors = neighbors;
+        this.batchIds = batchIds;
     }
 
+    TestBatchNeighbors(int[][] neighbors) {
+        this(IntStream.range(0, neighbors.length).toArray(), neighbors);
+    }
 
     @Override
     public int[] neighbors(int batchId) {
@@ -36,7 +43,12 @@ class TestBatchNeighbors implements BatchNeighbors {
     }
 
     @Override
+    public int[] batchIds() {
+        return batchIds;
+    }
+
+    @Override
     public int batchSize() {
-        return neighbors.length;
+        return batchIds.length;
     }
 }

@@ -28,16 +28,13 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
     private final BatchNeighbors batchNeighbors;
-    private final int[] batchIds;
 
     public MultiMean(
         Variable<?> parent,
-        BatchNeighbors batchNeighbors,
-        int[] batchIds
+        BatchNeighbors batchNeighbors
     ) {
-        super(parent, Dimensions.matrix(batchIds.length, parent.dimension(1)));
+        super(parent, Dimensions.matrix(batchNeighbors.batchSize(), parent.dimension(1)));
         this.batchNeighbors = batchNeighbors;
-        this.batchIds = batchIds;
     }
 
     @Override
@@ -45,6 +42,8 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
+        int[] batchIds = batchNeighbors.batchIds();
+
         int cols = parent.dimension(1);
 
         double[] means = new double[batchIds.length * cols];
@@ -72,6 +71,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
+        var batchIds = this.batchNeighbors.batchIds();
 
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 

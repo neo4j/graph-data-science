@@ -21,7 +21,11 @@ package org.neo4j.gds.ml.core.subgraph;
 
 public interface BatchNeighbors {
 
-    int[] neighbors(int batchId);
+    int[] batchIds();
 
-    int batchSize();
+    default int batchSize() {
+        return batchIds().length;
+    }
+
+    int[] neighbors(int batchId);
 }
