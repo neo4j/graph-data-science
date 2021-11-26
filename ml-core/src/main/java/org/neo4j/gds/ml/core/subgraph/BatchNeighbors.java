@@ -28,4 +28,6 @@ public interface BatchNeighbors {
     }
 
     int[] neighbors(int batchId);
+
+    double relationshipWeight(int src, int trg);
 }

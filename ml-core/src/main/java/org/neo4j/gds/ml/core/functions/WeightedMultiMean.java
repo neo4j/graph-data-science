@@ -61,7 +61,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
             }
             for (int targetIndex : neighbors) {
                 int targetOffset = targetIndex * cols;
-                double relationshipWeight = subGraph.relWeight(sourceId, targetIndex);
+                double relationshipWeight = subGraph.relationshipWeight(sourceId, targetIndex);
                 for (int col = 0; col < cols; col++) {
                     means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
@@ -87,7 +87,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
                 int degree = neighbors.length + 1;
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : neighbors) {
-                    double relationshipWeight = subGraph.relWeight(sourceId, neighbor); //TODO normalize weights
+                    double relationshipWeight = subGraph.relationshipWeight(sourceId, neighbor); //TODO normalize weights
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
