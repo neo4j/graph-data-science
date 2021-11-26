@@ -220,10 +220,10 @@ public class IdMap implements NodeMapping {
 
     private static class FilteredIdMap extends IdMap {
 
-        private final NodeMapping originalNodeMapping;
+        private final NodeMapping rootNodeMapping;
 
         FilteredIdMap(
-            NodeMapping originalNodeMapping,
+            NodeMapping rootNodeMapping,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             LabelInformation filteredLabelInformation,
@@ -232,7 +232,7 @@ public class IdMap implements NodeMapping {
             AllocationTracker allocationTracker
         ) {
             super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId, allocationTracker);
-            this.originalNodeMapping = originalNodeMapping;
+            this.rootNodeMapping = rootNodeMapping;
         }
 
         @Override
@@ -247,7 +247,7 @@ public class IdMap implements NodeMapping {
 
         @Override
         public long rootNodeCount() {
-            return originalNodeMapping.rootNodeCount();
+            return rootNodeMapping.rootNodeCount();
         }
 
         @Override
@@ -257,7 +257,7 @@ public class IdMap implements NodeMapping {
 
         @Override
         public NodeMapping rootNodeMapping() {
-            return originalNodeMapping.rootNodeMapping();
+            return rootNodeMapping.rootNodeMapping();
         }
 
         @Override
