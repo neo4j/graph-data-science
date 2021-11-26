@@ -45,7 +45,7 @@ import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 @ExtendWith(SoftAssertionsExtension.class)
 public abstract class SyntaxTestBase {
 
-    private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
+    private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/asciidoc");
 
     private Asciidoctor asciidoctor;
 
@@ -63,7 +63,7 @@ public abstract class SyntaxTestBase {
     void runSyntaxTest(SoftAssertions softAssertions, @TempDir File outputDirectory) {
         asciidoctor.javaExtensionRegistry().postprocessor(syntaxPostProcessor(softAssertions));
 
-        var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
+        var docFile = adocPath().resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
         var options = OptionsBuilder.options()
             .toDir(outputDirectory) // Make sure we don't write anything in the project.
@@ -81,6 +81,10 @@ public abstract class SyntaxTestBase {
             SyntaxModeMeta.of(MUTATE),
             SyntaxModeMeta.of(WRITE)
         );
+    }
+
+    Path adocPath() {
+        return ASCIIDOC_PATH;
     }
 
     protected abstract String adocFile();
