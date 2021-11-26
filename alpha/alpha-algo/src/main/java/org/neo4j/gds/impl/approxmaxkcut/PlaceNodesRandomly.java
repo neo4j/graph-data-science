@@ -33,9 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.stream.Collectors;
@@ -44,7 +43,7 @@ import java.util.stream.IntStream;
 class PlaceNodesRandomly {
 
     private final ApproxMaxKCutConfig config;
-    private final Random random;
+    private final SplittableRandom random;
     private final Graph graph;
     private final List<Long> rangePartitionActualBatchSizes;
     private final ExecutorService executor;
@@ -52,7 +51,7 @@ class PlaceNodesRandomly {
 
     PlaceNodesRandomly(
         ApproxMaxKCutConfig config,
-        Random random,
+        SplittableRandom random,
         Graph graph,
         ExecutorService executor,
         ProgressTracker progressTracker
@@ -83,6 +82,7 @@ class PlaceNodesRandomly {
             config.concurrency(),
             graph.nodeCount(),
             partition -> new AssignNodes(
+                random.split(),
                 candidateSolution,
                 currCardinalities,
                 minCommunitiesPerPartition[partitionIndex.getAndIncrement()],
@@ -151,17 +151,19 @@ class PlaceNodesRandomly {
 
     private final class AssignNodes implements Runnable {
 
+        private final SplittableRandom random;
         private final HugeByteArray candidateSolution;
         private final AtomicLongArray cardinalities;
         private final long[] minNodesPerCommunity;
         private final Partition partition;
 
         AssignNodes(
-            HugeByteArray candidateSolution,
+            SplittableRandom random, HugeByteArray candidateSolution,
             AtomicLongArray cardinalities,
             long[] minNodesPerCommunity,
             Partition partition
         ) {
+            this.random = random;
             this.candidateSolution = candidateSolution;
             this.cardinalities = cardinalities;
             this.minNodesPerCommunity = minNodesPerCommunity;
@@ -170,15 +172,7 @@ class PlaceNodesRandomly {
 
         @Override
         public void run() {
-            Random rand;
-            if (config.concurrency() > 1) {
-                rand = ThreadLocalRandom.current();
-            } else {
-                // We want the ability to obtain a deterministic result for single-threaded computations.
-                rand = random;
-            }
-
-            var nodes = shuffle(rand, partition.startNode(), partition.nodeCount());
+            var nodes = shuffle(partition.startNode(), partition.nodeCount());
 
             // Fill in the nodes that this partition is required to provide to each community.
             long offset = 0;
@@ -191,7 +185,7 @@ class PlaceNodesRandomly {
             // Assign the rest of the nodes of the partition to random communities.
             var localCardinalities = new long[config.k()];
             for (long i = offset; i < nodes.size(); i++) {
-                byte randomCommunity = (byte) rand.nextInt(config.k());
+                byte randomCommunity = (byte) random.nextInt(0, config.k());
                 localCardinalities[randomCommunity]++;
                 candidateSolution.set(nodes.get(i), randomCommunity);
             }
@@ -203,12 +197,12 @@ class PlaceNodesRandomly {
             progressTracker.logProgress(partition.nodeCount());
         }
 
-        private HugeLongArray shuffle(Random random, long minInclusive, long length) {
+        private HugeLongArray shuffle(long minInclusive, long length) {
             HugeLongArray elements = HugeLongArray.newArray(length, AllocationTracker.empty());
 
             for (long i = 0; i < length; i++) {
                 long nextToAdd = minInclusive + i;
-                long j = randomNonNegativeLong(random, 0, i + 1);
+                long j = random.nextLong(0, i + 1);
                 if (j == i) {
                     elements.set(i, nextToAdd);
                 } else {
@@ -219,19 +213,5 @@ class PlaceNodesRandomly {
 
             return elements;
         }
-    }
-
-    // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
-    // `min` is inclusive, and `max` is exclusive.
-    static long randomNonNegativeLong(Random rand, long min, long max) {
-        assert min >= 0;
-        assert max > min;
-
-        long randomNum;
-        do {
-            randomNum = rand.nextLong();
-        } while (randomNum == Long.MIN_VALUE);
-
-        return (Math.abs(randomNum) % (max - min)) + min;
     }
 }

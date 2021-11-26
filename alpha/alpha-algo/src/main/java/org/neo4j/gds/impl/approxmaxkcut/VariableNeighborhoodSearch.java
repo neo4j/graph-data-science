@@ -27,16 +27,14 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.gds.impl.approxmaxkcut.localsearch.LocalSearch;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Supplier;
-
-import static org.neo4j.gds.impl.approxmaxkcut.PlaceNodesRandomly.randomNonNegativeLong;
 
 class VariableNeighborhoodSearch {
 
     private final Graph graph;
-    private final Random random;
+    private final SplittableRandom random;
     private final ApproxMaxKCut.Comparator comparator;
     private final ApproxMaxKCutConfig config;
     private final LocalSearch localSearch;
@@ -48,7 +46,7 @@ class VariableNeighborhoodSearch {
 
     VariableNeighborhoodSearch(
         Graph graph,
-        Random random,
+        SplittableRandom random,
         ApproxMaxKCut.Comparator comparator,
         ApproxMaxKCutConfig config,
         LocalSearch localSearch,
@@ -136,7 +134,7 @@ class VariableNeighborhoodSearch {
         int retries = 0;
 
         while (retries < MAX_RETRIES) {
-            long nodeToFlip = randomNonNegativeLong(random, 0, graph.nodeCount());
+            long nodeToFlip = random.nextLong(0, graph.nodeCount());
             byte currCommunity = solution.get(nodeToFlip);
 
             if (cardinalities.get(currCommunity) <= config.minCommunitySizes().get(currCommunity)) {

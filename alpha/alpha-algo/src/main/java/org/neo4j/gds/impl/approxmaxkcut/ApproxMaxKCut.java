@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutConfig;
 import org.neo4j.gds.impl.approxmaxkcut.localsearch.LocalSearch;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLongArray;
 
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutResult> {
 
     private Graph graph;
-    private final Random random;
+    private final SplittableRandom random;
     private final ApproxMaxKCutConfig config;
     private final Comparator comparator;
     private final PlaceNodesRandomly placeNodesRandomly;
@@ -69,7 +69,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         AllocationTracker allocationTracker
     ) {
         super(progressTracker);
-        this.random = new Random(config.randomSeed().orElseGet(() -> new Random().nextLong()));
+        this.random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         this.graph = graph;
         this.config = config;
         this.comparator = config.minimize() ? (lhs, rhs) -> lhs < rhs : (lhs, rhs) -> lhs > rhs;
