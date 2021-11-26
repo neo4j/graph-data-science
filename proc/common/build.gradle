@@ -31,11 +31,14 @@ dependencies {
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    (neodeps + ['neo4j-unsafe']).each {
+
+    neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
+
+    compileOnly group: 'org.neo4j', name: 'neo4j-unsafe', version: ver.'neo4j'
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

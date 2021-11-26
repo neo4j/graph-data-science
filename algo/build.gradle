@@ -15,11 +15,13 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    (neodeps + ['neo4j-graph-algo']).each {
+    neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
+
+    compileOnly group: 'org.neo4j', name: 'neo4j-graph-algo', version: ver.'neo4j'
 
     implementation project(':algo-common')
     implementation project(':annotations')
