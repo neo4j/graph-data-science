@@ -56,6 +56,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestLog.INFO;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 
 @GdlExtension
@@ -104,7 +105,7 @@ class GraphSageModelTrainerTest {
             configBuilder.relationshipWeightProperty("times");
         }
         var config = configBuilder
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(AggregatorType.MEAN)
             .modelName(MODEL_NAME)
             .build();
 
@@ -137,7 +138,7 @@ class GraphSageModelTrainerTest {
             configBuilder.relationshipWeightProperty("times");
         }
         var config = configBuilder
-            .aggregator(Aggregator.AggregatorType.POOL)
+            .aggregator(AggregatorType.POOL)
             .modelName(MODEL_NAME)
             .build();
 
@@ -238,7 +239,7 @@ class GraphSageModelTrainerTest {
             .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
         var config = GraphSageTrainConfig.builder()
             .embeddingDimension(12)
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
             .addFeatureProperty("features")
             .modelName("model")
@@ -297,6 +298,53 @@ class GraphSageModelTrainerTest {
                 81.44260858480729,
                 81.44349342538301,
                 81.45612978296505
+            );
+    }
+
+    @Test
+    void testLossesWithPoolAggregator() {
+        var config = configBuilder
+            .modelName("randomSeed2")
+            .embeddingDimension(12)
+            .aggregator(AggregatorType.POOL)
+            .epochs(10)
+            .tolerance(1e-10)
+            .addSampleSizes(5, 3)
+            .batchSize(5)
+            .maxIterations(100)
+            .randomSeed(42L)
+            .build();
+
+        var trainer = new GraphSageModelTrainer(
+            config,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var trainResult = trainer.train(graph, features);
+
+        var metrics = trainResult.metrics();
+        assertThat(metrics.didConverge()).isFalse();
+        assertThat(metrics.ranEpochs()).isEqualTo(10);
+
+        var metricsMap =  metrics.toMap().get("metrics");
+        assertThat(metricsMap).isInstanceOf(Map.class);
+
+        var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
+        assertThat(epochLosses)
+            .isInstanceOf(List.class)
+            .asList()
+            .containsExactly(
+                90.53361989137981,
+                83.29795301874591,
+                74.75620220930375,
+                74.6103157894963,
+                74.68090829811632,
+                74.5497784349849,
+                74.37264430707182,
+                74.36673549939077,
+                74.36632354657218,
+                74.3662033796945
             );
     }
 

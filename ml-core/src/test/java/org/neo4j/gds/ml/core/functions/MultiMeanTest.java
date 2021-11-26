@@ -47,7 +47,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0, 3};
-        int[] selfAdjacency = {0, 1, 0};
+        int[] batchIds = {0, 1, 0};
 
         var expected = new Matrix(new double[]{
             2.5, 3.5,
@@ -56,14 +56,14 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         }, 3, 2);
 
         var data = Constant.matrix(matrix, 4, 2);
-        var mean = new MultiMean(data, new TestBatchNeighbors(adj), selfAdjacency);
+        var mean = new MultiMean(data, new TestBatchNeighbors(batchIds, adj));
 
         assertThat(ctx.forward(mean)).isEqualTo(expected);
     }
 
 
     @Test
-    void testGradientUnweighted() {
+    void testGradientWithDuplicateBatchIds() {
         double[] matrix = {
             1, 2,
             4, 5,
@@ -79,7 +79,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(adj), batchIds)))
+            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
         );
     }
 
@@ -95,13 +95,13 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0, 2};
-        int[] selfAdjacency = {0, 1};
+        int[] batchIds = {0, 1};
 
         Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(adj), selfAdjacency)))
+            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
         );
     }
 

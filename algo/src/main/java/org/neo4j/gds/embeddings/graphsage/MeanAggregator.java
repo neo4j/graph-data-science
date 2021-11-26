@@ -54,7 +54,7 @@ public class MeanAggregator implements Aggregator {
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
         Variable<Matrix> means = subGraph.isWeighted()
             ? new WeightedMultiMean( previousLayerRepresentations, subGraph)
-            : new MultiMean(previousLayerRepresentations, subGraph, subGraph.mappedBatchNodeIds);
+            : new MultiMean(previousLayerRepresentations, subGraph);
 
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);

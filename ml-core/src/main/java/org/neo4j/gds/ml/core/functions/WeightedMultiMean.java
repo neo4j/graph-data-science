@@ -46,7 +46,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         Tensor<?> parentTensor = ctx.data(parent());
         double[] parentData = parentTensor.data();
 
-        var batchIds = this.subGraph.mappedBatchNodeIds;
+        var batchIds = this.subGraph.batchIds();
         int batchSize = batchIds.length;
 
         double[] means = new double[batchSize * cols];
@@ -75,7 +75,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
 
-        var batchIds = this.subGraph.mappedBatchNodeIds;
+        var batchIds = this.subGraph.batchIds();
 
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
