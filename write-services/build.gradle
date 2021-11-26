@@ -11,7 +11,7 @@ dependencies {
     compileOnly project(':core')
     compileOnly project(':transaction')
 
-    neodeps.each {
+    neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }

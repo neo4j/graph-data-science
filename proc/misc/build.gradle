@@ -16,7 +16,7 @@ dependencies {
     implementation project(':string-formatting')
 
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    neodeps.each {
+    neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }

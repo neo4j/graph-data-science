@@ -21,6 +21,9 @@ package org.neo4j.gds.compat.dev;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.consistency.checking.full.ConsistencyCheckIncompleteException;
+import org.neo4j.consistency.checking.full.ConsistencyFlags;
+import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
@@ -54,6 +57,7 @@ import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.impl.api.index.IndexProviderMap;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.StoreFactory;
@@ -61,6 +65,7 @@ import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.kernel.impl.store.cursor.CachedStoreCursors;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.lock.LockService;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
@@ -84,6 +89,7 @@ import org.neo4j.token.api.TokenHolder;
 import org.neo4j.token.api.TokensLoader;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
@@ -220,6 +226,25 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     ) {
         NeoStores neoStores = (new StoreFactory(databaseLayout, config, new ScanOnOpenReadOnlyIdGeneratorFactory(), pageCache, fileSystemAbstraction, NullLogProvider.getInstance(), pageCacheTracer, readOnly())).openAllNeoStores();
         return new LenientStoreInput(neoStores, readBehaviour.decorateTokenHolders(this.loadReadOnlyTokens(neoStores, true, PageCacheTracer.NULL)), true, pageCacheTracer, readBehaviour);
+    }
+
+    @Override
+    public void consistencyCheck(
+        FileSystemAbstraction fileSystemAbstraction,
+        DatabaseLayout databaseLayout,
+        Config config,
+        PageCache pageCache,
+        IndexProviderMap indexProviderMap,
+        Log log,
+        ConsistencySummaryStatistics consistencySummaryStatistics,
+        int i,
+        double v,
+        OutputStream outputStream,
+        boolean b,
+        ConsistencyFlags consistencyFlags,
+        PageCacheTracer pageCacheTracer
+    ) throws ConsistencyCheckIncompleteException {
+
     }
 
     @Override
