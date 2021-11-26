@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public abstract class GraphAdapter implements Graph {
 
-    protected Graph graph;
+    protected final Graph graph;
 
     public GraphAdapter(Graph graph) {
         this.graph = graph;
