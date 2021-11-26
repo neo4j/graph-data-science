@@ -18,7 +18,7 @@ The algorithm is intended to support the creation of monopartite graphs required
 The main input for the algorithm is a list of relationship types.
 Starting from every node in the specified graph, these relationship types are traversed one after the other using the order specified in the configuration.
 Only nodes reached after traversing every relationship type specified are used as end nodes.
-Exactly one relationship is created for every pair of nodes for which at least one path from start to end node exists.
+Exactly one directed relationship is created for every pair of nodes for which at least one path from start to end node exists.
 
 
 [[algorithms-collapse-path-syntax]]
@@ -162,5 +162,5 @@ CREATE
   (Annie)-[:PLAYS_SAME_INSTRUMENT]->(Dan),
 
   (Matt)-[:PLAYS_SAME_INSTRUMENT]->(Jeff),
-  (Jeff)-[:PLAYS_SAME_INSTRUMENT]->(Matt),
+  (Jeff)-[:PLAYS_SAME_INSTRUMENT]->(Matt)
 ----

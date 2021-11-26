@@ -123,6 +123,15 @@ There are two different strategies for choosing which node pairs to consider whe
 Whereas the former considers all possible new links, the latter will use a randomized strategy that only considers a subset of them in order to run faster.
 We will explain each individually with examples in the <<algorithms-link-prediction-pipelines-predict-examples-mutate, mutate examples>> below.
 
+[NOTE]
+====
+The relationships that are produced by the write and mutate procedures are undirected, just like the input.
+However, no parallel relationships are produced.
+So for example if when doing approximate search, `a -- b` are among the top predictions for `a`, and `b -- a` are among the top predictions for `b`, then there will still only be one undirected relationship `a -- b` produced.
+The stream procedure will yield a node pair only once.
+====
+
+
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 ==== Stream
 

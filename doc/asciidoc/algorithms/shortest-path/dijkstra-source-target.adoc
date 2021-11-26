@@ -199,6 +199,11 @@ RETURN relationshipsWritten
 After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
 The new relationship will store a single property `totalCost`.
 
+[NOTE]
+====
+The relationship produced is always directed, even if the input graph is undirected.
+====
+
 
 [[algorithms-dijkstra-source-target-examples-write]]
 === Write
@@ -233,3 +238,8 @@ RETURN relationshipsWritten
 
 The above query will write a single relationship of type `PATH` back to Neo4j.
 The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+
+[NOTE]
+====
+The relationship written is always directed, even if the input graph is undirected.
+====
