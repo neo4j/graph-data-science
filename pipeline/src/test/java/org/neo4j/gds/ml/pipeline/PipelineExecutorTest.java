@@ -73,6 +73,19 @@ class PipelineExecutorTest {
     }
 
     @Test
+    void shouldCleanGraphStoreWhenNodePropertyStepIsFailing() {
+        var pipelineExecutor = new SucceedingPipelineExecutor(
+            new FailingNodePropertyPipeline(),
+            new PipelineExecutorTestConfig(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestExecuteNodeStepFailure.class);
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, FailingNodePropertyStep.PROPERTY)).isFalse();
+    }
+
+    @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = new TestLog();
         var pipelineExecutor = new FailingPipelineExecutor(
@@ -108,6 +121,7 @@ class PipelineExecutorTest {
     }
 
     private static final class PipelineExecutionTestFailure extends RuntimeException {}
+    private static final class PipelineExecutionTestExecuteNodeStepFailure extends RuntimeException {}
 
     private static class PipelineExecutorTestConfig implements AlgoBaseConfig {
         @Override
@@ -126,8 +140,8 @@ class PipelineExecutorTest {
         }
     }
 
-    private class FailingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, Object, FailingPipelineExecutor> {
-        FailingPipelineExecutor(
+    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<FeatureStep, ToMapConvertible>, String, SucceedingPipelineExecutor> {
+        SucceedingPipelineExecutor(
             Pipeline<FeatureStep, ToMapConvertible> pipelineStub,
             AlgoBaseConfig config,
             ProgressTracker progressTracker
@@ -148,13 +162,32 @@ class PipelineExecutorTest {
         }
 
         @Override
-        protected Object execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-            throw new PipelineExecutionTestFailure();
+        protected String execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+            return "I am not failing";
         }
 
         @Override
-        public FailingPipelineExecutor me() {
+        public SucceedingPipelineExecutor me() {
             return this;
+        }
+    }
+
+    private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
+        FailingPipelineExecutor(
+            Pipeline<FeatureStep, ToMapConvertible> pipelineStub,
+            AlgoBaseConfig config,
+            ProgressTracker progressTracker
+        ) {
+            super(
+                pipelineStub,
+                config,
+                progressTracker
+            );
+        }
+
+        @Override
+        protected String execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+            throw new PipelineExecutionTestFailure();
         }
     }
 
@@ -196,6 +229,39 @@ class PipelineExecutorTest {
         }
     }
 
+    private static class FailingNodePropertyStep implements ExecutableNodePropertyStep {
+        static final String PROPERTY = "failingStepProperty";
+        @Override
+        public String procName() {
+            return "FailingNodePropertyStep";
+        }
+
+        @Override
+        public Method procMethod() {
+            return null;
+        }
+
+        @Override
+        public void execute(
+            BaseProc caller,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+            throw new PipelineExecutionTestExecuteNodeStepFailure();
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return Map.of(MUTATE_PROPERTY_KEY, PROPERTY);
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+    }
+
     private class BogusNodePropertyPipeline extends Pipeline<FeatureStep, ToMapConvertible> {
 
         BogusNodePropertyPipeline() {super(List.of());}
@@ -203,6 +269,27 @@ class PipelineExecutorTest {
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
             return List.of(new AddBogusNodePropertyStep());
+        }
+
+        @Override
+        protected Map<String, Object> additionalEntries() {
+            return Map.of();
+        }
+
+        @Override
+        public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+
+        @Override
+        public void validate(GraphStore graphStore, AlgoBaseConfig config) {}
+    }
+
+    private class FailingNodePropertyPipeline extends Pipeline<FeatureStep, ToMapConvertible> {
+
+        FailingNodePropertyPipeline() {super(List.of());}
+
+        @Override
+        public List<ExecutableNodePropertyStep> nodePropertySteps() {
+            return List.of(new AddBogusNodePropertyStep(), new FailingNodePropertyStep());
         }
 
         @Override
