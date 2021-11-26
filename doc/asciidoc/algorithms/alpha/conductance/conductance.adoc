@@ -1,6 +1,6 @@
 [[alpha-algorithms-conductance]]
 [.alpha]
-= Conductance
+= Conductance metric
 :entity: node
 :result: conductance
 :algorithm: Conductance
@@ -23,6 +23,7 @@ include::../../shared/algorithm-traits.adoc[]
 https://en.wikipedia.org/wiki/Conductance_(graph)[Conductance] is a metric that allows you to evaluate the quality of a community detection.
 Relationships of nodes in a community `C` connect to nodes either within `C` or outside `C`.
 The conductance is the ratio between relationships that point outside `C` and the total number of relationships of `C`.
+The lower the conductance, the more "well-knit" a community is.
 
 It was shown by Yang and Leskovec in the paper _"Defining and Evaluating Network Communities based on Ground-truth"_ that conductance is a very good metric for evaluating actual communities of real world graphs.
 
@@ -72,7 +73,8 @@ include::specific-configuration.adoc[]
 
 [NOTE]
 ====
-Only non-negative community IDs are valid, and negative one are ignored in the computation.
+Only non-negative community IDs are valid for identifying communities.
+Nodes with a negative community ID will only take part in the computation to the extent that they are connected to nodes in valid communities, and thus contribute to those valid communities' outward relationship counts.
 ====
 
 
@@ -132,7 +134,7 @@ CALL gds.graph.create(
 )
 ----
 
-We now run the Louvain algorithm to create a division of the nodes into communities that we can then evalutate.
+We now run the <<algorithms-louvain, Louvain algorithm>> to create a division of the nodes into communities that we can then evalutate.
 
 [role=query-example, group=louvain-conductance]
 --
@@ -140,20 +142,20 @@ We now run the Louvain algorithm to create a division of the nodes into communit
 [source, cypher, role=noplay]
 ----
 CALL gds.louvain.mutate('myGraph', { mutateProperty: 'community', relationshipWeightProperty: 'weight' })
-YIELD communityCount, modularity, modularities
+YIELD communityCount
 ----
 
 .Results
 [opts="header"]
 |===
-| communityCount | modularity          | modularities
-| 3              | 0.29338842975206614 | [0.29338842975206614]
+| communityCount
+| 3
 |1 row
 |===
 --
 
 Now our in-memory graph `myGraph` is populated with node properties under the key `community` that we can set as input for our evaluation using Conductance.
-The distribution of nodes into communities is the following:
+The nodes are now assigned to communities in the following way:
 
 .Community assignments
 [opts="header"]
@@ -166,6 +168,8 @@ The distribution of nodes into communities is the following:
 | "Mark"    | 5
 | "Michael" | 5
 |===
+
+Please see the <<catalog-graph-stream-single-node-property-example, stream node properties>> procedure for how to obtain such an assignment table.
 
 For more information about Louvain, see its <<algorithms-louvain, algorithm page>>.
 
