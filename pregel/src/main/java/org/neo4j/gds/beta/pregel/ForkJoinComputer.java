@@ -80,4 +80,9 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     public boolean hasConverged() {
         return !sentMessage.get() && voteBits.allSet();
     }
+
+    @Override
+    void release() {
+        forkJoinPool.shutdown();
+    }
 }

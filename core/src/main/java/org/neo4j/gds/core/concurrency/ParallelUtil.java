@@ -76,7 +76,7 @@ public final class ParallelUtil {
      * The concurrency value is assumed to already be validated towards the edition limitation.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
-        ForkJoinPool pool = getFJPoolWithConcurrency(concurrency);
+        ForkJoinPool pool = Pools.createForkJoinPool(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
@@ -1486,21 +1486,5 @@ public final class ParallelUtil {
             }
             pushedElement = element;
         }
-    }
-
-    public static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
-        return new ForkJoinPool(concurrency, forkJoinPoolWorkerThreadFactory, null, false);
-    }
-
-    private static final ForkJoinPool.ForkJoinWorkerThreadFactory forkJoinPoolWorkerThreadFactory;
-
-    private static final String FORK_JOIN_INFIX = "-forkjoin-";
-
-    static {
-        forkJoinPoolWorkerThreadFactory = pool -> {
-            var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            worker.setName(Pools.THREAD_NAME_PREFIX + FORK_JOIN_INFIX + worker.getPoolIndex());
-            return worker;
-        };
     }
 }
