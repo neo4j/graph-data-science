@@ -68,6 +68,8 @@ public final class ParallelUtil {
     private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
     private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
 
+    private static ForkJoinPool FJ_INSTANCE;
+
     // prevent instantiation of factory
     private ParallelUtil() {}
 
@@ -76,7 +78,7 @@ public final class ParallelUtil {
      * The concurrency value is assumed to already be validated towards the edition limitation.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
-        ForkJoinPool pool = getFJPoolWithConcurrency(concurrency);
+        ForkJoinPool pool = newFJPoolWithConcurrency(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
@@ -1487,8 +1489,19 @@ public final class ParallelUtil {
             pushedElement = element;
         }
     }
-
+    
     public static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
+        if(FJ_INSTANCE == null) {
+            synchronized (ParallelUtil.class) {
+                if(FJ_INSTANCE == null) {
+                    FJ_INSTANCE = new ForkJoinPool(concurrency, forkJoinPoolWorkerThreadFactory, null, false);
+                }
+            }
+        }
+        return FJ_INSTANCE;
+    }
+
+    public static ForkJoinPool newFJPoolWithConcurrency(int concurrency) {
         return new ForkJoinPool(concurrency, forkJoinPoolWorkerThreadFactory, null, false);
     }
 
