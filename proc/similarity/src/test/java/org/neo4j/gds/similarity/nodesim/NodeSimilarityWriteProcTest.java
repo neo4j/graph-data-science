@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,13 +32,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,13 +51,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class NodeSimilarityWriteProcTest
     extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>
     implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityWriteConfig, NodeSimilarityResult> {
-
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream
-            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
-            .flatMap(Collection::stream);
-    }
 
     @Override
     public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
 import java.util.Collection;
@@ -42,8 +41,7 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
     @Override
     Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

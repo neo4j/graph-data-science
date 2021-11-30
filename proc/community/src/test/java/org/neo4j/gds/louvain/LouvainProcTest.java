@@ -41,7 +41,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.ToleranceConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -64,8 +63,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     final Stream<DynamicTest> configTests() {
         return Stream.concat(modeSpecificConfigTests(), Stream.of(
             IterationsConfigProcTest.test(proc(), createMinimalConfig()),
-            ToleranceConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
+            ToleranceConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream));
     }
 

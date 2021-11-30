@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,13 +48,6 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";
-
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream
-            .of(ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig()))
-            .flatMap(Collection::stream);
-    }
 
     @Override
     public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {

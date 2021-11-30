@@ -36,7 +36,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import org.neo4j.graphdb.Result;
 
@@ -60,8 +59,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     @Override
     Stream<DynamicTest> modeSpecificConfigTests() {
         return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig()),
-            ConcurrencyConfigProcTest.writeTest(proc(), createMinimalConfig())
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

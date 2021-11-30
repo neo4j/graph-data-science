@@ -20,11 +20,8 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import org.neo4j.gds.walking.RandomWalkStreamProc;
@@ -177,12 +174,5 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @Override
     public boolean releaseAlgorithm() {
         return false;
-    }
-
-    @TestFactory
-    Stream<DynamicTest> configTests() {
-        return Stream.of(
-            ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
     }
 }

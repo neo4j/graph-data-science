@@ -39,10 +39,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
@@ -58,12 +56,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
-        return Stream.concat(
-            modeSpecificConfigTests(),
-            Stream.of(
-                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-            ).flatMap(Collection::stream)
-        );
+        return modeSpecificConfigTests();
     }
 
     Stream<DynamicTest> modeSpecificConfigTests() {

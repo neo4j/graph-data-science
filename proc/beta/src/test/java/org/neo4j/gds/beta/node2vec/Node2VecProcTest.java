@@ -31,10 +31,8 @@ import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,12 +43,7 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
-        return Stream.concat(
-            modeSpecificConfigTests(),
-            Stream.of(
-                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-            ).flatMap(Collection::stream)
-        );
+        return modeSpecificConfigTests();
     }
 
     Stream<DynamicTest> modeSpecificConfigTests() {

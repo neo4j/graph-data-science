@@ -38,10 +38,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.test.config.ConcurrencyConfigProcTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,12 +54,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
-        return Stream.concat(
-            modeSpecificConfigTests(),
-            Stream.of(
-                ConcurrencyConfigProcTest.test(proc(), createMinimalConfig())
-            ).flatMap(Collection::stream)
-        );
+        return modeSpecificConfigTests();
     }
 
     Stream<DynamicTest> modeSpecificConfigTests() {
