@@ -17,20 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.beta.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.SourceNodesConfigTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
-import org.neo4j.gds.walking.RandomWalkStreamProc;
 import org.neo4j.graphdb.Path;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -42,8 +50,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressWarnings("unchecked")
 class RandomWalkStreamProcTest extends BaseProcTest implements
     AlgoBaseProcTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
-    SourceNodesConfigTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>
-{
+    SourceNodesConfigTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
+    MemoryEstimateTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>> {
+
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node1)" +
@@ -61,6 +70,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(RandomWalkStreamProc.class);
+        registerProcedures(GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -68,7 +78,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     void shouldRunSimpleConfig() {
         String query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
+            .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -92,7 +102,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     void shouldReturnPath() {
         String query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
+            .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -119,7 +129,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     void shouldThrowOnUnknownStartNode() {
         String query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
+            .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -133,7 +143,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     void shouldThrowOnUnselectedStartNode() {
         String query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "randomWalk")
+            .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -142,6 +152,23 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .yields();
 
         assertError(query, "Source nodes do not exist in the in-memory graph for the labels ['Node1', 'Node2']: ['3']");
+    }
+
+    @Test
+    void shouldRunMemoryEstimation() {
+        String query = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .algo("gds", "beta", "randomWalk")
+            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .addParameter("walksPerNode", 3)
+            .addParameter("walkLength", 10)
+            .yields("bytesMin", "bytesMax");
+
+
+        assertCypherResult(query, List.of(Map.of(
+            "bytesMin", 299440L,
+            "bytesMax", 395456L
+        )));
     }
 
     @Override
