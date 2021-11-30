@@ -48,7 +48,7 @@ class NodeClassificationPipelineTest {
     }
 
     @Test
-    void canAddFeatureSteps() {
+    void canSelectFeature() {
         var pipeline = new NodeClassificationPipeline();
         var fooStep = new NodeClassificationFeatureStep("foo");
         pipeline.addFeatureStep(fooStep);
@@ -144,9 +144,9 @@ class NodeClassificationPipelineTest {
                 .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
-                    .containsOnlyKeys("nodePropertySteps", "featureSteps")
+                    .containsOnlyKeys("nodePropertySteps", "featureProperties")
                     .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
-                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureSteps")))
+                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureProperties")))
                 .returns(
                     NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
                     pipelineMap -> pipelineMap.get("splitConfig")
@@ -179,14 +179,14 @@ class NodeClassificationPipelineTest {
                 .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
-                    .containsOnlyKeys("nodePropertySteps", "featureSteps")
+                    .containsOnlyKeys("nodePropertySteps", "featureProperties")
                     .returns(
                         List.of(pageRankPropertyStep.toMap()),
                         featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
                     )
                     .returns(
                         List.of(fooStep.toMap()),
-                        featurePipelineMap -> featurePipelineMap.get("featureSteps")
+                        featurePipelineMap -> featurePipelineMap.get("featureProperties")
                     ))
                 .returns(
                     pipeline.splitConfig().toMap(),

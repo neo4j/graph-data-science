@@ -53,7 +53,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", List.of(Map.of(
                     "maxEpochs", 100,
                     "minEpochs", 42,
@@ -76,7 +76,7 @@ class NodeClassificationPipelineConfigureParamsProcTest extends BaseProcTest {
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", List.of(Map.of(
                     "maxEpochs", 100,
                     "minEpochs", 4,

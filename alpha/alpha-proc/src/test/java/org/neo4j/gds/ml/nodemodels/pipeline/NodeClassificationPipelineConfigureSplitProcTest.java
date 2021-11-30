@@ -56,7 +56,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
@@ -75,7 +75,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainCoreConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
@@ -42,6 +43,15 @@ public class NodeClassificationPipeline extends Pipeline<NodeClassificationFeatu
         copied.setTrainingParameterSpace(new ArrayList<>(trainingParameterSpace));
         copied.setSplitConfig(splitConfig);
         return copied;
+    }
+
+
+    @Override
+    protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
+        return Map.of(
+            "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
+            "featureProperties", ToMapConvertible.toMap(featureSteps)
+        );
     }
 
     @Override

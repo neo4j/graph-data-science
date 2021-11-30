@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.Pipeline;
@@ -46,6 +47,15 @@ public class LinkPredictionPipeline extends Pipeline<LinkFeatureStep, LinkLogist
         copied.setTrainingParameterSpace(new ArrayList<>(trainingParameterSpace));
         copied.setSplitConfig(splitConfig);
         return copied;
+    }
+
+
+    @Override
+    protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
+        return Map.of(
+            "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
+            "featureSteps", ToMapConvertible.toMap(featureSteps)
+        );
     }
 
     @Override
