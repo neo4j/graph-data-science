@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
@@ -161,12 +162,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     }
 
     private GdsCypher.ModeBuildStage gdsCypher() {
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
-            .yields();
-        runQuery(createQuery);
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         return GdsCypher.call()
             .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness");

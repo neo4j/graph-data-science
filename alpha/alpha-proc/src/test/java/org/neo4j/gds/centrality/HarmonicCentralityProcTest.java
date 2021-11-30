@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
@@ -60,7 +61,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @Test
     void testStream() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         var query = GdsCypher.call()
             .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
@@ -80,7 +81,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
     @Test
     void testWrite() {
-        loadCompleteGraph(DEFAULT_GRAPH_NAME);
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         var query = GdsCypher.call()
             .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")

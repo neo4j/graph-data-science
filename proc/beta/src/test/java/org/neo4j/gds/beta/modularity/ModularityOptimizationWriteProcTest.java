@@ -21,9 +21,9 @@ package org.neo4j.gds.beta.modularity;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.compat.MapUtil;
 
 import java.util.Map;
 
@@ -56,9 +56,14 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingWeighted() {
-        String query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withRelationshipProperty("weight")
             .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -77,9 +82,14 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingSeeded() {
-        String query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .withNodeProperty("seed1")
             .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate(DEFAULT_GRAPH_NAME)
+            .yields();
+        runQuery(createQuery);
+        String query = GdsCypher.call()
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("seedProperty", "seed1")
@@ -98,8 +108,9 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingTolerance() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("tolerance", 1)
@@ -114,8 +125,9 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingIterations() {
+        loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
         String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+            .explicitCreation(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("maxIterations", 1)
@@ -130,9 +142,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingEstimate() {
-        String query = GdsCypher.call()
-            .loadEverything()
-            .algo("gds", "beta", "modularityOptimization")
+        String query = algoBuildStage()
             .estimationMode(WRITE)
             .addParameter("writeProperty", "community")
             .yields();
