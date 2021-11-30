@@ -125,7 +125,6 @@ class ListProcTest extends BaseProcTest {
 
         "gds.alpha.shortestPath.deltaStepping.write",
         "gds.alpha.shortestPath.deltaStepping.stream",
-        "gds.alpha.randomWalk.stream",
         "gds.alpha.similarity.cosine.write",
         "gds.alpha.similarity.cosine.stream",
         "gds.alpha.similarity.cosine.stats",
@@ -213,6 +212,9 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.beta.randomWalk.stream",
+        "gds.beta.randomWalk.stream.estimate",
 
         "gds.allShortestPaths.dijkstra.stream",
         "gds.allShortestPaths.dijkstra.stream.estimate",

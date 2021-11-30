@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.walking.RandomWalkStreamProc;
 
 import java.util.List;
 
@@ -36,6 +36,6 @@ class RandomWalkDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/randomWalk/alpha-random-walk.adoc";
+        return "algorithms/beta/randomWalk/beta-random-walk.adoc";
     }
 }

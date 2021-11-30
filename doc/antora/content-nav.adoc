@@ -80,7 +80,7 @@
 *** xref:alpha-algorithms/minimum-weight-spanning-tree/index.adoc[]
 *** xref:alpha-algorithms/single-source-shortest-path/index.adoc[]
 *** xref:alpha-algorithms/all-pairs-shortest-path/index.adoc[]
-*** xref:alpha-algorithms/random-walk/index.adoc[]
+*** xref:beta-algorithms/random-walk/index.adoc[]
 *** xref:algorithms/bfs/index.adoc[]
 *** xref:algorithms/dfs/index.adoc[]
 ** xref:algorithms/linkprediction/index.adoc[]
