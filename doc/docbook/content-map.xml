@@ -182,6 +182,9 @@
             <d:tocentry linkend="alpha-algorithms-approx-max-k-cut">
                 <?dbhtml filename="algorithms/alpha/approx-max-k-cut/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-conductance">
+                <?dbhtml filename="algorithms/alpha/conductance/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-similarity">
