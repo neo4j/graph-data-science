@@ -18,5 +18,6 @@ The Neo4j GDS library includes the following machine learning models, grouped by
 
 * Alpha
 ** <<algorithms-ml-nodeclassification, Node Classification>>
+** <<algorithms-ml-nodeclassification-pipelines, Node Classification Pipelines>>
 ** <<algorithms-ml-linkprediction, Link Prediction>>
 ** <<algorithms-ml-linkprediction-pipelines, Link Prediction Pipelines>>
