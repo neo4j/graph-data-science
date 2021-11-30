@@ -28,10 +28,10 @@ dependencies {
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }
 
-task unpackDocs(type: Copy) {
+tasks.register('unpackDocs', Copy) {
     dependsOn project(':doc').tasks.assembleDocs
     from tarTree(project(':doc').tasks.assembleDocs.archiveFile)
     into "$buildDir/doc-sources"
 }
 
-test.dependsOn unpackDocs
+test.dependsOn tasks.named('unpackDocs')
