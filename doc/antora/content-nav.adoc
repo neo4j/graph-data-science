@@ -62,6 +62,7 @@
 *** xref:algorithms/strongly-connected-components/index.adoc[]
 *** xref:algorithms/sllpa/index.adoc[]
 *** xref:algorithms/alpha/approx-max-k-cut/index.adoc[]
+*** xref:algorithms/alpha/conductance/index.adoc[]
 ** xref:algorithms/similarity/index.adoc[]
 *** xref:algorithms/node-similarity/index.adoc[]
 *** xref:algorithms/knn/index.adoc[]
