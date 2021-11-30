@@ -76,6 +76,10 @@ public interface GraphStore {
         return result;
     }
 
+    NodeProperty nodeProperty(NodeLabel label, String propertyKey);
+
+    NodeProperty nodeProperty(String propertyKey);
+
     ValueType nodePropertyType(NodeLabel label, String propertyKey);
 
     PropertyState nodePropertyState(String propertyKey);

@@ -234,6 +234,37 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
+        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    }
+
+    @Override
+    public NodeProperty nodeProperty(String propertyKey) {
+        if (nodes.availableNodeLabels().size() > 1) {
+            var unionValues = new HashMap<NodeLabel, NodeProperties>();
+            var unionOrigin = PropertyState.PERSISTENT;
+
+            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
+                var nodeLabel = labelAndPropertyStore.getKey();
+                var nodePropertyStore = labelAndPropertyStore.getValue();
+                if (nodePropertyStore.containsKey(propertyKey)) {
+                    var nodeProperty = nodePropertyStore.get(propertyKey);
+                    unionValues.put(nodeLabel, nodeProperty.values());
+                    unionOrigin = nodeProperty.propertyState();
+                }
+            }
+
+            return NodeProperty.of(
+                propertyKey,
+                unionOrigin,
+                new UnionNodeProperties(nodes, unionValues)
+            );
+        } else {
+            return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
+        }
+    }
+
+    @Override
     public ValueType nodePropertyType(NodeLabel label, String propertyKey) {
         return nodeProperty(label, propertyKey).valueType();
     }
@@ -490,35 +521,6 @@ public class CSRGraphStore implements GraphStore {
     private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
         updateFunction.accept(this);
         this.modificationTime = TimeUtil.now();
-    }
-
-    private NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
-    }
-
-    private NodeProperty nodeProperty(String propertyKey) {
-        if (nodes.availableNodeLabels().size() > 1) {
-            var unionValues = new HashMap<NodeLabel, NodeProperties>();
-            var unionOrigin = PropertyState.PERSISTENT;
-
-            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
-                var nodeLabel = labelAndPropertyStore.getKey();
-                var nodePropertyStore = labelAndPropertyStore.getValue();
-                if (nodePropertyStore.containsKey(propertyKey)) {
-                    var nodeProperty = nodePropertyStore.get(propertyKey);
-                    unionValues.put(nodeLabel, nodeProperty.values());
-                    unionOrigin = nodeProperty.propertyState();
-                }
-            }
-
-            return NodeProperty.of(
-                propertyKey,
-                unionOrigin,
-                new UnionNodeProperties(nodes, unionValues)
-            );
-        } else {
-            return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
-        }
     }
 
     private void addRelationshipProperty(
