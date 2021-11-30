@@ -227,34 +227,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-betweenness-centrality-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Betweenness Centrality in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.betweenness.write(
-  configuration: Map
-)
-YIELD
-  centralityDistribution: Map,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  nodePropertiesWritten: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-betweenness-centrality-syntax, write mode syntax above>>.
-
-
 [[algorithms-betweenness-centrality-examples]]
 == Examples
 

@@ -214,35 +214,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-eigenvector-centrality-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Eigenvector Centrality in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.eigenvector.write(
-  configuration: Map
-)
-YIELD
-  nodePropertiesWritten: Integer,
-  ranIterations: Integer,
-  didConverge: Boolean,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  centralityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
-
-
 [[algorithms-eigenvector-centrality-examples]]
 == Examples
 

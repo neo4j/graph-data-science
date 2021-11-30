@@ -227,35 +227,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-node-similarity-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Node Similarity in write mode on an anonymous graph.
-[source, cypher, role=noplay]
-----
-CALL gds.nodeSimilarity.write(
-  configuration: Map
-)
-YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  postProcessingMillis: Integer,
-  nodesCompared: Integer,
-  relationshipsWritten: Integer,
-  similarityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-node-similarity-syntax, write mode syntax above>>.
-
-
 [[algorithms-node-similarity-examples]]
 == Examples
 

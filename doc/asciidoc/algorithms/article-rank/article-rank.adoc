@@ -233,7 +233,8 @@ include::../shared/syntax-anonymous-graphs.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.articleRank.write(
-  configuration: Map
+  graphName: string,
+  configuration: map
 )
 YIELD
   nodePropertiesWritten: Integer,

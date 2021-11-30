@@ -59,12 +59,6 @@ Kilometers or miles also work, but the heuristic works best for nautical miles.
 include::path-syntax.adoc[]
 
 
-[[algorithms-astar-syntax-anonymous]]
-=== Anonymous graphs
-
-include::path-anonymous-graph.adoc[]
-
-
 [[algorithms-astar-examples]]
 == Examples
 

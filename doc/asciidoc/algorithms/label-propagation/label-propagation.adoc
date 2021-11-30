@@ -240,38 +240,6 @@ include::specific-configuration-write.adoc[]
 ====
 
 
-
-[[algorithms-label-propagation-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Label Propagation in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.labelPropagation.write(
-  configuration: Map
-)
-YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  postProcessingMillis: Integer,
-  nodePropertiesWritten: Integer,
-  communityCount: Integer,
-  ranIterations: Integer,
-  didConverge: Boolean,
-  communityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-label-propagation-syntax, write mode syntax above>>.
-
-
 [[algorithms-label-propagation-examples]]
 == Examples
 

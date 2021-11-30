@@ -235,35 +235,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-page-rank-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run PageRank in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.pageRank.write(
-  configuration: Map
-)
-YIELD
-  nodePropertiesWritten: Integer,
-  ranIterations: Integer,
-  didConverge: Boolean,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  centralityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
-
-
 [[algorithms-page-rank-examples]]
 == Examples
 

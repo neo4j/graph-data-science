@@ -37,11 +37,6 @@ Altering the concurrency configuration has no effect.
 
 include::path-syntax.adoc[]
 
-[[algorithms-dijkstra-single-source-syntax-anonymous]]
-=== Anonymous graphs
-
-include::path-anonymous-graph.adoc[]
-
 
 [[algorithms-dijkstra-source-target-examples]]
 == Examples

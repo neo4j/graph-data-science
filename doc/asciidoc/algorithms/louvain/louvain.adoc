@@ -218,33 +218,6 @@ include::specific-configuration-write.adoc[]
 ====
 
 
-[[algorithms-louvain-syntax-anonymous]]
-=== Anonymous graphs
-
-.Run Louvain in write mode on an anonymous graph.
-[source, cypher, role=noplay]
-----
-CALL gds.louvain.write(configuration: Map)
-YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  postProcessingMillis: Integer,
-  nodePropertiesWritten: Integer,
-  communityCount: Integer,
-  ranLevels: Integer,
-  modularity: Float,
-  modularities: List of Integer,
-  communityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-louvain-syntax, write mode syntax above>>.
-
 [[algorithms-louvain-examples]]
 == Examples
 
