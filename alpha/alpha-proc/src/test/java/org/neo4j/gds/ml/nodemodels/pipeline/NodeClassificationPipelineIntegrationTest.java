@@ -120,8 +120,8 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "  relationshipWeightProperty: 'w'" +
                  "})");
         // let's try both list and single string syntaxes
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures('p', 'a')");
-        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures('p', ['b', 'deg'])");
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', 'a')");
+        runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('p', ['b', 'deg'])");
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('p', {" +
                  "  testFraction: 0.2, " +

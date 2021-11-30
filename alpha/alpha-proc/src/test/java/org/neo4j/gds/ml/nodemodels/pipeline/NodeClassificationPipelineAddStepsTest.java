@@ -77,21 +77,21 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     "name", "gds.pageRank.mutate",
                     "config", Map.of("mutateProperty", "pr")
                 )));
-            assertThat(result.featureSteps).isEqualTo(List.of());
+            assertThat(result.featureProperties).isEqualTo(List.of());
             assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
 
     @Test
-    void shouldAddFeatureSteps() {
+    void shouldSelectFeatures() {
         run(caller -> {
-            NodeClassificationPipelineAddSteps.addFeatures(
+            NodeClassificationPipelineAddSteps.selectFeatures(
                 modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "test"
             );
-            var result = NodeClassificationPipelineAddSteps.addFeatures(
+            var result = NodeClassificationPipelineAddSteps.selectFeatures(
                 modelCatalog,
                 getUsername(),
                 "myPipeline",
@@ -100,7 +100,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
             assertThat(result.name).isEqualTo("myPipeline");
             assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
             assertThat(result.nodePropertySteps).isEqualTo(List.of());
-            assertThat(result.featureSteps).isEqualTo(List.of("test", "pr", "pr2"));
+            assertThat(result.featureProperties).isEqualTo(List.of("test", "pr", "pr2"));
             assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
@@ -161,7 +161,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     }
 
     @Test
-    void shouldAddNodeAndFeatureSteps() {
+    void shouldAddNodeAndSelectFeatureProperties() {
         run(caller -> {
             NodeClassificationPipelineAddSteps.addNodeProperty(
                 modelCatalog,
@@ -171,13 +171,13 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                 "pageRank",
                 Map.of("mutateProperty", "pr")
             );
-            NodeClassificationPipelineAddSteps.addFeatures(
+            NodeClassificationPipelineAddSteps.selectFeatures(
                 modelCatalog,
                 getUsername(),
                 "myPipeline",
                 "pr"
             );
-            var result = NodeClassificationPipelineAddSteps.addFeatures(
+            var result = NodeClassificationPipelineAddSteps.selectFeatures(
                 modelCatalog,
                 getUsername(),
                 "myPipeline",
@@ -190,7 +190,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     "name", "gds.pageRank.mutate",
                     "config", Map.of("mutateProperty", "pr")
                 )));
-            assertThat(result.featureSteps).isEqualTo(List.of("pr", "pr2"));
+            assertThat(result.featureProperties).isEqualTo(List.of("pr", "pr2"));
             assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
@@ -226,7 +226,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
                     "config", Map.of("mutateProperty", "pr2")
                 ))
             );
-            assertThat(result.featureSteps).isEqualTo(List.of());
+            assertThat(result.featureProperties).isEqualTo(List.of());
             assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
         });
     }
@@ -247,7 +247,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addFeatures(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
             modelCatalog,
             getUsername(),
             "ceci n'est pas une pipe",
@@ -327,7 +327,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
         );
 
         modelCatalog.set(model1);
-        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addFeatures(
+        run(caller -> assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
             modelCatalog,
             getUsername(),
             "testModel1",

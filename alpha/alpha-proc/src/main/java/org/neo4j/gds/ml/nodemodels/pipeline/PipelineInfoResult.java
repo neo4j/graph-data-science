@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class PipelineInfoResult {
     public final String name;
     public final List<Map<String, Object>> nodePropertySteps;
-    public final List<String> featureSteps;
+    public final List<String> featureProperties;
     public final Map<String, Object> splitConfig;
     public final Object parameterSpace;
 
@@ -40,7 +40,7 @@ public class PipelineInfoResult {
             .stream()
             .map(ExecutableNodePropertyStep::toMap)
             .collect(Collectors.toList());
-        this.featureSteps = info.featureProperties();
+        this.featureProperties = info.featureProperties();
         this.splitConfig = info.splitConfig().toMap();
         this.parameterSpace = info.trainingParameterSpace()
             .stream()

@@ -53,12 +53,12 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         ));
     }
 
-    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.addFeatures", mode = READ)
+    @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.selectFeatures", mode = READ)
     @Description("Add one or several features to an existing node classification pipeline.")
-    public Stream<PipelineInfoResult> addFeatures(
+    public Stream<PipelineInfoResult> selectFeatures(
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
     ) {
-        return Stream.of(NodeClassificationPipelineAddSteps.addFeatures(modelCatalog, username(), pipelineName, nodeProperties));
+        return Stream.of(NodeClassificationPipelineAddSteps.selectFeatures(modelCatalog, username(), pipelineName, nodeProperties));
     }
 }
