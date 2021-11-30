@@ -28,7 +28,6 @@ import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -169,11 +168,6 @@ class PipelineExecutorTest {
         @Override
         public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
             return List.of(NODE_LABEL_N);
-        }
-
-        @Override
-        public Optional<GraphCreateConfig> implicitCreateConfig() {
-            return Optional.empty();
         }
     }
 

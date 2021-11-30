@@ -64,19 +64,6 @@ class ConfigKeyValidationTest extends BaseProcTest {
     }
 
     @Test
-    void additionalKeyForImplicitLoading() {
-        QueryExecutionException exception = Assertions.assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test({nodeProjection: '*', relationshipProjection: '*', writeProperty: 'p', some: 'key'})")
-        );
-
-        assertThat(
-            exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
-        );
-    }
-
-    @Test
     void misspelledProjectionKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,

@@ -89,11 +89,10 @@ class WccBaseConfigTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-
     @Configuration
     interface TestWccBaseConfig extends WccBaseConfig {
         static TestWccBaseConfig of(CypherMapWrapper map) {
-            return new TestWccBaseConfigImpl(Optional.empty(), Optional.empty(), map);
+            return new TestWccBaseConfigImpl(Optional.empty(), map);
         }
     }
 

@@ -92,7 +92,7 @@ class RelationshipWeightConfigTest {
     @Configuration
     interface TestRelationshipWeightConfig extends AlgoBaseConfig, RelationshipWeightConfig {
         static TestRelationshipWeightConfig of(CypherMapWrapper map) {
-            return new TestRelationshipWeightConfigImpl(Optional.empty(), Optional.empty(), map);
+            return new TestRelationshipWeightConfigImpl(Optional.empty(), map);
         }
     }
 }
