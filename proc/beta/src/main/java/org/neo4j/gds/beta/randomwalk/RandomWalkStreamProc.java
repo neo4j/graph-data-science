@@ -17,14 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.walking;
+package org.neo4j.gds.beta.randomwalk;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.IdMapping;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
@@ -78,6 +80,15 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
 
                 return new RandomWalkResult(translatedNodes, path);
             });
+    }
+
+    @Procedure(value = "gds.beta.randomWalk.stream.estimate", mode = READ)
+    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
