@@ -19,17 +19,23 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 
 class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStreamConfig> {
 
@@ -59,19 +65,44 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
             .yields();
 
         Map<Long, Long> expected = Map.of(
-            idFunction.of("a"), 0L,
-            idFunction.of("b"), 0L,
-            idFunction.of("c"), 0L,
-            idFunction.of("d"), 1L,
-            idFunction.of("e"), 1L,
-            idFunction.of("f"), 1L,
-            idFunction.of("g"), 1L
+            idFunction.of("a"), 1L,
+            idFunction.of("b"), 1L,
+            idFunction.of("c"), 1L,
+            idFunction.of("d"), 0L,
+            idFunction.of("e"), 0L,
+            idFunction.of("f"), 0L,
+            idFunction.of("g"), 0L
         );
+
         runQueryWithRowConsumer(streamQuery, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             long communityId = row.getNumber("communityId").longValue();
             assertEquals(expected.get(nodeId), communityId);
         });
+    }
 
+    // Min k-cut capabilities not exposed in API yet.
+    @Disabled
+    @Test
+    void testIllegalMinCommunitySizesSum() {
+        String streamQuery = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("gds.alpha.maxkcut")
+            .streamMode()
+            .addParameter("minCommunitySizes", List.of(100, 100))
+            .yields();
+
+        QueryExecutionException exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(streamQuery)
+        );
+
+        assertThat(
+            exception,
+            rootCause(
+                IllegalArgumentException.class,
+                "The sum of min community sizes is larger than half of the number of nodes in the graph: 200 > 3"
+            )
+        );
     }
 }

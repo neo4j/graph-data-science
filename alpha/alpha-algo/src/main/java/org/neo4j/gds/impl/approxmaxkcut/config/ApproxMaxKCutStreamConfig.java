@@ -17,35 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.approxmaxkcut;
+package org.neo4j.gds.impl.approxmaxkcut.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 @ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutConfig extends AlgoBaseConfig, RelationshipWeightConfig, SingleThreadedRandomSeedConfig {
+public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig {
 
-    @Value.Default
-    @Configuration.IntegerRange(min = 2, max = Byte.MAX_VALUE)
-    default byte k() {
-        return 2;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int iterations() {
-        return 8;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 0)
-    default int vnsMaxNeighborhoodOrder() {
-        return 0;
+    static ApproxMaxKCutStreamConfig of(
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
+        CypherMapWrapper config
+    ) {
+        return new ApproxMaxKCutStreamConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

@@ -17,24 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.approxmaxkcut;
+package org.neo4j.gds.impl.approxmaxkcut.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphCreateConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig {
+public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePropertyConfig {
 
-    static ApproxMaxKCutStreamConfig of(
+    static ApproxMaxKCutMutateConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         CypherMapWrapper config
     ) {
-        return new ApproxMaxKCutStreamConfigImpl(graphName, implicitCreateConfig, config);
+        return new ApproxMaxKCutMutateConfigImpl(graphName, implicitCreateConfig, config);
     }
 }

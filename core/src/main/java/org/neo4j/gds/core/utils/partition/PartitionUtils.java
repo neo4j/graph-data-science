@@ -138,10 +138,33 @@ public final class PartitionUtils {
         var expectedCapacity = Math.toIntExact(BitUtil.ceilDiv(nodeCount, batchSize));
         var result = new ArrayList<TASK>(expectedCapacity);
         for (long i = 0; i < nodeCount; i += batchSize) {
-            long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
+            result.add(taskCreator.apply(Partition.of(i, actualBatchSize(i, batchSize, nodeCount))));
         }
         return result;
+    }
+
+    private static long actualBatchSize(long startNode, long batchSize, long nodeCount) {
+        return startNode + batchSize < nodeCount ? batchSize : nodeCount - startNode;
+    }
+
+    public static List<Long> rangePartitionActualBatchSizes(
+        int concurrency,
+        long nodeCount,
+        Optional<Integer> minBatchSize
+    ) {
+        long batchSize = ParallelUtil.adjustedBatchSize(
+            nodeCount,
+            concurrency,
+            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE)
+        );
+        var expectedCapacity = Math.toIntExact(BitUtil.ceilDiv(nodeCount, batchSize));
+        var batchSizes = new ArrayList<Long>(expectedCapacity);
+
+        for (long i = 0; i < nodeCount; i += batchSize) {
+            batchSizes.add(actualBatchSize(i, batchSize, nodeCount));
+        }
+
+        return batchSizes;
     }
 
     public static <TASK> Iterator<TASK> blockAlignedPartitioning(

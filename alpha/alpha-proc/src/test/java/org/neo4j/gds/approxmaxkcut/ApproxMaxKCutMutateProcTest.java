@@ -28,7 +28,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 
 import java.util.Optional;
 
@@ -87,13 +87,13 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
     @Override
     public String expectedMutatedGraph() {
         return
-            "  (a { community: 0 })" +
-            ", (b { community: 0 })" +
-            ", (c { community: 0 })" +
-            ", (d { community: 1 })" +
-            ", (e { community: 1 })" +
-            ", (f { community: 1 })" +
-            ", (g { community: 1 })" +
+            "  (a { community: 1 })" +
+            ", (b { community: 1 })" +
+            ", (c { community: 1 })" +
+            ", (d { community: 0 })" +
+            ", (e { community: 0 })" +
+            ", (f { community: 0 })" +
+            ", (g { community: 0 })" +
 
             ", (a)-[{w: 1.0d}]->(b)" +
             ", (a)-[{w: 1.0d}]->(d)" +
