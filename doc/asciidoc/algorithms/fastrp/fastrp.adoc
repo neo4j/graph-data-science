@@ -64,7 +64,6 @@ For more information on this algorithm see:
 * https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 === Node properties
-//=== Extended Algorithm: Using Node Properties
 
 Most real-world graphs contain node properties which store information about the nodes and what they represent.
 The FastRP algorithm in the GDS library extends the original FastRP algorithm with a capability to take node properties into account.
