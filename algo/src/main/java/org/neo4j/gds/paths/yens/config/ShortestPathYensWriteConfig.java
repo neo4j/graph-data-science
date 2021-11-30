@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.paths.yens.config;
 
-import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 import java.util.Optional;
 
