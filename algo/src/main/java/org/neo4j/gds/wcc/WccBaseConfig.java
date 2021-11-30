@@ -44,9 +44,5 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
         if (threshold() > 0 && relationshipWeightProperty() == null) {
             throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");
         }
-
-        if (isIncremental() && consecutiveIds()) {
-           throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
-        }
     }
 }
