@@ -239,8 +239,8 @@
             <d:tocentry linkend="alpha-algorithm-all-pairs-shortest-path">
                 <?dbhtml filename="alpha-algorithms/all-pairs-shortest-path/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="alpha-algorithms-random-walk">
-                <?dbhtml filename="alpha-algorithms/random-walk/index.html"?>
+            <d:tocentry linkend="beta-algorithms-random-walk">
+                <?dbhtml filename="beta-algorithms/random-walk/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="algorithms-bfs">
                 <?dbhtml filename="algorithms/bfs/index.html"?>
