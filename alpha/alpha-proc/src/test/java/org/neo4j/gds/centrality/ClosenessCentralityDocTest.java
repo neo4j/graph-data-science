@@ -21,22 +21,22 @@ package org.neo4j.gds.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 public class ClosenessCentralityDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
-    public static final String DB_CYPHER =
-        "CREATE " +
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
        "  (a:Node{name: \"A\"})" +
        " ,(b:Node{name: \"B\"})" +
        " ,(c:Node{name: \"C\"})" +
@@ -49,13 +49,15 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
        " ,(c)-[:LINK]->(d)" +
        " ,(d)-[:LINK]->(c)" +
        " ,(d)-[:LINK]->(e)" +
-       " ,(e)-[:LINK]->(d);";
+       " ,(e)-[:LINK]->(d)";
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(ClosenessCentralityProc.class);
+        registerProcedures(ClosenessCentralityProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
-        runQuery(DB_CYPHER);
+
+        var createQuery = "CALL gds.graph.create('graph', 'Node', 'LINK')";
+        runQuery(createQuery);
     }
 
     @AfterEach
@@ -66,10 +68,8 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
     @Test
     void shouldStream() {
         String query =
-            "CALL gds.alpha.closeness.stream({" +
-            "  nodeProjection: 'Node'," +
-            "  relationshipProjection: 'LINK'" +
-            "}) YIELD nodeId, centrality" +
+            "CALL gds.alpha.closeness.stream('graph', {})" +
+            " YIELD nodeId, centrality" +
             " RETURN gds.util.asNode(nodeId).name AS user, centrality" +
             " ORDER BY centrality DESC";
 
@@ -90,29 +90,9 @@ public class ClosenessCentralityDocTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         String query =
-            "CALL gds.alpha.closeness.write({" +
-            "  nodeProjection: 'Node'," +
-            "  relationshipProjection: 'LINK'," +
+            "CALL gds.alpha.closeness.write('graph', {" +
             "  writeProperty: 'centrality'" +
             "}) YIELD nodes, writeProperty";
-
-        String actual = runQuery(query, Result::resultAsString);
-        String expected = "+-----------------------+" + NL +
-                          "| nodes | writeProperty |" + NL +
-                          "+-----------------------+" + NL +
-                          "| 5     | \"centrality\"  |" + NL +
-                          "+-----------------------+" + NL +
-                          "1 row" + NL;
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void shouldWriteWithCypherProjection() {
-        String query = "CALL gds.alpha.closeness.write({" + NL + 
-                       "  nodeQuery: 'MATCH (p:Node) RETURN id(p) as id'," + NL + 
-                       "  relationshipQuery: 'MATCH (p1:Node)-[:LINK]->(p2:Node) RETURN id(p1) as source, id(p2) as target'" + NL + 
-                       "}) YIELD nodes, writeProperty";
 
         String actual = runQuery(query, Result::resultAsString);
         String expected = "+-----------------------+" + NL +

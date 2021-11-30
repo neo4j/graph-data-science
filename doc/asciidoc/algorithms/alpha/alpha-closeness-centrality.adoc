@@ -149,13 +149,16 @@ CREATE (a:Node{id:"A"}),
        (e)-[:LINK]->(d);
 ----
 
+.The following will create and store a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('graph', 'Node', 'LINK')
+----
+
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.stream({
-  nodeProjection: 'Node',
-  relationshipProjection: 'LINK'
-})
+CALL gds.alpha.closeness.stream('graph', {})
 YIELD nodeId, centrality
 RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
@@ -183,9 +186,7 @@ Any node that has a direct connection to all other nodes would score 1.
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.write({
-  nodeProjection: 'Node',
-  relationshipProjection: 'LINK',
+CALL gds.alpha.closeness.write('graph', {
   writeProperty: 'centrality'
 }) YIELD nodes, writeProperty
 ----
@@ -197,25 +198,6 @@ CALL gds.alpha.closeness.write({
 | 5     | "centrality"
 |===
 
-[[algorithms-closeness-centrality-cp]]
-== Cypher projection
-
-include::alpha-cypher-explanation.adoc[]
-
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.closeness.write({
-  nodeQuery: 'MATCH (p:Node) RETURN id(p) AS id',
-  relationshipQuery: 'MATCH (p1:Node)-[:LINK]->(p2:Node) RETURN id(p1) AS source, id(p2) AS target'
-}) YIELD nodes, writeProperty
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| nodes | writeProperty
-| 5     | "centrality"
-|===
 
 Calculation:
 
