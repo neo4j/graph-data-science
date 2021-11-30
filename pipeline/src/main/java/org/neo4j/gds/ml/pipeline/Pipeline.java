@@ -51,10 +51,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("featurePipeline", Map.of(
-            "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
-            "featureSteps", ToMapConvertible.toMap(featureSteps)
-        ));
+        map.put("featurePipeline", featurePipelineDescription());
         map.put(
             "trainingParameterSpace",
             trainingParameterSpace.stream().map(ToMapConvertible::toMap).collect(Collectors.toList())
@@ -62,6 +59,8 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep, TRAINING_CONFIG
         map.putAll(additionalEntries());
         return map;
     }
+
+    protected abstract Map<String, List<Map<String, Object>>> featurePipelineDescription();
 
     protected abstract Map<String, Object> additionalEntries();
 

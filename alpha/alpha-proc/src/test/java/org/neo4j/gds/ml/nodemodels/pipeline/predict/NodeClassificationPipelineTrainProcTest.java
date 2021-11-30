@@ -116,7 +116,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures($pipeline, ['array', 'scalar', 'pr'])",
+            "CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar', 'pr'])",
             pipe
         );
         runQuery(
@@ -124,7 +124,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit($pipeline, {holdoutFraction: 0.01, validationFolds: 2})",
+            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.01, validationFolds: 2})",
             pipe
         );
 
@@ -137,7 +137,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             Object.class
         );
 
-        var modelInfoCheck = new Condition<Object>(m -> {
+        var modelInfoCheck = new Condition<>(m -> {
 
             var modelInfo = assertThat(m).asInstanceOf(soMap)
                 .containsEntry("modelName", MODEL_NAME)
@@ -170,7 +170,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                 .containsEntry("config", Map.of("mutateProperty", "pr"));
 
             featurePipeline
-                .extractingByKey("featureSteps", InstanceOfAssertFactories.list(Map.class))
+                .extractingByKey("featureProperties", InstanceOfAssertFactories.list(Map.class))
                 .extracting(map -> map.get("feature"))
                 .containsExactly("array", "scalar", "pr");
 

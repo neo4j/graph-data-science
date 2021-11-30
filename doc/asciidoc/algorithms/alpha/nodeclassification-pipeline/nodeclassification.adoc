@@ -57,7 +57,7 @@ The rest of this page is divided as follows:
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.nodeClassification.create`.
-This stores a trainable model object in the model catalog of type `Node classificationn training pipeline`.
+This stores a trainable model object in the model catalog of type `Node classification training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a classification pipeline.
 The latter is also a model which is stored in the catalog with type `Node classification pipeline`.
 
@@ -74,7 +74,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.create(
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of String,
+  featureProperties: List of String,
   splitConfig: Map,
   parameterSpace: List of Map
 ----
@@ -102,9 +102,9 @@ CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
 .Results
 [opts="header",cols="1,1,1,1,1"]
 |===
-| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| name     | nodePropertySteps | featureProperties | splitConfig | parameterSpace
 | "pipe"   | []                | []
-           | {validationFolds=3, holdoutFraction=0.3}
+           | {testFraction=0.3, validationFolds=3}
            | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
 --
@@ -116,7 +116,7 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 
 A node classification pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
 Such steps producing node properties can be chained one after another and created properties can later be used as <<algorithms-ml-nodeclassification-adding-features, features>>.
-Moreover, the node property steps that are added to the trining pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
+Moreover, the node property steps that are added to the training pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
@@ -138,7 +138,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.addNodeProperty(
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of String,
+  featureProperties: List of String,
   splitConfig: Map,
   parameterSpace: List of Map
 ----
@@ -194,14 +194,14 @@ For example, the `embedding` property could be created by the previous example, 
 .Adding a feature to a pipeline syntax
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures(
+CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures(
   pipelineName: String,
   nodeProperties: List or String
 )
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of String,
+  featureProperties: List of String,
   splitConfig: Map,
   parameterSpace: List of Map
 ----
@@ -221,17 +221,17 @@ include::pipelineInfoResult.adoc[]
 
 [role=query-example,group=nc]
 --
-.The following will add a feature to the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
+.The following will select features for the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures('pipe', ['scaledSizes', 'sizePerStory'])
-YIELD name, featureSteps
+CALL gds.alpha.ml.pipeline.nodeClassification.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
+YIELD name, featureProperties
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name     | featureSteps
+| name     | featureProperties
 | "pipe"   | [scaledSizes, sizePerStory]
 |===
 --
@@ -281,7 +281,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit(
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of Strings,
+  featureProperties: List of Strings,
   splitConfig: Map,
   parameterSpace: List of Map
 ----
@@ -297,9 +297,9 @@ YIELD
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name                  | Type    | Default | Description
-| validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
-| holdoutFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
+| Name               | Type    | Default | Description
+| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
+| testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
 |===
 
 include::pipelineInfoResult.adoc[]
@@ -313,7 +313,7 @@ include::pipelineInfoResult.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('pipe', {
- holdoutFraction: 0.2,
+ testFraction: 0.2,
   validationFolds: 5
 })
 YIELD splitConfig
@@ -323,7 +323,7 @@ YIELD splitConfig
 [opts="header",cols="1"]
 |===
 | splitConfig
-| {validationFolds=5, holdoutFraction=0.2}
+| {testFraction=0.2, validationFolds=5}
 |===
 
 We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-nodeclassification-pipelines-train, training>>.
@@ -356,7 +356,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.configureParams(
 YIELD
   name: String,
   nodePropertySteps: List of Map,
-  featureSteps: List of String,
+  featureProperties: List of String,
   splitConfig: Map,
   parameterSpace: List of Map
 ----
