@@ -1,5 +1,5 @@
 [[algorithms-ml-linkprediction-pipelines]]
-= Link Prediction Pipelines
+= Link prediction pipelines
 :entity: relationship
 :result: relationships
 //:algorithm: Link Prediction
@@ -8,7 +8,7 @@
 
 [abstract]
 --
-This section describes Link Prediction Pipelines in the Neo4j Graph Data Science library.
+This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
 --
 
 

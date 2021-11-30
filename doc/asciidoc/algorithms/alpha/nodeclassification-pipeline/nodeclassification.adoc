@@ -1,5 +1,5 @@
 [[algorithms-ml-nodeclassification-pipelines]]
-= Node Classification Pipelines
+= Node classification pipelines
 :entity: node
 :result: predicted property
 :modelType: Node classification pipeline
@@ -7,7 +7,7 @@
 
 [abstract]
 --
-This section describes Node Classification Pipelines in the Neo4j Graph Data Science library.
+This section describes Node classification pipelines in the Neo4j Graph Data Science library.
 --
 
 
