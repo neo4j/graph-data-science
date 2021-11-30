@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.walking.RandomWalkStreamProc;
 
 import java.util.List;
 
