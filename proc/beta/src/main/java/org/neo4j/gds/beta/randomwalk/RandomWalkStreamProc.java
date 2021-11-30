@@ -52,7 +52,7 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
         "Random Walk is an algorithm that provides random paths in a graph. " +
         "It’s similar to how a drunk person traverses a city.";
 
-    @Procedure(name = "gds.alpha.randomWalk.stream", mode = READ)
+    @Procedure(name = "gds.beta.randomWalk.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<RandomWalkResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
