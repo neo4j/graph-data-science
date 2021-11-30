@@ -1,5 +1,5 @@
 [[algorithms-ml-linkprediction]]
-= Link Prediction
+= Link prediction
 :entity: relationship
 :result: relationships
 :algorithm: Link Prediction
@@ -8,7 +8,7 @@
 
 [abstract]
 --
-This section describes the Link Prediction Model in the Neo4j Graph Data Science library.
+This section describes the Link prediction model in the Neo4j Graph Data Science library.
 --
 
 

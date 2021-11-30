@@ -1,5 +1,5 @@
 [[algorithms-ml-nodeclassification]]
-= Node Classification
+= Node classification
 :entity: node
 :result: predicted property
 :algorithm: Node Classification
@@ -8,7 +8,7 @@
 
 [abstract]
 --
-This section describes the Node Classification Model in the Neo4j Graph Data Science library.
+This section describes the Node classification model in the Neo4j Graph Data Science library.
 --
 
 
