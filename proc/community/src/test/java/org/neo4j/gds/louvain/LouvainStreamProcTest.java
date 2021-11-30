@@ -24,9 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 
-class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> implements
-    ConsecutiveIdsConfigTest<Louvain, LouvainStreamConfig, Louvain> {
+class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainStreamConfig>> getProcedureClazz() {
