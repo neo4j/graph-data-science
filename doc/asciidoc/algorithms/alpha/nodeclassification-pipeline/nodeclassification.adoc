@@ -55,7 +55,7 @@ The rest of this page is divided as follows:
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.alpha.ml.pipeline.nodeClassification.create`.
-This stores a trainable model object in the model catalog of type `Node classificationn training pipeline`.
+This stores a trainable model object in the model catalog of type `Node classification training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a classification pipeline.
 The latter is also a model which is stored in the catalog with type `Node classification pipeline`.
 
@@ -114,7 +114,7 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 
 A node classification pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
 Such steps producing node properties can be chained one after another and created properties can later be used as <<algorithms-ml-nodeclassification-adding-features, features>>.
-Moreover, the node property steps that are added to the trining pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
+Moreover, the node property steps that are added to the training pipeline will be executed both when <<algorithms-ml-nodeclassification-pipelines-train, training>> a model and when the classification pipeline is <<algorithms-link-prediction-pipelines-predict, applied for classification>>.
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
