@@ -50,10 +50,13 @@ final class WccProc {
         String resultProperty,
         AllocationTracker allocationTracker
     ) {
+        var config = computationResult.config();
+
         return CommunityProcCompanion.nodeProperties(
-            computationResult,
+            config,
             resultProperty,
             computationResult.result().asNodeProperties(),
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty()),
             allocationTracker
         );
     }

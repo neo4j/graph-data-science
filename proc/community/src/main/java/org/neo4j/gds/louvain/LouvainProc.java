@@ -21,11 +21,11 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class LouvainProc {
@@ -42,11 +42,13 @@ final class LouvainProc {
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
+
         if (!includeIntermediateCommunities) {
             return CommunityProcCompanion.nodeProperties(
-                computationResult,
+                computationResult.config(),
                 resultProperty,
                 computationResult.result().finalDendrogram().asNodeProperties(),
+                () -> computationResult.graphStore().nodeProperty(config.seedProperty()),
                 allocationTracker
             );
         } else {
