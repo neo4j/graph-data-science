@@ -124,7 +124,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.addFeatures('p', ['b', 'deg'])");
 
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('p', {" +
-                 "  holdoutFraction: 0.2, " +
+                 "  testFraction: 0.2, " +
                  "  validationFolds: 5" +
                  "})");
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('p', [" +

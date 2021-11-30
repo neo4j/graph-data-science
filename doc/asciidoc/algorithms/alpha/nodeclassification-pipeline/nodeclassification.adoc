@@ -104,7 +104,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
 | "pipe"   | []                | []
-           | {validationFolds=3, holdoutFraction=0.3}
+           | {validationFolds=3, testFraction=0.3}
            | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
 --
@@ -297,9 +297,9 @@ YIELD
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name                  | Type    | Default | Description
-| validationFolds       | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
-| holdoutFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
+| Name               | Type    | Default | Description
+| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<algorithms-ml-nodeclassification-pipelines-train,model selection>>.
+| testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
 |===
 
 include::pipelineInfoResult.adoc[]
@@ -313,7 +313,7 @@ include::pipelineInfoResult.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('pipe', {
- holdoutFraction: 0.2,
+ testFraction: 0.2,
   validationFolds: 5
 })
 YIELD splitConfig
@@ -323,7 +323,7 @@ YIELD splitConfig
 [opts="header",cols="1"]
 |===
 | splitConfig
-| {validationFolds=5, holdoutFraction=0.2}
+| {validationFolds=5, testFraction=0.2}
 |===
 
 We now reconfigured the splitting of the pipeline, which will be applied during <<algorithms-ml-nodeclassification-pipelines-train, training>>.

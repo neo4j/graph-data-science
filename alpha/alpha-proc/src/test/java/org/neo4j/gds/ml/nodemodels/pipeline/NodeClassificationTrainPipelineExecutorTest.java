@@ -116,7 +116,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         )));
 
         pipeline.setSplitConfig(ImmutableNodeClassificationSplitConfig.builder()
-            .holdoutFraction(0.01)
+            .testFraction(0.01)
             .validationFolds(2)
             .build()
         );

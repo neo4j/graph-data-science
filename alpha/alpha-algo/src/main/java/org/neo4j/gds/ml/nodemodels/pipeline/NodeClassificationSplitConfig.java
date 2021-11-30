@@ -37,7 +37,7 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
-    default double holdoutFraction() {
+    default double testFraction() {
         return 0.3;
     }
 
