@@ -113,7 +113,7 @@ class NodeClassificationPipelineTest {
     @Test
     void canSetSplitConfig() {
         var pipeline = new NodeClassificationPipeline();
-        var splitConfig = NodeClassificationSplitConfig.builder().holdoutFraction(0.555).build();
+        var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.555).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
@@ -123,10 +123,10 @@ class NodeClassificationPipelineTest {
     @Test
     void overridesTheSplitConfig() {
         var pipeline = new NodeClassificationPipeline();
-        var splitConfig = NodeClassificationSplitConfig.builder().holdoutFraction(0.5).build();
+        var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
-        var splitConfigOverride = NodeClassificationSplitConfig.builder().holdoutFraction(0.7).build();
+        var splitConfigOverride = NodeClassificationSplitConfig.builder().testFraction(0.7).build();
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
@@ -141,14 +141,12 @@ class NodeClassificationPipelineTest {
             var pipeline = new NodeClassificationPipeline();
             assertThat(pipeline.toMap())
                 .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
-                .satisfies(pipelineMap -> {
-                    assertThat(pipelineMap.get("featurePipeline"))
-                        .isInstanceOf(Map.class)
-                        .asInstanceOf(InstanceOfAssertFactories.MAP)
-                        .containsOnlyKeys("nodePropertySteps", "featureSteps")
-                        .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
-                        .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureSteps"));
-                })
+                .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(InstanceOfAssertFactories.MAP)
+                    .containsOnlyKeys("nodePropertySteps", "featureSteps")
+                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
+                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureSteps")))
                 .returns(
                     NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
                     pipelineMap -> pipelineMap.get("splitConfig")
@@ -173,25 +171,23 @@ class NodeClassificationPipelineTest {
                 NodeLogisticRegressionTrainCoreConfig.of(Map.of("penalty", 1))
             ));
 
-            var splitConfig = NodeClassificationSplitConfig.builder().holdoutFraction(0.5).build();
+            var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
                 .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
-                .satisfies(pipelineMap -> {
-                    assertThat(pipelineMap.get("featurePipeline"))
-                        .isInstanceOf(Map.class)
-                        .asInstanceOf(InstanceOfAssertFactories.MAP)
-                        .containsOnlyKeys("nodePropertySteps", "featureSteps")
-                        .returns(
-                            List.of(pageRankPropertyStep.toMap()),
-                            featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
-                        )
-                        .returns(
-                            List.of(fooStep.toMap()),
-                            featurePipelineMap -> featurePipelineMap.get("featureSteps")
-                        );
-                })
+                .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(InstanceOfAssertFactories.MAP)
+                    .containsOnlyKeys("nodePropertySteps", "featureSteps")
+                    .returns(
+                        List.of(pageRankPropertyStep.toMap()),
+                        featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
+                    )
+                    .returns(
+                        List.of(fooStep.toMap()),
+                        featurePipelineMap -> featurePipelineMap.get("featureSteps")
+                    ))
                 .returns(
                     pipeline.splitConfig().toMap(),
                     pipelineMap -> pipelineMap.get("splitConfig")
@@ -272,16 +268,14 @@ class NodeClassificationPipelineTest {
         @Test
         void doesntDeepCopySplitConfig() {
             var pipeline = new NodeClassificationPipeline();
-            var splitConfig = NodeClassificationSplitConfig.builder().holdoutFraction(0.5).build();
+            var splitConfig = NodeClassificationSplitConfig.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             var copy = pipeline.copy();
 
             assertThat(copy)
                 .isNotSameAs(pipeline)
-                .satisfies(copiedPipeline -> {
-                    assertThat(copiedPipeline.splitConfig()).isSameAs(splitConfig);
-                });
+                .satisfies(copiedPipeline -> assertThat(copiedPipeline.splitConfig()).isSameAs(splitConfig));
         }
     }
 }

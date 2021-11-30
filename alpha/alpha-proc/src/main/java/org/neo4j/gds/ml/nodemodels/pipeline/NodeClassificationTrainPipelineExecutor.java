@@ -115,7 +115,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             .featureProperties(pipeline.featureProperties())
             .params(params)
             .randomSeed(config.randomSeed())
-            .holdoutFraction(pipeline.splitConfig().holdoutFraction())
+            .holdoutFraction(pipeline.splitConfig().testFraction())
             .validationFolds(pipeline.splitConfig().validationFolds())
             .nodeLabels(config.nodeLabels())
             .relationshipTypes(config.relationshipTypes())
