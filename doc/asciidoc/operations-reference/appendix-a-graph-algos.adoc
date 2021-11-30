@@ -201,6 +201,9 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.node2vec.stream.estimate`
 | `gds.beta.node2vec.write`
 | `gds.beta.node2vec.write`.estimate
+.2+<.^|<<beta-algorithms-random-walk, Random Walk>>
+| `gds.beta.randomWalk.stream`
+| `gds.beta.randomWalk.stream.estimate`
 |===
 
 [[alpha-tier]]
@@ -239,8 +242,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.hits.stream.estimate`
 | `gds.alpha.hits.write`
 | `gds.alpha.hits.write.estimate`
-.1+<.^|<<alpha-algorithms-random-walk, Random Walk>>
-| `gds.alpha.randomWalk.stream`
 .2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
