@@ -36,7 +36,7 @@ import static org.neo4j.gds.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 
-public class DefaultProcConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConfigParser<CONFIG> {
+public class DefaultProcConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> {
 
     private final NewConfigFunction<CONFIG> newConfigFunction;
     private final String username;

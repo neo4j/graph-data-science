@@ -40,13 +40,13 @@ import static org.neo4j.gds.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJE
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 import static org.neo4j.gds.similarity.AlphaSimilarityProc.removeGraph;
 
-public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG> {
+public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> implements ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> {
 
-    private final ProcConfigParser<CONFIG> configParser;
+    private final ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser;
     private final NamedDatabaseId databaseId;
 
     AlphaSimilarityProcConfigParser(
-        ProcConfigParser<CONFIG> configParser,
+        ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser,
         NamedDatabaseId databaseId
     ) {
         this.configParser = configParser;

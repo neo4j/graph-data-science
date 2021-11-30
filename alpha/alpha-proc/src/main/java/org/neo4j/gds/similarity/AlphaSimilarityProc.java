@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ProcConfigParser;
@@ -38,6 +39,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -146,7 +148,7 @@ abstract class AlphaSimilarityProc
     }
 
     @Override
-    public ProcConfigParser<CONFIG> configParser() {
+    public ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser() {
         return new AlphaSimilarityProcConfigParser<>(
             super.configParser(),
             databaseId()

@@ -48,7 +48,7 @@ public abstract class AlgoBaseProc<
         return this.getClass().getSimpleName();
     }
 
-    public ProcConfigParser<CONFIG> configParser() {
+    public ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser() {
         return new DefaultProcConfigParser<>(username(), AlgoBaseProc.this::newConfig);
     }
 
@@ -116,7 +116,18 @@ public abstract class AlgoBaseProc<
         var config = configAndGraphName.getOne();
         var maybeGraphName = configAndGraphName.getTwo();
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader(config, maybeGraphName)).memoryEstimation(config);
+        GraphStoreLoader graphStoreLoader;
+
+        if (maybeGraphName.isEmpty()) {
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
+            var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig, configuration);
+
+            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(this::username, this::graphLoaderContext, graphCreateConfig);
+        } else {
+            graphStoreLoader = new GraphStoreFromCatalogLoader(maybeGraphName.get(), config, username(), databaseId(), isGdsAdmin());
+        }
+
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader).memoryEstimation(config);
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );

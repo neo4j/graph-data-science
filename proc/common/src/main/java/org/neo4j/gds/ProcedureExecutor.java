@@ -44,7 +44,7 @@ public class ProcedureExecutor<
     CONFIG extends AlgoBaseConfig
 > {
 
-    private final ProcConfigParser<CONFIG> configParser;
+    private final ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
     private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
     private final Validator<CONFIG> validator;
@@ -56,7 +56,7 @@ public class ProcedureExecutor<
     private final AllocationTracker allocationTracker;
 
     ProcedureExecutor(
-        ProcConfigParser<CONFIG> configParser,
+        ProcConfigParser<CONFIG, Pair<CONFIG, Optional<String>>> configParser,
         MemoryUsageValidator memoryUsageValidator,
         BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
         Validator<CONFIG> validator,
