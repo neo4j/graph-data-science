@@ -20,19 +20,20 @@
 package org.neo4j.gds.shortestpaths;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 import org.neo4j.gds.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 class SpanningTreeDocTest extends BaseProcTest {
     private static final String NL = System.lineSeparator();
 
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE " +
         " (a:Place {id: 'A'})," +
@@ -48,29 +49,33 @@ class SpanningTreeDocTest extends BaseProcTest {
         " (b)-[:LINK {cost:3}]->(c)," +
         " (a)-[:LINK {cost:2}]->(c)," +
         " (c)-[:LINK {cost:5}]->(e)," +
-        " (f)-[:LINK {cost:1}]->(g);";
+        " (f)-[:LINK {cost:1}]->(g)";
 
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
             SpanningTreeProc.class,
-            KSpanningTreeProc.class
+            KSpanningTreeProc.class,
+            GraphCreateProc.class
         );
-        runQuery(DB_CYPHER);
+
+        runQuery("CALL gds.graph.create(" +
+                 "  'graph'," +
+                 "  'Place'," +
+                 "  {" +
+                 "    LINK: {" +
+                 "      type: 'LINK'," +
+                 "      properties: 'cost'," +
+                 "      orientation: 'UNDIRECTED'" +
+                 "    }" +
+                 "  }" +
+                 ")");
     }
 
     @Test
     void shouldWriteMinimumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                       " CALL gds.alpha.spanningTree.minimum.write({"+
-                       "   nodeProjection: 'Place'," +
-                       "   relationshipProjection: {" +
-                       "     LINK: {" +
-                       "       type: 'LINK'," +
-                       "       properties: 'cost'," +
-                       "       orientation: 'UNDIRECTED'" +
-                       "     }" +
-                       "   }," +
+                       " CALL gds.alpha.spanningTree.minimum.write('graph', {"+
                        "   startNodeId: id(n)," +
                        "   relationshipWeightProperty: 'cost'," +
                        "   weightWriteProperty: 'writeCost'," +
@@ -104,15 +109,7 @@ class SpanningTreeDocTest extends BaseProcTest {
     @Test
     void shouldWriteMaximumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                       " CALL gds.alpha.spanningTree.maximum.write({"+
-                       "   nodeProjection: 'Place'," +
-                       "   relationshipProjection: {" +
-                       "     LINK: {" +
-                       "       type: 'LINK'," +
-                       "       properties: 'cost'," +
-                       "       orientation: 'UNDIRECTED'" +
-                       "     }" +
-                       "   }," +
+                       " CALL gds.alpha.spanningTree.maximum.write('graph', {"+
                        "   startNodeId: id(n)," +
                        "   relationshipWeightProperty: 'cost'," +
                        "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship

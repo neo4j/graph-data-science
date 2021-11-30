@@ -152,21 +152,29 @@ CREATE (a:Place {id: 'A'}),
        (f)-[:LINK {cost:1}]->(g);
 ----
 
+.The following will create and store a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create(
+  'graph',
+  'Place',
+  {
+    LINK: {
+      type: 'LINK',
+      properties: 'cost',
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
 Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.
 
 .The following will run the Minimum Weight Spanning Tree algorithm and write back results:
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
-CALL gds.alpha.spanningTree.minimum.write({
-  nodeProjection: 'Place',
-  relationshipProjection: {
-    LINK: {
-      type: 'LINK',
-      properties: 'cost',
-      orientation: 'UNDIRECTED'
-    }
-  },
+CALL gds.alpha.spanningTree.minimum.write('graph', {
   startNodeId: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MINST',
@@ -208,14 +216,7 @@ Maximum weighted tree spanning algorithm is similar to the minimum one, except t
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.maximum.write({
-  nodeProjection: 'Place',
-  relationshipProjection: {
-    LINK: {
-      type: 'LINK',
-      properties: 'cost'
-    }
-  },
+CALL gds.alpha.spanningTree.maximum.write('graph', {
   startNodeId: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MAXST',
@@ -242,14 +243,7 @@ By setting the `k=3`, we define that we want to get returned a 3-minimum spannin
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.kmin.write({
-  nodeProjection: 'Place',
-  relationshipProjection: {
-    LINK: {
-      type: 'LINK',
-      properties: 'cost'
-    }
-  },
+CALL gds.alpha.spanningTree.kmin.write('graph', {
   k: 3,
   startNodeId: id(n),
   relationshipWeightProperty: 'cost',
@@ -285,14 +279,7 @@ Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.kmax.write({
-  nodeProjection: 'Place',
-  relationshipProjection: {
-    LINK: {
-      type: 'LINK',
-      properties: 'cost'
-    }
-  },
+CALL gds.alpha.spanningTree.kmax.write('graph', {
   k: 3,
   startNodeId: id(n),
   relationshipWeightProperty: 'cost',
