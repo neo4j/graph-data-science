@@ -33,6 +33,7 @@ allprojects {
 
 allprojects {
     plugins.withType(JavaLibraryPlugin) {
+
         repositories {
             mavenCentral()
             if (project.hasProperty('pipelineRepository')) {
