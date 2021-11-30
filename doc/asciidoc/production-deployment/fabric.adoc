@@ -40,13 +40,26 @@ Every `Person` node also stores an identifying property `id` and the persons `na
 
 The other shard, the analytical database, stores a graph with the same data, except that the only property is the unique identifier.
 
+First we need to create a named graph on the analytical database shard.
+
+[source, cypher, role=noplay]
+----
+CALL {
+  USE FABRIC_DB_NAME.ANALYTICS_DB
+  CALL gds.graph.create('graph', 'Person', 'KNOWS')
+  YIELD graphName
+  RETURN graphName
+}
+RETURN graphName
+----
+
 Using Fabric, we can now calculate the PageRank score for each Person and join the results with the name of that Person.
 
 [source, cypher, role=noplay]
 ----
 CALL {
   USE FABRIC_DB_NAME.ANALYTICS_DB
-  CALL gds.pagerank.stream({nodeProjection: 'Person', relationshipProjection: 'KNOWS'})
+  CALL gds.pagerank.stream('graph', {})
   YIELD nodeId, score AS pageRank
   RETURN gds.util.asNode(nodeId).id AS personId, pageRank
 }
