@@ -20,19 +20,21 @@
 package org.neo4j.gds.shortestpaths;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
+
+    @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE " +
         " (a:Loc {name: 'A'})," +
@@ -49,26 +51,29 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
         " (c)-[:ROAD {cost:80}]->(e)," +
         " (d)-[:ROAD {cost:30}]->(e)," +
         " (d)-[:ROAD {cost:80}]->(f)," +
-        " (e)-[:ROAD {cost:40}]->(f);";
+        " (e)-[:ROAD {cost:40}]->(f)";
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(ShortestPathDeltaSteppingProc.class);
+        registerProcedures(ShortestPathDeltaSteppingProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
-        runQuery(DB_CYPHER);
+
+        runQuery("CALL gds.graph.create(" +
+                 "  'graph'," +
+                 "  'Loc'," +
+                 "  {" +
+                 "    ROAD: {" +
+                 "      type: 'ROAD'," +
+                 "      properties: 'cost'" +
+                 "    }" +
+                 "  }" +
+                 ")");
     }
 
     @Test
     void shouldStream() {
         String query = "MATCH (n:Loc {name: 'A'})" +
-                       " CALL gds.alpha.shortestPath.deltaStepping.stream({" +
-                       "  nodeProjection: 'Loc'," +
-                       "  relationshipProjection: {" +
-                       "    ROAD: {" +
-                       "      type: 'ROAD'," +
-                       "      properties: 'cost'" +
-                       "    }" +
-                       "  }," +
+                       " CALL gds.alpha.shortestPath.deltaStepping.stream('graph', {" +
                        "  startNode: n," +
                        "  relationshipWeightProperty: 'cost'," +
                        "  delta: 3.0" +
@@ -95,41 +100,9 @@ class ShortestPathDeltaSteppingDocTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         String query = "MATCH (n:Loc {name: 'A'})" +
-                       " CALL gds.alpha.shortestPath.deltaStepping.write({" +
-                       "  nodeProjection: 'Loc'," +
-                       "  relationshipProjection: {" +
-                       "    ROAD: {" +
-                       "      type: 'ROAD'," +
-                       "      properties: 'cost'" +
-                       "    }" +
-                       "  }," +
+                       " CALL gds.alpha.shortestPath.deltaStepping.write('graph', {" +
                        "  startNode: n," +
                        "  relationshipWeightProperty: 'cost'," +
-                       "  delta: 3.0," +
-                       "  writeProperty: 'sssp'" +
-                       "})" +
-                       " YIELD nodeCount" +
-                       " RETURN nodeCount";
-
-        String actual = runQuery(query, Result::resultAsString);
-        String expected = "+-----------+" + NL +
-                          "| nodeCount |" + NL +
-                          "+-----------+" + NL +
-                          "| 6         |" + NL +
-                          "+-----------+" + NL +
-                          "1 row" + NL;
-
-        assertEquals(expected, actual);
-    }
-    
-    @Test
-    void shouldWriteCypher() {
-        String query = "MATCH (start:Loc{name:'A'})" +
-                       " CALL gds.alpha.shortestPath.deltaStepping.write({" +
-                       "  nodeQuery:'MATCH(n:Loc) WHERE not n.name = \"c\" RETURN id(n) as id'," +
-                       "  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) as source, id(m) as target, r.cost as weight'," +
-                       "  startNode: start," +
-                       "  relationshipWeightProperty: 'weight'," +
                        "  delta: 3.0," +
                        "  writeProperty: 'sssp'" +
                        "})" +
