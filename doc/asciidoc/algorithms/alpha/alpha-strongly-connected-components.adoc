@@ -135,12 +135,16 @@ CREATE (nBridget)-[:FOLLOW]->(nAlice)
 CREATE (nMichael)-[:FOLLOW]->(nBridget);
 ----
 
+.The following will create and store a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('graph', 'User', 'FOLLOW')
+----
+
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW',
+CALL gds.alpha.scc.write('graph', {
   writeProperty: 'componentId'
 })
 YIELD setCount, maxSetSize, minSetSize;
@@ -156,10 +160,7 @@ YIELD setCount, maxSetSize, minSetSize;
 .The following will run the algorithm and stream back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOW'
-})
+CALL gds.alpha.scc.stream('graph', {})
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
 ORDER BY Component DESC
@@ -198,36 +199,6 @@ LIMIT 1
 |===
 | Component | ComponentSize
 | 0         | 3
-|===
-
-
-[[algorithms-strongly-connected-components-cp]]
-== Cypher projection
-
-include::alpha-cypher-explanation.adoc[]
-
-.Use `nodeQuery` and `relationshipQuery` in the config:
-
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.scc.stream({
-  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
-  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' })
-YIELD nodeId, componentId
-RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
-ORDER BY Component DESC
-----
-
-.Results
-[opts="header",cols="1m,1m"]
-|===
-| Name      | Component
-| "Doug"    | 3
-| "Mark"    | 3
-| "Charles" | 2
-| "Alice"   | 0
-| "Bridget" | 0
-| "Michael" | 0
 |===
 
 

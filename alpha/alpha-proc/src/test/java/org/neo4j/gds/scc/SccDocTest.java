@@ -22,6 +22,7 @@ package org.neo4j.gds.scc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
@@ -50,16 +51,15 @@ class SccDocTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(SccProc.class);
+        registerProcedures(SccProc.class, GraphCreateProc.class);
         registerFunctions(AsNodeFunc.class);
+
+        runQuery("CALL gds.graph.create('graph', 'User', 'FOLLOW')");
     }
 
     @Test
     void stream1() {
-        String query = "CALL gds.alpha.scc.stream({ " +
-                       "  nodeProjection: 'User', " +
-                       "  relationshipProjection: 'FOLLOW' " +
-                       "}) " +
+        String query = "CALL gds.alpha.scc.stream('graph', {}) " +
                        "YIELD nodeId, componentId " +
                        "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
                        "ORDER BY Component DESC";
@@ -81,9 +81,7 @@ class SccDocTest extends BaseProcTest {
 
     @Test
     void write1() {
-        String query = "CALL gds.alpha.scc.write({ " +
-                       "  nodeProjection: 'User', " +
-                       "  relationshipProjection: 'FOLLOW', " +
+        String query = "CALL gds.alpha.scc.write('graph', { " +
                        "  writeProperty: 'componentId' " +
                        "}) " +
                        "YIELD setCount, maxSetSize, minSetSize; ";
@@ -100,9 +98,7 @@ class SccDocTest extends BaseProcTest {
 
     @Test
     void findLargest() {
-        String writeQ = "CALL gds.alpha.scc.write({ " +
-                       "  nodeProjection: 'User', " +
-                       "  relationshipProjection: 'FOLLOW', " +
+        String writeQ = "CALL gds.alpha.scc.write('graph', { " +
                        "  writeProperty: 'componentId' " +
                        "}) " +
                        "YIELD setCount, maxSetSize, minSetSize; ";
@@ -119,31 +115,6 @@ class SccDocTest extends BaseProcTest {
                           "| 0         | 3             |\n" +
                           "+---------------------------+\n" +
                           "1 row\n";
-
-        assertEquals(expected, runQuery(query, Result::resultAsString));
-    }
-
-    @Test
-    void cypherProjection() {
-        String query = "CALL gds.alpha.scc.stream({ " +
-                       "  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
-                       "  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' " +
-                       "}) " +
-                       "YIELD nodeId, componentId " +
-                       "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
-                       "ORDER BY componentId DESC ";
-
-        String expected = "+-----------------------+\n" +
-                          "| Name      | Component |\n" +
-                          "+-----------------------+\n" +
-                          "| \"Doug\"    | 3         |\n" +
-                          "| \"Mark\"    | 3         |\n" +
-                          "| \"Charles\" | 2         |\n" +
-                          "| \"Alice\"   | 0         |\n" +
-                          "| \"Bridget\" | 0         |\n" +
-                          "| \"Michael\" | 0         |\n" +
-                          "+-----------------------+\n" +
-                          "6 rows\n";
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
     }
