@@ -26,8 +26,17 @@ dependencies {
     implementation project(':proc-common')
 
     testImplementation project(':test-utils')
+    testImplementation project(':doc-test')
     testImplementation project(':test-graph-loaders')
 }
+
+// provide docs sources for use in test
+tasks.register('unpackDocs', Copy) {
+    dependsOn project(':doc').tasks.assembleDocs
+    from tarTree(project(':doc').tasks.assembleDocs.archiveFile)
+    into "$buildDir/doc-sources"
+}
+test.dependsOn tasks.named('unpackDocs')
 
 // configure the keys that will be written to the info.properties file
 infoBroker {

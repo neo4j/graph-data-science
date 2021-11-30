@@ -60,6 +60,9 @@ project(':cypher-test').projectDir = file('cypher/cypher-test')
 include('doc')
 project(':doc').projectDir = file('doc')
 
+include('doc-test')
+project(':doc-test').projectDir = file('doc-test')
+
 include('edition-api')
 project(':edition-api').projectDir = file('edition-api')
 

@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.functions.VersionFunc;
-import org.neo4j.gds.pagerank.PageRankMutateProc;
 
 import java.util.List;
 
@@ -37,7 +35,7 @@ class UtilityDocTest extends DocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphCreateProc.class, PageRankMutateProc.class);
+        return List.of();
     }
 
     @Override
