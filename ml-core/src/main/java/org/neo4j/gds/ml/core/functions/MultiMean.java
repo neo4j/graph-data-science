@@ -80,20 +80,28 @@ public class MultiMean extends SingleParentVariable<Matrix> {
 
         int cols = parent.dimension(1);
 
-        for (int col = 0; col < cols; col++) {
-            for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
-                var sourceId = batchIds[batchIdx];
-                int[] neighbors = subGraph.neighbors(sourceId);
-                int degree = neighbors.length + 1;
+        for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
+            var sourceId = batchIds[batchIdx];
+            int[] neighbors = subGraph.neighbors(sourceId);
+            int degree = neighbors.length + 1;
+
+            double[] cachedNeighborWeights = new double[neighbors.length];
+
+            for (int i = 0; i < neighbors.length; i++) {
+                cachedNeighborWeights[i] = subGraph.relationshipWeight(sourceId, neighbors[i]);
+            }
+
+            for (int col = 0; col < cols; col++) {
                 int gradientElementIndex = batchIdx * cols + col;
-                for (int neighbor : neighbors) {
-                    double relationshipWeight = subGraph.relationshipWeight(sourceId, neighbor); //TODO normalize weights
+                for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
+                    int neighbor = neighbors[neighborIndex];
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
-                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * relationshipWeight)
+                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * cachedNeighborWeights[neighborIndex])
                     );
                 }
+
                 result.addDataAt(
                     sourceId * cols + col,
                     (1d / degree) * multiMeanGradient[gradientElementIndex]
