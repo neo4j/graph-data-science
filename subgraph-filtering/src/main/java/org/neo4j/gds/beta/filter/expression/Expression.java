@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.filter.expression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,10 @@ public interface Expression {
     @Value.Derived
     default ValidationContext validate(ValidationContext context) {
         return context;
+    }
+
+    default ValueType valueType() {
+        return ValueType.DOUBLE;
     }
 
     interface LeafExpression extends Expression {
@@ -97,6 +102,11 @@ public interface Expression {
             @Override
             default double evaluate(EvaluationContext context) {
                 return context.getProperty(propertyKey());
+            }
+
+            @Value.Default
+            default ValueType valueType(EvaluationContext context) {
+                return context.getValueType(propertyKey());
             }
 
             @Override
@@ -300,6 +310,11 @@ public interface Expression {
         @ValueClass
         interface LongLiteral extends Literal {
             long value();
+
+            @Override
+            default ValueType valueType() {
+                return ValueType.LONG;
+            }
 
             @Value.Derived
             @Override
