@@ -56,7 +56,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
@@ -65,17 +65,17 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     @Test
     void shouldOnlyKeepLastOverride() {
         var expectedSplitConfig = new HashMap<>(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG) {{
-            put("holdoutFraction", 0.5);
+            put("testFraction", 0.5);
         }};
         runQuery("CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})");
 
         assertCypherResult(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {holdoutFraction: 0.5})",
+            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {testFraction: 0.5})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
                 "nodePropertySteps", List.of(),
-                "featureSteps", List.of(),
+                "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
@@ -84,8 +84,8 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {invalidKey: 42, holdMyFraction: -0.51})",
-            "Unexpected configuration keys: holdMyFraction (Did you mean [holdoutFraction]?), invalidKey"
+            "CALL gds.alpha.ml.pipeline.nodeClassification.configureSplit('myPipeline', {invalidKey: 42, testMyFraction: -0.51})",
+            "Unexpected configuration keys: invalidKey, testMyFraction (Did you mean [testFraction]?)"
         );
     }
 }

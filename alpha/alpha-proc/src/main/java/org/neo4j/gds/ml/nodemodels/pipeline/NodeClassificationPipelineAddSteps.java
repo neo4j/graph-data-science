@@ -44,7 +44,7 @@ public final class NodeClassificationPipelineAddSteps {
         return new PipelineInfoResult(pipelineName, pipeline);
     }
 
-    public static PipelineInfoResult addFeatures(
+    public static PipelineInfoResult selectFeatures(
         ModelCatalog modelCatalog,
         String username,
         String pipelineName,

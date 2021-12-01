@@ -57,7 +57,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
         var result = NodeClassificationPipelineCreate.create(modelCatalog, getUsername(), "myPipeline");
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
-        assertThat(result.featureSteps).isEqualTo(List.of());
+        assertThat(result.featureProperties).isEqualTo(List.of());
         assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
         assertThat(result.parameterSpace).isEqualTo(DEFAULT_PARAM_CONFIG);
 
@@ -70,7 +70,7 @@ public class NodeClassificationPipelineCreateTest extends BaseProcTest {
                         "modelType", PIPELINE_MODEL_TYPE,
                         "featurePipeline", Map.of(
                             "nodePropertySteps", List.of(),
-                            "featureSteps", List.of()
+                            "featureProperties", List.of()
                         ),
                         "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
                         "trainingParameterSpace", DEFAULT_PARAM_CONFIG

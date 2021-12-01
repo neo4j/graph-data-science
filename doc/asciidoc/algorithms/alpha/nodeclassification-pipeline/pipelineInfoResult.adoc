@@ -4,7 +4,7 @@
 | Name              | Type          | Description
 | name              | String        | Name of the pipeline.
 | nodePropertySteps | List of Map   | List of configurations for node property steps.
-| featureSteps      | List of String| List of node properties to be used as features.
+| featureProperties | List of String| List of node properties to be used as features.
 | splitConfig       | Map           | Configuration to define the split before the model training.
 | parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
 |===
