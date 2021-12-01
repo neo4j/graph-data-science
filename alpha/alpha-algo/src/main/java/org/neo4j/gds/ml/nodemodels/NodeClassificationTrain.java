@@ -36,14 +36,15 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
@@ -51,7 +52,6 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,12 +71,12 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
     private final HugeLongArray targets;
-    private final Multiset<Long> classCounts;
     private final HugeLongArray nodeIds;
     private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
     private final StatsMap trainStats;
     private final StatsMap validationStats;
+    private final MetricComputer metricComputer;
 
     static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
         var maxBatchSize = config.paramsConfig()
@@ -196,7 +196,18 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        return new NodeClassificationTrain(graph, config, targets, classCounts, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressTracker);
+        return new NodeClassificationTrain(
+            graph,
+            config,
+            targets,
+            classCounts,
+            metrics,
+            nodeIds,
+            trainStats,
+            validationStats,
+            allocationTracker,
+            progressTracker
+        );
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
@@ -232,12 +243,20 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         this.graph = graph;
         this.config = config;
         this.targets = targets;
-        this.classCounts = classCounts;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
         this.validationStats = validationStats;
         this.allocationTracker = allocationTracker;
+        this.metricComputer = new ClassificationMetricComputer(
+            allocationTracker,
+            metrics,
+            classCounts,
+            graph,
+            config,
+            progressTracker,
+            terminationFlag
+        );
     }
 
     @Override
@@ -287,12 +306,12 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
                 var validationSet = nodeSplit.testSet();
 
                 progressTracker.beginSubTask("Training");
-                var modelData = trainModel(trainSet, modelParams);
+                var predictor = trainPredictor(trainSet, modelParams);
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
-                computeMetrics(classCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
+                metricComputer.computeMetrics(validationSet, predictor).forEach(validationStatsBuilder::update);
+                metricComputer.computeMetrics(trainSet, predictor).forEach(trainStatsBuilder::update);
                 progressTracker.endSubTask();
 
                 progressTracker.endSubTask();
@@ -318,12 +337,12 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         NodeLogisticRegressionTrainConfig bestParameters
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
+        Predictor<Matrix, ?> bestPredictor = trainPredictor(outerSplit.trainSet(), bestParameters);
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = computeMetrics(classCounts, outerSplit.testSet(), bestModelData, metrics);
-        var outerTrainMetrics = computeMetrics(classCounts, outerSplit.trainSet(), bestModelData, metrics);
+        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestPredictor);
+        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestPredictor);
         progressTracker.endSubTask();
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
@@ -383,43 +402,11 @@ public final class NodeClassificationTrain extends Algorithm<NodeClassificationT
         return train.compute();
     }
 
-    private Map<Metric, Double> computeMetrics(
-        Multiset<Long> globalClassCounts,
-        HugeLongArray evaluationSet,
-        NodeLogisticRegressionData modelData,
-        Collection<Metric> metrics
+    private Predictor<Matrix, ?> trainPredictor(
+        HugeLongArray trainSet,
+        NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var predictor = new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
-        var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
-
-        // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
-        // the consumer internally remaps to original nodeIds before prediction
-        var consumer = new NodeClassificationPredictConsumer(
-            graph,
-            evaluationSet::get,
-            predictor,
-            null,
-            predictedClasses,
-            config.featureProperties(),
-            progressTracker
-        );
-
-        var queue = new BatchQueue(evaluationSet.size());
-        queue.parallelConsume(consumer, config.concurrency(), terminationFlag);
-
-        var localTargets = makeLocalTargets(evaluationSet);
-        return metrics.stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric -> metric.compute(localTargets, predictedClasses, globalClassCounts)
-        ));
-    }
-
-    private HugeLongArray makeLocalTargets(HugeLongArray nodeIds) {
-        var targets = HugeLongArray.newArray(nodeIds.size(), allocationTracker);
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-
-        targets.setAll(i -> targetNodeProperty.longValue(nodeIds.get(i)));
-        return targets;
+        return new NodeLogisticRegressionPredictor(trainModel(trainSet, nlrConfig), nlrConfig.featureProperties());
     }
 
     @ValueClass

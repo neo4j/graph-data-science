@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.ArrayList;
 import java.util.Collections;

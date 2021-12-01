@@ -26,7 +26,7 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Recall implements Metric {
+public class Recall implements ClassificationMetric {
 
     public static final String NAME = "RECALL";
 
