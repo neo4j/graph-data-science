@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 import java.util.Map;
@@ -39,21 +40,23 @@ public abstract class EvaluationContext {
 
         private final GraphStore graphStore;
         private final AtomicReference<NodeLabel> labelForPropertyReference;
-
+        private final AtomicReference<ValueType> typeForPropertyReference;
         private long nodeId;
 
         public NodeEvaluationContext(GraphStore graphStore) {
             this.graphStore = graphStore;
             labelForPropertyReference = new AtomicReference<>();
+            typeForPropertyReference = new AtomicReference<>();
         }
 
         @Override
         double getProperty(String propertyKey) {
             labelForPropertyReference.set(null);
-
+            typeForPropertyReference.set(null);
             graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
                 if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
                     labelForPropertyReference.set(nodeLabel);
+                    typeForPropertyReference.set(graphStore.nodePropertyType(nodeLabel, propertyKey));
                     return false;
                 }
                 return true;
@@ -63,6 +66,10 @@ public abstract class EvaluationContext {
             if (labelForProperty == null) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
+                var propertyType = typeForPropertyReference.get();
+                if (propertyType == ValueType.LONG) {
+                    return graphStore.nodePropertyValues(labelForProperty, propertyKey).longValue(nodeId);
+                }
                 return graphStore.nodePropertyValues(labelForProperty, propertyKey).doubleValue(nodeId);
             }
         }
