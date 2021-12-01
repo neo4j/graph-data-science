@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,14 +29,13 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.RelationshipType;
 
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import java.util.SplittableRandom;
 
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase extends BaseTest {
@@ -81,26 +81,47 @@ public abstract class RandomGraphTestCase extends BaseTest {
         }
     }
 
-    private static final String RANDOM_GRAPH_TPL =
-            "FOREACH (x IN range(1, %d) | CREATE (:Label)) " +
-            "WITH 0.1 AS p " +
-            "MATCH (n1),(n2) WITH n1,n2,p LIMIT 1000 WHERE rand() < p " +
-            "CREATE (n1)-[:TYPE {weight:ceil(10*rand())/10}]->(n2)";
-
-    private static final String RANDOM_LABELS =
-            "MATCH (n) WHERE rand() < 0.5 SET n:Label2";
-
     @BeforeEach
     void setupGraph() {
         buildGraph(NODE_COUNT);
     }
 
     void buildGraph(int nodeCount) {
-        String createGraph = formatWithLocale(RANDOM_GRAPH_TPL, nodeCount);
-        List<String> cyphers = Arrays.asList(createGraph, RANDOM_LABELS);
+        var random = new SplittableRandom();
+        var label1 = Label.label("Label");
+        var label2 = Label.label("Label2");
+        var type = RelationshipType.withName("TYPE");
 
-        for (String cypher : cyphers) {
-            runQuery(cypher);
+        try (var tx = db.beginTx()) {
+            // 1. Create nodeCount nodes with a label
+            //    For each, 50% chance it gets a second label
+            for (int i = 0; i < nodeCount; i++) {
+                var node = tx.createNode(label1);
+                if (random.nextBoolean()) {
+                    node.addLabel(label2);
+                }
+            }
+            // 2. For the first thousand random pairs of nodes
+            //    For 10% of cases, create a relationship with some weight
+            final var count = new MutableInt();
+            var limit = 1000;
+            var chance = 0.1;
+            tx.getAllNodes().forEach(
+                n1 -> tx.getAllNodes().forEach(
+                    n2 -> {
+                        if (count.getValue() < limit) {
+                            if (random.nextDouble() < chance) {
+                                var rel = n1.createRelationshipTo(n2, type);
+                                rel.setProperty("weight", Math.ceil(10 * random.nextDouble()) / 10);
+                            }
+                            count.increment();
+                        }
+
+                    }
+                )
+            );
+
+            tx.commit();
         }
     }
 }
