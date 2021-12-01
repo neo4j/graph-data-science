@@ -68,8 +68,6 @@ public final class ParallelUtil {
     private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
     private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
 
-    private static ForkJoinPool FJ_INSTANCE;
-
     // prevent instantiation of factory
     private ParallelUtil() {}
 
