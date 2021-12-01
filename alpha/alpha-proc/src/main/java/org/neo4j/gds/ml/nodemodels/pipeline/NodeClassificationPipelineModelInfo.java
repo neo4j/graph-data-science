@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.nodemodels.Metric;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.List;
 import java.util.Map;
