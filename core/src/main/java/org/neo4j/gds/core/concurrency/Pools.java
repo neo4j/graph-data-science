@@ -27,6 +27,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,6 +39,7 @@ public final class Pools {
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
+    public static final ForkJoinPool DEFAULT_FJ_POOL = createForkJoinPool();
 
     static final String THREAD_NAME_PREFIX = "gds";
 
@@ -85,5 +88,24 @@ public final class Pools {
                 }
             }
         }
+    }
+
+    private static final String FORK_JOIN_INFIX = "-forkjoin-";
+
+    public static ForkJoinPool createForkJoinPool(int concurrency) {
+        ForkJoinPool.ForkJoinWorkerThreadFactory factory = new ForkJoinPool.ForkJoinWorkerThreadFactory() {
+            @Override
+            public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+                var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+                worker.setName(Pools.THREAD_NAME_PREFIX + FORK_JOIN_INFIX + worker.getPoolIndex());
+                return worker;
+            }
+        };
+        return new ForkJoinPool(concurrency, factory, null, false);
+    }
+
+    public static ForkJoinPool createForkJoinPool() {
+        var poolSizes = PoolSizesService.poolSizes();
+        return createForkJoinPool(poolSizes.maxPoolSize());
     }
 }
