@@ -49,11 +49,13 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         // Node 1 --> three neighbours
         adjacencyMatrix[1] = new int[]{0, 1, 2};
 
-        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(adjacencyMatrix));
+        int[] batchIds = {1, 0};
+
+        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(batchIds, adjacencyMatrix));
 
         var expected = new Matrix(new double[]{
-            0, 0, 0,    // Node 0 --> no neighbours --> 0s
-            9, 4, 3     //
+            9, 4, 3,    // Node 1
+            0, 0, 0    // Node 0 --> no neighbours --> 0s
         }, 2, 3);
 
         assertThat(ctx.forward(max)).isEqualTo(expected);
@@ -73,7 +75,9 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
             new int[]{}
         };
 
-        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
+        int[] batchIds = {1, 2, 0};
+
+        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adjacencyMatrix))));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
@@ -100,6 +104,32 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         var expected = new Matrix(
             new double[] { 2.0 , 0.0},
             2,1
+        );
+
+        assertThat(ctx.gradient(weights)).isEqualTo(expected);
+    }
+
+    @Test
+    void testGradientWithUnorderedBatchIds() {
+        double[] matrix = {1, 4, 3};
+
+        int[][] adj = new int[2][];
+        adj[0] = new int[] {2};
+        adj[1] = new int[] {0, 1};
+        int[] batchIds = {1};
+
+        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 1));
+
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adj))));
+
+        ComputationContext ctx = new ComputationContext();
+
+        ctx.forward(loss);
+        ctx.backward(loss);
+
+        var expected = new Matrix(
+            new double[] { 0.0 , 1.0, 0.0},
+            3,1
         );
 
         assertThat(ctx.gradient(weights)).isEqualTo(expected);
