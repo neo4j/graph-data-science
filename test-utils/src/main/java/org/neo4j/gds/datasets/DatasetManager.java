@@ -42,8 +42,6 @@ public final class DatasetManager {
     private final Map<String, Dataset> datasets = new HashMap<>() {{
         put(EmptyDataset.NAME, EmptyDataset.INSTANCE);
         put(FakeLdbcDataset.NAME, FakeLdbcDataset.INSTANCE);
-        put(Cora.ID, new Cora());
-        put(TestCora.ID, new TestCora());
     }};
 
     private final Path workingDir;
