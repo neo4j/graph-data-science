@@ -34,6 +34,8 @@ public abstract class EvaluationContext {
 
     abstract double getProperty(String propertyKey);
 
+    abstract ValueType getValueType(String propertyKey);
+
     abstract boolean hasLabelsOrTypes(List<String> labelsOrTypes);
 
     public static class NodeEvaluationContext extends EvaluationContext {
@@ -75,6 +77,19 @@ public abstract class EvaluationContext {
         }
 
         @Override
+        ValueType getValueType(String propertyKey) {
+            graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
+                if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
+                    typeForPropertyReference.set(graphStore.nodePropertyType(nodeLabel, propertyKey));
+                    return false;
+                }
+                return true;
+            }));
+
+            return typeForPropertyReference.get();
+        }
+
+        @Override
         boolean hasLabelsOrTypes(List<String> labels) {
             boolean hasAllLabels = true;
             for (String label: labels) {
@@ -104,6 +119,11 @@ public abstract class EvaluationContext {
         @Override
         double getProperty(String propertyKey) {
             return properties[propertyIndices.get(propertyKey)];
+        }
+
+        @Override
+        ValueType getValueType(String propertyKey) {
+            return ValueType.DOUBLE;
         }
 
         @Override

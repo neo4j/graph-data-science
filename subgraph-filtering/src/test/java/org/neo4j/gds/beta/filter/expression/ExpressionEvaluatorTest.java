@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Collection;
@@ -38,9 +39,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.beta.filter.expression.Expression.FALSE;
 import static org.neo4j.gds.beta.filter.expression.Expression.TRUE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ExpressionEvaluatorTest {
 
@@ -221,6 +222,11 @@ class ExpressionEvaluatorTest {
         }
 
         @Override
+        ValueType getValueType(String propertyKey) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
             throw new UnsupportedOperationException();
         }
@@ -249,6 +255,12 @@ class ExpressionEvaluatorTest {
         double getProperty(String propertyKey) {
             assertThat(propertyKey).isEqualTo(propertyKey());
             return propertyValue();
+        }
+
+        @Override
+        ValueType getValueType(String propertyKey) {
+            assertThat(propertyKey).isEqualTo(propertyKey());
+            return ValueType.DOUBLE;
         }
 
         @Override
