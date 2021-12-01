@@ -61,10 +61,11 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0, max = 1)
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double similarityThreshold() {
         return 0;
     }
+
     @Configuration.IntegerRange(min = 1)
     @Override
     @Value.Default

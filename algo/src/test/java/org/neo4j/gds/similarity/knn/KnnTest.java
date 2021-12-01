@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.gds.nodeproperties.DoubleTestProperties;
@@ -53,7 +54,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
@@ -67,9 +67,19 @@ class KnnTest {
         "  (a { knn: 1.2 } )" +
         ", (b { knn: 1.1 } )" +
         ", (c { knn: 42.0 } )";
-
     @Inject
     private Graph graph;
+
+    @GdlGraph(graphNamePrefix = "simThreshold")
+    private static final String nodeCreateQuery =
+        "CREATE " +
+        "  (alice:Person {age: 23})" +
+        " ,(carol:Person {age: 24})" +
+        " ,(eve:Person {age: 34})" +
+        " ,(bob:Person {age: 30})";
+    @Inject
+    private TestGraph simThresholdGraph;
+
 
     @Inject
     private IdFunction idFunction;
@@ -132,23 +142,13 @@ class KnnTest {
             .doesNotContain(nodeId)
             .containsAnyOf(expectedNeighbors)
             .doesNotHaveDuplicates()
-            .isSortedAccordingTo(Comparator.naturalOrder()) //why are we testing this? if we switch the order of the nodes in the example this fails
+            .isSortedAccordingTo(Comparator.naturalOrder())
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
     }
 
-    //TODO Should we move this test to a separate file?
     @Test
     void shouldFilterResultsOfLowSimilarity() {
-        String nodeCreateQuery =
-            "CREATE " +
-            "  (alice:Person {age: 23})" +
-            " ,(carol:Person {age: 24})" +
-            " ,(eve:Person {age: 34})" +
-            " ,(bob:Person {age: 30})";
 
-        var simThresholdGraph = fromGdl(nodeCreateQuery);
-
-        double threshold = 0.8;
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeWeightProperty("age")
             .concurrency(1)
@@ -192,6 +192,7 @@ class KnnTest {
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors).isEmpty();
     }
+
     @ParameterizedTest
     @MethodSource("emptyProperties")
     void testNonExistingProperties(NodeProperties nodeProperties) {

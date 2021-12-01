@@ -120,7 +120,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                     break;
                 }
             }
-            if (config.similarityThreshold() != 0) {
+            if (config.similarityThreshold() > 0) {
                 for (long i = 0; i < neighbors.size(); i++) {
                     neighbors.get(i).filterHighSimilarityResults(config.similarityThreshold());
                 }

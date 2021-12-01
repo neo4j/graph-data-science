@@ -213,6 +213,7 @@ class NeighborList {
      * priorityElementPairs keeping only the results with similarity>=threshold.
      * It will write all high similarity elements
      * at the beginning of the array and re-define elementCount.
+     *
      * @param threshold we keep all results with similarity >=threshold.
      */
     public void filterHighSimilarityResults(double threshold) {
@@ -224,6 +225,5 @@ class NeighborList {
             }
         }
         elementCount = nextAvailablePosition / 2;
-        //TODO should we do something about the unused memory at the end of the array?
     }
 }
