@@ -54,12 +54,13 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
 
         var rows = batchNeighbors.batchSize();
         var cols = parentData.cols();
+        var batchIds = batchNeighbors.batchIds();
 
         var max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         for (int row = 0; row < rows; row++) {
-            // FIXME resolve row to sourceId
-            int[] neighbors = this.batchNeighbors.neighbors(row);
+            int sourceId = batchIds[row];
+            int[] neighbors = this.batchNeighbors.neighbors(sourceId);
             for(int col = 0; col < cols; col++) {
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
@@ -79,6 +80,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var result = (Matrix) ctx.data(parent).createWithSameDimensions();
 
         var rows = this.batchNeighbors.batchSize();
+        var batchIds = this.batchNeighbors.batchIds();
         var cols = result.cols();
 
         var parentData = (Matrix) ctx.data(parent);
@@ -86,8 +88,8 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var thisData = ctx.data(this);
 
         for (int row = 0; row < rows; row++) {
-            // FIXME resolve row via batchIds
-            int[] neighbors = this.batchNeighbors.neighbors(row);
+            int sourceId = batchIds[row];
+            int[] neighbors = this.batchNeighbors.neighbors(sourceId);
             for (int col = 0; col < cols; col++) {
                 double thisCellData = thisData.dataAt(row, col);
 
