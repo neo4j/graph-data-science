@@ -43,7 +43,7 @@ public interface Expression {
         return context;
     }
 
-    default ValueType valueType() {
+    default ValueType valueType(EvaluationContext context) {
         return ValueType.DOUBLE;
     }
 
@@ -104,11 +104,6 @@ public interface Expression {
                 return context.getProperty(propertyKey());
             }
 
-            @Value.Default
-            default ValueType valueType(EvaluationContext context) {
-                return context.getValueType(propertyKey());
-            }
-
             @Override
             default ValidationContext validate(ValidationContext context) {
                 context = in().validate(context);
@@ -127,6 +122,12 @@ public interface Expression {
                 }
 
                 return context;
+            }
+
+            @Value.Default
+            @Override
+            default ValueType valueType(EvaluationContext context) {
+                return context.getValueType(propertyKey());
             }
         }
 
@@ -228,78 +229,107 @@ public interface Expression {
             }
         }
 
-        @ValueClass
-        interface Equal extends BinaryExpression {
+        interface BinaryArithmeticExpression extends BinaryExpression {
 
-            @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
+                if (lhs().valueType(context) == ValueType.LONG && rhs().valueType(context) == ValueType.LONG) {
+                    return evaluateLong(Double.doubleToLongBits(lhsValue), Double.doubleToLongBits(rhsValue));
+                }
+
+                return evaluateDouble(lhsValue, rhsValue);
+            }
+
+            double evaluateLong(long lhsValue, long rhsValue);
+
+            double evaluateDouble(double lhsValue, double rhsValue);
+        }
+
+        @ValueClass
+        interface Equal extends BinaryArithmeticExpression {
+
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue == rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
             }
         }
 
         @ValueClass
-        interface NotEqual extends BinaryExpression {
+        interface NotEqual extends BinaryArithmeticExpression {
 
-            @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue != rhsValue ? TRUE : FALSE;
+            }
 
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return Math.abs(lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
 
         @ValueClass
-        interface GreaterThan extends BinaryExpression {
-            @Value.Derived
-            @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+        interface GreaterThan extends BinaryArithmeticExpression {
 
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue > rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return (lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
 
         @ValueClass
-        interface GreaterThanOrEquals extends BinaryExpression {
-            @Value.Derived
-            @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+        interface GreaterThanOrEquals extends BinaryArithmeticExpression {
 
+            @Override
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue >= rhsValue ? TRUE : FALSE;
+            }
+
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue > rhsValue || Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
             }
         }
 
         @ValueClass
-        interface LessThan extends BinaryExpression {
+        interface LessThan extends BinaryArithmeticExpression {
 
             @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue < rhsValue ? TRUE : FALSE;
+            }
 
+            @Value.Derived
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
 
         @ValueClass
-        interface LessThanOrEquals extends BinaryExpression {
+        interface LessThanOrEquals extends BinaryArithmeticExpression {
 
-            @Value.Derived
             @Override
-            default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+            default double evaluateLong(long lhsValue, long rhsValue) {
+                return lhsValue <= rhsValue ? TRUE : FALSE;
+            }
 
+            @Override
+            default double evaluateDouble(double lhsValue, double rhsValue) {
                 return lhsValue < rhsValue || (rhsValue - lhsValue) > -EPSILON ? TRUE : FALSE;
             }
         }
@@ -312,14 +342,14 @@ public interface Expression {
             long value();
 
             @Override
-            default ValueType valueType() {
+            default ValueType valueType(EvaluationContext context) {
                 return ValueType.LONG;
             }
 
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return ((Long) value()).doubleValue();
+                return Double.longBitsToDouble(value());
             }
         }
 
