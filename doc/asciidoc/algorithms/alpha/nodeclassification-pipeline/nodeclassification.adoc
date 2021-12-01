@@ -33,7 +33,7 @@ The training phase (II) proceeds in a manner akin to the standalone version of <
 After <<algorithms-ml-nodeclassification-pipelines-train, training the pipeline>>, a classification pipeline is created.
 This new pipeline inherits the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
 
-NOTE: <<algorithms-node-classification-pipelines-predict, Classification> can only be done with a trained classification pipeline (not with a training pipeline).
+NOTE: <<algorithms-node-classification-pipelines-predict, Classification>> can only be done with a trained classification pipeline (not with a training pipeline).
 
 
 The motivation for using pipelines:
