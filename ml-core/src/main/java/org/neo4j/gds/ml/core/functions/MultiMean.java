@@ -29,19 +29,15 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 public class MultiMean extends SingleParentVariable<Matrix> {
     private final BatchNeighbors batchNeighbors;
     private final int[] batchIds;
-    private final int rows;
-    private final int cols;
 
     public MultiMean(
         Variable<?> parent,
         BatchNeighbors batchNeighbors,
         int[] batchIds
     ) {
-        super(parent, Dimensions.matrix(batchNeighbors.batchSize(), parent.dimension(1)));
+        super(parent, Dimensions.matrix(batchIds.length, parent.dimension(1)));
         this.batchNeighbors = batchNeighbors;
         this.batchIds = batchIds;
-        this.rows = batchNeighbors.batchSize();
-        this.cols = parent.dimension(1);
     }
 
     @Override
@@ -49,24 +45,28 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
-        double[] means = new double[batchNeighbors.batchSize() * cols];
-        for (int source = 0; source < batchNeighbors.batchSize(); source++) {
-            int batchIdRowOffset = batchIds[source] * cols;
-            int sourceOffset = source * cols;
-            int[] neighbors = batchNeighbors.neighbors(source);
+        int cols = parent.dimension(1);
+
+        double[] means = new double[batchIds.length * cols];
+        for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
+            int sourceId = batchIds[batchIdx];
+            int batchIdRowOffset = sourceId * cols;
+            int batchIdxOffset = batchIdx * cols;
+            int[] neighbors = batchNeighbors.neighbors(sourceId);
             int numberOfNeighbors = neighbors.length;
+
             for (int col = 0; col < cols; col++) {
-                means[sourceOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
+                means[batchIdxOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
             }
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 for (int col = 0; col < cols; col++) {
-                    means[sourceOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
+                    means[batchIdxOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
                 }
             }
         }
 
-        return new Matrix(means, this.rows, this.cols);
+        return new Matrix(means, batchIds.length, cols);
     }
 
     @Override
@@ -75,11 +75,14 @@ public class MultiMean extends SingleParentVariable<Matrix> {
 
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
+        int cols = parent.dimension(1);
+
         for (int col = 0; col < cols; col++) {
-            for (int row = 0; row < rows; row++) {
-                int degree = batchNeighbors.neighbors(row).length + 1;
+            for (int row = 0; row < batchIds.length; row++) {
+                var sourceId = batchIds[row];
+                int degree = batchNeighbors.neighbors(sourceId).length + 1;
                 int gradientElementIndex = row * cols + col;
-                for (int neighbor : batchNeighbors.neighbors(row)) {
+                for (int neighbor : batchNeighbors.neighbors(sourceId)) {
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
@@ -87,7 +90,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
                     );
                 }
                 result.addDataAt(
-                    batchIds[row] * cols + col,
+                    sourceId * cols + col,
                     1d / degree * multiMeanGradient[gradientElementIndex]
                 );
             }

@@ -28,6 +28,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
+
     @Test
     void shouldAverage() {
         // a    a
@@ -46,17 +47,40 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         int[][] adj = new int[2][];
         adj[0] = new int[] {1};
         adj[1] = new int[] {0, 3};
-        int[] selfAdjacency = {0, 1};
+        int[] selfAdjacency = {0, 1, 0};
 
         var expected = new Matrix(new double[]{
             2.5, 3.5,
-            11.0 / 3, 2
-        }, 2, 2);
+            11.0 / 3, 2,
+            2.5, 3.5
+        }, 3, 2);
 
         var data = Constant.matrix(matrix, 4, 2);
         var mean = new MultiMean(data, new TestBatchNeighbors(adj), selfAdjacency);
 
         assertThat(ctx.forward(mean)).isEqualTo(expected);
+    }
+
+
+    @Test
+    void testGradientUnweighted() {
+        double[] matrix = {
+            1, 2,
+            4, 5,
+            3, 6
+        };
+
+        int[][] adj = new int[2][];
+        adj[0] = new int[] {1};
+        adj[1] = new int[] {0};
+        int[] batchIds = {0, 1, 0};
+
+        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
+
+        finiteDifferenceShouldApproximateGradient(
+            weights,
+            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(adj), batchIds)))
+        );
     }
 
 
