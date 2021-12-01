@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,8 +67,8 @@ public abstract class GdsCypher {
 
     private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
 
-    public static CreationBuildStage call() {
-        return new StagedBuilder();
+    public static QueryBuilder call(String graphName) {
+        return new QueryBuilder(graphName);
     }
 
     interface ExecutionMode {
@@ -77,210 +78,23 @@ public abstract class GdsCypher {
         WRITE, STATS, STREAM, MUTATE, TRAIN
     }
 
-    @SuppressWarnings("unused")
-    public interface ImplicitCreationInlineBuilder {
 
-        /**
-         * Loads all nodes of any label and relationships of any type in the
-         * {@link Orientation#NATURAL} projection.
-         *
-         * Does <strong>not</strong> load any properties.
-         *
-         * To load properties, call one of {@link #withNodeProperty(String)}
-         * or {@link #withRelationshipProperty(String)} or their variants.
-         */
-        default QueryBuilder loadEverything() {
-            return loadEverything(NATURAL);
+    public static final class QueryBuilder {
+        private final String graphName;
+
+        private QueryBuilder(String graphName) {
+            this.graphName = graphName;
         }
 
-        /**
-         * Loads all nodes of any label and relationships of any type in the
-         * given {@code projection}.
-         *
-         * Does <strong>not</strong> load any properties.
-         *
-         * To load properties, call one of {@link #withNodeProperty(String)}
-         * or {@link #withRelationshipProperty(String)} or their variants.
-         */
-        default QueryBuilder loadEverything(Orientation orientation) {
-            return this
-                .withNodeLabel(ALL_NODES.name, NodeProjection.all())
-                .withRelationshipType(
-                    ALL_RELATIONSHIPS.name(),
-                    RelationshipProjection.all().withOrientation(orientation)
-                );
+        public GraphCreateBuilder graphCreate() {
+            return new GraphCreateBuilder(graphName);
         }
 
-        default ImplicitCreationBuildStage withAnyLabel() {
-            return withNodeLabel(ALL_NODES.name, NodeProjection.all());
+        public ModeBuildStage algo(Iterable<String> namespace, String algoName) {
+            return new AlgoBuilder(graphName, namespace, algoName);
         }
 
-        default ImplicitCreationBuildStage withNodeLabel(String label) {
-            return withNodeLabels(label);
-        }
-
-        default ImplicitCreationBuildStage withNodeLabel(String label, NodeProjection nodeProjection) {
-            return withNodeLabels(Map.of(label, nodeProjection));
-        }
-
-        default ImplicitCreationBuildStage withNodeLabels(String... labels) {
-            return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
-                Function.identity(),
-                label -> NodeProjection.builder().label(label).build()
-            )));
-        }
-
-        ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections);
-
-        default ImplicitCreationBuildStage withAnyRelationshipType() {
-            return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all());
-        }
-
-        default ImplicitCreationBuildStage withRelationshipType(String type) {
-            return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
-        }
-
-        default ImplicitCreationBuildStage withRelationshipType(String type, Orientation orientation) {
-            return withRelationshipType(
-                type,
-                RelationshipProjection.builder().type(type).orientation(orientation).build()
-            );
-        }
-
-        default ImplicitCreationBuildStage withRelationshipType(String type, String neoType) {
-            return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
-        }
-
-        ImplicitCreationBuildStage withRelationshipType(String type, RelationshipProjection relationshipProjection);
-
-        default ImplicitCreationBuildStage withNodeProperty(String nodeProperty) {
-            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(String propertyKey, String neoPropertyKey) {
-            return withNodeProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(propertyKey)
-                .neoPropertyKey(neoPropertyKey)
-                .build());
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
-            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(
-            String propertyKey,
-            String neoPropertyKey,
-            DefaultValue defaultValue
-        ) {
-            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(
-            String propertyKey,
-            DefaultValue defaultValue,
-            Aggregation aggregation
-        ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(
-            String propertyKey,
-            Aggregation aggregation
-        ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, aggregation));
-        }
-
-        default ImplicitCreationBuildStage withNodeProperty(
-            String propertyKey,
-            String neoPropertyKey,
-            DefaultValue defaultValue,
-            Aggregation aggregation
-        ) {
-            return withNodeProperty(PropertyMapping.of(
-                propertyKey,
-                neoPropertyKey,
-                defaultValue,
-                aggregation
-            ));
-        }
-
-        ImplicitCreationBuildStage withNodeProperty(PropertyMapping propertyMapping);
-
-        default ImplicitCreationBuildStage withRelationshipProperty(String relationshipProperty) {
-            return withRelationshipProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(relationshipProperty)
-                .build());
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(String propertyKey, String neoPropertyKey) {
-            return withRelationshipProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(propertyKey)
-                .neoPropertyKey(neoPropertyKey)
-                .build());
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
-            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(
-            String propertyKey,
-            String neoPropertyKey,
-            DefaultValue defaultValue
-        ) {
-            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(
-            String propertyKey,
-            DefaultValue defaultValue,
-            Aggregation aggregation
-        ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(
-            String propertyKey,
-            Aggregation aggregation
-        ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, aggregation));
-        }
-
-        default ImplicitCreationBuildStage withRelationshipProperty(
-            String propertyKey,
-            String neoPropertyKey,
-            DefaultValue defaultValue,
-            Aggregation aggregation
-        ) {
-            return withRelationshipProperty(PropertyMapping.of(
-                propertyKey,
-                neoPropertyKey,
-                defaultValue,
-                aggregation
-            ));
-        }
-
-        ImplicitCreationBuildStage withRelationshipProperty(PropertyMapping propertyMapping);
-    }
-
-    public interface CreationBuildStage extends ImplicitCreationInlineBuilder {
-        QueryBuilder implicitCreation(GraphCreateFromStoreConfig config);
-
-        QueryBuilder explicitCreation(String graphName);
-    }
-
-    public interface QueryBuilder {
-        ParametersBuildStage graphCreate(String graphName);
-
-        ParametersBuildStage graphCreateCypher(String graphName);
-
-        ModeBuildStage algo(Iterable<String> namespace, String algoName);
-
-        default ModeBuildStage algo(String algoName) {
+        public ModeBuildStage algo(String algoName) {
             Objects.requireNonNull(algoName, "algoName");
             List<String> nameParts = PERIOD.splitAsStream(algoName).collect(Collectors.toList());
             if (nameParts.isEmpty()) {
@@ -291,7 +105,7 @@ public abstract class GdsCypher {
             return algo(nameParts, actualAlgoName);
         }
 
-        default ModeBuildStage algo(String... namespacedAlgoName) {
+        public ModeBuildStage algo(String... namespacedAlgoName) {
             Objects.requireNonNull(namespacedAlgoName, "namespacedAlgoName");
             if (namespacedAlgoName.length == 0) {
                 // let builder implementation deal with the empty case
@@ -301,16 +115,6 @@ public abstract class GdsCypher {
             String[] nameParts = Arrays.copyOf(namespacedAlgoName, lastIndex);
             String actualAlgoName = namespacedAlgoName[lastIndex];
             return algo(Arrays.asList(nameParts), actualAlgoName);
-        }
-    }
-
-    public interface ImplicitCreationBuildStage extends ImplicitCreationInlineBuilder, QueryBuilder {
-        default ImplicitCreationBuildStage withNodeProperties(List<String> nodeProperties, DefaultValue defaultValue) {
-            var stage = this;
-            for (String property : nodeProperties) {
-                stage = stage.withNodeProperty(property, defaultValue);
-            }
-            return stage;
         }
     }
 
@@ -374,7 +178,9 @@ public abstract class GdsCypher {
         ParametersBuildStage addAllParameters(Map<String, ?> entries);
 
         @Language("Cypher")
-        String yields(String... elements);
+        default String yields(String... elements) {
+            return yields(Arrays.asList(elements));
+        }
 
         @Language("Cypher")
         String yields(Iterable<String> elements);
@@ -382,10 +188,6 @@ public abstract class GdsCypher {
 
     enum SpecialExecution {
         NORMAL, ESTIMATE
-    }
-
-    private enum InternalExecutionMode implements ExecutionMode {
-        GRAPH_CREATE
     }
 
     @Language("Cypher")
@@ -396,13 +198,12 @@ public abstract class GdsCypher {
         String algoName,
         ExecutionMode executionMode,
         @Builder.Switch(defaultName = "NORMAL") SpecialExecution specialExecution,
-        Optional<String> explicitGraphName,
-        Optional<GraphCreateFromStoreConfig> implicitCreateConfig,
+        String graphName,
         Map<String, Object> parameters,
         List<String> yields
     ) {
         var procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
-        var queryArguments = queryArguments(explicitGraphName, implicitCreateConfig, executionMode, parameters);
+        var queryArguments = queryArguments(graphName, parameters);
         var yieldsFields = yieldsFields(yields);
 
         var query = Cypher.call(procedureName).withArgs(queryArguments);
@@ -436,38 +237,43 @@ public abstract class GdsCypher {
     }
 
     private static Expression[] queryArguments(
-        Optional<String> explicitGraphName,
-        Optional<GraphCreateFromStoreConfig> implicitCreateConfig,
-        ExecutionMode executionMode,
+        String graphName,
+        GraphCreateFromStoreConfig config,
         Map<String, Object> parameters
     ) {
         var queryArguments = new ArrayList<Expression>();
-        explicitGraphName.ifPresent(name -> queryArguments.add(Cypher.literalOf(name)));
+        queryArguments.add(Cypher.literalOf(graphName));
 
-        if (implicitCreateConfig.isPresent()) {
-            GraphCreateFromStoreConfig config = implicitCreateConfig.get();
-            Map<String, Object> newParameters = new LinkedHashMap<>(parameters.size());
+        Map<String, Object> newParameters = new LinkedHashMap<>(parameters.size());
 
-            Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
-            Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
-            if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(nodeProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
-                queryArguments.add(relationshipProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
-            } else {
-                nodeProjection.ifPresent(np -> newParameters.put("nodeProjection", np));
-                relationshipProjection.ifPresent(rp -> newParameters.put("relationshipProjection", rp));
-            }
+        Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
+        Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
+        queryArguments.add(nodeProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
+        queryArguments.add(relationshipProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
 
-            toMinimalObject(config.nodeProperties(), false)
-                .toObject()
-                .ifPresent(np -> newParameters.put("nodeProperties", np));
-            toMinimalObject(config.relationshipProperties(), false)
-                .toObject()
-                .ifPresent(rp -> newParameters.put("relationshipProperties", rp));
+        toMinimalObject(config.nodeProperties(), false)
+            .toObject()
+            .ifPresent(np -> newParameters.put("nodeProperties", np));
+        toMinimalObject(config.relationshipProperties(), false)
+            .toObject()
+            .ifPresent(rp -> newParameters.put("relationshipProperties", rp));
 
-            newParameters.putAll(parameters);
-            parameters = newParameters;
+        newParameters.putAll(parameters);
+        parameters = newParameters;
+
+        if (!parameters.isEmpty()) {
+            queryArguments.add(Objects.requireNonNullElseGet(toExpression(parameters), Cypher::mapOf));
         }
+
+        return queryArguments.toArray(new Expression[0]);
+    }
+
+    private static Expression[] queryArguments(
+        String graphName,
+        Map<String, Object> parameters
+    ) {
+        var queryArguments = new ArrayList<Expression>();
+        queryArguments.add(Cypher.literalOf(graphName));
 
         if (!parameters.isEmpty()) {
             queryArguments.add(Objects.requireNonNullElseGet(toExpression(parameters), Cypher::mapOf));
@@ -505,105 +311,283 @@ public abstract class GdsCypher {
         }
     }
 
-    private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
 
-        private final CallBuilder builder;
-        private @Nullable InlineGraphCreateConfigBuilder graphCreateBuilder;
+    public static final class GraphCreateBuilder {
+        private final String graphName;
+        private final InlineGraphCreateConfigBuilder graphCreateConfigBuilder;
+        private final Map<String, Object> parameters;
 
-        private StagedBuilder() {
-            builder = new CallBuilder();
+        private GraphCreateBuilder(String graphName) {
+            this.graphName = graphName;
+            graphCreateConfigBuilder = new InlineGraphCreateConfigBuilder().graphName(graphName);
+            parameters = new LinkedHashMap<>();
         }
 
-        @Override
-        public StagedBuilder explicitCreation(String graphName) {
-            graphCreateBuilder = null;
-            builder
-                .explicitGraphName(graphName)
-                .implicitCreateConfig(Optional.empty());
-            return this;
-        }
-
-        @Override
-        public StagedBuilder implicitCreation(GraphCreateFromStoreConfig config) {
-            graphCreateBuilder()
-                .graphName("")
+        public GraphCreateBuilder withGraphCreateConfig(GraphCreateFromStoreConfig config) {
+            graphCreateConfigBuilder
+                .graphName(config.graphName())
                 .nodeProjections(config.nodeProjections().projections())
                 .relProjections(config.relationshipProjections().projections())
                 .nodeProperties(config.nodeProperties())
                 .relProperties(config.relationshipProperties());
-            builder.explicitGraphName(Optional.empty());
+
             return this;
         }
 
-        @Override
-        public ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections) {
-            nodeProjections.forEach((label, nodeProjection) -> graphCreateBuilder().putNodeProjection(
+        /**
+         * Loads all nodes of any label and relationships of any type in the
+         * {@link org.neo4j.gds.Orientation#NATURAL} projection.
+         *
+         * Does <strong>not</strong> load any properties.
+         *
+         * To load properties, call one of {@link #withNodeProperty(String)}
+         * or {@link #withRelationshipProperty(String)} or their variants.
+         */
+        public GraphCreateBuilder loadEverything() {
+            return loadEverything(NATURAL);
+        }
+
+        /**
+         * Loads all nodes of any label and relationships of any type in the
+         * given {@code projection}.
+         *
+         * Does <strong>not</strong> load any properties.
+         *
+         * To load properties, call one of {@link #withNodeProperty(String)}
+         * or {@link #withRelationshipProperty(String)} or their variants.
+         */
+        public GraphCreateBuilder loadEverything(Orientation orientation) {
+            return this
+                .withNodeLabel(ALL_NODES.name, NodeProjection.all())
+                .withRelationshipType(
+                    ALL_RELATIONSHIPS.name(),
+                    RelationshipProjection.all().withOrientation(orientation)
+                );
+        }
+
+        public GraphCreateBuilder withAnyLabel() {
+            return withNodeLabel(ALL_NODES.name, NodeProjection.all());
+        }
+
+        public GraphCreateBuilder withNodeLabel(String label) {
+            return withNodeLabels(label);
+        }
+
+        public GraphCreateBuilder withNodeLabel(String label, NodeProjection nodeProjection) {
+            return withNodeLabels(Map.of(label, nodeProjection));
+        }
+
+        public GraphCreateBuilder withNodeLabels(String... labels) {
+            return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
+                Function.identity(),
+                label -> NodeProjection.builder().label(label).build()
+            )));
+        }
+
+        public GraphCreateBuilder withNodeLabels(Map<String, NodeProjection> nodeProjections) {
+            nodeProjections.forEach((label, nodeProjection) -> graphCreateConfigBuilder.putNodeProjection(
                 NodeLabel.of(label),
                 nodeProjection
             ));
             return this;
         }
 
-        @Override
-        public StagedBuilder withRelationshipType(
+        public GraphCreateBuilder withAnyRelationshipType() {
+            return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all());
+        }
+
+        public GraphCreateBuilder withRelationshipType(String type) {
+            return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
+        }
+
+        public GraphCreateBuilder withRelationshipType(String type, Orientation orientation) {
+            return withRelationshipType(
+                type,
+                RelationshipProjection.builder().type(type).orientation(orientation).build()
+            );
+        }
+
+        public GraphCreateBuilder withRelationshipType(String type, String neoType) {
+            return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
+        }
+
+        public GraphCreateBuilder withRelationshipType(
             String type,
             RelationshipProjection relationshipProjection
         ) {
-            graphCreateBuilder().putRelProjection(RelationshipType.of(type), relationshipProjection);
+            graphCreateConfigBuilder.putRelProjection(RelationshipType.of(type), relationshipProjection);
             return this;
         }
 
-        @Override
-        public StagedBuilder withNodeProperty(PropertyMapping propertyMapping) {
-            graphCreateBuilder().addNodeProperty(propertyMapping);
+        public GraphCreateBuilder withNodeProperty(String nodeProperty) {
+            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
+        }
+
+        public GraphCreateBuilder withNodeProperty(String propertyKey, String neoPropertyKey) {
+            return withNodeProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(propertyKey)
+                .neoPropertyKey(neoPropertyKey)
+                .build());
+        }
+
+        public GraphCreateBuilder withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
+            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        public GraphCreateBuilder withNodeProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            DefaultValue defaultValue
+        ) {
+            return withNodeProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
+        }
+
+        public GraphCreateBuilder withNodeProperty(
+            String propertyKey,
+            DefaultValue defaultValue,
+            Aggregation aggregation
+        ) {
+            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
+        }
+
+        public GraphCreateBuilder withNodeProperty(
+            String propertyKey,
+            Aggregation aggregation
+        ) {
+            return withNodeProperty(PropertyMapping.of(propertyKey, aggregation));
+        }
+
+        public GraphCreateBuilder withNodeProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            DefaultValue defaultValue,
+            Aggregation aggregation
+        ) {
+            return withNodeProperty(PropertyMapping.of(
+                propertyKey,
+                neoPropertyKey,
+                defaultValue,
+                aggregation
+            ));
+        }
+
+        public GraphCreateBuilder withNodeProperty(PropertyMapping propertyMapping) {
+            graphCreateConfigBuilder.addNodeProperty(propertyMapping);
             return this;
         }
 
-        @Override
-        public StagedBuilder withRelationshipProperty(PropertyMapping propertyMapping) {
-            graphCreateBuilder().addRelProperty(propertyMapping);
+        public GraphCreateBuilder withNodeProperties(Iterable<String> properties, DefaultValue defaultValue) {
+            properties.forEach(property -> withNodeProperty(property, defaultValue));
             return this;
         }
 
-        @Override
-        public StagedBuilder graphCreate(String graphName) {
-            return createGraph(graphName, "gds", "graph", "create");
+        public GraphCreateBuilder withRelationshipProperty(String relationshipProperty) {
+            return withRelationshipProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(relationshipProperty)
+                .build());
         }
 
-        @Override
-        public StagedBuilder graphCreateCypher(String graphName) {
-            return createGraph(graphName, "gds", "graph", "create", "cypher");
+        public GraphCreateBuilder withRelationshipProperty(String propertyKey, String neoPropertyKey) {
+            return withRelationshipProperty(ImmutablePropertyMapping
+                .builder()
+                .propertyKey(propertyKey)
+                .neoPropertyKey(neoPropertyKey)
+                .build());
         }
 
-        private StagedBuilder createGraph(String graphName, String... namespace) {
-            int algoNameIndex = namespace.length - 1;
-            String[] algoNameSpace = Arrays.copyOfRange(namespace, 0, algoNameIndex);
-            String algoName = namespace[algoNameIndex];
-            graphCreateBuilder().graphName(graphName);
-            builder
-                .explicitGraphName(Optional.empty())
-                .algoNamespace(Arrays.asList(algoNameSpace))
-                .algoName(algoName)
-                .executionMode(InternalExecutionMode.GRAPH_CREATE);
+        public GraphCreateBuilder withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
+            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+        }
+
+        public GraphCreateBuilder withRelationshipProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            DefaultValue defaultValue
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
+        }
+
+        public GraphCreateBuilder withRelationshipProperty(
+            String propertyKey,
+            DefaultValue defaultValue,
+            Aggregation aggregation
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
+        }
+
+        public GraphCreateBuilder withRelationshipProperty(
+            String propertyKey,
+            Aggregation aggregation
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(propertyKey, aggregation));
+        }
+
+        public GraphCreateBuilder withRelationshipProperty(
+            String propertyKey,
+            String neoPropertyKey,
+            DefaultValue defaultValue,
+            Aggregation aggregation
+        ) {
+            return withRelationshipProperty(PropertyMapping.of(
+                propertyKey,
+                neoPropertyKey,
+                defaultValue,
+                aggregation
+            ));
+        }
+
+        public GraphCreateBuilder withRelationshipProperty(PropertyMapping propertyMapping) {
+            graphCreateConfigBuilder.addRelProperty(propertyMapping);
             return this;
         }
 
-        @Override
-        public StagedBuilder algo(Iterable<String> namespace, String algoName) {
-            builder
-                .algoNamespace(namespace)
-                .algoName(algoName);
+        public GraphCreateBuilder addParameter(String key, Object value) {
+            parameters.put(key, value);
             return this;
         }
 
+        @Language("Cypher")
+        public String yields(String... elements) {
+            return yields(Arrays.asList(elements));
+        }
+
+        @Language("Cypher")
+        public String yields(Collection<String> elements) {
+            var procedureName = "gds.graph.create";
+
+            var queryArguments = queryArguments(graphName, graphCreateConfigBuilder.build(), parameters);
+            var yieldsFields = yieldsFields(elements);
+
+            var query = Cypher.call(procedureName).withArgs(queryArguments);
+            var statement = yieldsFields.map(fields -> query.yield(fields).build()).orElseGet(query::build);
+
+            var cypherRenderer = Renderer.getRenderer(Configuration.defaultConfig());
+            return cypherRenderer.render(statement);
+        }
+    }
+
+    private static final class AlgoBuilder implements ModeBuildStage, ParametersBuildStage {
+
+        private final CallBuilder builder;
+
+
+        private AlgoBuilder(String graphName, Iterable<String> namespace, String algoName) {
+            builder = new CallBuilder();
+            builder.graphName(graphName);
+            builder.algoName(algoName);
+            builder.addAllAlgoNamespace(namespace);
+        }
+
         @Override
-        public StagedBuilder executionMode(ExecutionMode mode) {
+        public AlgoBuilder executionMode(ExecutionMode mode) {
             builder.executionMode(mode);
             return this;
         }
 
         @Override
-        public StagedBuilder estimationMode(ExecutionMode mode) {
+        public AlgoBuilder estimationMode(ExecutionMode mode) {
             builder
                 .executionMode(mode)
                 .estimateSpecialExecution();
@@ -611,40 +595,33 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public StagedBuilder addParameter(String key, Object value) {
+        public AlgoBuilder addParameter(String key, Object value) {
             builder.putParameter(key, value);
             return this;
         }
 
         @Override
-        public StagedBuilder addPlaceholder(String key, String placeholder) {
+        public AlgoBuilder addPlaceholder(String key, String placeholder) {
             builder.putParameter(key, Cypher.parameter(placeholder));
             return this;
         }
 
         @Override
-        public StagedBuilder addVariable(String key, String variable) {
+        public AlgoBuilder addVariable(String key, String variable) {
             builder.putParameter(key, GdsCypher.name(variable));
             return this;
         }
 
         @Override
-        public StagedBuilder addParameter(Map.Entry<String, ?> entry) {
+        public AlgoBuilder addParameter(Map.Entry<String, ?> entry) {
             builder.putParameter(entry);
             return this;
         }
 
         @Override
-        public StagedBuilder addAllParameters(Map<String, ?> entries) {
+        public AlgoBuilder addAllParameters(Map<String, ?> entries) {
             builder.putAllParameters(entries);
             return this;
-        }
-
-        @Language("Cypher")
-        @Override
-        public String yields(String... elements) {
-            builder.yields(Arrays.asList(elements));
-            return build();
         }
 
         @Language("Cypher")
@@ -656,23 +633,7 @@ public abstract class GdsCypher {
 
         @Language("Cypher")
         private String build() {
-            if (graphCreateBuilder != null) {
-                GraphCreateFromStoreConfig config = graphCreateBuilder.build();
-                if (config.graphName().isEmpty()) {
-                    builder.explicitGraphName(Optional.empty());
-                } else {
-                    builder.explicitGraphName(config.graphName());
-                }
-                builder.implicitCreateConfig(config);
-            }
             return builder.build();
-        }
-
-        private InlineGraphCreateConfigBuilder graphCreateBuilder() {
-            if (graphCreateBuilder == null) {
-                graphCreateBuilder = new InlineGraphCreateConfigBuilder();
-            }
-            return graphCreateBuilder;
         }
     }
 
@@ -685,6 +646,16 @@ public abstract class GdsCypher {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relProperties
     ) {
+        if (nodeProjections.isEmpty()) {
+            nodeProjections = new HashMap<>();
+            nodeProjections.put(ALL_NODES, NodeProjection.all());
+        }
+
+        if (relProjections.isEmpty()) {
+            relProjections = new HashMap<>();
+            relProjections.put(ALL_RELATIONSHIPS, RelationshipProjection.all());
+        }
+
         return ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
