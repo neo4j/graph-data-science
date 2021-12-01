@@ -68,9 +68,10 @@ public abstract class EvaluationContext {
             if (labelForProperty == null) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
-                var propertyType = typeForPropertyReference.get();
-                if (propertyType == ValueType.LONG) {
-                    return graphStore.nodePropertyValues(labelForProperty, propertyKey).longValue(nodeId);
+                if (typeForPropertyReference.get() == ValueType.LONG) {
+                    return Double.longBitsToDouble(graphStore
+                        .nodePropertyValues(labelForProperty, propertyKey)
+                        .longValue(nodeId));
                 }
                 return graphStore.nodePropertyValues(labelForProperty, propertyKey).doubleValue(nodeId);
             }

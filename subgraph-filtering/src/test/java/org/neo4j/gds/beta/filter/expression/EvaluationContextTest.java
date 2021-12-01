@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class EvaluationContextTest {
 
     @GdlGraph
-    public static final String GDL = "(a:A:B:C { foo: 42 })-[:REL { baz: 84 }]->(b:B { bar: 1337 })";
+    public static final String GDL = "(a:A:B:C { p1: 42.0, p2: 42 })-[:REL { baz: 84.0 }]->(b:B { p1: 1337.0, p2: 1337 })";
 
     @Inject
     private GraphStore graphStore;
@@ -49,12 +49,21 @@ public class EvaluationContextTest {
 
     private static Stream<Arguments> nodesPositive() {
         return Stream.of(
-            Arguments.of("a", "foo", 42.0, List.of()),
-            Arguments.of("a", "foo", 42.0, List.of("A")),
-            Arguments.of("a", "foo", 42.0, List.of("A", "B")),
-            Arguments.of("a", "foo", 42.0, List.of("A", "B", "C")),
-            Arguments.of("b", "bar", 1337.0, List.of()),
-            Arguments.of("b", "bar", 1337.0, List.of("B"))
+            Arguments.of("a", "p1", 42.0, List.of()),
+            Arguments.of("a", "p1", 42.0, List.of("A")),
+            Arguments.of("a", "p1", 42.0, List.of("A", "B")),
+            Arguments.of("a", "p1", 42.0, List.of("A", "B", "C")),
+
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of()),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A")),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A", "B")),
+            Arguments.of("a", "p2", Double.longBitsToDouble(42), List.of("A", "B", "C")),
+
+            Arguments.of("b", "p1", 1337.0, List.of()),
+            Arguments.of("b", "p1", 1337.0, List.of("B")),
+
+            Arguments.of("b", "p2", Double.longBitsToDouble(1337), List.of()),
+            Arguments.of("b", "p2", Double.longBitsToDouble(1337), List.of("B"))
         );
     }
 
