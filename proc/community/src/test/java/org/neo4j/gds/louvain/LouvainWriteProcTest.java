@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
@@ -51,8 +50,7 @@ import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
-    ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {
+class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
 
     @Override
     Stream<DynamicTest> modeSpecificConfigTests() {

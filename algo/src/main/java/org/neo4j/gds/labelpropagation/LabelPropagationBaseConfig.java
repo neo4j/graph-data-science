@@ -42,11 +42,4 @@ public interface LabelPropagationBaseConfig extends
     default int maxIterations() {
         return 10;
     }
-
-    @Value.Check
-    default void validate(){
-        if (isIncremental() && consecutiveIds()) {
-            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
-        }
-    }
 }

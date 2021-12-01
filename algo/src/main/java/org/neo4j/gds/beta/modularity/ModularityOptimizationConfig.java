@@ -54,11 +54,4 @@ public interface ModularityOptimizationConfig extends
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
-
-    @Value.Check
-    default void validate() {
-        if (isIncremental() && consecutiveIds()) {
-            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
-        }
-    }
 }

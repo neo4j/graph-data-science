@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeMapping;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -111,6 +112,16 @@ public class NullGraphStore implements GraphStore {
     @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return false;
+    }
+
+    @Override
+    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
+        throw new NullGraphException();
+    }
+
+    @Override
+    public NodeProperty nodeProperty(String propertyKey) {
+        throw new NullGraphException();
     }
 
     @Override

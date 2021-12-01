@@ -62,10 +62,6 @@ public interface LouvainBaseConfig extends
 
     @Value.Check
     default void validate() {
-        if (isIncremental() && consecutiveIds()) {
-            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
-        }
-
         if (includeIntermediateCommunities() && consecutiveIds()) {
             throw new IllegalArgumentException("`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
         }

@@ -30,6 +30,7 @@ dependencies {
     }
 
     testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
 
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')

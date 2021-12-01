@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -43,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
-    ConsecutiveIdsConfigTest<Wcc, WccWriteConfig, DisjointSetStruct> {
+class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";

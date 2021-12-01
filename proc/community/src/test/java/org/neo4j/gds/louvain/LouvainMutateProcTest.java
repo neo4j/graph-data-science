@@ -21,16 +21,15 @@ package org.neo4j.gds.louvain;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -43,8 +42,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements
-    MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain>,
-    ConsecutiveIdsConfigTest<Louvain, LouvainMutateConfig, Louvain> {
+    MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain> {
 
     @Override
     public String mutateProperty() {

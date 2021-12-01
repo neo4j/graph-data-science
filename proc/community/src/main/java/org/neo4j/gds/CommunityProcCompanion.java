@@ -20,11 +20,12 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.collections.HugeSparseLongArray;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ComponentSizeConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -35,32 +36,32 @@ import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
+import java.util.function.Supplier;
+
 public final class CommunityProcCompanion {
 
     private CommunityProcCompanion() {}
 
-    public static <ALGO extends Algorithm<ALGO, RESULT>, RESULT, CONFIG extends AlgoBaseConfig & SeedConfig & ConsecutiveIdsConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<ALGO, RESULT, CONFIG> computationResult,
+    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodeProperties nodeProperties(
+        CONFIG config,
         String resultProperty,
         LongNodeProperties nodeProperties,
+        Supplier<NodeProperty> seedPropertySupplier,
         AllocationTracker allocationTracker
     ) {
-        var config = computationResult.config();
-        var graphStore = computationResult.graphStore();
 
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
-        var seedProperty = config.seedProperty();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(seedProperty);
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
 
         LongNodeProperties result;
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            result = LongIfChangedNodeProperties.of(graphStore, seedProperty, nodeProperties);
+            result = LongIfChangedNodeProperties.of(seedPropertySupplier.get(), nodeProperties);
         } else if (consecutiveIds && !isIncremental) {
             result = new ConsecutiveLongNodeProperties(
                 nodeProperties,
-                computationResult.graph().nodeCount(),
+                nodeProperties.size(),
                 allocationTracker
             );
         } else {
