@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -75,5 +76,32 @@ class ElementWiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
+    }
+
+    @Test
+    void shouldApproximateGradientWithSmallDiffBetweenNeighbors() {
+        var weights = new Weights<>(new Matrix(new double[]{
+            1.0000009,
+            1.0000004
+        }, 2, 1));
+
+        int[][] adjacencyMatrix = {
+            new int[]{0},
+            new int[]{0, 1}
+        };
+
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
+
+        ComputationContext ctx = new ComputationContext();
+
+        ctx.forward(loss);
+        ctx.backward(loss);
+
+        var expected = new Matrix(
+            new double[] { 2.0 , 0.0},
+            2,1
+        );
+
+        assertThat(ctx.gradient(weights)).isEqualTo(expected);
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.neo4j.gds.core.utils.DoubleUtil;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
@@ -59,6 +58,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         for (int row = 0; row < rows; row++) {
+            // FIXME resolve row to sourceId
             int[] neighbors = this.batchNeighbors.neighbors(row);
             for(int col = 0; col < cols; col++) {
                 if (neighbors.length > 0) {
@@ -86,13 +86,29 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var thisData = ctx.data(this);
 
         for (int row = 0; row < rows; row++) {
+            // FIXME resolve row via batchIds
             int[] neighbors = this.batchNeighbors.neighbors(row);
             for (int col = 0; col < cols; col++) {
+                double thisCellData = thisData.dataAt(row, col);
+
+                var minDiffToCellData = Double.MAX_VALUE;
+                var maxNeighbor = -1;
+
                 for (int neighbor : neighbors) {
-                    if (DoubleUtil.compareWithDefaultThreshold(parentData.dataAt(neighbor, col), thisData.dataAt(row, col))) {
-                        result.addDataAt(neighbor, col, thisGradient.dataAt(row, col));
+                    var diffToCellData = Math.abs(thisCellData - (parentData.dataAt(neighbor, col)));
+
+                    if (diffToCellData < minDiffToCellData) {
+                        minDiffToCellData = diffToCellData;
+                        maxNeighbor = neighbor;
                     }
                 }
+
+                if (maxNeighbor == -1) {
+                    assert neighbors.length == 0;
+                    continue;
+                }
+
+                result.addDataAt(maxNeighbor, col, thisGradient.dataAt(row, col));
             }
         }
 
