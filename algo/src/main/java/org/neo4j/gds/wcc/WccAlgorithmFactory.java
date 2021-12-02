@@ -21,6 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -42,7 +43,11 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Alg
 
     @Override
     protected Wcc build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             progressTracker.logWarning("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");

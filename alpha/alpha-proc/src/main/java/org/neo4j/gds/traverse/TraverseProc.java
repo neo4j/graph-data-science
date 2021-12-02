@@ -22,6 +22,7 @@ package org.neo4j.gds.traverse;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -84,7 +85,11 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
             @Override
             protected Traverse build(
-                Graph graph, TraverseConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+                Graph graph,
+                GraphStore graphStore,
+                TraverseConfig configuration,
+                AllocationTracker allocationTracker,
+                ProgressTracker progressTracker
             ) {
                 Traverse.ExitPredicate exitFunction;
                 Traverse.Aggregator aggregatorFunction;

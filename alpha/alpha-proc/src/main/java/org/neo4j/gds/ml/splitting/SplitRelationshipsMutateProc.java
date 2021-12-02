@@ -75,7 +75,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             @Override
             protected SplitRelationships build(
                 Graph graph,
-                SplitRelationshipsMutateConfig configuration,
+                GraphStore graphStore, SplitRelationshipsMutateConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {

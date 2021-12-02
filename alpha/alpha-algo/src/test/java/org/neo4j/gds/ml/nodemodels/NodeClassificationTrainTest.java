@@ -203,7 +203,7 @@ class NodeClassificationTrainTest {
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
 
         algorithm.compute();
@@ -421,7 +421,7 @@ class NodeClassificationTrainTest {
             config,
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
 
         var firstResult = algoSupplier.get().compute();

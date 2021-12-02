@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,7 +41,11 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends AlgorithmFac
 
     @Override
     protected FastRP build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 

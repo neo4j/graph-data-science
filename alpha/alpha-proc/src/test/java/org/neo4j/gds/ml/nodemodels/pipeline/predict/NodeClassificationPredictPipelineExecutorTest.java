@@ -274,7 +274,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "", CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
 
             var algo = factory.build(
-                null,
+                null, ,
                 streamConfig,
                 AllocationTracker.empty(),
                 ProgressTracker.NULL_TRACKER

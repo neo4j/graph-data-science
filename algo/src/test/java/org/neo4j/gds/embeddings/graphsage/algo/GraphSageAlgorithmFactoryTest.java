@@ -397,7 +397,7 @@ class GraphSageAlgorithmFactoryTest {
                 multiLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
-                EmptyTaskRegistryFactory.INSTANCE
+                EmptyTaskRegistryFactory.INSTANCE,
             );
         assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
 
@@ -414,7 +414,7 @@ class GraphSageAlgorithmFactoryTest {
                 singleLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
-                EmptyTaskRegistryFactory.INSTANCE
+                EmptyTaskRegistryFactory.INSTANCE,
             );
         assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }

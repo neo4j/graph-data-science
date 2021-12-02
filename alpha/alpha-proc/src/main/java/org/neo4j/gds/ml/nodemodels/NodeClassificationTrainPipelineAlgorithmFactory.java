@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -57,7 +58,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends AlgorithmFa
     @Override
     protected NodeClassificationTrainPipelineExecutor build(
         Graph graph,
-        NodeClassificationPipelineTrainConfig configuration,
+        GraphStore graphStore, NodeClassificationPipelineTrainConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

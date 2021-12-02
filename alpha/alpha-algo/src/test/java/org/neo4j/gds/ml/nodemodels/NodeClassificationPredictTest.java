@@ -245,7 +245,7 @@ class NodeClassificationPredictTest {
                 .build(),
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         mcnlrPredict.compute();
 

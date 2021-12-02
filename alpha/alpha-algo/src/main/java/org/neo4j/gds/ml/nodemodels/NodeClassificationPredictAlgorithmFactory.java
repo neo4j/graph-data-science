@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -47,7 +48,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
     @Override
     protected NodeClassificationPredict build(
         Graph graph,
-        NodeClassificationPredictConfig configuration,
+        GraphStore graphStore, NodeClassificationPredictConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

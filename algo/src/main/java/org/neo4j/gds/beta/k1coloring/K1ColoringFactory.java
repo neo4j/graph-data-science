@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -46,7 +47,11 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
 
     @Override
     public K1Coloring build(
-        Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        T configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         return new K1Coloring(
             graph,

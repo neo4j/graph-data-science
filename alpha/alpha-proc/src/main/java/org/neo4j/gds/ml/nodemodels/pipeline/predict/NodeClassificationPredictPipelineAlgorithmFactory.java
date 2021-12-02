@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -99,7 +100,11 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 
     @Override
     protected NodeClassificationPredictPipelineExecutor build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         String graphName = ""; // TODO: fixme
 

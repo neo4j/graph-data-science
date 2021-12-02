@@ -668,7 +668,7 @@ class PageRankTest {
     PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressTracker progressTracker) {
         return new PageRankAlgorithmFactory<>(mode)
             .build(
-                graph,
+                graph, ,
                 config,
                 AllocationTracker.empty(),
                 progressTracker

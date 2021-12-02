@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,6 +36,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
 
     public final ALGO build(
         Graph graph,
+        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         Log log,
@@ -47,7 +49,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
             configuration.concurrency(),
             taskRegistryFactory
         );
-        return build(graph, configuration, allocationTracker, progressTracker);
+        return build(graph, graphStore, configuration, allocationTracker, progressTracker);
     }
 
     /**
@@ -79,6 +81,7 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
      */
     protected abstract ALGO build(
         Graph graph,
+        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

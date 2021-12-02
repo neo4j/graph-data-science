@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -80,7 +81,11 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
 
     @Override
     protected LinkPredictionPredictPipelineExecutor build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         String graphName = ""; // TODO: fix me
 

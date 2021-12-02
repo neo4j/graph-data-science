@@ -262,7 +262,7 @@ final class ApproxMaxKCutTest {
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         approxMaxKCut.compute();
 

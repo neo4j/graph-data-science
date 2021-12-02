@@ -144,7 +144,7 @@ class GraphSageTest {
             streamConfig,
             AllocationTracker.empty(),
             NullLog.getInstance(),
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         GraphSage.GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
@@ -205,7 +205,7 @@ class GraphSageTest {
             trainConfig,
             AllocationTracker.empty(),
             new TestLog(),
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
 
         modelCatalog.set(graphSageTrain.compute());
@@ -222,7 +222,7 @@ class GraphSageTest {
             streamConfig,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         graphSage.compute();
 

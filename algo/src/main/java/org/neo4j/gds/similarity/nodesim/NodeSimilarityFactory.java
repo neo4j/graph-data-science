@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -45,7 +46,11 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     protected NodeSimilarity build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, allocationTracker);
     }

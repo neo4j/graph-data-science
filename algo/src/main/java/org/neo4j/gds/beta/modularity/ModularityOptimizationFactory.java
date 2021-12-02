@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
@@ -82,7 +83,11 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     @Override
     protected ModularityOptimization build(
-        Graph graph, T configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        T configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
         return build(graph, configuration, seedProperty, allocationTracker, progressTracker);

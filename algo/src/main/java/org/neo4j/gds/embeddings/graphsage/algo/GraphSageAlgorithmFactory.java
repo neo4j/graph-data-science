@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -56,7 +57,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     @Override
     public GraphSage build(
         Graph graph,
-        CONFIG configuration,
+        GraphStore graphStore, CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

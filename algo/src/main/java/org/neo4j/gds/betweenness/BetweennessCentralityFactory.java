@@ -21,6 +21,7 @@ package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -45,7 +46,11 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
     @Override
     protected BetweennessCentrality build(
-        Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
     ) {
         var samplingSize = configuration.samplingSize();
         var samplingSeed = configuration.samplingSeed();

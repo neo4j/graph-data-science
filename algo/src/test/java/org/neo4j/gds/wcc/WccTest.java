@@ -182,7 +182,7 @@ class WccTest {
             ImmutableWccStreamConfig.builder().relationshipWeightProperty("weights").build(),
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
 
         Assertions.assertThat(log.getMessages(WARN))
@@ -201,7 +201,7 @@ class WccTest {
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         wcc.compute();
 
@@ -413,7 +413,7 @@ class WccTest {
 
             var dss = new WccAlgorithmFactory<>()
                 .build(
-                    graph,
+                    graph, ,
                     config,
                     AllocationTracker.empty(),
                     ProgressTracker.NULL_TRACKER

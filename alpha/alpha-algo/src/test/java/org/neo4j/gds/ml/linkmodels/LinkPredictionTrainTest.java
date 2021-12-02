@@ -289,7 +289,7 @@ class LinkPredictionTrainTest {
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
         algo.compute();
 

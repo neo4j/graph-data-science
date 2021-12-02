@@ -805,7 +805,7 @@ final class NodeSimilarityTest {
             config,
             AllocationTracker.empty(),
             progressLog,
-            EmptyTaskRegistryFactory.INSTANCE
+            EmptyTaskRegistryFactory.INSTANCE,
         );
 
         nodeSimilarity.compute();

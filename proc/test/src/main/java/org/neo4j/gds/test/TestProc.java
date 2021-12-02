@@ -22,6 +22,7 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -81,7 +82,11 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
 
             @Override
             protected TestAlgorithm build(
-                Graph graph, TestConfig configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
+                Graph graph,
+                GraphStore graphStore,
+                TestConfig configuration,
+                AllocationTracker allocationTracker,
+                ProgressTracker progressTracker
             ) {
                 return new TestAlgorithm(
                     graph,

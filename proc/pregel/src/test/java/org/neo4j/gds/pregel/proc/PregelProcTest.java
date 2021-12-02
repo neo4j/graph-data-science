@@ -29,6 +29,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
@@ -299,7 +300,7 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 protected CompositeTestAlgorithm build(
                     Graph graph,
-                    TestPregelConfig configuration,
+                    GraphStore graphStore, TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
@@ -366,7 +367,7 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 protected CompositeTestAlgorithm build(
                     Graph graph,
-                    TestPregelConfig configuration,
+                    GraphStore graphStore, TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {
@@ -432,7 +433,7 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 protected CompositeTestAlgorithm build(
                     Graph graph,
-                    TestPregelConfig configuration,
+                    GraphStore graphStore, TestPregelConfig configuration,
                     AllocationTracker allocationTracker,
                     ProgressTracker progressTracker
                 ) {

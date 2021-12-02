@@ -22,6 +22,7 @@ package org.neo4j.gds.shortestpath;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -154,7 +155,7 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
             @Override
             protected ShortestPathDeltaStepping build(
                 Graph graph,
-                ShortestPathDeltaSteppingConfig configuration,
+                GraphStore graphStore, ShortestPathDeltaSteppingConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {

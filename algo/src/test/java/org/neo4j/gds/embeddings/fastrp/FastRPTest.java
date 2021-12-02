@@ -513,7 +513,7 @@ class FastRPTest extends AlgoTestBase {
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
-            .build(graph, config, AllocationTracker.empty(), progressTracker)
+            .build(graph, , config, AllocationTracker.empty(), progressTracker)
             .compute();
 
         assertThat(log.getMessages(TestLog.INFO))

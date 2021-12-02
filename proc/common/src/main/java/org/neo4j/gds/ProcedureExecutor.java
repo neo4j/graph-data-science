@@ -126,7 +126,7 @@ public class ProcedureExecutor<
                 .build();
         }
 
-        ALGO algo = newAlgorithm(graph, config, allocationTracker);
+        ALGO algo = newAlgorithm(graph, graphStore, config, allocationTracker);
 
         algo.progressTracker.setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
@@ -172,13 +172,14 @@ public class ProcedureExecutor<
     }
 
     private ALGO newAlgorithm(
-        final Graph graph,
-        final CONFIG config,
-        final AllocationTracker allocationTracker
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG config,
+        AllocationTracker allocationTracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(ktx);
         return algorithmFactory
-            .build(graph, config, allocationTracker, log, taskRegistryFactory)
+            .build(graph, graphStore, config, allocationTracker, log, taskRegistryFactory)
             .withTerminationFlag(terminationFlag);
     }
 

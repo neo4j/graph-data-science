@@ -21,6 +21,7 @@ package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -42,7 +43,7 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
     @Override
     protected RandomWalk build(
         Graph graph,
-        RandomWalkBaseConfig configuration,
+        GraphStore graphStore, RandomWalkBaseConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
