@@ -58,10 +58,10 @@ public class NodeClassificationPipelineStreamProc
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<NodeClassificationStreamResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Override

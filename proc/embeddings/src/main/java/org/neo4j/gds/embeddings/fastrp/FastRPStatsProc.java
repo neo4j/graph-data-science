@@ -40,11 +40,11 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
     @Procedure(value = "gds.fastRP.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
     public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<FastRP, FastRP.FastRPResult, FastRPStatsConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stats(computationResult);

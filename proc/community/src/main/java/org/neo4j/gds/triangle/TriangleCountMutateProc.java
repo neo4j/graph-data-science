@@ -43,10 +43,10 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     @Procedure(value = "gds.triangleCount.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.triangleCount.mutate.estimate", mode = READ)

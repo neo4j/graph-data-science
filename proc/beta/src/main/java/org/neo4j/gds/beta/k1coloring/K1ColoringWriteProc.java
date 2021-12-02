@@ -44,11 +44,11 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
+            compute(graphName, configuration);
 
         return write(computationResult);
     }

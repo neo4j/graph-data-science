@@ -43,11 +43,11 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
     @Procedure(value = "gds.pageRank.mutate", mode = READ)
     @Description(PageRankProc.PAGE_RANK_DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return mutate(computationResult);

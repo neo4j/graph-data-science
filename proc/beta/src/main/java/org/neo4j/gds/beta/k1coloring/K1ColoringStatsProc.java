@@ -42,11 +42,11 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     @Procedure(name = "gds.beta.k1coloring.stats", mode = READ)
     @Description(K1ColoringProc.K1_COLORING_DESCRIPTION)
     public Stream<StatsResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
+            compute(graphName, configuration);
 
         return stats(computationResult);
     }

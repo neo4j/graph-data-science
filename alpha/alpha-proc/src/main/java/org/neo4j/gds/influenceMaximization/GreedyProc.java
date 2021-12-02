@@ -45,12 +45,12 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     @Procedure(name = "gds.alpha.influenceMaximization.greedy.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
         ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 
@@ -66,11 +66,11 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
 //    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 

@@ -54,10 +54,10 @@ public class NodeClassificationPipelineTrainProc
     @Procedure(name = "gds.alpha.ml.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
     public Stream<MLTrainResult> train(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return trainAndStoreModelWithResult(graphNameOrConfig, configuration, (model, result) -> new MLTrainResult(model, result.computeMillis()));
+        return trainAndStoreModelWithResult(graphName, configuration, (model, result) -> new MLTrainResult(model, result.computeMillis()));
     }
 
     @Override

@@ -42,11 +42,11 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
     @Procedure(value = "gds.fastRP.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     )  {
         ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return write(computationResult);

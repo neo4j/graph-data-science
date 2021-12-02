@@ -44,10 +44,10 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityWriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)

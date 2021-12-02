@@ -48,10 +48,10 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write.estimate", mode = READ)

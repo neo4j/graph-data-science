@@ -42,11 +42,11 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     @Procedure(value = "gds.testProc.test", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<TestResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<TestAlgorithm, TestAlgorithm, TestConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stats(computationResult);

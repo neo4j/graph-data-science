@@ -41,10 +41,10 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
     @Procedure(value = "gds.degree.stream", mode = READ)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.degree.stream.estimate", mode = READ)

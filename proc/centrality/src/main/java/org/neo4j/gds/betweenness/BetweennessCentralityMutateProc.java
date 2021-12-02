@@ -45,10 +45,10 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     @Procedure(value = "gds.betweenness.mutate", mode = READ)
     @Description(BetweennessCentralityProc.BETWEENNESS_DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.betweenness.mutate.estimate", mode = READ)

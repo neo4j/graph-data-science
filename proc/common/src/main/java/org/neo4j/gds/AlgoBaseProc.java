@@ -64,20 +64,20 @@ public abstract class AlgoBaseProc<
     protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
-        Object graphNameOrConfig,
+        String graphName,
         Map<String, Object> configuration
     ) {
         ProcPreconditions.check();
-        return compute(graphNameOrConfig, configuration, true, true);
+        return compute(graphName, configuration, true, true);
     }
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
-        Object graphNameOrConfig,
+        String graphName,
         Map<String, Object> configuration,
         boolean releaseAlgorithm,
         boolean releaseTopology
     ) {
-        return procedureExecutor().compute(graphNameOrConfig, configuration, releaseAlgorithm, releaseTopology);
+        return procedureExecutor().compute(graphName, configuration, releaseAlgorithm, releaseTopology);
     }
 
     protected ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG> procedureExecutor() {

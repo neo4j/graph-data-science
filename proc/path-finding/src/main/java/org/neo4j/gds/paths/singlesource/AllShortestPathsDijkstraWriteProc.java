@@ -44,10 +44,10 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
     @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration, false, true));
+        return write(compute(graphName, configuration, false, true));
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)

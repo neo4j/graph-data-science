@@ -44,10 +44,10 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     @Procedure(value = "gds.localClusteringCoefficient.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.mutate.estimate", mode = READ)

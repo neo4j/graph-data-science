@@ -51,10 +51,10 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
     @Description("Splits a graph into holdout and remaining relationship types and adds them to the in-memory graph.")
     public Stream<SplitRelationshipsMutateProc.MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphNameOrConfig, configuration);
+        var computationResult = compute(graphName, configuration);
         return mutate(computationResult);
     }
 

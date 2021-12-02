@@ -40,10 +40,10 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
     @Description(K1ColoringProc.K1_COLORING_DESCRIPTION)
     public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)

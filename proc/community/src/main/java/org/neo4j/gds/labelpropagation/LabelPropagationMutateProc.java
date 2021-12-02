@@ -43,10 +43,10 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)

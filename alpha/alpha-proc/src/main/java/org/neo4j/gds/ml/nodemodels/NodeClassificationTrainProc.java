@@ -47,11 +47,11 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")
     public Stream<MLTrainResult> train(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return trainAndStoreModelWithResult(
-            graphNameOrConfig, configuration,
+            graphName, configuration,
             (model, result) -> new MLTrainResult(model, result.computeMillis())
         );
     }

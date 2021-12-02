@@ -48,11 +48,11 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<AllShortestPathsStream.Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> computationResult =
-            compute(graphNameOrConfig, configuration, false, false);
+            compute(graphName, configuration, false, false);
 
         if (computationResult.isGraphEmpty()) {
             computationResult.graph().release();

@@ -51,10 +51,10 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphNameOrConfig, configuration);
+        var computationResult = compute(graphName, configuration);
 
         var algorithm = computationResult.algorithm();
         var graph = computationResult.graph();
@@ -72,10 +72,10 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphNameOrConfig, configuration);
+        var computationResult = compute(graphName, configuration);
 
         var algorithm = computationResult.algorithm();
         var config = computationResult.config();

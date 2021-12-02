@@ -45,10 +45,10 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     @Procedure(value = "gds.degree.stats", mode = READ)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
     public Stream<DegreeCentralityStatsProc.StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.degree.stats.estimate", mode = READ)

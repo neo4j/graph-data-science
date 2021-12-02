@@ -43,28 +43,28 @@ public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, Eucli
     @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> euclideanStream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(graphNameOrConfig, configuration);
+        return stream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilaritySummaryResult> euclideanWrite(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(graphNameOrConfig, configuration);
+        return write(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilarityStatsResult> euclideanStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(graphNameOrConfig, configuration);
+        return stats(graphName, configuration);
     }
 
     @Override

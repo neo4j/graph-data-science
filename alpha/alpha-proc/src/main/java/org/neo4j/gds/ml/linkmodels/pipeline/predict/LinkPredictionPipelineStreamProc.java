@@ -47,10 +47,10 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
+        var result = compute(graphName, configuration);
 
         Graph graph = result.graph();
 

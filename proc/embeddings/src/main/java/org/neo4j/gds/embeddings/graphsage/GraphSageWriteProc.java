@@ -53,12 +53,12 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageWriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
 
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.graphSage.write.estimate", mode = Mode.READ)

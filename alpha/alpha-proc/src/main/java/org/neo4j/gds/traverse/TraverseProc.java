@@ -53,21 +53,21 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<WalkResult> bfs(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         isBfs = true;
-        return stream(graphNameOrConfig, configuration);
+        return stream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.dfs.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<WalkResult> dfs(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         isBfs = false;
-        return stream(graphNameOrConfig, configuration);
+        return stream(graphName, configuration);
     }
 
     @Override
@@ -122,9 +122,9 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
         };
     }
 
-    private Stream<WalkResult> stream(Object graphNameOrConfig, Map<String, Object> configuration) {
+    private Stream<WalkResult> stream(String graphName, Map<String, Object> configuration) {
         ComputationResult<Traverse, Traverse, TraverseConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 

@@ -41,11 +41,11 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ)
     @Description(CONDUCTANCE_DESCRIPTION)
     public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var result = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 

@@ -43,10 +43,10 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ)
     @Description(K1ColoringProc.K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringMutateProc.MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ)

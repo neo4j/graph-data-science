@@ -52,10 +52,10 @@ public class NodeClassificationPredictWriteProc
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write", mode = WRITE)
     @Description("Predicts classes for all nodes based on a previously trained model")
     public Stream<Result> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
+        var result = compute(graphName, configuration);
         return write(result);
     }
 

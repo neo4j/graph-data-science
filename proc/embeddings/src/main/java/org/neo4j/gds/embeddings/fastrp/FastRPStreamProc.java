@@ -42,11 +42,11 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     @Procedure(value = "gds.fastRP.stream", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
     public Stream<FastRPStreamProc.StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<FastRP, FastRP.FastRPResult, FastRPStreamConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stream(computationResult);

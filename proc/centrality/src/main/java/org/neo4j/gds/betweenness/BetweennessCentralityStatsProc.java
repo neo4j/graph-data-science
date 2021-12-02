@@ -46,10 +46,10 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     @Procedure(value = "gds.betweenness.stats", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
     public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)

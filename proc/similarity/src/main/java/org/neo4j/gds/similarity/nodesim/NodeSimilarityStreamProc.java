@@ -42,11 +42,11 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig> result = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         Graph graph = result.graph();

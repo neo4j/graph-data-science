@@ -45,28 +45,28 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
     @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> pearsonStream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(graphNameOrConfig, configuration);
+        return stream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.pearson.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilaritySummaryResult> pearsonWrite(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(graphNameOrConfig, configuration);
+        return write(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.pearson.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilarityStatsResult> pearsonStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(graphNameOrConfig, configuration);
+        return stats(graphName, configuration);
     }
 
     @Override

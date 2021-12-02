@@ -39,10 +39,10 @@ public class EigenvectorStreamProc extends PageRankStreamProc {
     @Procedure(value = "gds.eigenvector.stream", mode = READ)
     @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.stream(graphNameOrConfig, configuration);
+        return super.stream(graphName, configuration);
     }
 
     @Override

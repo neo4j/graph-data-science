@@ -42,11 +42,11 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
     @Procedure(value = "gds.testProc.mutate", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<TestResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return mutate(computationResult);

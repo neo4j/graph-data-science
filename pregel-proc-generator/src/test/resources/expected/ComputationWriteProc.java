@@ -53,7 +53,7 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
     @Description("Test computation description")
     public Stream<PregelWriteResult> write(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(

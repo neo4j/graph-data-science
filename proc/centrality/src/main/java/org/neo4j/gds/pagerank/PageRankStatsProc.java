@@ -43,11 +43,11 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stats(computationResult);

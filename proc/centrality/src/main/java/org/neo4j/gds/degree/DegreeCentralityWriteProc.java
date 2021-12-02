@@ -46,10 +46,10 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
     @Procedure(value = "gds.degree.write", mode = WRITE)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
     public Stream<DegreeCentralityWriteProc.WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.degree.write.estimate", mode = READ)

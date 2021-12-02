@@ -53,7 +53,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
     @Description("Test computation description")
     public Stream<PregelMutateResult> mutate(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(

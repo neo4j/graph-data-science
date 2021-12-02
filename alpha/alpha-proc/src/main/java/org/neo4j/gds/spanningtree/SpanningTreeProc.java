@@ -64,35 +64,35 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> spanningTree(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphNameOrConfig, configuration);
+        return computeAndWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> minimumSpanningTree(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphNameOrConfig, configuration);
+        return computeAndWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = WRITE)
     @Description(MAX_DESCRIPTION)
     public Stream<Prim.Result> maximumSpanningTree(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         minMax = Prim.MAX_OPERATOR;
-        return computeAndWrite(graphNameOrConfig, configuration);
+        return computeAndWrite(graphName, configuration);
     }
 
-    private Stream<Prim.Result> computeAndWrite(Object graphNameOrConfig, Map<String, Object> configuration) {
-        ComputationResult<Prim, SpanningTree, SpanningTreeConfig> computationResult = compute(graphNameOrConfig, configuration);
+    private Stream<Prim.Result> computeAndWrite(String graphName, Map<String, Object> configuration) {
+        ComputationResult<Prim, SpanningTree, SpanningTreeConfig> computationResult = compute(graphName, configuration);
 
         Graph graph = computationResult.graph();
         Prim prim = computationResult.algorithm();

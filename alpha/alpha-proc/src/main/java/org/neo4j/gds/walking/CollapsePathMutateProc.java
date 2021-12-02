@@ -48,21 +48,21 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     @Procedure(name = "gds.alpha.collapsePath.mutate", mode = READ)
     @Description("Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal")
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphNameOrConfig, configuration, true, false);
+        var computationResult = compute(graphName, configuration, true, false);
         return mutate(computationResult);
     }
 
     @Override
     protected ComputationResult<CollapsePath, Relationships, CollapsePathConfig> compute(
-        Object graphNameOrConfig, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology
+        String graphName, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology
     ) {
         ImmutableComputationResult.Builder<CollapsePath, Relationships, CollapsePathConfig> builder = ImmutableComputationResult.builder();
 
         Pair<CollapsePathConfig, Optional<String>> input = configParser().processInput(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         var config = input.getOne();

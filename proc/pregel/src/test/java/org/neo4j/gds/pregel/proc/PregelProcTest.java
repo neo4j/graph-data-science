@@ -266,10 +266,10 @@ public class PregelProcTest extends BaseProcTest {
         )
         @Description("Connected Components")
         public Stream<PregelMutateResult> mutate(
-            @Name("graphName") Object graphNameOrConfig,
+            @Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            return mutate(compute(graphNameOrConfig, configuration));
+            return mutate(compute(graphName, configuration));
         }
 
         @Override
@@ -335,10 +335,10 @@ public class PregelProcTest extends BaseProcTest {
         )
         @Description("Connected Components")
         public Stream<PregelWriteResult> write(
-            @Name("graphName") Object graphNameOrConfig,
+            @Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            return write(compute(graphNameOrConfig, configuration));
+            return write(compute(graphName, configuration));
         }
 
         @Override
@@ -402,10 +402,10 @@ public class PregelProcTest extends BaseProcTest {
             mode = Mode.READ
         )
         public Stream<PregelStreamResult> stream(
-            @Name("graphName") Object graphNameOrConfig,
+            @Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            return stream(compute(graphNameOrConfig, configuration));
+            return stream(compute(graphName, configuration));
         }
 
         @Override

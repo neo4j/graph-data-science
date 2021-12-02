@@ -46,11 +46,11 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     @Procedure(value = "gds.wcc.write", mode = WRITE)
     @Description(WCC_DESCRIPTION)
     public Stream<WccWriteProc.WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return write(computationResult);

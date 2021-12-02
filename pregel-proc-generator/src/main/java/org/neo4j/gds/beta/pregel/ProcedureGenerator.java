@@ -126,7 +126,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .build()
         ));
         return methodBuilder
-            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procGdsMode().lowerCase())
+            .addStatement("return $L(compute(graphName, configuration))", procGdsMode().lowerCase())
             .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
             .build();
     }
@@ -144,6 +144,14 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     @NotNull
     private MethodSpec.Builder procMethodSignature(String methodNameSuffix, String procedureSuffix, Mode procExecMode) {
+        var graphParameterType = methodNameSuffix.equals("Estimate")
+            ? Object.class
+            : String.class;
+
+        var graphParameterName = methodNameSuffix.equals("Estimate")
+            ? "graphNameOrConfig"
+            : "graphName";
+
         return MethodSpec.methodBuilder(procGdsMode().lowerCase() + methodNameSuffix)
             .addAnnotation(AnnotationSpec.builder(Procedure.class)
                 .addMember(
@@ -155,7 +163,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .build()
             )
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
+            .addParameter(ParameterSpec.builder(graphParameterType, graphParameterName)
                 .addAnnotation(AnnotationSpec.builder(Name.class)
                     .addMember("value", "$S", "graphName")
                     .build())

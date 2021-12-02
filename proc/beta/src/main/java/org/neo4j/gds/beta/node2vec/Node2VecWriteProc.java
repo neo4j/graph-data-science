@@ -47,11 +47,11 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return write(computationResult);

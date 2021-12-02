@@ -45,10 +45,10 @@ public class TriangleCountStreamProc
     @Description(TriangleCountCompanion.DESCRIPTION)
     @Procedure(name = "gds.triangleCount.stream", mode = Mode.READ)
     public Stream<Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.triangleCount.stream.estimate", mode = READ)

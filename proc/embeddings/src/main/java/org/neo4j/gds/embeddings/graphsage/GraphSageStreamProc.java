@@ -55,12 +55,12 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
     public Stream<GraphSageStreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
 
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.graphSage.stream.estimate", mode = Mode.READ)

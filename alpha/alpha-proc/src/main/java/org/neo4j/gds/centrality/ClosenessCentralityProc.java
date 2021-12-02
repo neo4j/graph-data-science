@@ -52,11 +52,11 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
     @Procedure(name = "gds.alpha.closeness.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MSClosenessCentrality.Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 
@@ -75,11 +75,11 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
     @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 
