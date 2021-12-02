@@ -31,8 +31,12 @@ public final class HugeMergeSort {
 
     public static void sort(HugeLongArray array, int concurrency, AllocationTracker allocationTracker) {
         var temp = HugeLongArray.newArray(array.size(), allocationTracker);
-        var forkJoinPool = Pools.DEFAULT_FJ_POOL;
-        forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
+        var forkJoinPool = Pools.createForkJoinPool(concurrency);
+        try {
+            forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
+        } finally {
+            forkJoinPool.shutdown();
+        }
     }
 
     static class MergeSortTask extends CountedCompleter<Void> {
