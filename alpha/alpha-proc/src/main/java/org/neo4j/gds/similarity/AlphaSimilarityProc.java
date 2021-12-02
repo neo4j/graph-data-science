@@ -53,11 +53,10 @@ abstract class AlphaSimilarityProc
     public static final String SIMILARITY_FAKE_GRAPH_NAME = "  SIM-NULL-GRAPH";
 
     Stream<SimilarityResult> stream(
-        String graphName,
         Map<String, Object> configuration
     ) {
         ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
-            graphName,
+            AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
             configuration
         );
 
@@ -68,11 +67,10 @@ abstract class AlphaSimilarityProc
     }
 
     Stream<AlphaSimilaritySummaryResult> write(
-        String graphName,
         Map<String, Object> configuration
     ) {
         ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
-            graphName,
+            AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
             configuration
         );
 
@@ -88,11 +86,10 @@ abstract class AlphaSimilarityProc
     }
 
     Stream<AlphaSimilarityStatsResult> stats(
-        String graphName,
         Map<String, Object> configuration
     ) {
         ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
-            graphName,
+            AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME,
             configuration
         );
 

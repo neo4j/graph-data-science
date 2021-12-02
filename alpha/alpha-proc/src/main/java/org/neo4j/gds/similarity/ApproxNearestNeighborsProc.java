@@ -69,19 +69,17 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
     @Procedure(name = "gds.alpha.ml.ann.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> annStream(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return stream(graphName, configuration);
+        return stream(configuration);
     }
 
     @Procedure(name = "gds.alpha.ml.ann.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<ApproxSimilaritySummaryResult> annWrite(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return writeResult(graphName, configuration);
+        return writeResult(configuration);
     }
 
     @Override
@@ -136,11 +134,10 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
     }
 
     Stream<ApproxSimilaritySummaryResult> writeResult(
-        String graphName,
         Map<String, Object> configuration
     ) {
         ComputationResult<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityAlgorithmResult, ApproximateNearestNeighborsConfig> computationResult = compute(
-            graphName,
+            "__empty__",
             configuration
         );
 

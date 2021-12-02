@@ -43,28 +43,25 @@ public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfi
     @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> cosineStream(
-        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(graphName, configuration);
+        return stream(configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.cosine.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilaritySummaryResult> cosineWrite(
-        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(graphName, configuration);
+        return write(configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.cosine.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilarityStatsResult> cosineStats(
-        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(graphName, configuration);
+        return stats(configuration);
     }
 
     @Override
