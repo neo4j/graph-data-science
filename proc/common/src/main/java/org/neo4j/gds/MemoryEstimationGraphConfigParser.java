@@ -58,8 +58,4 @@ public class MemoryEstimationGraphConfigParser implements ProcConfigParser<Graph
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys) {
-        throw new UnsupportedOperationException();
-    }
 }

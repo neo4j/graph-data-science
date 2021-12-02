@@ -30,6 +30,4 @@ public interface ProcConfigParser<CONFIG, RESULT> {
     RESULT processInput(Object graphNameOrConfig, Map<String, Object> configuration);
 
     CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config);
-
-    void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys);
 }

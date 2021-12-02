@@ -64,11 +64,6 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
     }
 
     @Override
-    public void withSharedConfigKeys(Map<String, Class<?>> sharedConfigKeys) {
-        configParser.withSharedConfigKeys(sharedConfigKeys);
-    }
-
-    @Override
     public Pair<CONFIG, Optional<String>> processInput(
         Object __, Map<String, Object> configuration
     ) {
