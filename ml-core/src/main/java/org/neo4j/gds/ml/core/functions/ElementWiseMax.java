@@ -61,13 +61,19 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         for (int row = 0; row < rows; row++) {
             int sourceId = batchIds[row];
             int[] neighbors = this.batchNeighbors.neighbors(sourceId);
-            for(int col = 0; col < cols; col++) {
-                if (neighbors.length > 0) {
-                    for (int neighbor : neighbors) {
-                        double relationshipWeight = batchNeighbors.relationshipWeight(sourceId, neighbor);
-                        max.setDataAt(row, col, Math.max(parentData.dataAt(neighbor, col) * relationshipWeight, max.dataAt(row, col)));
+
+            for (int neighbor : neighbors) {
+                double relationshipWeight = batchNeighbors.relationshipWeight(sourceId, neighbor);
+                for (int col = 0; col < cols; col++) {
+                    double neighborValue = parentData.dataAt(neighbor, col) * relationshipWeight;
+                    if (neighborValue >= max.dataAt(row, col)) {
+                        max.setDataAt(row, col, neighborValue);
                     }
-                } else {
+                }
+            }
+
+            if (neighbors.length == 0) {
+                for (int col = 0; col < cols; col++) {
                     max.setDataAt(row, col, 0);
                 }
             }
