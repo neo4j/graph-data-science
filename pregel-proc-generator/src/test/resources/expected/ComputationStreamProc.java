@@ -49,7 +49,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
             mode = Mode.READ
     )
     @Description("Test computation description")
-    public Stream<PregelStreamResult> stream(@Name("graphName") Object graphNameOrConfig,
+    public Stream<PregelStreamResult> stream(@Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stream(compute(graphName, configuration));
     }
