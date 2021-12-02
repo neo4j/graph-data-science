@@ -97,8 +97,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
     @Test
     void shouldMutateResults() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .mutateMode()
             .addParameter("sudo", true)
@@ -157,17 +156,16 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     void shouldMutateUniqueRelationships() {
         var graphName = "undirectedGraph";
 
-        var graphCreateQuery = GdsCypher.call()
+        var graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation(graphName)
+        var query = GdsCypher.call(graphName)
             .algo("gds", "beta", "knn")
             .mutateMode()
             .addParameter("sudo", true)
@@ -213,20 +211,19 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
         runQuery(nodeCreateQuery);
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeProperty("age")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
         String relationshipType = "SIMILAR";
         String relationshipProperty = "score";
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.beta.knn")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo"))

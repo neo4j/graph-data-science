@@ -125,17 +125,16 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     @Test
     void testMutateYields() {
         String graphName = "graph";
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("KNOWS")
-            .graphCreate(graphName)
             .yields();
 
         runQuery(loadQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
+            .call(graphName)
             .algo("gds.alpha.collapsePath")
             .mutateMode()
             .addParameter("relationshipTypes", List.of("KNOWS", "KNOWS"))

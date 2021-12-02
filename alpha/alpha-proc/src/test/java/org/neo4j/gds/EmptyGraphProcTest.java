@@ -57,17 +57,16 @@ class EmptyGraphProcTest extends BaseProcTest {
             GraphCreateProc.class
         );
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .loadEverything()
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(createQuery);
     }
 
     @Test
     void testSccStream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.scc")
             .streamMode()
             .yields();
@@ -76,8 +75,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testSccWrite() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .yields();
@@ -86,8 +84,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testAllShortestPathsStream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.allShortestPaths")
             .streamMode()
             .yields();
@@ -96,8 +93,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testClosenessCentralityStream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness")
             .streamMode()
             .yields();
@@ -106,8 +102,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testClosenessCentralityWrite() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness")
             .writeMode()
             .yields();
@@ -116,8 +111,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testHarmonicCentralityStream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields();
@@ -126,8 +120,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testHarmonicCentralityWrite() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .yields();
@@ -136,9 +129,9 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testTriangleStream() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("undirectedGraph")
+            .graphCreate()
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate("undirectedGraph")
             .yields();
         runQuery(createQuery);
 
@@ -148,8 +141,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testKSpanningTreeKMax() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -160,8 +152,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testKSpanningTreeKMin() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -172,8 +163,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testSpanningTree() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -184,8 +174,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testSpanningTreeMinimum() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.minimum")
             .writeMode()
             .addParameter("startNodeId", 0)
@@ -196,8 +185,7 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testSpanningTreeMaximum() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
             .addParameter("startNodeId", 0)

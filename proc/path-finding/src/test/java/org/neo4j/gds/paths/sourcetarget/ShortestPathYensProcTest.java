@@ -108,11 +108,11 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
         costs1 = new double[]{0.0, 2.0, 5.0, 7.0};
         costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

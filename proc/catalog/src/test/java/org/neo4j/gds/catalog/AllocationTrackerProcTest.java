@@ -59,8 +59,7 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     @Test
     void shouldFailOnMemoryLimitExceeded() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String cypher = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String cypher = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", 1024)

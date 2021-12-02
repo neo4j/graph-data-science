@@ -324,9 +324,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void loadGraph(String graphName, Orientation orientation) {
         runQuery(
             graphDb(),
-            GdsCypher.call()
+            GdsCypher.call(graphName)
+                .graphCreate()
                 .loadEverything(orientation)
-                .graphCreate(graphName)
                 .yields()
         );
     }

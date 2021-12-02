@@ -61,8 +61,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Test
     void testWrite() {
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")
@@ -92,8 +91,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Test
     void testWriteWithMaxDegree() {
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")

@@ -78,8 +78,7 @@ class SccProcTest extends BaseProcTest {
     void testWriteWithDefaultWriteProperty() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .yields();
@@ -112,8 +111,7 @@ class SccProcTest extends BaseProcTest {
     void testWriteWithExplicitWriteProperty() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .writeMode()
             .addParameter("writeProperty", "scc")
@@ -172,8 +170,7 @@ class SccProcTest extends BaseProcTest {
 
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.scc")
             .streamMode()
             .yields();

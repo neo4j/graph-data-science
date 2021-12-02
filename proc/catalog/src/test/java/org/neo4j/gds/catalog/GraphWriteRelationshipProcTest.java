@@ -65,13 +65,13 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         registerProcedures(GraphCreateProc.class, GraphWriteRelationshipProc.class);
         runQuery(DB_CYPHER);
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(TEST_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("NEW_REL1", "REL1")
             .withRelationshipType("NEW_REL2", "REL2")
             .withRelationshipProperty("newRelProp1", "relProp1")
             .withRelationshipProperty("newRelProp2", "relProp2")
-            .graphCreate(TEST_GRAPH_NAME)
             .yields()
         );
     }

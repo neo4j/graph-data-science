@@ -61,8 +61,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
     @Test
     void testStreamWithDefaults() {
         loadGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .streamMode()
             .yields("nodeId", "componentId");
@@ -91,8 +90,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             graphLoader(graphCreateConfig).graphStore()
         );
 
-        String query = GdsCypher.call()
-            .explicitCreation("testGraph")
+        String query = GdsCypher.call("testGraph")
             .algo("wcc")
             .streamMode()
             .yields("nodeId", "componentId");
@@ -113,10 +111,10 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
         runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
 
         String graphCreateQuery = GdsCypher
-            .call()
+            .call("nodeFilterGraph")
+            .graphCreate()
             .withNodeLabels("Label", "Label2", "Ignore")
             .withAnyRelationshipType()
-            .graphCreate("nodeFilterGraph")
             .yields();
 
         runQueryWithRowConsumer(graphCreateQuery, row -> {
@@ -124,8 +122,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             assertEquals(11L, row.getNumber("relationshipCount"));
         });
 
-        String query = GdsCypher.call()
-            .explicitCreation("nodeFilterGraph")
+        String query = GdsCypher.call("nodeFilterGraph")
             .algo("wcc")
             .streamMode()
             .addParameter("nodeLabels", Arrays.asList("Label", "Label2"))

@@ -118,8 +118,7 @@ class NodeSimilarityMutateProcTest
     void testMutateYields() {
         loadGraph("graph");
 
-        String query = GdsCypher.call()
-            .explicitCreation("graph")
+        String query = GdsCypher.call("graph")
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
@@ -177,16 +176,15 @@ class NodeSimilarityMutateProcTest
     void shouldMutateUniqueRelationships(int topN) {
         var graphName = "undirectedGraph";
 
-        var graphCreateQuery = GdsCypher.call()
+        var graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("LIKES", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation(graphName)
+        var query = GdsCypher.call(graphName)
             .algo("gds", "nodeSimilarity")
             .mutateMode()
             .addParameter("sudo", true)
@@ -216,20 +214,19 @@ class NodeSimilarityMutateProcTest
             ", (bob)-[:KNOWS]->(a)";
         runQuery(graphCreateQuery);
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
         String relationshipType = "SIMILAR";
         String relationshipProperty = "score";
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.nodeSimilarity")
             .mutateMode()
             .addParameter("nodeLabels", List.of("Foo", "Bar"))

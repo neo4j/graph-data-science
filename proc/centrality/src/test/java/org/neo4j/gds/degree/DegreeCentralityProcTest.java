@@ -101,9 +101,9 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
             GraphCreateProc.class
         );
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .loadEverything()
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);

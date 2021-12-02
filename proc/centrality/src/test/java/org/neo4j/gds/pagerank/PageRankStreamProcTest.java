@@ -49,8 +49,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Test
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth() {
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "equalWeight")
@@ -67,8 +66,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Test
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist() {
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "does_not_exist")
@@ -83,8 +81,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Test
     void testPageRank() {
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .streamMode()
             .yields("nodeId", "score");
@@ -94,8 +91,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Test
     void testWeightedPageRank() {
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -126,8 +122,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     void streamWithSourceNodes() {
         var sourceNodes = allNodesWithLabel("Label1");
 
-        String queryWithSourceNodes = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String queryWithSourceNodes = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")

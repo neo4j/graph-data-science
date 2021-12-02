@@ -53,7 +53,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
     void returnCorrectResult() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.allShortestPaths.dijkstra")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())

@@ -106,8 +106,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void stream() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
@@ -127,8 +126,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void streamEstimate() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamEstimation()
             .addParameter("maxIterations", 10)
@@ -144,15 +142,14 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void streamSeeded() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeProperty("seedProperty")
             .loadEverything()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
@@ -173,8 +170,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void write() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .writeMode()
             .addParameter("maxIterations", 10)
@@ -200,16 +196,15 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
 
-        var mutateQuery = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var mutateQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .mutateMode()
             .addParameter("maxIterations", 10)
@@ -240,8 +235,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     @Test
     void stats() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "cc")
             .statsMode()
             .addParameter("maxIterations", 10)

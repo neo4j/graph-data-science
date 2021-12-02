@@ -72,10 +72,10 @@ class ConductanceStreamProcTest extends BaseProcTest {
             GraphCreateProc.class
         );
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeProperty("community")
             .loadEverything()
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
@@ -88,8 +88,7 @@ class ConductanceStreamProcTest extends BaseProcTest {
 
     @Test
     void testStream() {
-        String streamQuery = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String streamQuery = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.conductance")
             .streamMode()
             .addParameter("communityProperty", "community")

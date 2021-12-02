@@ -75,7 +75,7 @@ class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestP
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.astar")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -107,7 +107,7 @@ class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestP
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.astar")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())

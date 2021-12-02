@@ -89,8 +89,7 @@ class EigenvectorProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("scalers")
     void scalers(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .addParameter("scaler", variant.name().toLowerCase(Locale.ENGLISH))
@@ -104,8 +103,7 @@ class EigenvectorProcTest extends BaseProcTest {
 
     @Test
     void invalidScaler() {
-        assertThatThrownBy(() -> runQuery(GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        assertThatThrownBy(() -> runQuery(GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .addParameter("scaler", "SUPERDUPERSCALARSCALERVARIANT")
@@ -118,8 +116,7 @@ class EigenvectorProcTest extends BaseProcTest {
 
     @Test
     void stats() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .statsMode()
             .addParameter("tolerance", 1E-2)
@@ -139,8 +136,7 @@ class EigenvectorProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .yields();
@@ -155,8 +151,7 @@ class EigenvectorProcTest extends BaseProcTest {
     void streamWithSourceNodes() {
         var sourceNodes = allNodes();
 
-        var query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
@@ -175,8 +170,7 @@ class EigenvectorProcTest extends BaseProcTest {
             new NodeEntity(null, 1337)
         );
 
-        var query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
@@ -192,8 +186,7 @@ class EigenvectorProcTest extends BaseProcTest {
     @Test
     void write() {
         String propertyKey = "pr";
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .writeMode()
             .addParameter("writeProperty", propertyKey)
@@ -217,8 +210,7 @@ class EigenvectorProcTest extends BaseProcTest {
     @Test
     void mutate() {
         String propertyKey = "pr";
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .mutateMode()
             .addParameter("mutateProperty", propertyKey)
@@ -242,8 +234,7 @@ class EigenvectorProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("estimations")
     void estimates(GdsCypher.ExecutionModes mode) {
-        var queryBuilder = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var queryBuilder = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .estimationMode(mode);
 
@@ -266,8 +257,7 @@ class EigenvectorProcTest extends BaseProcTest {
 
     @Test
     void failOnDampingFactor() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("eigenvector")
             .streamMode()
             .addParameter("dampingFactor", 0.5)

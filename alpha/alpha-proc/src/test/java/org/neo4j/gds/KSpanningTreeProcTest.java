@@ -64,18 +64,17 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(KSpanningTreeProc.class, GraphCreateProc.class);
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withRelationshipProperty("w")
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(createQuery);
     }
 
     @Test
     void testMax() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
             .addParameter("startNodeId", idFunction.of("a"))
@@ -104,8 +103,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void testMin() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", idFunction.of("a"))
@@ -134,8 +132,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void failOnInvalidStartNode() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
             .addParameter("startNodeId", 42)

@@ -64,11 +64,11 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, NodeClassificationPipelineStreamProc.class);
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call("g")
+            .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
-            .graphCreate("g")
             .yields();
 
         runQuery(loadQuery);
@@ -84,8 +84,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("modelName", MODEL_NAME)
@@ -122,8 +121,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("includePredictedProbabilities", true)

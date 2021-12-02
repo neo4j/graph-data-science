@@ -128,13 +128,14 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     }
 
     static String graphCreateQuery(Orientation orientation, String graphName) {
-        return graphCreateQuery(orientation).graphCreate(graphName).yields();
+        return graphCreateQuery(graphName, orientation).yields();
     }
 
-    static GdsCypher.QueryBuilder graphCreateQuery(Orientation orientation) {
+    static GdsCypher.GraphCreateBuilder graphCreateQuery(String graphName, Orientation orientation) {
         return GdsCypher
-            .call()
-            .implicitCreation(ImmutableGraphCreateFromStoreConfig
+            .call(graphName)
+            .graphCreate()
+            .withGraphCreateConfig(ImmutableGraphCreateFromStoreConfig
                 .builder()
                 .graphName("")
                 .nodeProjections(NodeProjections.fromObject(MapUtil.map("A", "A", "B", "B")))

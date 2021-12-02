@@ -53,11 +53,11 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
 
         registerProcedures(GraphCreateProc.class, ScalePropertiesMutateProc.class);
         var loadQuery = GdsCypher
-            .call()
+            .call(GRAPH_NAME)
+            .graphCreate()
             .withAnyRelationshipType()
             .withNodeLabel("A")
             .withNodeProperty("id")
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(loadQuery);
     }
@@ -65,8 +65,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     @Test
     void mutate() {
         var query = GdsCypher
-            .call()
-            .explicitCreation(GRAPH_NAME)
+            .call(GRAPH_NAME)
             .algo("gds.alpha.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("id"))

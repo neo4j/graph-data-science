@@ -43,7 +43,7 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
     void testWriting(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
         train(embeddingDimension, aggregator, activationFunction);
 
-        String query = GdsCypher.call().explicitCreation("embeddingsGraph")
+        String query = GdsCypher.call("embeddingsGraph")
             .algo("gds.beta.graphSage")
             .writeMode()
             .addParameter("writeProperty", "embedding")
@@ -76,10 +76,15 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
     void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
         train(42, "mean", ActivationFunction.SIGMOID);
 
-        runQuery(GdsCypher.call().implicitCreation(config).graphCreate(DEFAULT_GRAPH_NAME).yields());
+        runQuery(
+            GdsCypher
+                .call(DEFAULT_GRAPH_NAME)
+                .graphCreate()
+                .withGraphCreateConfig(config)
+                .yields()
+        );
 
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .writeMode()
             .addParameter("concurrency", 1)

@@ -51,16 +51,15 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Test
     void testStatsYields() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeProperty("knn")
             .loadEverything()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .statsMode()
             .addParameter("sudo", true)
@@ -112,8 +111,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
 
     @Test
     void statsShouldNotHaveWriteProperties() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .statsMode()
             .addParameter("nodeWeightProperty", "knn")
@@ -153,8 +151,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         runQuery("CALL gds.graph.create('graph', '*', '*', {nodeProperties: 'weight'})");
 
         String algoQuery = GdsCypher
-            .call()
-            .explicitCreation("graph")
+            .call("graph")
             .algo("gds.beta.knn")
             .statsMode()
             .addParameter("nodeWeightProperty", "weight")

@@ -65,11 +65,11 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         runQuery(DB_CYPHER);
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call("g")
+            .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
-            .graphCreate("g")
             .yields();
 
         runQuery(loadQuery);
@@ -86,8 +86,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
@@ -113,8 +112,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
@@ -144,8 +142,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
@@ -160,8 +157,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2, List.of("a","b"));
 
         var firstQuery = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
@@ -171,8 +167,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         runQuery(firstQuery);
 
         var secondQuery = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "bar")

@@ -92,7 +92,8 @@ class CELFProcTest extends BaseProcTest {
         registerProcedures(CELFProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
-        String graphCreateQuery = GdsCypher.call()
+        String graphCreateQuery = GdsCypher.call("celfGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",
@@ -101,8 +102,7 @@ class CELFProcTest extends BaseProcTest {
                     Orientation.NATURAL,
                     Aggregation.DEFAULT
                 )
-            ).graphCreate("celfGraph")
-            .yields();
+            ).yields();
 
         runQuery(graphCreateQuery);
     }
@@ -116,8 +116,7 @@ class CELFProcTest extends BaseProcTest {
     void testResultStream() {
         final Consumer consumer = mock(Consumer.class);
 
-        var cypher = GdsCypher.call()
-            .explicitCreation("celfGraph")
+        var cypher = GdsCypher.call("celfGraph")
             .algo("gds.alpha.influenceMaximization.celf")
             .streamMode()
             .addParameter("seedSetSize", 2)

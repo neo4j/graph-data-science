@@ -61,10 +61,10 @@ class TransactionsWhileProjectingIntegrationTest extends BaseProcTest {
 
             try {
                 runQuery(
-                    GdsCypher.call()
+                    GdsCypher.call("g")
+                        .graphCreate()
                         .withNodeLabel("Node")
                         .withAnyRelationshipType()
-                        .graphCreate("g")
                         .yields()
                 );
             } finally {

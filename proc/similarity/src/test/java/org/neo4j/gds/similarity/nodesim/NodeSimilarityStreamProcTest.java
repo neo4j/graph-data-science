@@ -306,17 +306,16 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             ", (bob)-[:KNOWS]->(a)";
         runQuery(graphCreateQuery);
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.nodeSimilarity")
             .streamMode()
             .addParameter("nodeLabels", List.of("Foo", "Bar"))

@@ -47,8 +47,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     void testStream(
     ) {
 
-        String query = GdsCypher.call()
-            .explicitCreation(TEST_GRAPH_NAME)
+        String query = GdsCypher.call(TEST_GRAPH_NAME)
             .algo("gds.labelPropagation")
             .streamMode()
             .yields();
@@ -66,8 +65,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     @Test
     void testEstimate() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH_NAME)
+            .call(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .streamEstimation()
             .addAllParameters(createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
@@ -92,13 +90,13 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             long ignoredNodes = 1;
 
             String graphCreateQuery = GdsCypher
-                .call()
+                .call("nodeFilteredGraph")
+                .graphCreate()
                 .withNodeLabels("A", "B")
                 .withNodeProperty("id", DefaultValue.of(-1))
                 .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
                 .withNodeProperty("weight", DefaultValue.of(Double.NaN))
                 .withAnyRelationshipType()
-                .graphCreate("nodeFilteredGraph")
                 .yields("nodeCount", "relationshipCount");
 
             runQueryWithRowConsumer(graphCreateQuery, row -> {
@@ -106,8 +104,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
                 assertEquals(10L, row.getNumber("relationshipCount"));
             });
 
-            String query = GdsCypher.call()
-                .explicitCreation("nodeFilteredGraph")
+            String query = GdsCypher.call("nodeFilteredGraph")
                 .algo("gds.labelPropagation")
                 .streamMode()
                 .addParameter("nodeLabels", Arrays.asList("A", "B"))

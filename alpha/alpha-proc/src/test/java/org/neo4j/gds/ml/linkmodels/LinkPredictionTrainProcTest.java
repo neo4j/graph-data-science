@@ -118,7 +118,8 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
 
     private String createQuery(String graphName, Orientation orientation) {
         return GdsCypher
-            .call()
+            .call(graphName)
+            .graphCreate()
             .withNodeLabel("N")
             .withNodeProperty("z")
             .withRelationshipType(
@@ -131,7 +132,6 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                 RelationshipProjection.of("TEST", orientation)
                     .withProperties(PropertyMappings.of(PropertyMapping.of("label")))
             )
-            .graphCreate(graphName)
             .yields();
     }
 

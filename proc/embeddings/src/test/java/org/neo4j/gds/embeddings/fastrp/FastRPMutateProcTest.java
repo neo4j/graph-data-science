@@ -109,8 +109,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     void shouldMutateNonZeroEmbeddings(List<Float> weights, double propertyRatio) {
         List<String> featureProperties = propertyRatio == 0 ? List.of() : List.of("f1", "f2");
         int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .explicitCreation(mutateGraphName().get())
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(mutateGraphName().get())
             .algo("fastRP")
             .mutateMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -140,19 +139,18 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     @Test
     void shouldProduceEmbeddingsWithSpecificValues() {
 
-            String graphCreateQuery = GdsCypher.call()
+            String graphCreateQuery = GdsCypher.call("g2labels")
+                .graphCreate()
                 .withNodeLabel("Node")
                 .withNodeLabel("Node2")
                 .withRelationshipType("REL2", Orientation.UNDIRECTED)
                 .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
-                .graphCreate("g2labels")
                 .yields();
             runQuery(graphCreateQuery);
 
         int embeddingDimension = 128;
         double propertyRatio = 0.5;
-        String query = GdsCypher.call()
-            .explicitCreation("g2labels")
+        String query = GdsCypher.call("g2labels")
             .algo("fastRP")
             .mutateMode()
             .addParameter("mutateProperty", "embedding")

@@ -97,8 +97,7 @@ class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCent
     @Test
     void testMutate() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(GRAPH_NAME)
+            .call(GRAPH_NAME)
             .algo("degree")
             .mutateMode()
             .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)

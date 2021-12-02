@@ -101,11 +101,11 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             GraphWriteRelationshipProc.class
         );
 
-        String graphCreateQuery = GdsCypher.call()
+        String graphCreateQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withAnyRelationshipType()
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(graphCreateQuery);
@@ -147,11 +147,11 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     public void loadGraph(String graphName) {
         QueryRunner.runQuery(
             graphDb(),
-            GdsCypher.call()
+            GdsCypher.call(graphName)
+                .graphCreate()
                 .withAnyLabel()
                 .withNodeProperty("knn")
                 .withAnyRelationshipType()
-                .graphCreate(graphName)
                 .yields()
         );
     }

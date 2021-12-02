@@ -62,8 +62,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
     @Test
     void testStream() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields("nodeId", "centrality");
@@ -82,8 +81,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
     @Test
     void testWrite() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .addParameter("writeProperty", "centralityScore")

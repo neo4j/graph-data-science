@@ -95,8 +95,8 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final Consumer consumer = mock(Consumer.class);
 
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .yields();
@@ -122,8 +122,8 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         final Consumer consumer = mock(Consumer.class);
 
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.REVERSE);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .yields();
@@ -147,15 +147,16 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
     void testWeightedASP() {
         final Consumer consumer = mock(Consumer.class);
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withRelationshipProperty("cost")
             .loadEverything()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
             .algo("gds", "alpha", "allShortestPaths")
             .streamMode()
             .addParameter("relationshipWeightProperty", "cost")

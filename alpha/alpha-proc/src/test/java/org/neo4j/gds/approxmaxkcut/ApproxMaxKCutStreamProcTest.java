@@ -51,8 +51,7 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
 
     @Test
     void testStream() {
-        String streamQuery = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String streamQuery = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.maxkcut")
             .streamMode()
             // Make sure we get a deterministic result.
@@ -81,8 +80,7 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
     @Disabled
     @Test
     void testIllegalMinCommunitySizesSum() {
-        String streamQuery = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String streamQuery = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.maxkcut")
             .streamMode()
             .addParameter("minCommunitySizes", List.of(100, 100))

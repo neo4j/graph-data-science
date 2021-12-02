@@ -62,8 +62,7 @@ class BFSLevelPregelProcTest extends BaseProcTest {
     @Test
     void stream() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "bfs.level")
             .streamMode()
             .addParameter("maxIterations", 10)

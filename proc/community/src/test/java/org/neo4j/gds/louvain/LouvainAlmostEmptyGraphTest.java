@@ -35,10 +35,10 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
     void setupGraph() throws Exception {
         registerProcedures(LouvainStreamProc.class, GraphCreateProc.class);
         runQuery("CREATE (:Node)");
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call("myGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
-            .graphCreate("myGraph")
             .yields());
     }
 
@@ -50,8 +50,7 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
     @Test
     void testStream() {
         runQueryWithRowConsumer(
-            GdsCypher.call()
-                .explicitCreation("myGraph")
+            GdsCypher.call("myGraph")
                 .algo("louvain")
                 .streamMode()
                 .addParameter("concurrency", 1)

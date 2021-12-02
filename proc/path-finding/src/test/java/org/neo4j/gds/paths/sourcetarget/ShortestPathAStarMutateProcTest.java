@@ -148,7 +148,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
     void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.astar")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())

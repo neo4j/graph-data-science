@@ -116,8 +116,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
     @Test
     void validateTargetPropertyExists() {
         String query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.nodeClassification")
             .trainMode()
             .addParameter("modelName", "model")
@@ -151,8 +150,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
     @Test
     void shouldFailWhenFirstMetricIsSyntacticSugar() {
         String query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.nodeClassification")
             .trainMode()
             .addParameter("modelName", "model")
@@ -174,8 +172,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
     void shouldFailWithInvalidMetrics() {
 
         String query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.nodeClassification")
             .trainMode()
             .addParameter("modelName", "model")

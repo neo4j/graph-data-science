@@ -58,7 +58,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     void runsTraining() {
         String modelName = "gsModel";
         String graphName = "embeddingsGraph";
-        String train = GdsCypher.call().explicitCreation(graphName)
+        String train = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
@@ -101,7 +101,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
         runQuery("CREATE (:A {a1: 1.0, a2: 2.0})-[:REL]->(:B {b1: 42.0, b2: 1337.0})");
 
-        String query = GdsCypher.call()
+        String query = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel(
                 "A",
                 NodeProjection.of("A", PropertyMappings.of(
@@ -116,13 +117,12 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 ))
             )
             .withAnyRelationshipType()
-            .graphCreate(graphName)
             .yields();
 
         runQuery(query);
 
         String modelName = "gsModel";
-        String train = GdsCypher.call().explicitCreation(graphName)
+        String train = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("projectedFeatureDimension", 5)
@@ -156,7 +156,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
     @Test
     void shouldFailOnMissingNodeProperties() {
-        String query = GdsCypher.call().explicitCreation("embeddingsGraph")
+        String query = GdsCypher.call("embeddingsGraph")
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
@@ -268,7 +268,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
     @Test
     void estimates() {
-        String query = GdsCypher.call().explicitCreation(graphName)
+        String query = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainEstimation()
             .addParameter("modelName", modelName)
@@ -283,7 +283,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @ParameterizedTest
     @ValueSource(ints = {-10, -1, 0})
     void featureDimensionValidation(int projectedFeatureDimension) {
-        String query = GdsCypher.call().explicitCreation(graphName)
+        String query = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainEstimation()
             .addParameter("featureProperties", List.of("a"))

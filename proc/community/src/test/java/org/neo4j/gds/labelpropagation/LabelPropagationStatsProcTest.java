@@ -54,8 +54,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
     void yields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("labelPropagation")
             .statsMode()
             .yields();
@@ -92,15 +91,14 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("labelPropagation")
             .statsMode()
             .yields("communityCount");
@@ -111,8 +109,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
     @Test
     void statsShouldNotHaveWriteProperties() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH_NAME)
+            .call(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .statsMode()
             .yields();

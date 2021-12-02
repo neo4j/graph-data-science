@@ -56,14 +56,13 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingWeighted() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withRelationshipProperty("weight")
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -82,14 +81,13 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     @Test
     void testWritingSeeded() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeProperty("seed1")
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("seedProperty", "seed1")
@@ -109,8 +107,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
     @Test
     void testWritingTolerance() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("tolerance", 1)
@@ -126,8 +123,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
     @Test
     void testWritingIterations() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .writeMode()
             .addParameter("maxIterations", 1)

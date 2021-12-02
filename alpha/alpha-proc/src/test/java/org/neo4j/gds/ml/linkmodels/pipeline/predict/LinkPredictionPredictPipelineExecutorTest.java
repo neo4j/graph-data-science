@@ -93,11 +93,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class
         );
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("N")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);

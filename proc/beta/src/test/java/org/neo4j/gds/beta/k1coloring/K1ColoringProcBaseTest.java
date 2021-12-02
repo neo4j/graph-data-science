@@ -92,9 +92,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     }
 
     GdsCypher.ModeBuildStage algoBuildStage() {
-        return GdsCypher.call()
-            .explicitCreation(K1COLORING_GRAPH)
-            .algo("gds", "beta", "k1coloring");
+        return GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring");
     }
 
 }

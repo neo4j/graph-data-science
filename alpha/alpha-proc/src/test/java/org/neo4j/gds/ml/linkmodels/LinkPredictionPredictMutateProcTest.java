@@ -81,11 +81,11 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
 
     private String createQuery(String graphName, Orientation orientation) {
         return GdsCypher
-            .call()
+            .call(graphName)
+            .graphCreate()
             .withNodeLabel("N")
             .withNodeProperty("a")
             .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
-            .graphCreate(graphName)
             .yields();
     }
 
@@ -97,8 +97,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         addModel("model", graphStore.schema());
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.linkPrediction.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")
@@ -127,8 +126,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         addModel("model", GraphSchema.empty());
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g2")
+            .call("g2")
             .algo("gds.alpha.ml.linkPrediction.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")

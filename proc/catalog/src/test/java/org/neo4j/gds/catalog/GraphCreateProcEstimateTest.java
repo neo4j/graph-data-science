@@ -213,11 +213,11 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
     void multiUseLoadedGraphWithMultipleRelationships() {
         String graphName = "foo";
 
-        String query = GdsCypher.call()
+        String query = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("X")
             .withRelationshipType("Y")
-            .graphCreate(graphName)
             .yields("nodeCount", "relationshipCount", "graphName");
 
         runQueryWithRowConsumer(query, map(), resultRow -> {
@@ -259,10 +259,10 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void silentlyDropRelsWithUnloadedNodes() {
-        String query = GdsCypher.call()
+        String query = GdsCypher.call("g")
+            .graphCreate()
             .withNodeLabel("A")
             .withAnyRelationshipType()
-            .graphCreate("'g'")
             .yields("nodeCount", "relationshipCount");
 
         runQueryWithRowConsumer(query, resultRow -> {
@@ -286,10 +286,10 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void failCreationWitIncompleteNodeQuery() {
-        String query = GdsCypher.call()
+        String query = GdsCypher.call("g")
+            .graphCreate()
             .withNodeLabel("A")
             .withAnyRelationshipType()
-            .graphCreate("'g'")
             .addParameter("validateRelationships", true)
             .yields("nodeCount");
 

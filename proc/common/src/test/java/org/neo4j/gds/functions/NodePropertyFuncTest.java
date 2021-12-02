@@ -22,9 +22,9 @@ package org.neo4j.gds.functions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
@@ -44,14 +44,14 @@ class NodePropertyFuncTest  extends BaseProcTest {
         registerFunctions(NodePropertyFunc.class);
         runQuery(DB_CYPHER);
         runQuery(GdsCypher
-            .call()
+            .call("testGraph")
+            .graphCreate()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("prop")
             .withNodeProperty("longListProp")
             .withNodeProperty("doubleListProp")
             .withAnyRelationshipType()
-            .graphCreate("testGraph")
             .yields());
     }
 

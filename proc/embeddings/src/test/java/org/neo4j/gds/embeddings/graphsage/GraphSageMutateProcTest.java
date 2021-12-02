@@ -36,8 +36,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphSageMutateProcTest extends GraphSageBaseProcTest {
 
@@ -47,7 +47,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
         train(embeddingSize, aggregator, activationFunction);
 
         String mutatePropertyKey = "embedding";
-        String query = GdsCypher.call().explicitCreation("embeddingsGraph")
+        String query = GdsCypher.call("embeddingsGraph")
             .algo("gds.beta.graphSage")
             .mutateMode()
             .addParameter("mutateProperty", mutatePropertyKey)
@@ -84,7 +84,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             .graphStore();
         GraphStoreCatalog.set(config, graphStore);
 
-        String query = GdsCypher.call().explicitCreation(config.graphName())
+        String query = GdsCypher.call(config.graphName())
             .algo("gds.beta.graphSage")
             .mutateMode()
             .addParameter("concurrency", 1)

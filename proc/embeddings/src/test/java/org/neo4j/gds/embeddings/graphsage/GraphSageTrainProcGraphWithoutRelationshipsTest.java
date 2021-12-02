@@ -58,11 +58,11 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
 
         runQuery(DB_CYPHER);
 
-        String query = GdsCypher.call()
+        String query = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withAnyRelationshipType()
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(query);
@@ -76,7 +76,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
     @Test
     void failsWhenThereAreNoRelationshipsInTheGraph() {
         String modelName = "gsModel";
-        String train = GdsCypher.call().explicitCreation(GRAPH_NAME)
+        String train = GdsCypher.call(GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age"))

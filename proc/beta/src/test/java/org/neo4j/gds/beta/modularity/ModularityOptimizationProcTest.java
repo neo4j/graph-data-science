@@ -69,8 +69,6 @@ abstract class ModularityOptimizationProcTest extends BaseProcTest {
 
     GdsCypher.ModeBuildStage algoBuildStage() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        return GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization");
+        return GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds", "beta", "modularityOptimization");
     }
 }

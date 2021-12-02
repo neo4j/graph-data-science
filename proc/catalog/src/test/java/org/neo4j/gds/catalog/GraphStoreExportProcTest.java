@@ -334,7 +334,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     private void createGraph() {
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call("test-graph")
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")
@@ -350,7 +351,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
                 .of("REL3", Orientation.NATURAL)
                 .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
             )
-            .graphCreate("test-graph")
             .yields());
     }
 }

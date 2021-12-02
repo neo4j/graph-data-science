@@ -25,13 +25,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -111,11 +111,11 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
 
     @Override
     public void loadGraph(String graphName) {
-        String graphCreateQuery = GdsCypher.call()
+        String graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("f1","f2"), DefaultValue.of(0.0f))
-            .graphCreate(graphName)
             .yields();
         runQuery(graphCreateQuery);
     }
@@ -125,8 +125,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     @Test
     void acceptsIntegerIterationWeights() {
         var query = GdsCypher
-            .call()
-            .explicitCreation(FASTRP_GRAPH)
+            .call(FASTRP_GRAPH)
             .algo("fastRP")
             .executionMode(mode())
             .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())
@@ -142,8 +141,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     @MethodSource("invalidWeights")
     void validatesWeights(List<?> iterationWeights, String messagePart) {
         var query = GdsCypher
-            .call()
-            .explicitCreation(FASTRP_GRAPH)
+            .call(FASTRP_GRAPH)
             .algo("fastRP")
             .executionMode(mode())
             .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())

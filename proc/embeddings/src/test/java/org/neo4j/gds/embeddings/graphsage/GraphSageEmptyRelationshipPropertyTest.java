@@ -98,17 +98,17 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     @Test
     void failOnRelationshipWithoutProperty() {
-        String graphQuery = GdsCypher.call()
+        String graphQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphQuery);
 
-        String train = GdsCypher.call().explicitCreation(graphName)
+        String train = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age"))
@@ -121,17 +121,17 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
     @Test
     void doesNotFailOnRelationshipWithoutPropertyWithDefaultValue() {
-        String graphQuery = GdsCypher.call()
+        String graphQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty, DefaultValue.of(1.5, true))
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphQuery);
 
-        String train = GdsCypher.call().explicitCreation(graphName)
+        String train = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age"))
@@ -157,17 +157,17 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("procQueries")
     void failOnRelationshipWithoutPropertyInInductiveSetting(String embeddingQuery, String mode) {
-        String graphQuery = GdsCypher.call()
+        String graphQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty, DefaultValue.of(1.5, true))
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphQuery);
 
-        String trainQuery = GdsCypher.call().explicitCreation(graphName)
+        String trainQuery = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age"))
@@ -177,17 +177,17 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
         runQuery(trainQuery);
 
-        String graphCreateForStream = GdsCypher.call()
+        String graphCreateForStream = GdsCypher.call("inductiveGraph")
+            .graphCreate()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("inductiveGraph")
             .yields();
 
         runQuery(graphCreateForStream);
 
-        String streamQuery = GdsCypher.call().explicitCreation("inductiveGraph")
+        String streamQuery = GdsCypher.call("inductiveGraph")
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("modelName", modelName)
@@ -199,15 +199,15 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
     private static Stream<Arguments> procQueries() {
         return Stream.of(
             Arguments.arguments(
-                GdsCypher.call().explicitCreation("inductiveGraph")
+                GdsCypher.call("inductiveGraph")
                     .algo("gds.beta.graphSage")
-                    .streamMode()
+                .streamMode()
                     .addParameter("modelName", modelName)
                     .yields(),
                 "stream"
             ),
             Arguments.arguments(
-                GdsCypher.call().explicitCreation("inductiveGraph")
+                GdsCypher.call("inductiveGraph")
                     .algo("gds.beta.graphSage")
                     .mutateMode()
                     .addParameter("modelName", modelName)
@@ -216,7 +216,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
                 "mutate"
             ),
             Arguments.arguments(
-                GdsCypher.call().explicitCreation("inductiveGraph")
+                GdsCypher.call("inductiveGraph")
                     .algo("gds.beta.graphSage")
                     .writeMode()
                     .addParameter("modelName", modelName)

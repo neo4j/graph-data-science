@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -81,7 +81,7 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
     }
 
     private void stream() {
-        String streamQuery = GdsCypher.call().explicitCreation("embeddingsGraph")
+        String streamQuery = GdsCypher.call("embeddingsGraph")
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)

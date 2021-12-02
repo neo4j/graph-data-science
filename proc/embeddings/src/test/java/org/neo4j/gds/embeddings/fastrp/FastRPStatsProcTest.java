@@ -52,8 +52,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
     @Test
     void testStats() {
         loadGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("fastRP")
             .statsMode()
             .addParameter("embeddingDimension", 2)

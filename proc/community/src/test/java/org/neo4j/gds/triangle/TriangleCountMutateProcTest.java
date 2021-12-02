@@ -70,8 +70,7 @@ class TriangleCountMutateProcTest
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -97,15 +96,14 @@ class TriangleCountMutateProcTest
                  "WITH n LIMIT 1 " +
                  "CREATE (d)-[:REL]->(n)");
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("testGraph")
+            .graphCreate()
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate("testGraph")
             .yields();
 
         runQuery(createQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation("testGraph")
+        var query = GdsCypher.call("testGraph")
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
