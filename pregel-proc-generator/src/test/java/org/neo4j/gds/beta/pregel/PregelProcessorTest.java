@@ -24,7 +24,6 @@ import com.google.testing.compile.CompilationRule;
 import com.google.testing.compile.CompileTester;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,14 +38,8 @@ import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.condition.JRE.JAVA_12;
-import static org.junit.jupiter.api.condition.JRE.JAVA_13;
-import static org.junit.jupiter.api.condition.JRE.JAVA_14;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-// Need to disable this for Java versions > 11
-// the dependency to com.google.testing.compile:compile-testing has not been updated since May 2019
-@DisabledOnJre({JAVA_12, JAVA_13, JAVA_14})
 @EnableRuleMigrationSupport
 class PregelProcessorTest {
 
