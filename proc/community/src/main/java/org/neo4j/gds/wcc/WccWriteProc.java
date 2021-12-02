@@ -34,7 +34,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
@@ -66,12 +65,8 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected WccWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return WccWriteConfig.of(graphName, config);
+    protected WccWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return WccWriteConfig.of(config);
     }
 
     @Override

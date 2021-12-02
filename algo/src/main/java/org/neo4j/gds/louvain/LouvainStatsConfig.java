@@ -23,17 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LouvainStatsConfig extends LouvainBaseConfig {
 
-    static LouvainStatsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new LouvainStatsConfigImpl(graphName, userInput);
+    static LouvainStatsConfig of(CypherMapWrapper userInput) {
+        return new LouvainStatsConfigImpl(userInput);
     }
 }

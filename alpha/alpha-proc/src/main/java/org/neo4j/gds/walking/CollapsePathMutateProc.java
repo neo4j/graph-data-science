@@ -108,12 +108,8 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    protected CollapsePathConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return CollapsePathConfig.of(graphName, config);
+    protected CollapsePathConfig newConfig(String username, CypherMapWrapper config) {
+        return CollapsePathConfig.of(config);
     }
 
     @Override

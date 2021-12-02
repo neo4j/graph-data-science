@@ -39,7 +39,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
@@ -131,12 +130,8 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     }
 
     @Override
-    protected SpanningTreeConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return SpanningTreeConfig.of(graphName, config);
+    protected SpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
+        return SpanningTreeConfig.of(config);
     }
 
     @Override

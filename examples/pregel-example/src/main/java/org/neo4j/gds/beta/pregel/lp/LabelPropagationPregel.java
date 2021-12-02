@@ -34,7 +34,6 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
@@ -110,11 +109,8 @@ public class LabelPropagationPregel implements PregelComputation<LabelPropagatio
     @SuppressWarnings("immutables:subtype")
     public interface LabelPropagationPregelConfig extends PregelProcedureConfig, SeedConfig {
 
-        static LabelPropagationPregelConfig of(
-            Optional<String> graphName,
-            CypherMapWrapper userInput
-        ) {
-            return new LabelPropagationPregelConfigImpl(graphName, userInput);
+        static LabelPropagationPregelConfig of(CypherMapWrapper userInput) {
+            return new LabelPropagationPregelConfigImpl(userInput);
         }
     }
 }

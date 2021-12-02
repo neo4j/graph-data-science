@@ -59,12 +59,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected SplitRelationshipsMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return SplitRelationshipsMutateConfig.of(graphName, config);
+    protected SplitRelationshipsMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return SplitRelationshipsMutateConfig.of(config);
     }
 
     @Override
@@ -85,7 +81,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             ) {
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
-                    var graphStore = graphStoreFromCatalog(configuration.graphName().get(), configuration).graphStore();
+                    var graphStore = (GraphStore) null; // TODO: fixme
                     masterGraph = graphStore.getGraph(
                         configuration.nodeLabelIdentifiers(graphStore),
                         configuration.superGraphTypes(),

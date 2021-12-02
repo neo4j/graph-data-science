@@ -42,7 +42,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
@@ -136,12 +135,8 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
     }
 
     @Override
-    protected KSpanningTreeConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return KSpanningTreeConfig.of(graphName, config);
+    protected KSpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
+        return KSpanningTreeConfig.of(config);
     }
 
     @Override

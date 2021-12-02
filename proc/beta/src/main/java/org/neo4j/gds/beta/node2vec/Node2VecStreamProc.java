@@ -37,7 +37,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -68,12 +67,8 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected Node2VecStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return Node2VecStreamConfig.of(graphName, config);
+    protected Node2VecStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return Node2VecStreamConfig.of(config);
     }
 
     @Override

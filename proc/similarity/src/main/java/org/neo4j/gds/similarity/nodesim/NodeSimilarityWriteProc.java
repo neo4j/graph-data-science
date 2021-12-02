@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
@@ -72,10 +71,9 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     @Override
     protected NodeSimilarityWriteConfig newConfig(
         String username,
-        Optional<String> graphName,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityWriteConfig.of(graphName, userInput);
+        return NodeSimilarityWriteConfig.of(userInput);
     }
 
     @Override

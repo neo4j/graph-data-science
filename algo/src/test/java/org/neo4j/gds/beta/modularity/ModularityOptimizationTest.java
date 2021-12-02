@@ -188,9 +188,7 @@ class ModularityOptimizationTest {
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
 
-        ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder()
-            .graphName("")
-            .build();
+        ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder().build();
         MemoryTree memoryTree = new ModularityOptimizationFactory<>()
             .memoryEstimation(config)
             .estimate(dimensions, concurrency);

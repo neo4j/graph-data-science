@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
-import java.util.Optional;
 
 @ValueClass
 @Configuration
@@ -51,16 +50,8 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         return List.of(LinkMetric.AUCPR);
     }
 
-    static LinkPredictionTrainConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionTrainConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionTrainConfigImpl(username, config);
     }
 
     @TestOnly

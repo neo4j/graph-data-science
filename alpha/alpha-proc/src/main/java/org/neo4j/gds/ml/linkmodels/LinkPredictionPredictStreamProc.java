@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
@@ -82,16 +81,8 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected LinkPredictionPredictStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LinkPredictionPredictStreamConfig.of(
-            username,
-            graphName,
-            config
-        );
+    protected LinkPredictionPredictStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return LinkPredictionPredictStreamConfig.of(username, config);
     }
 
     @Override

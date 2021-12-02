@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
@@ -64,12 +63,8 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected TriangleCountWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return TriangleCountWriteConfig.of(graphName, config);
+    protected TriangleCountWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return TriangleCountWriteConfig.of(config);
     }
 
     @Override

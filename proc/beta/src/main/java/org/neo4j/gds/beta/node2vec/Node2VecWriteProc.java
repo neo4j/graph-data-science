@@ -36,7 +36,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -67,12 +66,8 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     }
 
     @Override
-    protected Node2VecWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return Node2VecWriteConfig.of(graphName, config);
+    protected Node2VecWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return Node2VecWriteConfig.of(config);
     }
 
     @Override

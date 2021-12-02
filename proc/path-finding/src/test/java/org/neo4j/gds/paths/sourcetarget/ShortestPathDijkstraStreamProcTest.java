@@ -38,7 +38,6 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +56,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Override
     public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraStreamConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraStreamConfig.of(mapWrapper);
     }
 
     @Override

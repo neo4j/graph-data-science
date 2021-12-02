@@ -37,7 +37,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
@@ -93,12 +92,8 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    protected GraphSageMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return GraphSageMutateConfig.of(username, graphName, config);
+    protected GraphSageMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return GraphSageMutateConfig.of(username, config);
     }
 
     @Override

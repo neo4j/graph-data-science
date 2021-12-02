@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 public interface TestPregelConfig extends PregelProcedureConfig {
 
@@ -34,10 +32,7 @@ public interface TestPregelConfig extends PregelProcedureConfig {
         return false;
     }
 
-    static TestPregelConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new TestPregelConfigImpl(graphName, userInput);
+    static TestPregelConfig of(CypherMapWrapper userInput) {
+        return new TestPregelConfigImpl(userInput);
     }
 }

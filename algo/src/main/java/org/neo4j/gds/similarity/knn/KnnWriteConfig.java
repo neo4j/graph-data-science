@@ -25,17 +25,12 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface KnnWriteConfig extends KnnBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
-    static KnnWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new KnnWriteConfigImpl(graphName, config);
+    static KnnWriteConfig of(CypherMapWrapper config) {
+        return new KnnWriteConfigImpl(config);
     }
 }

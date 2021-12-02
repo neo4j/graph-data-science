@@ -30,7 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -67,12 +66,8 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
     }
 
     @Override
-    protected PearsonConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new PearsonConfigImpl(graphName, userInput);
+    protected PearsonConfig newConfig(String username, CypherMapWrapper userInput) {
+        return new PearsonConfigImpl(userInput);
     }
 
     @Override

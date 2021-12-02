@@ -31,7 +31,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
@@ -74,12 +73,8 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     }
 
     @Override
-    protected FastRPStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return FastRPStreamConfig.of(graphName, config);
+    protected FastRPStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return FastRPStreamConfig.of(config);
     }
 
     @Override

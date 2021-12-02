@@ -42,7 +42,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -160,10 +159,6 @@ class PipelineExecutorTest {
     private static final class PipelineExecutionTestExecuteNodeStepFailure extends RuntimeException {}
 
     private static class PipelineExecutorTestConfig implements AlgoBaseConfig {
-        @Override
-        public Optional<String> graphName() {
-            return Optional.empty();
-        }
 
         @Override
         public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {

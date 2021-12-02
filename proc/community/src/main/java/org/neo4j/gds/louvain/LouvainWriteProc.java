@@ -34,7 +34,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,12 +75,8 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected LouvainWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LouvainWriteConfig.of(graphName, config);
+    protected LouvainWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return LouvainWriteConfig.of(config);
     }
 
     @Override

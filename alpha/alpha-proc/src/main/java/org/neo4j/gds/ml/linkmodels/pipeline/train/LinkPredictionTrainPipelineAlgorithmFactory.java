@@ -54,10 +54,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        String graphName = trainConfig
-            .graphName()
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
+        String graphName = ""; // TODO: fixme
 
         var graphStore = GraphStoreCatalog.get(CatalogRequest.of(trainConfig.username(), databaseId), graphName).graphStore();
 

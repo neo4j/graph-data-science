@@ -37,7 +37,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -93,16 +92,8 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected NodeClassificationTrainConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationTrainConfig.of(
-            graphName,
-            username,
-            config
-        );
+    protected NodeClassificationTrainConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationTrainConfig.of(username, config);
     }
 
     @Override

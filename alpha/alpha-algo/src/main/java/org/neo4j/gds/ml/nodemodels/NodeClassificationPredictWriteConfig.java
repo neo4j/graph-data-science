@@ -41,16 +41,8 @@ public interface NodeClassificationPredictWriteConfig extends NodeClassification
 
     Optional<String> predictedProbabilityProperty();
     
-    static NodeClassificationPredictWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new NodeClassificationPredictWriteConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static NodeClassificationPredictWriteConfig of(String username, CypherMapWrapper userInput) {
+        return new NodeClassificationPredictWriteConfigImpl(username, userInput);
     }
 
 }

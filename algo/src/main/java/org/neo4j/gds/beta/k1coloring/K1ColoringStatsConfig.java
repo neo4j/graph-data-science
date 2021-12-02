@@ -23,18 +23,13 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface K1ColoringStatsConfig extends K1ColoringConfig {
 
-    static K1ColoringStatsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new K1ColoringStatsConfigImpl(graphName, config);
+    static K1ColoringStatsConfig of(CypherMapWrapper config) {
+        return new K1ColoringStatsConfigImpl(config);
     }
 
 }

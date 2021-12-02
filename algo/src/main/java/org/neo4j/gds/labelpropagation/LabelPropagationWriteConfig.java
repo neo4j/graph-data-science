@@ -25,20 +25,12 @@ import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
-    static LabelPropagationWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new LabelPropagationWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static LabelPropagationWriteConfig of(CypherMapWrapper userInput) {
+        return new LabelPropagationWriteConfigImpl(userInput);
     }
 }

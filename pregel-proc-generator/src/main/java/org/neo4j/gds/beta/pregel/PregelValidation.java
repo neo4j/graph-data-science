@@ -177,21 +177,19 @@ final class PregelValidation {
         var maybeHasFactoryMethod = ElementFilter.methodsIn(configElement.getEnclosedElements()).stream()
             .filter(method -> method.getModifiers().contains(Modifier.STATIC))
             .filter(method -> method.getSimpleName().contentEquals("of"))
-            .filter(method -> method.getParameters().size() == 2)
+            .filter(method -> method.getParameters().size() == 1)
             .filter(method -> typeUtils.isSameType(method.getReturnType(), config))
             .map(ExecutableElement::getParameters)
             .anyMatch(parameters ->
-                typeUtils.isSameType(graphNameType, parameters.get(0).asType()) &&
-                typeUtils.isSameType(cypherMapWrapperType, parameters.get(1).asType())
+                typeUtils.isSameType(cypherMapWrapperType, parameters.get(0).asType())
             );
 
         if (!maybeHasFactoryMethod) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 formatWithLocale(
-                    "Missing method 'static %s of(%s graphName, %s userConfig)' in %s.",
+                    "Missing method 'static %s of(%s userConfig)' in %s.",
                     configElement,
-                    graphNameType,
                     cypherMapWrapperType,
                     configElement
                 ),

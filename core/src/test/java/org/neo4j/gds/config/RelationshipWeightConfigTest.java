@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -92,7 +90,7 @@ class RelationshipWeightConfigTest {
     @Configuration
     interface TestRelationshipWeightConfig extends AlgoBaseConfig, RelationshipWeightConfig {
         static TestRelationshipWeightConfig of(CypherMapWrapper map) {
-            return new TestRelationshipWeightConfigImpl(Optional.empty(), map);
+            return new TestRelationshipWeightConfigImpl(map);
         }
     }
 }

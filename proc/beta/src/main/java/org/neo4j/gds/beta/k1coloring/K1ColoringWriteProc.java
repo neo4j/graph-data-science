@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
@@ -79,12 +78,8 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected K1ColoringWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return K1ColoringWriteConfig.of(graphName, config);
+    protected K1ColoringWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return K1ColoringWriteConfig.of(config);
     }
 
     @SuppressWarnings("unused")

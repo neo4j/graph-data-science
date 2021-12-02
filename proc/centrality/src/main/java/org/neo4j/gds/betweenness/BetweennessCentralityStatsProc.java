@@ -35,7 +35,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
@@ -62,12 +61,8 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected BetweennessCentralityStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return BetweennessCentralityStatsConfig.of(graphName, config);
+    protected BetweennessCentralityStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return BetweennessCentralityStatsConfig.of(config);
     }
 
     @Override

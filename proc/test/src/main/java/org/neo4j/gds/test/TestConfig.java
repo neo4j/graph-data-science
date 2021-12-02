@@ -27,8 +27,6 @@ import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -44,10 +42,7 @@ public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyCo
         return false;
     }
 
-    static TestConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new TestConfigImpl(graphName, config);
+    static TestConfig of(CypherMapWrapper config) {
+        return new TestConfigImpl(config);
     }
 }

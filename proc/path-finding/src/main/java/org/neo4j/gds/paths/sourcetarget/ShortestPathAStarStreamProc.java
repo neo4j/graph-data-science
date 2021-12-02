@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarProc.ASTAR_DESCRIPTION;
@@ -59,12 +58,8 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
     }
 
     @Override
-    protected ShortestPathAStarStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ShortestPathAStarStreamConfig.of(graphName, config);
+    protected ShortestPathAStarStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ShortestPathAStarStreamConfig.of(config);
     }
 
     @Override

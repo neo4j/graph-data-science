@@ -22,21 +22,11 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
     
-    static LinkPredictionPredictPipelineStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionPredictPipelineStreamConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictPipelineStreamConfigImpl(username, config);
     }
 }

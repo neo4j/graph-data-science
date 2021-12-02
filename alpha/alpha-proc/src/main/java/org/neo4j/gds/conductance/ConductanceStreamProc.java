@@ -30,7 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.conductance.ConductanceProc.CONDUCTANCE_DESCRIPTION;
@@ -60,12 +59,8 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     }
 
     @Override
-    protected ConductanceStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ConductanceStreamConfig.of(graphName, config);
+    protected ConductanceStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ConductanceStreamConfig.of(config);
     }
 
     @Override

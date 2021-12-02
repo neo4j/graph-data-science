@@ -34,7 +34,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -72,12 +71,8 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected WccStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return WccStatsConfig.of(graphName, config);
+    protected WccStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return WccStatsConfig.of(config);
     }
 
     @Override

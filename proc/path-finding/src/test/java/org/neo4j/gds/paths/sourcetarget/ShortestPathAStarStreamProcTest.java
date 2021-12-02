@@ -34,7 +34,6 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
@@ -50,7 +49,7 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
 
     @Override
     public ShortestPathAStarStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathAStarStreamConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathAStarStreamConfig.of(mapWrapper);
     }
 
     @Test

@@ -43,7 +43,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -154,12 +153,8 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     }
 
     @Override
-    protected SccConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return SccConfig.of(graphName, config);
+    protected SccConfig newConfig(String username, CypherMapWrapper config) {
+        return SccConfig.of(config);
     }
 
     @Override

@@ -31,7 +31,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,7 +65,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
 
     @Override
     public K1ColoringMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return K1ColoringMutateConfig.of(Optional.empty(), mapWrapper);
+        return K1ColoringMutateConfig.of(mapWrapper);
     }
 
     @Override

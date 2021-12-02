@@ -107,12 +107,8 @@ public class NodeClassificationPredictStreamProc
 
 
     @Override
-    protected NodeClassificationStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationStreamConfig.of(username, graphName, config);
+    protected NodeClassificationStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationStreamConfig.of(username, config);
     }
 
     @Override

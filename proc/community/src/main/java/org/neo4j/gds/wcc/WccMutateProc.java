@@ -34,7 +34,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
@@ -66,12 +65,8 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
     }
 
     @Override
-    protected WccMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return WccMutateConfig.of(graphName, config);
+    protected WccMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return WccMutateConfig.of(config);
     }
 
     @Override

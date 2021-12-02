@@ -35,7 +35,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,7 +58,7 @@ public class NodeSimilarityWriteProcTest
 
     @Override
     public NodeSimilarityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityWriteConfig.of(Optional.empty(), mapWrapper);
+        return NodeSimilarityWriteConfig.of(mapWrapper);
     }
 
     @ParameterizedTest(name = "{2}")

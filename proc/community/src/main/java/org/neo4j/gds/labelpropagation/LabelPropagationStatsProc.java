@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -66,12 +65,8 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected LabelPropagationStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LabelPropagationStatsConfig.of(graphName, config);
+    protected LabelPropagationStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return LabelPropagationStatsConfig.of(config);
     }
 
     @Override

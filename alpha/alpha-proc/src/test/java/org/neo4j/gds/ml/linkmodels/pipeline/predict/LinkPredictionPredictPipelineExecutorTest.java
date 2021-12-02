@@ -57,7 +57,6 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,7 +114,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                Optional.of(GRAPH_NAME),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 
@@ -158,7 +156,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                Optional.of(GRAPH_NAME),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 
@@ -200,7 +197,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                Optional.of(GRAPH_NAME),
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
             );
 

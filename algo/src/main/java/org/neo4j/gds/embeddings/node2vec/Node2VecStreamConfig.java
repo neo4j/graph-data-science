@@ -31,11 +31,8 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface Node2VecStreamConfig extends Node2VecBaseConfig, AlgoBaseConfig {
 
-    static Node2VecStreamConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new Node2VecStreamConfigImpl(graphName, userInput);
+    static Node2VecStreamConfig of(CypherMapWrapper userInput) {
+        return new Node2VecStreamConfigImpl(userInput);
     }
 
 }

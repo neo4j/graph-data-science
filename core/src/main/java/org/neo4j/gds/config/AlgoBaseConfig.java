@@ -29,17 +29,12 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
 
-    String GRAPH_NAME_KEY = "graphName";
     String NODE_LABELS_KEY = "nodeLabels";
     String RELATIONSHIP_TYPES_KEY = "relationshipTypes";
-
-    @Configuration.Parameter
-    Optional<String> graphName();
 
     @Value.Default
     @Configuration.Key(RELATIONSHIP_TYPES_KEY)

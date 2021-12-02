@@ -34,7 +34,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
@@ -79,12 +78,8 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
     }
 
     @Override
-    protected KnnWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return KnnWriteConfig.of(graphName, config);
+    protected KnnWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return KnnWriteConfig.of(config);
     }
 
     @Override

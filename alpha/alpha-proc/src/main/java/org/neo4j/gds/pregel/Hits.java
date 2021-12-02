@@ -35,7 +35,6 @@ import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.StreamSupport;
 
@@ -195,14 +194,8 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
             return StringIdentifierValidations.validateNoWhiteCharacter(input, "authProperty");
         }
 
-        static HitsConfig of(
-            Optional<String> graphName,
-            CypherMapWrapper userConfig
-        ) {
-            return new HitsConfigImpl(
-                graphName,
-                userConfig
-            );
+        static HitsConfig of(CypherMapWrapper userConfig) {
+            return new HitsConfigImpl(userConfig);
         }
     }
 

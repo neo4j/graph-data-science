@@ -25,8 +25,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +38,7 @@ class K1ColoringStatsProcTest extends K1ColoringProcBaseTest<K1ColoringStatsConf
 
     @Override
     public K1ColoringStatsConfig createConfig(CypherMapWrapper configMap) {
-        return K1ColoringStatsConfig.of(Optional.empty(), configMap);
+        return K1ColoringStatsConfig.of(configMap);
     }
     @Test
     void testStats() {

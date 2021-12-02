@@ -25,7 +25,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -41,7 +40,7 @@ class DegreeCentralityStatsProcTest extends DegreeCentralityProcTest<DegreeCentr
 
     @Override
     public DegreeCentralityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityStatsConfig.of(Optional.empty(), mapWrapper);
+        return DegreeCentralityStatsConfig.of(mapWrapper);
     }
 
     @Test

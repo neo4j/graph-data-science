@@ -29,7 +29,6 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,7 +43,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
 
     @Override
     public K1ColoringStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return K1ColoringStreamConfig.of(Optional.empty(), mapWrapper);
+        return K1ColoringStreamConfig.of(mapWrapper);
     }
 
     @Test

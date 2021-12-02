@@ -31,7 +31,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -143,6 +142,6 @@ class TriangleCountMutateProcTest
 
     @Override
     public TriangleCountMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountMutateConfig.of(Optional.empty(), mapWrapper);
+        return TriangleCountMutateConfig.of(mapWrapper);
     }
 }

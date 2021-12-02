@@ -36,7 +36,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
@@ -50,8 +49,10 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return trainAndStoreModelWithResult(
-            graphName, configuration,
+            graphName,
+            configuration,
             (model, result) -> new TrainResult(
+                graphName,
                 model,
                 result.computeMillis(),
                 result.graph().nodeCount(),
@@ -70,12 +71,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    protected GraphSageTrainConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return GraphSageTrainConfig.of(username, graphName, config);
+    protected GraphSageTrainConfig newConfig(String username, CypherMapWrapper config) {
+        return GraphSageTrainConfig.of(username, config);
     }
 
     @Override

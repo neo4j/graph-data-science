@@ -24,17 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface DegreeCentralityWriteConfig extends DegreeCentralityConfig, WritePropertyConfig {
 
-    static DegreeCentralityWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new DegreeCentralityWriteConfigImpl(graphName, config);
+    static DegreeCentralityWriteConfig of(CypherMapWrapper config) {
+        return new DegreeCentralityWriteConfigImpl(config);
     }
 }

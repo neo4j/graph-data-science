@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.beta.modularity.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
@@ -76,12 +75,8 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     }
 
     @Override
-    protected ModularityOptimizationMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ModularityOptimizationMutateConfig.of(graphName, config);
+    protected ModularityOptimizationMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return ModularityOptimizationMutateConfig.of(config);
     }
 
     @Override

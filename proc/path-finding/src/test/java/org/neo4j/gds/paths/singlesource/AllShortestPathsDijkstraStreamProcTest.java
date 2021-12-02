@@ -33,7 +33,6 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
 
@@ -46,7 +45,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
 
     @Override
     public AllShortestPathsDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return AllShortestPathsDijkstraStreamConfig.of(Optional.empty(), mapWrapper);
+        return AllShortestPathsDijkstraStreamConfig.of(mapWrapper);
     }
 
     @Test

@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -33,15 +31,7 @@ public interface GraphSageWriteConfig extends GraphSageBaseConfig, WriteProperty
 
     long serialVersionUID = 0x42L;
 
-    static GraphSageWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new GraphSageWriteConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static GraphSageWriteConfig of(String username, CypherMapWrapper userInput) {
+        return new GraphSageWriteConfigImpl(username, userInput);
     }
 }

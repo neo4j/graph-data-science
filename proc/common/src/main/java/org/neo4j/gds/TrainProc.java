@@ -109,6 +109,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         public final long trainMillis;
 
         public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends ToMapConvertible> TrainResult(
+            String graphName,
             Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
             long trainMillis,
             long nodeCount,
@@ -117,7 +118,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
 
             TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
 
-            this.graphName = trainConfig.graphName().orElse(null);
+            this.graphName = graphName;
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
             modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());

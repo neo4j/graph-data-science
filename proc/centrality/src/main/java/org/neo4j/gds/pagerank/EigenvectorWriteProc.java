@@ -27,7 +27,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -61,15 +60,11 @@ public class EigenvectorWriteProc extends PageRankWriteProc {
     }
 
     @Override
-    protected PageRankWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
+    protected PageRankWriteConfig newConfig(String username, CypherMapWrapper config) {
         if (config.containsKey("dampingFactor")) {
             throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
         }
 
-        return super.newConfig(username, graphName, config);
+        return super.newConfig(username, config);
     }
 }

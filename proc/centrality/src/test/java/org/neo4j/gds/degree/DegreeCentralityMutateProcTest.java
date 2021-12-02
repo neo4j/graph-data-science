@@ -27,7 +27,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -44,7 +43,7 @@ class DegreeCentralityMutateProcTest extends DegreeCentralityProcTest<DegreeCent
 
     @Override
     public DegreeCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityMutateConfig.of(Optional.empty(), mapWrapper);
+        return DegreeCentralityMutateConfig.of(mapWrapper);
     }
 
     @Override

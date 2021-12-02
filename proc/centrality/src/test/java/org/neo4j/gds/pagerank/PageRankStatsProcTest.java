@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -53,7 +52,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
 
     @Override
     public PageRankStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankStatsConfig.of(Optional.empty(), mapWrapper);
+        return PageRankStatsConfig.of(mapWrapper);
     }
 
     @Test

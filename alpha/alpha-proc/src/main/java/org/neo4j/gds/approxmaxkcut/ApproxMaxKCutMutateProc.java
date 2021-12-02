@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCutProc.APPROX_MAX_K_CUT_DESCRIPTION;
@@ -60,12 +59,8 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
     }
 
     @Override
-    protected ApproxMaxKCutMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ApproxMaxKCutMutateConfig.of(graphName, config);
+    protected ApproxMaxKCutMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return ApproxMaxKCutMutateConfig.of(config);
     }
 
     @Override

@@ -25,21 +25,13 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityMutateConfig extends NodeSimilarityBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
-    static NodeSimilarityMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(
-            graphName,
-            userInput
-        );
+    static NodeSimilarityMutateConfig of(CypherMapWrapper userInput) {
+        NodeSimilarityMutateConfig config = new NodeSimilarityMutateConfigImpl(userInput);
         config.validate();
         return config;
     }

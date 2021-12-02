@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
@@ -74,12 +73,8 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected NodeSimilarityStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeSimilarityStreamConfig.of(graphName, config);
+    protected NodeSimilarityStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeSimilarityStreamConfig.of(config);
     }
 
     @Override

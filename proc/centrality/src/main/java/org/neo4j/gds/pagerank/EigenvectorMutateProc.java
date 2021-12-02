@@ -27,7 +27,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -60,15 +59,11 @@ public class EigenvectorMutateProc extends PageRankMutateProc {
     }
 
     @Override
-    protected PageRankMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
+    protected PageRankMutateConfig newConfig(String username, CypherMapWrapper config) {
         if (config.containsKey("dampingFactor")) {
             throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
         }
 
-        return super.newConfig(username, graphName, config);
+        return super.newConfig(username, config);
     }
 }

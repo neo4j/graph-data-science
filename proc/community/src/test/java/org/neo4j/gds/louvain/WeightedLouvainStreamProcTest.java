@@ -37,7 +37,6 @@ import org.neo4j.graphdb.Result;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,6 +180,6 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
 
     @Override
     public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainStreamConfig.of(Optional.empty(), mapWrapper);
+        return LouvainStreamConfig.of(mapWrapper);
     }
 }

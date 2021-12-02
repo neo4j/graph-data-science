@@ -31,7 +31,6 @@ import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -122,7 +121,7 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Override
     public TriangleCountWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountWriteConfig.of(Optional.empty(), mapWrapper);
+        return TriangleCountWriteConfig.of(mapWrapper);
     }
 
     @Override

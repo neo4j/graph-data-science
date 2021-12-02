@@ -190,7 +190,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
     @Override
     public ModularityOptimizationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ModularityOptimizationMutateConfig.of(Optional.empty(), mapWrapper);
+        return ModularityOptimizationMutateConfig.of(mapWrapper);
     }
 
     @Override

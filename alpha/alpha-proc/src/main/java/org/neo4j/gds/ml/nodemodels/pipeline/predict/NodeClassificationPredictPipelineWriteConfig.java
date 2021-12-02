@@ -40,15 +40,7 @@ public interface NodeClassificationPredictPipelineWriteConfig
 
     Optional<String> predictedProbabilityProperty();
 
-    static NodeClassificationPredictPipelineWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new NodeClassificationPredictPipelineWriteConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static NodeClassificationPredictPipelineWriteConfig of(String username, CypherMapWrapper config) {
+        return new NodeClassificationPredictPipelineWriteConfigImpl(username, config);
     }
 }

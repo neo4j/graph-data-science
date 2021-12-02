@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -85,7 +84,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
     @Override
     public LabelPropagationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationMutateConfig.of(Optional.empty(), mapWrapper);
+        return LabelPropagationMutateConfig.of(mapWrapper);
     }
 
     @Test

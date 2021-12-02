@@ -45,7 +45,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
     Optional<String> relationshipProperty();
 
     static GraphWriteRelationshipConfig of(
-        String graphName,
         String relationshipType,
         Optional<String> relationshipProperty,
         CypherMapWrapper config
@@ -53,7 +52,6 @@ public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfi
         return new GraphWriteRelationshipConfigImpl(
             relationshipType,
             relationshipProperty,
-            Optional.of(graphName),
             config
         );
     }

@@ -26,8 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -41,10 +39,7 @@ public interface HarmonicCentralityConfig extends
         return "centrality";
     }
 
-    static HarmonicCentralityConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new HarmonicCentralityConfigImpl(graphName, config);
+    static HarmonicCentralityConfig of(CypherMapWrapper config) {
+        return new HarmonicCentralityConfigImpl(config);
     }
 }

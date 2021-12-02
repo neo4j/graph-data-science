@@ -26,20 +26,12 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsDijkstraWriteConfig extends AllShortestPathsBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
-    static AllShortestPathsDijkstraWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new AllShortestPathsDijkstraWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static AllShortestPathsDijkstraWriteConfig of(CypherMapWrapper userInput) {
+        return new AllShortestPathsDijkstraWriteConfigImpl(userInput);
     }
 }

@@ -41,7 +41,6 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -65,7 +64,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
     @Override
     public ShortestPathDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraWriteConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraWriteConfig.of(mapWrapper);
     }
 
     @Override

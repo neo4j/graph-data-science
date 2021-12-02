@@ -25,20 +25,12 @@ import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ShortestPathDijkstraMutateConfig extends ShortestPathBaseConfig, MutateRelationshipConfig {
 
-    static ShortestPathDijkstraMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ShortestPathDijkstraMutateConfigImpl(
-            graphName,
-            userInput
-        );
+    static ShortestPathDijkstraMutateConfig of(CypherMapWrapper userInput) {
+        return new ShortestPathDijkstraMutateConfigImpl(userInput);
     }
 }

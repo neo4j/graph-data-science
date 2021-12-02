@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
@@ -79,12 +78,8 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     }
 
     @Override
-    protected KnnStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return KnnStreamConfig.of(graphName, config);
+    protected KnnStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return KnnStreamConfig.of(config);
     }
 
     @Override

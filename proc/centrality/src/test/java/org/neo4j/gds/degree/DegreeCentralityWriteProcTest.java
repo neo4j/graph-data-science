@@ -28,7 +28,6 @@ import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -52,7 +51,7 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
 
     @Override
     public DegreeCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityWriteConfig.of(Optional.empty(), mapWrapper);
+        return DegreeCentralityWriteConfig.of(mapWrapper);
     }
 
     @Override

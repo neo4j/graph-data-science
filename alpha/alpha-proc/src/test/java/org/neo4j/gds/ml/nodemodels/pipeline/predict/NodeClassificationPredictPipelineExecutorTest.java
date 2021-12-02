@@ -57,7 +57,6 @@ import org.neo4j.gds.test.TestProc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -115,7 +114,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void shouldPredict() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
-                Optional.of(GRAPH_NAME),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -153,7 +151,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void shouldPredictWithNodePropertySteps() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
-                Optional.of(GRAPH_NAME),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -191,7 +188,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void progressTracking() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
-                Optional.of(GRAPH_NAME),
                 "",
                 CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
             );
@@ -275,7 +271,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 db.databaseId()
             );
             var streamConfig = NodeClassificationPredictPipelineStreamConfig.of(
-                "", Optional.of("g"), CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
+                "", CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
 
             var algo = factory.build(
                 null,

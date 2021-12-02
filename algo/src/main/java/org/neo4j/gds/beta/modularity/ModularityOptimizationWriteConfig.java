@@ -31,13 +31,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationWriteConfig extends ModularityOptimizationConfig, WritePropertyConfig {
 
-    static ModularityOptimizationWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ModularityOptimizationWriteConfigImpl(
-            graphName,
-            config
-        );
+    static ModularityOptimizationWriteConfig of(CypherMapWrapper config) {
+        return new ModularityOptimizationWriteConfigImpl(config);
     }
 }

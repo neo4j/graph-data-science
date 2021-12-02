@@ -186,16 +186,8 @@ public interface GraphSageTrainConfig extends
         }
     }
 
-    static GraphSageTrainConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new GraphSageTrainConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static GraphSageTrainConfig of(String username, CypherMapWrapper userInput) {
+        return new GraphSageTrainConfigImpl(username, userInput);
     }
 
     static ImmutableGraphSageTrainConfig.Builder builder() {

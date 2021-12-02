@@ -107,11 +107,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             return 0.85;
         }
 
-        static PageRankPregelConfig of(
-            Optional<String> graphName,
-            CypherMapWrapper userInput
-        ) {
-            return new PageRankPregelConfigImpl(graphName, userInput);
+        static PageRankPregelConfig of(CypherMapWrapper userInput) {
+            return new PageRankPregelConfigImpl(userInput);
         }
     }
 }

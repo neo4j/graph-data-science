@@ -28,8 +28,6 @@ import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -57,10 +55,7 @@ public interface PregelConfig extends
         return partitioning() == Partitioning.AUTO;
     }
 
-    static PregelConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new PregelConfigImpl(graphName, userInput);
+    static PregelConfig of(CypherMapWrapper userInput) {
+        return new PregelConfigImpl(userInput);
     }
 }

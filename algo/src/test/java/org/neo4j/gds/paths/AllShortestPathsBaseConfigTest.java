@@ -24,8 +24,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -36,7 +34,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", new ShortestPathConfigTest.TestNode(42L));
 
-        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper);
+        var config = new AllShortestPathsDijkstraStreamConfigImpl(cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
     }
@@ -47,7 +45,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", 42L);
 
-        var config = new AllShortestPathsDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper);
+        var config = new AllShortestPathsDijkstraStreamConfigImpl(cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
     }
@@ -58,7 +56,7 @@ class AllShortestPathsBaseConfigTest {
             .empty()
             .withEntry("sourceNode", "42");
 
-        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(Optional.of("graph"), cypherMapWrapper))
+        assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(cypherMapWrapper))
             .hasMessageContaining("Expected a node or a node id for `sourceNode`. Got String");
     }
 }

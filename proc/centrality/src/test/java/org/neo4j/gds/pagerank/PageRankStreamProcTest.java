@@ -29,7 +29,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,7 +43,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Override
     public PageRankStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankStreamConfig.of(Optional.empty(), mapWrapper);
+        return PageRankStreamConfig.of(mapWrapper);
     }
 
     @Test

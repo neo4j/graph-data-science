@@ -30,7 +30,6 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,22 +47,7 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
             .collect(Collectors.toList());
     }
 
-    //TODO: should this actually be a non-optional field, but then can we would have to put it in the
-    // config map or go outside of the default procedure syntax
-    @Value.Check
-    default void validate() {
-        if (graphName().isEmpty()) {
-            throw new IllegalArgumentException("SplitRelationships only supports execution on named graph.");
-        }
-    }
-
-    static SplitRelationshipsMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new SplitRelationshipsMutateConfigImpl(
-            graphName,
-            userInput
-        );
+    static SplitRelationshipsMutateConfig of(CypherMapWrapper userInput) {
+        return new SplitRelationshipsMutateConfigImpl(userInput);
     }
 }

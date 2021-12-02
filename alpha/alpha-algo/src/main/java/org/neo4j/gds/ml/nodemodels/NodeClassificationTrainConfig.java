@@ -33,7 +33,6 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
@@ -86,16 +85,8 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
         return validateNoWhiteCharacter(emptyToNull(input), "targetProperty");
     }
 
-    static NodeClassificationTrainConfig of(
-        Optional<String> graphName,
-        String username,
-        CypherMapWrapper config
-    ) {
-        return new NodeClassificationTrainConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static NodeClassificationTrainConfig of(String username, CypherMapWrapper config) {
+        return new NodeClassificationTrainConfigImpl(username, config);
     }
 
     static ImmutableNodeClassificationTrainConfig.Builder builder() {

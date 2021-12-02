@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
@@ -59,12 +58,8 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
     }
 
     @Override
-    protected ShortestPathYensMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ShortestPathYensMutateConfig.of(graphName, config);
+    protected ShortestPathYensMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return ShortestPathYensMutateConfig.of(config);
     }
 
     @Override

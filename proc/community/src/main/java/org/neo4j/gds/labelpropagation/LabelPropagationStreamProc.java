@@ -29,7 +29,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -63,12 +62,8 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    public LabelPropagationStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LabelPropagationStreamConfig.of(graphName, config);
+    public LabelPropagationStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return LabelPropagationStreamConfig.of(config);
     }
 
     @Override

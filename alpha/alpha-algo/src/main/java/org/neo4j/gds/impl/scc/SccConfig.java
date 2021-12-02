@@ -26,8 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -39,10 +37,7 @@ public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
         return "componentId";
     }
 
-    static SccConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new SccConfigImpl(graphName, userInput);
+    static SccConfig of(CypherMapWrapper userInput) {
+        return new SccConfigImpl(userInput);
     }
 }

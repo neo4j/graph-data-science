@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
@@ -386,7 +385,6 @@ class GraphSageAlgorithmFactoryTest {
     void shouldCreateCorrectAlgorithmInstance() {
         var multiLabelConfig = GraphSageTrainConfig.of(
             "",
-            Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
                 "featureProperties", List.of("a"),
@@ -405,7 +403,6 @@ class GraphSageAlgorithmFactoryTest {
 
         var singleLabelConfig = GraphSageTrainConfig.of(
             "",
-            Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
                 "featureProperties", List.of("a")

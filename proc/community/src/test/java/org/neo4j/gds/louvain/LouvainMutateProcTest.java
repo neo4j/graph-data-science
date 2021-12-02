@@ -112,7 +112,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
     @Override
     public LouvainMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainMutateConfig.of(Optional.empty(), mapWrapper);
+        return LouvainMutateConfig.of(mapWrapper);
     }
 
     @Test

@@ -34,7 +34,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.degree.DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION;
@@ -61,12 +60,8 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
     }
 
     @Override
-    protected DegreeCentralityStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return DegreeCentralityStatsConfig.of(graphName, config);
+    protected DegreeCentralityStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return DegreeCentralityStatsConfig.of(config);
     }
 
     @Override

@@ -79,10 +79,9 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
     @Override
     protected NodeSimilarityMutateConfig newConfig(
         String username,
-        Optional<String> graphName,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityMutateConfig.of(graphName, userInput);
+        return NodeSimilarityMutateConfig.of(userInput);
     }
 
     @Override

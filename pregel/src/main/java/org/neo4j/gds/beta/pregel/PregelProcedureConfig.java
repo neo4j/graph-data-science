@@ -26,8 +26,6 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -46,10 +44,7 @@ public interface PregelProcedureConfig extends
         return "";
     }
 
-    static PregelProcedureConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new PregelProcedureConfigImpl(graphName, userInput);
+    static PregelProcedureConfig of(CypherMapWrapper userInput) {
+        return new PregelProcedureConfigImpl(userInput);
     }
 }

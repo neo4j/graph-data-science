@@ -37,7 +37,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -70,12 +69,8 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    protected TriangleCountBaseConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return TriangleCountBaseConfig.of(graphName, config);
+    protected TriangleCountBaseConfig newConfig(String username, CypherMapWrapper config) {
+        return TriangleCountBaseConfig.of(config);
     }
 
     @Override

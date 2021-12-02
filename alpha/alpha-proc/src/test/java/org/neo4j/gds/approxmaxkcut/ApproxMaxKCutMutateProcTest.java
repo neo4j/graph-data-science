@@ -30,8 +30,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.impl.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -55,7 +53,7 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
 
     @Override
     public ApproxMaxKCutMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ApproxMaxKCutMutateConfig.of(Optional.empty(), mapWrapper);
+        return ApproxMaxKCutMutateConfig.of(mapWrapper);
     }
 
     @Override

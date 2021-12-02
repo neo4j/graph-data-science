@@ -28,7 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -70,7 +69,7 @@ public class BetweennessCentralityMutateProcTest
 
     @Override
     public BetweennessCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityMutateConfig.of(Optional.empty(), mapWrapper);
+        return BetweennessCentralityMutateConfig.of(mapWrapper);
     }
 
     @Override

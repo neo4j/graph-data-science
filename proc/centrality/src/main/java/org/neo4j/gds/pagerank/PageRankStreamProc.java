@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
@@ -74,12 +73,8 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected PageRankStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return PageRankStreamConfig.of(graphName, config);
+    protected PageRankStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return PageRankStreamConfig.of(config);
     }
 
     @Override

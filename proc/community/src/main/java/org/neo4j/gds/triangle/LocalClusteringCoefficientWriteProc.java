@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
@@ -61,12 +60,8 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected LocalClusteringCoefficientWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LocalClusteringCoefficientWriteConfig.of(graphName, config);
+    protected LocalClusteringCoefficientWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return LocalClusteringCoefficientWriteConfig.of(config);
     }
 
     @Override

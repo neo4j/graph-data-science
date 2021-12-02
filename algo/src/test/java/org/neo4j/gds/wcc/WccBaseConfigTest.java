@@ -26,7 +26,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -92,7 +91,7 @@ class WccBaseConfigTest {
     @Configuration
     interface TestWccBaseConfig extends WccBaseConfig {
         static TestWccBaseConfig of(CypherMapWrapper map) {
-            return new TestWccBaseConfigImpl(Optional.empty(), map);
+            return new TestWccBaseConfigImpl(map);
         }
     }
 

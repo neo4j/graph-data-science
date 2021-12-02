@@ -62,7 +62,7 @@ class Node2VecMutateProcTest
 
     @Override
     public Node2VecMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return Node2VecMutateConfig.of(Optional.empty(), mapWrapper);
+        return Node2VecMutateConfig.of(mapWrapper);
     }
 
     @Override

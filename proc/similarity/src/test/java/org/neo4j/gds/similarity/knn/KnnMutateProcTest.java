@@ -35,7 +35,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,7 +79,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
     @Override
     public KnnMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnMutateConfig.of(Optional.empty(), mapWrapper);
+        return KnnMutateConfig.of(mapWrapper);
     }
 
     @Override

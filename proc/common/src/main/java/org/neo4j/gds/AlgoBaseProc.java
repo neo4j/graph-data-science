@@ -57,7 +57,6 @@ public abstract class AlgoBaseProc<
 
     protected abstract CONFIG newConfig(
         String username,
-        Optional<String> graphName,
         CypherMapWrapper config
     );
 

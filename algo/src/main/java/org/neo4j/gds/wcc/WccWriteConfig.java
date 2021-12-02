@@ -25,20 +25,12 @@ import org.neo4j.gds.config.ComponentSizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, ComponentSizeConfig {
 
-    static WccWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new WccWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static WccWriteConfig of(CypherMapWrapper userInput) {
+        return new WccWriteConfigImpl(userInput);
     }
 }

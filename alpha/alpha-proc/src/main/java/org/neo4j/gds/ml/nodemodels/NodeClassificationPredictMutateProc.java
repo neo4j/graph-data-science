@@ -39,7 +39,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class NodeClassificationPredictMutateProc
@@ -80,12 +79,8 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected NodeClassificationMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationMutateConfig.of(username, graphName, config);
+    protected NodeClassificationMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationMutateConfig.of(username, config);
     }
 
     @Override

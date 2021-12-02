@@ -85,7 +85,6 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 
     private NodeClassificationPredictConfig innerConfig(CONFIG configuration) {
         return new NodeClassificationPredictConfigImpl(
-            configuration.graphName(),
             configuration.username(),
             CypherMapWrapper.create(configuration.toMap())
                 .withEntry("includePredictedProbabilities",configuration.includePredictedProbabilities())
@@ -102,10 +101,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     protected NodeClassificationPredictPipelineExecutor build(
         Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        String graphName = configuration
-            .graphName()
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "Node Classification Pipeline cannot be used with anonymous graphs. Please load the graph before"));
+        String graphName = ""; // TODO: fixme
 
         var model = getTrainedNCPipelineModel(
             modelCatalog,

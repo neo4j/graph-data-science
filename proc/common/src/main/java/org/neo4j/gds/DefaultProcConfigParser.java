@@ -45,7 +45,6 @@ public class DefaultProcConfigParser<CONFIG extends AlgoBaseConfig> implements P
     interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
         CONFIG apply(
             String username,
-            Optional<String> graphName,
             CypherMapWrapper config
         );
     }
@@ -117,7 +116,7 @@ public class DefaultProcConfigParser<CONFIG extends AlgoBaseConfig> implements P
             }
             config = configWithoutCreateKeys;
         }
-        CONFIG algoConfig = newConfigFunction.apply(username, graphName, config);
+        CONFIG algoConfig = newConfigFunction.apply(username, config);
         allowedKeys.addAll(algoConfig.configKeys());
         validateConfig(config, allowedKeys);
         return algoConfig;

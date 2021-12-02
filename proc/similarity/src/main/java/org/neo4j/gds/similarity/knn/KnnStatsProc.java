@@ -37,7 +37,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
@@ -66,12 +65,8 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    protected KnnStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return KnnStatsConfig.of(graphName, config);
+    protected KnnStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return KnnStatsConfig.of(config);
     }
 
     @Override

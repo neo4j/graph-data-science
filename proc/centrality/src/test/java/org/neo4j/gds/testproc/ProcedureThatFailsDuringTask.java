@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm, ProcedureThatFailsDuringTask.Output, DummyConfig> {
@@ -50,12 +49,8 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     }
 
     @Override
-    protected DummyConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new DummyConfigImpl(graphName,  config);
+    protected DummyConfig newConfig(String username, CypherMapWrapper config) {
+        return new DummyConfigImpl(config);
     }
 
     @Override

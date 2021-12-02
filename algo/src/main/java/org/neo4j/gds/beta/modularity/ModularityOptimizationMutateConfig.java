@@ -31,13 +31,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutatePropertyConfig {
 
-    static ModularityOptimizationMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ModularityOptimizationMutateConfigImpl(
-            graphName,
-            userInput
-        );
+    static ModularityOptimizationMutateConfig of(CypherMapWrapper userInput) {
+        return new ModularityOptimizationMutateConfigImpl(userInput);
     }
 }

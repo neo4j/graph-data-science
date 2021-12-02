@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -62,7 +61,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
     @Override
     public WccMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccMutateConfig.of(Optional.empty(), mapWrapper);
+        return WccMutateConfig.of(mapWrapper);
     }
 
     @Override

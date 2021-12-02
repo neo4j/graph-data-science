@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCutProc.APPROX_MAX_K_CUT_DESCRIPTION;
@@ -58,12 +57,8 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
     }
 
     @Override
-    protected ApproxMaxKCutStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ApproxMaxKCutStreamConfig.of(graphName, config);
+    protected ApproxMaxKCutStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ApproxMaxKCutStreamConfig.of(config);
     }
 
     @Override

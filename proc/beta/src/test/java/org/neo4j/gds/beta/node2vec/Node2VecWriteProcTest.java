@@ -31,7 +31,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,7 +69,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
 
     @Override
     public Node2VecWriteConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecWriteConfig.of(Optional.empty(), userInput);
+        return Node2VecWriteConfig.of(userInput);
     }
 
     @Test

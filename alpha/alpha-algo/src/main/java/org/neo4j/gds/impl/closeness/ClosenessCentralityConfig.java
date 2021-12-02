@@ -26,8 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -46,10 +44,7 @@ public interface ClosenessCentralityConfig extends
         return "centrality";
     }
 
-    static ClosenessCentralityConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ClosenessCentralityConfigImpl(graphName, config);
+    static ClosenessCentralityConfig of(CypherMapWrapper config) {
+        return new ClosenessCentralityConfigImpl(config);
     }
 }

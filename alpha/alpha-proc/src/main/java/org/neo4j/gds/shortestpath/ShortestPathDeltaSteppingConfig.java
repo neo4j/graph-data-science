@@ -27,8 +27,6 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphdb.Node;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -50,10 +48,7 @@ public interface ShortestPathDeltaSteppingConfig extends AlgoBaseConfig, Relatio
         return node.getId();
     }
 
-    static ShortestPathDeltaSteppingConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ShortestPathDeltaSteppingConfigImpl(graphName, config);
+    static ShortestPathDeltaSteppingConfig of(CypherMapWrapper config) {
+        return new ShortestPathDeltaSteppingConfigImpl(config);
     }
 }

@@ -28,7 +28,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -82,7 +81,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     @Override
     public TriangleCountStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStatsConfig.of(Optional.empty(), mapWrapper);
+        return TriangleCountStatsConfig.of(mapWrapper);
     }
 
 }

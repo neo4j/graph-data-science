@@ -32,7 +32,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -123,6 +122,6 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
     @Override
     public LabelPropagationStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStreamConfig.of(Optional.empty(), mapWrapper);
+        return LabelPropagationStreamConfig.of(mapWrapper);
     }
 }

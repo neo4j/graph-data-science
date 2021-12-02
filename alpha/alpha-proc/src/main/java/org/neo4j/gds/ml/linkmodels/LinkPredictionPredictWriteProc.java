@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
@@ -69,16 +68,8 @@ public class LinkPredictionPredictWriteProc extends WriteStreamOfRelationshipsPr
     }
 
     @Override
-    protected LinkPredictionPredictWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LinkPredictionPredictWriteConfig.of(
-            username,
-            graphName,
-            config
-        );
+    protected LinkPredictionPredictWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return LinkPredictionPredictWriteConfig.of(username, config);
     }
 
     @Override

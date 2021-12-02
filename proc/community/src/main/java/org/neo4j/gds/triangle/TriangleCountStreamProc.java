@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -87,12 +86,8 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected TriangleCountStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return TriangleCountStreamConfig.of(graphName, config);
+    protected TriangleCountStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return TriangleCountStreamConfig.of(config);
     }
 
     @Override

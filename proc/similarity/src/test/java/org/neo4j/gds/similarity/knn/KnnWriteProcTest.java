@@ -39,7 +39,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,7 +56,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
     @Override
     public KnnWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnWriteConfig.of(Optional.empty(), mapWrapper);
+        return KnnWriteConfig.of(mapWrapper);
     }
 
     @Override

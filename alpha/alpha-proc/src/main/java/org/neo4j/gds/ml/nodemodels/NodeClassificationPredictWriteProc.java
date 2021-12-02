@@ -37,7 +37,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -104,12 +103,8 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected NodeClassificationPredictWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationPredictWriteConfig.of(username, graphName, config);
+    protected NodeClassificationPredictWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationPredictWriteConfig.of(username, config);
     }
 
     @Override

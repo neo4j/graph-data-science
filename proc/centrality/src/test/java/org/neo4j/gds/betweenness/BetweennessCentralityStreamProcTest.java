@@ -25,8 +25,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
-import java.util.Optional;
-
 class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
 
     @Override
@@ -36,7 +34,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
 
     @Override
     public BetweennessCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStreamConfig.of(Optional.empty(), mapWrapper);
+        return BetweennessCentralityStreamConfig.of(mapWrapper);
     }
 
     @Test

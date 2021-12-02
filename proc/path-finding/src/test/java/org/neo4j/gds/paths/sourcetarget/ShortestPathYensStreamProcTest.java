@@ -33,7 +33,6 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
 
@@ -46,7 +45,7 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
 
     @Override
     public ShortestPathYensStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensStreamConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathYensStreamConfig.of(mapWrapper);
     }
 
     @Test

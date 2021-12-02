@@ -44,10 +44,7 @@ class BetweennessCentralityTest {
 
     private static final AllocationTracker ALLOCATION_TRACKER = AllocationTracker.empty();
 
-    private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(
-        Optional.empty(),
-        CypherMapWrapper.empty()
-    );
+    private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(CypherMapWrapper.empty());
 
     private static final String DIAMOND =
         "CREATE " +

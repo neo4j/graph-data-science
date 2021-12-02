@@ -26,8 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -43,10 +41,7 @@ public interface TestMutateConfig extends AlgoBaseConfig, MutatePropertyConfig {
         return false;
     }
 
-    static TestMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new TestMutateConfigImpl(graphName, config);
+    static TestMutateConfig of(CypherMapWrapper config) {
+        return new TestMutateConfigImpl(config);
     }
 }

@@ -24,16 +24,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface K1ColoringMutateConfig extends K1ColoringConfig, MutatePropertyConfig {
-    static K1ColoringMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new K1ColoringMutateConfigImpl(graphName, userInput);
+    static K1ColoringMutateConfig of(CypherMapWrapper userInput) {
+        return new K1ColoringMutateConfigImpl(userInput);
     }
 }

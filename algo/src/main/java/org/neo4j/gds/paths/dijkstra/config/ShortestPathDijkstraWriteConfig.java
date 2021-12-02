@@ -26,8 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -37,14 +35,8 @@ public interface ShortestPathDijkstraWriteConfig extends ShortestPathBaseConfig,
     String NODE_IDS_KEY = "nodeIds";
     String COSTS_KEY = "costs";
 
-    static ShortestPathDijkstraWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ShortestPathDijkstraWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static ShortestPathDijkstraWriteConfig of(CypherMapWrapper userInput) {
+        return new ShortestPathDijkstraWriteConfigImpl(userInput);
 
     }
 }

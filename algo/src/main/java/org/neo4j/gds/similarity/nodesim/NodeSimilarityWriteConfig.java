@@ -25,21 +25,13 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
-    static NodeSimilarityWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        NodeSimilarityWriteConfig config = new NodeSimilarityWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static NodeSimilarityWriteConfig of(CypherMapWrapper userInput) {
+        NodeSimilarityWriteConfig config = new NodeSimilarityWriteConfigImpl(userInput);
         config.validate();
         return config;
     }

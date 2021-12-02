@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -183,7 +182,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Override
     public RandomWalkStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return RandomWalkStreamConfig.of(Optional.empty(), mapWrapper);
+        return RandomWalkStreamConfig.of(mapWrapper);
     }
 
     @Override

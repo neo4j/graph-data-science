@@ -23,23 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictStreamConfig extends LinkPredictionPredictBaseConfig {
 
-    static LinkPredictionPredictStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionPredictStreamConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionPredictStreamConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictStreamConfigImpl(username, config);
     }
-
 }

@@ -157,7 +157,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var config = LinkPredictionTrainConfig
             .builder()
-            .graphName(GRAPH_NAME)
             .modelName("model")
             .pipeline("DUMMY")
             .negativeClassWeight(1)
@@ -317,7 +316,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var config = LinkPredictionTrainConfig
             .builder()
-            .graphName(GRAPH_NAME)
             .modelName("model")
             .pipeline("DUMMY")
             .negativeClassWeight(1)

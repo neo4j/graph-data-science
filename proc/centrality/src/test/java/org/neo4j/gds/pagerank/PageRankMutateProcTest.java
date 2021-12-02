@@ -123,7 +123,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
     @Override
     public PageRankMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankMutateConfig.of(Optional.empty(), mapWrapper);
+        return PageRankMutateConfig.of(mapWrapper);
     }
 
     @Test

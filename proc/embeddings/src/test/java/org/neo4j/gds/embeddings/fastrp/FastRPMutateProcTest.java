@@ -83,7 +83,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
 
     @Override
     public FastRPMutateConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPMutateConfig.of(Optional.empty(), userInput);
+        return FastRPMutateConfig.of(userInput);
     }
 
     @Override

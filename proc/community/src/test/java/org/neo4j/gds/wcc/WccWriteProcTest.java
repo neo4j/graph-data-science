@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,7 +53,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Override
     public WccWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccWriteConfig.of(Optional.empty(), mapWrapper);
+        return WccWriteConfig.of(mapWrapper);
     }
 
     @Override

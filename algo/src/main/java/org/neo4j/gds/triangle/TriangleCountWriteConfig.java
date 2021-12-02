@@ -24,20 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 
-    static TriangleCountWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new TriangleCountWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static TriangleCountWriteConfig of(CypherMapWrapper userInput) {
+        return new TriangleCountWriteConfigImpl(userInput);
     }
 }

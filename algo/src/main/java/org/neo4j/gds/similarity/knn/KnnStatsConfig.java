@@ -23,17 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface KnnStatsConfig extends KnnBaseConfig {
 
-    static KnnStatsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new KnnStatsConfigImpl(graphName, config);
+    static KnnStatsConfig of(CypherMapWrapper config) {
+        return new KnnStatsConfigImpl(config);
     }
 }

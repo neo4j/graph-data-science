@@ -37,7 +37,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class NodeClassificationPipelineTrainProc
@@ -61,12 +60,8 @@ public class NodeClassificationPipelineTrainProc
     }
 
     @Override
-    protected NodeClassificationPipelineTrainConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationPipelineTrainConfig.of(graphName, username, config);
+    protected NodeClassificationPipelineTrainConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationPipelineTrainConfig.of(username, config);
     }
 
     @Override

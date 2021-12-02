@@ -22,8 +22,6 @@ package org.neo4j.gds.spanningtree;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
@@ -34,11 +32,8 @@ public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
         return KSpanningTreeProc.DEFAULT_CLUSTER_PROPERTY;
     }
 
-    static KSpanningTreeConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new KSpanningTreeConfigImpl(graphName, userInput);
+    static KSpanningTreeConfig of(CypherMapWrapper userInput) {
+        return new KSpanningTreeConfigImpl(userInput);
     }
 
 }

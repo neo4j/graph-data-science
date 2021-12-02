@@ -25,8 +25,6 @@ import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
@@ -44,7 +42,12 @@ class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
     }
 
     private void runPrepareWeightsOnQuery(String query) {
-        SimilarityConfig similarityConfig = getDummyConfig();
+        SimilarityConfig similarityConfig = new SimilarityConfig() {
+            @Override
+            public String graph() {
+                return ProcedureConstants.CYPHER_QUERY_KEY;
+            }
+        };
 
         DummySimilarityAlgorithm dummySimilarityAlgorithm = new DummySimilarityAlgorithm(similarityConfig, db);
         dummySimilarityAlgorithm.prepareInputs(query, similarityConfig);
@@ -79,19 +82,5 @@ class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
         @Override
         public void assertRunning() {
         }
-    }
-
-    private SimilarityConfig getDummyConfig() {
-        return new SimilarityConfig() {
-            @Override
-            public Optional<String> graphName() {
-                return Optional.empty();
-            }
-
-            @Override
-            public String graph() {
-                return ProcedureConstants.CYPHER_QUERY_KEY;
-            }
-        };
     }
 }

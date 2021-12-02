@@ -61,7 +61,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -282,10 +281,9 @@ public class PregelProcTest extends BaseProcTest {
         @Override
         protected TestPregelConfig newConfig(
             String username,
-            Optional<String> graphName,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, config);
+            return TestPregelConfig.of(config);
         }
 
         @Override
@@ -351,10 +349,9 @@ public class PregelProcTest extends BaseProcTest {
         @Override
         protected TestPregelConfig newConfig(
             String username,
-            Optional<String> graphName,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, config);
+            return TestPregelConfig.of(config);
         }
 
         @Override
@@ -418,10 +415,9 @@ public class PregelProcTest extends BaseProcTest {
         @Override
         protected TestPregelConfig newConfig(
             String username,
-            Optional<String> graphName,
             CypherMapWrapper config
         ) {
-            return TestPregelConfig.of(graphName, config);
+            return TestPregelConfig.of(config);
         }
 
         @Override

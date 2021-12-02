@@ -23,8 +23,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -32,15 +30,7 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
 
     long serialVersionUID = 0x42L;
 
-    static GraphSageStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new GraphSageStreamConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static GraphSageStreamConfig of(String username, CypherMapWrapper userInput) {
+        return new GraphSageStreamConfigImpl(username, userInput);
     }
 }

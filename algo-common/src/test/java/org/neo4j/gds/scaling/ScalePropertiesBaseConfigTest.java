@@ -26,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -40,7 +39,6 @@ class ScalePropertiesBaseConfigTest {
     @EnumSource(ScalarScaler.Variant.class)
     void parseValidScalers(ScalarScaler.Variant scaler) {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
-            Optional.of("graph"),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -56,7 +54,6 @@ class ScalePropertiesBaseConfigTest {
     @Test
     void supportNodePropertyMap() {
         var config = new ScalePropertiesMutateConfigImpl(
-            Optional.of("graph"),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -74,7 +71,6 @@ class ScalePropertiesBaseConfigTest {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> new ScalePropertiesMutateConfigImpl(
-                Optional.of("graph"),
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",
@@ -91,7 +87,6 @@ class ScalePropertiesBaseConfigTest {
     @Test
     void failOnSpecifyingSamePropertyMultipleTimes() {
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
-            Optional.of("graph"),
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
@@ -107,7 +102,6 @@ class ScalePropertiesBaseConfigTest {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> new ScalePropertiesMutateConfigImpl(
-                Optional.of("graph"),
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",

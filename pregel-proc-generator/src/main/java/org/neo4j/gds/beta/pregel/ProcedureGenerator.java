@@ -45,7 +45,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -182,10 +181,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
             .addParameter(String.class, "username")
-            .addParameter(ParameterizedTypeName.get(Optional.class, String.class), "graphName")
             .addParameter(CypherMapWrapper.class, "config")
             .returns(pregelSpec.configTypeName())
-            .addStatement("return $T.of(graphName, config)", pregelSpec.configTypeName())
+            .addStatement("return $T.of(config)", pregelSpec.configTypeName())
             .build();
     }
 

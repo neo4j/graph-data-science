@@ -35,7 +35,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -133,12 +132,8 @@ public class HarmonicCentralityProc extends NodePropertiesWriter<HarmonicCentral
     }
 
     @Override
-    protected HarmonicCentralityConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return HarmonicCentralityConfig.of(graphName, config);
+    protected HarmonicCentralityConfig newConfig(String username, CypherMapWrapper config) {
+        return HarmonicCentralityConfig.of(config);
     }
 
     @Override

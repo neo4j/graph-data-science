@@ -70,12 +70,8 @@ public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, KnnMutate
     }
 
     @Override
-    protected KnnMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return KnnMutateConfig.of(graphName, config);
+    protected KnnMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return KnnMutateConfig.of(config);
     }
 
     @Override

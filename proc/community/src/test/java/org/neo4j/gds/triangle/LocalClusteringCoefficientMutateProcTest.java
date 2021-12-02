@@ -28,7 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -128,6 +127,6 @@ class LocalClusteringCoefficientMutateProcTest
 
     @Override
     public LocalClusteringCoefficientMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientMutateConfig.of(Optional.empty(), mapWrapper);
+        return LocalClusteringCoefficientMutateConfig.of(mapWrapper);
     }
 }

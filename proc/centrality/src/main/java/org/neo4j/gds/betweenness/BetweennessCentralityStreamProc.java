@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
@@ -75,12 +74,8 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected BetweennessCentralityStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return BetweennessCentralityStreamConfig.of(graphName, config);
+    protected BetweennessCentralityStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return BetweennessCentralityStreamConfig.of(config);
     }
 
     @Override

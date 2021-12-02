@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
@@ -37,16 +35,8 @@ public interface NodeClassificationStreamConfig extends NodeClassificationPredic
         return false;
     }
 
-    static NodeClassificationStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new NodeClassificationStreamConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static NodeClassificationStreamConfig of(String username, CypherMapWrapper userInput) {
+        return new NodeClassificationStreamConfigImpl(username, userInput);
     }
 
 }

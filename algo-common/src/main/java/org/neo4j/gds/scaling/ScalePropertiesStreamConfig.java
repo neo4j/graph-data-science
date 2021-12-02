@@ -23,17 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
 
-    static ScalePropertiesStreamConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ScalePropertiesStreamConfigImpl(graphName, userInput);
+    static ScalePropertiesStreamConfig of(CypherMapWrapper userInput) {
+        return new ScalePropertiesStreamConfigImpl(userInput);
     }
 }

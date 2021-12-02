@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -122,6 +121,6 @@ public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimi
 
     @Override
     public NodeSimilarityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStatsConfig.of(Optional.empty(), mapWrapper);
+        return NodeSimilarityStatsConfig.of(mapWrapper);
     }
 }

@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.config.SeedConfig.SEED_PROPERTY_KEY;
@@ -34,21 +32,21 @@ class SeedConfigTest {
     @Test
     void testDefaultSeedPropertyIsNull() {
         var mapWrapper = CypherMapWrapper.empty();
-        var config = new TestSeedConfigImpl(Optional.empty(), mapWrapper);
+        var config = new TestSeedConfigImpl(mapWrapper);
         assertThat(config.seedProperty()).isNull();
     }
 
     @Test
     void testEmptySeedPropertyValues() {
         var mapWrapper = CypherMapWrapper.empty().withString(SEED_PROPERTY_KEY, "");
-        var config = new TestSeedConfigImpl(Optional.empty(), mapWrapper);
+        var config = new TestSeedConfigImpl(mapWrapper);
         assertThat(config.seedProperty()).isNull();
     }
 
     @Test
     void failOnBlankPropertyName() {
         var mapWrapper = CypherMapWrapper.empty().withString(SEED_PROPERTY_KEY, "  ");
-        assertThatThrownBy(() -> new TestSeedConfigImpl(Optional.empty(), mapWrapper))
+        assertThatThrownBy(() -> new TestSeedConfigImpl(mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("not end or begin with whitespace characters");
     }

@@ -40,7 +40,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -176,7 +175,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldValidateLabelsAndPropertiesWithFeatureDimension() {
         var proc = new GraphSageTrainProc();
-        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(),
+        var config = GraphSageTrainConfig.of(
+            getUsername(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
@@ -208,7 +208,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldValidateLabelsAndPropertiesWithoutFeatureDimension() {
         var proc = new GraphSageTrainProc();
-        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(),
+        var config = GraphSageTrainConfig.of(
+            getUsername(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
@@ -244,7 +245,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             "sudo", true
         );
         var config = GraphSageTrainConfig.of(
-            getUsername(), Optional.empty(),
+            getUsername(),
             CypherMapWrapper.create(trainConfigParams)
         );
         var model = Model.of(

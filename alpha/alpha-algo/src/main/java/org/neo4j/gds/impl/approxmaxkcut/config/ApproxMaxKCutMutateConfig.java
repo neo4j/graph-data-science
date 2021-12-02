@@ -24,16 +24,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 public interface ApproxMaxKCutMutateConfig extends ApproxMaxKCutConfig, MutatePropertyConfig {
 
-    static ApproxMaxKCutMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ApproxMaxKCutMutateConfigImpl(graphName, config);
+    static ApproxMaxKCutMutateConfig of(CypherMapWrapper config) {
+        return new ApproxMaxKCutMutateConfigImpl(config);
     }
 }

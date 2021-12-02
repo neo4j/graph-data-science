@@ -35,7 +35,6 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ValueClass
@@ -81,16 +80,8 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
         return null;
     }
 
-    static LinkPredictionTrainConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionTrainConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionTrainConfigImpl(username, config);
     }
 
     static ImmutableLinkPredictionTrainConfig.Builder builder() {

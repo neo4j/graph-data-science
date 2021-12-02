@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +49,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Override
     public WccStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStreamConfig.of(Optional.empty(), mapWrapper);
+        return WccStreamConfig.of(mapWrapper);
     }
 
     @AfterEach

@@ -24,17 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface BetweennessCentralityWriteConfig extends BetweennessCentralityBaseConfig, WritePropertyConfig {
 
-    static BetweennessCentralityWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new BetweennessCentralityWriteConfigImpl(graphName, config);
+    static BetweennessCentralityWriteConfig of(CypherMapWrapper config) {
+        return new BetweennessCentralityWriteConfigImpl(config);
     }
 }

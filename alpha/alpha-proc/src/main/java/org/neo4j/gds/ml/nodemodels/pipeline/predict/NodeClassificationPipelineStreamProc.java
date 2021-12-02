@@ -106,12 +106,8 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    protected NodeClassificationPredictPipelineStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationPredictPipelineStreamConfig.of(username, graphName, config);
+    protected NodeClassificationPredictPipelineStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationPredictPipelineStreamConfig.of(username, config);
     }
 
     @Override

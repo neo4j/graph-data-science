@@ -24,18 +24,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface BFSPregelConfig extends PregelProcedureConfig {
     long startNode();
 
-    static BFSPregelConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new BFSPregelConfigImpl(graphName, userInput);
+    static BFSPregelConfig of(CypherMapWrapper userInput) {
+        return new BFSPregelConfigImpl(userInput);
     }
 }

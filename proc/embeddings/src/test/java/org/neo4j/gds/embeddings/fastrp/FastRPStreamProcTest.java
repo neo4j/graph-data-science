@@ -29,7 +29,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +49,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Override
     public FastRPStreamConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPStreamConfig.of(Optional.empty(), userInput);
+        return FastRPStreamConfig.of(userInput);
     }
 
     @ParameterizedTest

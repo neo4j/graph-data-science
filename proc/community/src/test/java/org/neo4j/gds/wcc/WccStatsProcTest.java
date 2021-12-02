@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -48,7 +47,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
     @Override
     public WccStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccStatsConfig.of(Optional.empty(), mapWrapper);
+        return WccStatsConfig.of(mapWrapper);
     }
 
     @Test

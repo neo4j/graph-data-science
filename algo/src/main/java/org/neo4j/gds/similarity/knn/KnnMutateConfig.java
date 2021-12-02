@@ -25,17 +25,12 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface KnnMutateConfig extends KnnBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
-    static KnnMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new KnnMutateConfigImpl(graphName, config);
+    static KnnMutateConfig of(CypherMapWrapper config) {
+        return new KnnMutateConfigImpl(config);
     }
 }

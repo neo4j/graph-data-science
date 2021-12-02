@@ -51,7 +51,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -83,12 +82,8 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
     }
 
     @Override
-    protected ApproximateNearestNeighborsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ApproximateNearestNeighborsConfigImpl(graphName, config);
+    protected ApproximateNearestNeighborsConfig newConfig(String username, CypherMapWrapper config) {
+        return new ApproximateNearestNeighborsConfigImpl(config);
     }
 
     @Override

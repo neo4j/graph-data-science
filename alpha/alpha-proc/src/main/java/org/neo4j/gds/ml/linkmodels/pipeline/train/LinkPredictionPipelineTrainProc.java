@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTrainPipelineExecutor, LinkLogisticRegressionData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
@@ -51,12 +50,8 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
     }
 
     @Override
-    protected LinkPredictionTrainConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LinkPredictionTrainConfig.of(username(), graphName, config);
+    protected LinkPredictionTrainConfig newConfig(String username, CypherMapWrapper config) {
+        return LinkPredictionTrainConfig.of(username(), config);
     }
 
     @Override

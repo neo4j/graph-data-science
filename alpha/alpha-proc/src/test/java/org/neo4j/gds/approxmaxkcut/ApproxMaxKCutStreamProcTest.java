@@ -30,7 +30,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +45,7 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
 
     @Override
     public ApproxMaxKCutStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ApproxMaxKCutStreamConfig.of(Optional.empty(), mapWrapper);
+        return ApproxMaxKCutStreamConfig.of(mapWrapper);
     }
 
     @Test

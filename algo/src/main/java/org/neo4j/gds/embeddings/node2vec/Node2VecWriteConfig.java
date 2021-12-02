@@ -24,17 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface Node2VecWriteConfig extends Node2VecBaseConfig, WritePropertyConfig {
 
-    static Node2VecWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new Node2VecWriteConfigImpl(graphName, userInput);
+    static Node2VecWriteConfig of(CypherMapWrapper userInput) {
+        return new Node2VecWriteConfigImpl(userInput);
     }
 }

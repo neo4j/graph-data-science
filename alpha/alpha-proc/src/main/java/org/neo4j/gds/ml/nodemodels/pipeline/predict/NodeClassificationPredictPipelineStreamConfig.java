@@ -23,8 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineStreamConfig
@@ -36,15 +34,7 @@ public interface NodeClassificationPredictPipelineStreamConfig
         return false;
     }
 
-    static NodeClassificationPredictPipelineStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new NodeClassificationPredictPipelineStreamConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static NodeClassificationPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
+        return new NodeClassificationPredictPipelineStreamConfigImpl(username, config);
     }
 }

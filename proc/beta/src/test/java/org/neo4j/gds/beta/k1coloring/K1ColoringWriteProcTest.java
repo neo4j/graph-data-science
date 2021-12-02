@@ -29,7 +29,6 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -52,7 +51,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
 
     @Override
     public K1ColoringWriteConfig createConfig(CypherMapWrapper configMap) {
-        return K1ColoringWriteConfig.of(Optional.empty(), configMap);
+        return K1ColoringWriteConfig.of(configMap);
     }
 
     @Test

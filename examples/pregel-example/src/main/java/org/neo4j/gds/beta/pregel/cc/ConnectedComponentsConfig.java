@@ -26,8 +26,6 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -39,10 +37,7 @@ public interface ConnectedComponentsConfig extends PregelProcedureConfig, SeedCo
         return true;
     }
 
-    static ConnectedComponentsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ConnectedComponentsConfigImpl(graphName, userInput);
+    static ConnectedComponentsConfig of(CypherMapWrapper userInput) {
+        return new ConnectedComponentsConfigImpl(userInput);
     }
 }

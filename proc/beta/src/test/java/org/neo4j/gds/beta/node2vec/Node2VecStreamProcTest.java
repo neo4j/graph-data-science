@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,7 +58,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
 
     @Override
     public Node2VecStreamConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecStreamConfig.of(Optional.empty(), userInput);
+        return Node2VecStreamConfig.of(userInput);
     }
 
     @Test

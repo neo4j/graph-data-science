@@ -60,12 +60,8 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    protected ScalePropertiesStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ScalePropertiesStreamConfig.of(graphName, config);
+    protected ScalePropertiesStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ScalePropertiesStreamConfig.of(config);
     }
 
     @Override

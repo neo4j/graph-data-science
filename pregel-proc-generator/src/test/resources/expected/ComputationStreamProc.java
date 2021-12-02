@@ -72,7 +72,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
 
     @Override
     protected PregelProcedureConfig newConfig(String username, Optional<String> graphName, CypherMapWrapper config) {
-        return PregelProcedureConfig.of(graphName, config);
+        return PregelProcedureConfig.of(config);
     }
 
     @Override

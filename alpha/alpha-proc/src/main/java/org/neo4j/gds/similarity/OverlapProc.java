@@ -30,7 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -65,12 +64,8 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
     }
 
     @Override
-    protected OverlapConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new OverlapConfigImpl(graphName, userInput);
+    protected OverlapConfig newConfig(String username, CypherMapWrapper userInput) {
+        return new OverlapConfigImpl(userInput);
     }
 
     @Override

@@ -28,7 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @ValueClass
 @Configuration
@@ -47,13 +46,7 @@ public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig
         return -1L;
     }
 
-    static TraverseConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new TraverseConfigImpl(
-            graphName,
-            userInput
-        );
+    static TraverseConfig of(CypherMapWrapper userInput) {
+        return new TraverseConfigImpl(userInput);
     }
 }

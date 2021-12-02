@@ -33,7 +33,6 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
 
     @Override
     public ShortestPathYensWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathYensWriteConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathYensWriteConfig.of(mapWrapper);
     }
 
     @Override

@@ -35,7 +35,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -61,12 +60,8 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Override
-    protected BetweennessCentralityMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return BetweennessCentralityMutateConfig.of(graphName, config);
+    protected BetweennessCentralityMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return BetweennessCentralityMutateConfig.of(config);
     }
 
     @Override

@@ -33,7 +33,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
@@ -88,12 +87,8 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected PageRankWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return PageRankWriteConfig.of(graphName, config);
+    protected PageRankWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return PageRankWriteConfig.of(config);
     }
 
     @SuppressWarnings("unused")

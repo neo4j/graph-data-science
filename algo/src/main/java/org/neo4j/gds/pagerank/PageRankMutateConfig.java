@@ -24,17 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface PageRankMutateConfig extends PageRankConfig, MutatePropertyConfig {
 
-    static PageRankMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new PageRankMutateConfigImpl(graphName, userInput);
+    static PageRankMutateConfig of(CypherMapWrapper userInput) {
+        return new PageRankMutateConfigImpl(userInput);
     }
 }

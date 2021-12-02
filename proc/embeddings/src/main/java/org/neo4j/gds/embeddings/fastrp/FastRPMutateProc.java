@@ -30,7 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
@@ -71,12 +70,8 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPRe
     }
 
     @Override
-    protected FastRPMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return FastRPMutateConfig.of(graphName, config);
+    protected FastRPMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return FastRPMutateConfig.of(config);
     }
 
     @Override

@@ -32,7 +32,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -55,7 +54,7 @@ class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestP
 
     @Override
     public ShortestPathAStarWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathAStarWriteConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathAStarWriteConfig.of(mapWrapper);
     }
 
     @Override

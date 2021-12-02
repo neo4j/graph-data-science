@@ -82,10 +82,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     protected LinkPredictionPredictPipelineExecutor build(
         Graph graph, CONFIG configuration, AllocationTracker allocationTracker, ProgressTracker progressTracker
     ) {
-        String graphName = configuration
-            .graphName()
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"));
+        String graphName = ""; // TODO: fix me
 
         var model = getTrainedLPPipelineModel(
             modelCatalog,

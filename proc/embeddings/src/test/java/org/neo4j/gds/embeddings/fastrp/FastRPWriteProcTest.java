@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +61,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
 
     @Override
     public FastRPWriteConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPWriteConfig.of(Optional.empty(), userInput);
+        return FastRPWriteConfig.of(userInput);
     }
 
     @Override

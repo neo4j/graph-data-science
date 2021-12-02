@@ -114,7 +114,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
 
     @Override
     public ShortestPathAStarMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathAStarMutateConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathAStarMutateConfig.of(mapWrapper);
     }
 
     @Override

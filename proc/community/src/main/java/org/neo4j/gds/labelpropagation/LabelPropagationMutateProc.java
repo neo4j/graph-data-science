@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
@@ -59,12 +58,8 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected LabelPropagationMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LabelPropagationMutateConfig.of(graphName, config);
+    protected LabelPropagationMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return LabelPropagationMutateConfig.of(config);
     }
 
     @Override

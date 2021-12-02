@@ -25,20 +25,12 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-    static AllShortestPathsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new AllShortestPathsConfigImpl(
-            graphName,
-            userInput
-        );
+    static AllShortestPathsConfig of(CypherMapWrapper userInput) {
+        return new AllShortestPathsConfigImpl(userInput);
     }
 }

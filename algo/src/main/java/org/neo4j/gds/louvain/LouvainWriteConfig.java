@@ -32,10 +32,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
-    static LouvainWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new LouvainWriteConfigImpl(graphName, userInput);
+    static LouvainWriteConfig of(CypherMapWrapper userInput) {
+        return new LouvainWriteConfigImpl(userInput);
     }
 }

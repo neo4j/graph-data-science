@@ -24,21 +24,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig {
 
-    static ShortestPathDijkstraStreamConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ShortestPathDijkstraStreamConfigImpl(
-            graphName,
-            userInput
-        );
+    static ShortestPathDijkstraStreamConfig of(CypherMapWrapper userInput) {
+        return new ShortestPathDijkstraStreamConfigImpl(userInput);
 
     }
 }

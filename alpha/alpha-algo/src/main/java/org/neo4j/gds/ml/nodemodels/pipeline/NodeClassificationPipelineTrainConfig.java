@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
@@ -54,16 +53,8 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
         return validateNoWhiteCharacter(emptyToNull(input), "targetProperty");
     }
 
-    static NodeClassificationPipelineTrainConfig of(
-        Optional<String> graphName,
-        String username,
-        CypherMapWrapper config
-    ) {
-        return new NodeClassificationPipelineTrainConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static NodeClassificationPipelineTrainConfig of(String username, CypherMapWrapper config) {
+        return new NodeClassificationPipelineTrainConfigImpl(username, config);
     }
 
     static ImmutableNodeClassificationPipelineTrainConfig.Builder builder() {

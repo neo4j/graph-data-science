@@ -174,7 +174,6 @@ class LinkPredictionTrainTest {
     private LinkPredictionTrainConfig trainingConfig(String modelName) {
         return LinkPredictionTrainConfig
             .builder()
-            .graphName("graph")
             .modelName(modelName)
             .pipeline("DUMMY")
             .negativeClassWeight(1)

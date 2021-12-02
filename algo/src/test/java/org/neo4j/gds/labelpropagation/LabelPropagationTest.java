@@ -45,7 +45,6 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -60,7 +59,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 class LabelPropagationTest {
 
-    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(Optional.empty(), CypherMapWrapper.empty());
+    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(CypherMapWrapper.empty());
 
     @GdlGraph
     private static final String GRAPH =

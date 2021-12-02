@@ -101,7 +101,7 @@ class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraPro
 
     @Override
     public AllShortestPathsDijkstraMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return AllShortestPathsDijkstraMutateConfig.of(Optional.empty(), mapWrapper);
+        return AllShortestPathsDijkstraMutateConfig.of(mapWrapper);
     }
 
     @Override

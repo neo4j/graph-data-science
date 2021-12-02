@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -47,7 +46,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
 
     @Override
     public LabelPropagationStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationStatsConfig.of(Optional.empty(), mapWrapper);
+        return LabelPropagationStatsConfig.of(mapWrapper);
     }
 
     @Test

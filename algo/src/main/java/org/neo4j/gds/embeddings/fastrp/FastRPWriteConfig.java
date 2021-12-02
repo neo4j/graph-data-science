@@ -24,17 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface FastRPWriteConfig extends FastRPBaseConfig, WritePropertyConfig {
 
-    static FastRPWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new FastRPWriteConfigImpl(graphName, userInput);
+    static FastRPWriteConfig of(CypherMapWrapper userInput) {
+        return new FastRPWriteConfigImpl(userInput);
     }
 }

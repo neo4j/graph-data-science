@@ -61,10 +61,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends AlgorithmFa
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        var graphName = configuration
-            .graphName()
-            .orElseThrow(() -> new UnsupportedOperationException(
-                "Node Classification Prediction Pipeline cannot be used with anonymous graphs, please provide a named graph."));
+        var graphName = ""; // TODO: fixme
 
         var graphStore = GraphStoreCatalog
             .get(CatalogRequest.of(configuration.username(), databaseId), graphName)

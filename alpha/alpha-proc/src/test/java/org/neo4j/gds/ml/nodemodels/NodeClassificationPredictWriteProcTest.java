@@ -52,7 +52,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.as;
@@ -175,7 +174,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
     @Override
     public NodeClassificationPredictWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeClassificationPredictWriteConfig.of(getUsername(), Optional.of(GRAPH_NAME), mapWrapper);
+        return NodeClassificationPredictWriteConfig.of(getUsername(), mapWrapper);
     }
 
     @Override

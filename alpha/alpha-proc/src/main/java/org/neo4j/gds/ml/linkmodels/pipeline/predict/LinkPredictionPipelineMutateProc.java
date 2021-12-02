@@ -127,12 +127,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    protected LinkPredictionPredictPipelineMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LinkPredictionPredictPipelineMutateConfig.of(username, graphName, config);
+    protected LinkPredictionPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return LinkPredictionPredictPipelineMutateConfig.of(username, config);
     }
 
     @Override

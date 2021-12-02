@@ -25,7 +25,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +37,7 @@ class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<DegreeCent
 
     @Override
     public DegreeCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityStreamConfig.of(Optional.empty(), mapWrapper);
+        return DegreeCentralityStreamConfig.of(mapWrapper);
     }
 
     @Test

@@ -30,7 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -56,12 +55,8 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected K1ColoringStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return K1ColoringStreamConfig.of(graphName, config);
+    protected K1ColoringStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return K1ColoringStreamConfig.of(config);
     }
 
     @Override

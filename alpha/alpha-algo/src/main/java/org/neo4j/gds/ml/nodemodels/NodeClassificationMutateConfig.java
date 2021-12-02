@@ -43,16 +43,8 @@ public interface NodeClassificationMutateConfig extends NodeClassificationPredic
 
     Optional<String> predictedProbabilityProperty();
 
-    static NodeClassificationMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new NodeClassificationMutateConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static NodeClassificationMutateConfig of(String username, CypherMapWrapper userInput) {
+        return new NodeClassificationMutateConfigImpl(username, userInput);
     }
 
 }

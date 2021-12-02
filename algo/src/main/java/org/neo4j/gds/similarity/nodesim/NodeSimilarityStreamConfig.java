@@ -23,21 +23,13 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
 
-    static NodeSimilarityStreamConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new NodeSimilarityStreamConfigImpl(
-            graphName,
-            userInput
-        );
+    static NodeSimilarityStreamConfig of(CypherMapWrapper userInput) {
+        return new NodeSimilarityStreamConfigImpl(userInput);
     }
 
     @Override

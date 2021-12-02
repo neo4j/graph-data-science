@@ -27,7 +27,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -77,13 +76,13 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(Optional.empty(), CypherMapWrapper.empty());
+        LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(CypherMapWrapper.empty());
         assertEquals(false, louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
     }
 
     @Override
     public LouvainStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainStreamConfig.of(Optional.empty(), mapWrapper);
+        return LouvainStreamConfig.of(mapWrapper);
     }
 }

@@ -30,10 +30,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {
 
-    static ModularityOptimizationStreamConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new ModularityOptimizationStreamConfigImpl(graphName, config);
+    static ModularityOptimizationStreamConfig of(CypherMapWrapper config) {
+        return new ModularityOptimizationStreamConfigImpl(config);
     }
 }

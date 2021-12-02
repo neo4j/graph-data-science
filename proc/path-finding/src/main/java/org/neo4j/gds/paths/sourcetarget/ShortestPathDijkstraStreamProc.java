@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
@@ -59,12 +58,8 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
     }
 
     @Override
-    protected ShortestPathDijkstraStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return ShortestPathDijkstraStreamConfig.of(graphName, config);
+    protected ShortestPathDijkstraStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return ShortestPathDijkstraStreamConfig.of(config);
     }
 
     @Override

@@ -36,7 +36,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -66,12 +65,8 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    protected LinkPredictionTrainConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        var lpConfig = LinkPredictionTrainConfig.of(username, graphName, config);
+    protected LinkPredictionTrainConfig newConfig(String username, CypherMapWrapper config) {
+        var lpConfig = LinkPredictionTrainConfig.of(username, config);
         var trainType = lpConfig.trainRelationshipType();
         var testType = lpConfig.testRelationshipType();
         return ImmutableLinkPredictionTrainConfig

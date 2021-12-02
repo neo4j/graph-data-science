@@ -25,8 +25,6 @@ import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictionPredictPipelineBaseConfig, MutateRelationshipConfig, MutatePropertyConfig {
@@ -36,15 +34,7 @@ public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictio
         return "probability";
     }
 
-    static LinkPredictionPredictPipelineMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionPredictPipelineMutateConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictPipelineMutateConfigImpl(username, config);
     }
 }

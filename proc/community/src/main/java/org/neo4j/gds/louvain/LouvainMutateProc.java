@@ -34,7 +34,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,12 +60,8 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     }
 
     @Override
-    protected LouvainMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LouvainMutateConfig.of(graphName, config);
+    protected LouvainMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return LouvainMutateConfig.of(config);
     }
 
     @Override

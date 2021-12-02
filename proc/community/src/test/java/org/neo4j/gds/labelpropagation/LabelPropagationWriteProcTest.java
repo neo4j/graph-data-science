@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,7 +67,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     @Override
     public LabelPropagationWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LabelPropagationWriteConfig.of(Optional.empty(), mapWrapper);
+        return LabelPropagationWriteConfig.of(mapWrapper);
     }
 
     @Override

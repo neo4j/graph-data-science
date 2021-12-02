@@ -31,7 +31,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
@@ -60,12 +59,8 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected LocalClusteringCoefficientStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LocalClusteringCoefficientStreamConfig.of(graphName, config);
+    protected LocalClusteringCoefficientStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return LocalClusteringCoefficientStreamConfig.of(config);
     }
 
     @Override

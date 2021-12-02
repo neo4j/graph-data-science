@@ -31,10 +31,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutatePropertyConfig {
 
-    static Node2VecMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new Node2VecMutateConfigImpl(graphName, userInput);
+    static Node2VecMutateConfig of(CypherMapWrapper userInput) {
+        return new Node2VecMutateConfigImpl(userInput);
     }
 }

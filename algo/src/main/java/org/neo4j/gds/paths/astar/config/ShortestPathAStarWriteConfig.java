@@ -25,17 +25,12 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ShortestPathAStarWriteConfig extends ShortestPathAStarBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
-    static ShortestPathAStarWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new ShortestPathAStarWriteConfigImpl(graphName, userInput);
+    static ShortestPathAStarWriteConfig of(CypherMapWrapper userInput) {
+        return new ShortestPathAStarWriteConfigImpl(userInput);
     }
 }

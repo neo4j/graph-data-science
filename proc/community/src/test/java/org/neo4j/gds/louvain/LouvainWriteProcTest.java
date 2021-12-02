@@ -178,7 +178,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     // TODO: add a variation of the below with non-defaults
     @Test
     void testCreateConfigWithDefaults() {
-        LouvainBaseConfig louvainConfig = LouvainWriteConfig.of(Optional.empty(), createMinimalConfig(CypherMapWrapper.empty()));
+        LouvainBaseConfig louvainConfig = LouvainWriteConfig.of(createMinimalConfig(CypherMapWrapper.empty()));
         assertFalse(louvainConfig.includeIntermediateCommunities());
         assertEquals(10, louvainConfig.maxLevels());
         assertEquals(10, louvainConfig.maxIterations());
@@ -253,7 +253,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
 
     @Override
     public LouvainWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainWriteConfig.of(Optional.empty(), mapWrapper);
+        return LouvainWriteConfig.of(mapWrapper);
     }
 
     @Override

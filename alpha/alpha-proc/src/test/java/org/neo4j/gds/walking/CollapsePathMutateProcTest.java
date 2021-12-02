@@ -39,7 +39,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
@@ -110,7 +109,7 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
 
     @Override
     public CollapsePathConfig createConfig(CypherMapWrapper mapWrapper) {
-        return CollapsePathConfig.of(Optional.empty(), mapWrapper);
+        return CollapsePathConfig.of(mapWrapper);
     }
 
     @Override

@@ -31,7 +31,6 @@ import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.allOf;
@@ -137,7 +136,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 
     @Override
     public PageRankWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankWriteConfig.of(Optional.empty(), mapWrapper);
+        return PageRankWriteConfig.of(mapWrapper);
     }
 
     @Override

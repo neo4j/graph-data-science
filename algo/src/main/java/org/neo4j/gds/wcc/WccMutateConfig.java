@@ -24,20 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface WccMutateConfig extends WccBaseConfig, MutatePropertyConfig {
 
-    static WccMutateConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new WccMutateConfigImpl(
-            graphName,
-            userInput
-        );
+    static WccMutateConfig of(CypherMapWrapper userInput) {
+        return new WccMutateConfigImpl(userInput);
     }
 }

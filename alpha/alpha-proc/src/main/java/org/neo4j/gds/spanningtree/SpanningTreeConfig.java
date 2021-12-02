@@ -23,8 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @Configuration
 public interface SpanningTreeConfig extends SpanningTreeBaseConfig
 {
@@ -38,11 +36,8 @@ public interface SpanningTreeConfig extends SpanningTreeBaseConfig
         return WRITE_RELATIONSHIP_TYPE;
     }
 
-    static SpanningTreeConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new SpanningTreeConfigImpl(graphName, userInput);
+    static SpanningTreeConfig of(CypherMapWrapper userInput) {
+        return new SpanningTreeConfigImpl(userInput);
     }
 
 }

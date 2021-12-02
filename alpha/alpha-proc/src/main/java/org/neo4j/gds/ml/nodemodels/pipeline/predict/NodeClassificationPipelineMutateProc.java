@@ -38,7 +38,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
@@ -105,12 +104,8 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    protected NodeClassificationPredictPipelineMutateConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeClassificationPredictPipelineMutateConfig.of(username, graphName, config);
+    protected NodeClassificationPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeClassificationPredictPipelineMutateConfig.of(username, config);
     }
 
     @Override

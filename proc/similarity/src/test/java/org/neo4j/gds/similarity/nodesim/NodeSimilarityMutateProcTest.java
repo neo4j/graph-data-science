@@ -34,7 +34,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,7 +69,7 @@ class NodeSimilarityMutateProcTest
 
     @Override
     public NodeSimilarityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityMutateConfig.of(Optional.empty(), mapWrapper);
+        return NodeSimilarityMutateConfig.of(mapWrapper);
     }
 
     @Override

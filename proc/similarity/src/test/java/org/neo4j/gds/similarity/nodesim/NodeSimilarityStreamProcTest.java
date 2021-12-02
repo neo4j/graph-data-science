@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +55,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
     @Override
     public NodeSimilarityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return NodeSimilarityStreamConfig.of(Optional.empty(), mapWrapper);
+        return NodeSimilarityStreamConfig.of(mapWrapper);
     }
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();

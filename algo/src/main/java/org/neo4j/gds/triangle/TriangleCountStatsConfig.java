@@ -23,20 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountStatsConfig extends TriangleCountBaseConfig {
 
-    static TriangleCountStatsConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new TriangleCountStatsConfigImpl(
-            graphName,
-            userInput
-        );
+    static TriangleCountStatsConfig of(CypherMapWrapper userInput) {
+        return new TriangleCountStatsConfigImpl(userInput);
     }
 }

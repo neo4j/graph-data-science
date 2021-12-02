@@ -38,7 +38,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -98,16 +97,8 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected GraphSageStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return GraphSageStreamConfig.of(
-            username,
-            graphName,
-            config
-        );
+    protected GraphSageStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return GraphSageStreamConfig.of(username, config);
     }
 
     @Override

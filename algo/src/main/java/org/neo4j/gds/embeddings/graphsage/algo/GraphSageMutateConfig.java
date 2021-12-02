@@ -24,8 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -33,15 +31,7 @@ public interface GraphSageMutateConfig extends GraphSageBaseConfig, MutateProper
 
     long serialVersionUID = 0x42L;
 
-    static GraphSageMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new GraphSageMutateConfigImpl(
-            graphName,
-            username,
-            userInput
-        );
+    static GraphSageMutateConfig of(String username, CypherMapWrapper userInput) {
+        return new GraphSageMutateConfigImpl(username, userInput);
     }
 }

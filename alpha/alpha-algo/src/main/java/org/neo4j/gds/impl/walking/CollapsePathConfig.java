@@ -27,7 +27,6 @@ import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @ValueClass
 @Configuration
@@ -41,14 +40,8 @@ public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipCo
         return false;
     }
 
-    static CollapsePathConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new CollapsePathConfigImpl(
-            graphName,
-            userInput
-        );
+    static CollapsePathConfig of(CypherMapWrapper userInput) {
+        return new CollapsePathConfigImpl(userInput);
     }
 
 }

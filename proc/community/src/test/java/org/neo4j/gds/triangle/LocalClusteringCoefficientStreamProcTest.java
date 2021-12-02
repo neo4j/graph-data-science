@@ -25,7 +25,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -80,6 +79,6 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
 
     @Override
     public LocalClusteringCoefficientStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LocalClusteringCoefficientStreamConfig.of(Optional.empty(), mapWrapper);
+        return LocalClusteringCoefficientStreamConfig.of(mapWrapper);
     }
 }

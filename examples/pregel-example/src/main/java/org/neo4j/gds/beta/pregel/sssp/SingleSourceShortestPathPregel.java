@@ -32,8 +32,6 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
 @PregelProcedure(name = "example.pregel.sssp", modes = {GDSMode.STREAM})
@@ -89,11 +87,8 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     interface SingleSourceShortestPathPregelConfig extends PregelProcedureConfig {
         long startNode();
 
-        static SingleSourceShortestPathPregelConfig of(
-            Optional<String> graphName,
-            CypherMapWrapper userInput
-        ) {
-            return new SingleSourceShortestPathPregelConfigImpl(graphName, userInput);
+        static SingleSourceShortestPathPregelConfig of(CypherMapWrapper userInput) {
+            return new SingleSourceShortestPathPregelConfigImpl(userInput);
         }
     }
 }

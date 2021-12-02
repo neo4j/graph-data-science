@@ -67,10 +67,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
     }
 
     static TriangleCountStatsConfig createTriangleCountConfig(LocalClusteringCoefficientBaseConfig configuration) {
-        return ImmutableTriangleCountStatsConfig.builder()
-            .graphName(configuration.graphName())
-            .concurrency(configuration.concurrency())
-            .build();
+        return ImmutableTriangleCountStatsConfig.builder().concurrency(configuration.concurrency()).build();
     }
 
     @Override

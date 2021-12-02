@@ -33,7 +33,6 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,7 +75,7 @@ class WriteProcTest {
 
             @Override
             protected AlgoBaseConfig newConfig(
-                String username, Optional graphName, CypherMapWrapper config
+                String username, CypherMapWrapper config
             ) {
                 throw new UnsupportedOperationException("TODO");
             }

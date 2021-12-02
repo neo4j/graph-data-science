@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.closeTo;
@@ -49,7 +48,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
     @Override
     public LouvainStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return LouvainStatsConfig.of(Optional.empty(), mapWrapper);
+        return LouvainStatsConfig.of(mapWrapper);
     }
 
     @Test

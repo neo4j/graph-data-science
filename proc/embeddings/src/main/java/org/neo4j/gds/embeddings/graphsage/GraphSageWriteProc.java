@@ -37,7 +37,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
@@ -78,12 +77,8 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected GraphSageWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return GraphSageWriteConfig.of(username, graphName, config);
+    protected GraphSageWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return GraphSageWriteConfig.of(username, config);
     }
 
     @Override

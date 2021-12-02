@@ -34,7 +34,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -63,12 +62,8 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected LouvainStreamConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return LouvainStreamConfig.of(graphName, config);
+    protected LouvainStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return LouvainStreamConfig.of(config);
     }
 
     @Override

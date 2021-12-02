@@ -92,7 +92,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Override
     public ShortestPathDijkstraMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraMutateConfig.of(Optional.empty(), mapWrapper);
+        return ShortestPathDijkstraMutateConfig.of(mapWrapper);
     }
 
     @Override

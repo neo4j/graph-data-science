@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +51,7 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
 
     @Override
     public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStreamConfig.of(Optional.empty(), mapWrapper);
+        return TriangleCountStreamConfig.of(mapWrapper);
     }
 
 }

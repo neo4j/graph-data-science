@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
@@ -47,7 +46,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     @Override
     public KnnStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return KnnStreamConfig.of(Optional.empty(), mapWrapper);
+        return KnnStreamConfig.of(mapWrapper);
     }
 
     @Test

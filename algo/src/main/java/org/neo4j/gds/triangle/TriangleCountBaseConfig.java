@@ -25,8 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -44,13 +42,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         }
     }
 
-    static TriangleCountBaseConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new TriangleCountBaseConfigImpl(
-            graphName,
-            userInput
-        );
+    static TriangleCountBaseConfig of(CypherMapWrapper userInput) {
+        return new TriangleCountBaseConfigImpl(userInput);
     }
 }

@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -76,12 +75,8 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected K1ColoringStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return K1ColoringStatsConfig.of(graphName, config);
+    protected K1ColoringStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return K1ColoringStatsConfig.of(config);
     }
 
     @SuppressWarnings("unused")

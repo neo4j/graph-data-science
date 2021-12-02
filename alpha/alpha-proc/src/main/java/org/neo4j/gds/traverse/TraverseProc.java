@@ -35,7 +35,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,12 +70,8 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     }
 
     @Override
-    protected TraverseConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return TraverseConfig.of(graphName, userInput);
+    protected TraverseConfig newConfig(String username, CypherMapWrapper userInput) {
+        return TraverseConfig.of(userInput);
     }
 
     @Override

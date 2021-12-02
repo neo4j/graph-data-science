@@ -36,7 +36,6 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Random;
 
 @PregelProcedure(
@@ -155,11 +154,8 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
             return 0.2;
         }
 
-        static SpeakerListenerLPAConfig of(
-            Optional<String> graphName,
-            CypherMapWrapper userConfig
-        ) {
-            return new SpeakerListenerLPAConfigImpl(graphName, userConfig);
+        static SpeakerListenerLPAConfig of(CypherMapWrapper userConfig) {
+            return new SpeakerListenerLPAConfigImpl(userConfig);
         }
 
         @Value.Derived

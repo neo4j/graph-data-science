@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
@@ -60,12 +59,8 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
     }
 
     @Override
-    protected AllShortestPathsDijkstraWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return AllShortestPathsDijkstraWriteConfig.of(graphName, config);
+    protected AllShortestPathsDijkstraWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return AllShortestPathsDijkstraWriteConfig.of(config);
     }
 
     @Override

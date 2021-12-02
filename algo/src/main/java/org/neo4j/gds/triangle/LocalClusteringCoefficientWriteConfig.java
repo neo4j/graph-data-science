@@ -24,20 +24,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LocalClusteringCoefficientWriteConfig extends LocalClusteringCoefficientBaseConfig, WritePropertyConfig {
 
-    static LocalClusteringCoefficientWriteConfig of(
-        Optional<String> graphName,
-        CypherMapWrapper userInput
-    ) {
-        return new LocalClusteringCoefficientWriteConfigImpl(
-            graphName,
-            userInput
-        );
+    static LocalClusteringCoefficientWriteConfig of(CypherMapWrapper userInput) {
+        return new LocalClusteringCoefficientWriteConfigImpl(userInput);
     }
 }

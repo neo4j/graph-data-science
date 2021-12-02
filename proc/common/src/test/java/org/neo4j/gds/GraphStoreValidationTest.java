@@ -26,8 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GraphStoreValidationTest {
@@ -46,11 +44,6 @@ class GraphStoreValidationTest {
         }
 
         @ValueClass
-        interface TestSeedConfig extends AlgoBaseConfig, SeedConfig {
-            @Override
-            default Optional<String> graphName() {
-                return Optional.empty();
-            }
-        }
+        interface TestSeedConfig extends AlgoBaseConfig, SeedConfig {}
     }
 }

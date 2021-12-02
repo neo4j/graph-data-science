@@ -26,8 +26,6 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Optional;
-
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -47,16 +45,8 @@ public interface LinkPredictionPredictWriteConfig extends LinkPredictionPredictB
         return concurrency();
     }
 
-    static LinkPredictionPredictWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionPredictWriteConfigImpl(
-            graphName,
-            username,
-            config
-        );
+    static LinkPredictionPredictWriteConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictWriteConfigImpl(username, config);
     }
 
 }

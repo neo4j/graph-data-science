@@ -33,7 +33,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
@@ -61,12 +60,8 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected NodeSimilarityStatsConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        CypherMapWrapper config
-    ) {
-        return NodeSimilarityStatsConfig.of(graphName, config);
+    protected NodeSimilarityStatsConfig newConfig(String username, CypherMapWrapper config) {
+        return NodeSimilarityStatsConfig.of(config);
     }
 
     @Override
