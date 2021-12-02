@@ -131,19 +131,20 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeBId, nodeAId, nodeCId);
         assertCorrectNeighborList(result, nodeCId, nodeAId, nodeBId);
     }
-
     private void assertCorrectNeighborList(
         Knn.Result result,
         long nodeId,
         long... expectedNeighbors
     ) {
+        var actualSimilarityPairs=result.neighborList().get(nodeId).similarityStream(nodeId);
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors)
             .doesNotContain(nodeId)
             .containsAnyOf(expectedNeighbors)
             .doesNotHaveDuplicates()
-            .isSortedAccordingTo(Comparator.naturalOrder())
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
+        assertThat(actualSimilarityPairs)
+            .isSortedAccordingTo(Comparator.comparingDouble((s)->-s.similarity));
     }
 
     @Test
@@ -169,23 +170,10 @@ class KnnTest {
         long nodeEveId = simThresholdGraph.toMappedNodeId("eve");
         long nodeCarolId = simThresholdGraph.toMappedNodeId("carol");
 
-        assertContainsAllExpectedNeighbours(result, nodeAliceId, nodeCarolId);
-        assertContainsAllExpectedNeighbours(result, nodeCarolId, nodeAliceId, nodeBobId);
-        assertContainsAllExpectedNeighbours(result, nodeBobId, nodeEveId, nodeCarolId);
-        assertContainsAllExpectedNeighbours(result, nodeEveId, nodeBobId);
-    }
-
-    //We created this additional assertion because the assertCorrectNeighborList is requiring
-    //a particular ordering in the nodeIds which we don't need in all examples.
-    private void assertContainsAllExpectedNeighbours(
-        Knn.Result result,
-        long nodeId,
-        long... expectedNeighbors
-    ) {
-        var actualNeighbors = result.neighborsOf(nodeId).toArray();
-        assertThat(actualNeighbors)
-            .doesNotContain(nodeId)
-            .containsExactlyInAnyOrder(expectedNeighbors);
+        assertCorrectNeighborList(result, nodeAliceId, nodeCarolId);
+        assertCorrectNeighborList(result, nodeCarolId, nodeAliceId, nodeBobId);
+        assertCorrectNeighborList(result, nodeBobId, nodeEveId, nodeCarolId);
+        assertCorrectNeighborList(result, nodeEveId, nodeBobId);
     }
 
     private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
@@ -208,7 +196,6 @@ class KnnTest {
             knnContext
         );
         var result = knn.compute();
-
         assertThat(result)
             .isNotNull()
             .extracting(Knn.Result::size)
