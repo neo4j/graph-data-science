@@ -126,13 +126,20 @@ CREATE (a:Node{id:"A"}),
        (d)-[:LINK]->(e)
 ----
 
+.The following will create and store a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create(
+  'graph',
+  'Node',
+  'LINK'
+)
+----
+
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.harmonic.stream({
-  nodeProjection: 'Node',
-  relationshipProjection: 'LINK'
-})
+CALL gds.alpha.closeness.harmonic.stream('graph', {})
 YIELD nodeId, centrality
 RETURN gds.util.asNode(nodeId).name AS user, centrality
 ORDER BY centrality DESC
@@ -153,11 +160,8 @@ ORDER BY centrality DESC
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.harmonic.write({
-  nodeProjection: 'Node',
-  relationshipProjection: 'LINK',
-  writeProperty: 'centrality'
-}) YIELD nodes, writeProperty
+CALL gds.alpha.closeness.harmonic.write('graph', {})
+YIELD nodes, writeProperty
 ----
 
 .Results

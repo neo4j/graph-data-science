@@ -319,33 +319,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-embeddings-fastrp-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run FastRP in write mode on an anonymous graph.
-[source, cypher, role=noplay]
-----
-CALL gds.fastRP.write(
-  configuration: Map
-)
-YIELD
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-fastrp-syntax, write mode syntax above>>.
-
-
 [[algorithms-embeddings-fastrp-examples]]
 == Examples
 

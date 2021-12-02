@@ -198,33 +198,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-degree-centrality-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Degree Centrality in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.degree.write(
-  configuration: Map
-) YIELD
-  centralityDistribution: Map,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  nodePropertiesWritten: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-degree-centrality-syntax, write mode syntax above>>.
-
-
 [[algorithms-degree-centrality-exsamples]]
 == Examples
 

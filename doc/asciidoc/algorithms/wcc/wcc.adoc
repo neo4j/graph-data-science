@@ -199,36 +199,6 @@ include::specific-configuration-write.adoc[]
 ====
 
 
-[[algorithms-wcc-syntax-anonymous-graphs]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run WCC in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.wcc.write(
-  configuration: Map
-)
-YIELD
-  componentCount: Integer,
-  nodePropertiesWritten: Integer,
-  relationshipPropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  postProcessingMillis: Integer,
-  componentDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-wcc-syntax, write mode syntax above>>.
-
-
 [[algorithms-wcc-examples]]
 == Examples
 

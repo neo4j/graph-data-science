@@ -43,12 +43,6 @@ Altering the concurrency configuration has no effect.
 include::path-syntax.adoc[]
 
 
-[[algorithms-yens-syntax-anonymous]]
-=== Anonymous graphs
-
-include::path-anonymous-graph.adoc[]
-
-
 [[algorithms-yens-examples]]
 == Examples
 

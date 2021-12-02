@@ -184,32 +184,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-embeddings-graph-sage-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../../shared/syntax-anonymous-graphs.adoc[]
-
-.Run GraphSAGE in write mode on an anonymous graph.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.graphSage.write(
-  configuration: Map
-)
-YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  configuration: Map
-----
-
-include::../../common-configuration/common-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-graph-sage-syntax, write mode syntax above>>.
-
 [[algorithms-embeddings-graph-sage-examples]]
 == Examples
 

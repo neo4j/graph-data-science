@@ -1,6 +1,0 @@
-It is also possible to execute the algorithm on a graph that is projected in conjunction with the algorithm execution.
-In this case, the graph does not have a name, and we call it anonymous.
-When executing over an anonymous graph the configuration map contains a graph projection configuration as well as an algorithm configuration.
-All execution modes support execution on anonymous graphs, although we only show syntax and mode-specific configuration for the `write` mode for brevity.
-
-For more information on syntax variants, see <<algorithms-syntax>>.

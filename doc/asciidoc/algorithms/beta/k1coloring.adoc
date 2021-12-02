@@ -64,10 +64,7 @@ YIELD nodeId, color
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                  | Type    | Default                | Optional | Description
-| nodeProjection                                        | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection                                | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
 | concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency                                       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | <<common-configuration-max-iterations,maxIterations>> | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
@@ -105,10 +102,7 @@ include::../common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                  | Type    | Default                | Optional | Description
-| nodeProjection                                        | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection                                | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
 | concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency                                       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | <<common-configuration-max-iterations,maxIterations>> | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
@@ -173,10 +167,7 @@ include::../common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                        | Type    | Default                | Optional | Description
-| nodeProjection                                              | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection                                      | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
 | <<common-configuration-concurrency,concurrency>>            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency                                             | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | <<common-configuration-write-concurrency,writeConcurrency>> | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | <<common-configuration-max-iterations,maxIterations>>       | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 | <<common-configuration-write-property,writeProperty>>       | String  | n/a                    | no       | The node property this procedure writes the color to.

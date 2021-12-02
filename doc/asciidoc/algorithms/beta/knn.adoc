@@ -290,33 +290,6 @@ include::knn-specific-algo-config.adoc[]
 ====
 
 
-[[algorithms-knn-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run K-Nearest Neighbors in write mode on an anonymous graph.
-[source, cypher, role=noplay]
-----
-CALL gds.beta.knn.write(
-  configuration: Map
-)
-YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  postProcessingMillis: Integer,
-  nodesCompared: Integer,
-  ranIterations: Integer,
-  didConverge: Boolean,
-  nodePairsConsidered: Integer,
-  relationshipsWritten: Integer,
-  similarityDistribution: Map,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
 [NOTE]
 ====
 The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.

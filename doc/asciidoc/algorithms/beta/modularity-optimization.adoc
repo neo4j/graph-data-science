@@ -78,7 +78,7 @@ include::../common-configuration/common-configuration.adoc[]
 .Run Modularity Optimization in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
+CALL gds.beta.modularityOptimization.mutate(graphName: String, configuration: Map})
 YIELD
   createMillis: Integer,
   computeMillis: Integer,
@@ -123,7 +123,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 .Run Modularity Optimization in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
+CALL gds.beta.modularityOptimization.write(graphName: String, configuration: Map})
 YIELD
   createMillis: Integer,
   computeMillis: Integer,

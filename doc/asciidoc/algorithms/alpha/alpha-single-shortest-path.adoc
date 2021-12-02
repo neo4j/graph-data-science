@@ -40,7 +40,10 @@ The algorithm assumes that adding a relationship to a path can never make a path
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.shortestPath.deltaStepping.write(configuration: Map)
+CALL gds.alpha.shortestPath.deltaStepping.write(
+  graphName: string,
+  configuration: map
+)
 YIELD nodeCount, loadDuration, evalDuration, writeDuration
 ----
 
@@ -68,7 +71,10 @@ YIELD nodeCount, loadDuration, evalDuration, writeDuration
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.shortestPath.deltaStepping.stream(configuration: Map)
+CALL gds.alpha.shortestPath.deltaStepping.stream(
+  graphName: string,
+  configuration: map
+)
 YIELD nodeId, distance
 ----
 

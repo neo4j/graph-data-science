@@ -75,7 +75,10 @@ In practice, a variation on the original formula is used so that we don't run in
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.write(configuration: Map)
+CALL gds.alpha.closeness.write(
+  graphName: string,
+  configuration: map
+)
 YIELD nodes, createMillis, computeMillis, writeMillis, centralityDistribution
 ----
 
@@ -105,7 +108,10 @@ YIELD nodes, createMillis, computeMillis, writeMillis, centralityDistribution
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.closeness.stream(configuration: Map)
+CALL gds.alpha.closeness.stream(
+  graphName: string,
+  configuration: map
+)
 YIELD nodeId, centrality
 ----
 

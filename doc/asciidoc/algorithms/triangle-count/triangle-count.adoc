@@ -194,34 +194,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-triangle-count-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Triangle Count in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.triangleCount.write(
-  configuration: Map
-)
-YIELD
-  globalTriangleCount: Integer,
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-triangle-count-syntax, write mode syntax above>>.
-
-
 [[algorithms-triangle-count-syntax-triangles-listing]]
 === Triangles listing
 

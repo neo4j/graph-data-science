@@ -55,21 +55,30 @@ If the graph has no weights, or all relationships have the same weight, then any
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.write(configuration: Map)
+CALL gds.alpha.spanningTree.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the minimum weight spanning tree and write the results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.minimum.write(configuration: Map)
+CALL gds.alpha.spanningTree.minimum.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the maximum weight spanning tree and write the results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.maximum.write(configuration: Map)
+CALL gds.alpha.spanningTree.maximum.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
@@ -96,13 +105,19 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.kmin.write(configuration: Map)
+CALL gds.alpha.spanningTree.kmin.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.kmax.write(configuration: Map)
+CALL gds.alpha.spanningTree.kmax.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 

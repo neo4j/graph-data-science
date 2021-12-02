@@ -46,7 +46,10 @@ Decomposing a directed graph into its strongly connected components is a classic
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scc.write(graphName: String|Map, configuration: Map)
+CALL gds.alpha.scc.write(
+  graphName: string,
+  configuration: map
+)
 YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 ----
 

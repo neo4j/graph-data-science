@@ -194,34 +194,6 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-local-clustering-coefficient-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Local Clustering Coefficient in write mode on an anonymous graph:
-[source, cypher, role=noplay]
-----
-CALL gds.localClusteringCoefficient.write(
-  configuration: Map
-)
-YIELD
-  averageClusteringCoefficient: Double,
-  nodeCount: Integer,
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-local-clustering-coefficient-syntax, write mode syntax above>>.
-
-
 [[algorithms-local-clustering-coefficient-examples]]
 == Examples
 

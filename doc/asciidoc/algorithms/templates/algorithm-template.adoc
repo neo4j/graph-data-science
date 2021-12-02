@@ -31,10 +31,6 @@ This section describes the Algorithm algorithm in the Neo4j Graph Data Science l
 === Write
 
 
-[[algorithms-algo-syntax-anonymous]]
-=== Anonymous graphs
-
-
 [[algorithms-algo-examples]]
 == Examples
 
