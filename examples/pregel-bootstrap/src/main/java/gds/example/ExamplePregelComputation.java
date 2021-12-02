@@ -65,10 +65,9 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
 
         static ExamplePregelComputation.ExampleConfig of(
                 Optional<String> graphName,
-                Optional<GraphCreateConfig> maybeImplicitCreate,
                 CypherMapWrapper userConfig
         ) {
-            return new ExampleConfigImpl(graphName, maybeImplicitCreate, userConfig);
+            return new ExampleConfigImpl(graphName, userConfig);
         }
     }
 }
