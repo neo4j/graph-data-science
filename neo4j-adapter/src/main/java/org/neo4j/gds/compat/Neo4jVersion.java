@@ -82,11 +82,8 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        switch (version) {
-            case "4.3.0-drop05.0":
-                return Neo4jVersion.V_4_3_drop50;
-            default:
-                break;
+        if ("4.3.0-drop05.0".equals(version)) {
+            return Neo4jVersion.V_4_3_drop50;
         }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
