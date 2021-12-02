@@ -149,7 +149,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .messenger(messenger)
             .voteBits(HugeAtomicBitSet.fixed(graph.nodeCount(), allocationTracker))
             .executorService(config.useForkJoin()
-                ? Pools.DEFAULT_FJ_POOL
+                ? Pools.createForkJoinPool(config.concurrency())
                 : executor)
             .progressTracker(progressTracker)
             .build();
@@ -194,6 +194,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 .build();
         } finally {
             progressTracker.endSubTask();
+            computer.release();
         }
     }
 

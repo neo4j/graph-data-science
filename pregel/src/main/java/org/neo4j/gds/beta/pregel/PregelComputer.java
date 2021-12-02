@@ -64,6 +64,8 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
 
     abstract boolean hasConverged();
 
+    abstract void release();
+
     static <CONFIG extends PregelConfig> ComputerBuilder<CONFIG> builder() {
         return new ComputerBuilder<>();
     }

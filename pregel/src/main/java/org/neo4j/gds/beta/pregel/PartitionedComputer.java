@@ -20,10 +20,10 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -81,6 +81,12 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             .anyMatch(PartitionedComputeStep::hasSentMessage);
         return !lastIterationSendMessages && voteBits.allSet();
 
+    }
+
+    @Override
+    void release() {
+        // Unlike in the sibling ForkJoinComputer, we will not shut down the
+        // executor service (thread pool), since we use the shared global thread pool.
     }
 
     @NotNull
