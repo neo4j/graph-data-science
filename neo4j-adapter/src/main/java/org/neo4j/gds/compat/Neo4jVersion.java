@@ -29,8 +29,7 @@ public enum Neo4jVersion {
     V_4_1,
     V_4_2,
     V_4_3,
-    V_4_4,
-    V_4_4_alpha01;
+    V_4_4;
 
     @Override
     public String toString() {
@@ -43,8 +42,6 @@ public enum Neo4jVersion {
                 return "4.3";
             case V_4_4:
                 return "4.4";
-            case V_4_4_alpha01:
-                return "4.4.0-alpha01";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -79,9 +76,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        if (version.equals("4.4.0-alpha01")) {
-            return Neo4jVersion.V_4_4_alpha01;
-        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
