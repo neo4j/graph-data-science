@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -32,31 +31,27 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
-public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
+public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final BaseProc caller;
-    private final NamedDatabaseId databaseId;
     private final ModelCatalog modelCatalog;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, NamedDatabaseId databaseId, ModelCatalog modelCatalog) {
+    public LinkPredictionTrainPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
         this.caller = caller;
-        this.databaseId = databaseId;
         this.modelCatalog = modelCatalog;
     }
 
     @Override
     public LinkPredictionTrainPipelineExecutor build(
         Graph graph,
+        GraphStore graphStore,
         LinkPredictionTrainConfig trainConfig,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         String graphName = ""; // TODO: fixme
-
-        var graphStore = GraphStoreCatalog.get(CatalogRequest.of(trainConfig.username(), databaseId), graphName).graphStore();
 
         var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, trainConfig.pipeline(), trainConfig.username());
         pipeline.validate();

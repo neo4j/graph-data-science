@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -34,38 +33,28 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
-public class NodeClassificationTrainPipelineAlgorithmFactory extends AlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
+public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
 
     private final BaseProc caller;
-    private final NamedDatabaseId databaseId;
     private final ModelCatalog modelCatalog;
 
-    public NodeClassificationTrainPipelineAlgorithmFactory(
-        BaseProc caller,
-        NamedDatabaseId databaseId,
-        ModelCatalog modelCatalog
-    ) {
+    public NodeClassificationTrainPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
         this.caller = caller;
-        this.databaseId = databaseId;
         this.modelCatalog = modelCatalog;
     }
 
     @Override
     protected NodeClassificationTrainPipelineExecutor build(
         Graph graph,
+        GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
         var graphName = ""; // TODO: fixme
-
-        var graphStore = GraphStoreCatalog
-            .get(CatalogRequest.of(configuration.username(), databaseId), graphName)
-            .graphStore();
 
         var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
             this.modelCatalog,

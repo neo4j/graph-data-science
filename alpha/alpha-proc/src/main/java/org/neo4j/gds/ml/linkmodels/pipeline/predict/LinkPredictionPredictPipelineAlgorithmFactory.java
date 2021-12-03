@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -32,25 +31,18 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.similarity.knn.KnnFactory;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
 
-public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends AlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
+public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
     private final BaseProc caller;
-    private final NamedDatabaseId databaseId;
     private final ModelCatalog modelCatalog;
 
-    LinkPredictionPredictPipelineAlgorithmFactory(
-        BaseProc caller,
-        NamedDatabaseId databaseId,
-        ModelCatalog modelCatalog
-    ) {
+    LinkPredictionPredictPipelineAlgorithmFactory(BaseProc caller, ModelCatalog modelCatalog) {
         super();
         this.caller = caller;
-        this.databaseId = databaseId;
         this.modelCatalog = modelCatalog;
     }
 
@@ -81,6 +73,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     @Override
     protected LinkPredictionPredictPipelineExecutor build(
         Graph graph,
+        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
@@ -92,7 +85,6 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.modelName(),
             configuration.username()
         );
-        var graphStore = GraphStoreCatalog.get(CatalogRequest.of(configuration.username(), databaseId), graphName).graphStore();
         var linkPredictionPipeline = model.customInfo().trainingPipeline();
         return new LinkPredictionPredictPipelineExecutor(
             linkPredictionPipeline,

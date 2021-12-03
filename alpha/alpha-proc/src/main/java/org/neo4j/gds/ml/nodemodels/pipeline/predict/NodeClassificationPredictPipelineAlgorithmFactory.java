@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,7 +34,6 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictConfigImpl;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 
@@ -43,23 +41,17 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCom
 
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
-    extends AlgorithmFactory<NodeClassificationPredictPipelineExecutor, CONFIG>
+    extends GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, CONFIG>
 {
 
     private final ModelCatalog modelCatalog;
     private final BaseProc caller;
-    private final NamedDatabaseId databaseId;
     private final NodeClassificationPredictAlgorithmFactory<NodeClassificationPredictConfig> innerFactory;
 
-    NodeClassificationPredictPipelineAlgorithmFactory(
-        ModelCatalog modelCatalog,
-        BaseProc caller,
-        NamedDatabaseId databaseId
-    ) {
+    NodeClassificationPredictPipelineAlgorithmFactory(ModelCatalog modelCatalog, BaseProc caller) {
         super();
         this.modelCatalog = modelCatalog;
         this.caller = caller;
-        this.databaseId = databaseId;
         this.innerFactory = new NodeClassificationPredictAlgorithmFactory<>(modelCatalog);
     }
 
@@ -100,6 +92,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
     @Override
     protected NodeClassificationPredictPipelineExecutor build(
         Graph graph,
+        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
@@ -111,7 +104,6 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration.modelName(),
             configuration.username()
         );
-        var graphStore = GraphStoreCatalog.get(CatalogRequest.of(configuration.username(), databaseId), graphName).graphStore();
         var nodeClassificationPipeline = model.customInfo().trainingPipeline();
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
