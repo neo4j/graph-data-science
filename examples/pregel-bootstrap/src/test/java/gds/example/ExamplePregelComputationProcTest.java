@@ -52,12 +52,19 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        // GdsCypher creates procedure statements, such as:
-        // CALL pregel.example.stream({
-        //   nodeProjection: "*", relationshipProjection: "*", maxIterations: 10
-        // }) YIELD nodeId, values
-        var query = GdsCypher.call()
+        var createQuery = GdsCypher.call()
             .loadEverything()
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        // GdsCypher creates procedure statements, such as:
+        // CALL pregel.example.stream('graph', {
+        //  maxIterations: 10
+        // }) YIELD nodeId, values
+
+        var query = GdsCypher.call()
+            .explicitCreation("graph")
             .algo("pregel", "example")
             .streamMode()
             .addParameter("maxIterations", 10)
