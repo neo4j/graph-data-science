@@ -60,6 +60,8 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        // TODO: this will go away once node property steps do not rely on this method
+        configuration.put("graphName", graphName);
         return write(compute(graphName, configuration));
     }
 

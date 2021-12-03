@@ -54,8 +54,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        var graphName = ""; // TODO: fixme
-
         var pipeline = NodeClassificationPipelineCompanion.getNCPipeline(
             this.modelCatalog,
             configuration.pipeline(),
@@ -68,7 +66,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             configuration,
             this.caller,
             graphStore,
-            graphName,
+            configuration.graphName(),
             progressTracker
         );
     }

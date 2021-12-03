@@ -49,6 +49,8 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        // TODO: this will go away once node property steps do not rely on this method
+        configuration.put("graphName", graphName);
         var result = compute(graphName, configuration);
 
         Graph graph = result.graph();

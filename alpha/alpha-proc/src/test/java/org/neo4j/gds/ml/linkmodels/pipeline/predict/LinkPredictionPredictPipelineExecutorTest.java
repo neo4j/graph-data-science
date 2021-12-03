@@ -114,7 +114,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("topN", 3)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new LinkPredictionPipeline();
@@ -156,7 +159,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("topN", 3)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new LinkPredictionPipeline();
@@ -197,7 +203,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = LinkPredictionPredictPipelineStreamConfig.of(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("topN", 3)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("topN", 3)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new LinkPredictionPipeline();
@@ -223,6 +232,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 LinkPredictionTrainConfig.builder()
                     .modelName("model")
                     .pipeline("DUMMY")
+                    .graphName(GRAPH_NAME)
                     .negativeClassWeight(1.0)
                     .build(),
                 LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)

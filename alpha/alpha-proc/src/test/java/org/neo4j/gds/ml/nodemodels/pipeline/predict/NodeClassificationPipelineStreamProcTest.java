@@ -42,6 +42,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPip
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
+    private static final String GRAPH_NAME = "g";
     private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
@@ -64,7 +65,7 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, NodeClassificationPipelineStreamProc.class);
 
-        String loadQuery = GdsCypher.call("g")
+        String loadQuery = GdsCypher.call(GRAPH_NAME)
             .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
@@ -81,10 +82,10 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
         var query = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("modelName", MODEL_NAME)
@@ -118,10 +119,10 @@ class NodeClassificationPipelineStreamProcTest extends BaseProcTest {
 
     @Test
     void streamWithProbabilities() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
         var query = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .streamMode()
             .addParameter("includePredictedProbabilities", true)

@@ -101,16 +101,16 @@ public final class ProcedureReflection {
     public Optional<AlgoBaseConfig> createAlgoConfig(BaseProc caller, Method procMethod, CypherMapWrapper config) {
         try {
             var proc = createProcedure(caller, procMethod);
-            var newConfigMethod = proc.getClass().getDeclaredMethod("newConfig", String.class, Optional.class, CypherMapWrapper.class);
+            var newConfigMethod = proc.getClass().getDeclaredMethod("newConfig", String.class, CypherMapWrapper.class);
             // make protected `newConfig` method accessible
             newConfigMethod.setAccessible(true);
             // validate mandatory algo specific fields are given
-            return Optional.of((AlgoBaseConfig) newConfigMethod.invoke(proc, "", Optional.empty(), config));
+            return Optional.of((AlgoBaseConfig) newConfigMethod.invoke(proc, "", config));
         } catch (InvocationTargetException e) {
             // propagate IllegalArgument exception
             throw new IllegalArgumentException(e.getTargetException().getMessage(), e.getTargetException().getCause());
-        } catch (NoSuchMethodException | IllegalAccessException ignored) {
-            return Optional.empty();
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 

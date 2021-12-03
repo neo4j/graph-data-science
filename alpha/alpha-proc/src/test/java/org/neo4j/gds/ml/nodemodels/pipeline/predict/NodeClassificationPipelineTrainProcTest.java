@@ -195,7 +195,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                     "configuration", Matchers.allOf(
                         Matchers.hasEntry("pipeline", PIPELINE_NAME),
                         Matchers.hasEntry("modelName", MODEL_NAME),
-                        aMapWithSize(10)
+                        aMapWithSize(11)
                     )
                 )
             )

@@ -46,6 +46,8 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
+        // TODO: this will go away once node property steps do not rely on this method
+        config.put("graphName", graphName);
         return trainAndStoreModelWithResult(graphName, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
     }
 

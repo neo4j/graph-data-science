@@ -46,6 +46,7 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPip
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
+    private static final String GRAPH_NAME = "g";
     private static final String MODEL_NAME = "model";
 
     private  static final String DB_CYPHER =
@@ -65,7 +66,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
         runQuery(DB_CYPHER);
 
-        String loadQuery = GdsCypher.call("g")
+        String loadQuery = GdsCypher.call(GRAPH_NAME)
             .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
@@ -83,10 +84,10 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
         var query = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
@@ -102,17 +103,17 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), "g").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class"));
         assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
     }
 
     @Test
     void mutateWithProbabilities(){
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
         var query = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
@@ -129,7 +130,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), "g").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class", "probabilities"));
         assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
         assertThat(mutatedGraph.nodeProperties("probabilities").size()).isEqualTo(5);
@@ -139,10 +140,10 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
     @Test
     void validatePropertyNames() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2);
 
         var query = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
@@ -154,10 +155,10 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
 
     @Test
     void failsOnExistingProbabilityProperty() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 2, List.of("a","b"));
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 2, List.of("a","b"));
 
         var firstQuery = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
@@ -167,7 +168,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
         runQuery(firstQuery);
 
         var secondQuery = GdsCypher
-            .call("g")
+            .call(GRAPH_NAME)
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "bar")

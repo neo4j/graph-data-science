@@ -154,6 +154,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void passesAllParameters() {
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
             .modelName("myModel")
             .concurrency(1)
             .randomSeed(42L)
@@ -212,6 +213,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     ) {
         return ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
             .modelName(modelName)
             .concurrency(1)
             .randomSeed(randomSeed)

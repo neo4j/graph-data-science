@@ -42,19 +42,24 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
 
     private NodeClassificationPipelinePredictProcTestUtil() {}
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String username, int dimensionOfNodeFeatures) {
-        addPipelineModelWithFeatures(modelCatalog, username, dimensionOfNodeFeatures, List.of("a","b"));
+    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName,  String username, int dimensionOfNodeFeatures) {
+        addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
     }
 
-    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
+    public static void addPipelineModelWithFeatures(ModelCatalog modelCatalog, String graphName, String username, int dimensionOfNodeFeatures, List<String> nodeFeatures) {
         var pipeline = new NodeClassificationPipeline();
+
         pipeline.addNodePropertyStep(NodePropertyStep.of("degree", Map.of("mutateProperty", "degree")));
-        for (String nodeFeature : nodeFeatures)
+        for (String nodeFeature : nodeFeatures) {
             pipeline.addFeatureStep(NodeClassificationFeatureStep.of(nodeFeature));
+        }
+
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("degree"));
-        var weights=new double[2*(dimensionOfNodeFeatures+2)];
-        for (int i=0; i<weights.length;++i)
-            weights[i]=i;
+        var weights = new double[2 * (dimensionOfNodeFeatures + 2)];
+        for (int i = 0; i < weights.length; ++i) {
+            weights[i] = i;
+        }
+
         NodeLogisticRegressionData modelData = createModeldata(weights);
         modelCatalog.set(Model.of(
             username,
@@ -64,6 +69,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
             modelData,
             NodeClassificationPipelineTrainConfig.builder()
                 .modelName("model")
+                .graphName(graphName)
                 .pipeline("DUMMY")
                 .targetProperty("foo")
                 .build(),

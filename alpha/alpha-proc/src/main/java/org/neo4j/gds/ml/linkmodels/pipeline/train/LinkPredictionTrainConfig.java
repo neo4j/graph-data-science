@@ -36,6 +36,8 @@ import java.util.List;
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig {
 
+    String graphName();
+
     @Value.Default
     @Configuration.DoubleRange(min = 0, minInclusive = false)
     default double negativeClassWeight() {

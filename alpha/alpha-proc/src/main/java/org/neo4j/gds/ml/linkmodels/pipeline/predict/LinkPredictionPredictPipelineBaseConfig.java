@@ -42,6 +42,8 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
 
     double DEFAULT_THRESHOLD = 0.0;
 
+    String graphName();
+
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double sampleRate() {

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -65,7 +66,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
 
     @Override
     protected AlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
+        return new GraphStoreAlgorithmFactory<>() {
 
             @Override
             protected String taskName() {
@@ -75,13 +76,13 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             @Override
             protected SplitRelationships build(
                 Graph graph,
+                GraphStore graphStore,
                 SplitRelationshipsMutateConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
-                    var graphStore = (GraphStore) null; // TODO: fixme
                     masterGraph = graphStore.getGraph(
                         configuration.nodeLabelIdentifiers(graphStore),
                         configuration.superGraphTypes(),

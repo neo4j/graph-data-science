@@ -158,6 +158,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         var config = LinkPredictionTrainConfig
             .builder()
             .modelName("model")
+            .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
             .negativeClassWeight(1)
             .randomSeed(1337L)
@@ -202,7 +203,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
-                ImmutableLinkPredictionTrainConfig.builder().modelName("foo").pipeline("bar").build(),
+                ImmutableLinkPredictionTrainConfig.builder().graphName(GRAPH_NAME).modelName("foo").pipeline("bar").build(),
                 caller,
                 graphStore,
                 GRAPH_NAME,
@@ -237,6 +238,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
             .modelName("foo")
+            .graphName(GRAPH_NAME)
             .pipeline("bar")
             .addNodeLabel(NODE_LABEL.name)
             .build();
@@ -277,6 +279,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
             .modelName("foo")
+            .graphName(GRAPH_NAME)
             .pipeline("bar")
             .addNodeLabel(NODE_LABEL.name)
             .build();
@@ -317,6 +320,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         var config = LinkPredictionTrainConfig
             .builder()
             .modelName("model")
+            .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
             .negativeClassWeight(1)
             .randomSeed(1337L)

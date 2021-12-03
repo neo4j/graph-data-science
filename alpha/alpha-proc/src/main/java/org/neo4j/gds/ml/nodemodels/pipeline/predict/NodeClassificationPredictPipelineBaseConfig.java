@@ -31,6 +31,8 @@ import org.neo4j.gds.model.ModelConfig;
 public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseConfig, ModelConfig {
     boolean includePredictedProbabilities();
 
+    String graphName();
+
     @Value.Default
     default int batchSize() {
         return 100;

@@ -97,8 +97,6 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        String graphName = ""; // TODO: fixme
-
         var model = getTrainedNCPipelineModel(
             modelCatalog,
             configuration.modelName(),
@@ -110,7 +108,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration,
             caller,
             graphStore,
-            graphName,
+            configuration.graphName(),
             progressTracker,
             model.data()
         );

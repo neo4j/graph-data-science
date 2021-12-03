@@ -63,6 +63,8 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        // TODO: this will go away once node property steps do not rely on this method
+        configuration.put("graphName", graphName);
         return mutate(compute(graphName, configuration));
     }
 

@@ -40,6 +40,8 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
 
     long serialVersionUID = 0x42L;
 
+    String graphName();
+
     @Configuration.ConvertWith("org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification#specificationsToString")
     List<MetricSpecification> metrics();

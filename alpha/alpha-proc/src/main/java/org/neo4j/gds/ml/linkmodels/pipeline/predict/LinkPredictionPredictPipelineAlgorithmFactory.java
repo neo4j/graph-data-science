@@ -78,8 +78,6 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        String graphName = ""; // TODO: fix me
-
         var model = getTrainedLPPipelineModel(
             modelCatalog,
             configuration.modelName(),
@@ -92,7 +90,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration,
             caller,
             graphStore,
-            graphName,
+            configuration.graphName(),
             progressTracker
         );
     }

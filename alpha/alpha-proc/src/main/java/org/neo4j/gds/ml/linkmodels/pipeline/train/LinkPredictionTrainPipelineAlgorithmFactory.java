@@ -51,8 +51,6 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {
-        String graphName = ""; // TODO: fixme
-
         var pipeline = LinkPredictionPipelineCompanion.getLPPipeline(modelCatalog, trainConfig.pipeline(), trainConfig.username());
         pipeline.validate();
 
@@ -61,7 +59,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             trainConfig,
             caller,
             graphStore,
-            graphName,
+            trainConfig.graphName(),
             progressTracker
         );
     }

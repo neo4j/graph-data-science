@@ -107,7 +107,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
                     "sampleRate", 1,
-                    "topN", 42
+                    "topN", 42,
+                    "graphName", "g"
                 )
             )
         );
@@ -126,7 +127,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
                     "sampleRate", 0.4,
                     "maxIterations", 42,
                     "concurrency", 1,
-                    "randomSeed", 42L
+                    "randomSeed", 42L,
+                    "graphName", "g"
                 )
             )
         ).approximateConfig();
@@ -145,7 +147,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
-                    "sampleRate", 1
+                    "sampleRate", 1,
+                    "graphName", "g"
                 )
             )
         ))

@@ -111,7 +111,6 @@ class LinkPredictionTrainTest {
     void trainsAModel() {
         String modelName = "model";
 
-
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
         var actualModel = runLinkPrediction(trainConfig);
@@ -175,6 +174,7 @@ class LinkPredictionTrainTest {
         return LinkPredictionTrainConfig
             .builder()
             .modelName(modelName)
+            .graphName("g")
             .pipeline("DUMMY")
             .negativeClassWeight(1)
             .randomSeed(1337L)

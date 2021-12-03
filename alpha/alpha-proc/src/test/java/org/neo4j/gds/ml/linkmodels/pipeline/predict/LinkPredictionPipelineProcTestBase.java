@@ -98,6 +98,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
             LinkPredictionTrainConfig.builder()
                 .modelName("model")
                 .pipeline("DUMMY")
+                .graphName("g")
                 .negativeClassWeight(1.0)
                 .build(),
             LinkPredictionModelInfo.of(LinkLogisticRegressionTrainConfig.of(Map.of()), Map.of(), pipeline)

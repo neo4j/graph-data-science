@@ -67,7 +67,8 @@ import static org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPip
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
-    public static final String GRAPH_NAME = "g";
+
+    private static final String GRAPH_NAME = "g";
     private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
@@ -115,7 +116,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new NodeClassificationPipeline();
@@ -152,7 +156,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new NodeClassificationPipeline();
@@ -189,7 +196,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = new NodeClassificationPredictPipelineBaseConfigImpl(
                 "",
-                CypherMapWrapper.empty().withEntry("modelName", "model").withEntry("includePredictedProbabilities",true)
+                CypherMapWrapper.empty()
+                    .withEntry("modelName", "model")
+                    .withEntry("includePredictedProbabilities",true)
+                    .withEntry("graphName", GRAPH_NAME)
             );
 
             var pipeline = new NodeClassificationPipeline();
@@ -210,6 +220,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 NodeClassificationPipelineTrainConfig.builder()
                     .modelName("model")
                     .pipeline("DUMMY")
+                    .graphName(GRAPH_NAME)
                     .targetProperty("foo")
                     .build(),
                 NodeClassificationPipelineModelInfo.builder()
@@ -263,11 +274,15 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void validateFeaturesExistOnGraph() {
-        addPipelineModelWithFeatures(modelCatalog, getUsername(), 3, List.of("a", "b", "d"));
+        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller);
-            var streamConfig = NodeClassificationPredictPipelineStreamConfig.of(
-                "", CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
+            var streamConfig = ImmutableNodeClassificationPredictPipelineBaseConfig.builder()
+                .username(getUsername())
+                .modelName(MODEL_NAME)
+                .graphName(GRAPH_NAME)
+                .includePredictedProbabilities(false)
+                .build();
 
             var algo = factory.build(
                 null,
@@ -276,7 +291,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 AllocationTracker.empty(),
                 ProgressTracker.NULL_TRACKER
             );
-            assertThatThrownBy(() -> algo.compute())
+            assertThatThrownBy(algo::compute)
                 .hasMessage(
                     "Node properties [d] defined in the feature steps do not exist in the graph or part of the pipeline"
                 );
