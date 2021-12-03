@@ -150,20 +150,20 @@ public class ListProgressProcTest extends BaseProgressTest {
         @Override
         @Procedure("gds.test.fastrp")
         public Stream<FastRPStreamProc.StreamResult> stream(
-            @Name(value = "graphName") Object graphNameOrConfig,
+            @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            return super.stream(graphNameOrConfig, configuration);
+            return super.stream(graphName, configuration);
         }
 
         @Procedure("gds.test.fakerp")
         public Stream<FastRPStreamProc.StreamResult> fakeStream(
-            @Name(value = "graphName") Object graphNameOrConfig,
+            @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
             var taskRegistry = taskRegistryFactory.newInstance();
             this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistry);
-            return super.stream(graphNameOrConfig, configuration);
+            return super.stream(graphName, configuration);
         }
 
         @Override

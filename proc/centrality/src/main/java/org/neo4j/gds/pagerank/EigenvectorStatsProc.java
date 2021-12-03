@@ -38,10 +38,10 @@ public class EigenvectorStatsProc extends PageRankStatsProc {
     @Procedure(value = "gds.eigenvector.stats", mode = READ)
     @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
     public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.stats(graphNameOrConfig, configuration);
+        return super.stats(graphName, configuration);
     }
 
     @Override

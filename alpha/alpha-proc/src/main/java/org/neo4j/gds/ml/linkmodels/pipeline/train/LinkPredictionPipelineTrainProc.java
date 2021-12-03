@@ -43,9 +43,11 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<LinkPredictionTra
 
     @Procedure(name = "gds.alpha.ml.pipeline.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model based on a pipeline")
-    public Stream<MLTrainResult> train(@Name(value = "graphName") Object graphNameOrConfig, @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
+    public Stream<MLTrainResult> train(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
-        return trainAndStoreModelWithResult(graphNameOrConfig, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
+        return trainAndStoreModelWithResult(graphName, config, (model, result) -> new MLTrainResult(model, result.computeMillis()));
     }
 
     @Override

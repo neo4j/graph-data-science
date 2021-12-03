@@ -44,10 +44,10 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)

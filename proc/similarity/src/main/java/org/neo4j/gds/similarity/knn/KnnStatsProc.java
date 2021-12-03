@@ -50,10 +50,10 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     @Procedure(name = "gds.beta.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<Result> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.knn.stats.estimate", mode = READ)

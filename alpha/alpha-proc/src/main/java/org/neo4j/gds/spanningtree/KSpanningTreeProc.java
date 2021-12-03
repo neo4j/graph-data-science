@@ -65,25 +65,25 @@ public class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, Spann
     @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = WRITE)
     @Description(MAX_DESCRIPTION)
     public Stream<Prim.Result> kmax(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         minMax = Prim.MAX_OPERATOR;
-        return computeAndWrite(graphNameOrConfig, configuration);
+        return computeAndWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> kmin(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         minMax = Prim.MIN_OPERATOR;
-        return computeAndWrite(graphNameOrConfig, configuration);
+        return computeAndWrite(graphName, configuration);
     }
 
-    public Stream<Prim.Result> computeAndWrite(Object graphNameOrConfig, Map<String, Object> configuration) {
-        ComputationResult<KSpanningTree, SpanningTree, KSpanningTreeConfig> computationResult = compute(graphNameOrConfig, configuration);
+    public Stream<Prim.Result> computeAndWrite(String graphName, Map<String, Object> configuration) {
+        ComputationResult<KSpanningTree, SpanningTree, KSpanningTreeConfig> computationResult = compute(graphName, configuration);
 
         Graph graph = computationResult.graph();
         SpanningTree spanningTree = computationResult.result();

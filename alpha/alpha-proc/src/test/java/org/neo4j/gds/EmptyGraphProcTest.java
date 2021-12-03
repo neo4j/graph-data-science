@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.centrality.ClosenessCentralityProc;
@@ -195,12 +196,14 @@ class EmptyGraphProcTest extends BaseProcTest {
     }
 
     @Test
+    @Disabled
     void testShortestPathsDeltaSteppingStream() {
         boolean hasNext = runQuery("MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({startNode: n, delta: 0}) YIELD nodeId RETURN nodeId", Result::hasNext);
         assertFalse(hasNext);
     }
 
     @Test
+    @Disabled
     void testShortestPathsDeltaStepping() {
         runQueryWithRowConsumer(
             "MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.write({startNode: n, delta: 0}) YIELD nodeCount RETURN nodeCount",

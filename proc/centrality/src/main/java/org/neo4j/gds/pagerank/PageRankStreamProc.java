@@ -42,11 +42,11 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stream(computationResult);

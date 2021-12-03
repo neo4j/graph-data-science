@@ -59,10 +59,10 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SccResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphName, configuration);
 
         SccAlgorithm algorithm = computationResult.algorithm();
         HugeLongArray components = computationResult.result();
@@ -131,10 +131,10 @@ public class SccProc extends NodePropertiesWriter<SccAlgorithm, HugeLongArray, S
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SccAlgorithm.StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphName, configuration);
 
         AllocationTracker allocationTracker = allocationTracker();
         Graph graph = computationResult.graph();

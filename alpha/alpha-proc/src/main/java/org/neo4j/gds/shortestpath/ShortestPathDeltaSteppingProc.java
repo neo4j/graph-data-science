@@ -65,12 +65,12 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
     @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
         ComputationResult<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 
@@ -84,11 +84,11 @@ public class ShortestPathDeltaSteppingProc extends NodePropertiesWriter<Shortest
     @Procedure(value = "gds.alpha.shortestPath.deltaStepping.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<DeltaSteppingProcResult> deltaStepping(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
 

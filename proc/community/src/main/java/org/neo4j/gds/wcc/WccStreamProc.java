@@ -47,11 +47,11 @@ public class WccStreamProc extends StreamProc<
     @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
     public Stream<WccStreamProc.StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stream(computationResult);

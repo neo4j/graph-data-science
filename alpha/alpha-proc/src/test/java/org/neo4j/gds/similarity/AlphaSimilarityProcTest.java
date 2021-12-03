@@ -34,7 +34,6 @@ import org.neo4j.gds.impl.similarity.SimilarityConfig;
 import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.gds.similarity.nil.NullGraph;
 import org.neo4j.gds.similarity.nil.NullGraphStore;
-import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
@@ -109,34 +108,11 @@ public abstract class AlphaSimilarityProcTest<
     }
 
     @Test
-    void throwsOnExplicitGraph() {
-        GraphStoreCatalog.set(
-            emptyWithNameNative(getUsername(), "foo"), new NullGraphStore(db.databaseId())
-        );
-        applyOnProcedure(proc -> {
-            getProcMethods(proc).forEach(method -> {
-                try {
-                    method.invoke(proc, "foo", minimalViableConfig());
-                } catch (InvocationTargetException e) {
-                    var rootCause = ExceptionUtil.rootCause(e);
-                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
-                    assertEquals(
-                        "Similarity algorithms do not support named graphs",
-                        rootCause.getMessage()
-                    );
-                } catch (IllegalAccessException e) {
-                    fail(e);
-                }
-            });
-        });
-    }
-
-    @Test
     void shouldAcceptOmittingProjections() {
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, minimalViableConfig(), Map.of());
+                    method.invoke(proc, minimalViableConfig());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -156,7 +132,7 @@ public abstract class AlphaSimilarityProcTest<
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, config, Map.of());
+                    method.invoke(proc, config);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -176,7 +152,7 @@ public abstract class AlphaSimilarityProcTest<
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, config, Map.of());
+                    method.invoke(proc, config);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -193,7 +169,7 @@ public abstract class AlphaSimilarityProcTest<
         applyOnProcedure((proc) -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    Stream<?> result = (Stream<?>) method.invoke(proc, minimalViableConfig(), Map.of());
+                    Stream<?> result = (Stream<?>) method.invoke(proc, minimalViableConfig());
 
                     if (getProcedureMethodName(method).endsWith("stream")) {
                         assertEquals(0, result.count(), "Stream result should be empty.");
@@ -211,8 +187,8 @@ public abstract class AlphaSimilarityProcTest<
     void shouldNotLoadAnything() {
         applyOnProcedure(proc -> {
             Pair<? extends SimilarityConfig, Optional<String>> input = proc.configParser().processInput(
-                minimalViableConfig(),
-                Map.of()
+                SIMILARITY_FAKE_GRAPH_NAME,
+                minimalViableConfig()
             );
             assertEquals(SIMILARITY_FAKE_GRAPH_NAME, input.getTwo().get());
             assertTrue(GraphStoreCatalog.exists(getUsername(), db.databaseId(), SIMILARITY_FAKE_GRAPH_NAME));
@@ -235,7 +211,7 @@ public abstract class AlphaSimilarityProcTest<
         applyOnProcedure((proc) -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, minimalViableConfig(), Map.of());
+                    method.invoke(proc, minimalViableConfig());
                 } catch (Throwable e) {
                     fail(e);
                 }
@@ -254,7 +230,7 @@ public abstract class AlphaSimilarityProcTest<
                 config.put("foo", 5);
                 var ignored = assertThrows(
                     InvocationTargetException.class,
-                    () -> method.invoke(proc, config, Map.of())
+                    () -> method.invoke(proc, config)
                 );
                 assertEquals(0, GraphStoreCatalog.getGraphStores(getUsername()).size());
             });

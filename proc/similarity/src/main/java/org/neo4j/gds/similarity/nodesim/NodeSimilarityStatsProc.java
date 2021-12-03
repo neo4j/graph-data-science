@@ -45,10 +45,10 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<SimilarityStatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)

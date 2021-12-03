@@ -44,10 +44,10 @@ public class ApproxMaxKCutMutateProc extends MutatePropertyProc<ApproxMaxKCut, A
     @Procedure(value = "gds.alpha.maxkcut.mutate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ)

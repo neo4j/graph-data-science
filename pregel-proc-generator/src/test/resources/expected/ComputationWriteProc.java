@@ -51,9 +51,9 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
             mode = Mode.WRITE
     )
     @Description("Test computation description")
-    public Stream<PregelWriteResult> write(@Name("graphName") Object graphNameOrConfig,
+    public Stream<PregelWriteResult> write(@Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(

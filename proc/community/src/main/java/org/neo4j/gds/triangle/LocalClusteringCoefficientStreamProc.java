@@ -44,10 +44,10 @@ public class LocalClusteringCoefficientStreamProc
     @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stream.estimate", mode = READ)

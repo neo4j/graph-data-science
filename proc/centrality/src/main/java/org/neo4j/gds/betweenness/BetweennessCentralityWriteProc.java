@@ -46,10 +46,10 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     @Procedure(value = "gds.betweenness.write", mode = WRITE)
     @Description(BETWEENNESS_DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.betweenness.write.estimate", mode = READ)

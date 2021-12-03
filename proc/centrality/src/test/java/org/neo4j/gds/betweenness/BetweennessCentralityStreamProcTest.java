@@ -52,6 +52,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
 
     @Test
     void shouldValidateSampleSize() {
+        loadGraph(DEFAULT_GRAPH_NAME);
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.betweenness")
             .streamMode()

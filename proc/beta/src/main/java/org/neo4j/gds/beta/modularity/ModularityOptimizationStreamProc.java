@@ -40,10 +40,10 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = READ)

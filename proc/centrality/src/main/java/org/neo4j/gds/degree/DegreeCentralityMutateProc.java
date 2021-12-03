@@ -44,10 +44,10 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
     @Procedure(value = "gds.degree.mutate", mode = READ)
     @Description(DegreeCentralityProc.DEGREE_CENTRALITY_DESCRIPTION)
     public Stream<DegreeCentralityMutateProc.MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.degree.mutate.estimate", mode = READ)

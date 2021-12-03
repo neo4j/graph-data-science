@@ -44,10 +44,10 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
     @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
     @Description(YENS_DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration, false, true));
+        return write(compute(graphName, configuration, false, true));
     }
 
     @Procedure(name = "gds.shortestPath.yens.write.estimate", mode = READ)

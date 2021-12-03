@@ -52,10 +52,10 @@ public class NodeClassificationPredictStreamProc
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
     public Stream<NodeClassificationStreamResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
+        var result = compute(graphName, configuration);
         return stream(result);
     }
 

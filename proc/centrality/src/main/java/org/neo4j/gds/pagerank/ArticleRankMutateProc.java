@@ -37,10 +37,10 @@ public class ArticleRankMutateProc extends PageRankMutateProc {
     @Procedure(value = "gds.articleRank.mutate", mode = READ)
     @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<PageRankMutateProc.MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.mutate(graphNameOrConfig, configuration);
+        return super.mutate(graphName, configuration);
     }
 
     @Override

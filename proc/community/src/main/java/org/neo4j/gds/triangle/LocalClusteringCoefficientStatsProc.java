@@ -45,10 +45,10 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)

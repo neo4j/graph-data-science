@@ -54,13 +54,13 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageMutateProc.MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfig, configuration), modelCatalog, username.username());
+        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog, username.username());
 
         ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return mutate(computationResult);

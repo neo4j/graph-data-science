@@ -47,10 +47,10 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LouvainProc.LOUVAIN_DESCRIPTION)
     public Stream<StreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.louvain.stream.estimate", mode = READ)

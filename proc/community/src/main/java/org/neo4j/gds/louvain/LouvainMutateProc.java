@@ -45,10 +45,10 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     @Procedure(value = "gds.louvain.mutate", mode = READ)
     @Description(LouvainProc.LOUVAIN_DESCRIPTION)
     public Stream<MutateResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)

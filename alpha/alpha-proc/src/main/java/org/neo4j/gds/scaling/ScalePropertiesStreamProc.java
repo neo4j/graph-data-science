@@ -41,10 +41,10 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     @Procedure("gds.alpha.scaleProperties.stream")
     @Description("Scale node properties")
     public Stream<Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return stream(compute(graphName, configuration));
     }
 
     @Override

@@ -51,9 +51,9 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
             mode = Mode.READ
     )
     @Description("Test computation description")
-    public Stream<PregelStatsResult> stats(@Name("graphName") Object graphNameOrConfig,
+    public Stream<PregelStatsResult> stats(@Name("graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphName, configuration));
     }
 
     @Procedure(

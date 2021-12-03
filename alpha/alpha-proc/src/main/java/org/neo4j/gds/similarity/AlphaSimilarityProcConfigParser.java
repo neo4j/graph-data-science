@@ -70,41 +70,31 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
 
     @Override
     public Pair<CONFIG, Optional<String>> processInput(
-        Object graphNameOrConfig, Map<String, Object> configuration
+        Object __, Map<String, Object> configuration
     ) {
-        if (graphNameOrConfig instanceof String) {
-            throw new IllegalArgumentException("Similarity algorithms do not support named graphs");
-        } else if (graphNameOrConfig instanceof Map) {
-            // User is doing the only supported thing: anonymous syntax
+        // We will tell the rest of the system that we are in named graph mode, with a fake graph name
+        var graphName = SIMILARITY_FAKE_GRAPH_NAME;
 
-            Map<String, Object> configMap = (Map<String, Object>) graphNameOrConfig;
+        // We must curate the configuration map to remove any eventual projection keys
+        // This is backwards compatibility since the alpha similarities featured anonymous star projections in docs
+        configuration.remove(NODE_QUERY_KEY);
+        configuration.remove(RELATIONSHIP_QUERY_KEY);
+        configuration.remove(NODE_PROJECTION_KEY);
+        configuration.remove(RELATIONSHIP_PROJECTION_KEY);
 
-            // We will tell the rest of the system that we are in named graph mode, with a fake graph name
-            graphNameOrConfig = SIMILARITY_FAKE_GRAPH_NAME;
-            // We move the map to the second argument position of CALL gds.algo.mode(name, config)
-            configuration = configMap;
-
-            // We must curate the configuration map to remove any eventual projection keys
-            // This is backwards compatibility since the alpha similarities featured anonymous star projections in docs
-            configuration.remove(NODE_QUERY_KEY);
-            configuration.remove(RELATIONSHIP_QUERY_KEY);
-            configuration.remove(NODE_PROJECTION_KEY);
-            configuration.remove(RELATIONSHIP_PROJECTION_KEY);
-
-            // We put the fake graph store into the graph catalog
-            GraphStoreCatalog.set(
-                ImmutableGraphCreateFromStoreConfig.of(
-                    username(),
-                    graphNameOrConfig.toString(),
-                    NodeProjections.ALL,
-                    RelationshipProjections.ALL
-                ),
-                new NullGraphStore(databaseId)
-            );
-        }
+        // We put the fake graph store into the graph catalog
+        GraphStoreCatalog.set(
+            ImmutableGraphCreateFromStoreConfig.of(
+                username(),
+                graphName,
+                NodeProjections.ALL,
+                RelationshipProjections.ALL
+            ),
+            new NullGraphStore(databaseId)
+        );
         // And finally we call super in named graph mode
         try {
-            return configParser.processInput(graphNameOrConfig, configuration);
+            return configParser.processInput(graphName, configuration);
         } catch (RuntimeException e) {
             removeGraph(username(), this.databaseId);
             throw e;

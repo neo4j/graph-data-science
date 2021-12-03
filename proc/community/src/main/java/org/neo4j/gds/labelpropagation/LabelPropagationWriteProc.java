@@ -43,10 +43,10 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
     @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)

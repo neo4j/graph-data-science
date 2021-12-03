@@ -42,10 +42,10 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
     @Procedure(value = "gds.beta.knn.stream", mode = READ)
     @Description(KNN_DESCRIPTION)
     public Stream<SimilarityResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Knn, Knn.Result, KnnStreamConfig> result = compute(graphNameOrConfig, configuration);
+        ComputationResult<Knn, Knn.Result, KnnStreamConfig> result = compute(graphName, configuration);
         Graph graph = result.graph();
 
         if (result.isGraphEmpty()) {

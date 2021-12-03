@@ -43,10 +43,10 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.mutate.estimate", mode = READ)

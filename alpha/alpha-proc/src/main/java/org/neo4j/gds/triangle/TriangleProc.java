@@ -49,11 +49,11 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     @Procedure(name = "gds.alpha.triangles", mode = READ)
     @Description(DESCRIPTION)
     public Stream<TriangleStream.Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> computationResult =
-            compute(graphNameOrConfig, configuration, false, false);
+            compute(graphName, configuration, false, false);
 
         Graph graph = computationResult.graph();
 

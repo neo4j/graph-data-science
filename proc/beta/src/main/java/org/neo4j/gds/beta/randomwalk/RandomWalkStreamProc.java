@@ -54,10 +54,10 @@ public class RandomWalkStreamProc extends AlgoBaseProc<RandomWalk, Stream<long[]
     @Procedure(name = "gds.beta.randomWalk.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<RandomWalkResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphNameOrConfig, configuration, false, false);
+        var computationResult = compute(graphName, configuration, false, false);
 
         if (computationResult.graph().isEmpty()) {
             computationResult.graph().release();

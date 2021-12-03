@@ -36,10 +36,10 @@ public class ArticleRankStatsProc extends PageRankStatsProc {
     @Procedure(value = "gds.articleRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<PageRankStatsProc.StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.stats(graphNameOrConfig, configuration);
+        return super.stats(graphName, configuration);
     }
 
     @Override

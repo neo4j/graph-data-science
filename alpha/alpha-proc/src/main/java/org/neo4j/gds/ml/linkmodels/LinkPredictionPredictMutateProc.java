@@ -56,10 +56,10 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate.estimate", mode = READ)

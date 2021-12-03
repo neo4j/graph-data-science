@@ -39,10 +39,10 @@ public class EigenvectorWriteProc extends PageRankWriteProc {
     @Procedure(value = "gds.eigenvector.write", mode = WRITE)
     @Description(PageRankProc.EIGENVECTOR_DESCRIPTION)
     public Stream<WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.write(graphNameOrConfig, configuration);
+        return super.write(graphName, configuration);
     }
 
     @Override

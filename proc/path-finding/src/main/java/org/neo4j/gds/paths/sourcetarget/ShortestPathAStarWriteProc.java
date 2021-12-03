@@ -44,10 +44,10 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
     @Procedure(name = "gds.shortestPath.astar.write", mode = WRITE)
     @Description(ASTAR_DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration, false, true));
+        return write(compute(graphName, configuration, false, true));
     }
 
     @Procedure(name = "gds.shortestPath.astar.write.estimate", mode = READ)

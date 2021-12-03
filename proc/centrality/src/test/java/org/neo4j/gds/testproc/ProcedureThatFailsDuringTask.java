@@ -38,10 +38,10 @@ import java.util.stream.Stream;
 public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm, ProcedureThatFailsDuringTask.Output, DummyConfig> {
     @Procedure(name = "very.strange.procedure", mode = Mode.READ)
     public Stream<Output> run(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
+        var result = compute(graphName, configuration);
         assert result.result() == null;
         // meaningless code to avoid spotBugs error
         Output out = new Output();

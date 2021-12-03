@@ -51,14 +51,14 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     protected abstract String modelType();
 
     protected <T> Stream<T> trainAndStoreModelWithResult(
-        Object graphNameOrConfig,
+        String graphName,
         Map<String, Object> configuration,
         BiFunction<
             Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>,
             ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO>, TRAIN_CONFIG>,
             T> resultConstructor
     ) {
-        var result = compute(graphNameOrConfig, configuration);
+        var result = compute(graphName, configuration);
         var model = Objects.requireNonNull(result.result());
         modelCatalog.set(model);
         return Stream.of(resultConstructor.apply(model, result));

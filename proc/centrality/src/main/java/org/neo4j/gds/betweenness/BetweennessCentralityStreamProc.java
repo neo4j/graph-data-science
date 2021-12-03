@@ -43,11 +43,11 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     @Procedure(value = "gds.betweenness.stream", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var computationResult = compute(
-            graphNameOrConfig,
+            graphName,
             configuration
         );
         return stream(computationResult);

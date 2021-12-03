@@ -43,28 +43,25 @@ public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapCo
     @Procedure(name = "gds.alpha.similarity.overlap.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> overlapStream(
-        @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(graphNameOrConfig, configuration);
+        return stream(configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.overlap.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilaritySummaryResult> overlapWrite(
-        @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(graphNameOrConfig, configuration);
+        return write(configuration);
     }
 
     @Procedure(name = "gds.alpha.similarity.overlap.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<AlphaSimilarityStatsResult> overlapStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(graphNameOrConfig, configuration);
+        return stats(configuration);
     }
 
     @Override

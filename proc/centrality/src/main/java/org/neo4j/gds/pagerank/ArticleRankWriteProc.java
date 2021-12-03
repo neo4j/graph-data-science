@@ -37,10 +37,10 @@ public class ArticleRankWriteProc extends PageRankWriteProc {
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
     @Description(PageRankProc.PAGE_RANK_DESCRIPTION)
     public Stream<PageRankWriteProc.WriteResult> write(
-        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return super.write(graphNameOrConfig, configuration);
+        return super.write(graphName, configuration);
     }
 
     @Override
