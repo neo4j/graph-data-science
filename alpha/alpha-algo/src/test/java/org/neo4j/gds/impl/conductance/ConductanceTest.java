@@ -171,7 +171,7 @@ final class ConductanceTest {
         );
 
         factory
-            .build(naturalGraph, , config, AllocationTracker.empty(), progressTracker)
+            .build(naturalGraph, config, AllocationTracker.empty(), progressTracker)
             .compute();
 
         assertThat(log.getMessages(TestLog.INFO))

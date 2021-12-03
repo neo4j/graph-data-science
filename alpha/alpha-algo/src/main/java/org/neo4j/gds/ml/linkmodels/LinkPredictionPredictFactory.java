@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -51,7 +50,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
     @Override
     protected LinkPredictionPredict build(
         Graph graph,
-        GraphStore graphStore, CONFIG configuration,
+        CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

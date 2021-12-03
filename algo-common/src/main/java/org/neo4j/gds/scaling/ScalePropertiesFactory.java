@@ -21,7 +21,6 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -42,7 +41,7 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
     @Override
     protected ScaleProperties build(
         Graph graph,
-        GraphStore graphStore, CONFIG configuration,
+        CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

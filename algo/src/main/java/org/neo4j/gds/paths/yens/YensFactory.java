@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.yens;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -62,7 +61,6 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Algo
     @Override
     protected Yens build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

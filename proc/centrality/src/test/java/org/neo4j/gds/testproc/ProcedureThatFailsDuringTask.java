@@ -22,7 +22,6 @@ package org.neo4j.gds.testproc;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -65,7 +64,7 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
             @Override
             protected FailingAlgorithm build(
                 Graph graph,
-                GraphStore graphStore, DummyConfig configuration,
+                DummyConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {

@@ -21,7 +21,6 @@ package org.neo4j.gds.centrality;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +36,7 @@ class HarmonicCentralityAlgorithmFactory extends AlgorithmFactory<HarmonicCentra
     @Override
     protected HarmonicCentrality build(
         Graph graph,
-        GraphStore graphStore, HarmonicCentralityConfig configuration,
+        HarmonicCentralityConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

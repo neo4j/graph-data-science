@@ -27,7 +27,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
@@ -55,7 +54,6 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
     @Override
     protected Louvain build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

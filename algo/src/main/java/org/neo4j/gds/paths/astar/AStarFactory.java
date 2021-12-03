@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.astar;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,7 +48,6 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> extends Al
     @Override
     protected AStar build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

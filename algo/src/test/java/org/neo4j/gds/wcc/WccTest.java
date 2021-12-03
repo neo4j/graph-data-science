@@ -413,7 +413,7 @@ class WccTest {
 
             var dss = new WccAlgorithmFactory<>()
                 .build(
-                    graph, ,
+                    graph,
                     config,
                     AllocationTracker.empty(),
                     ProgressTracker.NULL_TRACKER

@@ -22,7 +22,6 @@ package org.neo4j.gds.degree;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -44,7 +43,6 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
     @Override
     protected DegreeCentrality build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

@@ -25,7 +25,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.ProcConfigParser;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -138,7 +137,6 @@ abstract class AlphaSimilarityProc
             @Override
             protected ALGO build(
                 Graph graph,
-                GraphStore graphStore,
                 CONFIG configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker

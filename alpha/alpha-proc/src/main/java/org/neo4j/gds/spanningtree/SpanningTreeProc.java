@@ -22,7 +22,6 @@ package org.neo4j.gds.spanningtree;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -146,7 +145,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
             @Override
             protected Prim build(
                 Graph graph,
-                GraphStore graphStore, SpanningTreeConfig configuration,
+                SpanningTreeConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {

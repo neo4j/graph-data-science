@@ -22,7 +22,6 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -88,7 +87,6 @@ public class TestMutateProc extends MutateProc<TestAlgorithm, TestAlgorithm, Tes
             @Override
             protected TestAlgorithm build(
                 Graph graph,
-                GraphStore graphStore,
                 TestMutateConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker

@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -51,7 +50,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends AlgorithmFactor
     @Override
     public LinkPredictionTrainPipelineExecutor build(
         Graph graph,
-        GraphStore graphStore, LinkPredictionTrainConfig trainConfig,
+        LinkPredictionTrainConfig trainConfig,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

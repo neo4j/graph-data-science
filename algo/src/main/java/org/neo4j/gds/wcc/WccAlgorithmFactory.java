@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -44,7 +43,6 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Alg
     @Override
     protected Wcc build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

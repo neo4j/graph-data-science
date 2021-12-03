@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -83,7 +82,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Alg
     @Override
     protected PageRankAlgorithm build(
         Graph graph,
-        GraphStore graphStore, CONFIG configuration,
+        CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

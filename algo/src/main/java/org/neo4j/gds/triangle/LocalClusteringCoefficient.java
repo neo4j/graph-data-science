@@ -111,7 +111,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private HugeAtomicLongArray computeTriangleCounts() {
 
         IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
-            graph, ,
+            graph,
             LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
             allocationTracker,
             progressTracker

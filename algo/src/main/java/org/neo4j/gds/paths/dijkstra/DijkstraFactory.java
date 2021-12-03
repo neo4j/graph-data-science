@@ -22,7 +22,6 @@ package org.neo4j.gds.paths.dijkstra;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
@@ -66,7 +65,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
             @Override
             protected Dijkstra build(
                 Graph graph,
-                GraphStore graphStore,
                 T configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
@@ -87,7 +85,6 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
             @Override
             protected Dijkstra build(
                 Graph graph,
-                GraphStore graphStore,
                 T configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker

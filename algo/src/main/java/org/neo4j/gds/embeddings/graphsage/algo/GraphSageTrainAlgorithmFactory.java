@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -55,7 +54,7 @@ public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<Graph
     @Override
     protected GraphSageTrain build(
         Graph graph,
-        GraphStore graphStore, GraphSageTrainConfig configuration,
+        GraphSageTrainConfig configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
     ) {

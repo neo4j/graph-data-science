@@ -22,7 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -138,7 +137,7 @@ public class ClosenessCentralityProc extends NodePropertiesWriter<MSClosenessCen
             @Override
             protected MSClosenessCentrality build(
                 Graph graph,
-                GraphStore graphStore, ClosenessCentralityConfig configuration,
+                ClosenessCentralityConfig configuration,
                 AllocationTracker allocationTracker,
                 ProgressTracker progressTracker
             ) {

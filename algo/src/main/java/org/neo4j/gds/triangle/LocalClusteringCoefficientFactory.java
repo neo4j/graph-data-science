@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -42,7 +41,6 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
     @Override
     protected LocalClusteringCoefficient build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker

@@ -81,7 +81,6 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
      */
     protected abstract ALGO build(
         Graph graph,
-        GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         ProgressTracker progressTracker
