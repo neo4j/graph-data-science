@@ -258,16 +258,15 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
 
         runQuery(nodeCreateQuery);
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeProperty("age")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.beta.knn")
             .mutateMode()
             .addParameter("nodeWeightProperty", "age")
