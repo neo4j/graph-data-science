@@ -101,28 +101,20 @@ public class MultiMean extends SingleParentVariable<Matrix> {
             int[] neighbors = subGraph.neighbors(batchNodeId);
             int closedNeighborhoodDegree = neighbors.length + 1;
 
-            // TODO init array once with sampleSize (max number of neighbors)
-            double[] cachedWeights = new double[neighbors.length];
-
-            for (int i = 0; i < neighbors.length; i++) {
-                cachedWeights[i] = subGraph.relationshipWeight(batchNodeId, neighbors[i]);
-            }
-
             // TODO try to divide by closedNeighborhoodDegree once instead of on every update
 
+            // pass gradient to batchNode's data
             for (int col = 0; col < cols; col++) {
-                // pass gradient to batchNode's data
-                resultGradient.addDataAt(
-                    batchNodeId,
-                    col,
-                    multiMeanGradient.dataAt(batchIdx, col) / closedNeighborhoodDegree
-                );
+                double normalizedGradient = multiMeanGradient.dataAt(batchIdx, col) / closedNeighborhoodDegree;
+                resultGradient.addDataAt(batchNodeId, col, normalizedGradient);
+            }
 
-                // propagate gradient to neighbors' data
-                for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
-                    int neighbor = neighbors[neighborIndex];
-                    double neighborGradient = multiMeanGradient.dataAt(batchIdx, col) * cachedWeights[neighborIndex];
+            // propagate gradient to neighbors' data
+            for (int neighbor : neighbors) {
+                double relationshipWeight = subGraph.relationshipWeight(batchNodeId, neighbor);
 
+                for (int col = 0; col < cols; col++) {
+                    double neighborGradient = multiMeanGradient.dataAt(batchIdx, col) * relationshipWeight;
                     resultGradient.addDataAt(neighbor * cols + col, neighborGradient / closedNeighborhoodDegree);
                 }
             }
