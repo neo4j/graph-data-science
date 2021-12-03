@@ -27,9 +27,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-import java.util.Optional;
-
-public class GraphStoreFromDatabaseLoader implements GraphStoreLoader {
+public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
 
     private final GraphCreateConfig graphCreateConfig;
     private final String username;
@@ -63,8 +61,8 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreLoader {
     }
 
     @Override
-    public Optional<MemoryEstimation> memoryEstimation() {
-        return Optional.of(this.graphStoreFactory.memoryEstimation());
+    public MemoryEstimation memoryEstimation() {
+        return this.graphStoreFactory.memoryEstimation();
     }
 
     private GraphStoreFactory<?, ?> graphStoreFactory() {

@@ -21,8 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.FictitiousGraphStoreLoader;
+import org.neo4j.gds.GraphStoreCreator;
 import org.neo4j.gds.GraphStoreFromDatabaseLoader;
-import org.neo4j.gds.GraphStoreLoader;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipProjections;
@@ -292,21 +292,22 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
-        GraphStoreLoader graphStoreLoader;
+        GraphStoreCreator graphStoreCreator;
         if (config.isFictitiousLoading()) {
-            graphStoreLoader = new FictitiousGraphStoreLoader(config);
+            graphStoreCreator = new FictitiousGraphStoreLoader(config);
         } else {
-            graphStoreLoader = new GraphStoreFromDatabaseLoader(
+            graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 config,
                 username(),
                 graphLoaderContext()
             );
         }
-        var graphDimensions = graphStoreLoader.graphDimensions();
-        var memoryEstimation = graphStoreLoader
+        var graphDimensions = graphStoreCreator.graphDimensions();
+
+        MemoryTree memoryTree = graphStoreCreator
             .memoryEstimation()
-            .orElseThrow(() -> new IllegalStateException("GraphCreateProc should provide memory estimation"));
-        MemoryTree memoryTree = memoryEstimation.estimate(graphDimensions, config.readConcurrency());
+            .estimate(graphDimensions, config.readConcurrency());
+
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 

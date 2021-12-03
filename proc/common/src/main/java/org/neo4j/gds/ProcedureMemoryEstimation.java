@@ -25,32 +25,29 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 
-public class ProcedureMemoryEstimation<
+class ProcedureMemoryEstimation<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig
 > {
 
-    private final GraphStoreLoader graphStoreLoader;
     private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
+    private final GraphDimensions graphDimensions;
 
     ProcedureMemoryEstimation(
-        GraphStoreLoader graphStoreLoader,
+        GraphDimensions graphDimensions,
         AlgorithmFactory<ALGO, CONFIG> algorithmFactory
     ) {
-        this.graphStoreLoader = graphStoreLoader;
+        this.graphDimensions = graphDimensions;
         this.algorithmFactory = algorithmFactory;
     }
 
     MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        GraphDimensions estimateDimensions = graphStoreLoader.graphDimensions();
-        graphStoreLoader.memoryEstimation().map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
-
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
-        return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
+        MemoryTree memoryTree = estimationBuilder.build().estimate(graphDimensions, config.concurrency());
+        return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 }

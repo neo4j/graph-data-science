@@ -27,12 +27,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -43,6 +48,7 @@ public abstract class AlgoBaseProc<
     CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
+
     protected String procName() {
         return this.getClass().getSimpleName();
     }
@@ -86,21 +92,28 @@ public abstract class AlgoBaseProc<
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
-        GraphStoreLoader graphStoreLoader;
-        CONFIG algoConfig;
+        CONFIG algoConfig = configParser().processInput(configuration);
+
+        GraphDimensions graphDimensions;
+        Optional<MemoryEstimation> memoryEstimation;
 
         if (graphNameOrConfig instanceof Map) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
+            var graphStoreCreator = GraphStoreCreator.of(username(), graphLoaderContext(), graphCreateConfig);
 
-            var configMap = (Map<String, Object>) graphNameOrConfig;
-            graphCreateConfig.configKeys().forEach(configMap::remove);
-            algoConfig = configParser().processInput(configMap);
-
-            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(username(), this::graphLoaderContext, graphCreateConfig);
+            graphDimensions = graphStoreCreator.graphDimensions();
+            memoryEstimation = Optional.of(graphStoreCreator.memoryEstimation());
         } else if (graphNameOrConfig instanceof String) {
-            algoConfig = configParser().processInput(configuration);
-            graphStoreLoader = new GraphStoreFromCatalogLoader((String) graphNameOrConfig, algoConfig, username(), databaseId(), isGdsAdmin());
+            graphDimensions = new GraphStoreFromCatalogLoader(
+                (String) graphNameOrConfig,
+                algoConfig,
+                username(),
+                databaseId(),
+                isGdsAdmin()
+            ).graphDimensions();
+
+            memoryEstimation = Optional.empty();
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected `graphNameOrConfig` to be of type String or Map, but got",
@@ -108,7 +121,13 @@ public abstract class AlgoBaseProc<
             ));
         }
 
-        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(graphStoreLoader).memoryEstimation(algoConfig);
+        MemoryTreeWithDimensions memoryTreeWithDimensions = procedureMemoryEstimation(
+            graphDimensions,
+            memoryEstimation,
+            algorithmFactory(),
+            algoConfig
+        );
+
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
@@ -139,8 +158,20 @@ public abstract class AlgoBaseProc<
         );
     }
 
-    private ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
-        return new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory());
+    private MemoryTreeWithDimensions procedureMemoryEstimation(
+        GraphDimensions dimensions,
+        Optional<MemoryEstimation> maybeGraphMemoryEstimation,
+        AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
+        CONFIG config
+    ) {
+        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
+
+        maybeGraphMemoryEstimation.map(graphEstimation -> estimationBuilder.add("graph", graphEstimation));
+
+        estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
+
+        MemoryTree memoryTree = estimationBuilder.build().estimate(dimensions, config.concurrency());
+        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
     @ValueClass

@@ -29,7 +29,6 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
@@ -83,11 +82,6 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
             .maxRelCount(relCount)
             .build();
-    }
-
-    @Override
-    public Optional<MemoryEstimation> memoryEstimation() {
-        return Optional.empty();
     }
 
     public static GraphStoreWithConfig graphStoreFromCatalog(

@@ -28,14 +28,13 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.function.Predicate.isEqual;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FictitiousGraphStoreLoader implements GraphStoreLoader {
+public class FictitiousGraphStoreLoader implements GraphStoreCreator {
 
     private final GraphCreateConfig graphCreateConfig;
 
@@ -67,12 +66,11 @@ public class FictitiousGraphStoreLoader implements GraphStoreLoader {
     }
 
     @Override
-    public Optional<MemoryEstimation> memoryEstimation() {
-        return Optional.of(graphCreateConfig
+    public MemoryEstimation memoryEstimation() {
+        return graphCreateConfig
             .graphStoreFactory()
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
-            .memoryEstimation()
-        );
+            .memoryEstimation();
     }
 
     @Override

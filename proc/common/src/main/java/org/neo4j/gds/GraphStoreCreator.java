@@ -19,12 +19,27 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphCreateConfig;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-public interface GraphStoreLoader {
-    GraphCreateConfig graphCreateConfig();
-    GraphStore graphStore();
-    GraphDimensions graphDimensions();
+public interface GraphStoreCreator extends GraphStoreLoader {
+    MemoryEstimation memoryEstimation();
+
+
+    static GraphStoreCreator of(
+        String username,
+        GraphLoaderContext graphLoaderContext,
+        GraphCreateConfig graphCreateConfig
+    ) {
+        if (graphCreateConfig.isFictitiousLoading()) {
+            return new FictitiousGraphStoreLoader(graphCreateConfig);
+        } else {
+            return new GraphStoreFromDatabaseLoader(
+                graphCreateConfig,
+                username,
+                graphLoaderContext
+            );
+        }
+    }
 }

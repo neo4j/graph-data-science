@@ -84,15 +84,6 @@ public class ProcedureExecutor<
         this.allocationTracker = allocationTracker;
     }
 
-    public GraphStore getOrCreateGraphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
-        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
-        validator.validateConfigsBeforeLoad(graphCreateConfig, config);
-        var graphStore = graphStoreLoader.graphStore();
-        validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
-
-        return graphStore;
-    }
-
     protected AlgoBaseProc.ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         String graphName,
         Map<String, Object> configuration,
@@ -106,14 +97,14 @@ public class ProcedureExecutor<
         setAlgorithmMetaDataToTransaction(config);
 
         var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username, databaseId, isGdsAdmin);
-        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
+        var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader.graphDimensions(), algorithmFactory);
         var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 
         GraphStore graphStore;
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graphStore = getOrCreateGraphStore(config, graphStoreLoader);
+            graphStore = graphStore(config, graphStoreLoader);
             graph = createGraph(graphStore, config);
         }
 
@@ -144,6 +135,15 @@ public class ProcedureExecutor<
             .result(result)
             .config(config)
             .build();
+    }
+
+    private GraphStore graphStore(CONFIG config, GraphStoreLoader graphStoreLoader) {
+        var graphCreateConfig = graphStoreLoader.graphCreateConfig();
+        validator.validateConfigsBeforeLoad(graphCreateConfig, config);
+        var graphStore = graphStoreLoader.graphStore();
+        validator.validateConfigWithGraphStore(graphStore, graphCreateConfig, config);
+
+        return graphStore;
     }
 
     private ALGO_RESULT executeAlgorithm(
