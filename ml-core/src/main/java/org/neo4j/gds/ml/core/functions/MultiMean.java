@@ -22,25 +22,19 @@ package org.neo4j.gds.ml.core.functions;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
-    private final int[][] adjacency;
-    private final int[] selfAdjacency;
-    private final int rows;
-    private final int cols;
+    private final BatchNeighbors subGraph;
 
     public MultiMean(
-        Variable<?> parent,
-        int[][] adjacency,
-        int[] selfAdjacency
+        Variable<Matrix> parent,
+        BatchNeighbors subGraph
     ) {
-        super(parent, Dimensions.matrix(adjacency.length, parent.dimension(1)));
-        this.adjacency = adjacency;
-        this.selfAdjacency = selfAdjacency;
-        this.rows = adjacency.length;
-        this.cols = parent.dimension(1);
+        super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
+        this.subGraph = subGraph;
     }
 
     @Override
@@ -48,46 +42,69 @@ public class MultiMean extends SingleParentVariable<Matrix> {
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
-        double[] means = new double[adjacency.length * cols];
-        for (int source = 0; source < adjacency.length; source++) {
-            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
-            int sourceOffset = source * cols;
-            int[] neighbors = adjacency[source];
+        int[] batchIds = subGraph.batchIds();
+        int batchSize = batchIds.length;
+
+        int cols = parent.dimension(1);
+
+        double[] means = new double[batchSize * cols];
+        for (int batchIdx = 0; batchIdx < batchSize; batchIdx++) {
+            int sourceId = batchIds[batchIdx];
+            int batchIdRowOffset = sourceId * cols;
+            int batchIdxOffset = batchIdx * cols;
+            int[] neighbors = subGraph.neighbors(sourceId);
             int numberOfNeighbors = neighbors.length;
+
             for (int col = 0; col < cols; col++) {
-                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
+                means[batchIdxOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
             }
-            for (int target : neighbors) {
-                int targetOffset = target * cols;
+            for (int targetIndex : neighbors) {
+                int targetOffset = targetIndex * cols;
+                double relationshipWeight = subGraph.relationshipWeight(sourceId, targetIndex);
                 for (int col = 0; col < cols; col++) {
-                    means[sourceOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
+                    means[batchIdxOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
             }
         }
 
-        return new Matrix(means, this.rows, this.cols);
+        return new Matrix(means, batchSize, cols);
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
 
+        var batchIds = this.subGraph.batchIds();
+
         Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
-        for (int col = 0; col < cols; col++) {
-            for (int row = 0; row < rows; row++) {
-                int degree = adjacency[row].length + 1;
-                int gradientElementIndex = row * cols + col;
-                for (int neighbor : adjacency[row]) {
+        int cols = parent.dimension(1);
+
+        for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
+            var sourceId = batchIds[batchIdx];
+            int[] neighbors = subGraph.neighbors(sourceId);
+            int degree = neighbors.length + 1;
+
+            double[] cachedNeighborWeights = new double[neighbors.length];
+
+            for (int i = 0; i < neighbors.length; i++) {
+                cachedNeighborWeights[i] = subGraph.relationshipWeight(sourceId, neighbors[i]);
+            }
+
+            for (int col = 0; col < cols; col++) {
+                int gradientElementIndex = batchIdx * cols + col;
+                for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
+                    int neighbor = neighbors[neighborIndex];
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
-                        1d / degree * multiMeanGradient[gradientElementIndex]
+                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * cachedNeighborWeights[neighborIndex])
                     );
                 }
+
                 result.addDataAt(
-                    selfAdjacency[row] * cols + col,
-                    1d / degree * multiMeanGradient[gradientElementIndex]
+                    sourceId * cols + col,
+                    (1d / degree) * multiMeanGradient[gradientElementIndex]
                 );
             }
         }

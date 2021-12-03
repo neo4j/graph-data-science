@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand
 import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
 import org.neo4j.gds.ml.core.functions.Slice;
-import org.neo4j.gds.ml.core.functions.WeightedElementwiseMax;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -72,14 +71,10 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
 
-        Variable<Matrix> elementwiseMax = subGraph.maybeRelationshipWeightsFunction.<Variable<Matrix>>map(
-            relationshipWeightsFunction ->
-                // Weighted with respect to the Relationship Weights
-                new WeightedElementwiseMax(neighborhoodActivations, relationshipWeightsFunction, subGraph)
-        ).orElseGet(() -> new ElementWiseMax(neighborhoodActivations, subGraph.adjacency));
+        Variable<Matrix> elementwiseMax =new ElementWiseMax(neighborhoodActivations, subGraph);
 
 
-        Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
+        Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.batchIds());
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
         Variable<Matrix> neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable<Matrix> sum = new MatrixSum(List.of(self, neighbors));

@@ -17,19 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds.ml.core.subgraph;
 
-public final class DoubleUtil {
+public interface BatchNeighbors {
 
-    public static final double DEFAULT_THRESHOLD = 0.00001;
+    int[] batchIds();
 
-    private DoubleUtil() {}
-
-    public static boolean compareWithDefaultThreshold(double lhs, double rhs) {
-        return compareWithThreshold(lhs, rhs, DEFAULT_THRESHOLD);
+    default int batchSize() {
+        return batchIds().length;
     }
 
-    public static boolean compareWithThreshold(double lhs, double rhs, double epsilon) {
-        return Math.abs(lhs - rhs) < epsilon;
-    }
+    int[] neighbors(int batchId);
+
+    double relationshipWeight(int src, int trg);
 }

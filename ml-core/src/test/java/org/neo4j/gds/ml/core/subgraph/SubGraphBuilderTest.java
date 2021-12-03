@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -78,9 +79,9 @@ class SubGraphBuilderTest {
             idFunction.of("e")
         };
 
-        assertEquals(1, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdj, subGraph.adjacency[0]);
-        assertArrayEquals(expectedNeighbors, subGraph.nextNodes);
+        assertEquals(1, subGraph.batchSize());
+        assertArrayEquals(expectedAdj, subGraph.neighbors(0));
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
@@ -95,14 +96,16 @@ class SubGraphBuilderTest {
             idFunction.of("d")
         };
 
-        assertEquals(1, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdj, subGraph.adjacency[0]);
-        assertArrayEquals(expectedNeighbors, subGraph.nextNodes);
+        assertEquals(1, subGraph.batchSize());
+        assertArrayEquals(expectedAdj, subGraph.neighbors(0));
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
     void shouldBuildSubGraphMultipleNodes() {
         SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, graph);
+
+        assertThat(subGraph.batchIds()).containsExactly(0, 1, 2);
 
         // start a,b,c  : 0, 1, 2
         // neighbors d,e,f : 3,4,5
@@ -118,11 +121,12 @@ class SubGraphBuilderTest {
             idFunction.of("d"), idFunction.of("e"), idFunction.of("f")
         };
 
-        assertEquals(3, subGraph.adjacency.length);
-        assertArrayEquals(expectedAdjA, subGraph.adjacency[0]);
-        assertArrayEquals(expectedAdjB, subGraph.adjacency[1]);
-        assertArrayEquals(expectedAdjC, subGraph.adjacency[2]);
-        assertArrayEquals(expectedNeighbors, subGraph.nextNodes);
+        assertEquals(3, subGraph.batchSize());
+        assertArrayEquals(expectedAdjA, subGraph.neighbors(0));
+        assertArrayEquals(expectedAdjB, subGraph.neighbors(1));
+        assertArrayEquals(expectedAdjC, subGraph.neighbors(2));
+
+        assertArrayEquals(expectedNeighbors, subGraph.originalNodeIds());
     }
 
     @Test
@@ -145,11 +149,11 @@ class SubGraphBuilderTest {
             idFunction.of("e"), idFunction.of("f")
         };
 
-        assertEquals(3, subGraphs.get(0).adjacency.length);
-        assertArrayEquals(expectedAdjA, subGraphs.get(0).adjacency[0]);
-        assertArrayEquals(expectedAdjB, subGraphs.get(0).adjacency[1]);
-        assertArrayEquals(expectedAdjC, subGraphs.get(0).adjacency[2]);
-        assertArrayEquals(expectedNeighbors, subGraphs.get(0).nextNodes);
+        assertEquals(3, subGraphs.get(0).batchSize());
+        assertArrayEquals(expectedAdjA, subGraphs.get(0).neighbors(0));
+        assertArrayEquals(expectedAdjB, subGraphs.get(0).neighbors(1));
+        assertArrayEquals(expectedAdjC, subGraphs.get(0).neighbors(2));
+        assertArrayEquals(expectedNeighbors, subGraphs.get(0).originalNodeIds());
 
         // start a,b,c,d,e,f  : 0, 1, 2, 3,4,5
         // neighbors g,h,i : 6,7,8
@@ -172,14 +176,14 @@ class SubGraphBuilderTest {
             LongStream.of(idFunction.of("g"), idFunction.of("h"), idFunction.of("i"))
         ).toArray();
 
-        assertEquals(6, subGraphs.get(1).adjacency.length);
-        assertArrayEquals(expectedAdj2A, subGraphs.get(1).adjacency[0]);
-        assertArrayEquals(expectedAdj2B, subGraphs.get(1).adjacency[1]);
-        assertArrayEquals(expectedAdj2C, subGraphs.get(1).adjacency[2]);
-        assertArrayEquals(expectedAdj2D, subGraphs.get(1).adjacency[3]);
-        assertArrayEquals(expectedAdj2E, subGraphs.get(1).adjacency[4]);
-        assertArrayEquals(expectedAdj2F, subGraphs.get(1).adjacency[5]);
-        assertArrayEquals(expectedNeighbors, subGraphs.get(1).nextNodes);
+        assertEquals(6, subGraphs.get(1).batchSize());
+        assertArrayEquals(expectedAdj2A, subGraphs.get(1).neighbors(0));
+        assertArrayEquals(expectedAdj2B, subGraphs.get(1).neighbors(1));
+        assertArrayEquals(expectedAdj2C, subGraphs.get(1).neighbors(2));
+        assertArrayEquals(expectedAdj2D, subGraphs.get(1).neighbors(3));
+        assertArrayEquals(expectedAdj2E, subGraphs.get(1).neighbors(4));
+        assertArrayEquals(expectedAdj2F, subGraphs.get(1).neighbors(5));
+        assertArrayEquals(expectedNeighbors, subGraphs.get(1).originalNodeIds());
     }
 
     @Test
@@ -197,6 +201,6 @@ class SubGraphBuilderTest {
             graph
         );
 
-        assertEquals(6, subGraph.adjacency.length);
+        assertEquals(6, subGraph.neighbors.length);
     }
 }

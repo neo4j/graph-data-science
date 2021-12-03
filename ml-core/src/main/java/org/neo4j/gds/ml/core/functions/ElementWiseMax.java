@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.core.functions;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.subgraph.BatchNeighbors;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.core.utils.DoubleUtil;
 
 
 /*
@@ -40,31 +40,40 @@ import org.neo4j.gds.core.utils.DoubleUtil;
  */
 public class ElementWiseMax extends SingleParentVariable<Matrix> {
     private final Variable<Matrix> parent;
-    private final int[][] adjacencyMatrix;
+    private final BatchNeighbors batchNeighbors;
 
-    public ElementWiseMax(Variable<Matrix> parent, int[][] adjacencyMatrix) {
-        super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(Dimensions.COLUMNS_INDEX)));
+    public ElementWiseMax(Variable<Matrix> parent, BatchNeighbors batchGraph) {
+        super(parent, Dimensions.matrix(batchGraph.batchSize(), parent.dimension(Dimensions.COLUMNS_INDEX)));
+        this.batchNeighbors = batchGraph;
         this.parent = parent;
-        this.adjacencyMatrix = adjacencyMatrix;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
         var parentData = ctx.data(parent);
 
-        var rows = adjacencyMatrix.length;
+        var rows = batchNeighbors.batchSize();
         var cols = parentData.cols();
+        var batchIds = batchNeighbors.batchIds();
 
         var max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         for (int row = 0; row < rows; row++) {
-            int[] neighbors = this.adjacencyMatrix[row];
-            for(int col = 0; col < cols; col++) {
-                if (neighbors.length > 0) {
-                    for (int neighbor : neighbors) {
-                        max.setDataAt(row, col, Math.max(parentData.dataAt(neighbor, col), max.dataAt(row, col)));
+            int sourceId = batchIds[row];
+            int[] neighbors = this.batchNeighbors.neighbors(sourceId);
+
+            for (int neighbor : neighbors) {
+                double relationshipWeight = batchNeighbors.relationshipWeight(sourceId, neighbor);
+                for (int col = 0; col < cols; col++) {
+                    double neighborValue = parentData.dataAt(neighbor, col) * relationshipWeight;
+                    if (neighborValue >= max.dataAt(row, col)) {
+                        max.setDataAt(row, col, neighborValue);
                     }
-                } else {
+                }
+            }
+
+            if (neighbors.length == 0) {
+                for (int col = 0; col < cols; col++) {
                     max.setDataAt(row, col, 0);
                 }
             }
@@ -77,7 +86,8 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         var result = (Matrix) ctx.data(parent).createWithSameDimensions();
 
-        var rows = adjacencyMatrix.length;
+        var rows = this.batchNeighbors.batchSize();
+        var batchIds = this.batchNeighbors.batchIds();
         var cols = result.cols();
 
         var parentData = (Matrix) ctx.data(parent);
@@ -85,13 +95,42 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var thisData = ctx.data(this);
 
         for (int row = 0; row < rows; row++) {
-            int[] neighbors = this.adjacencyMatrix[row];
+            int sourceId = batchIds[row];
+            int[] neighbors = this.batchNeighbors.neighbors(sourceId);
+            double[] cachedNeighborWeights = new double[neighbors.length];
+
+            for (int i = 0; i < neighbors.length; i++) {
+                cachedNeighborWeights[i] = batchNeighbors.relationshipWeight(sourceId, neighbors[i]);
+            }
+
             for (int col = 0; col < cols; col++) {
-                for (int neighbor : neighbors) {
-                    if (DoubleUtil.compareWithDefaultThreshold(parentData.dataAt(neighbor, col), thisData.dataAt(row, col))) {
-                        result.addDataAt(neighbor, col, thisGradient.dataAt(row, col));
+                double thisCellData = thisData.dataAt(row, col);
+
+                var minDiffToCellData = Double.MAX_VALUE;
+                var maxNeighbor = -1;
+                var maxNeighborWeight = Double.NaN;
+
+                for (int i = 0; i < neighbors.length; i++) {
+                    int neighbor = neighbors[i];
+                    double relationshipWeight = cachedNeighborWeights[i];
+
+                    var diffToCellData = Math.abs(
+                        thisCellData - (parentData.dataAt(neighbor, col) * relationshipWeight)
+                    );
+
+                    if (diffToCellData < minDiffToCellData) {
+                        minDiffToCellData = diffToCellData;
+                        maxNeighbor = neighbor;
+                        maxNeighborWeight = relationshipWeight;
                     }
                 }
+
+                if (maxNeighbor == -1) {
+                    assert neighbors.length == 0;
+                    continue;
+                }
+
+                result.addDataAt(maxNeighbor, col, thisGradient.dataAt(row, col) * maxNeighborWeight);
             }
         }
 

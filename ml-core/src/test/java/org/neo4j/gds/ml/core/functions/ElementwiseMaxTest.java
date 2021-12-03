@@ -26,17 +26,20 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
+import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
+class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
@@ -56,84 +59,116 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
     @Inject
     TestGraph graph;
 
+
     @Test
-    void shouldAverageUnweighted() {
-        // a    a
-        // b    b
-        // c
-        // d
-        // (a)--(b), (c), (b)--(d)
+    void testApplyUnweighted() {
+        var parent = new Weights<>(new Matrix(new double[]{
+            1, 2, 3,
+            5, 2, 1,
+            9, 4, 2,
+            1, 1, 1
+        }, 4, 3));
 
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            5, 2,
-            6, -1
-        };
+        var adjacencyMatrix = new int[2][3];
 
-        int[][] adj = new int[2][];
-        adj[0] = new int[] {1};
-        adj[1] = new int[] {0, 3};
-        int[] batchIds = {0, 1, 0};
+        // Node 0 --> no neighbours
+        adjacencyMatrix[0] = new int[]{};
+
+        // Node 1 --> three neighbours
+        adjacencyMatrix[1] = new int[]{0, 1, 2};
+
+        int[] batchIds = {1, 0};
+
+        Variable<Matrix> max = new ElementWiseMax(parent, new TestBatchNeighbors(batchIds, adjacencyMatrix));
 
         var expected = new Matrix(new double[]{
-            2.5, 3.5,
-            11.0 / 3, 2,
-            2.5, 3.5
-        }, 3, 2);
+            9, 4, 3,    // Node 1
+            0, 0, 0    // Node 0 --> no neighbours --> 0s
+        }, 2, 3);
 
-        var data = Constant.matrix(matrix, 4, 2);
-        var mean = new MultiMean(data, new TestBatchNeighbors(batchIds, adj));
-
-        assertThat(ctx.forward(mean)).isEqualTo(expected);
+        assertThat(ctx.forward(max)).isEqualTo(expected);
     }
 
     @Test
-    void testGradientWithDuplicateBatchIds() {
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            3, 6
+    void shouldApproximateGradientUnweighted() {
+        var weights = new Weights<>(new Matrix(new double[]{
+            1, 2, 3,
+            3, 2, 1,
+            1, 3, 2
+        }, 3, 3));
+
+        int[][] adjacencyMatrix = {
+            new int[]{},
+            new int[]{0, 1, 2},
+            new int[]{}
         };
 
-        int[][] adj = new int[2][];
-        adj[0] = new int[] {1};
-        adj[1] = new int[] {0};
-        int[] batchIds = {0, 1, 0};
+        int[] batchIds = {1, 2, 0};
 
-        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
-
-        finiteDifferenceShouldApproximateGradient(
+        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
-        );
+            new TestBatchNeighbors(batchIds, adjacencyMatrix)
+        )));
+        Variable<Scalar> loss = new ConstantScale<>(sum, 2);
+        finiteDifferenceShouldApproximateGradient(weights, loss);
     }
 
-
     @Test
-    void testGradientUnweighted() {
-        double[] matrix = {
-            1, 2,
-            4, 5,
-            3, 6
+    void shouldApproximateGradientWithSmallDiffBetweenNeighbors() {
+        var weights = new Weights<>(new Matrix(new double[]{
+            1.0000009,
+            1.0000004
+        }, 2, 1));
+
+        int[][] adjacencyMatrix = {
+            new int[]{0},
+            new int[]{0, 1}
         };
 
-        int[][] adj = new int[2][];
-        adj[0] = new int[] {1};
-        adj[1] = new int[] {0, 2};
-        int[] batchIds = {0, 1};
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(adjacencyMatrix))));
 
-        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
+        ComputationContext ctx = new ComputationContext();
 
-        finiteDifferenceShouldApproximateGradient(
-            weights,
-            new ElementSum(List.of(new MultiMean(weights, new TestBatchNeighbors(batchIds, adj))))
+        ctx.forward(loss);
+        ctx.backward(loss);
+
+        var expected = new Matrix(
+            new double[]{2.0, 0.0},
+            2, 1
         );
+
+        assertThat(ctx.gradient(weights)).isEqualTo(expected);
+    }
+
+    @Test
+    void testUnweightedGradientWithUnorderedBatchIds() {
+        double[] matrix = {1, 4, 3};
+
+        int[][] adj = new int[2][];
+        adj[0] = new int[]{2};
+        adj[1] = new int[]{0, 1};
+        int[] batchIds = {1};
+
+        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 1));
+
+        ElementSum loss = new ElementSum(List.of(new ElementWiseMax(weights, new TestBatchNeighbors(batchIds, adj))));
+
+        ComputationContext ctx = new ComputationContext();
+
+        ctx.forward(loss);
+        ctx.backward(loss);
+
+        var expected = new Matrix(
+            new double[]{0.0, 1.0, 0.0},
+            3, 1
+        );
+
+        assertThat(ctx.gradient(weights)).isEqualTo(expected);
     }
 
     @Test
     void shouldApplyWeightsToEmbeddings() {
-        var ids = new long[]{
+        long[] ids = new long[]{
             graph.toMappedNodeId("d1"),
             graph.toMappedNodeId("d2"),
             graph.toMappedNodeId("d3"),
@@ -144,22 +179,25 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
             .mapToLong(RelationshipCursor::targetId);
         var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
-        var userEmbeddings = Constant.matrix(new double[] {
+        var userEmbeddings = Constant.matrix(new double[]{
             1, 1, 1, // u1
             1, 1, 1, // u2
             1, 1, 1, // d1
-            1, 1, 1, // d2
+            3, 3, 3, // d2
             1, 1, 1, // d3
             1, 1, 1 // d4
         }, 6, 3);
 
-        var weightedEmbeddings = new MultiMean(userEmbeddings, subGraph);
+        var weightedEmbeddings = new ElementWiseMax(
+            userEmbeddings,
+            subGraph
+        );
 
-        var expected = new Matrix(new double[] {
-            3.0, 3.0, 3.0, // d1
-            1.5, 1.5, 1.5, // d2
-            4.0/3.0, 4.0/3.0, 4.0/3.0, // d3
-            2.0, 2.0, 2.0, // d4
+        var expected = new Matrix(new double[]{
+            5.0, 5.0, 5.0, // d1
+            2.0, 2.0, 2.0, // d2
+            2.0, 2.0, 2.0, // d3
+            3.0, 3.0, 3.0, // d4
         }, 4, 3);
 
         // Add userEmbeddings to context's data
@@ -168,8 +206,8 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
     }
 
     @Test
-    void testGradientWeighted() {
-        var ids = new long[]{
+    void testWeightedGradient() {
+        long[] ids = new long[]{
             graph.toMappedNodeId("d1"),
             graph.toMappedNodeId("d2"),
             graph.toMappedNodeId("d3"),
@@ -180,7 +218,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
             .mapToLong(RelationshipCursor::targetId);
         var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
 
-        var weights = new Weights<>(new Matrix(new double[] {
+        var weights = new Weights<>(new Matrix(new double[]{
             1, 1, 1, // u1
             2, 2, 2, // u2
             3, 3, 3, // d1
@@ -191,7 +229,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MultiMean(weights, subGraph)))
+            new ElementSum(List.of(new ElementWiseMax(weights, subGraph)))
         );
     }
 }
