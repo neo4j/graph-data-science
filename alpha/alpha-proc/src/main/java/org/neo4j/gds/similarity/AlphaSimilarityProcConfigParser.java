@@ -70,10 +70,10 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
 
     @Override
     public Pair<CONFIG, Optional<String>> processInput(
-        Object graphName, Map<String, Object> configuration
+        Object __, Map<String, Object> configuration
     ) {
         // We will tell the rest of the system that we are in named graph mode, with a fake graph name
-        graphName = SIMILARITY_FAKE_GRAPH_NAME;
+        var graphName = SIMILARITY_FAKE_GRAPH_NAME;
 
         // We must curate the configuration map to remove any eventual projection keys
         // This is backwards compatibility since the alpha similarities featured anonymous star projections in docs
@@ -86,7 +86,7 @@ public class AlphaSimilarityProcConfigParser<CONFIG extends SimilarityConfig> im
         GraphStoreCatalog.set(
             ImmutableGraphCreateFromStoreConfig.of(
                 username(),
-                graphName.toString(),
+                graphName,
                 NodeProjections.ALL,
                 RelationshipProjections.ALL
             ),
