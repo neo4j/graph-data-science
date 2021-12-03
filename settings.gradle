@@ -1,12 +1,3 @@
-pluginManagement {
-    repositories {
-        maven {
-            url 'https://neo.jfrog.io/neo/docs-maven'
-        }
-        gradlePluginPortal()
-    }
-}
-
 rootProject.name = 'open-gds'
 
 include('algo')
