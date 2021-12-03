@@ -30,7 +30,7 @@ import static org.neo4j.gds.ml.core.Dimensions.totalSize;
 
 public interface FiniteDifferenceTest {
 
-    String FAIL_MESSAGE = "AutoGrad and FiniteDifference gradients differ for coordinate %s more than the tolerance";
+    String FAIL_MESSAGE = "AutoGrad of %f and FiniteDifference gradients of %f differs for coordinate %s more than the tolerance.";
 
     default double tolerance() {
         return 1E-5;
@@ -46,24 +46,26 @@ public interface FiniteDifferenceTest {
 
     default void finiteDifferenceShouldApproximateGradient(List<Weights<?>> weightVariables, Variable<Scalar> loss) {
         for (Weights<?> variable : weightVariables) {
-            for (int i = 0; i < totalSize(variable.dimensions()); i++) {
+            for (int tensorIndex = 0; tensorIndex < totalSize(variable.dimensions()); tensorIndex++) {
                 ComputationContext ctx = new ComputationContext();
-                double f0 = ctx.forward(loss).value();
+                double forwardLoss = ctx.forward(loss).value();
                 ctx.backward(loss);
-                var partialDerivative = ctx.gradient(variable).dataAt(i);
-                perturb(variable, i, epsilon());
+                var autoGradient = ctx.gradient(variable).dataAt(tensorIndex);
+
+                // perturb data
+                variable.data().addDataAt(tensorIndex, epsilon());
+
                 ComputationContext ctx2 = new ComputationContext();
-                double f1 = ctx2.forward(loss).value();
-                assertThat(partialDerivative).isNotNaN();
-                assertThat((f1 - f0) / epsilon())
-                    .withFailMessage(FAIL_MESSAGE, i)
-                    .isEqualTo(partialDerivative, Offset.offset(tolerance()));
+                double forwardLossOnPerturbedData = ctx2.forward(loss).value();
+
+                double finiteDifferenceGrad = (forwardLossOnPerturbedData - forwardLoss) / epsilon();
+
+                assertThat(finiteDifferenceGrad)
+                    .isNotNaN()
+                    .withFailMessage(FAIL_MESSAGE, finiteDifferenceGrad, autoGradient, tensorIndex)
+                    .isEqualTo(autoGradient, Offset.offset(tolerance()));
             }
         }
-    }
-
-    private void perturb(Weights<?> variable, int index, double epsilon) {
-        variable.data().addDataAt(index, epsilon);
     }
 
 }
