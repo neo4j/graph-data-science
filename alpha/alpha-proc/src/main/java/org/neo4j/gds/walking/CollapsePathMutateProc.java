@@ -20,6 +20,7 @@
 package org.neo4j.gds.walking;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.ImmutableComputationResult;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
@@ -64,7 +65,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
 
         GraphStore graphStore;
         var validator = validator();
-        var graphStoreLoader = graphStoreLoader(config, Optional.of(graphName));
+        var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username(), databaseId(), isGdsAdmin());
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             var graphCreateConfig = graphStoreLoader.graphCreateConfig();
             validator.validateConfigsBeforeLoad(graphCreateConfig, config);

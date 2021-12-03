@@ -29,12 +29,12 @@ import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.validation.Validator;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class ProcedureExecutor<
@@ -45,36 +45,42 @@ public class ProcedureExecutor<
 
     private final ProcConfigParser<CONFIG> configParser;
     private final MemoryUsageValidator memoryUsageValidator;
-    private final BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn;
     private final Validator<CONFIG> validator;
     private final AlgorithmFactory<ALGO, CONFIG> algorithmFactory;
     private final KernelTransaction ktx;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
     private final String procName;
+    private final String username;
+    private final NamedDatabaseId databaseId;
+    private final boolean isGdsAdmin;
     private final AllocationTracker allocationTracker;
 
     ProcedureExecutor(
         ProcConfigParser<CONFIG> configParser,
         MemoryUsageValidator memoryUsageValidator,
-        BiFunction<CONFIG, Optional<String>, GraphStoreLoader> graphStoreLoaderFn,
         Validator<CONFIG> validator,
         AlgorithmFactory<ALGO, CONFIG> algorithmFactory,
         KernelTransaction ktx,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
         String procName,
+        String username,
+        NamedDatabaseId databaseId,
+        boolean isGdsAdmin,
         AllocationTracker allocationTracker
     ) {
         this.configParser = configParser;
         this.memoryUsageValidator = memoryUsageValidator;
-        this.graphStoreLoaderFn = graphStoreLoaderFn;
         this.validator = validator;
         this.algorithmFactory = algorithmFactory;
         this.ktx = ktx;
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
         this.procName = procName;
+        this.username = username;
+        this.databaseId = databaseId;
+        this.isGdsAdmin = isGdsAdmin;
         this.allocationTracker = allocationTracker;
     }
 
@@ -99,7 +105,7 @@ public class ProcedureExecutor<
 
         setAlgorithmMetaDataToTransaction(config);
 
-        var graphStoreLoader = graphStoreLoaderFn.apply(config, Optional.of(graphName));
+        var graphStoreLoader = new GraphStoreFromCatalogLoader(graphName, config, username, databaseId, isGdsAdmin);
         var procedureMemoryEstimation = new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory);
         var memoryEstimationInBytes = memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
 

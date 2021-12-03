@@ -33,7 +33,6 @@ import org.neo4j.gds.validation.ValidationConfiguration;
 import org.neo4j.gds.validation.Validator;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -50,10 +49,6 @@ public abstract class AlgoBaseProc<
 
     public ProcConfigParser<CONFIG> configParser() {
         return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig);
-    }
-
-    public ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
-        return new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory());
     }
 
     protected abstract CONFIG newConfig(
@@ -80,21 +75,6 @@ public abstract class AlgoBaseProc<
         return procedureExecutor().compute(graphName, configuration, releaseAlgorithm, releaseTopology);
     }
 
-    protected ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG> procedureExecutor() {
-        return new ProcedureExecutor<>(
-            configParser(),
-            memoryUsageValidator(),
-            this::graphStoreLoader,
-            validator(),
-            algorithmFactory(),
-            transaction,
-            log,
-            taskRegistryFactory,
-            procName(),
-            allocationTracker()
-        );
-    }
-
     /**
      * Returns a single node property that has been produced by the procedure.
      */
@@ -114,7 +94,7 @@ public abstract class AlgoBaseProc<
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(username());
             var graphCreateConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfig);
 
-            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(this::username, this::graphLoaderContext, graphCreateConfig);
+            graphStoreLoader = GraphStoreLoader.implicitGraphLoader(username(), graphLoaderContext(), graphCreateConfig);
         } else if (graphNameOrConfig instanceof String) {
             graphStoreLoader = new GraphStoreFromCatalogLoader((String) graphNameOrConfig, algoConfig, username(), databaseId(), isGdsAdmin());
         } else {
@@ -134,20 +114,29 @@ public abstract class AlgoBaseProc<
         return ValidationConfiguration.empty();
     }
 
-    public Validator<CONFIG> validator() {
+    protected Validator<CONFIG> validator() {
         return new Validator<>(getValidationConfig());
     }
 
-    protected GraphStoreLoader graphStoreLoader(CONFIG config, Optional<String> maybeGraphName) {
-        return GraphStoreLoader.of(
-            config,
-            maybeGraphName,
-            Optional.empty(),
-            this::databaseId,
-            this::username,
-            this::graphLoaderContext,
-            isGdsAdmin()
+    private ProcedureExecutor<ALGO, ALGO_RESULT, CONFIG> procedureExecutor() {
+        return new ProcedureExecutor<>(
+            configParser(),
+            memoryUsageValidator(),
+            validator(),
+            algorithmFactory(),
+            transaction,
+            log,
+            taskRegistryFactory,
+            procName(),
+            username(),
+            databaseId(),
+            isGdsAdmin(),
+            allocationTracker()
         );
+    }
+
+    private ProcedureMemoryEstimation<ALGO, ALGO_RESULT, CONFIG> procedureMemoryEstimation(GraphStoreLoader graphStoreLoader) {
+        return new ProcedureMemoryEstimation<>(graphStoreLoader, algorithmFactory());
     }
 
     @ValueClass

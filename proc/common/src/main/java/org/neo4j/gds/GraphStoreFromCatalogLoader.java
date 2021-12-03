@@ -45,7 +45,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     private final GraphStore graphStore;
     private final GraphCreateConfig graphCreateConfig;
 
-    GraphStoreFromCatalogLoader(
+    public GraphStoreFromCatalogLoader(
         String graphName,
         AlgoBaseConfig config,
         String username,
