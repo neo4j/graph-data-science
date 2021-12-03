@@ -47,11 +47,11 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, GraphListProc.class);
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields()
         );
     }
@@ -112,11 +112,11 @@ class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnExistingGraph() {
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call("subgraph")
+            .graphCreate()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withAnyRelationshipType()
-            .graphCreate("subgraph")
             .yields());
 
         var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";

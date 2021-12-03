@@ -89,7 +89,8 @@ class GreedyProcTest extends BaseProcTest {
         registerProcedures(GreedyProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
-        String graphCreateQuery = GdsCypher.call()
+        String graphCreateQuery = GdsCypher.call("greedyGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",
@@ -98,8 +99,7 @@ class GreedyProcTest extends BaseProcTest {
                     Orientation.NATURAL,
                     Aggregation.DEFAULT
                 )
-            ).graphCreate("greedyGraph")
-            .yields();
+            ).yields();
 
         runQuery(graphCreateQuery);
     }
@@ -113,8 +113,7 @@ class GreedyProcTest extends BaseProcTest {
     void testResultStream() {
         final Consumer consumer = mock(Consumer.class);
 
-        var cypher = GdsCypher.call()
-            .explicitCreation("greedyGraph")
+        var cypher = GdsCypher.call("greedyGraph")
             .algo("gds.alpha.influenceMaximization.greedy")
             .streamMode()
             .addParameter("seedSetSize", 2)

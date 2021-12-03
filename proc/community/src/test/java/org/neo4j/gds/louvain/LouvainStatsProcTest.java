@@ -56,8 +56,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
     void yields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("louvain")
             .statsMode()
             .yields();
@@ -97,16 +96,15 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("louvain")
             .statsMode()
             .yields("communityCount");
@@ -116,8 +114,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
     @Test
     void statsShouldNotHaveWriteProperties() {
-        String query = GdsCypher.call()
-            .explicitCreation("myGraph")
+        String query = GdsCypher.call("myGraph")
             .algo("louvain")
             .statsMode()
             .yields();

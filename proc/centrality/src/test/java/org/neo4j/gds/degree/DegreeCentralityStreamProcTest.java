@@ -43,8 +43,7 @@ class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<DegreeCent
 
     @Test
     void testStream() {
-        String streamQuery = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String streamQuery = GdsCypher.call(GRAPH_NAME)
             .algo("degree")
             .streamMode()
             .yields();

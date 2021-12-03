@@ -99,11 +99,11 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
         ids0 = new long[]{idA, idC, idE, idD, idF};
         costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

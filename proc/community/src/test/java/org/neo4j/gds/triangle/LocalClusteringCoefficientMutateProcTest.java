@@ -84,8 +84,7 @@ class LocalClusteringCoefficientMutateProcTest
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH_NAME)
+            .call(TEST_GRAPH_NAME)
             .algo("localClusteringCoefficient")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())

@@ -64,8 +64,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         runQuery(createQuery("g2", Orientation.NATURAL));
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g2")
+            .call("g2")
             .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
             .streamMode()
             .addParameter("modelName", "model")

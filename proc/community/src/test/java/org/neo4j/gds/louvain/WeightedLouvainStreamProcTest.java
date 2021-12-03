@@ -86,7 +86,8 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
     @Override
     List<String> graphCreateQueries() {
         return Arrays.asList(
-            GdsCypher.call()
+            GdsCypher.call("weightedLouvainGraph")
+                .graphCreate()
                 .withNodeLabel("User")
                 .withNodeProperty("seed")
                 .withRelationshipType(
@@ -98,9 +99,9 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                     )
                 )
                 .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
-                .graphCreate("weightedLouvainGraph")
                 .yields(),
-            GdsCypher.call()
+            GdsCypher.call("unweightedGraph")
+                .graphCreate()
                 .withNodeLabel("User")
                 .withNodeProperty("seed")
                 .withRelationshipType(
@@ -111,7 +112,6 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                         Aggregation.NONE
                     )
                 )
-                .graphCreate("unweightedGraph")
                 .yields()
         );
     }
@@ -131,8 +131,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
     @Test
     void weightedLouvainTest() {
         var query = GdsCypher
-            .call()
-            .explicitCreation("weightedLouvainGraph")
+            .call("weightedLouvainGraph")
             .algo("louvain")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -146,8 +145,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
         return Stream.of(
             arguments(
                 GdsCypher
-                    .call()
-                    .explicitCreation("unweightedGraph")
+                    .call("unweightedGraph")
                     .algo("louvain")
                     .streamMode()
                     .yields("nodeId", "communityId", "intermediateCommunityIds")
@@ -157,8 +155,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
             ),
             arguments(
                 GdsCypher
-                    .call()
-                    .explicitCreation("weightedLouvainGraph")
+                    .call("weightedLouvainGraph")
                     .algo("louvain")
                     .streamMode()
                     .yields("nodeId", "communityId", "intermediateCommunityIds")

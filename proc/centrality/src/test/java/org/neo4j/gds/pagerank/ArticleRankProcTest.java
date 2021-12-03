@@ -88,8 +88,7 @@ class ArticleRankProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("scalers")
     void scalers(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
             .addParameter("scaler", variant.name().toLowerCase(Locale.ENGLISH))
@@ -103,8 +102,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
     @Test
     void invalidScaler() {
-        assertThatThrownBy(() -> runQuery(GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        assertThatThrownBy(() -> runQuery(GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
             .addParameter("scaler", "SUPERDUPERSCALARSCALERVARIANT")
@@ -117,8 +115,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
     @Test
     void stats() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .statsMode()
             .yields();
@@ -137,8 +134,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
             .yields();
@@ -153,8 +149,7 @@ class ArticleRankProcTest extends BaseProcTest {
     void streamWithSourceNodes() {
         var sourceNodes = allNodes();
 
-        var query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
@@ -173,8 +168,7 @@ class ArticleRankProcTest extends BaseProcTest {
             new NodeEntity(null, 1337)
         );
 
-        var query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
@@ -191,8 +185,7 @@ class ArticleRankProcTest extends BaseProcTest {
     @Test
     void write() {
         String propertyKey = "pr";
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .writeMode()
             .addParameter("writeProperty", propertyKey)
@@ -215,8 +208,7 @@ class ArticleRankProcTest extends BaseProcTest {
     @Test
     void mutate() {
         String propertyKey = "pr";
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .mutateMode()
             .addParameter("mutateProperty", propertyKey)
@@ -239,8 +231,7 @@ class ArticleRankProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("estimations")
     void estimates(GdsCypher.ExecutionModes mode) {
-        var queryBuilder = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var queryBuilder = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .estimationMode(mode);
 

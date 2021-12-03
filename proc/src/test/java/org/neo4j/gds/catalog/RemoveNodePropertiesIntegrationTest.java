@@ -22,12 +22,12 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.wcc.WccMutateProc;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -50,10 +50,10 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher
-            .call()
+            .call("testGraph")
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("TYPE")
-            .graphCreate("testGraph")
             .yields());
     }
 

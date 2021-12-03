@@ -92,9 +92,9 @@ abstract class ApproxMaxKCutProcTest<CONFIG extends ApproxMaxKCutConfig> extends
             GraphWriteNodePropertiesProc.class
         );
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .loadEverything()
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);

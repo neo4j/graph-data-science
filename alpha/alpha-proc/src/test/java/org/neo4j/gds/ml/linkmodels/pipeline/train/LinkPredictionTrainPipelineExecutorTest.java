@@ -119,11 +119,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class
         );
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("N")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
@@ -262,11 +262,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     void failOnExistingSplitRelTypes() {
         var graphName = "invalidGraph";
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("_TEST_", "REL")
             .withRelationshipType("_TEST_COMPLEMENT_", "REL")
-            .graphCreate(graphName)
             .yields();
 
         runQuery(createQuery);

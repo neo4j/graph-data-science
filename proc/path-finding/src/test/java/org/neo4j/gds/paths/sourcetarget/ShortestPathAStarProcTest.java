@@ -130,13 +130,13 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         ids0 = new long[]{idA, idB, idC, idD, idE, idF, idG, idH, idX};
         costs0 = new double[]{0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0};
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Label")
             .withNodeProperty(LATITUDE_PROPERTY)
             .withNodeProperty(LONGITUDE_PROPERTY)
             .withAnyRelationshipType()
             .withRelationshipProperty(COST_PROPERTY)
-            .graphCreate(GRAPH_NAME)
             .yields());
     }
 
@@ -191,13 +191,13 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     public void loadGraph(String graphName) {
         QueryRunner.runQuery(
             graphDb(),
-            GdsCypher.call()
+            GdsCypher.call(graphName)
+                .graphCreate()
                 .withAnyLabel()
                 .withNodeProperty(LATITUDE_PROPERTY)
                 .withNodeProperty(LONGITUDE_PROPERTY)
                 .withAnyRelationshipType()
                 .withRelationshipProperty(COST_PROPERTY)
-                .graphCreate(graphName)
                 .yields()
         );
     }

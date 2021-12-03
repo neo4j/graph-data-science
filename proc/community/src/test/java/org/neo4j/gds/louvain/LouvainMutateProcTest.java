@@ -121,8 +121,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         var testGraphName = mutateGraphName().get();
 
         var mutateQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -131,8 +130,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         runQuery(mutateQuery);
 
         var writeQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("louvain")
             .writeMode()
             .addParameter("seedProperty", mutateProperty())
@@ -155,8 +153,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(mutateGraphName().get())
+            .call(mutateGraphName().get())
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -208,17 +205,16 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         String graphName = "emptyGraph";
 
-        var loadQuery = GdsCypher.call()
+        var loadQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(graphName)
             .yields();
 
         runQuery(loadQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
+            .call(graphName)
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", "foo")

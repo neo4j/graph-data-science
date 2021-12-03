@@ -63,11 +63,11 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, NodeClassificationPipelineWriteProc.class);
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call("g")
+            .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
-            .graphCreate("g")
             .yields();
 
         runQuery(loadQuery);
@@ -83,8 +83,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "class")
@@ -117,8 +116,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "class")
@@ -158,8 +156,7 @@ class NodeClassificationPipelineWriteProcTest extends BaseProcTest {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 2);
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "foo")

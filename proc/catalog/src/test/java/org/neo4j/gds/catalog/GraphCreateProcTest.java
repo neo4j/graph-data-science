@@ -392,7 +392,8 @@ class GraphCreateProcTest extends BaseProcTest {
 
         Long expectedRelationshipCount = orientation.equals("UNDIRECTED") ? 2L : 1L;
 
-        String graphCreate = GdsCypher.call()
+        String graphCreate = GdsCypher.call(name)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType(
                 "B",
@@ -401,7 +402,6 @@ class GraphCreateProcTest extends BaseProcTest {
                     .orientation(Orientation.parse(orientation))
                     .build()
             )
-            .graphCreate(name)
             .yields();
 
         assertCypherResult(
@@ -428,7 +428,8 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipProjectionWithProperties(Object properties, Map<String, Object> expectedProperties) {
         String name = "g";
 
-        String graphCreate = GdsCypher.call()
+        String graphCreate = GdsCypher.call(name)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType(
                 "B", RelationshipProjection.builder()
@@ -436,7 +437,6 @@ class GraphCreateProcTest extends BaseProcTest {
                     .properties(PropertyMappings.fromObject(properties))
                     .build()
             )
-            .graphCreate(name)
             .yields();
 
         assertCypherResult(graphCreate,
@@ -600,7 +600,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String standard = "standard";
         String cypher = "cypher";
 
-        String graphCreateStandard = GdsCypher.call()
+        String graphCreateStandard = GdsCypher.call(standard)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType(
                 "KNOWS",
@@ -610,7 +611,6 @@ class GraphCreateProcTest extends BaseProcTest {
                     .addProperty("weight", "weight", DefaultValue.of(Double.NaN), Aggregation.parse(aggregation))
                     .build()
             )
-            .graphCreate(standard)
             .yields();
 
         AtomicInteger standardNodeCount = new AtomicInteger();
@@ -854,12 +854,12 @@ class GraphCreateProcTest extends BaseProcTest {
         // TODO: test create.cypher
         runQuery(testGraph, Collections.emptyMap());
         String query = GdsCypher
-            .call()
+            .call("g")
+            .graphCreate()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .withNodeProperty("fooProp", "foo")
             .withNodeProperty(PropertyMapping.of("barProp", "bar", 19.84))
-            .graphCreate("g")
             .yields("nodeCount");
 
         runQuery(query, map());
@@ -886,13 +886,13 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("aggGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", DefaultValue.of(1.0), Aggregation.SUM))
             .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
             .withRelationshipProperty(PropertyMapping.of("maxCost", "cost", Aggregation.MAX))
             .withRelationshipType("TYPE_1")
-            .graphCreate("aggGraph")
             .yields("relationshipProjection");
 
         runQueryWithRowConsumer(query, row -> {
@@ -934,11 +934,11 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph);
 
         String query = GdsCypher
-            .call()
+            .call("g")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
-            .graphCreate("g")
             .yields();
         runQuery(query);
 
@@ -962,11 +962,11 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("g")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
-            .graphCreate("g")
             .yields();
         runQuery(query);
 
@@ -989,11 +989,11 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("g")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("agg", "property", DefaultValue.of(42), aggregation)
             .withRelationshipType("TYPE")
-            .graphCreate("g")
             .yields();
         runQuery(query);
 
@@ -1016,11 +1016,11 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("countGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
             .withRelationshipType("TYPE_1")
-            .graphCreate("countGraph")
             .yields("relationshipProjection");
 
         runQueryWithRowConsumer(query, row -> {
@@ -1056,11 +1056,11 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("countGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "foo", DefaultValue.of(42L), Aggregation.COUNT)
             .withRelationshipType("TYPE")
-            .graphCreate("countGraph")
             .yields("relationshipProjection");
 
         runQueryWithRowConsumer(query, row -> {
@@ -1096,12 +1096,12 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
-            .call()
+            .call("countGraph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
             .withRelationshipProperty("foo", "foo", DefaultValue.of(42), Aggregation.SUM)
             .withRelationshipType("TYPE_1")
-            .graphCreate("countGraph")
             .yields("relationshipProjection");
 
         runQueryWithRowConsumer(query, row -> {

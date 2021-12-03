@@ -92,10 +92,10 @@ class TriangleProcTest extends BaseProcTest {
         HashSet<Integer> sums = new HashSet<>();
         TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 

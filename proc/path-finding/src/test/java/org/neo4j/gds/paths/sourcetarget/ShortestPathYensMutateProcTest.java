@@ -132,8 +132,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
     void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.shortestPath.yens")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())

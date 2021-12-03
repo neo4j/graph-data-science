@@ -84,10 +84,10 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     void setupGraph() throws Exception {
         registerProcedures(GraphCreateProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(loadQuery);
     }
@@ -129,8 +129,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(GRAPH_NAME)
+            .call(GRAPH_NAME)
             .algo("pageRank")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())

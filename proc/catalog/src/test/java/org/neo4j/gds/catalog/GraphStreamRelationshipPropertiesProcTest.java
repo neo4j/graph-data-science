@@ -67,17 +67,18 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(TEST_GRAPH_SAME_PROPERTIES)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("REL1")
             .withRelationshipType("REL2")
             .withRelationshipProperty("relProp1")
             .withRelationshipProperty("relProp2")
-            .graphCreate(TEST_GRAPH_SAME_PROPERTIES)
             .yields()
         );
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("REL1", RelationshipProjection.builder()
                 .type("REL1")
@@ -92,7 +93,6 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
                 .addProperties(PropertyMapping.of("newRelProp1", "relProp1", 1337))
                 .build()
             )
-            .graphCreate(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .yields());
     }
 

@@ -60,8 +60,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     void testStatsYields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("pageRank")
             .statsMode()
             .addParameter("tolerance", 0.1)
@@ -80,7 +79,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
 
     @Test
     void statsShouldNotHaveWriteProperties() {
-        String query = GdsCypher.call().explicitCreation("graphLabel1").algo("pageRank")
+        String query = GdsCypher.call("graphLabel1").algo("pageRank")
             .statsMode()
             .yields();
 

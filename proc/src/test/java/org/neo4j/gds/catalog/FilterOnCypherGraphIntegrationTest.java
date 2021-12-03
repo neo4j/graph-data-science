@@ -22,10 +22,10 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 
 import java.util.Arrays;
 
@@ -79,8 +79,7 @@ class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
     @Test
     void shouldFilterOnACypherGraph() {
         GdsCypher.ParametersBuildStage labelPropagationQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("labelPropagation")
             .statsMode();
 

@@ -77,13 +77,12 @@ public class PregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery("CREATE (:OffsetId), (:RealNode)");
         registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
-        runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(DEFAULT_GRAPH_NAME).yields());
+        runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphCreate().withNodeLabel("RealNode").withAnyRelationshipType().yields());
     }
 
     @Test
     void stream() {
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -103,8 +102,7 @@ public class PregelProcTest extends BaseProcTest {
     @ParameterizedTest
     @EnumSource(Partitioning.class)
     void streamWithPartitioning(Partitioning partitioningScheme) {
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -124,8 +122,7 @@ public class PregelProcTest extends BaseProcTest {
 
     @Test
     void streamWithInvalidPartitioning() {
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
@@ -142,8 +139,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void write() {
         var writePrefix = "test_";
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .writeMode()
             .addParameter("maxIterations", 20)
@@ -177,8 +173,7 @@ public class PregelProcTest extends BaseProcTest {
     void mutate() {
         var mutatePrefix = "test_";
 
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "test")
             .mutateMode()
             .addParameter("maxIterations", 20)

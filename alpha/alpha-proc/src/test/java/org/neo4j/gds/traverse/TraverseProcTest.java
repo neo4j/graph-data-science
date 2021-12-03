@@ -103,15 +103,14 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testFindAnyOf() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         long id = id("a");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -127,15 +126,14 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthOut() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         long id = id("a");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -150,16 +148,15 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthIn() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         long id = id("g");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -174,16 +171,15 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testDfsPath() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         long id = id("g");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -207,16 +203,15 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testBfsPath() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         long id = id("g");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.bfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -239,16 +234,15 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void worksOnGraphWithLoop() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         long id = id("a");
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.bfs")
             .streamMode()
             .addParameter("startNode", id)
@@ -272,8 +266,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void failOnInvalidStartNode() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", 42)
@@ -285,8 +278,7 @@ class TraverseProcTest extends BaseProcTest {
     @Test
     void failOnInvalidEndNode() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", 0)

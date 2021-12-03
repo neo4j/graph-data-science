@@ -94,10 +94,10 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withRelationshipProperty("cost")
             .loadEverything()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
@@ -123,11 +123,11 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testIncomingResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipProperty("cost")
             .withRelationshipType("TYPE", Orientation.REVERSE)
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
@@ -153,11 +153,11 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void testBothResultStream() {
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipProperty("cost")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
@@ -181,10 +181,10 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @Test
     void testWriteBack() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withRelationshipProperty("cost")
             .loadEverything()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
         final String cypher =
@@ -217,10 +217,10 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @Test
     void testProgressTracking() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         TestProcedureRunner.applyOnProcedure(db, ShortestPathDeltaSteppingProc.class, proc -> {
@@ -251,10 +251,10 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
     void failOnInvalidStartNode() {
         runQuery("CREATE (:Invalid)");
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Node")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 

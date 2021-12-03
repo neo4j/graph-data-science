@@ -100,8 +100,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .graphStore();
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")
@@ -148,8 +147,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
         runQuery(createQuery("g2", Orientation.NATURAL));
 
         var query = GdsCypher
-            .call()
-            .explicitCreation("g2")
+            .call("g2")
             .algo("gds.alpha.ml.pipeline.linkPrediction.predict")
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")

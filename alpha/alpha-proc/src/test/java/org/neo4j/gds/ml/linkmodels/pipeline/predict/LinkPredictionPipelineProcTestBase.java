@@ -105,11 +105,11 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
     }
 
     String createQuery(String graphName, Orientation orientation) {
-        return GdsCypher.call()
+        return GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("N")
             .withRelationshipType("T", orientation)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .graphCreate(graphName)
             .yields();
     }
 

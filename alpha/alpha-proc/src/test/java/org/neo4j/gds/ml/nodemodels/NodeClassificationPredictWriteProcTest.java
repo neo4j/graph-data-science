@@ -86,11 +86,11 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
 
         runQuery(DB_CYPHER);
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
-            .graphCreate(GRAPH_NAME)
             .yields();
         addModelWithFeatures(modelCatalog, getUsername(), MODEL_NAME, List.of("a", "b"));
 
@@ -125,8 +125,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     @Test
     void shouldHaveTheRightOutputs() {
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.nodeClassification.predict")
             .writeMode()
             .addParameter("writeProperty", "class")
@@ -146,8 +145,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Alg
     @Test
     void shouldEstimateMemory() {
         var query = GdsCypher
-            .call()
-            .explicitCreation("g")
+            .call("g")
             .algo("gds.alpha.ml.nodeClassification.predict")
             .estimationMode(GdsCypher.ExecutionModes.WRITE)
             .addParameter("writeProperty", "class")

@@ -103,12 +103,12 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             LinkPredictionPipelineConfigureSplitProc.class
         );
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);

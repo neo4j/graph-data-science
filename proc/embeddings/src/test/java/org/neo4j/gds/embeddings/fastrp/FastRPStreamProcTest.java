@@ -59,8 +59,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         List<String> featureProperties = List.of("f1", "f2");
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .explicitCreation(FASTRP_GRAPH)
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
             .algo("fastRP")
             .streamMode()
             .addParameter("propertyRatio", propertyRatio)
@@ -85,8 +84,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
         var weights = List.of(0.0D, 1.0D, 2.0D, 4.0D);
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .explicitCreation(FASTRP_GRAPH)
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -105,21 +103,20 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Test
     void shouldComputeWithWeight() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0.0f))
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         List<String> featureProperties = List.of("f1", "f2");
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("fastRP")
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)

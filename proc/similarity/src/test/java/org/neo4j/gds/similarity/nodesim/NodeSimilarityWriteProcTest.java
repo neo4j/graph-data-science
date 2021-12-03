@@ -115,12 +115,12 @@ public class NodeSimilarityWriteProcTest
         });
 
         String resultGraphName = "simGraph_" + orientation.name();
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(resultGraphName)
+            .graphCreate()
             .withNodeLabel(orientation == REVERSE ? "Item" : "Person")
             .withRelationshipType("SIMILAR", orientation)
             .withNodeProperty("id")
             .withRelationshipProperty("score")
-            .graphCreate(resultGraphName)
             .yields();
 
         runQuery(loadQuery);
@@ -203,16 +203,15 @@ public class NodeSimilarityWriteProcTest
     void shouldWriteUniqueRelationships(int topN) {
         var graphName = "undirectedGraph";
 
-        var graphCreateQuery = GdsCypher.call()
+        var graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("LIKES", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation(graphName)
+        var query = GdsCypher.call(graphName)
             .algo("gds", "nodeSimilarity")
             .writeMode()
             .addParameter("sudo", true)
@@ -240,20 +239,19 @@ public class NodeSimilarityWriteProcTest
                  "CREATE (dave)-[:KNOWS]->(a)" +
                  "CREATE (bob)-[:KNOWS]->(a)");
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeLabel("Bar")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
         String relationshipType = "SIMILAR";
         String relationshipProperty = "score";
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.nodeSimilarity")
             .writeMode()
             .addParameter("nodeLabels", List.of("Foo", "Bar"))

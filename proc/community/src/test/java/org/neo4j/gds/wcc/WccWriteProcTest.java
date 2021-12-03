@@ -69,8 +69,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     void testWriteYields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -122,8 +121,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     void testWrite() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -140,10 +138,10 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
 
         String graphCreateQuery = GdsCypher
-            .call()
+            .call("nodeFilterGraph")
+            .graphCreate()
             .withNodeLabels("Label", "Label2", "Ignore")
             .withAnyRelationshipType()
-            .graphCreate("nodeFilterGraph")
             .yields("nodeCount", "relationshipCount");
 
         runQueryWithRowConsumer(graphCreateQuery, row -> {
@@ -152,8 +150,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         });
 
         String query = GdsCypher
-            .call()
-            .explicitCreation("nodeFilterGraph")
+            .call("nodeFilterGraph")
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -167,16 +164,15 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithLabel() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -189,16 +185,15 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeed() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("seedId")
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -210,16 +205,15 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     @Test
     void testWriteWithSeedAndSameWriteProperty() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("seedId")
             .withAnyRelationshipType()
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", SEED_PROPERTY)
@@ -239,8 +233,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         runQuery(loadQuery, MapUtil.map("graphName", graphName));
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
+            .call(graphName)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -264,16 +257,15 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     @ParameterizedTest
     @MethodSource("componentSizeInputs")
     void testWriteWithMinComponentSize(Map<String, Object> parameters, Long[] expectedComponentIds) {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withAnyLabel()
             .withAnyRelationshipType()
             .withNodeProperty(SEED_PROPERTY)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         var query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -323,8 +315,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     void testWriteWithConsecutiveIds() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -346,15 +337,14 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", "foo")

@@ -163,9 +163,7 @@ class ClosenessCentralityProcTest extends BaseProcTest {
 
     private GdsCypher.ModeBuildStage gdsCypher() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
-        return GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.closeness");
+        return GdsCypher.call(DEFAULT_GRAPH_NAME).algo("gds.alpha.closeness");
     }
 
     private void verifyMock() {

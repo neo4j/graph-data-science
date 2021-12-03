@@ -171,20 +171,21 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     List<String> graphCreateQueries() {
         return Arrays.asList(
             GdsCypher
-                .call()
+                .call("graphLabel3")
+                .graphCreate()
                 .withNodeLabel("Label3")
                 .withRelationshipType("TYPE3", RelationshipProjection.of(
                     "TYPE3",
                     Orientation.UNDIRECTED,
                     Aggregation.DEFAULT
                 ).withProperties(PropertyMappings.of(PropertyMapping.of("equalWeight"))))
-                .graphCreate("graphLabel3").yields(),
-            GdsCypher.call()
+                .yields(),
+            GdsCypher.call("graphLabel1")
+                .graphCreate()
                 .withNodeLabel("Label1")
                 .withRelationshipType("TYPE1", RelationshipProjection.builder().type("TYPE1")
                     .addProperties(PropertyMapping.of("equalWeight"), PropertyMapping.of("weight"))
                     .build())
-                .graphCreate("graphLabel1")
                 .yields()
         );
     }

@@ -202,9 +202,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     GdsCypher.ModeBuildStage explicitAlgoBuildStage() {
-        return GdsCypher.call()
-            .explicitCreation(TEST_GRAPH_NAME)
-            .algo("gds", "beta", "modularityOptimization");
+        return GdsCypher.call(TEST_GRAPH_NAME).algo("gds", "beta", "modularityOptimization");
     }
 
     static String graphCreateQuery() {
@@ -226,9 +224,9 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
             ).build();
 
         return GdsCypher
-            .call()
-            .implicitCreation(config)
-            .graphCreate(TEST_GRAPH_NAME)
+            .call(TEST_GRAPH_NAME)
+            .graphCreate()
+            .withGraphCreateConfig(config)
             .yields();
     }
 }

@@ -62,17 +62,18 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(TEST_GRAPH_SAME_PROPERTIES)
+            .graphCreate()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("newNodeProp1", "nodeProp1")
             .withNodeProperty("newNodeProp2", "nodeProp2")
             .withAnyRelationshipType()
-            .graphCreate(TEST_GRAPH_SAME_PROPERTIES)
             .yields()
         );
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
+            .graphCreate()
             .withNodeLabel("A", NodeProjection.of(
                 "A",
                 PropertyMappings.of().withMappings(
@@ -87,7 +88,6 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
                 )
             ))
             .withAnyRelationshipType()
-            .graphCreate(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .yields()
         );
     }

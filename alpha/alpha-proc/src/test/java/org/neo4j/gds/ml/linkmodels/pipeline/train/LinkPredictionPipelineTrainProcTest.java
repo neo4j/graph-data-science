@@ -112,22 +112,22 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             ModelDropProc.class
         );
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
             .withRelationshipProperty("weight", DefaultValue.of(1.0))
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
-            .graphCreate(GRAPH_NAME)
             .yields();
 
-        String createQueryWeighted = GdsCypher.call()
+        String createQueryWeighted = GdsCypher.call("weighted_graph")
+            .graphCreate()
             .withNodeLabels("N", "Ignore")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
             .withRelationshipProperty("weight", DefaultValue.of(100000.0))
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
-            .graphCreate("weighted_graph")
             .yields();
 
         runQuery(createQuery);

@@ -46,11 +46,11 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
 
         registerProcedures(GraphCreateProc.class, ScalePropertiesStreamProc.class);
         var loadQuery = GdsCypher
-            .call()
+            .call(GRAPH_NAME)
+            .graphCreate()
             .withAnyRelationshipType()
             .withNodeLabel("A")
             .withNodeProperty("id")
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(loadQuery);
     }
@@ -68,8 +68,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     @Test
     void stream() {
         var query = GdsCypher
-            .call()
-            .explicitCreation(GRAPH_NAME)
+            .call(GRAPH_NAME)
             .algo("gds.alpha.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("id"))

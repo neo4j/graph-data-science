@@ -24,14 +24,14 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.OrientationCombinationTest;
+import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -84,7 +84,8 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             Map.of("nodeId", idFunction.of("e"), "score", 0.0)
         );
 
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(BC_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withRelationshipType(
                 "REL",
@@ -94,7 +95,6 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
                     Aggregation.DEFAULT
                 )
             )
-            .graphCreate(BC_GRAPH_NAME)
             .yields();
 
         runQuery(loadQuery);

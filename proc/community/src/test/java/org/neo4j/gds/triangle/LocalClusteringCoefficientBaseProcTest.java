@@ -177,10 +177,10 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
     @Override
     public void loadGraph(String graphName){
-        String graphCreateQuery = GdsCypher.call()
+        String graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withRelationshipType("T", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);

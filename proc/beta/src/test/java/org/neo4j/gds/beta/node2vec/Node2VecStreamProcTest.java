@@ -43,8 +43,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
     void embeddingsShouldHaveTheConfiguredDimension() {
         loadGraph(DEFAULT_GRAPH_NAME);
         int dimensions = 42;
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .streamMode()
             .addParameter("embeddingDimension", 42)
@@ -69,8 +68,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
             result.<Long>columnAs("count").stream().findFirst().orElse(-1L)
         );
         loadGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.node2vec")
             .streamMode()
             .addParameter("walksPerNode", Integer.MAX_VALUE)

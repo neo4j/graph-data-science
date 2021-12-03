@@ -101,7 +101,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     void testWrite() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -131,7 +131,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -170,7 +170,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     void testLazyComputationLoggingFinishes() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())

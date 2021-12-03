@@ -103,7 +103,8 @@ class GraphSageBaseProcTest extends BaseProcTest {
 
         runQuery(DB_CYPHER);
 
-        String query = GdsCypher.call()
+        String query = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withNodeProperty(PropertyMapping.of("birth_year", 1.0))
@@ -116,7 +117,6 @@ class GraphSageBaseProcTest extends BaseProcTest {
                 )
             )
             .withRelationshipProperty("weight")
-            .graphCreate(graphName)
             .yields();
 
         runQuery(query);
@@ -146,8 +146,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
     }
 
     void train(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
-        String trainQuery = GdsCypher.call()
-            .explicitCreation(graphName)
+        String trainQuery = GdsCypher.call(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("sampleSizes", List.of(2, 4))

@@ -77,11 +77,11 @@ class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     private String createQuery(String graphName, Orientation orientation) {
         return GdsCypher
-            .call()
+            .call(graphName)
+            .graphCreate()
             .withNodeLabel("N")
             .withNodeProperty("a")
             .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
-            .graphCreate(graphName)
             .yields();
     }
 

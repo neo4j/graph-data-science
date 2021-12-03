@@ -126,7 +126,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
     void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation(GRAPH_NAME)
+        var query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.shortestPath.dijkstra")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())

@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -69,20 +69,20 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher
-            .call()
+            .call("testGraph")
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
-            .graphCreate("testGraph")
             .yields());
 
         runQuery(GdsCypher
-            .call()
+            .call(TEST_GRAPH2)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
             .withRelationshipProperty("p", DefaultValue.of(2.0))
-            .graphCreate(TEST_GRAPH2)
             .yields());
     }
 

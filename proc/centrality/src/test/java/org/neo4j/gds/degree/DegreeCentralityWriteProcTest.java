@@ -65,8 +65,7 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
 
     @Test
     void testWrite() {
-        String writeQuery = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String writeQuery = GdsCypher.call(GRAPH_NAME)
             .algo("degree")
             .writeMode()
             .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)

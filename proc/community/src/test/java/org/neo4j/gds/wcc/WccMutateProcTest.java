@@ -102,8 +102,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
         GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
         var mutateQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -112,8 +111,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
         runQuery(mutateQuery);
 
         var writeQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("wcc")
             .writeMode()
             .addParameter("seedProperty", mutateProperty())
@@ -140,8 +138,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
         GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -191,16 +188,15 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
 
         String graphName = "emptyGraph";
-        var loadQuery = GdsCypher.call()
+        var loadQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(graphName)
             .yields();
         runQuery(loadQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
+            .call(graphName)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", "foo")

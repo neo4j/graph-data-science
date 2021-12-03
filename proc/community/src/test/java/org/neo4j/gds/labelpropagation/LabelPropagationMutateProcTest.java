@@ -99,8 +99,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
         var mutateQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -109,8 +108,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         runQuery(mutateQuery);
 
         var writeQuery = GdsCypher
-            .call()
-            .explicitCreation(testGraphName)
+            .call(testGraphName)
             .algo("labelPropagation")
             .writeMode()
             .addParameter("seedProperty", mutateProperty())
@@ -130,8 +128,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH_NAME)
+            .call(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -171,17 +168,16 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
         String graphName = "emptyGraph";
 
-        var loadQuery = GdsCypher.call()
+        var loadQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(graphName)
             .yields();
 
         runQuery(loadQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
+            .call(graphName)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
@@ -203,17 +199,16 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             String graphName = "loadGraph";
 
             String loadQuery = GdsCypher
-                .call()
+                .call(graphName)
+                .graphCreate()
                 .withNodeLabels("Ignore", "A", "B")
                 .withAnyRelationshipType()
-                .graphCreate(graphName)
                 .yields();
 
             runQuery(loadQuery);
 
             String query = GdsCypher
-                .call()
-                .explicitCreation(graphName)
+                .call(graphName)
                 .algo("labelPropagation")
                 .mutateMode()
                 .addParameter("nodeLabels", Arrays.asList("A", "B"))

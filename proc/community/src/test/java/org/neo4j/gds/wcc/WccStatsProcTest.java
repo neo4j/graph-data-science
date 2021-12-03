@@ -55,8 +55,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
     void yields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .statsMode()
             .yields();
@@ -91,16 +90,15 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
         String query = GdsCypher
-            .call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+            .call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .statsMode()
             .yields("componentCount");
@@ -111,8 +109,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
     @Test
     void statsShouldNotHaveWriteProperties() {
         loadGraph(DEFAULT_GRAPH_NAME);
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .statsMode()
             .yields();

@@ -81,8 +81,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         List<String> featureProperties = List.of("f1", "f2");
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .explicitCreation(FASTRP_GRAPH)
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(FASTRP_GRAPH)
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -107,13 +106,13 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
 
     @Test
     void shouldComputeAndWriteWithWeight() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0.0f))
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
 
@@ -121,8 +120,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         var propertyRatio = 0.5;
         int embeddingDimension = 128;
 
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)

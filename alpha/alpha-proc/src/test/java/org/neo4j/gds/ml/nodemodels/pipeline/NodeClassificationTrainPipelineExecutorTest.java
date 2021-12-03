@@ -84,11 +84,11 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class);
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("N")
             .withRelationshipType("R")
             .withNodeProperties(List.of("array", "scalar", "t"), DefaultValue.DEFAULT)
-            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);

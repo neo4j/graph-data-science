@@ -71,7 +71,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
     void testWrite() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.yens")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -106,7 +106,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.yens")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())

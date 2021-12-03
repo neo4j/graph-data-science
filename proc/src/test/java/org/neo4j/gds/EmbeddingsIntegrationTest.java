@@ -38,6 +38,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.gds.math.L2Norm.l2Norm;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Neo4jModelCatalogExtension
 class EmbeddingsIntegrationTest extends BaseProcTest {
@@ -84,11 +85,11 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         );
 
         runQuery(GdsCypher
-            .call()
+            .call(TEST_GRAPH)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
-            .graphCreate(TEST_GRAPH)
             .yields());
     }
 
@@ -103,8 +104,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         int node2vecEmbeddingDimension = 3;
         String node2vecQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("embeddingDimension", node2vecEmbeddingDimension)
@@ -115,8 +115,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         int rpEmbeddingDimension = 3;
         String rpQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("gds.fastRP")
             .writeMode()
             .addParameter("embeddingDimension", rpEmbeddingDimension)
@@ -126,31 +125,29 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         runQuery(rpQuery);
 
-        String newCreateQuery = GdsCypher
-            .call()
-            .withNodeLabel("MATCH (n) " +
-                           "RETURN " +
-                           "  id(n) AS id, " +
-                           "  n.rp[0] AS rp0," +
-                           "  n.rp[1] AS rp1," +
-                           "  n.rp[2] AS rp2," +
-                           "  n.node2vec[0] AS node2vec0," +
-                           "  n.node2vec[1] AS node2vec1," +
-                           "  n.node2vec[2] AS node2vec2")
-            .withRelationshipType("MATCH (n)-->(m) " +
-                                  "RETURN" +
-                                  "  id(n) AS source," +
-                                  "  id(m) AS target")
-            .graphCreateCypher("newGraph")
-            .yields();
+        String newCreateQuery = formatWithLocale(
+            "CALL gds.graph.create.cypher('newGraph', '%s', '%s')",
+            "MATCH (n) " +
+            "RETURN " +
+            "  id(n) AS id, " +
+            "  n.rp[0] AS rp0," +
+            "  n.rp[1] AS rp1," +
+            "  n.rp[2] AS rp2," +
+            "  n.node2vec[0] AS node2vec0," +
+            "  n.node2vec[1] AS node2vec1," +
+            "  n.node2vec[2] AS node2vec2",
+            "MATCH (n)-->(m) " +
+            "RETURN" +
+            "  id(n) AS source," +
+            "  id(m) AS target"
+        );
         runQuery(newCreateQuery);
 
         // run GraphSage in stream mode
         int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
         String graphSageTrainQuery = GdsCypher
-            .call()
-            .explicitCreation("newGraph")
+            .call("newGraph")
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("rp0", "rp1", "rp2", "node2vec0", "node2vec1", "node2vec2"))
@@ -160,8 +157,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         runQuery(graphSageTrainQuery);
         String graphSageStreamQuery = GdsCypher
-            .call()
-            .explicitCreation("newGraph")
+            .call("newGraph")
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("modelName", graphSageModel)

@@ -43,8 +43,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @Test
     void testStream() {
-        @Language("Cypher") String query = GdsCypher.call()
-            .explicitCreation("myGraph")
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
             .algo("louvain")
             .streamMode()
             .yields("nodeId", "communityId", "intermediateCommunityIds");
@@ -61,8 +60,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @Test
     void testStreamCommunities() {
-        @Language("Cypher") String query = GdsCypher.call()
-            .explicitCreation("myGraph")
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
             .algo("louvain")
             .streamMode()
             .addParameter("includeIntermediateCommunities", true)

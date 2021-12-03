@@ -72,17 +72,16 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
         registerProcedures(RandomWalkStreamProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
 
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphCreate()
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate(DEFAULT_GRAPH_NAME)
             .yields();
         runQuery(createQuery);
     }
 
     @Test
     void shouldRunSimpleConfig() {
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -105,8 +104,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Test
     void shouldReturnPath() {
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -132,8 +130,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Test
     void shouldThrowOnUnknownStartNode() {
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -146,8 +143,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Test
     void shouldThrowOnUnselectedStartNode() {
-        String query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
@@ -161,8 +157,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
     @Test
     void shouldRunMemoryEstimation() {
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds", "beta", "randomWalk")
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .addParameter("walksPerNode", 3)
@@ -171,8 +166,8 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
 
         assertCypherResult(query, List.of(Map.of(
-            "bytesMin", 299440L,
-            "bytesMax", 395456L
+            "bytesMin", 4048L,
+            "bytesMax", 100064L
         )));
     }
 

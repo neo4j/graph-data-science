@@ -109,11 +109,11 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
         ids4 = new long[]{idA, idC, idE, idD};
         ids5 = new long[]{idA, idC, idE, idD, idF};
 
-        runQuery(GdsCypher.call()
+        runQuery(GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

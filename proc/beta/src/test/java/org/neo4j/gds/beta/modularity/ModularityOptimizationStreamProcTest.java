@@ -34,11 +34,11 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
 
     @BeforeEach
     void graphSetup() {
-        var createQuery = GdsCypher.call()
+        var createQuery = GdsCypher.call(GRAPH_NAME)
+            .graphCreate()
             .withRelationshipProperty("weight")
             .withNodeProperty("seed1")
             .loadEverything(Orientation.UNDIRECTED)
-            .graphCreate(GRAPH_NAME)
             .yields();
         runQuery(createQuery);
     }
@@ -60,8 +60,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
 
     @Test
     void testStreamingWeighted() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
@@ -78,8 +77,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
 
     @Test
     void testStreamingSeeded() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("seedProperty", "seed1")
@@ -97,8 +95,7 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
 
     @Test
     void testStreamingEstimate() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "modularityOptimization")
             .estimationMode(STREAM)
             .yields();

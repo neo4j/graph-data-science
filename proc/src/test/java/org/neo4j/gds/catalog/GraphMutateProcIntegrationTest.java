@@ -127,11 +127,11 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         );
 
         runQuery(GdsCypher
-            .call()
+            .call(TEST_GRAPH)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
-            .graphCreate(TEST_GRAPH)
             .yields());
     }
 
@@ -144,37 +144,32 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
     void runPipeline() {
         // run algorithms in mutate mode
         String pageRankQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("pageRank")
             .mutateMode()
             .addParameter("mutateProperty", "pageRank")
             .yields();
         String wccQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", "wcc")
             .yields();
         String labelPropagationQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("nodeWeightProperty", "pageRank")
             .addParameter("mutateProperty", "louvain")
             .yields();
         String louvainQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", "labelPropagation")
             .yields();
         String nodeSimilarityQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("mutateProperty", "similarity")
@@ -192,8 +187,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
         String graphSageTrainQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
@@ -204,8 +198,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(graphSageTrainQuery);
 
         String graphSageStreamQuery = GdsCypher
-            .call()
-            .explicitCreation(TEST_GRAPH)
+            .call(TEST_GRAPH)
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("modelName", graphSageModel)
@@ -245,7 +238,9 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         // re-create named graph from written node and relationship properties
         runQuery(formatWithLocale("CALL gds.graph.drop('%s')", TEST_GRAPH));
-        runQuery(GdsCypher.call().withAnyLabel()
+        runQuery(GdsCypher.call(TEST_GRAPH)
+            .graphCreate()
+            .withAnyLabel()
             .withNodeProperty("nodeId")
             .withNodeProperty("pageRank")
             .withNodeProperty("louvain")
@@ -254,7 +249,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .withRelationshipType("TYPE")
             .withRelationshipType("SIMILAR_TO")
             .withRelationshipProperty("similarity", DefaultValue.of(1.0))
-            .graphCreate(TEST_GRAPH)
             .yields()
         );
 

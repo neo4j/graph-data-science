@@ -74,8 +74,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
     @Test
     void shouldWriteResults() {
-        String query = GdsCypher.call()
-            .explicitCreation(GRAPH_NAME)
+        String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds", "beta", "knn")
             .writeMode()
             .addParameter("sudo", true)
@@ -124,12 +123,12 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
         });
 
         String resultGraphName = "simGraph";
-        String loadQuery = GdsCypher.call()
+        String loadQuery = GdsCypher.call(resultGraphName)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("id")
             .withRelationshipType("SIMILAR")
             .withRelationshipProperty("score")
-            .graphCreate(resultGraphName)
             .yields();
 
         runQuery(loadQuery);
@@ -144,17 +143,16 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
     void shouldWriteUniqueRelationships() {
         var graphName = "undirectedGraph";
 
-        var graphCreateQuery = GdsCypher.call()
+        var graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation(graphName)
+        var query = GdsCypher.call(graphName)
             .algo("gds", "beta", "knn")
             .writeMode()
             .addParameter("sudo", true)
@@ -173,11 +171,11 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
     void testProgressTracking() {
         var graphName = "undirectedGraph";
 
-        var graphCreateQuery = GdsCypher.call()
+        var graphCreateQuery = GdsCypher.call(graphName)
+            .graphCreate()
             .withAnyLabel()
             .withNodeProperty("knn")
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
-            .graphCreate(graphName)
             .yields();
 
         runQuery(graphCreateQuery);
@@ -209,20 +207,19 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
                  "CREATE (dave:Foo {name: 'Dave', age: 48})" +
                  "CREATE (bob:Foo {name: 'Bob', age: 48})");
 
-        String createQuery = GdsCypher.call()
+        String createQuery = GdsCypher.call("graph")
+            .graphCreate()
             .withNodeLabel("Person")
             .withNodeLabel("Foo")
             .withNodeProperty("age")
             .withAnyRelationshipType()
-            .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
         String relationshipType = "SIMILAR";
         String relationshipProperty = "score";
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation("graph")
+        String algoQuery = GdsCypher.call("graph")
             .algo("gds.beta.knn")
             .writeMode()
             .addParameter("nodeLabels", List.of("Foo"))

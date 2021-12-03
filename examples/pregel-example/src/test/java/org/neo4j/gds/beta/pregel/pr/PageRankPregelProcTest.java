@@ -92,8 +92,7 @@ class PageRankPregelProcTest extends BaseProcTest {
     @Test
     void stream() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
-        var query = GdsCypher.call()
-            .explicitCreation(DEFAULT_GRAPH_NAME)
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("example", "pregel", "pr")
             .streamMode()
             .addParameter("maxIterations", 10)
@@ -104,15 +103,14 @@ class PageRankPregelProcTest extends BaseProcTest {
 
     @Test
     void streamSeeded() {
-        var createGraphQuery = GdsCypher.call()
+        var createGraphQuery = GdsCypher.call("test")
+            .graphCreate()
             .loadEverything()
-            .graphCreate("test")
             .yields();
 
         runQuery(createGraphQuery);
 
-        var mutateQuery = GdsCypher.call()
-            .explicitCreation("test")
+        var mutateQuery = GdsCypher.call("test")
             .algo("example", "pregel", "pr")
             .mutateMode()
             .addParameter("maxIterations", 5)
@@ -121,8 +119,7 @@ class PageRankPregelProcTest extends BaseProcTest {
 
         runQuery(mutateQuery);
 
-        var query = GdsCypher.call()
-            .explicitCreation("test")
+        var query = GdsCypher.call("test")
             .algo("example", "pregel", "pr")
             .streamMode()
             // we need 11 iterations in total to achieve the same result

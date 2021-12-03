@@ -82,7 +82,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     void testStream() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -116,7 +116,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     void testLazyComputationLoggingFinishes() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call("graph")
             .algo("gds.shortestPath.dijkstra")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())

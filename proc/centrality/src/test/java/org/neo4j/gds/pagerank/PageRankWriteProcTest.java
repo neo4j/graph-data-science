@@ -58,8 +58,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     @Test
     void testPageRankWriteBack() {
         String writeProperty = "myFancyScore";
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .writeMode()
             .addPlaceholder("writeProperty", "writeProp")
@@ -78,8 +77,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     @Test
     void testWeightedPageRankWriteBack() {
         var writeProperty = "pagerank";
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
@@ -100,8 +98,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     @Test
     void testWriteYields() {
         var writeProp = "writeProp";
-        String query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        String query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .writeMode()
             .addParameter("writeProperty", writeProp)
@@ -124,8 +121,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
     @Test
     void shouldNotComputeCentralityDistributionOnLogScaler() {
         var writeProp = "writeProp";
-        var query = GdsCypher.call()
-            .explicitCreation("graphLabel1")
+        var query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .writeMode()
             .addParameter("scaler", ScalarScaler.Variant.LOG)
