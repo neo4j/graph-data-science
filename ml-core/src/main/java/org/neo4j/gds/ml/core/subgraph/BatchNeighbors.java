@@ -33,6 +33,8 @@ public interface BatchNeighbors {
      */
     int nodeCount();
 
+    int degree(int batchId);
+
     int[] neighbors(int batchId);
 
     double relationshipWeight(int src, int trg);

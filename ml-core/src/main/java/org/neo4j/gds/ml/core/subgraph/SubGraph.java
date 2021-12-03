@@ -114,6 +114,11 @@ public final class SubGraph implements BatchNeighbors {
         return originalNodeIds.length;
     }
 
+    @Override
+    public int degree(int batchId) {
+        return neighbors[batchId].length;
+    }
+
     public long[] originalNodeIds() {
         return originalNodeIds;
     }

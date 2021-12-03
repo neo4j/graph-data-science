@@ -77,4 +77,9 @@ class TestBatchNeighbors implements BatchNeighbors {
     public int nodeCount() {
         return numberOfNodes;
     }
+
+    @Override
+    public int degree(int batchId) {
+        return neighbors[batchId].length;
+    }
 }
