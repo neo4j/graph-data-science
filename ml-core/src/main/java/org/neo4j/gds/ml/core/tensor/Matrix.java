@@ -142,14 +142,11 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     public Vector sumPerColumn() {
-        var cols = this.cols();
+        double[] result = new double[columns];
 
-        double[] result = new double[cols];
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                int matrixIndex = row * cols + col;
-                result[col] += this.dataAt(matrixIndex);
+        for (int col = 0; col < columns; col++) {
+            for (int row = 0; row < rows; row++) {
+                result[col] += data[row * columns + col];
             }
         }
 
