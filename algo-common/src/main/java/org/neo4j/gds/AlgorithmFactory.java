@@ -76,6 +76,16 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
      */
     protected abstract String taskName();
 
+    protected ALGO build(
+        Graph graph,
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker allocationTracker,
+        ProgressTracker progressTracker
+    ) {
+        return build(graph, configuration, allocationTracker, progressTracker);
+    }
+
     /**
      * Builds the algorithm class.
      */
