@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -49,6 +50,24 @@ class MatrixVectorSumTest extends ComputationGraphBaseTest implements FiniteDiff
         var expected = new Matrix(new double[]{2, 3, 4, 5, 6, 8}, 2, 3);
         assertThat(ctx.forward(broadcastSum))
             .isEqualTo(expected);
+    }
+
+
+    @Test
+    void shouldComputeVectorGradient() {
+        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3));
+        Weights<Vector> vector = new Weights<>(Vector.create(1, 3));
+
+        var matrixVectorSum = new MatrixVectorSum(weights, vector);
+        Variable<Scalar> broadcastSum = new ElementSum(List.of(new Sigmoid<>(matrixVectorSum)));
+
+        ComputationContext ctx = new ComputationContext();
+        ctx.forward(broadcastSum);
+        ctx.backward(broadcastSum);
+
+        assertThat(ctx.gradient(weights)).isEqualTo(ctx.gradient(matrixVectorSum));
+        Vector expectedGradient = new Vector(0.11164164207429665, 0.04764316902227213, 0.017997943884047476);
+        assertThat(ctx.gradient(vector)).isEqualTo(expectedGradient);
     }
 
     @Test

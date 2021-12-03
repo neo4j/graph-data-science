@@ -75,16 +75,7 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
         if (parent == matrix) {
             return ctx.gradient(this);
         } else {
-            Tensor<?> gradient = ctx.gradient(this);
-            double[] result = new double[cols];
-            for (int row = 0; row < rows; row++) {
-                for (int col = 0; col < cols; col++) {
-                    int matrixIndex = row * cols + col;
-                    result[col] += gradient.dataAt(matrixIndex);
-                }
-            }
-
-            return new Vector(result);
+            return ctx.gradient(this).sumPerColumn();
         }
     }
 }

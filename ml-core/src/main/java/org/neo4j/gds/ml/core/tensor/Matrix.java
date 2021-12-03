@@ -123,10 +123,6 @@ public class Matrix extends Tensor<Matrix> {
         return sum;
     }
 
-    private DMatrixRMaj toEjml() {
-        return DMatrixRMaj.wrap(this.dimension(ROWS_INDEX), this.dimension(COLUMNS_INDEX), this.data());
-    }
-
     public Matrix multiply(Matrix other) {
         DMatrixRMaj result = new DMatrixRMaj(this.rows, other.cols());
         MatrixMatrixMult_DDRM.mult_reorder(this.toEjml(), other.toEjml(), result);
@@ -145,6 +141,21 @@ public class Matrix extends Tensor<Matrix> {
         return Matrix.of(prod);
     }
 
+    public Vector sumPerColumn() {
+        var cols = this.cols();
+
+        double[] result = new double[cols];
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                int matrixIndex = row * cols + col;
+                result[col] += this.dataAt(matrixIndex);
+            }
+        }
+
+        return new Vector(result);
+    }
+
     @Override
     public String shortDescription() {
         return formatWithLocale("Matrix(%d, %d)", rows(), cols());
@@ -160,5 +171,9 @@ public class Matrix extends Tensor<Matrix> {
 
     public boolean isVector() {
         return Dimensions.isVector(dimensions);
+    }
+
+    private DMatrixRMaj toEjml() {
+        return DMatrixRMaj.wrap(this.dimension(ROWS_INDEX), this.dimension(COLUMNS_INDEX), this.data());
     }
 }
