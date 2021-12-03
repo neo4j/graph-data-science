@@ -28,87 +28,95 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class MultiMean extends SingleParentVariable<Matrix> {
     private final BatchNeighbors subGraph;
+    private final Variable<Matrix> parentVariable;
 
     public MultiMean(
-        Variable<Matrix> parent,
+        Variable<Matrix> parentVariable,
         BatchNeighbors subGraph
     ) {
-        super(parent, Dimensions.matrix(subGraph.batchSize(), parent.dimension(1)));
+        super(parentVariable, Dimensions.matrix(subGraph.batchSize(), parentVariable.dimension(1)));
         this.subGraph = subGraph;
+        this.parentVariable = parentVariable;
+
+        // TODO assert  parent.dimension(Dimensions.ROWS_INDEX) >= subGraph.nodeCount()
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Variable<?> parent = parent();
-        Tensor<?> parentTensor = ctx.data(parent);
-        double[] parentData = parentTensor.data();
+        var parentData = ctx.data(parentVariable);
+
         int[] batchIds = subGraph.batchIds();
         int batchSize = batchIds.length;
 
-        int cols = parent.dimension(1);
+        int cols = parentVariable.dimension(1);
 
-        double[] means = new double[batchSize * cols];
+        var resultMeans = Matrix.create(0, batchSize, cols);
+
         for (int batchIdx = 0; batchIdx < batchSize; batchIdx++) {
-            int sourceId = batchIds[batchIdx];
-            int batchIdRowOffset = sourceId * cols;
-            int batchIdxOffset = batchIdx * cols;
-            int[] neighbors = subGraph.neighbors(sourceId);
-            int numberOfNeighbors = neighbors.length;
+            // node-ids respond to rows in parentData
+            int batchNodeId = batchIds[batchIdx];
+            int[] neighbors = subGraph.neighbors(batchNodeId);
 
+            // TODO Replace this with the sum of weights instead to normalize the weights
+            // degree + the node itself
+            int numberOfEntries = neighbors.length + 1;
+
+            // initialize mean row with parent row for nodeId in batch
             for (int col = 0; col < cols; col++) {
-                means[batchIdxOffset + col] += parentData[batchIdRowOffset + col] / (numberOfNeighbors + 1);
+                double sourceColEntry = parentData.dataAt(batchNodeId, col);
+                resultMeans.addDataAt(batchIdx, col, sourceColEntry / numberOfEntries);
             }
-            for (int targetIndex : neighbors) {
-                int targetOffset = targetIndex * cols;
-                double relationshipWeight = subGraph.relationshipWeight(sourceId, targetIndex);
+
+            // fetch rows from neighbors and update mean
+            for (int neighbor : neighbors) {
+                double relationshipWeight = subGraph.relationshipWeight(batchNodeId, neighbor);
                 for (int col = 0; col < cols; col++) {
-                    means[batchIdxOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
+                    double neighborColEntry = parentData.dataAt(neighbor, col) * relationshipWeight;
+                    resultMeans.addDataAt(batchIdx, col, neighborColEntry / numberOfEntries);
                 }
             }
         }
 
-        return new Matrix(means, batchSize, cols);
+        // TODO try to divide by numberOfEntries once instead of on every update
+
+        return resultMeans;
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        double[] multiMeanGradient = ctx.gradient(this).data();
+        assert parent == parentVariable : "Invalid parent for SingleParentVariable";
 
-        var batchIds = this.subGraph.batchIds();
-
-        Tensor<?> result = ctx.data(parent).createWithSameDimensions();
+        var multiMeanGradient = ctx.gradient(this);
+        var resultGradient = ctx.data(parentVariable).createWithSameDimensions();
 
         int cols = parent.dimension(1);
+        var batchIds = this.subGraph.batchIds();
 
         for (int batchIdx = 0; batchIdx < batchIds.length; batchIdx++) {
-            var sourceId = batchIds[batchIdx];
-            int[] neighbors = subGraph.neighbors(sourceId);
-            int degree = neighbors.length + 1;
+            var batchNodeId = batchIds[batchIdx];
+            int[] neighbors = subGraph.neighbors(batchNodeId);
+            int numberOfEntries = neighbors.length + 1;
 
             double[] cachedNeighborWeights = new double[neighbors.length];
 
             for (int i = 0; i < neighbors.length; i++) {
-                cachedNeighborWeights[i] = subGraph.relationshipWeight(sourceId, neighbors[i]);
+                cachedNeighborWeights[i] = subGraph.relationshipWeight(batchNodeId, neighbors[i]);
             }
 
+            // TODO try to divide by numberOfEntries once instead of on every update
+
             for (int col = 0; col < cols; col++) {
-                int gradientElementIndex = batchIdx * cols + col;
                 for (int neighborIndex = 0; neighborIndex < neighbors.length; neighborIndex++) {
                     int neighbor = neighbors[neighborIndex];
-                    int neighborElementIndex = neighbor * cols + col;
-                    result.addDataAt(
-                        neighborElementIndex,
-                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * cachedNeighborWeights[neighborIndex])
-                    );
+                    double neighborGradient = (multiMeanGradient.dataAt(batchIdx, col) * cachedNeighborWeights[neighborIndex] / numberOfEntries);
+
+                    resultGradient.addDataAt(neighbor * cols + col, neighborGradient);
                 }
 
-                result.addDataAt(
-                    sourceId * cols + col,
-                    (1d / degree) * multiMeanGradient[gradientElementIndex]
-                );
+                resultGradient.addDataAt(batchNodeId, col, multiMeanGradient.dataAt(batchIdx, col) / numberOfEntries);
             }
         }
 
-        return result;
+        return resultGradient;
     }
 }
