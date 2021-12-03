@@ -230,7 +230,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller, db.databaseId(), modelCatalog).progressTask(graphStore.getUnion(), config),
+                new LinkPredictionPredictPipelineAlgorithmFactory<>(caller, modelCatalog).progressTask(graphStore.getUnion(), config),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

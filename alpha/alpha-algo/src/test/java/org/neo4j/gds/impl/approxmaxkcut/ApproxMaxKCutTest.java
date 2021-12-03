@@ -42,6 +42,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -259,10 +260,11 @@ final class ApproxMaxKCutTest {
         var log = new TestLog();
         var approxMaxKCut = new ApproxMaxKCutFactory<>().build(
             maxGraph,
+            Optional.empty(),
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         approxMaxKCut.compute();
 

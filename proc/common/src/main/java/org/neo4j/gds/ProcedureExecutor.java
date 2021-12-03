@@ -179,7 +179,7 @@ public class ProcedureExecutor<
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(ktx);
         return algorithmFactory
-            .build(graph, graphStore, config, allocationTracker, log, taskRegistryFactory)
+            .build(graph, Optional.of(graphStore), config, allocationTracker, log, taskRegistryFactory)
             .withTerminationFlag(terminationFlag);
     }
 

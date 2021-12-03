@@ -49,6 +49,7 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -179,10 +180,11 @@ class WccTest {
 
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
+            Optional.empty(),
             ImmutableWccStreamConfig.builder().relationshipWeightProperty("weights").build(),
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         Assertions.assertThat(log.getMessages(WARN))
@@ -198,10 +200,11 @@ class WccTest {
         var log = new TestLog();
         var wcc = new WccAlgorithmFactory<>().build(
             graph,
+            Optional.empty(),
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         wcc.compute();
 

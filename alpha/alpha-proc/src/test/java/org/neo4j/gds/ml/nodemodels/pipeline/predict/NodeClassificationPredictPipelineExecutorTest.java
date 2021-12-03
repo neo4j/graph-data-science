@@ -222,7 +222,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = new TestLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller, db.databaseId())
+                new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller)
                     .progressTask(graphStore.getUnion(), config),
                 log,
                 1,
@@ -265,16 +265,13 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void validateFeaturesExistOnGraph() {
         addPipelineModelWithFeatures(modelCatalog, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(
-                modelCatalog,
-                caller,
-                db.databaseId()
-            );
+            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, caller);
             var streamConfig = NodeClassificationPredictPipelineStreamConfig.of(
                 "", CypherMapWrapper.create(Map.of("modelName", MODEL_NAME)));
 
             var algo = factory.build(
                 null,
+                graphStore,
                 streamConfig,
                 AllocationTracker.empty(),
                 ProgressTracker.NULL_TRACKER

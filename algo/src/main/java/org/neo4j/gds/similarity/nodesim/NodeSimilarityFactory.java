@@ -44,7 +44,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     }
 
     @Override
-    protected NodeSimilarity build(
+    public NodeSimilarity build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker allocationTracker,

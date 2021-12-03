@@ -286,10 +286,11 @@ class LinkPredictionTrainTest {
         var log = new TestLog();
         var algo = new LinkPredictionTrainFactory().build(
             graph,
+            Optional.empty(),
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 

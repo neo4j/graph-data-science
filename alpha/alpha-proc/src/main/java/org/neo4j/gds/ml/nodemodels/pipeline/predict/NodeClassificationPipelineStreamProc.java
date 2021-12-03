@@ -115,6 +115,6 @@ public class NodeClassificationPipelineStreamProc
         NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig
         > algorithmFactory()
     {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this, databaseId());
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 }

@@ -49,10 +49,10 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -143,8 +143,7 @@ class GraphSageTest {
             orphanGraph,
             streamConfig,
             AllocationTracker.empty(),
-            NullLog.getInstance(),
-            EmptyTaskRegistryFactory.INSTANCE,
+            ProgressTracker.NULL_TRACKER
         );
         GraphSage.GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
@@ -204,8 +203,7 @@ class GraphSageTest {
             graph,
             trainConfig,
             AllocationTracker.empty(),
-            new TestLog(),
-            EmptyTaskRegistryFactory.INSTANCE,
+            ProgressTracker.NULL_TRACKER
         );
 
         modelCatalog.set(graphSageTrain.compute());
@@ -219,10 +217,11 @@ class GraphSageTest {
         var log = new TestLog();
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
+            Optional.empty(),
             streamConfig,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.compute();
 

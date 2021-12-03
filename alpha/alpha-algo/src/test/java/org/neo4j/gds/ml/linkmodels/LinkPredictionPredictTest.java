@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -145,10 +146,11 @@ class LinkPredictionPredictTest {
         var log = new TestLog();
         var algo = new LinkPredictionPredictFactory<>(modelCatalog).build(
             graph,
+            Optional.empty(),
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 

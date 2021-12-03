@@ -66,7 +66,7 @@ public class NodeClassificationPipelineTrainProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> algorithmFactory() {
-        return new NodeClassificationTrainPipelineAlgorithmFactory(this, databaseId(), modelCatalog);
+        return new NodeClassificationTrainPipelineAlgorithmFactory(this, modelCatalog);
     }
 
     @Override

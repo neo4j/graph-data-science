@@ -110,7 +110,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this, databaseId());
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 
     @SuppressWarnings("unused")

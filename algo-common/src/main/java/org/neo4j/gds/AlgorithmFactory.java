@@ -32,11 +32,13 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
+import java.util.Optional;
+
 public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
     public final ALGO build(
         Graph graph,
-        GraphStore graphStore,
+        Optional<GraphStore> maybeGraphStore,
         CONFIG configuration,
         AllocationTracker allocationTracker,
         Log log,
@@ -49,7 +51,9 @@ public abstract class AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
             configuration.concurrency(),
             taskRegistryFactory
         );
-        return build(graph, graphStore, configuration, allocationTracker, progressTracker);
+        return maybeGraphStore
+            .map(graphStore -> build(graph, graphStore, configuration, allocationTracker, progressTracker))
+            .orElseGet(() -> build(graph, configuration, allocationTracker, progressTracker));
     }
 
     /**

@@ -133,7 +133,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredictPipelineExecutor, LinkPredictionPredictPipelineMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, databaseId(), modelCatalog);
+        return new LinkPredictionPredictPipelineAlgorithmFactory<>(this, modelCatalog);
     }
 
     @SuppressWarnings("unused")

@@ -131,7 +131,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     protected AlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineWriteConfig> algorithmFactory() {
-        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this, databaseId());
+        return new NodeClassificationPredictPipelineAlgorithmFactory<>(modelCatalog, this);
     }
 
     @SuppressWarnings("unused")

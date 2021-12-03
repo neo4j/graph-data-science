@@ -48,6 +48,7 @@ import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -194,10 +195,11 @@ class GraphSageModelTrainerTest {
 
         var algo = new GraphSageTrainAlgorithmFactory().build(
             graph,
+            Optional.empty(),
             config,
             AllocationTracker.empty(),
             log,
-            EmptyTaskRegistryFactory.INSTANCE,
+            EmptyTaskRegistryFactory.INSTANCE
         );
         algo.compute();
 

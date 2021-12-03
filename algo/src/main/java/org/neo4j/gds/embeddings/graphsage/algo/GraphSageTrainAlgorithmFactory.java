@@ -52,7 +52,7 @@ public final class GraphSageTrainAlgorithmFactory extends AlgorithmFactory<Graph
     }
 
     @Override
-    protected GraphSageTrain build(
+    public GraphSageTrain build(
         Graph graph,
         GraphSageTrainConfig configuration,
         AllocationTracker allocationTracker,
