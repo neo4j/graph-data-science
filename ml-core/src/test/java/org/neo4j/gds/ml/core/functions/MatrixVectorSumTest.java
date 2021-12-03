@@ -43,11 +43,11 @@ class MatrixVectorSumTest extends ComputationGraphBaseTest implements FiniteDiff
     @Test
     void shouldBroadcastSum() {
         var matrix = Constant.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
-        Constant<Vector> vector = Constant.vector(new double[]{1, 1, 1});
+        Constant<Vector> vector = Constant.vector(new double[]{1, 2, 1});
 
         Variable<Matrix> broadcastSum = new MatrixVectorSum(matrix, vector);
 
-        var expected = new Matrix(new double[]{2, 3, 4, 5, 6, 8}, 2, 3);
+        var expected = new Matrix(new double[]{2, 4, 4, 5, 7, 8}, 2, 3);
         assertThat(ctx.forward(broadcastSum))
             .isEqualTo(expected);
     }

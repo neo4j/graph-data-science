@@ -141,6 +141,19 @@ public class Matrix extends Tensor<Matrix> {
         return Matrix.of(prod);
     }
 
+    public Matrix sumBroadcast(Vector vector) {
+        var result = this.createWithSameDimensions();
+
+        for(int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                int matrixIndex = row * columns + col;
+                result.data[matrixIndex] = data[matrixIndex] + vector.data[col];
+            }
+        }
+
+        return result;
+    }
+
     public Vector sumPerColumn() {
         double[] result = new double[columns];
 

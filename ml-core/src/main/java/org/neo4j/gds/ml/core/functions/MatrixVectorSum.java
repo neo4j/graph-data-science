@@ -36,8 +36,6 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
 
     private final Variable<Matrix> matrix;
     private final Variable<Vector> vector;
-    private final int rows;
-    private final int cols;
 
     public MatrixVectorSum(Variable<Matrix> matrix, Variable<Vector> vector) {
         super(List.of(matrix, vector), matrix.dimensions());
@@ -47,27 +45,12 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
             matrix.dimension(COLUMNS_INDEX)
         );
         this.matrix = matrix;
-        this.rows = matrix.dimension(ROWS_INDEX);
-        this.cols = matrix.dimension(COLUMNS_INDEX);
         this.vector = vector;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-
-        double[] matrixData = ctx.data(matrix).data();
-        double[] vectorData = ctx.data(vector).data();
-
-        double[] result = new double[matrixData.length];
-
-        for(int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                int matrixIndex = row * cols + col;
-                result[matrixIndex] = matrixData[matrixIndex] + vectorData[col];
-            }
-        }
-
-        return new Matrix(result, rows, cols);
+        return ctx.data(matrix).sumBroadcast(ctx.data(vector));
     }
 
     @Override
